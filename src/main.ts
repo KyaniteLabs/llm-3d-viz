@@ -18,7 +18,9 @@ function modelIdFromPlotlyPoint(point: any): string | null {
 
 // Keep the scaffold's typed dataset in the entry graph. The chart layer consumes it in T2+.
 document.documentElement.dataset.modelCount = String(models.length);
-const heatEncoding = new URLSearchParams(window.location.search).get("heat") === "1";
+// The score-luminance encoding is the shipped default. Keep a reversible URL
+// opt-out for A/B comparison and capture work: `?heat=0`.
+const heatEncoding = new URLSearchParams(window.location.search).get("heat") !== "0";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;

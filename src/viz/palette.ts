@@ -62,9 +62,8 @@ export function mixColors(from: string, to: string, ratio: number): string {
 }
 
 /**
- * A/B value-score encoding: higher composite scores move up the filament
- * luminance ramp. The default stays the semantic frontier/dominated palette;
- * this variant is only enabled with `?heat=1`.
+ * Value-score encoding: higher composite scores move up the filament
+ * luminance ramp while preserving the frontier and optimum semantics.
  */
 export function scoreLuminanceFill(
   score: number,

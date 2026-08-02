@@ -32,7 +32,7 @@ export class Stage3D {
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
 
-  constructor(container: HTMLElement, heatEncoding = false) {
+  constructor(container: HTMLElement, heatEncoding = true) {
     this.container = container;
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>

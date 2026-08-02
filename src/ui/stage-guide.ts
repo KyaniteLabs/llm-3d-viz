@@ -47,7 +47,7 @@ export class StageGuide {
   private readonly models: readonly Model[];
   private readonly heatEncoding: boolean;
 
-  constructor(root: HTMLElement, store: AppStore, models: readonly Model[], heatEncoding = false) {
+  constructor(root: HTMLElement, store: AppStore, models: readonly Model[], heatEncoding = true) {
     this.root = root;
     this.store = store;
     this.models = models;
@@ -59,9 +59,10 @@ export class StageGuide {
     const frontierModels = frontier(this.models).sort((a, b) => a.model.localeCompare(b.model));
     const optimum = weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
     const groups = providerGroups(this.models);
+    const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches;
 
     this.root.innerHTML = `
-      <details class="stage-guide-disclosure" open>
+      <details class="stage-guide-disclosure"${isCompact ? "" : " open"}>
         <summary><span>STAGE KEY</span><span class="stage-guide-count">${frontierModels.length} FRONTIER</span></summary>
         <div class="stage-guide-body">
           <section class="stage-legend" aria-label="Stage legend">
@@ -72,7 +73,7 @@ export class StageGuide {
               <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>filament-dim / efficient model</small></span></li>
               <li data-legend-entry="dominated-point"><span class="key-mark key-mark--dominated" aria-hidden="true"></span><span><strong>Dominated point</strong><small>dim slate / tradeoff set</small></span></li>
             </ul>
-            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT A/B · point luminance follows current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
+            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · point luminance follows the current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
           </section>
 
           <details class="provider-disclosure">

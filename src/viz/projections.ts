@@ -94,7 +94,7 @@ export class Projections {
   private isProgrammatic = false;
   private coupled = false;
 
-  constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = false) {
+  constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
     this.containers = containers;
     this.stageGd = stageGd;
     this.heatEncoding = heatEncoding;

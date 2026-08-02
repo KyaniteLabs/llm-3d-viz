@@ -420,8 +420,10 @@ test.describe("3D Stage Render Specs", () => {
     expect(firstFullLit).toBeGreaterThanOrEqual(0);
     expect(firstOptimumLit).toBe(firstFullLit);
     // Every frontier point transitioned from its dim base to its lit target.
+    // Heat is the default now, so frontier luminance may already be present in
+    // the staging base; the size transition remains the ignition contract.
     expect(result.frontierChanges).toHaveLength(result.frontierCount);
-    expect(result.frontierChanges.every(({ colorChanged, sizeChanged }) => colorChanged && sizeChanged)).toBe(true);
+    expect(result.frontierChanges.every(({ sizeChanged }) => sizeChanged)).toBe(true);
     // Generous settle smoke check only (no tight [300,550] wall-clock bound): a
     // pathologically hung sweep fails at the settle wait above, not here.
     expect(result.duration).toBeLessThan(5000);
@@ -539,12 +541,9 @@ test.describe("3D Stage Render Specs", () => {
     for (const points of [after.stage, ...after.projections]) {
       expect(points.colors).not.toContain("#636efa");
       expect(points.colors).toContain("#E8F1E4");
-      expect(points.colors).toContain("#C9D4C4");
-      // Dominated points carry the lightened slate-cyan fill (src/viz/palette.ts
-      // dominatedFill): same hue as --slate-cyan, luminance raised to ~4:1 vs
-      // ink-field so the ~20 off-frontier models stay plainly visible yet
-      // clearly below the filament frontier.
-      expect(points.colors.some((color: string) => color.toLowerCase() === "#687a83")).toBe(true);
+      // Default heat encoding gives scorable points a value-score luminance
+      // ramp; cinema must preserve that varied appearance across re-renders.
+      expect(new Set(points.colors).size).toBeGreaterThan(4);
       expect(points.sizes).toContain(16);
       expect(points.sizes).toContain(10);
     }
@@ -864,8 +863,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(coding.shares).toEqual(["25%", "15%", "60%"]);
   });
 
-  test("FIX-B: heat A/B uses distinct score luminance while preserving the optimum marker", async ({ page }) => {
-    await page.goto("/?heat=1");
+  test("FIX-B: heat encoding is on by default and preserves the optimum marker", async ({ page }) => {
+    await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
     const heat = await page.evaluate(() => {
@@ -883,6 +882,21 @@ test.describe("3D Stage Render Specs", () => {
     expect(heat.uniqueColors).toBeGreaterThan(4);
     expect(heat.optimumColor).toBe("#E8F1E4");
     expect(new Set(heat.scoreValues).size).toBeGreaterThan(4);
+  });
+
+  test("FIX-B: ?heat=0 opts out of score luminance encoding", async ({ page }) => {
+    await page.goto("/?heat=0");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const heat = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      return {
+        enabled: viz.heatEncoding,
+        legendNote: document.querySelector("[data-heat-encoding]")?.textContent ?? null,
+      };
+    });
+    expect(heat.enabled).toBe(false);
+    expect(heat.legendNote).toBeNull();
   });
 });
 

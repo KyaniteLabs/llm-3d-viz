@@ -65,7 +65,7 @@ export class SweepScheduler {
   private readonly heatEncoding: boolean;
   private removeMotionListener: (() => void) | null = null;
 
-  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[], heatEncoding = false) {
+  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[], heatEncoding = true) {
     this.stage = stage;
     this.projections = projections;
     this.store = store;
