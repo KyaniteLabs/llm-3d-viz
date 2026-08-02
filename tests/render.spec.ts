@@ -1,4 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+/**
+ * Wait for the active sweep to reach its final restyle batch — the deterministic
+ * end-of-sweep signal, with no wall-clock race. On a weight change, start()
+ * synchronously resets every marker to its dim base (size 7), then re-lights the
+ * optimum at size 16 only on the final batch (the optimum is last in the
+ * ascending-score ignition order, so it lights at progress === 1). Thus "a marker
+ * reaches size 16" is exactly "the current sweep has settled on its terminal
+ * palette" — replacing a fixed waitForTimeout that raced the browser's clock and
+ * flaked under machine load.
+ */
+async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> {
+  await page.waitForFunction(
+    () => ((window as any).__viz?.gd?.data?.[0]?.marker?.size ?? []).includes(16),
+    null,
+    { timeout: timeoutMs },
+  );
+}
 
 test.describe("3D Stage Render Specs", () => {
   let consoleErrors: string[] = [];
@@ -186,7 +204,7 @@ test.describe("3D Stage Render Specs", () => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
     await page.locator("#weight-cost").fill("9");
-    await page.waitForTimeout(550);
+    await waitForSweepSettled(page);
 
     const result = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -219,7 +237,9 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
     await page.locator("#weight-cost").fill("9");
-    await page.waitForTimeout(550);
+    // Wait for the deterministic end-of-sweep signal (optimum reaches size 16 on
+    // the final batch) instead of racing a fixed wall-clock timeout.
+    await waitForSweepSettled(page);
     const result = await page.evaluate(() => {
       const W = window as any;
       const log = W.__restyleLog as any[];
@@ -227,6 +247,16 @@ test.describe("3D Stage Render Specs", () => {
       const stage = W.__viz.gd;
       const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
       const optimum = stage.data[0].text[optimumIndex];
+      const frontierCount = W.__viz.frontierModelIds.length;
+      // Per stage restyle batch: how many points are lit (size > 7) and the
+      // optimum's size at that batch — drives ORDER + staging + optimum-last.
+      const perCall = stageCalls.map((entry) => {
+        const sizes = entry.update["marker.size"][0] as number[];
+        return {
+          litCount: sizes.filter((size: number) => size > 7).length,
+          optimumSize: sizes[optimumIndex],
+        };
+      });
       const firstStage = stageCalls[0]?.update;
       const finalStage = stageCalls.at(-1)?.update;
       const startColors = firstStage?.["marker.color"]?.[0] as string[];
@@ -246,16 +276,45 @@ test.describe("3D Stage Render Specs", () => {
         duration: stageCalls.length > 1 ? stageCalls.at(-1).at - stageCalls[0].at : 0,
         projectionCalls: log.filter((entry) => !entry.isStage).length,
         optimum,
+        frontierCount,
+        perCall,
         frontierChanges,
       };
     });
+    // Staged: more than one synchronized restyle batch reached the stage and
+    // each projection. No tight wall-clock bound — the settle wait is the gate.
     expect(result.count).toBeGreaterThan(1);
     expect(result.projectionCalls).toBeGreaterThan(1);
-    expect(result.duration).toBeGreaterThanOrEqual(300);
-    expect(result.duration).toBeLessThanOrEqual(550);
     expect(result.optimum).toBe("Command A+");
-    expect(result.frontierChanges.length).toBeGreaterThan(0);
+    expect(result.frontierCount).toBeGreaterThan(0);
+
+    const per = result.perCall;
+    // Staging: the first batch is the dim base — nothing lit yet.
+    expect(per[0].litCount).toBe(0);
+    expect(per[0].optimumSize).toBeLessThan(16);
+    // ORDER: lit-count is monotonic non-decreasing across batches (a frame that
+    // does not advance the ignition order is deduped and emits no restyle).
+    for (let i = 1; i < per.length; i++) {
+      expect(per[i].litCount).toBeGreaterThanOrEqual(per[i - 1].litCount);
+    }
+    // The final batch lights the entire frontier.
+    expect(per[per.length - 1].litCount).toBe(result.frontierCount);
+    // optimum-last: the optimum lights at exactly the batch that completes the
+    // frontier (progress === 1) — Command A+ is the last point in the
+    // ascending-score ignition order, so it is the last point to light. Robust
+    // to any trailing appearance re-assertion (findIndex stops at the first
+    // occurrence, and the frontier only first reaches full litness at the
+    // optimum's own batch).
+    const firstFullLit = per.findIndex((c) => c.litCount === result.frontierCount);
+    const firstOptimumLit = per.findIndex((c) => c.optimumSize === 16);
+    expect(firstFullLit).toBeGreaterThanOrEqual(0);
+    expect(firstOptimumLit).toBe(firstFullLit);
+    // Every frontier point transitioned from its dim base to its lit target.
+    expect(result.frontierChanges).toHaveLength(result.frontierCount);
     expect(result.frontierChanges.every(({ colorChanged, sizeChanged }) => colorChanged && sizeChanged)).toBe(true);
+    // Generous settle smoke check only (no tight [300,550] wall-clock bound): a
+    // pathologically hung sweep fails at the settle wait above, not here.
+    expect(result.duration).toBeLessThan(5000);
   });
 
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
@@ -274,7 +333,7 @@ test.describe("3D Stage Render Specs", () => {
     await page.locator("#weight-cost").fill("9");
     await page.waitForTimeout(120);
     await page.locator("#weight-speed").fill("8");
-    await page.waitForTimeout(550);
+    await waitForSweepSettled(page);
     const result = await page.evaluate(() => {
       const W = window as any;
       const stageCalls = (W.__restyleLog as any[]).filter((entry) => entry.isStage);

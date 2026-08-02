@@ -19,6 +19,15 @@ export interface Model {
   provider: string;
   openness: Openness;
   modality: Modality[];
+  /**
+   * Authoritative flag: is this a reasoning / thinking-effort model — the only
+   * kind whose measured TTFT can honestly include substantial thinking time.
+   * Set explicitly per row so reasoning-gated behaviour (the TTFT caveat, etc.)
+   * reads structured data instead of guessing from the curated name. Optional:
+   * when absent, src/lib/format.ts falls back to a conservative name heuristic
+   * for legacy/incomplete rows.
+   */
+  reasoning?: boolean;
   context_length: number;
   release_date: string;
   source_url: string;
@@ -95,6 +104,9 @@ export function validateModels(candidateModels: readonly Model[]): void {
     const label = `models[${index}]`;
     if (isMissingString(row.model) || isMissingString(row.provider)) {
       throw new Error(`${label}: model and provider must be non-empty strings`);
+    }
+    if (row.reasoning !== undefined && typeof row.reasoning !== "boolean") {
+      throw new Error(`${label} (${row.model}): reasoning must be a boolean when present`);
     }
     if (!Number.isFinite(row.context_length) || row.context_length <= 0) {
       throw new Error(`${label} (${row.model}): context_length is required and must be positive`);

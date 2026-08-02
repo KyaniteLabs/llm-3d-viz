@@ -50,6 +50,15 @@ describe("model data validation", () => {
     ).not.toThrow();
   });
 
+  it("accepts an optional boolean `reasoning` field and rejects a non-boolean", () => {
+    expect(() => validateModels([{ ...model({ price_in_per_M: 1, price_out_per_M: 2, blended_price_per_M: 1.7 }), reasoning: true }])).not.toThrow();
+    expect(() => validateModels([{ ...model({ price_in_per_M: 1, price_out_per_M: 2, blended_price_per_M: 1.7 }), reasoning: false }])).not.toThrow();
+    expect(() => validateModels([{ ...model({ price_in_per_M: 1, price_out_per_M: 2, blended_price_per_M: 1.7 }) }])).not.toThrow();
+    expect(() =>
+      validateModels([{ ...model({ price_in_per_M: 1, price_out_per_M: 2, blended_price_per_M: 1.7 }), reasoning: "yes" as unknown as boolean }]),
+    ).toThrow(/reasoning must be a boolean when present/);
+  });
+
   it("classifies negative-price rows as data_error quarantine entries", () => {
     const negative = model({ price_in_per_M: -1, price_out_per_M: 2, blended_price_per_M: 1.7 });
     const quarantined = quarantinedModels([negative]);

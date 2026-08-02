@@ -52,17 +52,34 @@ export const TTFT_MULTI_MINUTE_MS = 60_000;
 export const TTFT_CAVEAT = "incl. thinking time (long-prompt median)";
 
 /**
- * Whether a model is a reasoning/thinking-effort model — the only models whose
- * measured TTFT can honestly include substantial thinking time. Detected from
- * the curated name: an explicit "(Reasoning)" / "(Adaptive Reasoning, …)"
- * marker, or a parenthesized effort tier "(max)"/"(high)"/"(xhigh)". This is
- * the single heuristic the value-score readout and `ttftCaveat` share — a bare
- * latency threshold alone is wrong, because a slow NON-reasoning model is just
- * slow, not "thinking".
+ * Name-only fallback for classifying a model as a reasoning/thinking-effort
+ * model — used ONLY when a row omits the structured `reasoning` field. It is
+ * deliberately conservative: it matches an explicit "(reasoning)" /
+ * "adaptive reasoning" marker (but NOT "non-reasoning", which the old bare
+ * `includes("reasoning")` substring wrongly classified as a reasoner), a
+ * "thinking" marker, or a parenthesized effort tier "(max)"/"(high)"/"(xhigh)".
+ * Authoritative classification is the per-row `reasoning` boolean; this exists
+ * for legacy/incomplete rows.
  */
-export function isReasoningModel(model: Pick<Model, "model">): boolean {
-  const name = model.model.toLowerCase();
-  return name.includes("reasoning") || /\((xhigh|max|high)\)/.test(name);
+function nameLooksReasoning(name: string): boolean {
+  const lower = name.toLowerCase();
+  return (
+    // "reasoning" as a marker, but not the "non-reasoning" negation.
+    /(?<!non-)reasoning/.test(lower) ||
+    lower.includes("thinking") ||
+    /\((xhigh|max|high)\)/.test(lower)
+  );
+}
+
+/**
+ * Whether a model is a reasoning/thinking-effort model — the only models whose
+ * measured TTFT can honestly include substantial thinking time. The structured
+ * `reasoning` field is authoritative when present; the name heuristic is a
+ * fallback for rows that omit it. A bare latency threshold alone is wrong,
+ * because a slow NON-reasoning model is just slow, not "thinking".
+ */
+export function isReasoningModel(model: Pick<Model, "model" | "reasoning">): boolean {
+  return model.reasoning !== undefined ? model.reasoning : nameLooksReasoning(model.model);
 }
 
 /**
@@ -71,7 +88,7 @@ export function isReasoningModel(model: Pick<Model, "model">): boolean {
  * time to disclose, and a slow non-reasoner has no thinking time to attribute
  * its latency to — the caveat must not appear for either.
  */
-export function ttftCaveat(model: Pick<Model, "ttft" | "model">): string {
+export function ttftCaveat(model: Pick<Model, "ttft" | "model" | "reasoning">): string {
   return isReasoningModel(model) &&
     model.ttft !== null &&
     model.ttft >= TTFT_MULTI_MINUTE_MS
