@@ -651,6 +651,12 @@ test.describe("3D Stage Render Specs", () => {
   test("Item 16: cinema re-render preserves the current point appearance", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
+    // FIX-D (#29): wait for the deterministic end-of-sweep signal before
+    // snapshotting. Without this, `before` can capture mid-ignition (points still
+    // at the flat slate floor) while `after` — taken after a 250ms cinema toggle —
+    // lands post-settle (heat ramp), producing a spurious before≠after under
+    // full-suite load. Every sibling spec waits on this same settle signal.
+    await waitForSweepSettled(page);
     const before = await page.evaluate(() => {
       const viz = (window as any).__viz;
       const snapshot = (gd: any) => ({ colors: [...gd.data[0].marker.color], sizes: [...gd.data[0].marker.size] });
@@ -979,7 +985,10 @@ test.describe("3D Stage Render Specs", () => {
     const readShares = () => page.locator("[data-weight-output]").evaluateAll((nodes) =>
       nodes.map((node) => Number.parseInt(node.textContent ?? "", 10)),
     );
-    expect(await readShares()).toEqual([34, 33, 33]);
+    // FIX-D (#29): the console opens on the chat landing preset
+    // (presets.chat = .35/.30/.35 → shares [35,30,35], sum 100). The prior
+    // [34,33,33] reflected the retired equal-weight (.3333) default.
+    expect(await readShares()).toEqual([35, 30, 35]);
     expect((await readShares()).reduce((sum, share) => sum + share, 0)).toBe(100);
 
     await page.locator('[data-preset="coding"]').click();
