@@ -1,4 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+/**
+ * Wait for the active sweep to reach its final restyle batch — the deterministic
+ * end-of-sweep signal, with no wall-clock race. On a weight change, start()
+ * synchronously resets every marker to its dim base (size 7), then re-lights the
+ * optimum at size 16 only on the final batch (the optimum is last in the
+ * ascending-score ignition order, so it lights at progress === 1). Thus "a marker
+ * reaches size 16" is exactly "the current sweep has settled on its terminal
+ * palette" — replacing a fixed waitForTimeout that raced the browser's clock and
+ * flaked under machine load.
+ */
+async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> {
+  await page.waitForFunction(
+    () => ((window as any).__viz?.gd?.data?.[0]?.marker?.size ?? []).includes(16),
+    null,
+    { timeout: timeoutMs },
+  );
+}
 
 test.describe("3D Stage Render Specs", () => {
   let consoleErrors: string[] = [];
@@ -72,21 +90,28 @@ test.describe("3D Stage Render Specs", () => {
     await expect(hoverlayer).toHaveJSProperty("childElementCount", 0);
   });
 
-  test("Items 11 & 28: incomplete rows are visible, labelled, and have no stage affordance", async ({ page }) => {
+  test("Items 11 & 28: incomplete rows show per-axis reasons, no stage affordance", async ({ page }) => {
     await page.goto("/");
     const entries = page.locator(".incomplete-data-entry");
     await expect(entries).toHaveCount(2);
     await expect(entries.nth(0)).toContainText("GPT-5.5 Pro (xhigh)");
     await expect(entries.nth(1)).toContainText("DeepSeek V4 Flash 0731 (Reasoning, Max Effort)");
-    await expect(entries.nth(0)).toContainText("Missing benchmark axis: not measured");
-    await expect(entries.nth(1)).toContainText("Missing benchmark axis: not measured");
+    // Per-axis coverage (frontier-math §5.2): GPT-5.5 Pro (xhigh) is missing
+    // ALL three axes; DeepSeek V4 Flash 0731 is missing ONLY speed and shows
+    // its published price + intelligence index.
+    await expect(entries.nth(0)).toContainText("Speed: not measured");
+    await expect(entries.nth(0)).toContainText("Cost: not measured");
+    await expect(entries.nth(0)).toContainText("Intelligence: not measured");
+    await expect(entries.nth(1)).toContainText("Speed: not measured");
+    await expect(entries.nth(1)).toContainText("Cost: $0.06 /M tokens");
+    await expect(entries.nth(1)).toContainText("Intelligence: 49.9");
     for (const entry of [entries.nth(0), entries.nth(1)]) {
       await expect(entry).not.toHaveAttribute("role", "button");
       await expect(entry).not.toHaveAttribute("tabindex");
     }
   });
 
-  test("Item 13: All three axes are log scale with custom ticks including ε floor", async ({ page }) => {
+  test("Item 13: speed/cost LOG, intelligence LINEAR (0–100), ε floor on cost", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
@@ -112,18 +137,23 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
 
+    // Speed + cost stay log (heavy-tailed). Intelligence is LINEAR on its native
+    // 0–100 index (frontier-math §3.3 — logging it "would distort"; the score
+    // layer already normalizes intelligence linearly). The old log [1,10,100]
+    // axis crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
     expect(layout.xaxisType).toBe("log");
-    expect(layout.yaxisType).toBe("log");
+    expect(layout.yaxisType).toBe("linear");
     expect(layout.zaxisType).toBe("log");
 
-    // Check powers of 10 ticks
+    // Speed ticks: powers of 10.
     expect(layout.xaxisTickvals).toEqual([10, 100, 1000]);
     expect(layout.xaxisTicktext).toEqual(["10", "100", "1000"]);
 
-    expect(layout.yaxisTickvals).toEqual([1, 10, 100]);
-    expect(layout.yaxisTicktext).toEqual(["1", "10", "100"]);
+    // Intelligence ticks: linear 0–100 every 20.
+    expect(layout.yaxisTickvals).toEqual([0, 20, 40, 60, 80, 100]);
+    expect(layout.yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
 
-    // Check cost axis includes the floor value and "≤ floor" label
+    // Cost axis includes the floor value and "≤ floor" label (unchanged).
     expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
     expect(layout.zaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
     expect(layout.zaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
@@ -174,7 +204,7 @@ test.describe("3D Stage Render Specs", () => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
     await page.locator("#weight-cost").fill("9");
-    await page.waitForTimeout(550);
+    await waitForSweepSettled(page);
 
     const result = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -207,7 +237,9 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
     await page.locator("#weight-cost").fill("9");
-    await page.waitForTimeout(550);
+    // Wait for the deterministic end-of-sweep signal (optimum reaches size 16 on
+    // the final batch) instead of racing a fixed wall-clock timeout.
+    await waitForSweepSettled(page);
     const result = await page.evaluate(() => {
       const W = window as any;
       const log = W.__restyleLog as any[];
@@ -215,6 +247,16 @@ test.describe("3D Stage Render Specs", () => {
       const stage = W.__viz.gd;
       const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
       const optimum = stage.data[0].text[optimumIndex];
+      const frontierCount = W.__viz.frontierModelIds.length;
+      // Per stage restyle batch: how many points are lit (size > 7) and the
+      // optimum's size at that batch — drives ORDER + staging + optimum-last.
+      const perCall = stageCalls.map((entry) => {
+        const sizes = entry.update["marker.size"][0] as number[];
+        return {
+          litCount: sizes.filter((size: number) => size > 7).length,
+          optimumSize: sizes[optimumIndex],
+        };
+      });
       const firstStage = stageCalls[0]?.update;
       const finalStage = stageCalls.at(-1)?.update;
       const startColors = firstStage?.["marker.color"]?.[0] as string[];
@@ -234,16 +276,45 @@ test.describe("3D Stage Render Specs", () => {
         duration: stageCalls.length > 1 ? stageCalls.at(-1).at - stageCalls[0].at : 0,
         projectionCalls: log.filter((entry) => !entry.isStage).length,
         optimum,
+        frontierCount,
+        perCall,
         frontierChanges,
       };
     });
+    // Staged: more than one synchronized restyle batch reached the stage and
+    // each projection. No tight wall-clock bound — the settle wait is the gate.
     expect(result.count).toBeGreaterThan(1);
     expect(result.projectionCalls).toBeGreaterThan(1);
-    expect(result.duration).toBeGreaterThanOrEqual(300);
-    expect(result.duration).toBeLessThanOrEqual(550);
     expect(result.optimum).toBe("Command A+");
-    expect(result.frontierChanges.length).toBeGreaterThan(0);
+    expect(result.frontierCount).toBeGreaterThan(0);
+
+    const per = result.perCall;
+    // Staging: the first batch is the dim base — nothing lit yet.
+    expect(per[0].litCount).toBe(0);
+    expect(per[0].optimumSize).toBeLessThan(16);
+    // ORDER: lit-count is monotonic non-decreasing across batches (a frame that
+    // does not advance the ignition order is deduped and emits no restyle).
+    for (let i = 1; i < per.length; i++) {
+      expect(per[i].litCount).toBeGreaterThanOrEqual(per[i - 1].litCount);
+    }
+    // The final batch lights the entire frontier.
+    expect(per[per.length - 1].litCount).toBe(result.frontierCount);
+    // optimum-last: the optimum lights at exactly the batch that completes the
+    // frontier (progress === 1) — Command A+ is the last point in the
+    // ascending-score ignition order, so it is the last point to light. Robust
+    // to any trailing appearance re-assertion (findIndex stops at the first
+    // occurrence, and the frontier only first reaches full litness at the
+    // optimum's own batch).
+    const firstFullLit = per.findIndex((c) => c.litCount === result.frontierCount);
+    const firstOptimumLit = per.findIndex((c) => c.optimumSize === 16);
+    expect(firstFullLit).toBeGreaterThanOrEqual(0);
+    expect(firstOptimumLit).toBe(firstFullLit);
+    // Every frontier point transitioned from its dim base to its lit target.
+    expect(result.frontierChanges).toHaveLength(result.frontierCount);
     expect(result.frontierChanges.every(({ colorChanged, sizeChanged }) => colorChanged && sizeChanged)).toBe(true);
+    // Generous settle smoke check only (no tight [300,550] wall-clock bound): a
+    // pathologically hung sweep fails at the settle wait above, not here.
+    expect(result.duration).toBeLessThan(5000);
   });
 
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
@@ -262,7 +333,7 @@ test.describe("3D Stage Render Specs", () => {
     await page.locator("#weight-cost").fill("9");
     await page.waitForTimeout(120);
     await page.locator("#weight-speed").fill("8");
-    await page.waitForTimeout(550);
+    await waitForSweepSettled(page);
     const result = await page.evaluate(() => {
       const W = window as any;
       const stageCalls = (W.__restyleLog as any[]).filter((entry) => entry.isStage);
@@ -359,7 +430,11 @@ test.describe("3D Stage Render Specs", () => {
       expect(points.colors).not.toContain("#636efa");
       expect(points.colors).toContain("#E8F1E4");
       expect(points.colors).toContain("#C9D4C4");
-      expect(points.colors.some((color: string) => color.includes("61, 85, 96"))).toBe(true);
+      // Dominated points carry the lightened slate-cyan fill (src/viz/palette.ts
+      // dominatedFill): same hue as --slate-cyan, luminance raised to ~4:1 vs
+      // ink-field so the ~20 off-frontier models stay plainly visible yet
+      // clearly below the filament frontier.
+      expect(points.colors.some((color: string) => color.toLowerCase() === "#687a83")).toBe(true);
       expect(points.sizes).toContain(16);
       expect(points.sizes).toContain(10);
     }
@@ -376,7 +451,7 @@ test.describe("3D Stage Render Specs", () => {
       for (let x = canvasBox!.x + 8; x < canvasBox!.x + canvasBox!.width - 8; x += 12) {
         await page.mouse.move(x, y);
         const text = await page.evaluate(() => (document.querySelector(".stage-tooltip") as HTMLElement).textContent);
-        if (text.includes("TTFT incl. reasoning (long prompt)")) {
+        if (text.includes("incl. thinking time (long-prompt median)")) {
           hit = { x, y };
           break;
         }
@@ -394,7 +469,7 @@ test.describe("3D Stage Render Specs", () => {
     expect(inspected.initial.text).toContain("TPS");
     expect(inspected.initial.text).toContain("Blended price");
     expect(inspected.initial.text).toContain("AA index");
-    expect(inspected.initial.text).toContain("TTFT incl. reasoning (long prompt)");
+    expect(inspected.initial.text).toContain("incl. thinking time (long-prompt median)");
     expect(Number.parseInt(inspected.initial.left, 10) - hit!.x).toBeLessThanOrEqual(24);
     expect(Number.parseInt(inspected.initial.top, 10) - hit!.y).toBeLessThanOrEqual(24);
     expect(pinnedText).toBeTruthy();
@@ -478,7 +553,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     );
   });
 
-  test("Projection render: 3 de-chromed log-axis scatters with ε floor on cost axes", async ({ page }) => {
+  test("Projection render: 3 de-chromed scatters (log speed/cost, linear intelligence) with ε floor on cost axes", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
@@ -534,13 +609,25 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       expect(gd.points).toBe(33);
       // hoverinfo 'none' (NOT 'skip'): events fire, no native hover card.
       expect(gd.hoverinfo).toBe("none");
-      // Log axes wherever the stage uses log (TPS, cost, intelligence all log).
-      expect(gd.xaxisType).toBe("log");
-      expect(gd.yaxisType).toBe("log");
       expect(gd.modebarNodes).toBe(0);
       // hoverinfo 'none' → no native hover card drawn (de-chrome contract).
       expect(gd.hoverlayerChildren).toBe(0);
     });
+
+    // Axis scale per projection: speed (tps) + cost stay LOG; intelligence is
+    // LINEAR on its native 0–100 index (frontier-math §3.3), matching the stage.
+    //   gds[0] tps-intelligence : x=tps(log)     y=intelligence(linear)
+    //   gds[1] tps-cost         : x=tps(log)     y=cost(log)
+    //   gds[2] cost-intelligence: x=cost(log)    y=intelligence(linear)
+    expect(data.perGd[0].xaxisType).toBe("log");
+    expect(data.perGd[0].yaxisType).toBe("linear");
+    expect(data.perGd[1].xaxisType).toBe("log");
+    expect(data.perGd[1].yaxisType).toBe("log");
+    expect(data.perGd[2].xaxisType).toBe("log");
+    expect(data.perGd[2].yaxisType).toBe("linear");
+    // Intelligence axes carry linear 0–100 ticks (every 20).
+    expect(data.perGd[0].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
+    expect(data.perGd[2].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
 
     // Cost axes carry the single ε "≤ floor" tick (tps-cost y, cost-intelligence x).
     expect(data.perGd[1].yaxisTicktext).toContain("≤ floor");

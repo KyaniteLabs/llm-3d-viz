@@ -2,6 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
+import { dominatedFill } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -207,7 +208,7 @@ export class Projections {
         ) ?? (baseSymbol === "diamond" ? "circle" : "diamond");
     }
 
-    let color = this.colorWithAlpha(this.tokens.slateCyan, 0.5);
+    let color = dominatedFill(this.tokens.slateCyan);
     if (isOptimum) color = this.tokens.filament;
     else if (isFrontier) color = this.tokens.filamentDim;
 
@@ -222,6 +223,10 @@ export class Projections {
     let titleText: string;
     let tickvals: number[];
     let ticktext: string[];
+    // Intelligence is LINEAR on its native 0–100 index (frontier-math §3.3 —
+    // "logging it would distort"); speed + cost stay log, matching the stage.
+    let scale: "log" | "linear" = "log";
+    let range: [number, number] | undefined;
     switch (kind) {
       case "tps":
         titleText = "SPEED (TPS)";
@@ -230,8 +235,10 @@ export class Projections {
         break;
       case "intelligence":
         titleText = "INTELLIGENCE (INDEX)";
-        tickvals = [1, 10, 100];
-        ticktext = ["1", "10", "100"];
+        tickvals = [0, 20, 40, 60, 80, 100];
+        ticktext = ["0", "20", "40", "60", "80", "100"];
+        scale = "linear";
+        range = [0, 100];
         break;
       case "cost":
         titleText = "COST ($/M)";
@@ -241,7 +248,8 @@ export class Projections {
         break;
     }
     return {
-      type: "log",
+      type: scale,
+      ...(range ? { range, autorange: false } : {}),
       showgrid: false,
       zeroline: false,
       showline: true,

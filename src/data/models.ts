@@ -1,4 +1,5 @@
 import rawModels from "../../data/models.v0.draft.json";
+import { formatTps, formatPricePerM, formatIntelligence } from "../lib/format";
 
 export type Openness = "open" | "closed";
 export type Modality = "text" | "vision" | "audio" | "video";
@@ -18,6 +19,15 @@ export interface Model {
   provider: string;
   openness: Openness;
   modality: Modality[];
+  /**
+   * Authoritative flag: is this a reasoning / thinking-effort model — the only
+   * kind whose measured TTFT can honestly include substantial thinking time.
+   * Set explicitly per row so reasoning-gated behaviour (the TTFT caveat, etc.)
+   * reads structured data instead of guessing from the curated name. Optional:
+   * when absent, src/lib/format.ts falls back to a conservative name heuristic
+   * for legacy/incomplete rows.
+   */
+  reasoning?: boolean;
   context_length: number;
   release_date: string;
   source_url: string;
@@ -95,6 +105,9 @@ export function validateModels(candidateModels: readonly Model[]): void {
     if (isMissingString(row.model) || isMissingString(row.provider)) {
       throw new Error(`${label}: model and provider must be non-empty strings`);
     }
+    if (row.reasoning !== undefined && typeof row.reasoning !== "boolean") {
+      throw new Error(`${label} (${row.model}): reasoning must be a boolean when present`);
+    }
     if (!Number.isFinite(row.context_length) || row.context_length <= 0) {
       throw new Error(`${label} (${row.model}): context_length is required and must be positive`);
     }
@@ -142,6 +155,67 @@ export function incompleteModels(): IncompleteModel[] {
       typeof model.null_reason === "string" &&
       model.null_reason.length > 0,
   );
+}
+
+/** The three benchmark axes, in display order. */
+export type IncompleteAxis = "speed" | "cost" | "intelligence";
+
+export interface AxisCoverage {
+  axis: IncompleteAxis;
+  /** Human-facing axis label, e.g. "Speed". */
+  label: string;
+  /** True when this axis has a measured value for the model. */
+  measured: boolean;
+  /** Per-axis reason ("not measured" / "unpublished" / "not applicable") when missing; "" when measured. */
+  reason: string;
+  /** Formatted value when measured, else the reason label. */
+  display: string;
+}
+
+/** Human label for a row's null_reason enum (frontier-math §5.2 schema). */
+const AXIS_REASON_LABELS: Record<string, string> = {
+  not_measured: "not measured",
+  unpublished: "unpublished",
+  not_applicable: "not applicable",
+};
+
+function missingAxisReason(model: Model): string {
+  if (!model.null_reason) return "not measured";
+  return AXIS_REASON_LABELS[model.null_reason] ?? model.null_reason.replaceAll("_", " ");
+}
+
+/**
+ * Per-axis coverage for an excluded model (frontier-math §5.2): each axis shows
+ * its measured value when known, or the row's missing-data reason when not — so
+ * the dataset's coverage gaps read per axis instead of as one generic "missing"
+ * line. GPT-5.5 Pro (xhigh) lacks all three; DeepSeek V4 Flash 0731 lacks only
+ * speed (price + index are published, so they are shown).
+ */
+export function incompleteAxisCoverage(model: Model): AxisCoverage[] {
+  const reason = missingAxisReason(model);
+  return [
+    {
+      axis: "speed",
+      label: "Speed",
+      measured: model.tps !== null,
+      reason: model.tps === null ? reason : "",
+      display: model.tps !== null ? formatTps(model.tps) : reason,
+    },
+    {
+      axis: "cost",
+      label: "Cost",
+      measured: model.blended_price_per_M !== null,
+      reason: model.blended_price_per_M === null ? reason : "",
+      display: model.blended_price_per_M !== null ? formatPricePerM(model.blended_price_per_M) : reason,
+    },
+    {
+      axis: "intelligence",
+      label: "Intelligence",
+      measured: model.aa_intelligence_index !== null,
+      reason: model.aa_intelligence_index === null ? reason : "",
+      display: model.aa_intelligence_index !== null ? formatIntelligence(model.aa_intelligence_index) : reason,
+    },
+  ];
 }
 
 /** Negative-price rows are quarantined as data errors for defense in depth. */

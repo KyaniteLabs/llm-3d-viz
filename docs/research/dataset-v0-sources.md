@@ -127,7 +127,7 @@ Specific caveats per model:
   (GPT-5.6 family, Claude Opus/Sonnet 5, GPT-5) TTFT includes thinking time and is therefore
   74–188 **seconds**; their medium-prompt TTFT is much lower (e.g. Claude Opus 5: 25.5s). This is
   a real, published tradeoff, not an extraction artifact — but the viz should label the axis
-  "TTFT incl. reasoning (long prompt)" or it will mislead.
+  "TTFT incl. reasoning (long prompt)" or it will mislead. **[CORRECTED 2026-08-02 (PR #31 review, #28):** the shipped caveat is the footnote `"incl. thinking time (long-prompt median)"` shown *under* the TTFT value (not an axis label), gated on the model being a reasoning/thinking-effort model **and** having a multi-minute TTFT — see `src/lib/format.ts` (`ttftCaveat`/`isReasoningModel`) and `.omx/plans/prd-v0-build.md` step 5b. A bare ms threshold would wrongly tag a slow non-reasoner. Original 2026-08-01 snapshot wording preserved; this note appended, not retroactive.**]**
 - **Blended price:** stored verbatim from AA's `price1mBlended7To2To1` (AA's 7:2:1 blend). Never
   recomputed. Note several models have blended < input price (e.g. Muse Spark 1.1: blended 0.78
   vs in 1.25) — this is how AA's blend math falls out with cache-hit pricing; verbatim from

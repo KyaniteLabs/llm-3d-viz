@@ -1,19 +1,10 @@
-import { incompleteModels, quarantinedModels, type Model } from "../data/models";
+import { incompleteModels, incompleteAxisCoverage, quarantinedModels, type Model } from "../data/models";
 import { normalizedScores, presets } from "../lib/score";
+import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
 import type { AppStore, AppState } from "../state";
 
 const weightKeys = ["speed", "cost", "intelligence"] as const;
 type WeightKey = (typeof weightKeys)[number];
-
-function formatNumber(value: number | null, suffix = ""): string {
-  return value === null ? "—" : `${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}${suffix}`;
-}
-
-function reasonLabel(model: Model & { null_reason?: string }): string {
-  if (model.null_reason === "not_measured") return "Missing benchmark axis: not measured";
-  if (model.null_reason) return `Missing benchmark axis: ${model.null_reason.replaceAll("_", " ")}`;
-  return "Excluded data error";
-}
 
 export class DecisionConsole {
   private readonly root: HTMLElement;
@@ -78,9 +69,18 @@ export class DecisionConsole {
   private renderIncompleteData() {
     const incomplete = [...incompleteModels(), ...quarantinedModels()];
     const section = this.root.querySelector(".incomplete-data")!;
-    section.innerHTML = `<p class="eyebrow">INCOMPLETE DATA / EXCLUDED</p>${incomplete.map((model) =>
-      `<p class="incomplete-data-entry" data-model-id="${model.model}"><strong>${model.model}</strong><span>${reasonLabel(model)}</span></p>`,
-    ).join("")}`;
+    section.innerHTML = `<p class="eyebrow">INCOMPLETE DATA / EXCLUDED</p>${incomplete
+      .map((model) => {
+        // Per-axis coverage (frontier-math §5.2): show each measured value where
+        // known and mark missing axes with their reason, instead of one generic
+        // "missing" line. One block span per axis (`.incomplete-data-entry span`
+        // is already display:block in tokens.css).
+        const axes = incompleteAxisCoverage(model)
+          .map((a) => `<span class="incomplete-axis">${a.label}: ${a.display}</span>`)
+          .join("");
+        return `<p class="incomplete-data-entry" data-model-id="${model.model}"><strong>${model.model}</strong>${axes}</p>`;
+      })
+      .join("")}`;
   }
 
   private activeModel(state: Readonly<AppState>) {
@@ -91,14 +91,20 @@ export class DecisionConsole {
   private details(model: Model, state: Readonly<AppState>) {
     const score = normalizedScores(this.models, state.weights, this.models)
       .find((candidate) => candidate.model.model === model.model)?.score;
-    const ttftLabel = /reasoning|reasoner/i.test(model.model)
-      ? "TTFT incl. reasoning (long prompt)"
-      : "TTFT";
+    // Multi-minute TTFTs carry the honest thinking-time caveat only when the
+    // model is a reasoning/thinking-effort model — ttftCaveat gates on both
+    // (latency AND reasoning nature, unified in src/lib/format.ts). This same
+    // cell feeds both the value-score readout and the stage tooltip. ttft is
+    // stored in ms; shown in seconds.
+    const caveat = ttftCaveat(model);
+    const ttftCell = caveat
+      ? `${formatTtftSeconds(model.ttft)}<span class="ttft-caveat">${caveat}</span>`
+      : formatTtftSeconds(model.ttft);
     return `<strong>${model.model}</strong><span>${model.provider}</span>
-      <dl><div><dt>TPS</dt><dd>${formatNumber(model.tps)}</dd></div>
-      <div><dt>${ttftLabel}</dt><dd>${formatNumber(model.ttft, " ms")}</dd></div>
-      <div><dt>Blended price</dt><dd>${formatNumber(model.blended_price_per_M, " / M")}</dd></div>
-      <div><dt>AA index</dt><dd>${formatNumber(model.aa_intelligence_index)}</dd></div>
+      <dl><div><dt>TPS</dt><dd>${formatTps(model.tps)}</dd></div>
+      <div><dt>TTFT</dt><dd>${ttftCell}</dd></div>
+      <div><dt>Blended price</dt><dd>${formatPricePerM(model.blended_price_per_M)}</dd></div>
+      <div><dt>AA index</dt><dd>${formatIntelligence(model.aa_intelligence_index)}</dd></div>
       <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>`;
   }
 

@@ -2,6 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
+import { dominatedFill } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -192,7 +193,11 @@ export class Stage3D {
       } else if (isFront) {
         color = this.tokens.filamentDim;
       } else {
-        color = this.colorWithAlpha(this.tokens.slateCyan, 0.5);
+        // Dominated fill is lightened slate-cyan (see src/viz/palette.ts):
+        // stays in the subtraction language but raises the luminance floor so
+        // the ~20 off-frontier models are plainly visible yet clearly dimmer
+        // than the filament frontier.
+        color = dominatedFill(this.tokens.slateCyan);
       }
       colors.push(color);
 
@@ -246,9 +251,22 @@ export class Stage3D {
       hoverinfo: "none",
     };
 
-    // De-chromed axis config
-    const axisLayout = (titleText: string, tickvals: number[], ticktext: string[]) => ({
-      type: "log",
+    // De-chromed axis config. Speed and cost stay LOG (heavy-tailed: price
+    // spans >10³×, tps ~10²×). Intelligence is LINEAR on its native 0–100 index
+    // scale — frontier-math §3.3 pins linear min-max for intelligence because
+    // "the intelligence index is already a bounded, roughly uniform 0–100-style
+    // index; logging it would distort", and the score layer already normalizes
+    // intelligence linearly (src/lib/score.ts). The old log [1,10,100] axis
+    // crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
+    const axisLayout = (
+      titleText: string,
+      tickvals: number[],
+      ticktext: string[],
+      scale: "log" | "linear" = "log",
+      range?: [number, number],
+    ) => ({
+      type: scale,
+      ...(range ? { range, autorange: false as const } : {}),
       visible: true,
       showgrid: false,
       zeroline: false,
@@ -283,7 +301,13 @@ export class Stage3D {
       scene: {
         uirevision: "constant_camera",
         xaxis: axisLayout("SPEED (TPS)", [10, 100, 1000], ["10", "100", "1000"]),
-        yaxis: axisLayout("INTELLIGENCE (INDEX)", [1, 10, 100], ["1", "10", "100"]),
+        yaxis: axisLayout(
+          "INTELLIGENCE (INDEX)",
+          [0, 20, 40, 60, 80, 100],
+          ["0", "20", "40", "60", "80", "100"],
+          "linear",
+          [0, 100],
+        ),
         zaxis: axisLayout(
           "COST ($/M)",
           [this.priceFloor, 0.1, 1, 10, 100],

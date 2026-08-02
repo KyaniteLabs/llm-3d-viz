@@ -1,6 +1,7 @@
 [
   {
     "model": "GPT-5.6 Sol (max)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -25,6 +26,7 @@
   },
   {
     "model": "GPT-5.6 Terra (max)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -49,6 +51,7 @@
   },
   {
     "model": "GPT-5.6 Luna (max)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -73,6 +76,7 @@
   },
   {
     "model": "GPT-5.5 Pro (xhigh)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -98,6 +102,7 @@
   },
   {
     "model": "gpt-oss-120b (high)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "open",
     "modality": [
@@ -121,6 +126,7 @@
   },
   {
     "model": "GPT-5 (high)",
+    "reasoning": true,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -145,6 +151,7 @@
   },
   {
     "model": "GPT-4o (Nov '24)",
+    "reasoning": false,
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
@@ -169,6 +176,7 @@
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+    "reasoning": true,
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
@@ -193,6 +201,7 @@
   },
   {
     "model": "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
+    "reasoning": true,
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
@@ -217,6 +226,7 @@
   },
   {
     "model": "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)",
+    "reasoning": true,
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
@@ -241,6 +251,7 @@
   },
   {
     "model": "Claude 4.5 Haiku (Reasoning)",
+    "reasoning": true,
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
@@ -265,6 +276,7 @@
   },
   {
     "model": "Gemini 3.6 Flash (high)",
+    "reasoning": true,
     "provider": "Google",
     "openness": "closed",
     "modality": [
@@ -291,6 +303,7 @@
   },
   {
     "model": "Gemini 3.5 Flash-Lite",
+    "reasoning": false,
     "provider": "Google",
     "openness": "closed",
     "modality": [
@@ -317,6 +330,7 @@
   },
   {
     "model": "Gemini 2.5 Pro",
+    "reasoning": false,
     "provider": "Google",
     "openness": "closed",
     "modality": [
@@ -343,6 +357,7 @@
   },
   {
     "model": "Gemma 4 31B (Reasoning)",
+    "reasoning": true,
     "provider": "Google",
     "openness": "open",
     "modality": [
@@ -368,6 +383,7 @@
   },
   {
     "model": "Muse Spark 1.1 (xhigh)",
+    "reasoning": true,
     "provider": "Meta",
     "openness": "closed",
     "modality": [
@@ -392,6 +408,7 @@
   },
   {
     "model": "Llama 4 Maverick",
+    "reasoning": false,
     "provider": "Meta",
     "openness": "open",
     "modality": [
@@ -416,6 +433,7 @@
   },
   {
     "model": "Llama 4 Scout",
+    "reasoning": false,
     "provider": "Meta",
     "openness": "open",
     "modality": [
@@ -440,6 +458,7 @@
   },
   {
     "model": "Llama 3.3 Instruct 70B",
+    "reasoning": false,
     "provider": "Meta",
     "openness": "open",
     "modality": [
@@ -463,6 +482,7 @@
   },
   {
     "model": "Grok 4.5 (high)",
+    "reasoning": true,
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
@@ -487,6 +507,7 @@
   },
   {
     "model": "DeepSeek V4 Pro (Reasoning, Max Effort)",
+    "reasoning": true,
     "provider": "DeepSeek",
     "openness": "open",
     "modality": [
@@ -510,6 +531,7 @@
   },
   {
     "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+    "reasoning": true,
     "provider": "DeepSeek",
     "openness": "open",
     "modality": [
@@ -534,6 +556,7 @@
   },
   {
     "model": "Kimi K3 (max)",
+    "reasoning": true,
     "provider": "Kimi",
     "openness": "open",
     "modality": [
@@ -558,6 +581,7 @@
   },
   {
     "model": "GLM-5.2 (max)",
+    "reasoning": true,
     "provider": "Z AI",
     "openness": "open",
     "modality": [
@@ -581,6 +605,7 @@
   },
   {
     "model": "Qwen3.7 Max",
+    "reasoning": false,
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
@@ -604,6 +629,7 @@
   },
   {
     "model": "Qwen3.5 397B A17B (Reasoning)",
+    "reasoning": true,
     "provider": "Alibaba",
     "openness": "open",
     "modality": [
@@ -628,6 +654,7 @@
   },
   {
     "model": "Mistral Large 3",
+    "reasoning": false,
     "provider": "Mistral",
     "openness": "open",
     "modality": [
@@ -652,6 +679,7 @@
   },
   {
     "model": "Mistral Medium 3.5",
+    "reasoning": false,
     "provider": "Mistral",
     "openness": "open",
     "modality": [
@@ -676,6 +704,7 @@
   },
   {
     "model": "MiniMax-M3",
+    "reasoning": false,
     "provider": "MiniMax",
     "openness": "open",
     "modality": [
@@ -701,6 +730,7 @@
   },
   {
     "model": "MiMo-V2.5-Pro",
+    "reasoning": false,
     "provider": "Xiaomi",
     "openness": "open",
     "modality": [
@@ -724,6 +754,7 @@
   },
   {
     "model": "Nemotron 3 Ultra 550B A55B (Reasoning)",
+    "reasoning": true,
     "provider": "NVIDIA",
     "openness": "open",
     "modality": [
@@ -747,6 +778,7 @@
   },
   {
     "model": "Command A+",
+    "reasoning": false,
     "provider": "Cohere",
     "openness": "open",
     "modality": [
@@ -771,6 +803,7 @@
   },
   {
     "model": "Inkling (xhigh)",
+    "reasoning": true,
     "provider": "Thinking Machines",
     "openness": "open",
     "modality": [
@@ -796,6 +829,7 @@
   },
   {
     "model": "Nova Premier",
+    "reasoning": false,
     "provider": "Amazon",
     "openness": "closed",
     "modality": [
@@ -819,6 +853,7 @@
   },
   {
     "model": "Phi-4",
+    "reasoning": false,
     "provider": "Microsoft",
     "openness": "open",
     "modality": [
