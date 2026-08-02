@@ -86,7 +86,7 @@ describe("value-score normalization", () => {
     const visible = [model("visible-low", 10, 1, 20), model("visible-high", 100, 100, 80)];
     const below = model("below", 1, 1_000, 0);
     const above = model("above", 1_000, 0.1, 100);
-    const scores = normalizedScores([below, above], weights(1, 1, 1), visible);
+    const scores = normalizedScores([...visible, below, above], weights(1, 1, 1), visible);
 
     for (const { normalized } of scores) {
       expect(normalized.speed).toBeGreaterThanOrEqual(0);
@@ -96,8 +96,26 @@ describe("value-score normalization", () => {
       expect(normalized.intelligence).toBeGreaterThanOrEqual(0);
       expect(normalized.intelligence).toBeLessThanOrEqual(1);
     }
-    expect(scores[0].normalized).toEqual({ speed: 0, cost: 0, intelligence: 0 });
-    expect(scores[1].normalized).toEqual({ speed: 1, cost: 1, intelligence: 1 });
+    expect(scores.find(({ model: row }) => row.model === "visible-low")?.normalized).toEqual({
+      speed: 0,
+      cost: 1,
+      intelligence: 0,
+    });
+    expect(scores.find(({ model: row }) => row.model === "visible-high")?.normalized).toEqual({
+      speed: 1,
+      cost: 0,
+      intelligence: 1,
+    });
+    expect(scores.find(({ model: row }) => row.model === "below")?.normalized).toEqual({
+      speed: 0,
+      cost: 0,
+      intelligence: 0,
+    });
+    expect(scores.find(({ model: row }) => row.model === "above")?.normalized).toEqual({
+      speed: 1,
+      cost: 1,
+      intelligence: 1,
+    });
   });
 
   it("computes weighted composites and falls back to equal weights at zero", () => {
