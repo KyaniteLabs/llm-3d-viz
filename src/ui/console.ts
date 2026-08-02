@@ -22,19 +22,23 @@ export class DecisionConsole {
   private readonly tooltip: HTMLElement;
   private cursor = { x: 0, y: 0 };
 
-  constructor(root: HTMLElement, store: AppStore, models: readonly Model[]) {
+  constructor(root: HTMLElement, store: AppStore, models: readonly Model[], onCinemaToggle: () => void) {
     this.root = root;
     this.store = store;
     this.models = models;
     this.root.innerHTML = `
       <p class="eyebrow">INSTRUMENT CONSOLE</p>
       <h2 id="console-title">Value readout</h2>
+      <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
       <section class="weight-controls" aria-label="Value-score weights"></section>
       <section class="preset-controls" aria-label="Workload presets"></section>
       <section class="model-readout" aria-live="polite"></section>
       <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>`;
 
     this.renderControls();
+    this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]")!.addEventListener("click", () => {
+      onCinemaToggle();
+    });
     this.renderIncompleteData();
     this.tooltip = document.createElement("aside");
     this.tooltip.className = "stage-tooltip";
@@ -111,6 +115,11 @@ export class DecisionConsole {
       button.classList.toggle("is-active", button.dataset.preset === activePreset);
       button.setAttribute("aria-pressed", String(button.dataset.preset === activePreset));
     });
+    const cinemaButton = this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]");
+    if (cinemaButton) {
+      cinemaButton.setAttribute("aria-pressed", String(state.cinemaMode));
+      cinemaButton.textContent = state.cinemaMode ? "EXIT CINEMA [C]" : "ENTER CINEMA [C]";
+    }
     const readout = this.root.querySelector(".model-readout")!;
     const model = this.activeModel(state);
     readout.innerHTML = model ? this.details(model, state) : `<p class="console-note">Hover a model point to inspect its current value score.</p>`;

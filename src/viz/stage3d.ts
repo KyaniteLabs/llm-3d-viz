@@ -218,13 +218,9 @@ export class Stage3D {
       z,
       text: textLabels,
       marker: {
-        color: colors,
-        size: sizes,
+        ...(this.isInitialized ? {} : { color: colors, size: sizes }),
         symbol: symbols,
-        line: {
-          color: this.tokens.inkField,
-          width: 1,
-        },
+        line: { color: this.tokens.inkField, width: 1 },
       },
       hoverinfo: "none",
     };
