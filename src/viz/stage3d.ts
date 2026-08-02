@@ -448,27 +448,36 @@ export class Stage3D {
       this.showReloadPrompt();
     });
     on.call(this.gd, "plotly_relayout", (eventData: any) => {
+      // FIX-D (#29) review: Plotly emits camera drags in three shapes — the full
+      // `scene.camera` object, partial objects (`scene.camera.eye`), and fully
+      // flattened per-component keys (`scene.camera.eye.z`). The first two were
+      // already clamped, but the flattened shape (verified live: a tilt pushed
+      // eye.z to -5) fell through `updated === false` and never reached the clamp.
+      // Merge every dotted camera key present — partial OR flattened — so all
+      // three shapes converge on clampCameraEye.
       let updated = false;
       if (eventData["scene.camera"]) {
         this.camera = eventData["scene.camera"];
         updated = true;
-      } else {
+      }
+      const dotted = Object.keys(eventData).filter((k) =>
+        k.startsWith("scene.camera."),
+      );
+      if (dotted.length) {
         const newCamera = { ...this.camera };
-        if (eventData["scene.camera.eye"]) {
-          newCamera.eye = eventData["scene.camera.eye"];
+        for (const key of dotted) {
           updated = true;
+          // "scene.camera.eye.z" → ["eye","z"]; "scene.camera.eye" → ["eye"].
+          const parts = key.slice("scene.camera.".length).split(".");
+          let node: any = newCamera;
+          for (let i = 0; i < parts.length - 1; i++) {
+            const k = parts[i];
+            node[k] = { ...(node[k] || {}) };
+            node = node[k];
+          }
+          node[parts[parts.length - 1]] = eventData[key];
         }
-        if (eventData["scene.camera.up"]) {
-          newCamera.up = eventData["scene.camera.up"];
-          updated = true;
-        }
-        if (eventData["scene.camera.center"]) {
-          newCamera.center = eventData["scene.camera.center"];
-          updated = true;
-        }
-        if (updated) {
-          this.camera = newCamera;
-        }
+        this.camera = newCamera;
       }
       // FIX-D (#29): a normal orbit drag can push eye.z at/below the stage plane
       // (eye.z < floor), flipping the view and clipping/rotating axis labels.
