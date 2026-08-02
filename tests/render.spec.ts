@@ -291,7 +291,7 @@ test.describe("3D Stage Render Specs", () => {
     expect(uniqueSymbols.size).toBeGreaterThanOrEqual(4);
 
     // Let's find the optimum model index.
-    // By default weights are equal. We can find the optimum model in data.
+    // Landing weights are the chat preset (.35/.30/.35); locate the optimum by its size-16 marker.
     // The optimum is styled with filament color rgba(232, 241, 228, 1.0) and size 16.
     const optimumIndex = data.sizes.findIndex((s: number) => s === 16);
     expect(optimumIndex).not.toBe(-1);
@@ -651,6 +651,12 @@ test.describe("3D Stage Render Specs", () => {
   test("Item 16: cinema re-render preserves the current point appearance", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
+    // FIX-D (#29): wait for the deterministic end-of-sweep signal before
+    // snapshotting. Without this, `before` can capture mid-ignition (points still
+    // at the flat slate floor) while `after` — taken after a 250ms cinema toggle —
+    // lands post-settle (heat ramp), producing a spurious before≠after under
+    // full-suite load. Every sibling spec waits on this same settle signal.
+    await waitForSweepSettled(page);
     const before = await page.evaluate(() => {
       const viz = (window as any).__viz;
       const snapshot = (gd: any) => ({ colors: [...gd.data[0].marker.color], sizes: [...gd.data[0].marker.size] });
@@ -713,6 +719,59 @@ test.describe("3D Stage Render Specs", () => {
     await page.mouse.move(5, 5);
     await page.locator(".stage-3d-canvas").click({ position: { x: 5, y: 5 } });
     await expect(page.locator(".stage-tooltip")).toBeHidden();
+  });
+
+  test("FIX-D #29 review: flattened per-component camera relayout is clamped above the floor", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    // Plotly emits camera drags in three shapes: the full `scene.camera` object,
+    // partial objects (`scene.camera.eye`), and fully flattened per-component keys
+    // (`scene.camera.eye.z`). The clamp caught the first two, but the flattened
+    // shape (the kind a turntable/orbit tilt emits mid-drag) fell through
+    // `updated === false` and never reached clampCameraEye — verified live
+    // reaching eye.z = -5, flipping the view below the floor. Prove the flattened
+    // path now converges on the clamp (EYE_Z_FLOOR = 0.2).
+    const FLOOR = 0.2;
+    const result = await page.evaluate(async (floor) => {
+      const W = window as any;
+      const viz = W.__viz;
+      const gd = viz.gd;
+      const Plotly = viz.Plotly;
+      const realRelayout = Plotly.relayout;
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      // Let the clamp's corrective relayout (an async Plotly.relayout().then) settle.
+      const settle = async () => { for (let i = 0; i < 50; i++) await wait(10); };
+
+      // Phase A — drive the flattened key through the REAL Plotly pipeline.
+      // Plotly applies eye.z = -5 to the layout, then emits plotly_relayout with
+      // the dotted key. Without the fix the clamp never runs and -5 persists.
+      await realRelayout.call(Plotly, gd, { "scene.camera.eye.z": -5 });
+      await settle();
+      const realPipelineZ = gd.layout.scene.camera.eye.z;
+
+      // Phase B — emit the flattened event directly (deterministic shape) and
+      // confirm the clamp issues its corrective full-camera relayout. Spy on
+      // Plotly.relayout to catch it (stage3d's Plotly === viz.Plotly, same ref).
+      let clampRelayoutSeen = false;
+      Plotly.relayout = function (g: any, update: any) {
+        const eyeZ = update && update["scene.camera"] && update["scene.camera"].eye
+          && update["scene.camera"].eye.z;
+        if (typeof eyeZ === "number" && eyeZ >= floor) clampRelayoutSeen = true;
+        return realRelayout.call(this, g, update);
+      };
+      gd.emit("plotly_relayout", { "scene.camera.eye.z": -7 });
+      await settle();
+      const directEmitCorrective = clampRelayoutSeen;
+      Plotly.relayout = realRelayout;
+
+      return { realPipelineZ, directEmitCorrective };
+    }, FLOOR);
+
+    // Phase A: the live layout eye.z was raised back above the floor.
+    expect(result.realPipelineZ, "flattened eye.z not clamped above floor via real pipeline").toBeGreaterThanOrEqual(FLOOR);
+    // Phase B: the clamp fired on the flattened per-component path.
+    expect(result.directEmitCorrective, "clamp did not fire for flattened scene.camera.eye.z").toBe(true);
   });
 
   test("FIX-A #26: tooltip follows the real DOM cursor and flips at both viewport edges", async ({ page }) => {
@@ -979,7 +1038,10 @@ test.describe("3D Stage Render Specs", () => {
     const readShares = () => page.locator("[data-weight-output]").evaluateAll((nodes) =>
       nodes.map((node) => Number.parseInt(node.textContent ?? "", 10)),
     );
-    expect(await readShares()).toEqual([34, 33, 33]);
+    // FIX-D (#29): the console opens on the chat landing preset
+    // (presets.chat = .35/.30/.35 → shares [35,30,35], sum 100). The prior
+    // [34,33,33] reflected the retired equal-weight (.3333) default.
+    expect(await readShares()).toEqual([35, 30, 35]);
     expect((await readShares()).reduce((sum, share) => sum + share, 0)).toBe(100);
 
     await page.locator('[data-preset="coding"]').click();
@@ -1396,8 +1458,8 @@ test.describe("2D Projection Render + Coupling Specs", () => {
         "xaxis.range[1]": 2.5,
       });
       const before = gd.layout.xaxis.range.slice();
-      // Re-render the same way the stage re-renders on a weight change.
-      await proj.render({ speed: 0.3333, cost: 0.3333, intelligence: 0.3333 }, allModels);
+      // Re-render via the chat landing preset (.35/.30/.35) — the same render() path the stage uses on a weight change.
+      await proj.render({ speed: 0.35, cost: 0.3, intelligence: 0.35 }, allModels);
       const after = gd.layout.xaxis.range.slice();
       // Also confirm a re-render genuinely happened (datarevision bumped).
       const datarevision = gd.layout.datarevision;

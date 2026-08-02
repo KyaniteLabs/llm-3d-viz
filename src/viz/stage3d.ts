@@ -28,6 +28,10 @@ export class Stage3D {
     fontMono: string;
   };
   private camera: any;
+  // FIX-D (#29): re-entrancy guard for the corrective relayout that enforces the
+  // eye.z floor on the plotly_relayout read-back path (a normal orbit drag can
+  // otherwise flip the camera below the stage plane).
+  private relayoutClampInFlight = false;
   private isInitialized = false;
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
@@ -111,11 +115,40 @@ export class Stage3D {
     });
   }
 
+  /**
+   * Floor for eye.z (FIX-D #29). Keeps the camera above the z=0 stage plane and
+   * off the degenerate horizon where axis labels clip and rotate. Small relative
+   * to the default eye radius (~2.6), and robust across the scene's zoom range.
+   */
+  private static readonly EYE_Z_FLOOR = 0.2;
+
+  /**
+   * Below this plot-container width (FIX-D #29) the stage is treated as "narrow"
+   * (phones). The native 3D axis titles are WebGL textures fixed at the axis ends;
+   * on a narrow stage the long titles clip at the canvas edge and no paper margin
+   * reclaims them, so at narrow widths the titles are shortened to the metric name
+   * and the title/tick fonts shrunk. Threshold is in plot-container px (≈317 at a
+   * 375px viewport), comfortably below any desktop column width, so the default
+   * (1280px) render suite is unaffected.
+   */
+  private static readonly NARROW_PX = 460;
+
+  /** Clamp eye.z to EYE_Z_FLOOR; returns true iff it raised the eye. */
+  private clampCameraEye(): boolean {
+    const eye = this.camera?.eye;
+    if (eye && typeof eye.z === "number" && eye.z < Stage3D.EYE_Z_FLOOR) {
+      eye.z = Stage3D.EYE_Z_FLOOR;
+      return true;
+    }
+    return false;
+  }
+
   public setCamera(camera: any) {
     this.camera = {
       ...this.camera,
       ...camera,
     };
+    this.clampCameraEye();
     Plotly.relayout(this.gd, { "scene.camera": this.camera });
   }
 
@@ -261,6 +294,36 @@ export class Stage3D {
     // index; logging it would distort", and the score layer already normalizes
     // intelligence linearly (src/lib/score.ts). The old log [1,10,100] axis
     // crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
+    // FIX-D (#29): narrow-stage axis legibility (see NARROW_PX). The `> 0` guard
+    // avoids treating an un-laid-out container (clientWidth 0) as narrow. gl3d
+    // renders axis titles as textures fixed at the axis ends; on a narrow stage
+    // the long titles ("INTELLIGENCE (INDEX)") overflow the canvas and clip, and
+    // no paper margin reclaims them (verified by independent vision review). So
+    // at narrow widths we SHORTEN the titles to the metric name AND thin the tick
+    // density (the three axes converge near the origin in the 3D projection, so a
+    // full tick set jumbles there on a small canvas). Units still live in the
+    // tooltip/console readout and the 2D projections below.
+    const containerWidth = this.container.clientWidth;
+    const narrow = containerWidth > 0 && containerWidth < Stage3D.NARROW_PX;
+    const axisTitleSize = narrow ? 9 : 11;
+    const axisTickSize = narrow ? 9 : 10;
+    const axisCfg = narrow
+      ? {
+          // FIX-D (#29): on a narrow 3D stage the three axes converge at one
+          // origin corner, so their lowest ticks ("0"/"10"/"≤ floor") stack into
+          // an illegible cluster. Drop each axis's origin tick on mobile — the
+          // full tick set (incl. the ε "≤ floor" marker) stays on the 2D
+          // projections rendered below the stage.
+          speed: { title: "SPEED", ticks: [100, 1000], labels: ["100", "1000"] },
+          intelligence: { title: "INTEL", ticks: [50, 100], labels: ["50", "100"] },
+          cost: { title: "COST", ticks: [1, 100], labels: ["1", "100"] },
+        }
+      : {
+          speed: { title: "SPEED (TPS)", ticks: [10, 100, 1000], labels: ["10", "100", "1000"] },
+          intelligence: { title: "INTELLIGENCE (INDEX)", ticks: [0, 20, 40, 60, 80, 100], labels: ["0", "20", "40", "60", "80", "100"] },
+          cost: { title: "COST ($/M)", ticks: [this.priceFloor, 0.1, 1, 10, 100], labels: ["≤ floor", "0.1", "1", "10", "100"] },
+        };
+
     const axisLayout = (
       titleText: string,
       tickvals: number[],
@@ -282,14 +345,14 @@ export class Stage3D {
       ticktext,
       tickfont: {
         family: this.tokens.fontMono,
-        size: 10,
+        size: axisTickSize,
         color: this.tokens.textMuted,
       },
       title: {
         text: titleText,
         font: {
           family: this.tokens.fontMono,
-          size: 11,
+          size: axisTitleSize,
           color: this.tokens.textWarm,
         },
       },
@@ -298,23 +361,27 @@ export class Stage3D {
     const layout = {
       paper_bgcolor: this.tokens.inkField,
       plot_bgcolor: this.tokens.inkField,
+      // FIX-D (#29): margin stays flush (0) at every width — an earlier 8px inset
+      // was tried to reclaim title clipping but did not help (titles are fixed by
+      // shortening), and insetting only shrinks the 3D scene and worsens
+      // point-cloud overlap with the back-face axes on a small canvas.
       margin: { l: 0, r: 0, t: 0, b: 0 },
       showlegend: false,
       uirevision: "constant_camera",
       scene: {
         uirevision: "constant_camera",
-        xaxis: axisLayout("SPEED (TPS)", [10, 100, 1000], ["10", "100", "1000"]),
+        xaxis: axisLayout(axisCfg.speed.title, axisCfg.speed.ticks, axisCfg.speed.labels),
         yaxis: axisLayout(
-          "INTELLIGENCE (INDEX)",
-          [0, 20, 40, 60, 80, 100],
-          ["0", "20", "40", "60", "80", "100"],
+          axisCfg.intelligence.title,
+          axisCfg.intelligence.ticks,
+          axisCfg.intelligence.labels,
           "linear",
           [0, 100],
         ),
         zaxis: axisLayout(
-          "COST ($/M)",
-          [this.priceFloor, 0.1, 1, 10, 100],
-          ["≤ floor", "0.1", "1", "10", "100"]
+          axisCfg.cost.title,
+          axisCfg.cost.ticks,
+          axisCfg.cost.labels,
         ),
         camera: this.camera,
         // 'closest' (not false) so the stage emits plotly_hover on hover and the
@@ -329,6 +396,10 @@ export class Stage3D {
       displayModeBar: false,
       displaylogo: false,
       responsive: true,
+      // FIX-D (#29): de-chrome parity — suppress the "Double-click to zoom back
+      // out" notifier tip on the 3D stage too (same showTips-gated chrome class
+      // as the 2D projections; it leaks here on a 3D double-click-reset).
+      showTips: false,
     };
 
     if (!this.isInitialized) {
@@ -377,27 +448,48 @@ export class Stage3D {
       this.showReloadPrompt();
     });
     on.call(this.gd, "plotly_relayout", (eventData: any) => {
+      // FIX-D (#29) review: Plotly emits camera drags in three shapes — the full
+      // `scene.camera` object, partial objects (`scene.camera.eye`), and fully
+      // flattened per-component keys (`scene.camera.eye.z`). The first two were
+      // already clamped, but the flattened shape (verified live: a tilt pushed
+      // eye.z to -5) fell through `updated === false` and never reached the clamp.
+      // Merge every dotted camera key present — partial OR flattened — so all
+      // three shapes converge on clampCameraEye.
       let updated = false;
       if (eventData["scene.camera"]) {
         this.camera = eventData["scene.camera"];
         updated = true;
-      } else {
+      }
+      const dotted = Object.keys(eventData).filter((k) =>
+        k.startsWith("scene.camera."),
+      );
+      if (dotted.length) {
         const newCamera = { ...this.camera };
-        if (eventData["scene.camera.eye"]) {
-          newCamera.eye = eventData["scene.camera.eye"];
+        for (const key of dotted) {
           updated = true;
+          // "scene.camera.eye.z" → ["eye","z"]; "scene.camera.eye" → ["eye"].
+          const parts = key.slice("scene.camera.".length).split(".");
+          let node: any = newCamera;
+          for (let i = 0; i < parts.length - 1; i++) {
+            const k = parts[i];
+            node[k] = { ...(node[k] || {}) };
+            node = node[k];
+          }
+          node[parts[parts.length - 1]] = eventData[key];
         }
-        if (eventData["scene.camera.up"]) {
-          newCamera.up = eventData["scene.camera.up"];
-          updated = true;
-        }
-        if (eventData["scene.camera.center"]) {
-          newCamera.center = eventData["scene.camera.center"];
-          updated = true;
-        }
-        if (updated) {
-          this.camera = newCamera;
-        }
+        this.camera = newCamera;
+      }
+      // FIX-D (#29): a normal orbit drag can push eye.z at/below the stage plane
+      // (eye.z < floor), flipping the view and clipping/rotating axis labels.
+      // Clamp and re-apply so the camera can never cross the horizon. The
+      // corrective relayout re-emits plotly_relayout, but with eye.z already at
+      // the floor the next read-back is a no-op, so it converges; the in-flight
+      // guard is belt-and-suspenders against any re-entrant scheduling.
+      if (updated && this.clampCameraEye() && !this.relayoutClampInFlight) {
+        this.relayoutClampInFlight = true;
+        void Plotly.relayout(this.gd, { "scene.camera": this.camera }).then(
+          () => { this.relayoutClampInFlight = false; },
+        );
       }
     });
   }

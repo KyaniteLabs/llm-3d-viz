@@ -20,7 +20,9 @@ export default defineConfig({
       ".idea",
       ".git",
       ".cache",
-      "tests/render.spec.ts",
+      // Playwright browser specs live as *.spec.ts; vitest (the unit runner)
+      // must skip them. Globbed so new Playwright specs are auto-excluded.
+      "tests/*.spec.ts",
     ],
   },
 } as any);
