@@ -89,10 +89,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   new SweepScheduler(stage.gd, projections?.gds ?? [], store, models, heatEncoding);
 
+  // FIX-D (#29): the cinema shortcut yields only to genuine TEXT-ENTRY focus.
+  // Buttons, preset chips, and the range sliders (the weight controls) must NOT
+  // swallow "C". A bare <input> with no type defaults to "text" (text-entry →
+  // blocks); range/checkbox/radio/button-type inputs, <button>, and chips never do.
+  const isTextEntryTarget = (el: HTMLElement | null): boolean => {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    const tag = el.tagName.toLowerCase();
+    if (tag === "textarea" || tag === "select") return true;
+    if (tag === "input") {
+      const type = (el.getAttribute("type") || "text").toLowerCase();
+      return !["range", "checkbox", "radio", "button", "submit", "reset", "image", "file", "color"].includes(type);
+    }
+    return false;
+  };
+
   document.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() !== "c" || event.metaKey || event.ctrlKey || event.altKey) return;
-    const target = event.target as HTMLElement | null;
-    if (target?.matches("input, textarea, select, button")) return;
+    if (isTextEntryTarget(event.target as HTMLElement | null)) return;
     event.preventDefault();
     cinema.toggle();
   });

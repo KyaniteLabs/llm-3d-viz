@@ -1,4 +1,4 @@
-import type { ScoreWeights } from "./lib/score";
+import { presets, type ScoreWeights } from "./lib/score";
 
 export interface AppState {
   weights: ScoreWeights;
@@ -16,7 +16,10 @@ function sameWeights(left: ScoreWeights, right: ScoreWeights): boolean {
 
 export function createStore(initial: Partial<AppState> = {}) {
   let state: AppState = {
-    weights: { speed: 0.3333, cost: 0.3333, intelligence: 0.3333 },
+    // frontier-math §4: "chat is the landing state for the sliders" — the chat
+    // preset (.35/.30/.35) is the most balanced default and is what the value-score
+    // console opens on. Sourced from presets so the default cannot drift from it.
+    weights: { ...presets.chat },
     hoveredModelId: null,
     pinnedModelId: null,
     cinemaMode: false,
