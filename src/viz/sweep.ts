@@ -75,6 +75,17 @@ export class SweepScheduler {
   private reduced = motionPreference()?.matches ?? false;
   private readonly heatEncoding: boolean;
   private removeMotionListener: (() => void) | null = null;
+  // FIX-D (#29): plotly_afterplot re-assert hardening. `afterPlotRegistered` is
+  // set once a listener is attached to every plot (stage + projections). The
+  // actual re-assert is DEFERRED to a microtask (`afterPlotCheckQueued` dedupes
+  // a burst of afterplot events into one pass): Plotly can re-emit events
+  // synchronously during a react/restyle, so a synchronous re-assert here would
+  // run nested inside a hover→render cycle and recurse (stack overflow under the
+  // intensive hover scan). A microtask unwinds the stack each pass, so it can
+  // never recurse; it converges because a plot whose markers already match the
+  // appearance writes nothing. See onAfterPlot.
+  private afterPlotRegistered = false;
+  private afterPlotCheckQueued = false;
 
   constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[], heatEncoding = true) {
     this.stage = stage;
@@ -92,6 +103,7 @@ export class SweepScheduler {
       this.removeMotionListener = () => media.removeEventListener?.("change", onChange);
     }
     this.store.subscribe((state) => {
+      this.ensureAfterPlotListeners();
       const changed = !this.previousWeights || Object.keys(state.weights).some(
         (key) => state.weights[key as keyof ScoreWeights] !== this.previousWeights![key as keyof ScoreWeights],
       );
@@ -170,6 +182,10 @@ export class SweepScheduler {
       if (projection) this.write(gd, projection.colors, projection.sizes);
     });
     this.currentAppearance = appearance;
+    // Plots are guaranteed ready once we have written them — arm the afterplot
+    // re-assert here too (idempotent) so it registers even if no later store tick
+    // would have done it before a styling-dropping render lands.
+    this.ensureAfterPlotListeners();
   }
 
   private reassertAppearance() {
@@ -183,6 +199,81 @@ export class SweepScheduler {
         colors: colors.slice(),
         sizes: sizes.slice(),
       })),
+    });
+  }
+
+  /**
+   * FIX-D (#29): ensure a plotly_afterplot listener is registered on the stage and
+   * every projection. Idempotent; a no-op until every plot div has Plotly's `.on`
+   * emitter attached (which happens once the first newPlot resolves).
+   */
+  private ensureAfterPlotListeners() {
+    if (this.afterPlotRegistered) return;
+    const graphs = [this.stage, ...this.projections];
+    if (!graphs.every((gd) => typeof (gd as any).on === "function")) return;
+    this.afterPlotRegistered = true;
+    graphs.forEach((gd) => (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)));
+  }
+
+  /** The appearance slice the scheduler owns for one graph div (stage or a projection). */
+  private appearanceFor(gd: Graph): { colors: string[]; sizes: number[] } | null {
+    if (!this.currentAppearance) return null;
+    if (gd === this.stage) return this.currentAppearance.stage;
+    const idx = this.projections.indexOf(gd);
+    return idx >= 0 ? this.currentAppearance.projections[idx] ?? null : null;
+  }
+
+  /**
+   * True iff the live trace markers already equal the scheduler's appearance for
+   * this graph. Gates the afterplot re-assert so a converged plot writes nothing,
+   * which also makes the restyle→afterplot echo terminate after one no-op (no
+   * infinite loop) and adds zero restyles during a normal sweep.
+   */
+  private liveMatchesAppearance(gd: Graph): boolean {
+    const slice = this.appearanceFor(gd);
+    if (!slice) return true;
+    const marker = (gd as any).data?.[0]?.marker;
+    const liveColor = marker?.color;
+    const liveSize = marker?.size;
+    // Plotly keeps a per-point array once restyled; an unset/default marker is a
+    // single string (e.g. "#636efa") or undefined → never deep-equals our array.
+    return (
+      Array.isArray(liveColor) &&
+      Array.isArray(liveSize) &&
+      liveColor.length === slice.colors.length &&
+      liveColor.every((c: string, i: number) => c === slice.colors[i]) &&
+      liveSize.every((s: number, i: number) => s === slice.sizes[i])
+    );
+  }
+
+  /**
+   * FIX-D (#29): after ANY plot redraw (newPlot/react/relayout/restyle), if the
+   * scheduler's marker styling was dropped — e.g. a Plotly.react that re-applied a
+   * color/size-less trace landed AFTER the store-tick reassert (the async race
+   * that intermittently resets markers to Plotly defaults in long sessions) —
+   * restore it. This makes the scheduler's appearance the terminal write on every
+   * frame, so any operation ordering self-heals within one frame.
+   *
+   * The check is DEFERRED to a microtask (not run inline) so it can never execute
+   * synchronously nested inside a hover→render cycle — Plotly may re-emit events
+   * synchronously during react/restyle, and an inline re-assert there recurses
+   * (stack overflow under the intensive hover-scan spec). A microtask unwinds the
+   * stack each pass; the dedupe flag folds a burst of afterplot events into one
+   * pass; and it converges because a plot whose markers already match the
+   * appearance writes nothing.
+   */
+  private onAfterPlot(_gd: Graph) {
+    if (this.afterPlotCheckQueued || !this.currentAppearance) return;
+    this.afterPlotCheckQueued = true;
+    queueMicrotask(() => {
+      this.afterPlotCheckQueued = false;
+      if (!this.currentAppearance) return;
+      for (const gd of [this.stage, ...this.projections]) {
+        const slice = this.appearanceFor(gd);
+        if (slice && !this.liveMatchesAppearance(gd)) {
+          this.write(gd, slice.colors.slice(), slice.sizes.slice());
+        }
+      }
     });
   }
 
