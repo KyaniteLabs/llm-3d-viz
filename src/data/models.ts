@@ -64,6 +64,16 @@ export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {
 
 export const models: Model[] = rawModels as Model[];
 
+/** Complete rows eligible for three-axis frontier and value-score math. */
+export function isScorable(model: Model): boolean {
+  return (
+    model.tps !== null &&
+    model.blended_price_per_M !== null &&
+    model.blended_price_per_M >= 0 &&
+    model.aa_intelligence_index !== null
+  );
+}
+
 function isMissingString(value: unknown): boolean {
   return typeof value !== "string" || value.trim().length === 0;
 }

@@ -1,4 +1,4 @@
-import type { Model } from "../data/models";
+import { isScorable, type Model } from "../data/models";
 
 export interface RidgeVertex {
   /** The alphabetically first provider at this unique metric triple. */
@@ -7,49 +7,51 @@ export interface RidgeVertex {
   aliases: Model[];
 }
 
-function isComplete(model: Model): boolean {
-  return (
-    model.tps !== null &&
-    model.blended_price_per_M !== null &&
-    model.blended_price_per_M >= 0 &&
-    model.aa_intelligence_index !== null
-  );
+function publishedMetrics(model: Model): [number, number, number] {
+  return [
+    Math.round(model.tps! * 10) / 10,
+    Math.round(model.blended_price_per_M! * 100) / 100,
+    Math.round(model.aa_intelligence_index! * 10) / 10,
+  ];
 }
 
 /** Raw linear-space Pareto dominance: speed/intelligence maximize, cost minimize. */
 export function dominates(a: Model, b: Model): boolean {
-  if (!isComplete(a) || !isComplete(b)) return false;
-  const atLeastAsGood = a.tps! >= b.tps! && a.blended_price_per_M! <= b.blended_price_per_M! && a.aa_intelligence_index! >= b.aa_intelligence_index!;
-  const strictlyBetter =
-    a.tps! > b.tps! ||
-    a.blended_price_per_M! < b.blended_price_per_M! ||
-    a.aa_intelligence_index! > b.aa_intelligence_index!;
+  if (!isScorable(a) || !isScorable(b)) return false;
+  const [aSpeed, aCost, aIntelligence] = publishedMetrics(a);
+  const [bSpeed, bCost, bIntelligence] = publishedMetrics(b);
+  const atLeastAsGood = aSpeed >= bSpeed && aCost <= bCost && aIntelligence >= bIntelligence;
+  const strictlyBetter = aSpeed > bSpeed || aCost < bCost || aIntelligence > bIntelligence;
   return atLeastAsGood && strictlyBetter;
 }
 
 /** Returns the non-dominated, complete, non-quarantined model rows. */
 export function frontier(models: readonly Model[]): Model[] {
-  const valid = models.filter(isComplete);
+  const valid = models.filter(isScorable);
   return valid.filter((candidate) => !valid.some((other) => other !== candidate && dominates(other, candidate)));
 }
 
 function compareRidge(a: Model, b: Model): number {
+  const [aSpeed, aCost, aIntelligence] = publishedMetrics(a);
+  const [bSpeed, bCost, bIntelligence] = publishedMetrics(b);
   return (
-    a.blended_price_per_M! - b.blended_price_per_M! ||
-    a.aa_intelligence_index! - b.aa_intelligence_index! ||
-    b.tps! - a.tps! ||
+    aCost - bCost ||
+    aIntelligence - bIntelligence ||
+    bSpeed - aSpeed ||
     a.provider.localeCompare(b.provider) ||
     a.model.localeCompare(b.model)
   );
 }
 
 function sameTriple(a: Model, b: Model): boolean {
-  return a.tps === b.tps && a.blended_price_per_M === b.blended_price_per_M && a.aa_intelligence_index === b.aa_intelligence_index;
+  const [aSpeed, aCost, aIntelligence] = publishedMetrics(a);
+  const [bSpeed, bCost, bIntelligence] = publishedMetrics(b);
+  return aSpeed === bSpeed && aCost === bCost && aIntelligence === bIntelligence;
 }
 
 /** Sorts the frontier by cost ascending, intelligence ascending, speed descending and dedupes tied triples. */
 export function ridgeOrder(frontierModels: readonly Model[]): RidgeVertex[] {
-  const ordered = [...frontierModels].filter(isComplete).sort(compareRidge);
+  const ordered = [...frontierModels].filter(isScorable).sort(compareRidge);
   const vertices: RidgeVertex[] = [];
   for (const candidate of ordered) {
     const vertex = vertices.find(({ model }) => sameTriple(model, candidate));

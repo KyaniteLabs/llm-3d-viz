@@ -1,4 +1,4 @@
-import type { Model } from "../data/models";
+import { isScorable, type Model } from "../data/models";
 
 export interface ScoreWeights {
   speed: number;
@@ -29,15 +29,6 @@ export const presets = {
   "long-context": { speed: 0.25, cost: 0.45, intelligence: 0.3 },
 } as const satisfies Record<string, ScoreWeights>;
 
-function isScorable(model: Model): boolean {
-  return (
-    model.tps !== null &&
-    model.blended_price_per_M !== null &&
-    model.blended_price_per_M >= 0 &&
-    model.aa_intelligence_index !== null
-  );
-}
-
 function minPositive(values: readonly number[]): number {
   const positive = values.filter((value) => value > 0);
   return positive.length > 0 ? Math.min(...positive) : 1;
@@ -52,6 +43,10 @@ function logMinMax(value: number, min: number, max: number): number {
   const logMin = Math.log10(min);
   const logMax = Math.log10(max);
   return logMax === logMin ? 1 : (logValue - logMin) / (logMax - logMin);
+}
+
+function clampUnit(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }
 
 function composite(normalized: NormalizedAxes, weights: ScoreWeights): number {
@@ -91,9 +86,9 @@ export function normalizedScores(
     const speed = Math.max(row.tps!, speedFloor);
     const price = row.blended_price_per_M! <= 0 ? priceFloor : row.blended_price_per_M!;
     const normalized = {
-      speed: logMinMax(speed, speedMin, speedMax),
-      cost: 1 - logMinMax(price, priceMin, priceMax),
-      intelligence: minMax(row.aa_intelligence_index!, intelligenceMin, intelligenceMax),
+      speed: clampUnit(logMinMax(speed, speedMin, speedMax)),
+      cost: clampUnit(priceMax === priceMin ? 1 : 1 - logMinMax(price, priceMin, priceMax)),
+      intelligence: clampUnit(minMax(row.aa_intelligence_index!, intelligenceMin, intelligenceMax)),
     };
     return {
       model: row,

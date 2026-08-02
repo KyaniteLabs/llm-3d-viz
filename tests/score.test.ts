@@ -74,6 +74,30 @@ describe("value-score normalization", () => {
     const scores = normalizedScores([a, b], weights(1, 1, 1), [a, b]);
 
     expect(scores.every(({ normalized }) => normalized.speed === 1)).toBe(true);
+
+    const costDegenerate = [model("cost-a", 10, 2, 50), model("cost-b", 20, 2, 80)];
+    expect(normalizedScores(costDegenerate, weights(1, 1, 1), costDegenerate).every(({ normalized }) => normalized.cost === 1)).toBe(true);
+
+    const intelligenceDegenerate = [model("intel-a", 10, 2, 50), model("intel-b", 20, 4, 50)];
+    expect(normalizedScores(intelligenceDegenerate, weights(1, 1, 1), intelligenceDegenerate).every(({ normalized }) => normalized.intelligence === 1)).toBe(true);
+  });
+
+  it("clamps scores for models outside visible-set extrema", () => {
+    const visible = [model("visible-low", 10, 1, 20), model("visible-high", 100, 100, 80)];
+    const below = model("below", 1, 1_000, 0);
+    const above = model("above", 1_000, 0.1, 100);
+    const scores = normalizedScores([below, above], weights(1, 1, 1), visible);
+
+    for (const { normalized } of scores) {
+      expect(normalized.speed).toBeGreaterThanOrEqual(0);
+      expect(normalized.speed).toBeLessThanOrEqual(1);
+      expect(normalized.cost).toBeGreaterThanOrEqual(0);
+      expect(normalized.cost).toBeLessThanOrEqual(1);
+      expect(normalized.intelligence).toBeGreaterThanOrEqual(0);
+      expect(normalized.intelligence).toBeLessThanOrEqual(1);
+    }
+    expect(scores[0].normalized).toEqual({ speed: 0, cost: 0, intelligence: 0 });
+    expect(scores[1].normalized).toEqual({ speed: 1, cost: 1, intelligence: 1 });
   });
 
   it("computes weighted composites and falls back to equal weights at zero", () => {

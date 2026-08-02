@@ -35,6 +35,20 @@ describe("Pareto frontier", () => {
     expect(dominates(better, a)).toBe(true);
   });
 
+  it("compares dominance and tied triples at published precision", () => {
+    const a = model("a", 100.04, 2.004, 80.04);
+    const b = model("b", 100.03, 2.003, 80.03);
+
+    expect(dominates(a, b)).toBe(false);
+    expect(dominates(b, a)).toBe(false);
+    const ridge = ridgeOrder([a, b]);
+    expect(ridge).toHaveLength(1);
+    expect(ridge[0].aliases).toHaveLength(1);
+    expect(new Set([ridge[0].model.model, ...ridge[0].aliases.map(({ model: name }) => name)])).toEqual(
+      new Set(["a", "b"]),
+    );
+  });
+
   it("returns the three expected frontier models in deterministic ridge order", () => {
     const fixture = [
       model("cheap", 80, 1, 60),
