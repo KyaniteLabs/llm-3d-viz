@@ -419,10 +419,11 @@ test.describe("3D Stage Render Specs", () => {
     const firstOptimumLit = per.findIndex((c) => c.optimumSize === 16);
     expect(firstFullLit).toBeGreaterThanOrEqual(0);
     expect(firstOptimumLit).toBe(firstFullLit);
-    // Every frontier point transitioned from its dim base to its lit target.
-    // Heat is the default now, so frontier luminance may already be present in
-    // the staging base; the size transition remains the ignition contract.
+    // Every frontier point transitioned from its dim class floor to its
+    // score-lit target. This is the visible FIX-A staging standard: heat must
+    // change color as well as size.
     expect(result.frontierChanges).toHaveLength(result.frontierCount);
+    expect(result.frontierChanges.every(({ colorChanged }) => colorChanged)).toBe(true);
     expect(result.frontierChanges.every(({ sizeChanged }) => sizeChanged)).toBe(true);
     // Generous settle smoke check only (no tight [300,550] wall-clock bound): a
     // pathologically hung sweep fails at the settle wait above, not here.
@@ -882,6 +883,62 @@ test.describe("3D Stage Render Specs", () => {
     expect(heat.uniqueColors).toBeGreaterThan(4);
     expect(heat.optimumColor).toBe("#E8F1E4");
     expect(new Set(heat.scoreValues).size).toBeGreaterThan(4);
+  });
+
+  test("FIX-B #27 P1a: heat keeps dominated < frontier < optimum across weight sets", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const readOrdering = () => page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const luminance = (color: string) => {
+        const channels = color.match(/^#([\da-f]{6})$/i)![1]
+          .match(/../g)!
+          .map((channel: string) => Number.parseInt(channel, 16) / 255)
+          .map((channel: number) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const models = viz.gd.data[0].text as string[];
+      const colors = viz.gd.data[0].marker.color as string[];
+      const frontierIds = new Set(viz.frontierModelIds as string[]);
+      const optimumIndex = (viz.gd.data[0].marker.size as number[]).findIndex((size) => size === 16);
+      const frontierLuminance = frontierIds
+        ? [...frontierIds]
+            .map((id) => models.indexOf(id))
+            .filter((index) => index !== optimumIndex)
+            .map((index) => luminance(colors[index]))
+        : [];
+      const dominatedLuminance = models
+        .map((model, index) => frontierIds.has(model) ? null : luminance(colors[index]))
+        .filter((value): value is number => value !== null);
+      const scores = viz.scoreByModel as Record<string, number>;
+      const dominatedOutscoresFrontier = models
+        .filter((model) => !frontierIds.has(model))
+        .some((dominated) => [...frontierIds]
+          .filter((model) => model !== models[optimumIndex])
+          .some((frontierModel) => scores[dominated] > scores[frontierModel]));
+      return {
+        dominatedMax: Math.max(...dominatedLuminance),
+        frontierMin: Math.min(...frontierLuminance),
+        frontierMax: Math.max(...frontierLuminance),
+        optimum: luminance(colors[optimumIndex]),
+        dominatedOutscoresFrontier,
+      };
+    });
+
+    const results = [];
+    for (const preset of ["coding", "RAG", "long-context"]) {
+      await page.locator(`[data-preset="${preset}"]`).click();
+      await waitForSweepSettled(page);
+      results.push(await readOrdering());
+    }
+
+    expect(results).toHaveLength(3);
+    for (const result of results) {
+      expect(result.dominatedMax).toBeLessThan(result.frontierMin);
+      expect(result.frontierMax).toBeLessThan(result.optimum);
+    }
+    expect(results.some((result) => result.dominatedOutscoresFrontier)).toBe(true);
   });
 
   test("FIX-B: ?heat=0 opts out of score luminance encoding", async ({ page }) => {

@@ -2,7 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { dominatedFill, scoreLuminanceFill } from "./palette";
+import { semanticPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -170,8 +170,13 @@ export class Stage3D {
     ];
 
     scorable.forEach((model) => {
-      const isOpt = optimumModel && model.model === optimumModel.model;
-      const isFront = frontierModels.some((fm) => fm.model === model.model);
+      const isOptimum = Boolean(optimumModel && model.model === optimumModel.model);
+      const isFrontier = frontierModels.some((fm) => fm.model === model.model);
+      const semanticClass: SemanticPointClass = isOptimum
+        ? "optimum"
+        : isFrontier
+          ? "frontier"
+          : "dominated";
 
       x.push(model.tps!);
       y.push(model.aa_intelligence_index!);
@@ -182,7 +187,7 @@ export class Stage3D {
 
       const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
       let symbol: Plotly3dSymbol = baseSymbol;
-      if (isOpt) {
+      if (isOptimum) {
         // The optimum needs a non-colour channel that is distinct from every
         // other frontier point, not just from its own provider's base glyph.
         symbol =
@@ -192,26 +197,17 @@ export class Stage3D {
       symbols.push(symbol);
 
       const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
-      let color = this.tokens.textWarm;
-      if (isOpt) {
-        color = this.tokens.filament;
-      } else if (this.heatEncoding) {
-        color = scoreLuminanceFill(score, this.tokens.filamentDim, this.tokens.filament);
-      } else if (isFront) {
-        color = this.tokens.filamentDim;
-      } else {
-        // Dominated fill is lightened slate-cyan (see src/viz/palette.ts):
-        // stays in the subtraction language but raises the luminance floor so
-        // the ~20 off-frontier models are plainly visible yet clearly dimmer
-        // than the filament frontier.
-        color = dominatedFill(this.tokens.slateCyan);
-      }
+      const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+        slateCyan: this.tokens.slateCyan,
+        filamentDim: this.tokens.filamentDim,
+        filament: this.tokens.filament,
+      });
       colors.push(color);
 
       let size = 8; // standard pearl base size
-      if (isOpt) {
+      if (isOptimum) {
         size = 16; // Optimum gets larger size
-      } else if (isFront) {
+      } else if (isFrontier) {
         size = 10; // Frontier slightly larger
       } else {
         size = 7; // Dominated slightly smaller

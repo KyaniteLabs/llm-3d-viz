@@ -4,7 +4,11 @@ import { frontier, ridgeOrder } from "../lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
-import { dominatedFill, scoreLuminanceFill } from "./palette";
+import {
+  semanticFloorFill,
+  semanticPointFill,
+  type SemanticPointClass,
+} from "./palette";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -115,12 +119,15 @@ export class SweepScheduler {
     const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimum = weightedOptimum(scores)?.model.model;
     const targetIds = new Set(ignitionOrder(this.models, weights, this.interacted));
+    const semanticClassFor = (id: string): SemanticPointClass =>
+      id === optimum ? "optimum" : frontierIds.has(id) ? "frontier" : "dominated";
     const make = (gd: Graph, target: boolean): MarkerState => {
       const ids = graphIds(gd);
       const colors = ids.map((id) => {
-        if (target && id === optimum) return "#E8F1E4";
-        if (this.heatEncoding) return scoreLuminanceFill(scoreById.get(id) ?? 0);
-        return target && frontierIds.has(id) ? "#C9D4C4" : dominatedFill();
+        const semanticClass = semanticClassFor(id);
+        return target
+          ? semanticPointFill(semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
+          : semanticFloorFill(semanticClass);
       });
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
       return { ids, colors, sizes };
@@ -188,7 +195,9 @@ export class SweepScheduler {
       projectionAppearance[projectionIndex] = {
         colors: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
-          return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : dominatedFill());
+          return style?.color ?? semanticFloorFill(
+            states.optimum === id ? "optimum" : states.frontierIds.has(id) ? "frontier" : "dominated",
+          );
         }),
         sizes: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);

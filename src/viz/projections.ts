@@ -2,7 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
-import { dominatedFill, scoreLuminanceFill } from "./palette";
+import { semanticPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -205,10 +205,16 @@ export class Projections {
         ) ?? (baseSymbol === "diamond" ? "circle" : "diamond");
     }
 
-    let color = dominatedFill(this.tokens.slateCyan);
-    if (isOptimum) color = this.tokens.filament;
-    else if (this.heatEncoding) color = scoreLuminanceFill(score, this.tokens.filamentDim, this.tokens.filament);
-    else if (isFrontier) color = this.tokens.filamentDim;
+    const semanticClass: SemanticPointClass = isOptimum
+      ? "optimum"
+      : isFrontier
+        ? "frontier"
+        : "dominated";
+    const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+      slateCyan: this.tokens.slateCyan,
+      filamentDim: this.tokens.filamentDim,
+      filament: this.tokens.filament,
+    });
 
     let size = 7;
     if (isOptimum) size = 16;
