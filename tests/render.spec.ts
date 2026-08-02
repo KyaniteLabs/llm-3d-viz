@@ -337,6 +337,34 @@ test.describe("3D Stage Render Specs", () => {
     await page.evaluate(() => { const W = window as any; W.__viz.Plotly.relayout = W.__realRelayout; });
   });
 
+  test("Item 16: cinema re-render preserves the current point appearance", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const before = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const snapshot = (gd: any) => ({ colors: [...gd.data[0].marker.color], sizes: [...gd.data[0].marker.size] });
+      return { stage: snapshot(viz.gd), projections: viz.projections.gds.map(snapshot) };
+    });
+
+    await page.locator("[data-cinema-toggle]").click();
+    await page.waitForTimeout(250);
+    const after = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const snapshot = (gd: any) => ({ colors: [...gd.data[0].marker.color], sizes: [...gd.data[0].marker.size] });
+      return { stage: snapshot(viz.gd), projections: viz.projections.gds.map(snapshot) };
+    });
+
+    expect(after).toEqual(before);
+    for (const points of [after.stage, ...after.projections]) {
+      expect(points.colors).not.toContain("#636efa");
+      expect(points.colors).toContain("#E8F1E4");
+      expect(points.colors).toContain("#C9D4C4");
+      expect(points.colors.some((color: string) => color.includes("61, 85, 96"))).toBe(true);
+      expect(points.sizes).toContain(16);
+      expect(points.sizes).toContain(10);
+    }
+  });
+
   test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);

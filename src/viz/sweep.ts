@@ -40,6 +40,11 @@ interface SweepStates {
   targetById: Map<string, { color: string; size: number }>;
 }
 
+interface CurrentAppearance {
+  stage: { colors: string[]; sizes: number[] };
+  projections: Array<{ colors: string[]; sizes: number[] }>;
+}
+
 function alpha(color: string, opacity: number): string {
   const match = color.match(/^#([\da-f]{6})$/i);
   if (!match) return color;
@@ -61,6 +66,7 @@ export class SweepScheduler {
   private interacted = false;
   private previousWeights: ScoreWeights | null = null;
   private lastBatch = -1;
+  private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
   private removeMotionListener: (() => void) | null = null;
 
@@ -82,7 +88,14 @@ export class SweepScheduler {
       const changed = !this.previousWeights || Object.keys(state.weights).some(
         (key) => state.weights[key as keyof ScoreWeights] !== this.previousWeights![key as keyof ScoreWeights],
       );
-      if (!changed && this.previousWeights) return;
+      if (!changed && this.previousWeights) {
+        // Store updates such as cinema mode re-render Plotly without starting a
+        // sweep. Re-assert the last scheduler-owned appearance because those
+        // renders intentionally omit marker color/size and Plotly otherwise
+        // restores its default palette.
+        this.reassertAppearance();
+        return;
+      }
       if (this.previousWeights) this.interacted = true;
       this.previousWeights = { ...state.weights };
       this.start(state);
@@ -100,7 +113,7 @@ export class SweepScheduler {
     this.run += 1;
   }
 
-  private markerStates(weights: ScoreWeights): { base: MarkerState; target: MarkerState; order: string[] } {
+  private markerStates(weights: ScoreWeights): SweepStates {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
     const optimum = weightedOptimum(scores)?.model.model;
@@ -131,8 +144,33 @@ export class SweepScheduler {
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
-    const plotly = (typeof window !== "undefined" && (window as any).__viz?.Plotly) ?? Plotly;
+    const plotly = import.meta.env.DEV
+      ? (window as any).__viz?.Plotly ?? Plotly
+      : Plotly;
     void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+  }
+
+  private writeAppearance(appearance: CurrentAppearance) {
+    this.write(this.stage, appearance.stage.colors, appearance.stage.sizes);
+    this.projections.forEach((gd, index) => {
+      const projection = appearance.projections[index];
+      if (projection) this.write(gd, projection.colors, projection.sizes);
+    });
+    this.currentAppearance = appearance;
+  }
+
+  private reassertAppearance() {
+    if (!this.currentAppearance) return;
+    this.writeAppearance({
+      stage: {
+        colors: this.currentAppearance.stage.colors.slice(),
+        sizes: this.currentAppearance.stage.sizes.slice(),
+      },
+      projections: this.currentAppearance.projections.map(({ colors, sizes }) => ({
+        colors: colors.slice(),
+        sizes: sizes.slice(),
+      })),
+    });
   }
 
   private writeAtProgress(states: SweepStates, progress: number) {
@@ -145,21 +183,21 @@ export class SweepScheduler {
     });
     const colors = states.base.colors.map((color, index) => lit.has(states.base.ids[index]) ? states.target.colors[index] : color);
     const sizes = states.base.sizes.map((size, index) => lit.has(states.base.ids[index]) ? states.target.sizes[index] : size);
-    this.write(this.stage, colors, sizes);
-    this.projections.forEach((gd) => {
+    const projectionAppearance: Array<{ colors: string[]; sizes: number[] }> = [];
+    this.projections.forEach((gd, projectionIndex) => {
       const ids = graphIds(gd);
-      this.write(
-        gd,
-        ids.map((id) => {
+      projectionAppearance[projectionIndex] = {
+        colors: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
           return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : alpha("#3D5560", 0.5));
         }),
-        ids.map((id) => {
+        sizes: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
           return style?.size ?? (states.frontierIds.has(id) ? 10 : 7);
         }),
-      );
+      };
     });
+    this.writeAppearance({ stage: { colors, sizes }, projections: projectionAppearance });
   }
 
   private start(state: Readonly<AppState>) {

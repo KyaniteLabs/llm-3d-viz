@@ -22,6 +22,9 @@ type AxisKind = "tps" | "cost" | "intelligence";
 /** The three orthogonal 2D projections of the SPEED × COST × INTELLIGENCE stage. */
 type ProjectionKind = "tps-intelligence" | "tps-cost" | "cost-intelligence";
 
+/** A graph host after Plotly has attached its runtime graph properties. */
+type PlotlyGraphDiv = HTMLDivElement & { data?: unknown };
+
 interface ProjectionSpec {
   kind: ProjectionKind;
   x: AxisKind;
@@ -79,7 +82,7 @@ export class Projections {
     fontMono: string;
   };
   /** One graph div per projection, in `ProjectionSpec` order. */
-  public readonly gds: HTMLDivElement[] = [];
+  public readonly gds: PlotlyGraphDiv[] = [];
   private readonly specs: ProjectionSpec[];
   private initialized = false;
   private priceFloor = 0.08125;
@@ -134,7 +137,8 @@ export class Projections {
       gd.style.flex = "1 1 auto";
       gd.style.minHeight = "140px";
       container.appendChild(gd);
-      this.gds.push(gd);
+      // Plotly adds `data` to the graph host when it initializes the plot.
+      this.gds.push(gd as PlotlyGraphDiv);
     });
   }
 
