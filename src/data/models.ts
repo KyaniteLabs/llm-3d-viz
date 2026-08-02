@@ -1,7 +1,7 @@
 import rawModels from "../../data/models.v0.draft.json";
 
 export type Openness = "open" | "closed";
-export type Modality = "text" | "vision" | "audio";
+export type Modality = "text" | "vision" | "audio" | "video";
 export type Plotly3dSymbol =
   | "circle"
   | "circle-open"
