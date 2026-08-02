@@ -29,7 +29,6 @@ export class Stage3D {
   private camera: any;
   private isInitialized = false;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
-  public onCameraChange?: (camera: any) => void;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -295,7 +294,6 @@ export class Stage3D {
           ["≤ floor", "0.1", "1", "10", "100"]
         ),
         camera: this.camera,
-        hovermode: false,
       },
     };
 
@@ -336,6 +334,7 @@ export class Stage3D {
         frontierModelIds: frontierModels.map((model) => model.model),
         gd: this.gd,
         priceFloor: this.priceFloor,
+        Plotly,
       };
     }
   }
@@ -369,9 +368,6 @@ export class Stage3D {
         if (updated) {
           this.camera = newCamera;
         }
-      }
-      if (updated && this.onCameraChange) {
-        this.onCameraChange(this.camera);
       }
     });
   }
