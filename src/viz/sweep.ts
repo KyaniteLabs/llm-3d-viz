@@ -1,7 +1,12 @@
 import * as Plotly from "plotly.js-dist-min";
 import { isScorable, type Model } from "../data/models";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
+import {
+  compareWeightedScores,
+  normalizedScores,
+  weightedOptimum,
+  type ScoreWeights,
+} from "../lib/score";
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
 import {
@@ -22,10 +27,10 @@ export function ignitionOrder(models: readonly Model[], weights: ScoreWeights, i
   // order by contract; only an interacted weight change switches to score rank.
   if (!interacted) return ridgeOrder(frontierModels).map(({ model }) => model.model);
   const scores = normalizedScores(models, weights, models);
-  const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
+  const scoreById = new Map(scores.map((entry) => [entry.model.model, entry]));
   return frontierModels
     .slice()
-    .sort((a, b) => (scoreById.get(a.model)! - scoreById.get(b.model)!) || a.model.localeCompare(b.model))
+    .sort((a, b) => compareWeightedScores(scoreById.get(a.model)!, scoreById.get(b.model)!))
     .map((model) => model.model);
 }
 
