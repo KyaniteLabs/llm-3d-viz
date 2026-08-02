@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let plotlyPointClicked = false;
 
   store.subscribe((state) => stage.render(state.weights, models));
-  stage.onCameraChange = (camera) => store.update({ camera });
-
   const plotlyOn = (stage.gd as any).on;
   if (typeof plotlyOn === "function") {
     plotlyOn.call(stage.gd, "plotly_hover", (event: any) => {

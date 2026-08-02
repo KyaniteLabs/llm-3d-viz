@@ -192,26 +192,41 @@ test.describe("3D Stage Render Specs", () => {
   test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const canvas = page.locator(".stage-3d-canvas canvas");
+    const canvasBox = await canvas.boundingBox();
+    expect(canvasBox).toBeTruthy();
+    let hit: { x: number; y: number } | undefined;
+    for (let y = canvasBox!.y + 8; y < canvasBox!.y + canvasBox!.height - 8 && !hit; y += 12) {
+      for (let x = canvasBox!.x + 8; x < canvasBox!.x + canvasBox!.width - 8; x += 12) {
+        await page.mouse.move(x, y);
+        const text = await page.evaluate(() => (document.querySelector(".stage-tooltip") as HTMLElement).textContent);
+        if (text.includes("TTFT incl. reasoning (long prompt)")) {
+          hit = { x, y };
+          break;
+        }
+      }
+    }
+    expect(hit).toBeTruthy();
     const inspected = await page.evaluate(() => {
-      const viz = (window as any).__viz;
-      const pointNumber = viz.scorableModels.findIndex((model: any) => /reasoning/i.test(model.model));
-      const event = { points: [{ pointNumber }], event: { clientX: 140, clientY: 120 } };
-      viz.gd.emit("plotly_hover", event);
       const tooltip = document.querySelector(".stage-tooltip") as HTMLElement;
       const initial = { left: tooltip.style.left, top: tooltip.style.top, text: tooltip.textContent };
-      viz.gd.emit("plotly_click", event);
-      const pinnedText = tooltip.textContent;
       const camera = { eye: { x: 2.1, y: 1.2, z: 0.9 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } };
-      viz.gd.emit("plotly_relayout", { "scene.camera": camera });
-      return { initial, pinnedText, camera };
+      return { initial, camera };
     });
+    await page.mouse.click(hit!.x, hit!.y);
+    const pinnedText = await page.locator(".stage-tooltip").textContent();
     expect(inspected.initial.text).toContain("TPS");
     expect(inspected.initial.text).toContain("Blended price");
     expect(inspected.initial.text).toContain("AA index");
     expect(inspected.initial.text).toContain("TTFT incl. reasoning (long prompt)");
-    expect(Number.parseInt(inspected.initial.left, 10) - 140).toBeLessThanOrEqual(24);
-    expect(Number.parseInt(inspected.initial.top, 10) - 120).toBeLessThanOrEqual(24);
-    expect(inspected.pinnedText).toBeTruthy();
+    expect(Number.parseInt(inspected.initial.left, 10) - hit!.x).toBeLessThanOrEqual(24);
+    expect(Number.parseInt(inspected.initial.top, 10) - hit!.y).toBeLessThanOrEqual(24);
+    expect(pinnedText).toBeTruthy();
+
+    await page.evaluate(async (camera) => {
+      const viz = (window as any).__viz;
+      await viz.Plotly.relayout(viz.gd, { "scene.camera": camera });
+    }, inspected.camera);
 
     await page.locator("#weight-speed").fill("8");
     const persistedCamera = await page.evaluate(() => (window as any).__viz.gd.layout.scene.camera.eye);

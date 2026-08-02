@@ -1,27 +1,14 @@
 import type { ScoreWeights } from "./lib/score";
 
-export interface CameraState {
-  eye: { x: number; y: number; z: number };
-  up: { x: number; y: number; z: number };
-  center: { x: number; y: number; z: number };
-}
-
 export interface AppState {
   weights: ScoreWeights;
   hoveredModelId: string | null;
   pinnedModelId: string | null;
   cinemaMode: boolean;
-  camera: CameraState;
   datarevision: number;
 }
 
 export type StateListener = (state: Readonly<AppState>) => void;
-
-const initialCamera: CameraState = {
-  eye: { x: 1.5, y: 1.5, z: 1.5 },
-  up: { x: 0, y: 0, z: 1 },
-  center: { x: 0, y: 0, z: 0 },
-};
 
 export function createStore(initial: Partial<AppState> = {}) {
   let state: AppState = {
@@ -29,7 +16,6 @@ export function createStore(initial: Partial<AppState> = {}) {
     hoveredModelId: null,
     pinnedModelId: null,
     cinemaMode: false,
-    camera: initialCamera,
     datarevision: 0,
     ...initial,
   };
@@ -48,7 +34,6 @@ export function createStore(initial: Partial<AppState> = {}) {
         ...state,
         ...patch,
         weights: patch.weights ? { ...patch.weights } : state.weights,
-        camera: patch.camera ? { ...patch.camera } : state.camera,
         datarevision: state.datarevision + 1,
       };
       emit();

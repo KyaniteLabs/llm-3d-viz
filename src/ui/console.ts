@@ -1,5 +1,5 @@
 import { incompleteModels, quarantinedModels, type Model } from "../data/models";
-import { normalizedScores, presets, weightedOptimum } from "../lib/score";
+import { normalizedScores, presets } from "../lib/score";
 import type { AppStore, AppState } from "../state";
 
 const weightKeys = ["speed", "cost", "intelligence"] as const;
@@ -130,8 +130,15 @@ export class DecisionConsole {
 
   private positionTooltip() {
     if (this.tooltip.hidden) return;
-    this.tooltip.style.left = `${this.cursor.x + 12}px`;
-    this.tooltip.style.top = `${this.cursor.y + 12}px`;
+    const offset = 12;
+    const left = this.cursor.x + offset + this.tooltip.offsetWidth > window.innerWidth
+      ? this.cursor.x - this.tooltip.offsetWidth - offset
+      : this.cursor.x + offset;
+    const top = this.cursor.y + offset + this.tooltip.offsetHeight > window.innerHeight
+      ? this.cursor.y - this.tooltip.offsetHeight - offset
+      : this.cursor.y + offset;
+    this.tooltip.style.left = `${left}px`;
+    this.tooltip.style.top = `${top}px`;
   }
 
   handleHover(modelId: string, clientX: number, clientY: number) {
@@ -149,9 +156,5 @@ export class DecisionConsole {
     } else {
       this.store.update({ hoveredModelId: null });
     }
-  }
-
-  expectedOptimum(): string | undefined {
-    return weightedOptimum(normalizedScores(this.models, this.store.getState().weights, this.models))?.model.model;
   }
 }
