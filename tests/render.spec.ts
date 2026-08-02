@@ -430,6 +430,133 @@ test.describe("3D Stage Render Specs", () => {
     expect(result.duration).toBeLessThan(5000);
   });
 
+  test("FIX-B #27 P1b: initial sweep uses ridge order, then slider sweep ends on the optimum", async ({ page }) => {
+    // Install the restyle tap before the app creates Plotly so the initial
+    // pre-interaction sweep is observable, not just the later slider sweep.
+    await page.addInitScript(() => {
+      const restyles: any[] = [];
+      let viz: any;
+      (window as any).__initialSweepRestyles = restyles;
+      Object.defineProperty(window, "__viz", {
+        configurable: true,
+        get: () => viz,
+        set: (next: any) => {
+          viz = next;
+          const plotly = next?.Plotly;
+          if (!plotly || plotly.__initialSweepRestyleWrapped) return;
+          const realRestyle = plotly.restyle;
+          plotly.restyle = function (gd: any, update: any, traces: any) {
+            restyles.push({
+              gd,
+              colors: Array.isArray(update?.["marker.color"]?.[0])
+                ? update["marker.color"][0].slice()
+                : null,
+              sizes: Array.isArray(update?.["marker.size"]?.[0])
+                ? update["marker.size"][0].slice()
+                : null,
+            });
+            return realRestyle.call(this, gd, update, traces);
+          };
+          plotly.__initialSweepRestyleWrapped = true;
+        },
+      });
+    });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.waitForFunction(() => {
+      const viz = (window as any).__viz;
+      const ids = viz?.gd?.data?.[0]?.text as string[] | undefined;
+      const frontierIds = viz?.frontierModelIds as string[] | undefined;
+      const stageRestyles = ((window as any).__initialSweepRestyles as any[] | undefined)
+        ?.filter((entry) => entry.gd === viz?.gd && Array.isArray(entry.sizes)) ?? [];
+      if (!ids || !frontierIds || stageRestyles.length === 0) return false;
+      const sawDimStaging = stageRestyles.some((entry) => entry.sizes.every((size: number) => size === 7));
+      const sawFullFrontier = stageRestyles.some((entry) => frontierIds.every((id) => {
+        const index = ids.indexOf(id);
+        return index >= 0 && entry.sizes[index] > 7;
+      }));
+      return sawDimStaging && sawFullFrontier;
+    });
+
+    const initial = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const ids = viz.gd.data[0].text as string[];
+      const stageRestyles = ((window as any).__initialSweepRestyles as any[])
+        .filter((entry) => entry.gd === viz.gd && Array.isArray(entry.sizes));
+
+      // Match ridgeOrder's contract: cost asc, intelligence asc, speed desc,
+      // with duplicate published triples represented by one rendered vertex.
+      const byId = new Map(viz.scorableModels.map((model: any) => [model.model, model]));
+      const frontierModels = (viz.frontierModelIds as string[]).map((id) => byId.get(id));
+      const published = (model: any) => [
+        Math.round(model.tps * 10) / 10,
+        Math.round(model.blended_price_per_M * 100) / 100,
+        Math.round(model.aa_intelligence_index * 10) / 10,
+      ];
+      const expectedRidge: string[] = [];
+      const seenTriples = new Set<string>();
+      frontierModels
+        .filter(Boolean)
+        .sort((left: any, right: any) => {
+          const [leftSpeed, leftCost, leftIntelligence] = published(left);
+          const [rightSpeed, rightCost, rightIntelligence] = published(right);
+          return leftCost - rightCost
+            || leftIntelligence - rightIntelligence
+            || rightSpeed - leftSpeed
+            || left.provider.localeCompare(right.provider)
+            || left.model.localeCompare(right.model);
+        })
+        .forEach((model: any) => {
+          const triple = published(model).join("|");
+          if (!seenTriples.has(triple)) {
+            seenTriples.add(triple);
+            expectedRidge.push(model.model);
+          }
+        });
+
+      const sizes = viz.gd.data[0].marker.size as number[];
+      const symbols = viz.gd.data[0].marker.symbol as string[];
+      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const frontierIndices = (viz.frontierModelIds as string[])
+        .map((id) => ids.indexOf(id))
+        .filter((index) => index !== optimumIndex);
+      return {
+        litSets: stageRestyles.map((entry) => ids.filter((_, index) => entry.sizes[index] > 7)),
+        expectedRidge,
+        optimumSize: sizes[optimumIndex],
+        optimumSymbol: symbols[optimumIndex],
+        otherSizes: sizes.filter((_, index) => index !== optimumIndex),
+        otherFrontierSymbols: frontierIndices.map((index) => symbols[index]),
+      };
+    });
+
+    // A frame may cross more than one stage, so assert the rendered state is
+    // always a prefix of ridge order; the final frame must contain the full
+    // ridge. This observes the actual marker batches without fabricating
+    // within-frame timing that Plotly does not render.
+    expect(initial.litSets.every((litIds: string[]) => {
+      const expectedPrefix = initial.expectedRidge.slice(0, litIds.length);
+      return expectedPrefix.length === litIds.length
+        && expectedPrefix.every((id: string) => litIds.includes(id));
+    })).toBe(true);
+    expect(new Set(initial.litSets.at(-1))).toEqual(new Set(initial.expectedRidge));
+    expect(initial.optimumSize).toBe(16);
+    expect(initial.otherSizes.every((size: number) => size < initial.optimumSize)).toBe(true);
+    expect(initial.otherFrontierSymbols.every((symbol: string) => symbol !== initial.optimumSymbol)).toBe(true);
+
+    await page.locator("#weight-cost").fill("9");
+    await waitForSweepSettled(page);
+    const postSlider = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const sizes = viz.gd.data[0].marker.size as number[];
+      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const scores = Object.entries(viz.scoreByModel as Record<string, number>);
+      const expectedOptimum = scores.sort((left, right) => right[1] - left[1])[0][0];
+      return { settledModel: viz.gd.data[0].text[optimumIndex], expectedOptimum };
+    });
+    expect(postSlider.settledModel).toBe(postSlider.expectedOptimum);
+  });
+
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
@@ -939,6 +1066,45 @@ test.describe("3D Stage Render Specs", () => {
       expect(result.frontierMax).toBeLessThan(result.optimum);
     }
     expect(results.some((result) => result.dominatedOutscoresFrontier)).toBe(true);
+  });
+
+  test("FIX-B #27 P1a: settled dominated points keep score-scaled slate luminance", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.locator("#weight-cost").fill("9");
+    await waitForSweepSettled(page);
+
+    const result = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const luminance = (color: string) => {
+        const channels = color.match(/^#([\da-f]{6})$/i)![1]
+          .match(/../g)!
+          .map((channel: string) => Number.parseInt(channel, 16) / 255)
+          .map((channel: number) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const models = viz.gd.data[0].text as string[];
+      const colors = viz.gd.data[0].marker.color as string[];
+      const frontierIds = new Set(viz.frontierModelIds as string[]);
+      const scores = viz.scoreByModel as Record<string, number>;
+      const dominated = models
+        .map((model, index) => ({ model, score: scores[model], luminance: luminance(colors[index]) }))
+        .filter(({ model }) => !frontierIds.has(model));
+      return {
+        dominated,
+        frontierDimLuminance: luminance("#C9D4C4"),
+      };
+    });
+
+    expect(result.dominated.length).toBeGreaterThanOrEqual(2);
+    expect(Math.max(...result.dominated.map(({ luminance }) => luminance))).toBeLessThan(
+      result.frontierDimLuminance,
+    );
+    expect(result.dominated.some((left, leftIndex) =>
+      result.dominated.slice(leftIndex + 1).some((right) =>
+        left.score !== right.score && left.luminance !== right.luminance,
+      ),
+    )).toBe(true);
   });
 
   test("FIX-B: ?heat=0 opts out of score luminance encoding", async ({ page }) => {

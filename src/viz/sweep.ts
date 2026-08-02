@@ -18,6 +18,8 @@ export function motionPreference(): MediaQueryList | null {
 
 export function ignitionOrder(models: readonly Model[], weights: ScoreWeights, interacted: boolean): string[] {
   const frontierModels = frontier(models);
+  // docs/research/frontier-math.md §2.4: the pre-interaction sweep is ridge
+  // order by contract; only an interacted weight change switches to score rank.
   if (!interacted) return ridgeOrder(frontierModels).map(({ model }) => model.model);
   const scores = normalizedScores(models, weights, models);
   const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
@@ -183,24 +185,32 @@ export class SweepScheduler {
     const batch = Math.min(states.order.length, Math.floor(progress * Math.max(states.order.length, 1)));
     if (batch === this.lastBatch && progress < 1) return;
     this.lastBatch = batch;
+    // Dominated points stay at the slate floor while the frontier ignites, but
+    // the settled batch must commit every target so their score heat survives
+    // the sweep instead of remaining permanently at the staging floor.
+    const settled = progress >= 1;
     const lit = new Set<string>();
     states.order.forEach((id, index) => {
       if (progress >= (index + 1) / Math.max(states.order.length, 1)) lit.add(id);
     });
-    const colors = states.base.colors.map((color, index) => lit.has(states.base.ids[index]) ? states.target.colors[index] : color);
-    const sizes = states.base.sizes.map((size, index) => lit.has(states.base.ids[index]) ? states.target.sizes[index] : size);
+    const colors = states.base.colors.map((color, index) =>
+      settled || lit.has(states.base.ids[index]) ? states.target.colors[index] : color,
+    );
+    const sizes = states.base.sizes.map((size, index) =>
+      settled || lit.has(states.base.ids[index]) ? states.target.sizes[index] : size,
+    );
     const projectionAppearance: Array<{ colors: string[]; sizes: number[] }> = [];
     this.projections.forEach((gd, projectionIndex) => {
       const ids = graphIds(gd);
       projectionAppearance[projectionIndex] = {
         colors: ids.map((id) => {
-          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          const style = settled || lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
           return style?.color ?? semanticFloorFill(
             states.optimum === id ? "optimum" : states.frontierIds.has(id) ? "frontier" : "dominated",
           );
         }),
         sizes: ids.map((id) => {
-          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          const style = settled || lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
           return style?.size ?? (states.frontierIds.has(id) ? 10 : 7);
         }),
       };
