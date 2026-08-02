@@ -11,6 +11,8 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 
 ## Status: v0.1 READY FOR SIMON'S EYES → publish decision pending (approval-gated)
 
+**Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Applies to the 3D stage + ridge; 2D projections keep their named pair views. Cost and speed axes log; intelligence linear 0–100.
+
 ### What exists on main (all review-gated)
 - **v0 build** (T1–T7, PRs #19–#25): scaffold + validated 35-model dataset, frontier math engine, de-chromed Plotly 3D stage, linked 2D projections, value-score console, threshold-sweep, cinema mode, first-render gate SHIP.
 - **Ultra-QA fix program** (#26–#29, PRs #30–#34) — after two independent end-to-end QA agents (GLM 5.2 + Luna xhigh) ruled the first build "makes no sense / FIX-FIRST":

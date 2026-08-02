@@ -247,6 +247,7 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
 
+    // Axis mapping (locked 2026-08-02): x = COST, y = INTELLIGENCE, z = SPEED.
     // Speed + cost stay log (heavy-tailed). Intelligence is LINEAR on its native
     // 0–100 index (frontier-math §3.3 — logging it "would distort"; the score
     // layer already normalizes intelligence linearly). The old log [1,10,100]
@@ -255,18 +256,18 @@ test.describe("3D Stage Render Specs", () => {
     expect(layout.yaxisType).toBe("linear");
     expect(layout.zaxisType).toBe("log");
 
-    // Speed ticks: powers of 10.
-    expect(layout.xaxisTickvals).toEqual([10, 100, 1000]);
-    expect(layout.xaxisTicktext).toEqual(["10", "100", "1000"]);
+    // Cost axis (x): includes the floor value and "≤ floor" label.
+    expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
+    expect(layout.xaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
+    expect(layout.xaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
 
-    // Intelligence ticks: linear 0–100 every 20.
+    // Intelligence ticks (y): linear 0–100 every 20.
     expect(layout.yaxisTickvals).toEqual([0, 20, 40, 60, 80, 100]);
     expect(layout.yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
 
-    // Cost axis includes the floor value and "≤ floor" label (unchanged).
-    expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
-    expect(layout.zaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
-    expect(layout.zaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
+    // Speed ticks (z): powers of 10.
+    expect(layout.zaxisTickvals).toEqual([10, 100, 1000]);
+    expect(layout.zaxisTicktext).toEqual(["10", "100", "1000"]);
   });
 
   test("Item 20 & 21: Provider shapes and optimum marker size/symbol distinctness", async ({ page }) => {
@@ -952,7 +953,7 @@ test.describe("3D Stage Render Specs", () => {
         if (model.blended_price_per_M === 0) {
           res.push({
             name: model.model,
-            z: pointsTrace.z[index],
+            x: pointsTrace.x[index], // cost axis is x (locked 2026-08-02)
           });
         }
       });
@@ -962,7 +963,7 @@ test.describe("3D Stage Render Specs", () => {
     expect(zeroPricePlottedCoords.res.length).toBe(2);
     expect(zeroPricePlottedCoords.vizPriceFloor).toBe(zeroPricePlottedCoords.expectedFloor);
     zeroPricePlottedCoords.res.forEach((pt) => {
-      expect(pt.z).toBe(zeroPricePlottedCoords.expectedFloor);
+      expect(pt.x).toBe(zeroPricePlottedCoords.expectedFloor);
     });
   });
 

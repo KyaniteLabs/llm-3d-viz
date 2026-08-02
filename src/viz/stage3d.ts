@@ -211,12 +211,12 @@ export class Stage3D {
           ? "frontier"
           : "dominated";
 
-      x.push(model.tps!);
-      y.push(model.aa_intelligence_index!);
-
+      // Axis mapping (locked by Simon 2026-08-02): x = COST, y = INTELLIGENCE, z = SPEED.
       const price =
         model.blended_price_per_M! <= 0 ? this.priceFloor : model.blended_price_per_M!;
-      z.push(price);
+      x.push(price);
+      y.push(model.aa_intelligence_index!);
+      z.push(model.tps!);
 
       const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
       let symbol: Plotly3dSymbol = baseSymbol;
@@ -268,11 +268,11 @@ export class Stage3D {
 
     // Trace 1: Pareto ridge polyline
     const vertices = ridgeOrder(frontierModels);
-    const ridgeX = vertices.map((v) => v.model.tps!);
-    const ridgeY = vertices.map((v) => v.model.aa_intelligence_index!);
-    const ridgeZ = vertices.map((v) =>
+    const ridgeX = vertices.map((v) =>
       v.model.blended_price_per_M! <= 0 ? this.priceFloor : v.model.blended_price_per_M!
     );
+    const ridgeY = vertices.map((v) => v.model.aa_intelligence_index!);
+    const ridgeZ = vertices.map((v) => v.model.tps!);
 
     const ridgeTrace = {
       type: "scatter3d",
@@ -370,7 +370,7 @@ export class Stage3D {
       uirevision: "constant_camera",
       scene: {
         uirevision: "constant_camera",
-        xaxis: axisLayout(axisCfg.speed.title, axisCfg.speed.ticks, axisCfg.speed.labels),
+        xaxis: axisLayout(axisCfg.cost.title, axisCfg.cost.ticks, axisCfg.cost.labels),
         yaxis: axisLayout(
           axisCfg.intelligence.title,
           axisCfg.intelligence.ticks,
@@ -379,9 +379,9 @@ export class Stage3D {
           [0, 100],
         ),
         zaxis: axisLayout(
-          axisCfg.cost.title,
-          axisCfg.cost.ticks,
-          axisCfg.cost.labels,
+          axisCfg.speed.title,
+          axisCfg.speed.ticks,
+          axisCfg.speed.labels,
         ),
         camera: this.camera,
         // 'closest' (not false) so the stage emits plotly_hover on hover and the
