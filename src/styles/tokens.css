@@ -135,6 +135,9 @@ body { margin: 0; min-width: 320px; }
 .stage-tooltip > span { color: var(--color-text-muted); margin-top: 0.2rem; }
 .stage-tooltip dl { margin: 0.5rem 0 0; }
 .stage-tooltip dl div { padding: 0.22rem 0; }
+/* Multi-minute (reasoning-model) TTFT caveat — a muted footnote under the value,
+   wherever TTFT is shown (readout + tooltip). */
+.ttft-caveat { display: block; color: var(--text-muted); font-size: var(--step--1); margin-top: 0.1rem; }
 .projection-row { grid-area: projections; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.75rem, 1.4vw, 1.5rem); }
 .projection { min-height: 10rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); }
 .eyebrow { margin: 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.14em; }

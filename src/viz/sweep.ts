@@ -4,6 +4,7 @@ import { frontier, ridgeOrder } from "../lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
+import { dominatedFill } from "./palette";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -43,13 +44,6 @@ interface SweepStates {
 interface CurrentAppearance {
   stage: { colors: string[]; sizes: number[] };
   projections: Array<{ colors: string[]; sizes: number[] }>;
-}
-
-function alpha(color: string, opacity: number): string {
-  const match = color.match(/^#([\da-f]{6})$/i);
-  if (!match) return color;
-  const channels = [0, 2, 4].map((offset) => Number.parseInt(match[1].slice(offset, offset + 2), 16));
-  return `rgba(${channels.join(", ")}, ${opacity})`;
 }
 
 function graphIds(gd: Graph): string[] {
@@ -122,7 +116,7 @@ export class SweepScheduler {
       const ids = graphIds(gd);
       const colors = ids.map((id) => target && id === optimum
         ? "#E8F1E4"
-        : target && frontierIds.has(id) ? "#C9D4C4" : alpha("#3D5560", 0.5));
+        : target && frontierIds.has(id) ? "#C9D4C4" : dominatedFill());
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
       return { ids, colors, sizes };
     };
@@ -189,7 +183,7 @@ export class SweepScheduler {
       projectionAppearance[projectionIndex] = {
         colors: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
-          return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : alpha("#3D5560", 0.5));
+          return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : dominatedFill());
         }),
         sizes: ids.map((id) => {
           const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);

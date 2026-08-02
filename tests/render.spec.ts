@@ -72,21 +72,28 @@ test.describe("3D Stage Render Specs", () => {
     await expect(hoverlayer).toHaveJSProperty("childElementCount", 0);
   });
 
-  test("Items 11 & 28: incomplete rows are visible, labelled, and have no stage affordance", async ({ page }) => {
+  test("Items 11 & 28: incomplete rows show per-axis reasons, no stage affordance", async ({ page }) => {
     await page.goto("/");
     const entries = page.locator(".incomplete-data-entry");
     await expect(entries).toHaveCount(2);
     await expect(entries.nth(0)).toContainText("GPT-5.5 Pro (xhigh)");
     await expect(entries.nth(1)).toContainText("DeepSeek V4 Flash 0731 (Reasoning, Max Effort)");
-    await expect(entries.nth(0)).toContainText("Missing benchmark axis: not measured");
-    await expect(entries.nth(1)).toContainText("Missing benchmark axis: not measured");
+    // Per-axis coverage (frontier-math §5.2): GPT-5.5 Pro (xhigh) is missing
+    // ALL three axes; DeepSeek V4 Flash 0731 is missing ONLY speed and shows
+    // its published price + intelligence index.
+    await expect(entries.nth(0)).toContainText("Speed: not measured");
+    await expect(entries.nth(0)).toContainText("Cost: not measured");
+    await expect(entries.nth(0)).toContainText("Intelligence: not measured");
+    await expect(entries.nth(1)).toContainText("Speed: not measured");
+    await expect(entries.nth(1)).toContainText("Cost: $0.06 /M tokens");
+    await expect(entries.nth(1)).toContainText("Intelligence: 49.9");
     for (const entry of [entries.nth(0), entries.nth(1)]) {
       await expect(entry).not.toHaveAttribute("role", "button");
       await expect(entry).not.toHaveAttribute("tabindex");
     }
   });
 
-  test("Item 13: All three axes are log scale with custom ticks including ε floor", async ({ page }) => {
+  test("Item 13: speed/cost LOG, intelligence LINEAR (0–100), ε floor on cost", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
@@ -112,18 +119,23 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
 
+    // Speed + cost stay log (heavy-tailed). Intelligence is LINEAR on its native
+    // 0–100 index (frontier-math §3.3 — logging it "would distort"; the score
+    // layer already normalizes intelligence linearly). The old log [1,10,100]
+    // axis crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
     expect(layout.xaxisType).toBe("log");
-    expect(layout.yaxisType).toBe("log");
+    expect(layout.yaxisType).toBe("linear");
     expect(layout.zaxisType).toBe("log");
 
-    // Check powers of 10 ticks
+    // Speed ticks: powers of 10.
     expect(layout.xaxisTickvals).toEqual([10, 100, 1000]);
     expect(layout.xaxisTicktext).toEqual(["10", "100", "1000"]);
 
-    expect(layout.yaxisTickvals).toEqual([1, 10, 100]);
-    expect(layout.yaxisTicktext).toEqual(["1", "10", "100"]);
+    // Intelligence ticks: linear 0–100 every 20.
+    expect(layout.yaxisTickvals).toEqual([0, 20, 40, 60, 80, 100]);
+    expect(layout.yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
 
-    // Check cost axis includes the floor value and "≤ floor" label
+    // Cost axis includes the floor value and "≤ floor" label (unchanged).
     expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
     expect(layout.zaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
     expect(layout.zaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
@@ -359,7 +371,11 @@ test.describe("3D Stage Render Specs", () => {
       expect(points.colors).not.toContain("#636efa");
       expect(points.colors).toContain("#E8F1E4");
       expect(points.colors).toContain("#C9D4C4");
-      expect(points.colors.some((color: string) => color.includes("61, 85, 96"))).toBe(true);
+      // Dominated points carry the lightened slate-cyan fill (src/viz/palette.ts
+      // dominatedFill): same hue as --slate-cyan, luminance raised to ~4:1 vs
+      // ink-field so the ~20 off-frontier models stay plainly visible yet
+      // clearly below the filament frontier.
+      expect(points.colors.some((color: string) => color.toLowerCase() === "#687a83")).toBe(true);
       expect(points.sizes).toContain(16);
       expect(points.sizes).toContain(10);
     }
@@ -376,7 +392,7 @@ test.describe("3D Stage Render Specs", () => {
       for (let x = canvasBox!.x + 8; x < canvasBox!.x + canvasBox!.width - 8; x += 12) {
         await page.mouse.move(x, y);
         const text = await page.evaluate(() => (document.querySelector(".stage-tooltip") as HTMLElement).textContent);
-        if (text.includes("TTFT incl. reasoning (long prompt)")) {
+        if (text.includes("incl. thinking time (long-prompt median)")) {
           hit = { x, y };
           break;
         }
@@ -394,7 +410,7 @@ test.describe("3D Stage Render Specs", () => {
     expect(inspected.initial.text).toContain("TPS");
     expect(inspected.initial.text).toContain("Blended price");
     expect(inspected.initial.text).toContain("AA index");
-    expect(inspected.initial.text).toContain("TTFT incl. reasoning (long prompt)");
+    expect(inspected.initial.text).toContain("incl. thinking time (long-prompt median)");
     expect(Number.parseInt(inspected.initial.left, 10) - hit!.x).toBeLessThanOrEqual(24);
     expect(Number.parseInt(inspected.initial.top, 10) - hit!.y).toBeLessThanOrEqual(24);
     expect(pinnedText).toBeTruthy();
@@ -478,7 +494,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     );
   });
 
-  test("Projection render: 3 de-chromed log-axis scatters with ε floor on cost axes", async ({ page }) => {
+  test("Projection render: 3 de-chromed scatters (log speed/cost, linear intelligence) with ε floor on cost axes", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
@@ -534,13 +550,25 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       expect(gd.points).toBe(33);
       // hoverinfo 'none' (NOT 'skip'): events fire, no native hover card.
       expect(gd.hoverinfo).toBe("none");
-      // Log axes wherever the stage uses log (TPS, cost, intelligence all log).
-      expect(gd.xaxisType).toBe("log");
-      expect(gd.yaxisType).toBe("log");
       expect(gd.modebarNodes).toBe(0);
       // hoverinfo 'none' → no native hover card drawn (de-chrome contract).
       expect(gd.hoverlayerChildren).toBe(0);
     });
+
+    // Axis scale per projection: speed (tps) + cost stay LOG; intelligence is
+    // LINEAR on its native 0–100 index (frontier-math §3.3), matching the stage.
+    //   gds[0] tps-intelligence : x=tps(log)     y=intelligence(linear)
+    //   gds[1] tps-cost         : x=tps(log)     y=cost(log)
+    //   gds[2] cost-intelligence: x=cost(log)    y=intelligence(linear)
+    expect(data.perGd[0].xaxisType).toBe("log");
+    expect(data.perGd[0].yaxisType).toBe("linear");
+    expect(data.perGd[1].xaxisType).toBe("log");
+    expect(data.perGd[1].yaxisType).toBe("log");
+    expect(data.perGd[2].xaxisType).toBe("log");
+    expect(data.perGd[2].yaxisType).toBe("linear");
+    // Intelligence axes carry linear 0–100 ticks (every 20).
+    expect(data.perGd[0].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
+    expect(data.perGd[2].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
 
     // Cost axes carry the single ε "≤ floor" tick (tps-cost y, cost-intelligence x).
     expect(data.perGd[1].yaxisTicktext).toContain("≤ floor");
