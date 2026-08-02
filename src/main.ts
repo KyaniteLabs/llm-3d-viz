@@ -93,21 +93,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Console wiring: the graph div owns cursor truth because gl3d plotly_hover
   // payloads do not reliably include event coordinates.
-  const HOVER_GRACE_MS = 300;
-  let stagePointerInside = false;
   let pointer = { x: 0, y: 0 };
-  let lastHover: { modelId: string; at: number; x: number; y: number } | null = null;
   stage.gd.addEventListener("mouseenter", () => {
-    stagePointerInside = true;
+    // Re-entering the stage starts a fresh hover snapshot. If the pointer then
+    // lands on a point, Plotly's hover event immediately replaces this null.
+    consoleUi.handleStageEnter();
   });
   stage.gd.addEventListener("mousemove", (event) => {
-    stagePointerInside = true;
     pointer = { x: event.clientX, y: event.clientY };
     consoleUi.setCursor(event.clientX, event.clientY);
   });
   stage.gd.addEventListener("mouseleave", () => {
-    stagePointerInside = false;
-    lastHover = null;
     consoleUi.handleStageLeave();
   });
 
@@ -117,18 +113,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const point = event.points?.[0];
       const modelId = modelIdFromPlotlyPoint(point);
       if (!modelId) return;
-      if (stagePointerInside) lastHover = { modelId, at: performance.now(), ...pointer };
       consoleUi.handleHover(modelId);
     });
   }
   stage.gd.addEventListener("click", (event) => {
-    const hoverAge = lastHover ? performance.now() - lastHover.at : Number.POSITIVE_INFINITY;
-    const hoverDistance = lastHover
-      ? Math.hypot(event.clientX - lastHover.x, event.clientY - lastHover.y)
-      : Number.POSITIVE_INFINITY;
-    const recentHover = stagePointerInside && lastHover && hoverAge <= HOVER_GRACE_MS && hoverDistance <= 24
-      ? lastHover.modelId
-      : null;
-    consoleUi.handleStageClick(recentHover, event.clientX, event.clientY);
+    // The store is the authoritative hover snapshot. A DOM click can arrive
+    // after Plotly's hover event and must not be resolved through a time/space
+    // heuristic that can turn a real point click into an empty click.
+    consoleUi.handleStageClick(store.getState().hoveredModelId, event.clientX, event.clientY);
   });
 });

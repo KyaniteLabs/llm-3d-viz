@@ -161,20 +161,20 @@ export class DecisionConsole {
     if (!this.store.getState().pinnedModelId) this.store.update({ hoveredModelId: modelId });
   }
 
+  handleStageEnter() {
+    this.store.update({ hoveredModelId: null });
+  }
+
   handleStageLeave() {
-    if (this.store.getState().pinnedModelId) return;
     this.store.update({ hoveredModelId: null });
   }
 
   handleStageClick(modelId: string | null, clientX: number, clientY: number) {
     this.setCursor(clientX, clientY);
-    const state = this.store.getState();
-    if (state.pinnedModelId) {
-      this.store.update({ pinnedModelId: null, hoveredModelId: modelId });
-    } else if (modelId) {
+    if (modelId) {
       this.store.update({ pinnedModelId: modelId, hoveredModelId: modelId });
-    } else {
-      this.store.update({ hoveredModelId: null });
+      return;
     }
+    this.store.update({ pinnedModelId: null, hoveredModelId: null });
   }
 }
