@@ -1,40 +1,45 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-01 (v2 — v0 BUILD COMPLETE)
+Last updated: 2026-08-02 (v3 — v0 + Ultra-QA fix program COMPLETE)
 
 ## What this is
-Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — a rotatable 3D scatter with a Pareto ridge, linked 2D projections, and a tunable value-score. Goal: a publishable product **and** source material for visually beautiful videos.
+Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
 
 - **Repo (Forgejo, private):** https://git.kyanitelabs.tech/simon/llm-3d-viz
-- **Local clone:** `~/workspaces/llm-3d-viz`
-- **Namespace:** `simon` on `git.kyanitelabs.tech`
+- **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
+- **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 
-## Status: v0 BUILT + GATE PASSED → publish decision pending (approval-gated)
+## Status: v0.1 READY FOR SIMON'S EYES → publish decision pending (approval-gated)
 
-### Done (2026-08-01, single orchestrated session)
-- **Wayfinder map #2 COMPLETE** — all 8 tickets resolved (#3–#9 decisions, #10 first-render gate SHIP).
-- **Ralplan consensus** — Architect SOUND-WITH-CHANGES → Critic APPROVE; 16 revisions applied. Artifacts in `.omx/`.
-- **SPEC #11 + tickets #12–#18** — all 7 implementation tickets merged via PRs #19–#25, each behind an independent cross-model review gate (Terra/Luna/GLM rotation; gjc/MiniMax benched — expired credential; agy/Gemini benched from coding per Simon — search/image-gen only).
-- **v0 on main**: de-chromed Plotly 3D stage (33 shape-coded models + filament Pareto ridge, log³ axes, ε-floor, single-writer camera), three linked 2D projections (model-ID hover coupling, zoom persistence), value-score console (A1 store, sliders + 5 presets, instant fixed-frontier re-rank, click-to-pin tooltip, incomplete-data disclosure), threshold-sweep (visible dim→lit staging, optimum payoff, time-based, cancel-on-input), cinema mode (orbit + detune), reduced-motion collapse.
-- **Gate #10 SHIP**: filament-white confirmed over mineral-gold (A/B evidence); contrast muted 6.31:1 / filament 17:1; feed-scale accepted w/ axis-clip nit. Cinema appearance-persistence defect caught at the gate and fixed (value-level regression spec).
-- **Suites**: `vite build` + `tsc --noEmit` clean, 20 vitest, 18 playwright, dist free of `__viz`.
+### What exists on main (all review-gated)
+- **v0 build** (T1–T7, PRs #19–#25): scaffold + validated 35-model dataset, frontier math engine, de-chromed Plotly 3D stage, linked 2D projections, value-score console, threshold-sweep, cinema mode, first-render gate SHIP.
+- **Ultra-QA fix program** (#26–#29, PRs #30–#34) — after two independent end-to-end QA agents (GLM 5.2 + Luna xhigh) ruled the first build "makes no sense / FIX-FIRST":
+  - **FIX-A**: hover-recursion dead (RangeError), tooltip anchors to cursor ≤24px, click-to-pin works (hovered/pinned as separate states), scrub is rAF-smooth, 60s zero-error soak spec.
+  - **FIX-B**: STAGE KEY legend, named frontier models, tighter camera, slider share %, projections co-visible at 1366×768, cinema reclaims its column, and the **class-bounded heat encoding** (continuous value-score luminance — default on, `?heat=0` opts out; dominated < frontier < optimum invariant; Simon's color directive via tastecheck).
+  - **FIX-C**: linear intelligence axis (frontier-math §3.3 honored), dominated points visible (4.4:1), per-axis incomplete labels, explicit units, reasoning-gated TTFT caveat, structured `reasoning` field on all 35 rows.
+  - **FIX-D**: camera-flip clamp (all payload shapes), marker-appearance hardening, C-key focus fix, de-chromed scrollZoom, mobile axes, chat landing weights.
+- **Data**: 35 models, snapshot 2026-08-01, GPT-5.6 trio refreshed 2026-08-02 (Luna/Terra prices verified current vs OpenAI's page).
+- **Suites**: `vite build` + `tsc --noEmit` clean, 44 vitest, 35 playwright (incl. 60s zero-error soak). dist free of `__viz`.
 
-### Next — pick one at resume
-- **(a) Publish** (APPROVAL-GATED — Simon must approve): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8). DNS + Pages project + first deploy.
-- **(b) Make videos** — the dry-run take (`docs/gate/t7/dry-run.webm`) is the proof; cinematic mode is record-ready (fonts self-hosted, time-based motion).
-- **(c) v1 planning** — new wayfinder map: workload recommender UI, provider/modality slicing, shareable URLs, backend (SPEC §8 v1).
+### Honest residuals (known, documented, not blockers)
+- 375px: 3D tick labels partially occluded (inherent to tiny canvas; 2D projections below carry the info — GLM tastecheck).
+- Initial load sweep follows ridge order (cheapest→smartest) by contract (frontier-math §2.4); optimum-last applies after first slider input.
+- 320px feed-scale: native 3D axis titles clip (recorded at the v0 gate).
+- Multi-minute TTFTs are real AA medians (include reasoning thinking time) — labeled, but they read oddly to newcomers.
+
+### Next — pick one
+- **(a) LOOK AT IT** — `npm run build && npx vite preview` → localhost. This is the build Simon hasn't seen since the fix program.
+- **(b) Publish** (APPROVAL-GATED): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8).
+- **(c) Videos** — cinema mode is record-ready (self-hosted fonts, time-based motion, heat encoding).
+- **(d) v1 planning** — recommender UI, slicing, shareable URLs, backend (SPEC §8 v1). Data refresh cadence: re-pull AA speed/TTFT periodically (rolling medians).
+
+## Ops (validated this session)
+- **Worker pool**: `codex exec -m gpt-5.6-luna|gpt-5.6-terra` (coding + review), `claude-glm -p` (GLM 5.2 — sharpest reviewer; no vision), agy/Gemini (search/image-gen/tastecheck-vision ONLY — benched from coding per Simon), gjc/MiniMax (benched — expired key in ~/.gjc).
+- **Gate discipline that worked**: reviewer ≠ implementer on every PR; FAIL → fix round → re-review; tastecheck-pass with render evidence for aesthetic calls; real-mouse/real-event tests only (synthetic events proved nothing).
+- **Parallel work**: per-ticket git worktrees (two collisions learned the hard way); watch for port contention on playwright (`reuseExistingServer` trap — isolate ports per worktree); machine-load kills happen (exit 137) — workers resume from uncommitted state cleanly.
+- **Forgejo auth**: write-scoped token = the `git.kyanitelabs.tech` line in `~/.git-credentials` (browser UA required). Keychain entries are read-scoped.
+- **Tracker hygiene**: deleting a branch before its merge lands auto-closes the PR — merge first, delete after (recovered via successor PR #32).
 
 ## Key pointers
-- `SPEC.md` — locked decisions D1–D8 + roadmap. `DESIGN-SYSTEM.md` — approved visual system.
-- `docs/research/` — frontier-math, plotly-dechrome, dataset-v0-sources (the three contracts).
-- `docs/gate/t7/` — first-render gate evidence package.
-- `.omx/` — ralplan context/PRD/test-spec/handoff. `AGENTS.md` + `docs/agents/` — agent-ops config (Forgejo REST tracker, triage labels, domain docs).
-- **Auth**: write-scoped Forgejo token = the `git.kyanitelabs.tech` line in `~/.git-credentials` (browser UA required; keychain entries are read-scoped).
-
-## Worker pool (validated this session)
-- Coding: `codex exec -m gpt-5.6-luna|gpt-5.6-terra`, `claude-glm -p` (GLM 5.2 — sharpest reviewer; no vision), gjc/MiniMax (needs key refresh).
-- Review rule that worked: reviewer ≠ implementer, every PR gated, FAIL→fix-round→re-review.
-- Parallel work needs per-ticket git worktrees (learned the hard way).
-
-## Memory entries (claude-glm recall)
-- `llm-3d-viz-project`, `llm-3d-benchmark-plots-research`, `skill-roles-design-vs-gstack` — update `llm-3d-viz-project` on next session (status: v0 built).
+- `SPEC.md` / `DESIGN-SYSTEM.md` — locked authority. `docs/research/` — frontier-math, plotly-dechrome, dataset sources. `.omx/` — ralplan consensus artifacts. `docs/gate/t7/` — first-render gate evidence. `HANDOFF.md` (this file).
+- Memory entries (claude-glm recall): `llm-3d-viz-project`, `llm-3d-benchmark-plots-research`, `skill-roles-design-vs-gstack` — update `llm-3d-viz-project` to "v0.1 ready" next session.
