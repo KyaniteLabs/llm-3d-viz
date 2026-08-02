@@ -294,6 +294,11 @@ export class Stage3D {
           ["≤ floor", "0.1", "1", "10", "100"]
         ),
         camera: this.camera,
+        // 'closest' (not false) so the stage emits plotly_hover on hover and the
+        // linked 2D projections can couple to it bidirectionally by model ID.
+        // hoverinfo 'none' on the trace still suppresses the native hover card,
+        // so the de-chrome contract (empty hoverlayer) is preserved.
+        hovermode: "closest",
       },
     };
 
