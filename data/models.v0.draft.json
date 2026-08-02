@@ -93,7 +93,8 @@
     "swe_bench": null,
     "aider_pct": null,
     "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "null_reason": "not_measured"
   },
   {
     "model": "gpt-oss-120b (high)",
@@ -528,7 +529,8 @@
     "swe_bench": null,
     "aider_pct": null,
     "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "null_reason": "not_measured"
   },
   {
     "model": "Kimi K3 (max)",
