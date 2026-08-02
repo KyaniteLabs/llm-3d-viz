@@ -3,6 +3,17 @@ import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/mode
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
 
+// Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
+const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
+  filament: "#E8F1E4",
+  filamentDim: "#C9D4C4",
+  slateCyan: "#3D5560",
+  textWarm: "#E7E2D8",
+  textMuted: "#89939E",
+  inkField: "#070C0B",
+  fontMono: '"IBM Plex Mono", "Geist Mono", ui-monospace, monospace',
+} as const;
+
 export class Stage3D {
   private readonly container: HTMLElement;
   public readonly gd: HTMLDivElement;
@@ -23,14 +34,16 @@ export class Stage3D {
   constructor(container: HTMLElement) {
     this.container = container;
     const styles = getComputedStyle(document.documentElement);
+    const resolveToken = (name: string, fallback: string) =>
+      styles.getPropertyValue(name).trim() || fallback;
     this.tokens = {
-      filament: styles.getPropertyValue("--filament").trim(),
-      filamentDim: styles.getPropertyValue("--filament-dim").trim(),
-      slateCyan: styles.getPropertyValue("--slate-cyan").trim(),
-      textWarm: styles.getPropertyValue("--text-warm").trim(),
-      textMuted: styles.getPropertyValue("--text-muted").trim(),
-      inkField: styles.getPropertyValue("--ink-field").trim(),
-      fontMono: styles.getPropertyValue("--font-mono").trim(),
+      filament: resolveToken("--filament", DESIGN_SYSTEM_TOKEN_FALLBACKS.filament),
+      filamentDim: resolveToken("--filament-dim", DESIGN_SYSTEM_TOKEN_FALLBACKS.filamentDim),
+      slateCyan: resolveToken("--slate-cyan", DESIGN_SYSTEM_TOKEN_FALLBACKS.slateCyan),
+      textWarm: resolveToken("--text-warm", DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm),
+      textMuted: resolveToken("--text-muted", DESIGN_SYSTEM_TOKEN_FALLBACKS.textMuted),
+      inkField: resolveToken("--ink-field", DESIGN_SYSTEM_TOKEN_FALLBACKS.inkField),
+      fontMono: resolveToken("--font-mono", DESIGN_SYSTEM_TOKEN_FALLBACKS.fontMono),
     };
     this.gd = document.createElement("div");
     this.gd.className = "stage-3d-canvas";
@@ -47,19 +60,20 @@ export class Stage3D {
     this.setupContextLostListener();
   }
 
-  private colorWithAlpha(color: string, alpha: number): string {
-    const hex = color.match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+  private colorWithAlpha(color: string | undefined, alpha: number): string {
+    const resolvedColor = color?.trim() || DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm;
+    const hex = resolvedColor.match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
     if (hex) {
       const normalized = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex;
       const channels = [0, 2, 4].map((offset) => Number.parseInt(normalized.slice(offset, offset + 2), 16));
       return `rgba(${channels.join(", ")}, ${alpha})`;
     }
-    const rgb = color.match(/^rgba?\(([^)]+)\)$/i)?.[1];
+    const rgb = resolvedColor.match(/^rgba?\(([^)]+)\)$/i)?.[1];
     if (rgb) {
       const channels = rgb.split(",").slice(0, 3).map((channel) => channel.trim());
       return `rgba(${channels.join(", ")}, ${alpha})`;
     }
-    return color;
+    return resolvedColor;
   }
 
   private setupContextLostListener() {
@@ -318,6 +332,7 @@ export class Stage3D {
         pointNumberToModelId,
         modelIdToPointNumber,
         scorableModels: scorable,
+        providerShapes: PROVIDER_SHAPES,
         frontierModelIds: frontierModels.map((model) => model.model),
         gd: this.gd,
         priceFloor: this.priceFloor,

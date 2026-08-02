@@ -124,6 +124,7 @@ test.describe("3D Stage Render Specs", () => {
         sizes: pointsTrace.marker.size,
         models: viz.scorableModels.map((m: any) => m.model),
         providers: viz.scorableModels.map((m: any) => m.provider),
+        providerShapes: viz.providerShapes,
         frontierModelIds: viz.frontierModelIds,
       };
     });
@@ -139,15 +140,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(optimumIndex).not.toBe(-1);
 
     const optimumSymbol = data.symbols[optimumIndex];
-    const providerShapes: Record<string, string> = {
-      OpenAI: "circle", Anthropic: "circle-open", Google: "cross", Meta: "diamond",
-      DeepSeek: "diamond-open", Alibaba: "square", Mistral: "square-open", Cohere: "x",
-      Amazon: "circle", Kimi: "circle-open", Microsoft: "circle-open", MiniMax: "circle-open",
-      NVIDIA: "circle-open", SpaceXAI: "circle", "Thinking Machines": "circle-open",
-      Xiaomi: "circle-open", "Z AI": "circle-open",
-    };
     data.providers.forEach((provider: string, index: number) => {
-      if (index !== optimumIndex) expect(data.symbols[index]).toBe(providerShapes[provider]);
+      if (index !== optimumIndex) expect(data.symbols[index]).toBe(data.providerShapes[provider]);
     });
 
     const frontierIndices = data.frontierModelIds
