@@ -1,7 +1,7 @@
 import rawModels from "../../data/models.v0.draft.json";
 
 export type Openness = "open" | "closed";
-export type Modality = "text" | "vision" | "audio";
+export type Modality = "text" | "vision" | "audio" | "video";
 export type Plotly3dSymbol =
   | "circle"
   | "circle-open"
@@ -36,6 +36,8 @@ export interface Model {
   null_reason?: string;
 }
 
+export const DATA_ERROR = "data_error" as const;
+
 /**
  * Plotly Scatter3d has eight useful glyphs. The first eight providers retain a
  * dedicated glyph; the remaining long tail intentionally shares an open or
@@ -64,8 +66,26 @@ export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {
 
 export const models: Model[] = rawModels as Model[];
 
+/** Complete rows eligible for three-axis frontier and value-score math. */
+export function isScorable(model: Model): boolean {
+  return (
+    model.tps !== null &&
+    model.blended_price_per_M !== null &&
+    model.blended_price_per_M >= 0 &&
+    model.aa_intelligence_index !== null
+  );
+}
+
 function isMissingString(value: unknown): boolean {
   return typeof value !== "string" || value.trim().length === 0;
+}
+
+function hasNegativePrice(model: Model): boolean {
+  return (
+    (model.price_in_per_M !== null && model.price_in_per_M < 0) ||
+    (model.price_out_per_M !== null && model.price_out_per_M < 0) ||
+    (model.blended_price_per_M !== null && model.blended_price_per_M < 0)
+  );
 }
 
 /** Throws a descriptive error so Vite aborts before emitting an invalid dataset build. */
@@ -80,6 +100,11 @@ export function validateModels(candidateModels: readonly Model[]): void {
     }
     if (row.tps !== null && (!Number.isFinite(row.tps) || row.tps < 0)) {
       throw new Error(`${label} (${row.model}): tps must be null or a number >= 0`);
+    }
+    if (hasNegativePrice(row)) {
+      throw new Error(
+        `${label} (${row.model}): price_in_per_M, price_out_per_M, and blended_price_per_M must be null or >= 0`,
+      );
     }
     if (
       row.aa_intelligence_index !== null &&
@@ -103,6 +128,10 @@ export interface IncompleteModel extends Model {
   null_reason: string;
 }
 
+export interface QuarantinedModel extends Model {
+  reason: typeof DATA_ERROR;
+}
+
 /** Models excluded from the three-axis view, retaining the source-supplied missing-data reason. */
 export function incompleteModels(): IncompleteModel[] {
   return models.filter(
@@ -113,4 +142,11 @@ export function incompleteModels(): IncompleteModel[] {
       typeof model.null_reason === "string" &&
       model.null_reason.length > 0,
   );
+}
+
+/** Negative-price rows are quarantined as data errors for defense in depth. */
+export function quarantinedModels(candidateModels: readonly Model[] = models): QuarantinedModel[] {
+  return candidateModels
+    .filter(hasNegativePrice)
+    .map((model) => ({ ...model, reason: DATA_ERROR }));
 }
