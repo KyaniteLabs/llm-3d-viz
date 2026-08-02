@@ -1,51 +1,40 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-01
+Last updated: 2026-08-01 (v2 — v0 BUILD COMPLETE)
 
 ## What this is
-Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — a rotatable 3D scatter with a Pareto frontier, linked 2D projections, and a tunable value-score. Goal: a publishable product **and** source material for visually beautiful videos.
+Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — a rotatable 3D scatter with a Pareto ridge, linked 2D projections, and a tunable value-score. Goal: a publishable product **and** source material for visually beautiful videos.
 
 - **Repo (Forgejo, private):** https://git.kyanitelabs.tech/simon/llm-3d-viz
 - **Local clone:** `~/workspaces/llm-3d-viz`
 - **Namespace:** `simon` on `git.kyanitelabs.tech`
 
-## Status: design APPROVED → build pending
+## Status: v0 BUILT + GATE PASSED → publish decision pending (approval-gated)
 
-### Done
-- **Research** — true-3D LLM plots barely exist; only [AI IQ](https://www.aiiq.org/charts/) has one; all majors (Artificial Analysis, LMArena, Aider, Epoch AI, Vellum) are 2D-only. The interactive-3D perception gap (Wiederich & VanderPlas 2024 — the evidence against 3D is all on *static* projections; interactive 3D is untested) is the wedge.
-- **Design** — *Observatory-after-dark*: filament-white accent (`#E8F1E4`) on cool-green ink (`#070C0B`); **threshold-sweep** signature (staged filament ignition on re-weight, synced to the 2D projections); calm chrome + dramatic canvas. Pressure-tested by GPT-5.6 Sol + Kimi K3 consults. Full system in `DESIGN-SYSTEM.md`.
-- **Spec** — 8 locked decisions (D1–D8) + phased roadmap (v0→v1→v2→publish). See `SPEC.md`.
-- **Repo** — initialized on Forgejo; SPEC + DESIGN-SYSTEM + README on `main`.
+### Done (2026-08-01, single orchestrated session)
+- **Wayfinder map #2 COMPLETE** — all 8 tickets resolved (#3–#9 decisions, #10 first-render gate SHIP).
+- **Ralplan consensus** — Architect SOUND-WITH-CHANGES → Critic APPROVE; 16 revisions applied. Artifacts in `.omx/`.
+- **SPEC #11 + tickets #12–#18** — all 7 implementation tickets merged via PRs #19–#25, each behind an independent cross-model review gate (Terra/Luna/GLM rotation; gjc/MiniMax benched — expired credential; agy/Gemini benched from coding per Simon — search/image-gen only).
+- **v0 on main**: de-chromed Plotly 3D stage (33 shape-coded models + filament Pareto ridge, log³ axes, ε-floor, single-writer camera), three linked 2D projections (model-ID hover coupling, zoom persistence), value-score console (A1 store, sliders + 5 presets, instant fixed-frontier re-rank, click-to-pin tooltip, incomplete-data disclosure), threshold-sweep (visible dim→lit staging, optimum payoff, time-based, cancel-on-input), cinema mode (orbit + detune), reduced-motion collapse.
+- **Gate #10 SHIP**: filament-white confirmed over mineral-gold (A/B evidence); contrast muted 6.31:1 / filament 17:1; feed-scale accepted w/ axis-clip nit. Cinema appearance-persistence defect caught at the gate and fixed (value-level regression spec).
+- **Suites**: `vite build` + `tsc --noEmit` clean, 20 vitest, 18 playwright, dist free of `__viz`.
 
 ### Next — pick one at resume
-- **(a) Wayfinder build map** — run `setup-matt-pocock-skills` (configure Forgejo issues as the tracker), then chart the build as decision tickets on this repo's issues. Best for a multi-session build.
-- **(b) Start v0 directly** — curated ~20–40-model dataset + de-chromed Plotly stage + threshold-sweep, styled to `DESIGN-SYSTEM.md`.
-
-## v0 scope (first build)
-- **Data:** curated static dataset, ~20–40 notable models — identity (model/provider/openness/modality/context_length), speed (tps, ttft), cost ($/M in/out/blended), intelligence (AA Intelligence Index primary + Arena ELO/GPQA/SWE-bench/Aider%), workload→weight presets. Reproducible, no scraping.
-- **Views:** 3D hero scatter (x=speed, y=intelligence, z=cost, log axes) + Pareto ridge + linked 2D projections + value-score panel.
-- **Aesthetic:** `DESIGN-SYSTEM.md` (Observatory-after-dark). **No slop.**
-- **Stack:** v0 = Plotly, brutally de-chromed (render-engine-only); v1+ = Three.js/R3F cinematic.
-
-## How to resume (fresh session)
-> **"resume work on llm-3d-viz — chart the wayfinder build map"**  (or: **"start v0"**)
-
-Memory entries + this repo carry full context; no re-briefing needed.
+- **(a) Publish** (APPROVAL-GATED — Simon must approve): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8). DNS + Pages project + first deploy.
+- **(b) Make videos** — the dry-run take (`docs/gate/t7/dry-run.webm`) is the proof; cinematic mode is record-ready (fonts self-hosted, time-based motion).
+- **(c) v1 planning** — new wayfinder map: workload recommender UI, provider/modality slicing, shareable URLs, backend (SPEC §8 v1).
 
 ## Key pointers
-- `SPEC.md` — product spec + locked decisions D1–D8 + phased roadmap (§8).
-- `DESIGN-SYSTEM.md` — visual system (tokens, motion, refusals, structure, build order). Status approved; pixel sign-off at first render via `tastecheck-pass`.
-- **Skill roles:** gstack = product/exec/eng (**not** design); design via `tastecheck` + questions; **no slop**.
+- `SPEC.md` — locked decisions D1–D8 + roadmap. `DESIGN-SYSTEM.md` — approved visual system.
+- `docs/research/` — frontier-math, plotly-dechrome, dataset-v0-sources (the three contracts).
+- `docs/gate/t7/` — first-render gate evidence package.
+- `.omx/` — ralplan context/PRD/test-spec/handoff. `AGENTS.md` + `docs/agents/` — agent-ops config (Forgejo REST tracker, triage labels, domain docs).
+- **Auth**: write-scoped Forgejo token = the `git.kyanitelabs.tech` line in `~/.git-credentials` (browser UA required; keychain entries are read-scoped).
 
-## Auth note
-Repo creation needs a `write:user`-scope Forgejo token — stored in a *named* keychain generic-password entry (the default git-push credential lacks that scope). Git push/pull uses the standard host credential helper.
-
-## Open decisions (deferred to build)
-- Plotly v0 scope: typographic-signature v0 (recommended) vs cut-scope static.
-- Accent sign-off: filament-white primary; mineral-gold (`#D6A84B`) is the documented warm alternative — confirm at first render.
-- Type licensing: Söhne / Neue Haas Grotesk (paid) vs Inter Tight / Geist (free).
+## Worker pool (validated this session)
+- Coding: `codex exec -m gpt-5.6-luna|gpt-5.6-terra`, `claude-glm -p` (GLM 5.2 — sharpest reviewer; no vision), gjc/MiniMax (needs key refresh).
+- Review rule that worked: reviewer ≠ implementer, every PR gated, FAIL→fix-round→re-review.
+- Parallel work needs per-ticket git worktrees (learned the hard way).
 
 ## Memory entries (claude-glm recall)
-- `llm-3d-viz-project` — project status (condensed handoff).
-- `llm-3d-benchmark-plots-research` — research findings + sources.
-- `skill-roles-design-vs-gstack` — gstack ≠ design; tastecheck + questions; no slop.
+- `llm-3d-viz-project`, `llm-3d-benchmark-plots-research`, `skill-roles-design-vs-gstack` — update `llm-3d-viz-project` on next session (status: v0 built).
