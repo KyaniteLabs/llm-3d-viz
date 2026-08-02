@@ -146,3 +146,13 @@ Specific caveats per model:
 - **Extraction method:** numbers parsed from the pages' own embedded JSON (JSON-LD `Dataset`
   blocks + RSC `initialModels`/`currentModel` payloads), not transcribed from rendered charts;
   spot-checked against the JSON-LD chart datasets for agreement.
+
+## Refresh — 2026-08-02 (GPT-5.6 trio)
+
+Re-pulled Artificial Analysis model pages (live fetch 2026-08-02) and cross-checked OpenAI official pricing (platform.openai.com/docs/pricing). Prices CONFIRMED CURRENT for all three (Sol $5/$30, Terra $2/$12, Luna $0.20/$1.20 in/out; blends unchanged — AA 7:2:1 formula is (7×cacheHit + 2×input + 1×output)/10 with cached prices $0.50/$0.20/$0.02). Updated stale speed/latency fields:
+
+- Sol (max): tps 63.5 → 67.63; ttft 133042 → 137842 ms; AA index 58.9 → 58.89
+- Terra (max): tps 125.6 → 124.61; ttft 164360 → 163263 ms; AA index 55.0 → 54.95
+- Luna (max): ttft 121891 → 143498 ms (+18%); AA index 51.2 → 51.24
+
+Shared: released 2026-07-09, 1M context, reasoning models (TTFT includes thinking time). data_date bumped to 2026-08-02 on these rows. Note: AA publishes no as-of date; speed/TTFT are rolling medians — re-pull periodically.
