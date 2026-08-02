@@ -69,6 +69,20 @@ test.describe("3D Stage Render Specs", () => {
     await expect(hoverlayer).toHaveJSProperty("childElementCount", 0);
   });
 
+  test("Items 11 & 28: incomplete rows are visible, labelled, and have no stage affordance", async ({ page }) => {
+    await page.goto("/");
+    const entries = page.locator(".incomplete-data-entry");
+    await expect(entries).toHaveCount(2);
+    await expect(entries.nth(0)).toContainText("GPT-5.5 Pro (xhigh)");
+    await expect(entries.nth(1)).toContainText("DeepSeek V4 Flash 0731 (Reasoning, Max Effort)");
+    await expect(entries.nth(0)).toContainText("Missing benchmark axis: not measured");
+    await expect(entries.nth(1)).toContainText("Missing benchmark axis: not measured");
+    for (const entry of [entries.nth(0), entries.nth(1)]) {
+      await expect(entry).not.toHaveAttribute("role", "button");
+      await expect(entry).not.toHaveAttribute("tabindex");
+    }
+  });
+
   test("Item 13: All three axes are log scale with custom ticks including ε floor", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
@@ -151,6 +165,59 @@ test.describe("3D Stage Render Specs", () => {
     data.sizes.forEach((size: number, index: number) => {
       if (index !== optimumIndex) expect(data.sizes[optimumIndex]).toBeGreaterThan(size);
     });
+  });
+
+  test("Items 14 & 21: slider re-ranks immediately and keeps the optimum non-colour distinct", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.locator("#weight-cost").fill("9");
+
+    const result = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const scores = viz.scorableModels.map((model: any, index: number) => ({
+        model: model.model,
+        size: viz.gd.data[0].marker.size[index],
+        symbol: viz.gd.data[0].marker.symbol[index],
+      }));
+      const optimum = scores.find((point: any) => point.size === 16);
+      return { optimum, scores };
+    });
+    expect(result.optimum).toBeTruthy();
+    expect(result.optimum!.model).toBe("Command A+");
+    expect(result.scores.filter((point: any) => point.model !== result.optimum!.model).every(
+      (point: any) => point.size < result.optimum!.size,
+    )).toBe(true);
+  });
+
+  test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const inspected = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const pointNumber = viz.scorableModels.findIndex((model: any) => /reasoning/i.test(model.model));
+      const event = { points: [{ pointNumber }], event: { clientX: 140, clientY: 120 } };
+      viz.gd.emit("plotly_hover", event);
+      const tooltip = document.querySelector(".stage-tooltip") as HTMLElement;
+      const initial = { left: tooltip.style.left, top: tooltip.style.top, text: tooltip.textContent };
+      viz.gd.emit("plotly_click", event);
+      const pinnedText = tooltip.textContent;
+      const camera = { eye: { x: 2.1, y: 1.2, z: 0.9 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } };
+      viz.gd.emit("plotly_relayout", { "scene.camera": camera });
+      return { initial, pinnedText, camera };
+    });
+    expect(inspected.initial.text).toContain("TPS");
+    expect(inspected.initial.text).toContain("Blended price");
+    expect(inspected.initial.text).toContain("AA index");
+    expect(inspected.initial.text).toContain("TTFT incl. reasoning (long prompt)");
+    expect(Number.parseInt(inspected.initial.left, 10) - 140).toBeLessThanOrEqual(24);
+    expect(Number.parseInt(inspected.initial.top, 10) - 120).toBeLessThanOrEqual(24);
+    expect(inspected.pinnedText).toBeTruthy();
+
+    await page.locator("#weight-speed").fill("8");
+    const persistedCamera = await page.evaluate(() => (window as any).__viz.gd.layout.scene.camera.eye);
+    expect(persistedCamera).toEqual(inspected.camera.eye);
+    await page.locator(".stage-3d-canvas").click({ position: { x: 5, y: 5 } });
+    await expect(page.locator(".stage-tooltip")).toBeHidden();
   });
 
   test("Item 24: $0.00 models are placed at the ε price floor position", async ({ page }) => {
