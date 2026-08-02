@@ -4,6 +4,7 @@ import {
   formatPricePerM,
   formatIntelligence,
   formatTtftSeconds,
+  isReasoningModel,
   ttftCaveat,
   TTFT_MULTI_MINUTE_MS,
 } from "../src/lib/format";
@@ -33,15 +34,54 @@ describe("metric formatting (FIX-C #28: readout units)", () => {
   });
 });
 
-describe("ttft caveat (FIX-C #28: multi-minute reasoning models)", () => {
-  it("carries the thinking-time caveat at/above the multi-minute threshold", () => {
-    expect(ttftCaveat(TTFT_MULTI_MINUTE_MS)).toMatch(/thinking time/);
-    expect(ttftCaveat(188060)).toMatch(/long-prompt median/); // Claude Sonnet 5 (~188s)
+describe("ttft caveat (#28 review fix: reasoning models only)", () => {
+  it("carries the caveat for a reasoning model at/above the multi-minute threshold", () => {
+    // Claude Sonnet 5 (Adaptive Reasoning) — reasoning model, ~188s.
+    expect(
+      ttftCaveat({ model: "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)", ttft: 188_060 }),
+    ).toMatch(/long-prompt median/);
+    // GPT-5.6 Luna — reasoning by effort tier "(max)", exactly at the threshold.
+    expect(ttftCaveat({ model: "GPT-5.6 Luna (max)", ttft: TTFT_MULTI_MINUTE_MS })).toMatch(
+      /thinking time/,
+    );
   });
 
   it("omits the caveat below the threshold — fast reasoners included", () => {
-    expect(ttftCaveat(59_999)).toBe("");
-    expect(ttftCaveat(1091)).toBe(""); // Gemma 4 31B (Reasoning), ~1.1s
-    expect(ttftCaveat(null)).toBe("");
+    // Gemma 4 31B (Reasoning) is a reasoner, but ~1.1s is not multi-minute.
+    expect(ttftCaveat({ model: "Gemma 4 31B (Reasoning)", ttft: 1_091 })).toBe("");
+    expect(ttftCaveat({ model: "GPT-5.6 Luna (max)", ttft: 59_999 })).toBe("");
+    expect(ttftCaveat({ model: "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)", ttft: null })).toBe(
+      "",
+    );
+  });
+
+  it("does NOT carry the caveat for a NON-reasoning model even with a multi-minute TTFT (#28 review fix)", () => {
+    // The old ms-only gate would wrongly attach the thinking-time caveat to a
+    // non-reasoning model that is merely slow. The reasoning gate blocks it.
+    expect(ttftCaveat({ model: "Llama 4 Scout", ttft: 188_060 })).toBe("");
+    expect(ttftCaveat({ model: "Mistral Large 3", ttft: TTFT_MULTI_MINUTE_MS })).toBe("");
+    // Parentheses, but not an effort tier — still non-reasoning.
+    expect(ttftCaveat({ model: "GPT-4o (Nov '24)", ttft: 200_000 })).toBe("");
+  });
+});
+
+describe("isReasoningModel (#28 review fix: unified name heuristic)", () => {
+  it("detects reasoning models by marker or effort tier", () => {
+    expect(isReasoningModel({ model: "Claude 4.5 Haiku (Reasoning)" })).toBe(true);
+    expect(isReasoningModel({ model: "DeepSeek V4 Pro (Reasoning, Max Effort)" })).toBe(true);
+    expect(isReasoningModel({ model: "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)" })).toBe(true);
+    expect(isReasoningModel({ model: "Gemma 4 31B (Reasoning)" })).toBe(true);
+    expect(isReasoningModel({ model: "GPT-5.6 Luna (max)" })).toBe(true);
+    expect(isReasoningModel({ model: "GPT-5.5 Pro (xhigh)" })).toBe(true);
+    expect(isReasoningModel({ model: "GPT-5 (high)" })).toBe(true);
+  });
+
+  it("rejects non-reasoning models", () => {
+    expect(isReasoningModel({ model: "Llama 4 Scout" })).toBe(false);
+    expect(isReasoningModel({ model: "Llama 3.3 Instruct 70B" })).toBe(false);
+    expect(isReasoningModel({ model: "GPT-4o (Nov '24)" })).toBe(false);
+    expect(isReasoningModel({ model: "Mistral Large 3" })).toBe(false);
+    expect(isReasoningModel({ model: "Gemini 3.5 Flash-Lite" })).toBe(false);
+    expect(isReasoningModel({ model: "Command A+" })).toBe(false);
   });
 });

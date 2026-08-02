@@ -8,6 +8,8 @@
  * the human-facing strings the instrument shows.
  */
 
+import type { Model } from "../data/models";
+
 /** Output tokens/sec, one decimal — "172.1 tok/s". */
 export function formatTps(value: number | null): string {
   return value === null
@@ -43,13 +45,36 @@ export function formatTtftSeconds(ms: number | null): string {
 export const TTFT_MULTI_MINUTE_MS = 60_000;
 
 /**
- * The honest caveat carried wherever a multi-minute TTFT is shown. Explains
- * WHY the number is large: it includes the model's thinking time, measured on
- * the long-prompt median — not raw network/streaming latency.
+ * The honest caveat carried wherever a multi-minute reasoning-model TTFT is
+ * shown. Explains WHY the number is large: it includes the model's thinking
+ * time, measured on the long-prompt median — not raw network/streaming latency.
  */
 export const TTFT_CAVEAT = "incl. thinking time (long-prompt median)";
 
-/** The TTFT caveat string when `ms` is multi-minute, else "". */
-export function ttftCaveat(ms: number | null): string {
-  return ms !== null && ms >= TTFT_MULTI_MINUTE_MS ? TTFT_CAVEAT : "";
+/**
+ * Whether a model is a reasoning/thinking-effort model — the only models whose
+ * measured TTFT can honestly include substantial thinking time. Detected from
+ * the curated name: an explicit "(Reasoning)" / "(Adaptive Reasoning, …)"
+ * marker, or a parenthesized effort tier "(max)"/"(high)"/"(xhigh)". This is
+ * the single heuristic the value-score readout and `ttftCaveat` share — a bare
+ * latency threshold alone is wrong, because a slow NON-reasoning model is just
+ * slow, not "thinking".
+ */
+export function isReasoningModel(model: Pick<Model, "model">): boolean {
+  const name = model.model.toLowerCase();
+  return name.includes("reasoning") || /\((xhigh|max|high)\)/.test(name);
+}
+
+/**
+ * The TTFT caveat when `model` is a reasoning model whose TTFT is multi-minute,
+ * else "". Both gates are required: a fast reasoner (< 60s) has no thinking
+ * time to disclose, and a slow non-reasoner has no thinking time to attribute
+ * its latency to — the caveat must not appear for either.
+ */
+export function ttftCaveat(model: Pick<Model, "ttft" | "model">): string {
+  return isReasoningModel(model) &&
+    model.ttft !== null &&
+    model.ttft >= TTFT_MULTI_MINUTE_MS
+    ? TTFT_CAVEAT
+    : "";
 }

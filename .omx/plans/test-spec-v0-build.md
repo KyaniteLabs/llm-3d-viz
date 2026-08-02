@@ -29,7 +29,7 @@ Pairs with `.omx/plans/prd-v0-build.md` (revised per Architect A1–A6 + Critic 
 16. Cinema mode: toggle hides the console and the camera `eye` changes over a 2s observation window (time-based orbit); pointer-enter on the stage restores the console and halts the orbit.
 17. Hover coupling (A2): hovering projection point i triggers `Plotly.Fx.hover` on the stage with the same `pointNumber` (spy-asserted), and stage hover updates the model readout to model i.
 18. Contrast: computed `--text-muted` on `--ink-field` ≥ 4.5:1; filament on ink ≥ 7:1. (The single contrast check — no separate script.)
-19. Tooltip: hovering a stage point shows the HTML tooltip within 24px of the cursor containing model name + TPS + blended price + AA index; reasoner models show "TTFT incl. reasoning (long prompt)" (C15). **Click pins the tooltip; a second click elsewhere unpins/moves it** (A6).
+19. Tooltip: hovering a stage point shows the HTML tooltip within 24px of the cursor containing model name + TPS + blended price + AA index; reasoner models with a multi-minute TTFT show the "incl. thinking time (long-prompt median)" caveat (C15). **Click pins the tooltip; a second click elsewhere unpins/moves it** (A6).
 20. Provider glyphs: ≥4 distinct marker symbols; the 17-provider mapping table in `models.ts` is honored — no two providers share shape + openness-variant unintentionally (C14).
 21. Optimum marker (C13): the weighted optimum carries a larger size AND distinct symbol vs other frontier points (asserted via the restyle spy channel), in addition to filament luminance.
 22. Camera persistence (A6): drag the stage to orbit, then move a slider — `scene.camera.eye` is unchanged after re-render (`uirevision` pinned).

@@ -91,10 +91,12 @@ export class DecisionConsole {
   private details(model: Model, state: Readonly<AppState>) {
     const score = normalizedScores(this.models, state.weights, this.models)
       .find((candidate) => candidate.model.model === model.model)?.score;
-    // Multi-minute TTFTs (reasoning models) carry the honest thinking-time
-    // caveat wherever TTFT is shown — this same cell feeds both the value-score
-    // readout and the stage tooltip. ttft is stored in ms; shown in seconds.
-    const caveat = ttftCaveat(model.ttft);
+    // Multi-minute TTFTs carry the honest thinking-time caveat only when the
+    // model is a reasoning/thinking-effort model — ttftCaveat gates on both
+    // (latency AND reasoning nature, unified in src/lib/format.ts). This same
+    // cell feeds both the value-score readout and the stage tooltip. ttft is
+    // stored in ms; shown in seconds.
+    const caveat = ttftCaveat(model);
     const ttftCell = caveat
       ? `${formatTtftSeconds(model.ttft)}<span class="ttft-caveat">${caveat}</span>`
       : formatTtftSeconds(model.ttft);
