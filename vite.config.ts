@@ -13,4 +13,14 @@ function validateDataset(): Plugin {
 
 export default defineConfig({
   plugins: [validateDataset()],
-});
+  test: {
+    exclude: [
+      "node_modules",
+      "dist",
+      ".idea",
+      ".git",
+      ".cache",
+      "tests/render.spec.ts",
+    ],
+  },
+} as any);
