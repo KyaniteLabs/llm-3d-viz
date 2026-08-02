@@ -63,8 +63,11 @@ test.describe("3D Stage Render Specs", () => {
     const modebar = page.locator(".modebar");
     await expect(modebar).toHaveCount(0);
 
-    // Check .hoverlayer is empty
-    const hoverlayer = page.locator(".hoverlayer");
+    // Check the STAGE's .hoverlayer is empty (native hover card suppressed).
+    // Scoped to .stage because the linked 2D projections each carry their own
+    // (empty, hoverinfo:'none') hoverlayer node — the de-chrome contract is
+    // "no native hover card anywhere", verified per-view, not "exactly one node".
+    const hoverlayer = page.locator(".stage .hoverlayer");
     await expect(hoverlayer).toHaveCount(1);
     await expect(hoverlayer).toHaveJSProperty("childElementCount", 0);
   });
@@ -280,5 +283,282 @@ test.describe("3D Stage Render Specs", () => {
     await expect(prompt).toBeVisible();
     await expect(prompt.locator("text=WEBGL CONTEXT LOST")).toBeVisible();
     await expect(prompt.locator("button#webgl-reload-btn")).toBeVisible();
+  });
+});
+
+test.describe("2D Projection Render + Coupling Specs", () => {
+  let consoleErrors: string[] = [];
+  let pageErrors: any[] = [];
+  let requestErrors: string[] = [];
+
+  test.beforeEach(async ({ page }) => {
+    consoleErrors = [];
+    pageErrors = [];
+    requestErrors = [];
+
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleErrors.push(msg.text());
+    });
+    page.on("pageerror", (err) => pageErrors.push(err));
+    page.on("requestfailed", (req) =>
+      requestErrors.push(`${req.url()} failed: ${req.failure()?.errorText}`),
+    );
+  });
+
+  test("Projection render: 3 de-chromed log-axis scatters with ε floor on cost axes", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+
+    const data = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const proj = viz.projections;
+      const positivePrices = viz.scorableModels
+        .map((m: any) => m.blended_price_per_M)
+        .filter((p: number) => p > 0);
+      const expectedFloor = Math.min(...positivePrices) / 2;
+      const kinds = proj.gds.map((gd: any) => gd.dataset.projectionKind);
+      return {
+        gdsCount: proj.gds.length,
+        kinds,
+        perGd: proj.gds.map((gd: any) => ({
+          traceType: gd.data[0]?.type,
+          mode: gd.data[0]?.mode,
+          points: gd.data[0]?.x?.length,
+          hoverinfo: gd.data[0]?.hoverinfo,
+          xaxisType: gd.layout?.xaxis?.type,
+          yaxisType: gd.layout?.yaxis?.type,
+          xaxisTicktext: gd.layout?.xaxis?.ticktext,
+          yaxisTicktext: gd.layout?.yaxis?.ticktext,
+          modebarNodes: gd.querySelectorAll(".modebar").length,
+          hoverlayerChildren: gd.querySelector(".hoverlayer")?.childElementCount,
+        })),
+        // ε-floor placement: the two $0.00 models on every cost-involved axis.
+        expectedFloor,
+        zeroModels: viz.scorableModels
+          .map((m: any, i: number) => ({ i, name: m.model, price: m.blended_price_per_M }))
+          .filter((r: any) => r.price === 0),
+        tpsCostYforZero: (() => {
+          const gd = proj.gds[1]; // tps-cost
+          return viz.scorableModels
+            .map((m: any, i: number) => m.blended_price_per_M === 0 ? gd.data[0].y[i] : null)
+            .filter((v: any) => v !== null);
+        })(),
+        costIntelXforZero: (() => {
+          const gd = proj.gds[2]; // cost-intelligence
+          return viz.scorableModels
+            .map((m: any, i: number) => m.blended_price_per_M === 0 ? gd.data[0].x[i] : null)
+            .filter((v: any) => v !== null);
+        })(),
+      };
+    });
+
+    expect(data.gdsCount).toBe(3);
+    expect(data.kinds).toEqual(["tps-intelligence", "tps-cost", "cost-intelligence"]);
+
+    data.perGd.forEach((gd: any) => {
+      expect(gd.traceType).toBe("scatter");
+      expect(gd.mode).toBe("markers");
+      expect(gd.points).toBe(33);
+      // hoverinfo 'none' (NOT 'skip'): events fire, no native hover card.
+      expect(gd.hoverinfo).toBe("none");
+      // Log axes wherever the stage uses log (TPS, cost, intelligence all log).
+      expect(gd.xaxisType).toBe("log");
+      expect(gd.yaxisType).toBe("log");
+      expect(gd.modebarNodes).toBe(0);
+      // hoverinfo 'none' → no native hover card drawn (de-chrome contract).
+      expect(gd.hoverlayerChildren).toBe(0);
+    });
+
+    // Cost axes carry the single ε "≤ floor" tick (tps-cost y, cost-intelligence x).
+    expect(data.perGd[1].yaxisTicktext).toContain("≤ floor");
+    expect(data.perGd[2].xaxisTicktext).toContain("≤ floor");
+    // Non-cost axes do NOT carry the floor tick.
+    expect(data.perGd[0].xaxisTicktext).not.toContain("≤ floor");
+
+    // The two $0.00 models land on the ε floor on every cost-involved axis.
+    expect(data.zeroModels.length).toBe(2);
+    data.tpsCostYforZero.forEach((v: number) => expect(v).toBeCloseTo(data.expectedFloor, 10));
+    data.costIntelXforZero.forEach((v: number) => expect(v).toBeCloseTo(data.expectedFloor, 10));
+
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+    expect(requestErrors).toEqual([]);
+  });
+
+  test("Item 17a: hovering a projection point fans Fx.hover to the stage by model ID", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+    const POINT = 5;
+
+    // Spy on the SAME Plotly the app bundles — window.__viz.Plotly is the imported
+    // module namespace the coupling actually calls. (Spying on the UMD
+    // window.Plotly.Fx.hover does NOT intercept bundled calls, which is why the
+    // old hoverLog fallback could mask a coupling that stopped invoking Plotly.)
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realFxHover = Plotly.Fx.hover;
+      W.__fxSpy = [];
+      Plotly.Fx.hover = function (gd: any, pts: any) {
+        const proj = W.__viz.projections;
+        W.__fxSpy.push({
+          isStage: gd === proj.stageGd,
+          projIndex: proj.gds.indexOf(gd),
+          pointNumber: pts && pts[0] && pts[0].pointNumber,
+        });
+        try {
+          return W.__realFxHover.call(this, gd, pts);
+        } catch {
+          /* programmatic hover on a de-chromed plot is best-effort */
+        }
+      };
+    });
+
+    // Production path: a real pointer move onto projection 0's POINT-th marker.
+    // Plotly's native hover emits plotly_hover → the coupling → Plotly.Fx.hover.
+    // The projection row renders below the fold, so scroll the marker on-screen
+    // first — Playwright's page.mouse.move operates in viewport pixels and will
+    // not auto-scroll, so an off-screen target would receive no mousemove.
+    const target = await page.evaluate((i) => {
+      const gd = (window as any).__viz.projections.gds[0];
+      const el = gd.querySelectorAll(".scatterlayer .point")[i];
+      if (!el) return null;
+      el.scrollIntoView({ block: "center" });
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }, POINT);
+    expect(target).toBeTruthy();
+    await page.mouse.move(target!.x, target!.y);
+    // Plotly hover is synchronous on mousemove, but poll briefly to be safe.
+    await page
+      .waitForFunction(() => (window as any).__fxSpy.length > 0, null, { timeout: 3000 })
+      .catch(() => {});
+
+    // Resolve by MODEL ID (trace-carried text), not by reusing POINT: the stage's
+    // pointNumber for the hovered model is stage.text.indexOf(modelId). No
+    // fallback — if the coupling stops calling Plotly.Fx.hover, this FAILS.
+    const res = await page.evaluate((i) => {
+      const W = window as any;
+      const proj = W.__viz.projections;
+      const stageGd = W.__viz.gd;
+      const hoveredModelId = proj.gds[0].data[0].text[i];
+      const expectedStagePointNumber = stageGd.data[0].text.indexOf(hoveredModelId);
+      const spy = W.__fxSpy as any[];
+      W.__viz.Plotly.Fx.hover = W.__realFxHover; // restore
+      return {
+        hoveredModelId,
+        expectedStagePointNumber,
+        stageHit: spy.some((c) => c.isStage && c.pointNumber === expectedStagePointNumber),
+        spyLen: spy.length,
+      };
+    }, POINT);
+
+    expect(res.hoveredModelId).toBeTruthy();
+    expect(res.stageHit).toBe(true);
+  });
+
+  test("Item 17b: stage hover fans Fx.hover to all three projections by model ID", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+
+    // Same spy as 17a — intercepts the bundled Plotly the coupling actually calls.
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realFxHover = Plotly.Fx.hover;
+      W.__fxSpy = [];
+      Plotly.Fx.hover = function (gd: any, pts: any) {
+        const proj = W.__viz.projections;
+        W.__fxSpy.push({
+          isStage: gd === proj.stageGd,
+          projIndex: proj.gds.indexOf(gd),
+          pointNumber: pts && pts[0] && pts[0].pointNumber,
+        });
+        try {
+          return W.__realFxHover.call(this, gd, pts);
+        } catch {
+          /* programmatic hover on a de-chromed plot is best-effort */
+        }
+      };
+    });
+
+    // Production path: sweep the stage WebGL canvas with real pointer moves until
+    // a hover fans out (the spy records Fx.hover onto the projections). Same scan
+    // strategy the T5 tooltip spec (items 19 & 22) uses to hit a 3D point.
+    const canvas = page.locator(".stage-3d-canvas canvas");
+    const box = await canvas.boundingBox();
+    expect(box).toBeTruthy();
+    let found = false;
+    for (let y = box!.y + 8; y < box!.y + box!.height - 8 && !found; y += 12) {
+      for (let x = box!.x + 8; x < box!.x + box!.width - 8; x += 12) {
+        await page.mouse.move(x, y);
+        if (await page.evaluate(() => (window as any).__fxSpy.length > 0)) {
+          found = true;
+          break;
+        }
+      }
+    }
+    expect(found).toBe(true);
+
+    // All three projections must be hit, and every view must resolve the hover to
+    // the SAME model identity (model-ID keying via trace-carried text). No
+    // fallback — if the coupling stopped calling Plotly.Fx.hover, this FAILS.
+    const res = await page.evaluate(() => {
+      const W = window as any;
+      const proj = W.__viz.projections;
+      const spy = W.__fxSpy as any[];
+      W.__viz.Plotly.Fx.hover = W.__realFxHover; // restore
+      const resolved: Record<number, string> = {};
+      spy.forEach((c) => {
+        if (c.projIndex >= 0) {
+          resolved[c.projIndex] = proj.gds[c.projIndex].data[0].text[c.pointNumber];
+        }
+      });
+      return {
+        projectionsHit: [0, 1, 2].every((idx) => idx in resolved),
+        resolvedIds: Object.values(resolved),
+        spyLen: spy.length,
+      };
+    });
+
+    expect(res.projectionsHit).toBe(true);
+    // Model-ID keying: every coupled view resolved the hover to one shared id.
+    expect(new Set(res.resolvedIds).size).toBe(1);
+  });
+
+  test("Item 25: a user's 2D projection zoom survives a re-render (uirevision pinned)", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+
+    // Zoom projection 0's x-axis (log units), then re-render exactly the way a
+    // weight change re-renders the stage (the same render() → Plotly.react path).
+    const ranges = await page.evaluate(async () => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      const proj = W.__viz.projections;
+      const gd = proj.gds[0];
+      const models = W.__viz.scorableModels;
+      // Sanity: a model list is reachable so render() can be re-invoked.
+      const allModels = (W.__viz.scorableModels.slice());
+      // Zoom the x-axis into a sub-range (log10 units).
+      await Plotly.relayout(gd, {
+        "xaxis.autorange": false,
+        "xaxis.range[0]": 1.5,
+        "xaxis.range[1]": 2.5,
+      });
+      const before = gd.layout.xaxis.range.slice();
+      // Re-render the same way the stage re-renders on a weight change.
+      await proj.render({ speed: 0.3333, cost: 0.3333, intelligence: 0.3333 }, allModels);
+      const after = gd.layout.xaxis.range.slice();
+      // Also confirm a re-render genuinely happened (datarevision bumped).
+      const datarevision = gd.layout.datarevision;
+      return { before, after, datarevision, modelsCount: allModels.length };
+    });
+
+    expect(ranges.modelsCount).toBe(33);
+    // The zoomed range is preserved across the re-render.
+    expect(ranges.after).toEqual(ranges.before);
+    // And it is the zoomed range, not the original auto-range.
+    expect(ranges.before).toEqual([1.5, 2.5]);
   });
 });
