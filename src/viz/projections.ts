@@ -89,13 +89,7 @@ export class Projections {
   private priceFloor = 0.08125;
   /** Incremented every render so Plotly.react never silently skips a data diff. */
   private datarevision = 0;
-  /**
-   * `Fx.hover` fan-out guard. True only while we are driving programmatic
-   * hovers. `Plotly.Fx.hover` does not itself emit `plotly_hover` on the locked
-   * plotly.js-dist-min 3.7.0 (verified — see attachCoupling), so the echo this
-   * guards against is future-proofing; kept because the brief mandates an
-   * explicit programmatic-hover flag.
-   */
+  /** True while either direction of a coupling fan-out is driving Fx.hover. */
   private isProgrammatic = false;
   private coupled = false;
 
@@ -368,21 +362,7 @@ export class Projections {
     }
   }
 
-  /**
-   * Register `plotly_hover` listeners on the stage and every projection so a
-   * hover on any view fans a programmatic `Fx.hover` to the other three,
-   * resolved by MODEL ID. Guarded by `isProgrammatic` so fan-out hovers do not
-   * echo.
-   *
-   * `Plotly.Fx.hover` does not itself emit `plotly_hover` on the locked
-   * plotly.js-dist-min 3.7.0 (verified with a headless scratch probe —
-   * `Fx.hover` sets hover state only; the registered listener count stayed 0),
-   * so the fan-out cannot chase itself today. The guard is kept anyway as
-   * belt-and-suspenders and because the brief mandates an explicit
-   * programmatic-hover flag. NB: package.json pins the range `^3.1.0`; the
-   * resolved (locked) version is 3.7.0, which is what this behaviour was
-   * verified against — not the 3.1.0 range floor.
-   */
+  /** Register guarded bidirectional hover coupling on the stage and projections. */
   private attachCoupling(): void {
     if (this.coupled) return;
     this.coupled = true;
@@ -410,12 +390,13 @@ export class Projections {
    * or future) is ignored by the listeners.
    */
   private fanOut(modelId: string): void {
+    const previous = this.isProgrammatic;
     this.isProgrammatic = true;
     try {
       this.programmaticHover(this.stageGd, modelId, "scene");
       this.gds.forEach((gd) => this.programmaticHover(gd, modelId, "xy"));
     } finally {
-      this.isProgrammatic = false;
+      this.isProgrammatic = previous;
     }
   }
 

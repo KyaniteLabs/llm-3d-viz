@@ -18,6 +18,116 @@ async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> 
   );
 }
 
+type StageHover = { model: string; x: number; y: number };
+
+async function stageCanvasBox(page: Page) {
+  const box = await page.locator(".stage-3d-canvas canvas").boundingBox();
+  expect(box).toBeTruthy();
+  return { ...box!, right: box!.x + box!.width, bottom: box!.y + box!.height };
+}
+
+async function projectedStagePoints(page: Page): Promise<StageHover[]> {
+  return page.evaluate(() => {
+    const gd = (window as any).__viz.gd;
+    const scene = gd._fullLayout.scene._scene;
+    const { model, view, projection } = scene.glplot.cameraParams;
+    const rect = gd.querySelector("canvas").getBoundingClientRect();
+    const points = scene.glplot.objects[0].points;
+    const models = gd.data[0].text;
+    const multiply = (matrix: number[], vector: number[]) => [
+      matrix[0] * vector[0] + matrix[4] * vector[1] + matrix[8] * vector[2] + matrix[12] * vector[3],
+      matrix[1] * vector[0] + matrix[5] * vector[1] + matrix[9] * vector[2] + matrix[13] * vector[3],
+      matrix[2] * vector[0] + matrix[6] * vector[1] + matrix[10] * vector[2] + matrix[14] * vector[3],
+      matrix[3] * vector[0] + matrix[7] * vector[1] + matrix[11] * vector[2] + matrix[15] * vector[3],
+    ];
+    return points.map((point: number[], index: number) => {
+      let clip = multiply(model, [...point, 1]);
+      clip = multiply(view, clip);
+      clip = multiply(projection, clip);
+      return {
+        model: models[index],
+        x: rect.x + (clip[0] / clip[3] + 1) * rect.width / 2,
+        y: rect.y + (1 - clip[1] / clip[3]) * rect.height / 2,
+      };
+    });
+  });
+}
+
+async function hoverRealPoint(page: Page, point: StageHover): Promise<StageHover> {
+  // Projection lands on the model center; the small neighborhood accounts for
+  // WebGL pick-radius rounding while every accepted position remains a real
+  // Plotly hover for the expected model.
+  for (let dy = -8; dy <= 8; dy += 2) {
+    for (let dx = -8; dx <= 8; dx += 2) {
+      const candidate = { ...point, x: point.x + dx, y: point.y + dy };
+      await page.mouse.move(candidate.x, candidate.y);
+      if (await page.locator(".stage-tooltip").evaluate((element, model) =>
+        !element.hasAttribute("hidden") && element.textContent?.includes(model), point.model)) {
+        return candidate;
+      }
+    }
+  }
+  throw new Error(`Projected point did not produce a real hover: ${point.model}`);
+}
+
+async function hoverRealPointByEvent(page: Page, point: StageHover): Promise<StageHover> {
+  for (let dy = -8; dy <= 8; dy += 2) {
+    for (let dx = -8; dx <= 8; dx += 2) {
+      const candidate = { ...point, x: point.x + dx, y: point.y + dy };
+      await page.mouse.move(candidate.x, candidate.y);
+      if (await page.evaluate((model) => (window as any).__stageHoverModel === model, point.model)) {
+        return candidate;
+      }
+    }
+  }
+  throw new Error(`Projected point did not produce a real hover event: ${point.model}`);
+}
+
+async function realStagePointAtEdge(page: Page, edge: "right" | "bottom"): Promise<StageHover> {
+  // These are camera centers, not arbitrary canvas coordinates. Each candidate
+  // is applied to the real Plotly scene, then the known model coordinates are
+  // projected and the selected point is hovered with a real pointer move.
+  const centers = [-4, -3, -2, -1, 0, 1, 2, 3, 4].flatMap((x) =>
+    [-4, -2, 0, 2, 4].map((y) => ({ x, y, z: 0 })),
+  );
+  for (const center of centers) {
+    await page.evaluate(async (nextCenter) => {
+      await (window as any).__viz.Plotly.relayout((window as any).__viz.gd, {
+        "scene.camera.center": nextCenter,
+      });
+    }, center);
+    await page.waitForTimeout(120);
+    const box = await stageCanvasBox(page);
+    const points = await projectedStagePoints(page);
+    const visible = points.filter((point) =>
+      point.x >= box.x && point.x <= box.right && point.y >= box.y && point.y <= box.bottom,
+    );
+    const point = visible.sort((left, right) => edge === "right" ? right.x - left.x : right.y - left.y)[0];
+    if (point && (edge === "right" ? point.x >= box.right - 24 : point.y >= box.bottom - 24)) {
+      try {
+        return await hoverRealPoint(page, point);
+      } catch {
+        // Camera relayout can still be settling; try the next deterministic
+        // camera placement rather than treating a stale projection as a hit.
+      }
+    }
+  }
+  throw new Error(`No real model point rendered near the ${edge} edge`);
+}
+
+async function tooltipGeometry(page: Page) {
+  return page.evaluate(() => {
+    const tooltip = document.querySelector(".stage-tooltip") as HTMLElement;
+    const rect = tooltip.getBoundingClientRect();
+    return {
+      hidden: tooltip.hidden,
+      text: tooltip.textContent ?? "",
+      rect: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+    };
+  });
+}
+
 test.describe("3D Stage Render Specs", () => {
   let consoleErrors: string[] = [];
   let pageErrors: any[] = [];
@@ -443,21 +553,12 @@ test.describe("3D Stage Render Specs", () => {
   test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
-    const canvas = page.locator(".stage-3d-canvas canvas");
-    const canvasBox = await canvas.boundingBox();
-    expect(canvasBox).toBeTruthy();
-    let hit: { x: number; y: number } | undefined;
-    for (let y = canvasBox!.y + 8; y < canvasBox!.y + canvasBox!.height - 8 && !hit; y += 12) {
-      for (let x = canvasBox!.x + 8; x < canvasBox!.x + canvasBox!.width - 8; x += 12) {
-        await page.mouse.move(x, y);
-        const text = await page.evaluate(() => (document.querySelector(".stage-tooltip") as HTMLElement).textContent);
-        if (text.includes("incl. thinking time (long-prompt median)")) {
-          hit = { x, y };
-          break;
-        }
-      }
-    }
-    expect(hit).toBeTruthy();
+    const reasoningModel = await page.evaluate(() =>
+      (window as any).__viz.scorableModels.find((model: any) => /reasoning|reasoner/i.test(model.model)).model,
+    );
+    const projectedHit = (await projectedStagePoints(page)).find((point) => point.model === reasoningModel);
+    expect(projectedHit).toBeTruthy();
+    const hit = await hoverRealPoint(page, projectedHit!);
     const inspected = await page.evaluate(() => {
       const tooltip = document.querySelector(".stage-tooltip") as HTMLElement;
       const initial = { left: tooltip.style.left, top: tooltip.style.top, text: tooltip.textContent };
@@ -482,8 +583,171 @@ test.describe("3D Stage Render Specs", () => {
     await page.locator("#weight-speed").fill("8");
     const persistedCamera = await page.evaluate(() => (window as any).__viz.gd.layout.scene.camera.eye);
     expect(persistedCamera).toEqual(inspected.camera.eye);
+    await page.mouse.move(5, 5);
     await page.locator(".stage-3d-canvas").click({ position: { x: 5, y: 5 } });
     await expect(page.locator(".stage-tooltip")).toBeHidden();
+  });
+
+  test("FIX-A #26: tooltip follows the real DOM cursor and flips at both viewport edges", async ({ page }) => {
+    await page.setViewportSize({ width: 760, height: 600 });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const rightPoint = await realStagePointAtEdge(page, "right");
+    const rightTooltip = await tooltipGeometry(page);
+    expect(rightTooltip.rect.right).toBeLessThanOrEqual(rightPoint.x);
+    expect(rightTooltip.rect.right).toBeGreaterThanOrEqual(rightPoint.x - 24);
+    expect(rightTooltip.rect.bottom).toBeLessThanOrEqual(rightTooltip.viewport.height);
+
+    const bottomPoint = await realStagePointAtEdge(page, "bottom");
+    const bottomTooltip = await tooltipGeometry(page);
+    expect(bottomTooltip.rect.bottom).toBeLessThanOrEqual(bottomPoint.y);
+    expect(bottomTooltip.rect.bottom).toBeGreaterThanOrEqual(bottomPoint.y - 24);
+    expect(bottomTooltip.rect.right).toBeLessThanOrEqual(bottomTooltip.viewport.width);
+  });
+
+  test("FIX-A #26: real gl3d hover and click keep pin separate, including in-stage blank unpin", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      W.__stageHoverModel = null;
+      W.__viz.gd.on("plotly_hover", (event: any) => {
+        const point = event.points?.[0];
+        const text = point?.data?.text ?? point?.fullData?.text;
+        W.__stageHoverModel = Array.isArray(text) ? text[point?.pointNumber] ?? null : null;
+      });
+    });
+    const points = await projectedStagePoints(page);
+    const pointA = points[0];
+    const pointB = points
+      .slice(1)
+      .sort((left, right) => Math.hypot(right.x - pointA.x, right.y - pointA.y) - Math.hypot(left.x - pointA.x, left.y - pointA.y))[0];
+    expect(pointA).toBeTruthy();
+    expect(pointB).toBeTruthy();
+
+    // Journey 1: pin A, hover B, then click. The click must pin the live hover
+    // (B), proving hoveredModelId is not frozen by pinnedModelId.
+    const hitA = await hoverRealPoint(page, pointA);
+    await page.mouse.click(hitA.x, hitA.y);
+    await expect(page.locator(".model-readout")).toContainText(pointA.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointA.model);
+    const hitB = await hoverRealPointByEvent(page, pointB);
+    await expect(page.locator(".model-readout")).toContainText(pointA.model);
+    await page.mouse.click(hitB.x, hitB.y);
+    await expect(page.locator(".model-readout")).toContainText(pointB.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointB.model);
+
+    // Journey 2: move to blank space that is still inside the stage. The real
+    // Plotly unhover path clears hoveredModelId before this DOM click, so the
+    // click must unpin instead of re-pinning B.
+    const box = await stageCanvasBox(page);
+    const blank = { x: box.x + 8, y: box.y + 8 };
+    await page.mouse.move(blank.x, blank.y);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointB.model);
+    await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
+    await expect(page.locator(".stage-tooltip")).toBeHidden();
+    await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+
+    // Preserve the established repeated real-event stress coverage.
+    for (let repetition = 0; repetition < 10; repetition += 1) {
+      const realHit = await hoverRealPoint(page, pointA);
+      await page.mouse.click(realHit.x, realHit.y);
+      await expect(page.locator(".model-readout")).toContainText(pointA.model);
+      await page.mouse.move(blank.x, blank.y);
+      await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
+      await expect(page.locator(".stage-tooltip")).toBeHidden();
+      await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+    }
+  });
+
+  test("FIX-A #26: 30 rapid slider inputs produce one rAF-batched render and the final optimum", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const stage = W.__viz.stage;
+      const projections = W.__viz.projectionsInstance;
+      W.__realStageRender = stage.render;
+      W.__realProjectionRender = projections.render;
+      W.__renderLog = [];
+      stage.render = function (...args: any[]) {
+        W.__renderLog.push({ at: performance.now(), kind: "stage" });
+        return W.__realStageRender.apply(this, args);
+      };
+      projections.render = function (...args: any[]) {
+        W.__renderLog.push({ at: performance.now(), kind: "projection" });
+        return W.__realProjectionRender.apply(this, args);
+      };
+      const input = document.querySelector<HTMLInputElement>("#weight-cost")!;
+      for (let index = 0; index < 30; index += 1) {
+        input.value = String(1 + (8 * index) / 29);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    await page.waitForTimeout(650);
+
+    const result = await page.evaluate(() => {
+      const W = window as any;
+      const log = W.__renderLog as Array<{ at: number; kind: string }>;
+      const stageCalls = log.filter((entry) => entry.kind === "stage");
+      const stage = W.__viz.gd;
+      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
+      const optimum = stage.data[0].text[optimumIndex];
+      W.__viz.stage.render = W.__realStageRender;
+      W.__viz.projectionsInstance.render = W.__realProjectionRender;
+      return {
+        total: log.length,
+        stageCalls: stageCalls.length,
+        projectionCalls: log.filter((entry) => entry.kind === "projection").length,
+        optimum,
+      };
+    });
+
+    expect(result.stageCalls).toBe(1);
+    expect(result.projectionCalls).toBe(1);
+    expect(result.total).toBe(2);
+    expect(result.optimum).toBe("Command A+");
+  });
+
+  test("FIX-A #26 / Item 10: 60-second real hover sweep plus slider scrub has zero runtime errors", async ({ page }) => {
+    test.setTimeout(75000);
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => document.fonts.ready);
+    const box = await stageCanvasBox(page);
+    const started = Date.now();
+
+    const hoverSweep = (async () => {
+      let step = 0;
+      while (Date.now() - started < 60000) {
+        const row = step % 30;
+        const column = step % 2 === 0 ? step % 56 : 55 - (step % 56);
+        const x = box.x + 8 + (column / 55) * (box.width - 16);
+        const y = box.y + 8 + (row / 29) * (box.height - 16);
+        await page.mouse.move(x, y);
+        step += 1;
+      }
+    })();
+
+    const sliderScrub = page.evaluate(async () => {
+      const input = document.querySelector<HTMLInputElement>("#weight-cost")!;
+      const end = performance.now() + 60000;
+      let index = 0;
+      while (performance.now() < end) {
+        input.value = String(1 + 8 * ((index % 41) / 40));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        index += 1;
+        await new Promise((resolve) => window.setTimeout(resolve, 40));
+      }
+      input.value = "9";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    await Promise.all([hoverSweep, sliderScrub]);
+    await page.waitForTimeout(550);
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+    expect(requestErrors).toEqual([]);
   });
 
   test("Item 24: $0.00 models are placed at the ε price floor position", async ({ page }) => {
