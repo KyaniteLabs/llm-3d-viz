@@ -115,6 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!modelId) return;
       consoleUi.handleHover(modelId);
     });
+    plotlyOn.call(stage.gd, "plotly_unhover", () => {
+      // Plotly emits this when the pointer remains inside the stage but leaves
+      // the last point. Clear only hover; a pin is an independent click state.
+      consoleUi.handleStageLeave();
+    });
   }
   stage.gd.addEventListener("click", (event) => {
     // The store is the authoritative hover snapshot. A DOM click can arrive

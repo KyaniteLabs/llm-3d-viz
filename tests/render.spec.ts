@@ -70,6 +70,19 @@ async function hoverRealPoint(page: Page, point: StageHover): Promise<StageHover
   throw new Error(`Projected point did not produce a real hover: ${point.model}`);
 }
 
+async function hoverRealPointByEvent(page: Page, point: StageHover): Promise<StageHover> {
+  for (let dy = -8; dy <= 8; dy += 2) {
+    for (let dx = -8; dx <= 8; dx += 2) {
+      const candidate = { ...point, x: point.x + dx, y: point.y + dy };
+      await page.mouse.move(candidate.x, candidate.y);
+      if (await page.evaluate((model) => (window as any).__stageHoverModel === model, point.model)) {
+        return candidate;
+      }
+    }
+  }
+  throw new Error(`Projected point did not produce a real hover event: ${point.model}`);
+}
+
 async function realStagePointAtEdge(page: Page, edge: "right" | "bottom"): Promise<StageHover> {
   // These are camera centers, not arbitrary canvas coordinates. Each candidate
   // is applied to the real Plotly scene, then the known model coordinates are
@@ -592,20 +605,56 @@ test.describe("3D Stage Render Specs", () => {
     expect(bottomTooltip.rect.right).toBeLessThanOrEqual(bottomTooltip.viewport.width);
   });
 
-  test("FIX-A #26: real gl3d click pins the last hover, and empty click unpins", async ({ page }) => {
+  test("FIX-A #26: real gl3d hover and click keep pin separate, including in-stage blank unpin", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
-    const [hit] = await projectedStagePoints(page);
-    for (let repetition = 0; repetition < 10; repetition += 1) {
-      const realHit = await hoverRealPoint(page, hit);
-      await page.waitForTimeout(50);
-      await page.mouse.click(realHit.x, realHit.y);
-      await expect(page.locator(".model-readout")).toContainText(hit.model);
-      await expect(page.locator(".stage-tooltip")).toContainText(hit.model);
+    await page.evaluate(() => {
+      const W = window as any;
+      W.__stageHoverModel = null;
+      W.__viz.gd.on("plotly_hover", (event: any) => {
+        const point = event.points?.[0];
+        const text = point?.data?.text ?? point?.fullData?.text;
+        W.__stageHoverModel = Array.isArray(text) ? text[point?.pointNumber] ?? null : null;
+      });
+    });
+    const points = await projectedStagePoints(page);
+    const pointA = points[0];
+    const pointB = points
+      .slice(1)
+      .sort((left, right) => Math.hypot(right.x - pointA.x, right.y - pointA.y) - Math.hypot(left.x - pointA.x, left.y - pointA.y))[0];
+    expect(pointA).toBeTruthy();
+    expect(pointB).toBeTruthy();
 
-      await page.mouse.move(5, 5);
-      await expect(page.locator(".stage-tooltip")).toBeVisible();
-      await page.locator(".stage-3d-canvas").click({ position: { x: 5, y: 5 } });
+    // Journey 1: pin A, hover B, then click. The click must pin the live hover
+    // (B), proving hoveredModelId is not frozen by pinnedModelId.
+    const hitA = await hoverRealPoint(page, pointA);
+    await page.mouse.click(hitA.x, hitA.y);
+    await expect(page.locator(".model-readout")).toContainText(pointA.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointA.model);
+    const hitB = await hoverRealPointByEvent(page, pointB);
+    await expect(page.locator(".model-readout")).toContainText(pointA.model);
+    await page.mouse.click(hitB.x, hitB.y);
+    await expect(page.locator(".model-readout")).toContainText(pointB.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointB.model);
+
+    // Journey 2: move to blank space that is still inside the stage. The real
+    // Plotly unhover path clears hoveredModelId before this DOM click, so the
+    // click must unpin instead of re-pinning B.
+    const box = await stageCanvasBox(page);
+    const blank = { x: box.x + 8, y: box.y + 8 };
+    await page.mouse.move(blank.x, blank.y);
+    await expect(page.locator(".stage-tooltip")).toContainText(pointB.model);
+    await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
+    await expect(page.locator(".stage-tooltip")).toBeHidden();
+    await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+
+    // Preserve the established repeated real-event stress coverage.
+    for (let repetition = 0; repetition < 10; repetition += 1) {
+      const realHit = await hoverRealPoint(page, pointA);
+      await page.mouse.click(realHit.x, realHit.y);
+      await expect(page.locator(".model-readout")).toContainText(pointA.model);
+      await page.mouse.move(blank.x, blank.y);
+      await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
       await expect(page.locator(".stage-tooltip")).toBeHidden();
       await expect(page.locator(".model-readout")).toContainText("Hover a model point");
     }

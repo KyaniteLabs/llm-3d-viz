@@ -158,7 +158,7 @@ export class DecisionConsole {
 
   handleHover(modelId: string, clientX?: number, clientY?: number) {
     if (clientX !== undefined && clientY !== undefined) this.setCursor(clientX, clientY);
-    if (!this.store.getState().pinnedModelId) this.store.update({ hoveredModelId: modelId });
+    this.store.update({ hoveredModelId: modelId });
   }
 
   handleStageEnter() {
