@@ -32,13 +32,14 @@ test.describe("FIX-D #29 mobile axes (responsive titles/ticks)", () => {
 
     expect(s.containerWidth).toBeLessThan(460); // genuinely narrow
     // Titles shortened to the metric name (units live in ticks + tooltip).
-    expect(s.xTitle).toBe("SPEED");
+    // Axis mapping (locked 2026-08-02): x = COST, y = INTEL, z = SPEED.
+    expect(s.xTitle).toBe("COST");
     expect(s.yTitle).toBe("INTEL");
-    expect(s.zTitle).toBe("COST");
+    expect(s.zTitle).toBe("SPEED");
     // Origin ticks dropped on every axis (they labelled one convergent corner).
-    expect(s.xTicks).not.toContain(10);
-    expect(s.yTicks).not.toContain(0);
-    expect(s.zTicks).toEqual([1, 100]);
+    expect(s.xTicks).toEqual([1, 100]);
+    expect(s.yTicks).toEqual([50, 100]);
+    expect(s.zTicks).toEqual([100, 1000]);
   });
 
   test("desktop (1280px): full titles + full tick set unchanged", async ({ page }) => {
@@ -54,13 +55,17 @@ test.describe("FIX-D #29 mobile axes (responsive titles/ticks)", () => {
         zTitle: sc.zaxis.title.text,
         xTicks: sc.xaxis.tickvals as number[],
         yTicks: sc.yaxis.tickvals as number[],
+        zTicks: sc.zaxis.tickvals as number[],
       };
     });
 
-    expect(s.xTitle).toBe("SPEED (TPS)");
+    expect(s.xTitle).toBe("COST ($/M)");
     expect(s.yTitle).toBe("INTELLIGENCE (INDEX)");
-    expect(s.zTitle).toBe("COST ($/M)");
-    expect(s.xTicks).toEqual([10, 100, 1000]);
+    expect(s.zTitle).toBe("SPEED (TPS)");
+    // Cost axis carries the dynamic ε floor first, then the standard decades.
+    expect(s.xTicks.slice(1)).toEqual([0.1, 1, 10, 100]);
+    expect(s.xTicks[0]).toBeLessThan(0.1);
     expect(s.yTicks).toEqual([0, 20, 40, 60, 80, 100]);
+    expect(s.zTicks).toEqual([10, 100, 1000]);
   });
 });
