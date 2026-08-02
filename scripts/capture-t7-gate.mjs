@@ -79,7 +79,7 @@ try {
   await page.screenshot({ path: resolve(outputDir, "stage-full.png") });
 
   await page.locator("#weight-cost").fill("9");
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(100);
   await page.screenshot({ path: resolve(outputDir, "sweep-mid.png") });
   await page.waitForTimeout(350);
 
