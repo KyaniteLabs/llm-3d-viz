@@ -52,6 +52,29 @@ export function lighten(color: string, ratio: number): string {
   return toHex(channels.map((c) => c + (255 - c) * ratio) as RGBChannels);
 }
 
+/** Mix two palette colours without introducing a categorical provider hue. */
+export function mixColors(from: string, to: string, ratio: number): string {
+  const fromChannels = parseChannels(from);
+  const toChannels = parseChannels(to);
+  if (!fromChannels || !toChannels) return to;
+  const amount = Math.max(0, Math.min(1, ratio));
+  return toHex(fromChannels.map((channel, index) => channel + (toChannels[index] - channel) * amount) as RGBChannels);
+}
+
+/**
+ * A/B value-score encoding: higher composite scores move up the filament
+ * luminance ramp. The default stays the semantic frontier/dominated palette;
+ * this variant is only enabled with `?heat=1`.
+ */
+export function scoreLuminanceFill(
+  score: number,
+  filamentDim = "#C9D4C4",
+  filament = "#E8F1E4",
+): string {
+  const amount = 0.12 + Math.max(0, Math.min(1, score)) * 0.88;
+  return mixColors(filamentDim, filament, amount);
+}
+
 function channelLinear(c8bit: number): number {
   const c = c8bit / 255;
   return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;

@@ -796,6 +796,94 @@ test.describe("3D Stage Render Specs", () => {
     await expect(prompt.locator("text=WEBGL CONTEXT LOST")).toBeVisible();
     await expect(prompt.locator("button#webgl-reload-btn")).toBeVisible();
   });
+
+  test("FIX-B: legend, provider shape groups, and frontier model names are visible without hover", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    for (const entry of ["frontier-ridge", "optimum-marker", "frontier-point", "dominated-point"]) {
+      await expect(page.locator(`[data-legend-entry="${entry}"]`)).toHaveCount(1);
+    }
+
+    const labels = await page.locator("[data-frontier-model]").evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute("data-frontier-model")),
+    );
+    const expected = await page.evaluate(() => (window as any).__viz.frontierModelIds as string[]);
+    expect(new Set(labels)).toEqual(new Set(expected));
+
+    const providerNames = await page.evaluate(() => Object.keys((window as any).__viz.providerShapes));
+    await page.locator(".provider-disclosure > summary").click();
+    const providerKeyText = await page.locator(".provider-shape-list").innerText();
+    providerNames.forEach((provider: string) => expect(providerKeyText).toContain(provider));
+    expect(await page.locator("[data-provider-shape]").count()).toBeGreaterThanOrEqual(4);
+    await expect(page.locator("#frontier-label-note")).toContainText("no 3D-to-pixel label API");
+  });
+
+  test("FIX-B: stage, console, and all projections fit the 1366×768 first viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+
+    const boxes = await page.locator(".projection").evaluateAll((nodes) => nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, height: rect.height };
+    }));
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.height > 0 && box.top >= 0 && box.bottom <= 768)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)).toBe(true);
+  });
+
+  test("FIX-B: cinema reclaims the console column", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const before = await page.locator(".stage").boundingBox();
+    expect(before).toBeTruthy();
+    await page.locator("[data-cinema-toggle]").click();
+    await expect(page.locator(".console")).toBeHidden();
+    const after = await page.locator(".stage").boundingBox();
+    expect(after).toBeTruthy();
+    expect(after!.width).toBeGreaterThan(before!.width + 100);
+  });
+
+  test("FIX-B: slider outputs are integer weight shares and coding presets move raw sliders", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const readShares = () => page.locator("[data-weight-output]").evaluateAll((nodes) =>
+      nodes.map((node) => Number.parseInt(node.textContent ?? "", 10)),
+    );
+    expect(await readShares()).toEqual([34, 33, 33]);
+    expect((await readShares()).reduce((sum, share) => sum + share, 0)).toBe(100);
+
+    await page.locator('[data-preset="coding"]').click();
+    const coding = await page.evaluate(() => ({
+      raw: ["speed", "cost", "intelligence"].map((key) => (document.querySelector(`#weight-${key}`) as HTMLInputElement).value),
+      shares: [...document.querySelectorAll("[data-weight-output]")].map((node) => node.textContent),
+    }));
+    expect(coding.raw).toEqual(["0.25", "0.15", "0.6"]);
+    expect(coding.shares).toEqual(["25%", "15%", "60%"]);
+  });
+
+  test("FIX-B: heat A/B uses distinct score luminance while preserving the optimum marker", async ({ page }) => {
+    await page.goto("/?heat=1");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const heat = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const colors = viz.gd.data[0].marker.color as string[];
+      const optimumIndex = viz.gd.data[0].marker.size.findIndex((size: number) => size === 16);
+      return {
+        enabled: viz.heatEncoding,
+        uniqueColors: [...new Set(colors)].length,
+        optimumColor: colors[optimumIndex],
+        scoreValues: Object.values(viz.scoreByModel),
+      };
+    });
+    expect(heat.enabled).toBe(true);
+    expect(heat.uniqueColors).toBeGreaterThan(4);
+    expect(heat.optimumColor).toBe("#E8F1E4");
+    expect(new Set(heat.scoreValues).size).toBeGreaterThan(4);
+  });
 });
 
 test.describe("2D Projection Render + Coupling Specs", () => {

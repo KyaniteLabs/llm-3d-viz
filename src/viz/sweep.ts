@@ -4,7 +4,7 @@ import { frontier, ridgeOrder } from "../lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
-import { dominatedFill } from "./palette";
+import { dominatedFill, scoreLuminanceFill } from "./palette";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -62,13 +62,15 @@ export class SweepScheduler {
   private lastBatch = -1;
   private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
+  private readonly heatEncoding: boolean;
   private removeMotionListener: (() => void) | null = null;
 
-  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[]) {
+  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[], heatEncoding = false) {
     this.stage = stage;
     this.projections = projections;
     this.store = store;
     this.models = models;
+    this.heatEncoding = heatEncoding;
     const media = motionPreference();
     if (media) {
       const onChange = (event: MediaQueryListEvent) => {
@@ -110,13 +112,16 @@ export class SweepScheduler {
   private markerStates(weights: ScoreWeights): SweepStates {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
+    const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimum = weightedOptimum(scores)?.model.model;
     const targetIds = new Set(ignitionOrder(this.models, weights, this.interacted));
     const make = (gd: Graph, target: boolean): MarkerState => {
       const ids = graphIds(gd);
-      const colors = ids.map((id) => target && id === optimum
-        ? "#E8F1E4"
-        : target && frontierIds.has(id) ? "#C9D4C4" : dominatedFill());
+      const colors = ids.map((id) => {
+        if (target && id === optimum) return "#E8F1E4";
+        if (this.heatEncoding) return scoreLuminanceFill(scoreById.get(id) ?? 0);
+        return target && frontierIds.has(id) ? "#C9D4C4" : dominatedFill();
+      });
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
       return { ids, colors, sizes };
     };

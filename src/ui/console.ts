@@ -6,6 +6,26 @@ import type { AppStore, AppState } from "../state";
 const weightKeys = ["speed", "cost", "intelligence"] as const;
 type WeightKey = (typeof weightKeys)[number];
 
+function weightShares(weights: AppState["weights"]): Record<WeightKey, number> {
+  const total = weightKeys.reduce((sum, weightKey) => sum + Math.max(0, weights[weightKey]), 0);
+  const exact = weightKeys.map((key) => ({
+    key,
+    value: total === 0 ? 100 / weightKeys.length : (Math.max(0, weights[key]) / total) * 100,
+  }));
+  const shares = Object.fromEntries(exact.map(({ key, value }) => [key, Math.floor(value)])) as Record<WeightKey, number>;
+  let remaining = 100 - weightKeys.reduce((sum, key) => sum + shares[key], 0);
+  exact
+    .slice()
+    .sort((a, b) => (b.value - Math.floor(b.value)) - (a.value - Math.floor(a.value)))
+    .forEach(({ key }) => {
+      if (remaining > 0) {
+        shares[key] += 1;
+        remaining -= 1;
+      }
+    });
+  return shares;
+}
+
 export class DecisionConsole {
   private readonly root: HTMLElement;
   private readonly store: AppStore;
@@ -21,7 +41,7 @@ export class DecisionConsole {
       <p class="eyebrow">INSTRUMENT CONSOLE</p>
       <h2 id="console-title">Value readout</h2>
       <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
-      <section class="weight-controls" aria-label="Value-score weights"></section>
+      <section class="weight-controls" aria-label="Value-score weight shares"><p class="weight-heading">VALUE SCORE / WEIGHT SHARE</p></section>
       <section class="preset-controls" aria-label="Workload presets"></section>
       <section class="model-readout" aria-live="polite"></section>
       <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>`;
@@ -44,7 +64,7 @@ export class DecisionConsole {
     controls.innerHTML = weightKeys.map((key) => `
       <label class="weight-control" for="weight-${key}">
         <span>${key === "intelligence" ? "Intelligence" : key[0].toUpperCase() + key.slice(1)}</span>
-        <output for="weight-${key}" data-weight-output="${key}"></output>
+        <output for="weight-${key}" data-weight-output="${key}" aria-live="polite"></output>
         <input id="weight-${key}" data-weight="${key}" type="range" min="0" max="10" step="0.01" aria-label="${key} weight" />
       </label>`).join("");
     controls.querySelectorAll<HTMLInputElement>("input[data-weight]").forEach((input) => {
@@ -113,7 +133,10 @@ export class DecisionConsole {
       const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`)!;
       const output = this.root.querySelector<HTMLOutputElement>(`[data-weight-output="${key}"]`)!;
       input.value = String(state.weights[key]);
-      output.value = state.weights[key].toFixed(2);
+      const share = weightShares(state.weights)[key];
+      output.value = `${share}%`;
+      output.textContent = `${share}%`;
+      input.setAttribute("aria-valuetext", `${share}% share`);
     });
     const activePreset = (Object.entries(presets) as [keyof typeof presets, typeof presets[keyof typeof presets]][])
       .find(([, weights]) => weightKeys.every((key) => weights[key] === state.weights[key]))?.[0];

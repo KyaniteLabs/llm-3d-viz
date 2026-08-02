@@ -2,7 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { dominatedFill } from "./palette";
+import { dominatedFill, scoreLuminanceFill } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -29,9 +29,10 @@ export class Stage3D {
   };
   private camera: any;
   private isInitialized = false;
+  private readonly heatEncoding: boolean;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, heatEncoding = false) {
     this.container = container;
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
@@ -52,10 +53,13 @@ export class Stage3D {
     this.container.appendChild(this.gd);
 
     this.camera = {
-      eye: { x: 1.5, y: 1.5, z: 1.5 },
+      // A tighter hero framing keeps the model cluster legible on first load;
+      // user camera state still remains the single writer after Plotly init.
+      eye: { x: 1.05, y: 1.05, z: 0.9 },
       up: { x: 0, y: 0, z: 1 },
       center: { x: 0, y: 0, z: 0 },
     };
+    this.heatEncoding = heatEncoding;
 
     this.setupContextLostListener();
   }
@@ -187,9 +191,12 @@ export class Stage3D {
       }
       symbols.push(symbol);
 
+      const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
       let color = this.tokens.textWarm;
       if (isOpt) {
         color = this.tokens.filament;
+      } else if (this.heatEncoding) {
+        color = scoreLuminanceFill(score, this.tokens.filamentDim, this.tokens.filament);
       } else if (isFront) {
         color = this.tokens.filamentDim;
       } else {
@@ -357,6 +364,8 @@ export class Stage3D {
         scorableModels: scorable,
         providerShapes: PROVIDER_SHAPES,
         frontierModelIds: frontierModels.map((model) => model.model),
+        scoreByModel: Object.fromEntries(scores.map((entry) => [entry.model.model, entry.score])),
+        heatEncoding: this.heatEncoding,
         gd: this.gd,
         priceFloor: this.priceFloor,
         Plotly,
