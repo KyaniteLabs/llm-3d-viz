@@ -20,7 +20,7 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run build && npx vite preview --port 5173 --strictPort",
+    command: "npx vite --host 127.0.0.1 --port 5173 --strictPort",
     url: "http://localhost:5173",
     reuseExistingServer: true,
     timeout: 15000,

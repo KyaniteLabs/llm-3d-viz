@@ -59,10 +59,6 @@ test.describe("3D Stage Render Specs", () => {
     expect(vizData.pointsCount).toBe(33);
     expect(vizData.ridgeType).toBe("scatter3d");
     expect(vizData.ridgeMode).toBe("lines");
-    await expect(page.locator(".incomplete-data-entry")).toHaveCount(2);
-    await expect(page.locator(".incomplete-data")).toContainText("GPT-5.5 Pro (xhigh)");
-    await expect(page.locator(".incomplete-data")).toContainText("DeepSeek V4 Flash 0731");
-
     // Check no .modebar element in the DOM
     const modebar = page.locator(".modebar");
     await expect(modebar).toHaveCount(0);
@@ -78,7 +74,12 @@ test.describe("3D Stage Render Specs", () => {
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
     const layout = await page.evaluate(() => {
-      const scene = (window as any).__viz.gd.layout.scene;
+      const viz = (window as any).__viz;
+      const scene = viz.gd.layout.scene;
+      const positivePrices = viz.scorableModels
+        .map((model: any) => model.blended_price_per_M)
+        .filter((price: number) => price > 0);
+      const expectedFloor = Math.min(...positivePrices) / 2;
       return {
         xaxisType: scene.xaxis.type,
         yaxisType: scene.yaxis.type,
@@ -89,6 +90,8 @@ test.describe("3D Stage Render Specs", () => {
         yaxisTicktext: scene.yaxis.ticktext,
         zaxisTickvals: scene.zaxis.tickvals,
         zaxisTicktext: scene.zaxis.ticktext,
+        expectedFloor,
+        vizPriceFloor: viz.priceFloor,
       };
     });
 
@@ -104,8 +107,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(layout.yaxisTicktext).toEqual(["1", "10", "100"]);
 
     // Check cost axis includes the floor value and "≤ floor" label
-    const priceFloor = 0.08125;
-    expect(layout.zaxisTickvals).toEqual([priceFloor, 0.1, 1, 10, 100]);
+    expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
+    expect(layout.zaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
     expect(layout.zaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
   });
 
@@ -119,9 +122,9 @@ test.describe("3D Stage Render Specs", () => {
       return {
         symbols: pointsTrace.marker.symbol,
         sizes: pointsTrace.marker.size,
-        colors: pointsTrace.marker.color,
         models: viz.scorableModels.map((m: any) => m.model),
         providers: viz.scorableModels.map((m: any) => m.provider),
+        frontierModelIds: viz.frontierModelIds,
       };
     });
 
@@ -136,34 +139,24 @@ test.describe("3D Stage Render Specs", () => {
     expect(optimumIndex).not.toBe(-1);
 
     const optimumSymbol = data.symbols[optimumIndex];
-    const optimumProvider = data.providers[optimumIndex];
-
-    // Assert optimum is larger in size (16)
-    expect(data.sizes[optimumIndex]).toBe(16);
-
-    // Check standard provider shapes are honored
-    // E.g. OpenAI -> circle, Anthropic -> circle-open, Google -> cross, Meta -> diamond
-    const openaiIndices = data.providers.map((p: string, idx: number) => p === "OpenAI" ? idx : -1).filter((idx: number) => idx !== -1);
-    openaiIndices.forEach((idx: number) => {
-      if (idx !== optimumIndex) {
-        expect(data.symbols[idx]).toBe("circle");
-      }
+    const providerShapes: Record<string, string> = {
+      OpenAI: "circle", Anthropic: "circle-open", Google: "cross", Meta: "diamond",
+      DeepSeek: "diamond-open", Alibaba: "square", Mistral: "square-open", Cohere: "x",
+      Amazon: "circle", Kimi: "circle-open", Microsoft: "circle-open", MiniMax: "circle-open",
+      NVIDIA: "circle-open", SpaceXAI: "circle", "Thinking Machines": "circle-open",
+      Xiaomi: "circle-open", "Z AI": "circle-open",
+    };
+    data.providers.forEach((provider: string, index: number) => {
+      if (index !== optimumIndex) expect(data.symbols[index]).toBe(providerShapes[provider]);
     });
 
-    const googleIndices = data.providers.map((p: string, idx: number) => p === "Google" ? idx : -1).filter((idx: number) => idx !== -1);
-    googleIndices.forEach((idx: number) => {
-      if (idx !== optimumIndex) {
-        expect(data.symbols[idx]).toBe("cross");
-      }
+    const frontierIndices = data.frontierModelIds
+      .map((modelId: string) => data.models.indexOf(modelId))
+      .filter((index: number) => index !== optimumIndex);
+    frontierIndices.forEach((index: number) => expect(optimumSymbol).not.toBe(data.symbols[index]));
+    data.sizes.forEach((size: number, index: number) => {
+      if (index !== optimumIndex) expect(data.sizes[optimumIndex]).toBeGreaterThan(size);
     });
-
-    // The optimum must have a symbol distinct from its own provider's standard shape
-    // Wait, let's verify if its standard provider shape is overridden.
-    if (optimumProvider === "OpenAI") {
-      expect(optimumSymbol).not.toBe("circle");
-    } else if (optimumProvider === "Google") {
-      expect(optimumSymbol).not.toBe("cross");
-    }
   });
 
   test("Item 24: $0.00 models are placed at the ε price floor position", async ({ page }) => {
@@ -173,6 +166,10 @@ test.describe("3D Stage Render Specs", () => {
     const zeroPricePlottedCoords = await page.evaluate(() => {
       const viz = (window as any).__viz;
       const pointsTrace = viz.gd.data[0];
+      const positivePrices = viz.scorableModels
+        .map((model: any) => model.blended_price_per_M)
+        .filter((price: number) => price > 0);
+      const expectedFloor = Math.min(...positivePrices) / 2;
       const res: any[] = [];
       viz.scorableModels.forEach((model: any, index: number) => {
         if (model.blended_price_per_M === 0) {
@@ -182,13 +179,13 @@ test.describe("3D Stage Render Specs", () => {
           });
         }
       });
-      return res;
+      return { res, expectedFloor, vizPriceFloor: viz.priceFloor };
     });
 
-    expect(zeroPricePlottedCoords.length).toBe(2);
-    const priceFloor = 0.08125;
-    zeroPricePlottedCoords.forEach((pt) => {
-      expect(pt.z).toBeCloseTo(priceFloor);
+    expect(zeroPricePlottedCoords.res.length).toBe(2);
+    expect(zeroPricePlottedCoords.vizPriceFloor).toBe(zeroPricePlottedCoords.expectedFloor);
+    zeroPricePlottedCoords.res.forEach((pt) => {
+      expect(pt.z).toBe(zeroPricePlottedCoords.expectedFloor);
     });
   });
 

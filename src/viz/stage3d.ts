@@ -6,6 +6,15 @@ import { frontier, ridgeOrder } from "../lib/pareto";
 export class Stage3D {
   private readonly container: HTMLElement;
   public readonly gd: HTMLDivElement;
+  private readonly tokens: {
+    filament: string;
+    filamentDim: string;
+    slateCyan: string;
+    textWarm: string;
+    textMuted: string;
+    inkField: string;
+    fontMono: string;
+  };
   private camera: any;
   private isInitialized = false;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
@@ -13,6 +22,16 @@ export class Stage3D {
 
   constructor(container: HTMLElement) {
     this.container = container;
+    const styles = getComputedStyle(document.documentElement);
+    this.tokens = {
+      filament: styles.getPropertyValue("--filament").trim(),
+      filamentDim: styles.getPropertyValue("--filament-dim").trim(),
+      slateCyan: styles.getPropertyValue("--slate-cyan").trim(),
+      textWarm: styles.getPropertyValue("--text-warm").trim(),
+      textMuted: styles.getPropertyValue("--text-muted").trim(),
+      inkField: styles.getPropertyValue("--ink-field").trim(),
+      fontMono: styles.getPropertyValue("--font-mono").trim(),
+    };
     this.gd = document.createElement("div");
     this.gd.className = "stage-3d-canvas";
     this.gd.style.width = "100%";
@@ -26,6 +45,21 @@ export class Stage3D {
     };
 
     this.setupContextLostListener();
+  }
+
+  private colorWithAlpha(color: string, alpha: number): string {
+    const hex = color.match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+    if (hex) {
+      const normalized = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex;
+      const channels = [0, 2, 4].map((offset) => Number.parseInt(normalized.slice(offset, offset + 2), 16));
+      return `rgba(${channels.join(", ")}, ${alpha})`;
+    }
+    const rgb = color.match(/^rgba?\(([^)]+)\)$/i)?.[1];
+    if (rgb) {
+      const channels = rgb.split(",").slice(0, 3).map((channel) => channel.trim());
+      return `rgba(${channels.join(", ")}, ${alpha})`;
+    }
+    return color;
   }
 
   private setupContextLostListener() {
@@ -139,13 +173,13 @@ export class Stage3D {
       }
       symbols.push(symbol);
 
-      let color = "rgba(231, 226, 216, 1.0)"; // Pearl near-neutral base
+      let color = this.tokens.textWarm;
       if (isOpt) {
-        color = "rgba(232, 241, 228, 1.0)"; // Filament #E8F1E4
+        color = this.tokens.filament;
       } else if (isFront) {
-        color = "rgba(201, 212, 196, 1.0)"; // Filament-dim #C9D4C4
+        color = this.tokens.filamentDim;
       } else {
-        color = "rgba(61, 85, 96, 0.5)"; // Dominated: slate-cyan #3D5560 at 50% opacity
+        color = this.colorWithAlpha(this.tokens.slateCyan, 0.5);
       }
       colors.push(color);
 
@@ -175,7 +209,7 @@ export class Stage3D {
         size: sizes,
         symbol: symbols,
         line: {
-          color: "#070C0B",
+          color: this.tokens.inkField,
           width: 1,
         },
       },
@@ -197,7 +231,7 @@ export class Stage3D {
       y: ridgeY,
       z: ridgeZ,
       line: {
-        color: "#E8F1E4", // Filament color
+        color: this.tokens.filament,
         width: 4,
       },
       hoverinfo: "none",
@@ -210,30 +244,30 @@ export class Stage3D {
       showgrid: false,
       zeroline: false,
       showline: true,
-      linecolor: "rgba(231, 226, 216, 0.15)",
+      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.15),
       showbackground: false,
       showspikes: false,
       tickmode: "array",
       tickvals,
       ticktext,
       tickfont: {
-        family: '"IBM Plex Mono", monospace',
+        family: this.tokens.fontMono,
         size: 10,
-        color: "#89939E",
+        color: this.tokens.textMuted,
       },
       title: {
         text: titleText,
         font: {
-          family: '"IBM Plex Mono", monospace',
+          family: this.tokens.fontMono,
           size: 11,
-          color: "#E7E2D8",
+          color: this.tokens.textWarm,
         },
       },
     });
 
     const layout = {
-      paper_bgcolor: "#070C0B",
-      plot_bgcolor: "#070C0B",
+      paper_bgcolor: this.tokens.inkField,
+      plot_bgcolor: this.tokens.inkField,
       margin: { l: 0, r: 0, t: 0, b: 0 },
       showlegend: false,
       uirevision: "constant_camera",
@@ -265,8 +299,30 @@ export class Stage3D {
       Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
     }
 
-    // Export instrumented tests mapping to window.__viz
-    this.updateVizMapping(scorable);
+    if (import.meta.env.DEV || import.meta.env.MODE === "test") {
+      const modelIndexToPointNumber: Record<number, number> = {};
+      const pointNumberToModelIndex: Record<number, number> = {};
+      const pointNumberToModelId: Record<number, string> = {};
+      const modelIdToPointNumber: Record<string, number> = {};
+
+      scorable.forEach((model, index) => {
+        modelIndexToPointNumber[index] = index;
+        pointNumberToModelIndex[index] = index;
+        pointNumberToModelId[index] = model.model;
+        modelIdToPointNumber[model.model] = index;
+      });
+
+      (window as any).__viz = {
+        modelIndexToPointNumber,
+        pointNumberToModelIndex,
+        pointNumberToModelId,
+        modelIdToPointNumber,
+        scorableModels: scorable,
+        frontierModelIds: frontierModels.map((model) => model.model),
+        gd: this.gd,
+        priceFloor: this.priceFloor,
+      };
+    }
   }
 
   private setupPlotlyListeners() {
@@ -303,29 +359,5 @@ export class Stage3D {
         this.onCameraChange(this.camera);
       }
     });
-  }
-
-  private updateVizMapping(scorable: Model[]) {
-    const modelIndexToPointNumber: Record<number, number> = {};
-    const pointNumberToModelIndex: Record<number, number> = {};
-    const pointNumberToModelId: Record<number, string> = {};
-    const modelIdToPointNumber: Record<string, number> = {};
-
-    scorable.forEach((model, index) => {
-      modelIndexToPointNumber[index] = index;
-      pointNumberToModelIndex[index] = index;
-      pointNumberToModelId[index] = model.model;
-      modelIdToPointNumber[model.model] = index;
-    });
-
-    (window as any).__viz = {
-      modelIndexToPointNumber,
-      pointNumberToModelIndex,
-      pointNumberToModelId,
-      modelIdToPointNumber,
-      scorableModels: scorable,
-      gd: this.gd,
-      priceFloor: this.priceFloor,
-    };
   }
 }
