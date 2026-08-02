@@ -22,7 +22,7 @@ export class DecisionConsole {
   private readonly tooltip: HTMLElement;
   private cursor = { x: 0, y: 0 };
 
-  constructor(root: HTMLElement, store: AppStore, models: readonly Model[]) {
+  constructor(root: HTMLElement, store: AppStore, models: readonly Model[], onCinemaToggle: () => void) {
     this.root = root;
     this.store = store;
     this.models = models;
@@ -37,7 +37,7 @@ export class DecisionConsole {
 
     this.renderControls();
     this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]")!.addEventListener("click", () => {
-      this.store.update({ cinemaMode: !this.store.getState().cinemaMode });
+      onCinemaToggle();
     });
     this.renderIncompleteData();
     this.tooltip = document.createElement("aside");

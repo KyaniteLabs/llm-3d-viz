@@ -3,7 +3,7 @@ import { isScorable, type Model } from "../data/models";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
 import type { AppStore, AppState } from "../state";
-import { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
+import { scheduleSweep } from "./sweep-timing";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -30,6 +30,16 @@ interface MarkerState {
   sizes: number[];
 }
 
+interface SweepStates {
+  base: MarkerState;
+  target: MarkerState;
+  order: string[];
+  frontierIds: Set<string>;
+  optimum: string | undefined;
+  baseById: Map<string, { color: string; size: number }>;
+  targetById: Map<string, { color: string; size: number }>;
+}
+
 function alpha(color: string, opacity: number): string {
   const match = color.match(/^#([\da-f]{6})$/i);
   if (!match) return color;
@@ -46,7 +56,7 @@ export class SweepScheduler {
   private readonly projections: readonly Graph[];
   private readonly models: readonly Model[];
   private readonly store: AppStore;
-  private frame: number | null = null;
+  private cancelScheduled: (() => void) | null = null;
   private run = 0;
   private interacted = false;
   private previousWeights: ScoreWeights | null = null;
@@ -85,8 +95,8 @@ export class SweepScheduler {
   }
 
   private cancel() {
-    if (this.frame !== null) cancelAnimationFrame(this.frame);
-    this.frame = null;
+    this.cancelScheduled?.();
+    this.cancelScheduled = null;
     this.run += 1;
   }
 
@@ -99,13 +109,21 @@ export class SweepScheduler {
       const ids = graphIds(gd);
       const colors = ids.map((id) => target && id === optimum
         ? "#E8F1E4"
-        : frontierIds.has(id) ? "#C9D4C4" : alpha("#3D5560", 0.5));
-      const sizes = ids.map((id) => target && id === optimum ? 16 : frontierIds.has(id) ? 10 : 7);
+        : target && frontierIds.has(id) ? "#C9D4C4" : alpha("#3D5560", 0.5));
+      const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
       return { ids, colors, sizes };
     };
     const base = make(this.stage, false);
     const target = make(this.stage, true);
-    return { base, target, order: [...targetIds].filter((id) => target.ids.includes(id)) };
+    return {
+      base,
+      target,
+      order: [...targetIds].filter((id) => target.ids.includes(id)),
+      frontierIds,
+      optimum,
+      baseById: new Map(base.ids.map((id, index) => [id, { color: base.colors[index], size: base.sizes[index] }])),
+      targetById: new Map(target.ids.map((id, index) => [id, { color: target.colors[index], size: target.sizes[index] }])),
+    };
   }
 
   private write(gd: Graph, colors: string[], sizes: number[]) {
@@ -117,7 +135,7 @@ export class SweepScheduler {
     void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
   }
 
-  private writeAtProgress(states: ReturnType<SweepScheduler["markerStates"]>, progress: number) {
+  private writeAtProgress(states: SweepStates, progress: number) {
     const batch = Math.min(states.order.length, Math.floor(progress * Math.max(states.order.length, 1)));
     if (batch === this.lastBatch && progress < 1) return;
     this.lastBatch = batch;
@@ -125,17 +143,22 @@ export class SweepScheduler {
     states.order.forEach((id, index) => {
       if (progress >= (index + 1) / Math.max(states.order.length, 1)) lit.add(id);
     });
-    // Stage3D has already synchronously exposed the new optimum. Keep that
-    // truthful during the staged pass; the final batch still includes it as
-    // the payoff point in the score-ranked order.
-    const optimum = weightedOptimum(normalizedScores(this.models, this.store.getState().weights, this.models))?.model.model;
-    if (optimum) lit.add(optimum);
     const colors = states.base.colors.map((color, index) => lit.has(states.base.ids[index]) ? states.target.colors[index] : color);
     const sizes = states.base.sizes.map((size, index) => lit.has(states.base.ids[index]) ? states.target.sizes[index] : size);
     this.write(this.stage, colors, sizes);
     this.projections.forEach((gd) => {
       const ids = graphIds(gd);
-      this.write(gd, ids.map((id, index) => lit.has(id) ? states.target.colors[states.target.ids.indexOf(id)] ?? "#3D5560" : (frontier(this.models).some((model) => model.model === id) ? "#C9D4C4" : alpha("#3D5560", 0.5))), ids.map((id) => lit.has(id) && id === weightedOptimum(normalizedScores(this.models, this.store.getState().weights, this.models))?.model.model ? 16 : frontier(this.models).some((model) => model.model === id) ? 10 : 7));
+      this.write(
+        gd,
+        ids.map((id) => {
+          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : alpha("#3D5560", 0.5));
+        }),
+        ids.map((id) => {
+          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          return style?.size ?? (states.frontierIds.has(id) ? 10 : 7);
+        }),
+      );
     });
   }
 
@@ -148,15 +171,20 @@ export class SweepScheduler {
       this.writeAtProgress(states, 1);
       return;
     }
-    const started = performance.now();
-    const tick = (now: number) => {
-      if (currentRun !== this.run) return;
-      const progress = timingProgress(started, now);
+    // Establish the dim staging palette synchronously; the first animation
+    // frame must never expose the final Plotly.react palette first.
+    this.writeAtProgress(states, 0);
+    this.cancelScheduled = scheduleSweep((progress) => {
+      if (currentRun !== this.run) {
+        this.cancelScheduled?.();
+        this.cancelScheduled = null;
+        return;
+      }
       this.writeAtProgress(states, progress);
-      if (progress < 1) this.frame = requestAnimationFrame(tick);
-      else this.frame = null;
-    };
-    this.frame = requestAnimationFrame(tick);
+      if (progress >= 1) {
+        this.cancelScheduled = null;
+      }
+    });
   }
 
   private cancelAndSettle(state: Readonly<AppState>) {

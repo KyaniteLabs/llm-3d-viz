@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const consoleRoot = document.querySelector(".console") as HTMLElement;
   const store = createStore();
   const stage = new Stage3D(plotContainer);
-  const consoleUi = new DecisionConsole(consoleRoot, store, models);
 
   // Linked 2D projections couple to the stage bidirectionally by model ID (hover
   // fans out via Plotly.Fx.hover; see src/viz/projections.ts). Constructed after
@@ -45,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const projections =
     projectionContainers.length > 0 ? new Projections(projectionContainers, stage.gd) : null;
   const cinema = new CinemaMode(stage, store);
+  const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
 
   let plotlyPointClicked = false;
 

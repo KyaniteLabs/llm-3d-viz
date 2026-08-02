@@ -308,8 +308,7 @@ export class Projections {
         text,
         hoverinfo: "none",
         marker: {
-          color: colors,
-          size: sizes,
+          ...(this.initialized ? {} : { color: colors, size: sizes }),
           symbol: symbols,
           line: { color: this.tokens.inkField, width: 1 },
         },

@@ -174,6 +174,7 @@ test.describe("3D Stage Render Specs", () => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
     await page.locator("#weight-cost").fill("9");
+    await page.waitForTimeout(550);
 
     const result = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -214,12 +215,26 @@ test.describe("3D Stage Render Specs", () => {
       const stage = W.__viz.gd;
       const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
       const optimum = stage.data[0].text[optimumIndex];
+      const firstStage = stageCalls[0]?.update;
+      const finalStage = stageCalls.at(-1)?.update;
+      const startColors = firstStage?.["marker.color"]?.[0] as string[];
+      const startSizes = firstStage?.["marker.size"]?.[0] as number[];
+      const finalColors = finalStage?.["marker.color"]?.[0] as string[];
+      const finalSizes = finalStage?.["marker.size"]?.[0] as number[];
+      const frontierChanges = W.__viz.frontierModelIds.map((modelId: string) => {
+        const index = stage.data[0].text.indexOf(modelId);
+        return {
+          colorChanged: startColors[index] !== finalColors[index],
+          sizeChanged: startSizes[index] !== finalSizes[index],
+        };
+      });
       W.__viz.Plotly.restyle = W.__realRestyle;
       return {
         count: stageCalls.length,
         duration: stageCalls.length > 1 ? stageCalls.at(-1).at - stageCalls[0].at : 0,
         projectionCalls: log.filter((entry) => !entry.isStage).length,
         optimum,
+        frontierChanges,
       };
     });
     expect(result.count).toBeGreaterThan(1);
@@ -227,6 +242,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(result.duration).toBeGreaterThanOrEqual(300);
     expect(result.duration).toBeLessThanOrEqual(550);
     expect(result.optimum).toBe("Command A+");
+    expect(result.frontierChanges.length).toBeGreaterThan(0);
+    expect(result.frontierChanges.every(({ colorChanged, sizeChanged }) => colorChanged && sizeChanged)).toBe(true);
   });
 
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
