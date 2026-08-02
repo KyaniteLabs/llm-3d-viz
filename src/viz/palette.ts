@@ -11,6 +11,29 @@
 
 export type RGBChannels = [number, number, number];
 
+export type SemanticPointClass = "dominated" | "frontier" | "optimum";
+
+export interface SemanticPalette {
+  slateCyan: string;
+  filamentDim: string;
+  filament: string;
+}
+
+export const DEFAULT_SEMANTIC_PALETTE: SemanticPalette = {
+  slateCyan: "#3D5560",
+  filamentDim: "#C9D4C4",
+  filament: "#E8F1E4",
+};
+
+// Heat is deliberately clipped at both semantic boundaries. The frontier
+// starts above its dim floor so an unlit point has a visible transition, but
+// never reaches the fixed optimum filament. Dominated heat stays in slate and
+// is capped below the frontier floor by boundedSlateCeiling().
+const FRONTIER_HEAT_FLOOR = 0.12;
+const FRONTIER_HEAT_CEILING = 0.92;
+const DOMINATED_HEAT_FLOOR = 0.08;
+const DOMINATED_LUMINANCE_CEILING = 0.8;
+
 const HEX6 = /^#([\da-f]{6})$/i;
 const HEX3 = /^#([\da-f]{3})$/i;
 const RGB = /^rgba?\(([^)]+)\)$/i;
@@ -50,6 +73,30 @@ export function lighten(color: string, ratio: number): string {
   const channels = parseChannels(color);
   if (!channels) return color;
   return toHex(channels.map((c) => c + (255 - c) * ratio) as RGBChannels);
+}
+
+/** Mix two palette colours without introducing a categorical provider hue. */
+export function mixColors(from: string, to: string, ratio: number): string {
+  const fromChannels = parseChannels(from);
+  const toChannels = parseChannels(to);
+  if (!fromChannels || !toChannels) return to;
+  const amount = Math.max(0, Math.min(1, ratio));
+  return toHex(fromChannels.map((channel, index) => channel + (toChannels[index] - channel) * amount) as RGBChannels);
+}
+
+/**
+ * Frontier-only value-score encoding. The ramp begins above filament-dim and
+ * stops short of filament so the optimum retains exclusive maximum luminance.
+ */
+export function scoreLuminanceFill(
+  score: number,
+  filamentDim = "#C9D4C4",
+  filament = "#E8F1E4",
+): string {
+  const amount =
+    FRONTIER_HEAT_FLOOR +
+    Math.max(0, Math.min(1, score)) * (FRONTIER_HEAT_CEILING - FRONTIER_HEAT_FLOOR);
+  return mixColors(filamentDim, filament, amount);
 }
 
 function channelLinear(c8bit: number): number {
@@ -99,4 +146,71 @@ export function resolveSlateCyan(): string {
  */
 export function dominatedFill(slateCyan: string = resolveSlateCyan()): string {
   return lighten(slateCyan, 0.22);
+}
+
+/**
+ * Find the brightest slate-family colour that remains below the frontier
+ * floor. Keeping this boundary derived from the actual tokens makes the
+ * exclusivity invariant survive token changes instead of relying on a lucky
+ * hard-coded RGB value.
+ */
+function boundedSlateCeiling(slateCyan: string, filamentDim: string): string {
+  const floor = dominatedFill(slateCyan);
+  const floorLuminance = relativeLuminance(floor);
+  const frontierLuminance = relativeLuminance(filamentDim);
+  if (!(frontierLuminance > floorLuminance)) return floor;
+
+  const target = frontierLuminance * DOMINATED_LUMINANCE_CEILING;
+  let low = 0.22;
+  let high = 1;
+  for (let iteration = 0; iteration < 14; iteration += 1) {
+    const midpoint = (low + high) / 2;
+    if (relativeLuminance(lighten(slateCyan, midpoint)) < target) low = midpoint;
+    else high = midpoint;
+  }
+  return lighten(slateCyan, low);
+}
+
+/** Dominated-only heat ramp: score changes brightness inside the slate class. */
+export function dominatedScoreLuminanceFill(
+  score: number,
+  slateCyan = SLATE_CYAN_FALLBACK,
+  filamentDim = "#C9D4C4",
+): string {
+  const floor = dominatedFill(slateCyan);
+  const ceiling = boundedSlateCeiling(slateCyan, filamentDim);
+  const amount = DOMINATED_HEAT_FLOOR + Math.max(0, Math.min(1, score)) * (1 - DOMINATED_HEAT_FLOOR);
+  return mixColors(floor, ceiling, amount);
+}
+
+/** Unlit appearance for each semantic class during threshold-sweep staging. */
+export function semanticFloorFill(
+  semanticClass: SemanticPointClass,
+  palette: SemanticPalette = DEFAULT_SEMANTIC_PALETTE,
+): string {
+  return semanticClass === "dominated" ? dominatedFill(palette.slateCyan) : palette.filamentDim;
+}
+
+/** Heat-scaled appearance for each semantic class at the settled weight set. */
+export function semanticHeatFill(
+  semanticClass: SemanticPointClass,
+  score: number,
+  palette: SemanticPalette = DEFAULT_SEMANTIC_PALETTE,
+): string {
+  if (semanticClass === "optimum") return palette.filament;
+  if (semanticClass === "frontier") {
+    return scoreLuminanceFill(score, palette.filamentDim, palette.filament);
+  }
+  return dominatedScoreLuminanceFill(score, palette.slateCyan, palette.filamentDim);
+}
+
+/** Shared point-color policy for the stage, projections, and sweep target. */
+export function semanticPointFill(
+  semanticClass: SemanticPointClass,
+  score: number,
+  heatEncoding: boolean,
+  palette: SemanticPalette = DEFAULT_SEMANTIC_PALETTE,
+): string {
+  if (heatEncoding) return semanticHeatFill(semanticClass, score, palette);
+  return semanticClass === "optimum" ? palette.filament : semanticFloorFill(semanticClass, palette);
 }

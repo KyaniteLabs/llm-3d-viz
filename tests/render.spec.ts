@@ -419,12 +419,142 @@ test.describe("3D Stage Render Specs", () => {
     const firstOptimumLit = per.findIndex((c) => c.optimumSize === 16);
     expect(firstFullLit).toBeGreaterThanOrEqual(0);
     expect(firstOptimumLit).toBe(firstFullLit);
-    // Every frontier point transitioned from its dim base to its lit target.
+    // Every frontier point transitioned from its dim class floor to its
+    // score-lit target. This is the visible FIX-A staging standard: heat must
+    // change color as well as size.
     expect(result.frontierChanges).toHaveLength(result.frontierCount);
-    expect(result.frontierChanges.every(({ colorChanged, sizeChanged }) => colorChanged && sizeChanged)).toBe(true);
+    expect(result.frontierChanges.every(({ colorChanged }) => colorChanged)).toBe(true);
+    expect(result.frontierChanges.every(({ sizeChanged }) => sizeChanged)).toBe(true);
     // Generous settle smoke check only (no tight [300,550] wall-clock bound): a
     // pathologically hung sweep fails at the settle wait above, not here.
     expect(result.duration).toBeLessThan(5000);
+  });
+
+  test("FIX-B #27 P1b: initial sweep uses ridge order, then slider sweep ends on the optimum", async ({ page }) => {
+    // Install the restyle tap before the app creates Plotly so the initial
+    // pre-interaction sweep is observable, not just the later slider sweep.
+    await page.addInitScript(() => {
+      const restyles: any[] = [];
+      let viz: any;
+      (window as any).__initialSweepRestyles = restyles;
+      Object.defineProperty(window, "__viz", {
+        configurable: true,
+        get: () => viz,
+        set: (next: any) => {
+          viz = next;
+          const plotly = next?.Plotly;
+          if (!plotly || plotly.__initialSweepRestyleWrapped) return;
+          const realRestyle = plotly.restyle;
+          plotly.restyle = function (gd: any, update: any, traces: any) {
+            restyles.push({
+              gd,
+              colors: Array.isArray(update?.["marker.color"]?.[0])
+                ? update["marker.color"][0].slice()
+                : null,
+              sizes: Array.isArray(update?.["marker.size"]?.[0])
+                ? update["marker.size"][0].slice()
+                : null,
+            });
+            return realRestyle.call(this, gd, update, traces);
+          };
+          plotly.__initialSweepRestyleWrapped = true;
+        },
+      });
+    });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.waitForFunction(() => {
+      const viz = (window as any).__viz;
+      const ids = viz?.gd?.data?.[0]?.text as string[] | undefined;
+      const frontierIds = viz?.frontierModelIds as string[] | undefined;
+      const stageRestyles = ((window as any).__initialSweepRestyles as any[] | undefined)
+        ?.filter((entry) => entry.gd === viz?.gd && Array.isArray(entry.sizes)) ?? [];
+      if (!ids || !frontierIds || stageRestyles.length === 0) return false;
+      const sawDimStaging = stageRestyles.some((entry) => entry.sizes.every((size: number) => size === 7));
+      const sawFullFrontier = stageRestyles.some((entry) => frontierIds.every((id) => {
+        const index = ids.indexOf(id);
+        return index >= 0 && entry.sizes[index] > 7;
+      }));
+      return sawDimStaging && sawFullFrontier;
+    });
+
+    const initial = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const ids = viz.gd.data[0].text as string[];
+      const stageRestyles = ((window as any).__initialSweepRestyles as any[])
+        .filter((entry) => entry.gd === viz.gd && Array.isArray(entry.sizes));
+
+      // Match ridgeOrder's contract: cost asc, intelligence asc, speed desc,
+      // with duplicate published triples represented by one rendered vertex.
+      const byId = new Map(viz.scorableModels.map((model: any) => [model.model, model]));
+      const frontierModels = (viz.frontierModelIds as string[]).map((id) => byId.get(id));
+      const published = (model: any) => [
+        Math.round(model.tps * 10) / 10,
+        Math.round(model.blended_price_per_M * 100) / 100,
+        Math.round(model.aa_intelligence_index * 10) / 10,
+      ];
+      const expectedRidge: string[] = [];
+      const seenTriples = new Set<string>();
+      frontierModels
+        .filter(Boolean)
+        .sort((left: any, right: any) => {
+          const [leftSpeed, leftCost, leftIntelligence] = published(left);
+          const [rightSpeed, rightCost, rightIntelligence] = published(right);
+          return leftCost - rightCost
+            || leftIntelligence - rightIntelligence
+            || rightSpeed - leftSpeed
+            || left.provider.localeCompare(right.provider)
+            || left.model.localeCompare(right.model);
+        })
+        .forEach((model: any) => {
+          const triple = published(model).join("|");
+          if (!seenTriples.has(triple)) {
+            seenTriples.add(triple);
+            expectedRidge.push(model.model);
+          }
+        });
+
+      const sizes = viz.gd.data[0].marker.size as number[];
+      const symbols = viz.gd.data[0].marker.symbol as string[];
+      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const frontierIndices = (viz.frontierModelIds as string[])
+        .map((id) => ids.indexOf(id))
+        .filter((index) => index !== optimumIndex);
+      return {
+        litSets: stageRestyles.map((entry) => ids.filter((_, index) => entry.sizes[index] > 7)),
+        expectedRidge,
+        optimumSize: sizes[optimumIndex],
+        optimumSymbol: symbols[optimumIndex],
+        otherSizes: sizes.filter((_, index) => index !== optimumIndex),
+        otherFrontierSymbols: frontierIndices.map((index) => symbols[index]),
+      };
+    });
+
+    // A frame may cross more than one stage, so assert the rendered state is
+    // always a prefix of ridge order; the final frame must contain the full
+    // ridge. This observes the actual marker batches without fabricating
+    // within-frame timing that Plotly does not render.
+    expect(initial.litSets.every((litIds: string[]) => {
+      const expectedPrefix = initial.expectedRidge.slice(0, litIds.length);
+      return expectedPrefix.length === litIds.length
+        && expectedPrefix.every((id: string) => litIds.includes(id));
+    })).toBe(true);
+    expect(new Set(initial.litSets.at(-1))).toEqual(new Set(initial.expectedRidge));
+    expect(initial.optimumSize).toBe(16);
+    expect(initial.otherSizes.every((size: number) => size < initial.optimumSize)).toBe(true);
+    expect(initial.otherFrontierSymbols.every((symbol: string) => symbol !== initial.optimumSymbol)).toBe(true);
+
+    await page.locator("#weight-cost").fill("9");
+    await waitForSweepSettled(page);
+    const postSlider = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const sizes = viz.gd.data[0].marker.size as number[];
+      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const scores = Object.entries(viz.scoreByModel as Record<string, number>);
+      const expectedOptimum = scores.sort((left, right) => right[1] - left[1])[0][0];
+      return { settledModel: viz.gd.data[0].text[optimumIndex], expectedOptimum };
+    });
+    expect(postSlider.settledModel).toBe(postSlider.expectedOptimum);
   });
 
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
@@ -539,12 +669,9 @@ test.describe("3D Stage Render Specs", () => {
     for (const points of [after.stage, ...after.projections]) {
       expect(points.colors).not.toContain("#636efa");
       expect(points.colors).toContain("#E8F1E4");
-      expect(points.colors).toContain("#C9D4C4");
-      // Dominated points carry the lightened slate-cyan fill (src/viz/palette.ts
-      // dominatedFill): same hue as --slate-cyan, luminance raised to ~4:1 vs
-      // ink-field so the ~20 off-frontier models stay plainly visible yet
-      // clearly below the filament frontier.
-      expect(points.colors.some((color: string) => color.toLowerCase() === "#687a83")).toBe(true);
+      // Default heat encoding gives scorable points a value-score luminance
+      // ramp; cinema must preserve that varied appearance across re-renders.
+      expect(new Set(points.colors).size).toBeGreaterThan(4);
       expect(points.sizes).toContain(16);
       expect(points.sizes).toContain(10);
     }
@@ -795,6 +922,204 @@ test.describe("3D Stage Render Specs", () => {
     await expect(prompt).toBeVisible();
     await expect(prompt.locator("text=WEBGL CONTEXT LOST")).toBeVisible();
     await expect(prompt.locator("button#webgl-reload-btn")).toBeVisible();
+  });
+
+  test("FIX-B: legend, provider shape groups, and frontier model names are visible without hover", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    for (const entry of ["frontier-ridge", "optimum-marker", "frontier-point", "dominated-point"]) {
+      await expect(page.locator(`[data-legend-entry="${entry}"]`)).toHaveCount(1);
+    }
+
+    const labels = await page.locator("[data-frontier-model]").evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute("data-frontier-model")),
+    );
+    const expected = await page.evaluate(() => (window as any).__viz.frontierModelIds as string[]);
+    expect(new Set(labels)).toEqual(new Set(expected));
+
+    const providerNames = await page.evaluate(() => Object.keys((window as any).__viz.providerShapes));
+    await page.locator(".provider-disclosure > summary").click();
+    const providerKeyText = await page.locator(".provider-shape-list").innerText();
+    providerNames.forEach((provider: string) => expect(providerKeyText).toContain(provider));
+    expect(await page.locator("[data-provider-shape]").count()).toBeGreaterThanOrEqual(4);
+    await expect(page.locator("#frontier-label-note")).toContainText("no 3D-to-pixel label API");
+  });
+
+  test("FIX-B: stage, console, and all projections fit the 1366×768 first viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz?.projections);
+
+    const boxes = await page.locator(".projection").evaluateAll((nodes) => nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, height: rect.height };
+    }));
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.height > 0 && box.top >= 0 && box.bottom <= 768)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)).toBe(true);
+  });
+
+  test("FIX-B: cinema reclaims the console column", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const before = await page.locator(".stage").boundingBox();
+    expect(before).toBeTruthy();
+    await page.locator("[data-cinema-toggle]").click();
+    await expect(page.locator(".console")).toBeHidden();
+    const after = await page.locator(".stage").boundingBox();
+    expect(after).toBeTruthy();
+    expect(after!.width).toBeGreaterThan(before!.width + 100);
+  });
+
+  test("FIX-B: slider outputs are integer weight shares and coding presets move raw sliders", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const readShares = () => page.locator("[data-weight-output]").evaluateAll((nodes) =>
+      nodes.map((node) => Number.parseInt(node.textContent ?? "", 10)),
+    );
+    expect(await readShares()).toEqual([34, 33, 33]);
+    expect((await readShares()).reduce((sum, share) => sum + share, 0)).toBe(100);
+
+    await page.locator('[data-preset="coding"]').click();
+    const coding = await page.evaluate(() => ({
+      raw: ["speed", "cost", "intelligence"].map((key) => (document.querySelector(`#weight-${key}`) as HTMLInputElement).value),
+      shares: [...document.querySelectorAll("[data-weight-output]")].map((node) => node.textContent),
+    }));
+    expect(coding.raw).toEqual(["0.25", "0.15", "0.6"]);
+    expect(coding.shares).toEqual(["25%", "15%", "60%"]);
+  });
+
+  test("FIX-B: heat encoding is on by default and preserves the optimum marker", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const heat = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const colors = viz.gd.data[0].marker.color as string[];
+      const optimumIndex = viz.gd.data[0].marker.size.findIndex((size: number) => size === 16);
+      return {
+        enabled: viz.heatEncoding,
+        uniqueColors: [...new Set(colors)].length,
+        optimumColor: colors[optimumIndex],
+        scoreValues: Object.values(viz.scoreByModel),
+      };
+    });
+    expect(heat.enabled).toBe(true);
+    expect(heat.uniqueColors).toBeGreaterThan(4);
+    expect(heat.optimumColor).toBe("#E8F1E4");
+    expect(new Set(heat.scoreValues).size).toBeGreaterThan(4);
+  });
+
+  test("FIX-B #27 P1a: heat keeps dominated < frontier < optimum across weight sets", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const readOrdering = () => page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const luminance = (color: string) => {
+        const channels = color.match(/^#([\da-f]{6})$/i)![1]
+          .match(/../g)!
+          .map((channel: string) => Number.parseInt(channel, 16) / 255)
+          .map((channel: number) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const models = viz.gd.data[0].text as string[];
+      const colors = viz.gd.data[0].marker.color as string[];
+      const frontierIds = new Set(viz.frontierModelIds as string[]);
+      const optimumIndex = (viz.gd.data[0].marker.size as number[]).findIndex((size) => size === 16);
+      const frontierLuminance = frontierIds
+        ? [...frontierIds]
+            .map((id) => models.indexOf(id))
+            .filter((index) => index !== optimumIndex)
+            .map((index) => luminance(colors[index]))
+        : [];
+      const dominatedLuminance = models
+        .map((model, index) => frontierIds.has(model) ? null : luminance(colors[index]))
+        .filter((value): value is number => value !== null);
+      const scores = viz.scoreByModel as Record<string, number>;
+      const dominatedOutscoresFrontier = models
+        .filter((model) => !frontierIds.has(model))
+        .some((dominated) => [...frontierIds]
+          .filter((model) => model !== models[optimumIndex])
+          .some((frontierModel) => scores[dominated] > scores[frontierModel]));
+      return {
+        dominatedMax: Math.max(...dominatedLuminance),
+        frontierMin: Math.min(...frontierLuminance),
+        frontierMax: Math.max(...frontierLuminance),
+        optimum: luminance(colors[optimumIndex]),
+        dominatedOutscoresFrontier,
+      };
+    });
+
+    const results = [];
+    for (const preset of ["coding", "RAG", "long-context"]) {
+      await page.locator(`[data-preset="${preset}"]`).click();
+      await waitForSweepSettled(page);
+      results.push(await readOrdering());
+    }
+
+    expect(results).toHaveLength(3);
+    for (const result of results) {
+      expect(result.dominatedMax).toBeLessThan(result.frontierMin);
+      expect(result.frontierMax).toBeLessThan(result.optimum);
+    }
+    expect(results.some((result) => result.dominatedOutscoresFrontier)).toBe(true);
+  });
+
+  test("FIX-B #27 P1a: settled dominated points keep score-scaled slate luminance", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.locator("#weight-cost").fill("9");
+    await waitForSweepSettled(page);
+
+    const result = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      const luminance = (color: string) => {
+        const channels = color.match(/^#([\da-f]{6})$/i)![1]
+          .match(/../g)!
+          .map((channel: string) => Number.parseInt(channel, 16) / 255)
+          .map((channel: number) => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const models = viz.gd.data[0].text as string[];
+      const colors = viz.gd.data[0].marker.color as string[];
+      const frontierIds = new Set(viz.frontierModelIds as string[]);
+      const scores = viz.scoreByModel as Record<string, number>;
+      const dominated = models
+        .map((model, index) => ({ model, score: scores[model], luminance: luminance(colors[index]) }))
+        .filter(({ model }) => !frontierIds.has(model));
+      return {
+        dominated,
+        frontierDimLuminance: luminance("#C9D4C4"),
+      };
+    });
+
+    expect(result.dominated.length).toBeGreaterThanOrEqual(2);
+    expect(Math.max(...result.dominated.map(({ luminance }) => luminance))).toBeLessThan(
+      result.frontierDimLuminance,
+    );
+    expect(result.dominated.some((left, leftIndex) =>
+      result.dominated.slice(leftIndex + 1).some((right) =>
+        left.score !== right.score && left.luminance !== right.luminance,
+      ),
+    )).toBe(true);
+  });
+
+  test("FIX-B: ?heat=0 opts out of score luminance encoding", async ({ page }) => {
+    await page.goto("/?heat=0");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const heat = await page.evaluate(() => {
+      const viz = (window as any).__viz;
+      return {
+        enabled: viz.heatEncoding,
+        legendNote: document.querySelector("[data-heat-encoding]")?.textContent ?? null,
+      };
+    });
+    expect(heat.enabled).toBe(false);
+    expect(heat.legendNote).toBeNull();
   });
 });
 

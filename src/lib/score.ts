@@ -100,18 +100,20 @@ export function normalizedScores(
   });
 }
 
+/** Positive when a is preferred over b by the weighted-score contract. */
+export function compareWeightedScores(a: NormalizedScore, b: NormalizedScore): number {
+  return (
+    a.score - b.score ||
+    a.normalized.intelligence - b.normalized.intelligence ||
+    a.normalized.cost - b.normalized.cost ||
+    -a.model.provider.localeCompare(b.model.provider) ||
+    -a.model.model.localeCompare(b.model.model)
+  );
+}
+
 /** Deterministic arg-max with the contract's intelligence, cost, provider tie-breaks. */
 export function weightedOptimum(scores: readonly NormalizedScore[]): NormalizedScore | undefined {
   return scores.reduce<NormalizedScore | undefined>((best, candidate) => {
-    if (!best || candidate.score > best.score) return candidate;
-    if (candidate.score < best.score) return best;
-    return (
-      candidate.normalized.intelligence - best.normalized.intelligence ||
-      candidate.normalized.cost - best.normalized.cost ||
-      -candidate.model.provider.localeCompare(best.model.provider) ||
-      -candidate.model.model.localeCompare(best.model.model)
-    ) > 0
-      ? candidate
-      : best;
+    return !best || compareWeightedScores(candidate, best) > 0 ? candidate : best;
   }, undefined);
 }

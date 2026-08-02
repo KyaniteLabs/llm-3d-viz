@@ -6,6 +6,7 @@ import { createStore, type AppState } from "./state";
 import { DecisionConsole } from "./ui/console";
 import { SweepScheduler } from "./viz/sweep";
 import { CinemaMode } from "./viz/cinema";
+import { StageGuide } from "./ui/stage-guide";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -17,10 +18,14 @@ function modelIdFromPlotlyPoint(point: any): string | null {
 
 // Keep the scaffold's typed dataset in the entry graph. The chart layer consumes it in T2+.
 document.documentElement.dataset.modelCount = String(models.length);
+// The score-luminance encoding is the shipped default. Keep a reversible URL
+// opt-out for A/B comparison and capture work: `?heat=0`.
+const heatEncoding = new URLSearchParams(window.location.search).get("heat") !== "0";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;
-  const placeholder = stagePanel?.querySelector(".stage-placeholder");
+  const stageVisual = stagePanel?.querySelector(".stage-visual") as HTMLElement | null;
+  const placeholder = stageVisual?.querySelector(".stage-placeholder");
   if (placeholder) {
     placeholder.remove();
   }
@@ -30,10 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
   plotContainer.style.flex = "1";
   plotContainer.style.minHeight = "300px";
   plotContainer.style.width = "100%";
-  stagePanel?.appendChild(plotContainer);
+  stageVisual?.appendChild(plotContainer);
   const consoleRoot = document.querySelector(".console") as HTMLElement;
   const store = createStore();
-  const stage = new Stage3D(plotContainer);
+  const stage = new Stage3D(plotContainer, heatEncoding);
+  new StageGuide(stagePanel?.querySelector(".stage-guide") as HTMLElement, store, models, heatEncoding);
 
   // Linked 2D projections couple to the stage bidirectionally by model ID (hover
   // fans out via Plotly.Fx.hover; see src/viz/projections.ts). Constructed after
@@ -42,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".projection-row .projection"),
   ) as HTMLElement[];
   const projections =
-    projectionContainers.length > 0 ? new Projections(projectionContainers, stage.gd) : null;
+    projectionContainers.length > 0 ? new Projections(projectionContainers, stage.gd, heatEncoding) : null;
   const cinema = new CinemaMode(stage, store);
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
 
@@ -81,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (weights) renderVisuals(weights);
     });
   });
-  new SweepScheduler(stage.gd, projections?.gds ?? [], store, models);
+  new SweepScheduler(stage.gd, projections?.gds ?? [], store, models, heatEncoding);
 
   document.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() !== "c" || event.metaKey || event.ctrlKey || event.altKey) return;

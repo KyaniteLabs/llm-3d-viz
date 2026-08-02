@@ -1,10 +1,19 @@
 import * as Plotly from "plotly.js-dist-min";
 import { isScorable, type Model } from "../data/models";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { normalizedScores, weightedOptimum, type ScoreWeights } from "../lib/score";
+import {
+  compareWeightedScores,
+  normalizedScores,
+  weightedOptimum,
+  type ScoreWeights,
+} from "../lib/score";
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
-import { dominatedFill } from "./palette";
+import {
+  semanticFloorFill,
+  semanticPointFill,
+  type SemanticPointClass,
+} from "./palette";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -14,12 +23,14 @@ export function motionPreference(): MediaQueryList | null {
 
 export function ignitionOrder(models: readonly Model[], weights: ScoreWeights, interacted: boolean): string[] {
   const frontierModels = frontier(models);
+  // docs/research/frontier-math.md §2.4: the pre-interaction sweep is ridge
+  // order by contract; only an interacted weight change switches to score rank.
   if (!interacted) return ridgeOrder(frontierModels).map(({ model }) => model.model);
   const scores = normalizedScores(models, weights, models);
-  const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
+  const scoreById = new Map(scores.map((entry) => [entry.model.model, entry]));
   return frontierModels
     .slice()
-    .sort((a, b) => (scoreById.get(a.model)! - scoreById.get(b.model)!) || a.model.localeCompare(b.model))
+    .sort((a, b) => compareWeightedScores(scoreById.get(a.model)!, scoreById.get(b.model)!))
     .map((model) => model.model);
 }
 
@@ -62,13 +73,15 @@ export class SweepScheduler {
   private lastBatch = -1;
   private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
+  private readonly heatEncoding: boolean;
   private removeMotionListener: (() => void) | null = null;
 
-  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[]) {
+  constructor(stage: Graph, projections: readonly Graph[], store: AppStore, models: readonly Model[], heatEncoding = true) {
     this.stage = stage;
     this.projections = projections;
     this.store = store;
     this.models = models;
+    this.heatEncoding = heatEncoding;
     const media = motionPreference();
     if (media) {
       const onChange = (event: MediaQueryListEvent) => {
@@ -110,13 +123,19 @@ export class SweepScheduler {
   private markerStates(weights: ScoreWeights): SweepStates {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
+    const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimum = weightedOptimum(scores)?.model.model;
     const targetIds = new Set(ignitionOrder(this.models, weights, this.interacted));
+    const semanticClassFor = (id: string): SemanticPointClass =>
+      id === optimum ? "optimum" : frontierIds.has(id) ? "frontier" : "dominated";
     const make = (gd: Graph, target: boolean): MarkerState => {
       const ids = graphIds(gd);
-      const colors = ids.map((id) => target && id === optimum
-        ? "#E8F1E4"
-        : target && frontierIds.has(id) ? "#C9D4C4" : dominatedFill());
+      const colors = ids.map((id) => {
+        const semanticClass = semanticClassFor(id);
+        return target
+          ? semanticPointFill(semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
+          : semanticFloorFill(semanticClass);
+      });
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
       return { ids, colors, sizes };
     };
@@ -171,22 +190,32 @@ export class SweepScheduler {
     const batch = Math.min(states.order.length, Math.floor(progress * Math.max(states.order.length, 1)));
     if (batch === this.lastBatch && progress < 1) return;
     this.lastBatch = batch;
+    // Dominated points stay at the slate floor while the frontier ignites, but
+    // the settled batch must commit every target so their score heat survives
+    // the sweep instead of remaining permanently at the staging floor.
+    const settled = progress >= 1;
     const lit = new Set<string>();
     states.order.forEach((id, index) => {
       if (progress >= (index + 1) / Math.max(states.order.length, 1)) lit.add(id);
     });
-    const colors = states.base.colors.map((color, index) => lit.has(states.base.ids[index]) ? states.target.colors[index] : color);
-    const sizes = states.base.sizes.map((size, index) => lit.has(states.base.ids[index]) ? states.target.sizes[index] : size);
+    const colors = states.base.colors.map((color, index) =>
+      settled || lit.has(states.base.ids[index]) ? states.target.colors[index] : color,
+    );
+    const sizes = states.base.sizes.map((size, index) =>
+      settled || lit.has(states.base.ids[index]) ? states.target.sizes[index] : size,
+    );
     const projectionAppearance: Array<{ colors: string[]; sizes: number[] }> = [];
     this.projections.forEach((gd, projectionIndex) => {
       const ids = graphIds(gd);
       projectionAppearance[projectionIndex] = {
         colors: ids.map((id) => {
-          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
-          return style?.color ?? (states.frontierIds.has(id) && states.optimum === id ? "#E8F1E4" : dominatedFill());
+          const style = settled || lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          return style?.color ?? semanticFloorFill(
+            states.optimum === id ? "optimum" : states.frontierIds.has(id) ? "frontier" : "dominated",
+          );
         }),
         sizes: ids.map((id) => {
-          const style = lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
+          const style = settled || lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
           return style?.size ?? (states.frontierIds.has(id) ? 10 : 7);
         }),
       };

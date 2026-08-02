@@ -2,7 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
-import { dominatedFill } from "./palette";
+import { semanticPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -86,6 +86,7 @@ export class Projections {
   public readonly gds: PlotlyGraphDiv[] = [];
   private readonly specs: ProjectionSpec[];
   private initialized = false;
+  private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
   /** Incremented every render so Plotly.react never silently skips a data diff. */
   private datarevision = 0;
@@ -93,9 +94,10 @@ export class Projections {
   private isProgrammatic = false;
   private coupled = false;
 
-  constructor(containers: HTMLElement[], stageGd: HTMLDivElement) {
+  constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
     this.containers = containers;
     this.stageGd = stageGd;
+    this.heatEncoding = heatEncoding;
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
       styles.getPropertyValue(name).trim() || fallback;
@@ -182,6 +184,7 @@ export class Projections {
     isOptimum: boolean,
     isFrontier: boolean,
     otherFrontierSymbols: Set<Plotly3dSymbol>,
+    score: number,
   ): { color: string; size: number; symbol: Plotly3dSymbol } {
     const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
     const symbolCandidates: Plotly3dSymbol[] = [
@@ -202,9 +205,16 @@ export class Projections {
         ) ?? (baseSymbol === "diamond" ? "circle" : "diamond");
     }
 
-    let color = dominatedFill(this.tokens.slateCyan);
-    if (isOptimum) color = this.tokens.filament;
-    else if (isFrontier) color = this.tokens.filamentDim;
+    const semanticClass: SemanticPointClass = isOptimum
+      ? "optimum"
+      : isFrontier
+        ? "frontier"
+        : "dominated";
+    const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+      slateCyan: this.tokens.slateCyan,
+      filamentDim: this.tokens.filamentDim,
+      filament: this.tokens.filament,
+    });
 
     let size = 7;
     if (isOptimum) size = 16;
@@ -276,6 +286,7 @@ export class Projections {
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
+    const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimumModel = weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((model) => model.model));
     this.priceFloor = this.computePriceFloor(scorable);
@@ -301,6 +312,7 @@ export class Projections {
           Boolean(optimumModel && model.model === optimumModel.model),
           frontierIds.has(model.model),
           otherFrontierSymbols,
+          scoreById.get(model.model) ?? 0,
         );
         colors.push(style.color);
         sizes.push(style.size);
@@ -356,6 +368,7 @@ export class Projections {
       viz.projections = {
         gds: this.gds,
         stageGd: this.stageGd,
+        heatEncoding: this.heatEncoding,
         render: (w: ScoreWeights, m: Model[]) => this.render(w, m),
       };
       (window as any).__viz = viz;

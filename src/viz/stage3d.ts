@@ -2,7 +2,7 @@ import * as Plotly from "plotly.js-dist-min";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { dominatedFill } from "./palette";
+import { semanticPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -29,9 +29,10 @@ export class Stage3D {
   };
   private camera: any;
   private isInitialized = false;
+  private readonly heatEncoding: boolean;
   private priceFloor = 0.08125; // default fallback, will be computed dynamically
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, heatEncoding = true) {
     this.container = container;
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
@@ -52,10 +53,13 @@ export class Stage3D {
     this.container.appendChild(this.gd);
 
     this.camera = {
-      eye: { x: 1.5, y: 1.5, z: 1.5 },
+      // A tighter hero framing keeps the model cluster legible on first load;
+      // user camera state still remains the single writer after Plotly init.
+      eye: { x: 1.05, y: 1.05, z: 0.9 },
       up: { x: 0, y: 0, z: 1 },
       center: { x: 0, y: 0, z: 0 },
     };
+    this.heatEncoding = heatEncoding;
 
     this.setupContextLostListener();
   }
@@ -166,8 +170,13 @@ export class Stage3D {
     ];
 
     scorable.forEach((model) => {
-      const isOpt = optimumModel && model.model === optimumModel.model;
-      const isFront = frontierModels.some((fm) => fm.model === model.model);
+      const isOptimum = Boolean(optimumModel && model.model === optimumModel.model);
+      const isFrontier = frontierModels.some((fm) => fm.model === model.model);
+      const semanticClass: SemanticPointClass = isOptimum
+        ? "optimum"
+        : isFrontier
+          ? "frontier"
+          : "dominated";
 
       x.push(model.tps!);
       y.push(model.aa_intelligence_index!);
@@ -178,7 +187,7 @@ export class Stage3D {
 
       const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
       let symbol: Plotly3dSymbol = baseSymbol;
-      if (isOpt) {
+      if (isOptimum) {
         // The optimum needs a non-colour channel that is distinct from every
         // other frontier point, not just from its own provider's base glyph.
         symbol =
@@ -187,24 +196,18 @@ export class Stage3D {
       }
       symbols.push(symbol);
 
-      let color = this.tokens.textWarm;
-      if (isOpt) {
-        color = this.tokens.filament;
-      } else if (isFront) {
-        color = this.tokens.filamentDim;
-      } else {
-        // Dominated fill is lightened slate-cyan (see src/viz/palette.ts):
-        // stays in the subtraction language but raises the luminance floor so
-        // the ~20 off-frontier models are plainly visible yet clearly dimmer
-        // than the filament frontier.
-        color = dominatedFill(this.tokens.slateCyan);
-      }
+      const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
+      const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+        slateCyan: this.tokens.slateCyan,
+        filamentDim: this.tokens.filamentDim,
+        filament: this.tokens.filament,
+      });
       colors.push(color);
 
       let size = 8; // standard pearl base size
-      if (isOpt) {
+      if (isOptimum) {
         size = 16; // Optimum gets larger size
-      } else if (isFront) {
+      } else if (isFrontier) {
         size = 10; // Frontier slightly larger
       } else {
         size = 7; // Dominated slightly smaller
@@ -357,6 +360,8 @@ export class Stage3D {
         scorableModels: scorable,
         providerShapes: PROVIDER_SHAPES,
         frontierModelIds: frontierModels.map((model) => model.model),
+        scoreByModel: Object.fromEntries(scores.map((entry) => [entry.model.model, entry.score])),
+        heatEncoding: this.heatEncoding,
         gd: this.gd,
         priceFloor: this.priceFloor,
         Plotly,
