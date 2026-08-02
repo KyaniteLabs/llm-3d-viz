@@ -192,6 +192,134 @@ test.describe("3D Stage Render Specs", () => {
     )).toBe(true);
   });
 
+  test("Items 14 & 16: slider fires staged synchronized restyles and ends on the optimum", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realRestyle = Plotly.restyle;
+      W.__restyleLog = [];
+      Plotly.restyle = function (gd: any, update: any, traces: any) {
+        W.__restyleLog.push({ at: performance.now(), isStage: gd === W.__viz.gd, update, traces });
+        return W.__realRestyle.call(this, gd, update, traces);
+      };
+    });
+    await page.locator("#weight-cost").fill("9");
+    await page.waitForTimeout(550);
+    const result = await page.evaluate(() => {
+      const W = window as any;
+      const log = W.__restyleLog as any[];
+      const stageCalls = log.filter((entry) => entry.isStage);
+      const stage = W.__viz.gd;
+      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
+      const optimum = stage.data[0].text[optimumIndex];
+      W.__viz.Plotly.restyle = W.__realRestyle;
+      return {
+        count: stageCalls.length,
+        duration: stageCalls.length > 1 ? stageCalls.at(-1).at - stageCalls[0].at : 0,
+        projectionCalls: log.filter((entry) => !entry.isStage).length,
+        optimum,
+      };
+    });
+    expect(result.count).toBeGreaterThan(1);
+    expect(result.projectionCalls).toBeGreaterThan(1);
+    expect(result.duration).toBeGreaterThanOrEqual(300);
+    expect(result.duration).toBeLessThanOrEqual(550);
+    expect(result.optimum).toBe("Command A+");
+  });
+
+  test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realRestyle = Plotly.restyle;
+      W.__restyleLog = [];
+      Plotly.restyle = function (gd: any, update: any, traces: any) {
+        W.__restyleLog.push({ at: performance.now(), isStage: gd === W.__viz.gd, update, traces });
+        return W.__realRestyle.call(this, gd, update, traces);
+      };
+    });
+    await page.locator("#weight-cost").fill("9");
+    await page.waitForTimeout(120);
+    await page.locator("#weight-speed").fill("8");
+    await page.waitForTimeout(550);
+    const result = await page.evaluate(() => {
+      const W = window as any;
+      const stageCalls = (W.__restyleLog as any[]).filter((entry) => entry.isStage);
+      const stage = W.__viz.gd;
+      const optimum = stage.data[0].text[stage.data[0].marker.size.findIndex((size: number) => size === 16)];
+      W.__viz.Plotly.restyle = W.__realRestyle;
+      return { count: stageCalls.length, optimum };
+    });
+    expect(result.count).toBeGreaterThan(3);
+    expect(result.optimum).toBeTruthy();
+  });
+
+  test("Item 15: reduced motion collapses the sweep and disables cinema orbit", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realRestyle = Plotly.restyle;
+      W.__realRelayout = Plotly.relayout;
+      W.__restyleLog = [];
+      W.__relayoutLog = [];
+      Plotly.restyle = function (gd: any, update: any) {
+        W.__restyleLog.push({ gd, update });
+        return W.__realRestyle.call(this, gd, update);
+      };
+      Plotly.relayout = function (gd: any, update: any) {
+        W.__relayoutLog.push(update);
+        return W.__realRelayout.call(this, gd, update);
+      };
+    });
+    await page.locator("#weight-cost").fill("9");
+    await page.waitForTimeout(100);
+    await page.locator("[data-cinema-toggle]").click();
+    await page.waitForTimeout(500);
+    const result = await page.evaluate(() => {
+      const W = window as any;
+      const hasOrbit = (W.__relayoutLog as any[]).some((update) => update["scene.camera"]);
+      const restyles = W.__restyleLog.length;
+      W.__viz.Plotly.restyle = W.__realRestyle;
+      W.__viz.Plotly.relayout = W.__realRelayout;
+      return { hasOrbit, restyles };
+    });
+    expect(result.hasOrbit).toBe(false);
+    expect(result.restyles).toBeGreaterThan(0);
+  });
+
+  test("Item 16: cinema hides the console, orbits, and pointer-enter detunes", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const Plotly = W.__viz.Plotly;
+      W.__realRelayout = Plotly.relayout;
+      W.__relayoutLog = [];
+      Plotly.relayout = function (gd: any, update: any) {
+        W.__relayoutLog.push({ at: performance.now(), update });
+        return W.__realRelayout.call(this, gd, update);
+      };
+    });
+    await page.locator("[data-cinema-toggle]").click();
+    await expect(page.locator(".console")).toBeHidden();
+    await page.waitForTimeout(500);
+    const orbitBeforePointer = await page.evaluate(() => (window as any).__relayoutLog.length);
+    expect(orbitBeforePointer).toBeGreaterThan(1);
+    await page.locator(".stage-3d-canvas").dispatchEvent("pointerenter");
+    await expect(page.locator(".console")).toBeVisible();
+    const orbitAfterPointer = await page.evaluate(() => (window as any).__relayoutLog.length);
+    await page.waitForTimeout(250);
+    expect(await page.evaluate((before) => (window as any).__relayoutLog.length, orbitAfterPointer)).toBe(orbitAfterPointer);
+    await page.evaluate(() => { const W = window as any; W.__viz.Plotly.relayout = W.__realRelayout; });
+  });
+
   test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);

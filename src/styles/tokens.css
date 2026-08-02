@@ -112,6 +112,11 @@ body { margin: 0; min-width: 320px; }
 .panel { background: var(--color-surface-1); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
 .stage { grid-area: stage; min-height: clamp(30rem, 66vh, 48rem); padding: clamp(1rem, 2.4vw, 2rem); display: flex; flex-direction: column; }
 .console { grid-area: console; padding: clamp(1rem, 2vw, 1.5rem); }
+.cinema-toggle { margin-top: 0.8rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); padding: 0.35rem 0.55rem; background: transparent; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); cursor: pointer; }
+.cinema-toggle:hover, .cinema-toggle[aria-pressed="true"] { color: var(--filament); border-color: var(--filament-dim); }
+.cinema-toggle:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; }
+.is-cinema .console { opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(0.5rem); transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base); }
+.is-cinema .model-readout { font-size: var(--step-1); }
 .weight-controls { margin-top: 1.5rem; border-top: 1px solid var(--color-border); }
 .weight-control { display: grid; grid-template-columns: 1fr auto; gap: 0.45rem 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
 .weight-control output { color: var(--filament); font-variant-numeric: tabular-nums; }

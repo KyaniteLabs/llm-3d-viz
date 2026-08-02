@@ -4,6 +4,8 @@ import { Stage3D } from "./viz/stage3d";
 import { Projections } from "./viz/projections";
 import { createStore } from "./state";
 import { DecisionConsole } from "./ui/console";
+import { SweepScheduler } from "./viz/sweep";
+import { CinemaMode } from "./viz/cinema";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -42,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ) as HTMLElement[];
   const projections =
     projectionContainers.length > 0 ? new Projections(projectionContainers, stage.gd) : null;
+  const cinema = new CinemaMode(stage, store);
 
   let plotlyPointClicked = false;
 
@@ -50,6 +53,15 @@ document.addEventListener("DOMContentLoaded", () => {
   store.subscribe((state) => {
     stage.render(state.weights, models);
     projections?.render(state.weights, models);
+  });
+  new SweepScheduler(stage.gd, projections?.gds ?? [], store, models);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() !== "c" || event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.matches("input, textarea, select, button")) return;
+    event.preventDefault();
+    cinema.toggle();
   });
 
   // Console wiring: stage hover/click drive the value-score readout + tooltip.
