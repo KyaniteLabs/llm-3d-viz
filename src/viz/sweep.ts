@@ -100,7 +100,7 @@ export class SweepScheduler {
     this.run += 1;
   }
 
-  private markerStates(weights: ScoreWeights): { base: MarkerState; target: MarkerState; order: string[] } {
+  private markerStates(weights: ScoreWeights): SweepStates {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
     const optimum = weightedOptimum(scores)?.model.model;
@@ -131,7 +131,9 @@ export class SweepScheduler {
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
-    const plotly = (typeof window !== "undefined" && (window as any).__viz?.Plotly) ?? Plotly;
+    const plotly = import.meta.env.DEV
+      ? (window as any).__viz?.Plotly ?? Plotly
+      : Plotly;
     void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
   }
 
