@@ -334,7 +334,18 @@ export class Projections {
     });
 
     this.datarevision += 1;
-    const config = { displayModeBar: false, displaylogo: false, responsive: true };
+    // FIX-D (#29): scrollZoom engages wheel/pinch zoom on the 2D projections.
+    // showTips:false suppresses Plotly's "Double-click to zoom back out" notifier
+    // tip (verified: that tip is gated by context.showTips in plotly.js 3.7.0) — a
+    // de-chrome violation. uirevision (per-spec-kind, set on each layout below)
+    // keeps a user's zoom across re-renders.
+    const config = {
+      displayModeBar: false,
+      displaylogo: false,
+      responsive: true,
+      scrollZoom: "cartesian",
+      showTips: false,
+    };
 
     this.specs.forEach((spec, index) => {
       const gd = this.gds[index];
