@@ -10,6 +10,10 @@ export interface AppState {
 
 export type StateListener = (state: Readonly<AppState>) => void;
 
+function sameWeights(left: ScoreWeights, right: ScoreWeights): boolean {
+  return left.speed === right.speed && left.cost === right.cost && left.intelligence === right.intelligence;
+}
+
 export function createStore(initial: Partial<AppState> = {}) {
   let state: AppState = {
     weights: { speed: 0.3333, cost: 0.3333, intelligence: 0.3333 },
@@ -30,6 +34,11 @@ export function createStore(initial: Partial<AppState> = {}) {
       emit();
     },
     update: (patch: Partial<Omit<AppState, "datarevision">>) => {
+      const weightsChanged = patch.weights !== undefined && !sameWeights(state.weights, patch.weights);
+      const scalarChanged = (Object.keys(patch) as Array<keyof Omit<AppState, "datarevision" >>)
+        .filter((key) => key !== "weights")
+        .some((key) => patch[key] !== state[key]);
+      if (!weightsChanged && !scalarChanged) return;
       state = {
         ...state,
         ...patch,

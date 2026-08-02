@@ -156,9 +156,14 @@ export class DecisionConsole {
     this.tooltip.style.top = `${top}px`;
   }
 
-  handleHover(modelId: string, clientX: number, clientY: number) {
-    this.setCursor(clientX, clientY);
+  handleHover(modelId: string, clientX?: number, clientY?: number) {
+    if (clientX !== undefined && clientY !== undefined) this.setCursor(clientX, clientY);
     if (!this.store.getState().pinnedModelId) this.store.update({ hoveredModelId: modelId });
+  }
+
+  handleStageLeave() {
+    if (this.store.getState().pinnedModelId) return;
+    this.store.update({ hoveredModelId: null });
   }
 
   handleStageClick(modelId: string | null, clientX: number, clientY: number) {

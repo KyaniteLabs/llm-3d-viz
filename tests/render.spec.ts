@@ -18,6 +18,60 @@ async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> 
   );
 }
 
+type StageHover = { model: string; x: number; y: number };
+
+async function stageCanvasBox(page: Page) {
+  const box = await page.locator(".stage-3d-canvas canvas").boundingBox();
+  expect(box).toBeTruthy();
+  return { ...box!, right: box!.x + box!.width, bottom: box!.y + box!.height };
+}
+
+async function collectStageHovers(page: Page, limit = 8): Promise<StageHover[]> {
+  await page.evaluate(() => {
+    const W = window as any;
+    W.__stageHoverLog = [];
+    W.__viz.gd.on("plotly_hover", (event: any) => {
+      const point = event.points?.[0];
+      const text = point?.data?.text ?? point?.fullData?.text;
+      const model = Array.isArray(text) ? text[point?.pointNumber] : null;
+      if (typeof model === "string") W.__stageHoverLog.push(model);
+    });
+  });
+  const box = await stageCanvasBox(page);
+  const hits: StageHover[] = [];
+  const seen = new Set<string>();
+  let hoverCount = 0;
+  for (let y = box.y + 8; y < box.y + box.height - 8 && hits.length < limit; y += 12) {
+    for (let x = box.x + 8; x < box.x + box.width - 8 && hits.length < limit; x += 12) {
+      await page.mouse.move(x, y);
+      const result = await page.evaluate((previousCount) => {
+        const W = window as any;
+        const log = W.__stageHoverLog as string[];
+        return { count: log.length, model: log.at(-1) ?? null, previousCount };
+      }, hoverCount);
+      if (result.count > hoverCount && result.model && !seen.has(result.model)) {
+        hits.push({ model: result.model, x, y });
+        seen.add(result.model);
+      }
+      hoverCount = result.count;
+    }
+  }
+  return hits;
+}
+
+async function tooltipGeometry(page: Page) {
+  return page.evaluate(() => {
+    const tooltip = document.querySelector(".stage-tooltip") as HTMLElement;
+    const rect = tooltip.getBoundingClientRect();
+    return {
+      hidden: tooltip.hidden,
+      text: tooltip.textContent ?? "",
+      rect: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+    };
+  });
+}
+
 test.describe("3D Stage Render Specs", () => {
   let consoleErrors: string[] = [];
   let pageErrors: any[] = [];
@@ -484,6 +538,156 @@ test.describe("3D Stage Render Specs", () => {
     expect(persistedCamera).toEqual(inspected.camera.eye);
     await page.locator(".stage-3d-canvas").click({ position: { x: 5, y: 5 } });
     await expect(page.locator(".stage-tooltip")).toBeHidden();
+  });
+
+  test("FIX-A #26: tooltip follows the real DOM cursor and flips at both viewport edges", async ({ page }) => {
+    await page.setViewportSize({ width: 760, height: 600 });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const hits = await collectStageHovers(page, 3);
+    expect(new Set(hits.map((hit) => hit.model)).size).toBeGreaterThanOrEqual(3);
+
+    const box = await stageCanvasBox(page);
+    const selected = hits.slice(0, 3);
+    for (const hit of selected) {
+      await page.mouse.move(hit.x, hit.y);
+      const pointTooltip = await tooltipGeometry(page);
+      expect(pointTooltip.hidden).toBe(false);
+      expect(pointTooltip.text).toContain(hit.model);
+
+      const rightEdge = { x: box.right - 4, y: Math.max(box.y + 20, Math.min(hit.y, box.bottom - 20)) };
+      await page.mouse.move(rightEdge.x, rightEdge.y);
+      const rightTooltip = await tooltipGeometry(page);
+      expect(rightTooltip.hidden).toBe(false);
+      expect(rightTooltip.rect.right).toBeLessThanOrEqual(rightEdge.x);
+      expect(rightTooltip.rect.right).toBeGreaterThanOrEqual(rightEdge.x - 24);
+      expect(rightTooltip.rect.bottom).toBeLessThanOrEqual(rightTooltip.viewport.height);
+
+      const bottomEdge = { x: Math.max(box.x + 20, Math.min(hit.x, box.right - 20)), y: box.bottom - 4 };
+      await page.mouse.move(bottomEdge.x, bottomEdge.y);
+      const bottomTooltip = await tooltipGeometry(page);
+      expect(bottomTooltip.hidden).toBe(false);
+      expect(bottomTooltip.rect.bottom).toBeLessThanOrEqual(bottomEdge.y);
+      expect(bottomTooltip.rect.bottom).toBeGreaterThanOrEqual(bottomEdge.y - 24);
+      expect(bottomTooltip.rect.right).toBeLessThanOrEqual(bottomTooltip.viewport.width);
+    }
+  });
+
+  test("FIX-A #26: real gl3d click pins the last hover, and empty click unpins", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const [hit] = await collectStageHovers(page, 1);
+    expect(hit).toBeTruthy();
+
+    await page.mouse.move(hit.x, hit.y);
+    await page.mouse.click(hit.x, hit.y);
+    await expect(page.locator(".model-readout")).toContainText(hit.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(hit.model);
+
+    await page.mouse.move(5, 5);
+    await expect(page.locator(".stage-tooltip")).toBeVisible();
+    await expect(page.locator(".model-readout")).toContainText(hit.model);
+
+    await page.locator("#weight-speed").fill("8");
+    await page.waitForTimeout(550);
+    await expect(page.locator(".model-readout")).toContainText(hit.model);
+    await expect(page.locator(".stage-tooltip")).toContainText(hit.model);
+
+    const box = await stageCanvasBox(page);
+    await page.waitForTimeout(360);
+    await page.mouse.click(box.x + 6, box.y + 6);
+    await expect(page.locator(".stage-tooltip")).toBeHidden();
+    await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+  });
+
+  test("FIX-A #26: 30 rapid slider inputs produce one rAF-batched render and the final optimum", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => {
+      const W = window as any;
+      const stage = W.__viz.stage;
+      const projections = W.__viz.projectionsInstance;
+      W.__realStageRender = stage.render;
+      W.__realProjectionRender = projections.render;
+      W.__renderLog = [];
+      stage.render = function (...args: any[]) {
+        W.__renderLog.push({ at: performance.now(), kind: "stage" });
+        return W.__realStageRender.apply(this, args);
+      };
+      projections.render = function (...args: any[]) {
+        W.__renderLog.push({ at: performance.now(), kind: "projection" });
+        return W.__realProjectionRender.apply(this, args);
+      };
+      const input = document.querySelector<HTMLInputElement>("#weight-cost")!;
+      for (let index = 0; index < 30; index += 1) {
+        input.value = String(1 + (8 * index) / 29);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    await page.waitForTimeout(650);
+
+    const result = await page.evaluate(() => {
+      const W = window as any;
+      const log = W.__renderLog as Array<{ at: number; kind: string }>;
+      const stageCalls = log.filter((entry) => entry.kind === "stage");
+      const stage = W.__viz.gd;
+      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
+      const optimum = stage.data[0].text[optimumIndex];
+      W.__viz.stage.render = W.__realStageRender;
+      W.__viz.projectionsInstance.render = W.__realProjectionRender;
+      return {
+        total: log.length,
+        stageCalls: stageCalls.length,
+        projectionCalls: log.filter((entry) => entry.kind === "projection").length,
+        optimum,
+      };
+    });
+
+    expect(result.stageCalls).toBe(1);
+    expect(result.projectionCalls).toBe(1);
+    expect(result.total).toBe(2);
+    expect(result.optimum).toBe("Command A+");
+  });
+
+  test("FIX-A #26 / Item 10: 60-second real hover sweep plus slider scrub has zero runtime errors", async ({ page }) => {
+    test.setTimeout(75000);
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.evaluate(() => document.fonts.ready);
+    const box = await stageCanvasBox(page);
+    const started = Date.now();
+
+    const hoverSweep = (async () => {
+      let step = 0;
+      while (Date.now() - started < 60000) {
+        const row = step % 30;
+        const column = step % 2 === 0 ? step % 56 : 55 - (step % 56);
+        const x = box.x + 8 + (column / 55) * (box.width - 16);
+        const y = box.y + 8 + (row / 29) * (box.height - 16);
+        await page.mouse.move(x, y);
+        step += 1;
+      }
+    })();
+
+    const sliderScrub = page.evaluate(async () => {
+      const input = document.querySelector<HTMLInputElement>("#weight-cost")!;
+      const end = performance.now() + 60000;
+      let index = 0;
+      while (performance.now() < end) {
+        input.value = String(1 + 8 * ((index % 41) / 40));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        index += 1;
+        await new Promise((resolve) => window.setTimeout(resolve, 40));
+      }
+      input.value = "9";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    await Promise.all([hoverSweep, sliderScrub]);
+    await page.waitForTimeout(550);
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+    expect(requestErrors).toEqual([]);
   });
 
   test("Item 24: $0.00 models are placed at the ε price floor position", async ({ page }) => {
