@@ -4,6 +4,12 @@ import { Stage3D } from "./viz/stage3d";
 import { createStore } from "./state";
 import { DecisionConsole } from "./ui/console";
 
+function modelIdFromPlotlyPoint(point: any): string | null {
+  const text = point?.data?.text ?? point?.fullData?.text;
+  const modelId = Array.isArray(text) ? text[point?.pointNumber] : null;
+  return typeof modelId === "string" ? modelId : null;
+}
+
 // Keep the scaffold's typed dataset in the entry graph. The chart layer consumes it in T2+.
 document.documentElement.dataset.modelCount = String(models.length);
 
@@ -31,12 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof plotlyOn === "function") {
     plotlyOn.call(stage.gd, "plotly_hover", (event: any) => {
       const point = event.points?.[0];
-      const modelId = (window as any).__viz?.pointNumberToModelId?.[point?.pointNumber];
+      const modelId = modelIdFromPlotlyPoint(point);
       if (modelId) consoleUi.handleHover(modelId, event.event?.clientX ?? 0, event.event?.clientY ?? 0);
     });
     plotlyOn.call(stage.gd, "plotly_click", (event: any) => {
       const point = event.points?.[0];
-      const modelId = (window as any).__viz?.pointNumberToModelId?.[point?.pointNumber] ?? null;
+      const modelId = modelIdFromPlotlyPoint(point);
       plotlyPointClicked = true;
       window.setTimeout(() => { plotlyPointClicked = false; }, 0);
       consoleUi.handleStageClick(modelId, event.event?.clientX ?? 0, event.event?.clientY ?? 0);
