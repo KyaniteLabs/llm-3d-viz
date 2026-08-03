@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 /**
  * Wait for the active sweep to reach its final restyle batch — the deterministic
  * end-of-sweep signal, with no wall-clock race. On a weight change, start()
- * synchronously resets every marker to its dim base (size 7), then re-lights the
+ * synchronously resets every marker to its dim base (size 8), then re-lights the
  * optimum at size 16 only on the final batch (the optimum is last in the
  * ascending-score ignition order, so it lights at progress === 1). Thus "a marker
  * reaches size 16" is exactly "the current sweep has settled on its terminal
@@ -1482,5 +1482,35 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     expect(ranges.after).toEqual(ranges.before);
     // And it is the zoomed range, not the original auto-range.
     expect(ranges.before).toEqual([1.5, 2.5]);
+  });
+
+  test("residuals closeout: h1 untruncated, heat note muted, disclosure survives weight change", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+
+    const h1 = page.locator("h1");
+    await expect(h1).toHaveText("Speed × cost × intelligence");
+    const h1Box = await h1.boundingBox();
+    expect(h1Box, "h1 should render").toBeTruthy();
+    // Single-line title: height should not be ~2× line-height of step-2.
+    expect(h1Box!.height).toBeLessThan(48);
+
+    const heatColor = await page.locator("[data-heat-encoding]").evaluate((el) => getComputedStyle(el).color);
+    // copper is ~rgb(196, 122, 58); muted is cooler/grayer — reject copper-ish orange.
+    expect(heatColor).not.toMatch(/rgb\(\s*196\s*,\s*122\s*,\s*58\s*\)/);
+
+    const provider = page.locator(".provider-disclosure");
+    await expect(provider).toHaveAttribute("open", "");
+    await provider.locator("summary").click();
+    await expect(provider).not.toHaveAttribute("open", "");
+
+    // Trigger a weight change (real input event on a range).
+    const slider = page.locator('input[type=range]').first();
+    await slider.focus();
+    await page.keyboard.press("ArrowRight");
+    await page.waitForTimeout(200);
+    // Provider disclosure must stay closed across the re-render.
+    await expect(page.locator(".provider-disclosure")).not.toHaveAttribute("open", "");
   });
 });

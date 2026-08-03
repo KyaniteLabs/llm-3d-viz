@@ -216,9 +216,9 @@ export class Projections {
       filament: this.tokens.filament,
     });
 
-    let size = 7;
+    let size = 8;
     if (isOptimum) size = 16;
-    else if (isFrontier) size = 10;
+    else if (isFrontier) size = 11;
 
     return { color, size, symbol };
   }
@@ -254,10 +254,11 @@ export class Projections {
     return {
       type: scale,
       ...(range ? { range, autorange: false } : {}),
-      showgrid: false,
+      showgrid: true,
+      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.06),
       zeroline: false,
       showline: true,
-      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.15),
+      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.22),
       ticks: "outside",
       ticklen: 4,
       tickwidth: 1,

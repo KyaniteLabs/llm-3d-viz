@@ -148,7 +148,7 @@ export class SweepScheduler {
           ? semanticPointFill(semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
           : semanticFloorFill(semanticClass);
       });
-      const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 10 : 7);
+      const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 11 : 8);
       return { ids, colors, sizes };
     };
     const base = make(this.stage, false);
@@ -307,7 +307,7 @@ export class SweepScheduler {
         }),
         sizes: ids.map((id) => {
           const style = settled || lit.has(id) ? states.targetById.get(id) : states.baseById.get(id);
-          return style?.size ?? (states.frontierIds.has(id) ? 10 : 7);
+          return style?.size ?? (states.frontierIds.has(id) ? 11 : 8);
         }),
       };
     });
