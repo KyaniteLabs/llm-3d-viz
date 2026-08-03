@@ -9,9 +9,11 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 
-## Status: v0.1 NOT SHIP-READY — Simon rejected publish readiness (2026-08-03)
+## Status: NOT SHIP-READY — comprehension fix #38 landed; Simon re-approval required
 
-**Do not publish.** Live preview QA (2026-08-03) confirms product-comprehension and layout flaws; suites being green does not mean the product is ready. Publish prep (PR #36) stays as docs only.
+**Do not publish** until Simon re-looks after the fix pass. Suites green ≠ product ready (learned).
+
+**Landed 2026-08-03:** PR [#38](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/38) comprehension pass (Terra implement / GLM review PASS): landing optimum + top-3, collapsed incomplete, short display names, mobile in-flow guide, taller projections, token sliders. Preview: `npm run build && npx vite preview`.
 
 **Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Applies to the 3D stage + ridge; 2D projections keep their named pair views. Cost and speed axes log; intelligence linear 0–100.
 
@@ -31,19 +33,22 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - 320px feed-scale: native 3D axis titles clip (recorded at the v0 gate).
 - Multi-minute TTFTs are real AA medians (include reasoning thinking time) — labeled, but they read oddly to newcomers.
 
-### Next — FIX-FIRST (publish / videos / v1 blocked until Simon says ready)
-Ranked product flaws from live preview evidence (`/tmp/llm3d-qa/`, 2026-08-03):
-1. **Empty value console** — "Value readout" is dead until hover; incomplete-data wall dominates.
-2. **3D stage hard to read** — sparse black void, weak axis/depth, chrome (STAGE KEY + long frontier names) steals the plot.
-3. **Mobile layout broken** — title truncates, guide/console stack over the stage, unusable.
-4. **Projections too thin** (~160px) — linked-2D perception aid fails its job.
-5. **Provider-shape key collapsed/empty-looking** — "17 PROVIDERS" without visible glyphs by default.
-6. **Model names are dumpster fire** — full AA marketing strings on the frontier rail.
-7. **Preset chips unexplained** — coding/chat/… look active but no outcome summary.
-8. **Orange range thumbs / residual chrome** — not observatory tokens.
+### Next — Simon re-looks (fix #38 landed; not auto-shipped)
+**Look:** `npm run build && npx vite preview` (or http://127.0.0.1:4181 if still up from this session).
 
-- **Publish** — blocked. Runbook exists; do not deploy.
-- **Videos / v1** — blocked until core comprehension pass.
+Addressed in #38 (evidence `/tmp/llm3d-qa-fix/`):
+- Landing CURRENT OPTIMUM + top-3 + preset outcome
+- Incomplete collapsed; short display names; provider shapes open on desktop
+- Mobile in-flow guide; taller projections (~14–16rem); token sliders
+
+**Still weak / possible next fix rounds** (do not pretend fixed):
+- 3D depth / sparse black void / axis legibility in the WebGL stage itself
+- h1 still wraps awkwardly at desktop (`max-width: 14ch`)
+- Stage-guide rebuild snaps disclosure state on weight change
+- Tastecheck residual: heat note reads as warning (copper)
+
+- **Publish** — blocked until Simon says go. Runbook: `docs/deploy/cloudflare-pages.md`.
+- **Videos / v1** — only after re-approval.
 - **Work mode:** branch → PR → independent review; real-mouse tests; tastecheck with render evidence.
 
 ## Ops (validated this session)
