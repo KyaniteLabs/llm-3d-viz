@@ -1,6 +1,7 @@
 import { PROVIDER_SHAPES, type Model } from "../data/models";
 import { frontier } from "../lib/pareto";
 import { normalizedScores, weightedOptimum } from "../lib/score";
+import { displayName } from "../lib/display-name";
 import type { AppState, AppStore } from "../state";
 
 const SHAPE_LABELS: Record<string, string> = {
@@ -76,7 +77,7 @@ export class StageGuide {
             ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · point luminance follows the current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
           </section>
 
-          <details class="provider-disclosure">
+          <details class="provider-disclosure"${isCompact ? "" : " open"}>
             <summary class="stage-guide-heading">PROVIDER SHAPES · ${Object.keys(PROVIDER_SHAPES).length} PROVIDERS</summary>
             <section class="provider-key" aria-label="Provider shape key">
               <ul class="provider-shape-list">
@@ -95,7 +96,7 @@ export class StageGuide {
                 const isOptimum = model.model === optimum?.model;
                 return `<li data-frontier-model="${escapeHtml(model.model)}"${isOptimum ? ' data-optimum="true"' : ""}>
                   <span class="frontier-model-status">${isOptimum ? "OPTIMUM" : "FRONTIER"}</span>
-                  <strong>${escapeHtml(model.model)}</strong>
+                  <strong>${escapeHtml(displayName(model.model))}</strong>
                   <small>${escapeHtml(model.provider)}</small>
                 </li>`;
               }).join("")}

@@ -8,6 +8,15 @@ import {
   ttftCaveat,
   TTFT_MULTI_MINUTE_MS,
 } from "../src/lib/format";
+import { displayName } from "../src/lib/display-name";
+
+describe("displayName", () => {
+  it("removes parenthetical reasoning and effort metadata without changing ordinary release labels", () => {
+    expect(displayName("GPT-5.6 Luna (max)")).toBe("GPT-5.6 Luna");
+    expect(displayName("Claude Sonnet 5 (Adaptive Reasoning, Max Effort)")).toBe("Claude Sonnet 5");
+    expect(displayName("GPT-4o (Nov '24)")).toBe("GPT-4o (Nov '24)");
+  });
+});
 
 describe("metric formatting (FIX-C #28: readout units)", () => {
   it("formats speed as tok/s", () => {

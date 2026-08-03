@@ -833,7 +833,7 @@ test.describe("3D Stage Render Specs", () => {
     await expect(page.locator(".stage-tooltip")).toContainText(pointB.model);
     await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
     await expect(page.locator(".stage-tooltip")).toBeHidden();
-    await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+    await expect(page.locator(".model-readout")).toContainText("CURRENT OPTIMUM");
 
     // Preserve the established repeated real-event stress coverage.
     for (let repetition = 0; repetition < 10; repetition += 1) {
@@ -843,7 +843,7 @@ test.describe("3D Stage Render Specs", () => {
       await page.mouse.move(blank.x, blank.y);
       await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
       await expect(page.locator(".stage-tooltip")).toBeHidden();
-      await expect(page.locator(".model-readout")).toContainText("Hover a model point");
+      await expect(page.locator(".model-readout")).toContainText("CURRENT OPTIMUM");
     }
   });
 
@@ -1004,6 +1004,16 @@ test.describe("3D Stage Render Specs", () => {
     providerNames.forEach((provider: string) => expect(providerKeyText).toContain(provider));
     expect(await page.locator("[data-provider-shape]").count()).toBeGreaterThanOrEqual(4);
     await expect(page.locator("#frontier-label-note")).toContainText("no 3D-to-pixel label API");
+  });
+
+  test("comprehension pass: landing shows the weighted optimum after a real pointer event without hovering a point", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const box = await stageCanvasBox(page);
+    await page.mouse.move(box.x + 8, box.y + 8);
+    await expect(page.locator(".value-leaderboard")).toContainText("CURRENT OPTIMUM");
+    await expect(page.locator("[data-optimum-model-id]")).toContainText(/.+/);
+    await expect(page.locator("[data-preset-outcome]")).toContainText(/chat/i);
   });
 
   test("FIX-B: stage, console, and all projections fit the 1366×768 first viewport", async ({ page }) => {
