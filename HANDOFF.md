@@ -31,7 +31,7 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 
 ### Next — pick one
 - **(a) LOOK AT IT** — `npm run build && npx vite preview` → localhost. This is the build Simon hasn't seen since the fix program.
-- **(b) Publish** (APPROVAL-GATED): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8).
+- **(b) Publish** (APPROVAL-GATED): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8). **Prep landed** in `docs/deploy/cloudflare-pages.md` + `public/_headers` — live deploy still needs Simon's explicit go-ahead in-session.
 - **(c) Videos** — cinema mode is record-ready (self-hosted fonts, time-based motion, heat encoding).
 - **(d) v1 planning** — recommender UI, slicing, shareable URLs, backend (SPEC §8 v1). Data refresh cadence: re-pull AA speed/TTFT periodically (rolling medians).
 

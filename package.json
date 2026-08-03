@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:render": "playwright test"
+    "test:render": "playwright test",
+    "deploy:pages": "node -e \"console.error('REFUSED: live publish is approval-gated. Read docs/deploy/cloudflare-pages.md and get Simon\\'s explicit go-ahead in this session.'); process.exit(2)\""
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
