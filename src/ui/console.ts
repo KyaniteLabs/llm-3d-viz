@@ -1,6 +1,7 @@
 import { incompleteModels, incompleteAxisCoverage, quarantinedModels, type Model } from "../data/models";
 import { normalizedScores, presets } from "../lib/score";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
+import { displayName } from "../lib/display-name";
 import type { AppStore, AppState } from "../state";
 
 const weightKeys = ["speed", "cost", "intelligence"] as const;
@@ -89,7 +90,7 @@ export class DecisionConsole {
   private renderIncompleteData() {
     const incomplete = [...incompleteModels(), ...quarantinedModels()];
     const section = this.root.querySelector(".incomplete-data")!;
-    section.innerHTML = `<p class="eyebrow">INCOMPLETE DATA / EXCLUDED</p>${incomplete
+    section.innerHTML = `<details class="incomplete-disclosure"><summary>INCOMPLETE DATA / EXCLUDED <span>${incomplete.length}</span></summary><div class="incomplete-data-body">${incomplete
       .map((model) => {
         // Per-axis coverage (frontier-math §5.2): show each measured value where
         // known and mark missing axes with their reason, instead of one generic
@@ -98,9 +99,9 @@ export class DecisionConsole {
         const axes = incompleteAxisCoverage(model)
           .map((a) => `<span class="incomplete-axis">${a.label}: ${a.display}</span>`)
           .join("");
-        return `<p class="incomplete-data-entry" data-model-id="${model.model}"><strong>${model.model}</strong>${axes}</p>`;
+        return `<p class="incomplete-data-entry" data-model-id="${model.model}"><strong>${displayName(model.model)}</strong>${axes}</p>`;
       })
-      .join("")}`;
+      .join("")}</div></details>`;
   }
 
   private activeModel(state: Readonly<AppState>) {
@@ -120,12 +121,30 @@ export class DecisionConsole {
     const ttftCell = caveat
       ? `${formatTtftSeconds(model.ttft)}<span class="ttft-caveat">${caveat}</span>`
       : formatTtftSeconds(model.ttft);
-    return `<strong>${model.model}</strong><span>${model.provider}</span>
+    // Detail keeps the full curated id visible as well as in data-model-id: a
+    // hover/pin is an identity inspection, unlike the scan-oriented landing list.
+    return `<strong data-model-id="${model.model}">${model.model}</strong><span>${model.provider}</span>
       <dl><div><dt>TPS</dt><dd>${formatTps(model.tps)}</dd></div>
       <div><dt>TTFT</dt><dd>${ttftCell}</dd></div>
       <div><dt>Blended price</dt><dd>${formatPricePerM(model.blended_price_per_M)}</dd></div>
       <div><dt>AA index</dt><dd>${formatIntelligence(model.aa_intelligence_index)}</dd></div>
       <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>`;
+  }
+
+  private leaderboard(state: Readonly<AppState>, activePreset: string | undefined) {
+    const scores = normalizedScores(this.models, state.weights, this.models)
+      .slice()
+      .sort((left, right) => right.score - left.score || left.model.model.localeCompare(right.model.model));
+    const optimum = scores[0];
+    if (!optimum) return `<p class="console-note">No complete benchmark rows are available.</p>`;
+    const shares = weightShares(state.weights);
+    const presetLabel = activePreset ?? "custom weights";
+    return `<section class="value-leaderboard" aria-label="Current value-score leaderboard">
+      <p class="eyebrow">CURRENT OPTIMUM</p>
+      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} VALUE SCORE</span></p>
+      <ol>${scores.slice(0, 3).map(({ model, score }) => `<li data-model-id="${model.model}"><span>${displayName(model.model)}</span><strong>${score.toFixed(3)}</strong></li>`).join("")}</ol>
+      <p class="preset-outcome" data-preset-outcome="${activePreset ?? "custom"}">${presetLabel} · ${shares.speed}% speed / ${shares.cost}% cost / ${shares.intelligence}% intelligence → ${displayName(optimum.model.model)}</p>
+    </section>`;
   }
 
   render(state: Readonly<AppState>) {
@@ -151,7 +170,7 @@ export class DecisionConsole {
     }
     const readout = this.root.querySelector(".model-readout")!;
     const model = this.activeModel(state);
-    readout.innerHTML = model ? this.details(model, state) : `<p class="console-note">Hover a model point to inspect its current value score.</p>`;
+    readout.innerHTML = model ? this.details(model, state) : this.leaderboard(state, activePreset);
     if (model) {
       this.tooltip.innerHTML = this.details(model, state);
       this.tooltip.hidden = false;
