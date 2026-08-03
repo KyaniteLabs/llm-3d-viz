@@ -120,7 +120,8 @@ body { margin: 0; min-width: 320px; }
 .cinema-toggle:hover, .cinema-toggle[aria-pressed="true"] { color: var(--filament); border-color: var(--filament-dim); }
 .cinema-toggle:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; }
 .is-cinema { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "stage"; }
-.is-cinema .console, .is-cinema .projection-row { display: none; }
+.is-cinema .console, .is-cinema .projection-row, .is-cinema .stage-guide { display: none; }
+.is-cinema .stage { grid-template-columns: minmax(0, 1fr); }
 .is-cinema .model-readout { font-size: var(--step-1); }
 .weight-controls { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
 .weight-heading { margin: 0; padding: 0.45rem 0 0.1rem; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); letter-spacing: 0.1em; }

@@ -334,16 +334,15 @@ export class Stage3D {
       type: scale,
       ...(range ? { range, autorange: false as const } : {}),
       visible: true,
-      // Subtle grid + plane tint so the 3D volume reads as a volume, not a flat
-      // black disc. Opacity stays low to preserve observatory de-chrome.
+      // Grid only — never filled axis planes. Plotly gl3d ignores/wipes alpha on
+      // backgroundcolor and paints solid cream (visual regression #40 residual).
       showgrid: true,
-      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.07),
+      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.10),
       gridwidth: 1,
       zeroline: false,
       showline: true,
-      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.22),
-      showbackground: true,
-      backgroundcolor: this.colorWithAlpha(this.tokens.textWarm, 0.03),
+      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.28),
+      showbackground: false,
       showspikes: false,
       tickmode: "array",
       tickvals,
