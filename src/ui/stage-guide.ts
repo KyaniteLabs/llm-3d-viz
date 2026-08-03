@@ -47,6 +47,9 @@ export class StageGuide {
   private readonly store: AppStore;
   private readonly models: readonly Model[];
   private readonly heatEncoding: boolean;
+  /** User-controlled open state; null until first paint (then defaults apply). */
+  private stageKeyOpen: boolean | null = null;
+  private providerOpen: boolean | null = null;
 
   constructor(root: HTMLElement, store: AppStore, models: readonly Model[], heatEncoding = true) {
     this.root = root;
@@ -56,14 +59,31 @@ export class StageGuide {
     this.store.subscribe((state) => this.render(state));
   }
 
+  private captureDisclosureState() {
+    const stage = this.root.querySelector<HTMLDetailsElement>(".stage-guide-disclosure");
+    const provider = this.root.querySelector<HTMLDetailsElement>(".provider-disclosure");
+    if (stage) this.stageKeyOpen = stage.open;
+    if (provider) this.providerOpen = provider.open;
+  }
+
+  private defaultOpen(isCompact: boolean): { stage: boolean; provider: boolean } {
+    // Compact: start collapsed so the plot is unobstructed; desktop: open both.
+    return {
+      stage: this.stageKeyOpen ?? !isCompact,
+      provider: this.providerOpen ?? !isCompact,
+    };
+  }
+
   private render(state: Readonly<AppState>) {
+    this.captureDisclosureState();
     const frontierModels = frontier(this.models).sort((a, b) => a.model.localeCompare(b.model));
     const optimum = weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
     const groups = providerGroups(this.models);
     const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches;
+    const open = this.defaultOpen(isCompact);
 
     this.root.innerHTML = `
-      <details class="stage-guide-disclosure"${isCompact ? "" : " open"}>
+      <details class="stage-guide-disclosure"${open.stage ? " open" : ""}>
         <summary><span>STAGE KEY</span><span class="stage-guide-count">${frontierModels.length} FRONTIER</span></summary>
         <div class="stage-guide-body">
           <section class="stage-legend" aria-label="Stage legend">
@@ -77,7 +97,7 @@ export class StageGuide {
             ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · point luminance follows the current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
           </section>
 
-          <details class="provider-disclosure"${isCompact ? "" : " open"}>
+          <details class="provider-disclosure"${open.provider ? " open" : ""}>
             <summary class="stage-guide-heading">PROVIDER SHAPES · ${Object.keys(PROVIDER_SHAPES).length} PROVIDERS</summary>
             <section class="provider-key" aria-label="Provider shape key">
               <ul class="provider-shape-list">
@@ -106,5 +126,13 @@ export class StageGuide {
 
         </div>
       </details>`;
+
+    // Persist toggles from user interaction without waiting for the next store tick.
+    this.root.querySelector(".stage-guide-disclosure")?.addEventListener("toggle", (event) => {
+      this.stageKeyOpen = (event.currentTarget as HTMLDetailsElement).open;
+    });
+    this.root.querySelector(".provider-disclosure")?.addEventListener("toggle", (event) => {
+      this.providerOpen = (event.currentTarget as HTMLDetailsElement).open;
+    });
   }
 }

@@ -57,9 +57,9 @@ export class Stage3D {
     this.container.appendChild(this.gd);
 
     this.camera = {
-      // A tighter hero framing keeps the model cluster legible on first load;
+      // Slightly elevated/oblique hero framing so depth reads on first paint;
       // user camera state still remains the single writer after Plotly init.
-      eye: { x: 1.05, y: 1.05, z: 0.9 },
+      eye: { x: 1.25, y: 1.15, z: 1.05 },
       up: { x: 0, y: 0, z: 1 },
       center: { x: 0, y: 0, z: 0 },
     };
@@ -237,13 +237,13 @@ export class Stage3D {
       });
       colors.push(color);
 
-      let size = 8; // standard pearl base size
+      let size = 9; // standard pearl base size
       if (isOptimum) {
         size = 16; // Optimum gets larger size
       } else if (isFrontier) {
-        size = 10; // Frontier slightly larger
+        size = 11; // Frontier slightly larger
       } else {
-        size = 7; // Dominated slightly smaller
+        size = 8; // Dominated still readable against the void
       }
       sizes.push(size);
 
@@ -334,11 +334,16 @@ export class Stage3D {
       type: scale,
       ...(range ? { range, autorange: false as const } : {}),
       visible: true,
-      showgrid: false,
+      // Subtle grid + plane tint so the 3D volume reads as a volume, not a flat
+      // black disc. Opacity stays low to preserve observatory de-chrome.
+      showgrid: true,
+      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.07),
+      gridwidth: 1,
       zeroline: false,
       showline: true,
-      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.15),
-      showbackground: false,
+      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.22),
+      showbackground: true,
+      backgroundcolor: this.colorWithAlpha(this.tokens.textWarm, 0.03),
       showspikes: false,
       tickmode: "array",
       tickvals,
@@ -370,6 +375,8 @@ export class Stage3D {
       uirevision: "constant_camera",
       scene: {
         uirevision: "constant_camera",
+        aspectmode: "manual",
+        aspectratio: { x: 1.15, y: 1, z: 1 },
         xaxis: axisLayout(axisCfg.cost.title, axisCfg.cost.ticks, axisCfg.cost.labels),
         yaxis: axisLayout(
           axisCfg.intelligence.title,
