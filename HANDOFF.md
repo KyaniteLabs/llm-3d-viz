@@ -9,11 +9,15 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 
-## Status: NOT SHIP-READY — comprehension fix #38 landed; Simon re-approval required
+## Status: FIX PASSES LANDED (#38 + #40) — publish still Simon-gated
 
-**Do not publish** until Simon re-looks after the fix pass. Suites green ≠ product ready (learned).
+**Do not publish** until Simon re-approves after looking. Suites green ≠ product ready (learned).
 
-**Landed 2026-08-03:** PR [#38](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/38) comprehension pass (Terra implement / GLM review PASS): landing optimum + top-3, collapsed incomplete, short display names, mobile in-flow guide, taller projections, token sliders. Preview: `npm run build && npx vite preview`.
+**Landed 2026-08-03:**
+- PR [#38](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/38) comprehension pass (Terra / GLM PASS): landing optimum + top-3, collapsed incomplete, short names, mobile in-flow guide, taller projections, token sliders.
+- PR [#40](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/40) residual closeout (GLM PASS): h1 single-line, 3D grid/depth + markers, guide disclosure state, heat note muted.
+
+**Look:** `npm run build && npx vite preview`
 
 **Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Applies to the 3D stage + ridge; 2D projections keep their named pair views. Cost and speed axes log; intelligence linear 0–100.
 
@@ -33,21 +37,10 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - 320px feed-scale: native 3D axis titles clip (recorded at the v0 gate).
 - Multi-minute TTFTs are real AA medians (include reasoning thinking time) — labeled, but they read oddly to newcomers.
 
-### Next — Simon re-looks (fix #38 landed; not auto-shipped)
-**Look:** `npm run build && npx vite preview` (or http://127.0.0.1:4181 if still up from this session).
+### Next — Simon re-look (no agent-open residuals from the 2026-08-03 list)
+All previously listed fix-program open items are closed on `main` (#38 + #40). Further work only if Simon finds more after looking.
 
-Addressed in #38 (evidence `/tmp/llm3d-qa-fix/`):
-- Landing CURRENT OPTIMUM + top-3 + preset outcome
-- Incomplete collapsed; short display names; provider shapes open on desktop
-- Mobile in-flow guide; taller projections (~14–16rem); token sliders
-
-**Still weak / possible next fix rounds** (do not pretend fixed):
-- 3D depth / sparse black void / axis legibility in the WebGL stage itself
-- h1 still wraps awkwardly at desktop (`max-width: 14ch`)
-- Stage-guide rebuild snaps disclosure state on weight change
-- Tastecheck residual: heat note reads as warning (copper)
-
-- **Publish** — blocked until Simon says go. Runbook: `docs/deploy/cloudflare-pages.md`.
+- **Publish** — still blocked until Simon says go. Runbook: `docs/deploy/cloudflare-pages.md`.
 - **Videos / v1** — only after re-approval.
 - **Work mode:** branch → PR → independent review; real-mouse tests; tastecheck with render evidence.
 
