@@ -1,5 +1,5 @@
 import { incompleteModels, incompleteAxisCoverage, quarantinedModels, type Model } from "../data/models";
-import { normalizedScores, presets } from "../lib/score";
+import { normalizedScores, presets, weightedOptimum } from "../lib/score";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
 import { displayName } from "../lib/display-name";
 import type { AppStore, AppState } from "../state";
@@ -135,7 +135,8 @@ export class DecisionConsole {
     const scores = normalizedScores(this.models, state.weights, this.models)
       .slice()
       .sort((left, right) => right.score - left.score || left.model.model.localeCompare(right.model.model));
-    const optimum = scores[0];
+    // Same optimum identity as the stage marker (weightedOptimum tie-break).
+    const optimum = weightedOptimum(scores) ?? scores[0];
     if (!optimum) return `<p class="console-note">No complete benchmark rows are available.</p>`;
     const shares = weightShares(state.weights);
     const presetLabel = activePreset ?? "custom weights";
