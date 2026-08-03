@@ -9,7 +9,9 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 
-## Status: v0.1 READY FOR SIMON'S EYES → publish decision pending (approval-gated)
+## Status: v0.1 NOT SHIP-READY — Simon rejected publish readiness (2026-08-03)
+
+**Do not publish.** Live preview QA (2026-08-03) confirms product-comprehension and layout flaws; suites being green does not mean the product is ready. Publish prep (PR #36) stays as docs only.
 
 **Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Applies to the 3D stage + ridge; 2D projections keep their named pair views. Cost and speed axes log; intelligence linear 0–100.
 
@@ -29,11 +31,20 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - 320px feed-scale: native 3D axis titles clip (recorded at the v0 gate).
 - Multi-minute TTFTs are real AA medians (include reasoning thinking time) — labeled, but they read oddly to newcomers.
 
-### Next — pick one
-- **(a) LOOK AT IT** — `npm run build && npx vite preview` → localhost. This is the build Simon hasn't seen since the fix program.
-- **(b) Publish** (APPROVAL-GATED): deploy `dist/` to Cloudflare Pages at `viz.kyanitelabs.tech` (wayfinder #8). **Prep landed** in `docs/deploy/cloudflare-pages.md` + `public/_headers` — live deploy still needs Simon's explicit go-ahead in-session.
-- **(c) Videos** — cinema mode is record-ready (self-hosted fonts, time-based motion, heat encoding).
-- **(d) v1 planning** — recommender UI, slicing, shareable URLs, backend (SPEC §8 v1). Data refresh cadence: re-pull AA speed/TTFT periodically (rolling medians).
+### Next — FIX-FIRST (publish / videos / v1 blocked until Simon says ready)
+Ranked product flaws from live preview evidence (`/tmp/llm3d-qa/`, 2026-08-03):
+1. **Empty value console** — "Value readout" is dead until hover; incomplete-data wall dominates.
+2. **3D stage hard to read** — sparse black void, weak axis/depth, chrome (STAGE KEY + long frontier names) steals the plot.
+3. **Mobile layout broken** — title truncates, guide/console stack over the stage, unusable.
+4. **Projections too thin** (~160px) — linked-2D perception aid fails its job.
+5. **Provider-shape key collapsed/empty-looking** — "17 PROVIDERS" without visible glyphs by default.
+6. **Model names are dumpster fire** — full AA marketing strings on the frontier rail.
+7. **Preset chips unexplained** — coding/chat/… look active but no outcome summary.
+8. **Orange range thumbs / residual chrome** — not observatory tokens.
+
+- **Publish** — blocked. Runbook exists; do not deploy.
+- **Videos / v1** — blocked until core comprehension pass.
+- **Work mode:** branch → PR → independent review; real-mouse tests; tastecheck with render evidence.
 
 ## Ops (validated this session)
 - **Worker pool**: `codex exec -m gpt-5.6-luna|gpt-5.6-terra` (coding + review), `claude-glm -p` (GLM 5.2 — sharpest reviewer; no vision), agy/Gemini (search/image-gen/tastecheck-vision ONLY — benched from coding per Simon), gjc/MiniMax (benched — expired key in ~/.gjc).
