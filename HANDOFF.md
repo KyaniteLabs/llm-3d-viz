@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-02 (v3 — v0 + Ultra-QA fix program COMPLETE)
+Last updated: 2026-08-03 (v4 — #42 landed; Plotly freeze; R3F stage is critical path)
 
 ## What this is
 Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
@@ -9,48 +9,53 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 
-## Status: FIX PASSES LANDED (#38 + #40) — publish still Simon-gated
+## Status: Plotly v0 frozen after #42 — R3F stage is the product critical path
 
-**Do not publish** until Simon re-approves after looking. Suites green ≠ product ready (learned).
+**Do not publish** until Simon re-approves after looking. Suites green ≠ product ready.
 
-**Landed 2026-08-03:**
-- PR [#38](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/38) comprehension pass (Terra / GLM PASS): landing optimum + top-3, collapsed incomplete, short names, mobile in-flow guide, taller projections, token sliders.
-- PR [#40](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/40) residual closeout (GLM PASS): h1 single-line, 3D grid/depth + markers, guide disclosure state, heat note muted.
+**Plotly is not the end-state renderer** (SPEC D7). It was the v0 prototype. Further Plotly stage "depth / volume / chrome" work is **out of scope** unless P0 crash or explicit publish blocker.
+
+### Landed 2026-08-03
+- PR [#38](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/38) comprehension pass: landing optimum + top-3, collapsed incomplete, short names, mobile guide, taller projections, token sliders.
+- PR [#40](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/40) residual closeout: h1, guide state, heat note — **and a bad showbackground "depth" that painted a solid cream stage**.
+- PR [#42](https://git.kyanitelabs.tech/simon/llm-3d-viz/pulls/42) **cream plane kill + axis camera orientation**: `showbackground: false`; default eye in −cost/−intelligence octant so floor axes read high-up, not reversed; cinema guide hide; explicit ascending log ranges.
 
 **Look:** `npm run build && npx vite preview`
 
-**Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Applies to the 3D stage + ridge; 2D projections keep their named pair views. Cost and speed axes log; intelligence linear 0–100.
+**Axis mapping (LOCKED by Simon 2026-08-02):** x = COST, y = INTELLIGENCE, z = SPEED. Cost and speed log; intelligence linear 0–100.
 
-### What exists on main (all review-gated)
-- **v0 build** (T1–T7, PRs #19–#25): scaffold + validated 35-model dataset, frontier math engine, de-chromed Plotly 3D stage, linked 2D projections, value-score console, threshold-sweep, cinema mode, first-render gate SHIP.
-- **Ultra-QA fix program** (#26–#29, PRs #30–#34) — after two independent end-to-end QA agents (GLM 5.2 + Luna xhigh) ruled the first build "makes no sense / FIX-FIRST":
-  - **FIX-A**: hover-recursion dead (RangeError), tooltip anchors to cursor ≤24px, click-to-pin works (hovered/pinned as separate states), scrub is rAF-smooth, 60s zero-error soak spec.
-  - **FIX-B**: STAGE KEY legend, named frontier models, tighter camera, slider share %, projections co-visible at 1366×768, cinema reclaims its column, and the **class-bounded heat encoding** (continuous value-score luminance — default on, `?heat=0` opts out; dominated < frontier < optimum invariant; Simon's color directive via tastecheck).
-  - **FIX-C**: linear intelligence axis (frontier-math §3.3 honored), dominated points visible (4.4:1), per-axis incomplete labels, explicit units, reasoning-gated TTFT caveat, structured `reasoning` field on all 35 rows.
-  - **FIX-D**: camera-flip clamp (all payload shapes), marker-appearance hardening, C-key focus fix, de-chromed scrollZoom, mobile axes, chat landing weights.
-- **Data**: 35 models, snapshot 2026-08-01, GPT-5.6 trio refreshed 2026-08-02 (Luna/Terra prices verified current vs OpenAI's page).
-- **Suites**: `vite build` + `tsc --noEmit` clean, 44 vitest, 35 playwright (incl. 60s zero-error soak). dist free of `__viz`.
+### Critical path (do this next)
+1. ~~Merge #42~~ **done**
+2. **Freeze Plotly stage polish** (active)
+3. **R3F / Three stage spike** per contract: `docs/v1/r3f-stage-contract.md`
+4. Go/kill on spike → production stage swap if go
+5. Then v1 product features + high-quality video; publish only with Simon go
 
-### Honest residuals (known, documented, not blockers)
-- 375px: 3D tick labels partially occluded (inherent to tiny canvas; 2D projections below carry the info — GLM tastecheck).
-- Initial load sweep follows ridge order (cheapest→smartest) by contract (frontier-math §2.4); optimum-last applies after first slider input.
-- 320px feed-scale: native 3D axis titles clip (recorded at the v0 gate).
-- Multi-minute TTFTs are real AA medians (include reasoning thinking time) — labeled, but they read oddly to newcomers.
+**Do not:** keep polishing Plotly; rewrite console/math/2D in the same train as the stage; add Three.js demo slop (particles, bloom soup, starfields).
 
-### Next — Simon re-look (no agent-open residuals from the 2026-08-03 list)
-All previously listed fix-program open items are closed on `main` (#38 + #40). Further work only if Simon finds more after looking.
+### What exists on main
+- **v0 build** (T1–T7 + Ultra-QA FIX-A–D + #38/#40/#42): de-chromed Plotly stage (frozen), 35 models, frontier math, linked 2D, value console, sweep, cinema.
+- **Suites:** vitest 45, tsc, build clean at last #42 verify.
 
-- **Publish** — still blocked until Simon says go. Runbook: `docs/deploy/cloudflare-pages.md`.
-- **Videos / v1** — only after re-approval.
-- **Work mode:** branch → PR → independent review; real-mouse tests; tastecheck with render evidence.
+### Honest residuals (known)
+- Plotly still is a chart engine: no reliable 3D data→pixel labels (HTML stage guide stays).
+- 375px / 320px: native 3D ticks/titles tight on small canvases.
+- Multi-minute TTFTs are real AA medians (reasoning) — labeled, still surprising.
+- Showcase / cinema quality ceiling = **R3F stage**, not more gl3d knobs.
 
-## Ops (validated this session)
-- **Worker pool**: `codex exec -m gpt-5.6-luna|gpt-5.6-terra` (coding + review), `claude-glm -p` (GLM 5.2 — sharpest reviewer; no vision), agy/Gemini (search/image-gen/tastecheck-vision ONLY — benched from coding per Simon), gjc/MiniMax (benched — expired key in ~/.gjc).
-- **Gate discipline that worked**: reviewer ≠ implementer on every PR; FAIL → fix round → re-review; tastecheck-pass with render evidence for aesthetic calls; real-mouse/real-event tests only (synthetic events proved nothing).
-- **Parallel work**: per-ticket git worktrees (two collisions learned the hard way); watch for port contention on playwright (`reuseExistingServer` trap — isolate ports per worktree); machine-load kills happen (exit 137) — workers resume from uncommitted state cleanly.
-- **Forgejo auth**: write-scoped token = the `git.kyanitelabs.tech` line in `~/.git-credentials` (browser UA required). Keychain entries are read-scoped.
-- **Tracker hygiene**: deleting a branch before its merge lands auto-closes the PR — merge first, delete after (recovered via successor PR #32).
+### Next — Simon
+- Optional **honest v0 publish** after look (concept instrument, not final cinema).
+- **Videos** that need hero quality → wait for R3F stage or accept Plotly look.
+- **Work mode:** branch → PR → independent review; real-mouse tests; visual proof before "done."
+
+## Ops
+- **Workers:** codex luna/terra (implement), claude-glm (review ≠ implementer), vision models only for screenshots/taste.
+- **Forgejo:** write token = `git.kyanitelabs.tech` line in `~/.git-credentials` + browser UA.
+- **Tracker:** merge before delete branch.
 
 ## Key pointers
-- `SPEC.md` / `DESIGN-SYSTEM.md` — locked authority. `docs/research/` — frontier-math, plotly-dechrome, dataset sources. `.omx/` — ralplan consensus artifacts. `docs/gate/t7/` — first-render gate evidence. `HANDOFF.md` (this file).
-- Memory entries (claude-glm recall): `llm-3d-viz-project`, `llm-3d-benchmark-plots-research`, `skill-roles-design-vs-gstack` — update `llm-3d-viz-project` to "v0.1 ready" next session.
+- `SPEC.md` / `DESIGN-SYSTEM.md` — locked product + visual authority
+- `docs/v1/r3f-stage-contract.md` — **stage rewrite contract + spike plan**
+- `docs/research/` — frontier-math, plotly-dechrome, dataset
+- `docs/deploy/cloudflare-pages.md` — publish runbook (gated)
+- `HANDOFF.md` (this file)
