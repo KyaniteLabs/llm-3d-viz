@@ -9,7 +9,8 @@
  * - families=a,b     multi-select; empty ≡ all (comma-separated family_ids)
  * - ax=x,y,z         AxisMetricId triple for scene X/Y/Z
  * - w=s,c,i          raw weight triple speed,cost,intelligence
- * - heat=1 / stage=  already consumed at boot for renderer flags (left alone)
+ * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
+ * - enc=openness     legacy openness-primary fill (product default is curve-focus)
  */
 
 import {
@@ -102,7 +103,7 @@ export function serializeShareableState(
   const params = existing ? new URLSearchParams(existing) : new URLSearchParams();
 
   // Preserve renderer flags managed outside this module.
-  const keep = ["stage", "heat", "debug"];
+  const keep = ["stage", "heat", "debug", "enc"];
   const preserved: Record<string, string> = {};
   for (const key of keep) {
     const v = params.get(key);

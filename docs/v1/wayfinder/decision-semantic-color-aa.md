@@ -24,3 +24,22 @@ Supersedes canvas-only monochrome / “copper never on canvas” / “never cate
 
 - Legend must match stage 1:1 (Open / Closed [ / Restricted ], Reasoning icon, lab swatches if used).
 - Filters (age, provider, family) do not change the color *meaning*, only the visible set.
+
+
+---
+
+## Instrument override (2026-08-04) — curve-focus product default
+
+**Tickets:** #79 map · PRD #86 · RALPLAN A2  
+**Supersedes for product default:** primary fill = openness.
+
+| Channel | Product default (curve-focus) |
+|---------|-------------------------------|
+| Primary fill | Multi-effort **family series color** |
+| Trail | Same family series color; real points only |
+| Singleton | Dim slate (opacity 0.30, size ×0.55); still in score/frontier |
+| Openness | Glyph only — not primary fill |
+| Heat | `?heat=1` diagnostic only |
+| Legacy AA openness fill | `?enc=openness` regression / screenshot path only |
+
+Dim is **visual only** — does not remove models from the visible set, value-score, or frontier math.

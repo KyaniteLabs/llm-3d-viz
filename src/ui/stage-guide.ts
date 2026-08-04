@@ -3,6 +3,7 @@ import { frontier } from "../lib/pareto";
 import { normalizedScores, weightedOptimum } from "../lib/score";
 import { displayName } from "../lib/display-name";
 import type { AppState, AppStore } from "../state";
+import { legendEntries, type PresentationMode } from "../viz/palette";
 
 const SHAPE_LABELS: Record<string, string> = {
   circle: "circle",
@@ -47,15 +48,23 @@ export class StageGuide {
   private readonly store: AppStore;
   private models: readonly Model[];
   private readonly heatEncoding: boolean;
+  private readonly presentationMode: PresentationMode;
   /** User-controlled open state; null until first paint (then defaults apply). */
   private stageKeyOpen: boolean | null = null;
   private providerOpen: boolean | null = null;
 
-  constructor(root: HTMLElement, store: AppStore, models: readonly Model[], heatEncoding = true) {
+  constructor(
+    root: HTMLElement,
+    store: AppStore,
+    models: readonly Model[],
+    heatEncoding = true,
+    presentationMode: PresentationMode = "curve",
+  ) {
     this.root = root;
     this.store = store;
     this.models = models;
     this.heatEncoding = heatEncoding;
+    this.presentationMode = presentationMode;
     this.store.subscribe((state) => this.render(state));
   }
 
@@ -95,14 +104,21 @@ export class StageGuide {
           <section class="stage-legend" aria-label="Stage legend">
             <p class="stage-guide-heading">ENCODING</p>
             <ul class="semantic-key">
-              <li data-legend-entry="frontier-ridge"><span class="key-mark key-mark--ridge" aria-hidden="true"></span><span><strong>Pareto frontier</strong><small>white ridge / efficient boundary</small></span></li>
-              <li data-legend-entry="optimum-marker"><span class="key-mark key-mark--optimum" aria-hidden="true"></span><span><strong>Optimum marker</strong><small>bright gold / largest</small></span></li>
-              <li data-legend-entry="open-point"><span class="key-mark key-mark--open" aria-hidden="true"></span><span><strong>Open weights</strong><small>blue fill (dominated)</small></span></li>
-              <li data-legend-entry="closed-point"><span class="key-mark key-mark--closed" aria-hidden="true"></span><span><strong>Closed / proprietary</strong><small>near-black fill (dominated)</small></span></li>
-              <li data-legend-entry="reasoning-mark"><span class="key-mark key-mark--reasoning" aria-hidden="true"></span><span><strong>Reasoning</strong><small>open / wireframe glyph</small></span></li>
-              <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>filament-dim size</small></span></li>
+              ${legendEntries(this.presentationMode, this.heatEncoding)
+                .filter((e) => e.id !== "heat-note")
+                .map(
+                  (e) =>
+                    `<li data-legend-entry="${e.id}"><span class="key-mark key-mark--${e.id}" aria-hidden="true"></span><span><strong>${e.title}</strong><small>${e.detail}</small></span></li>`,
+                )
+                .join("")}
             </ul>
-            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1). Openness still secondary.</p>' : '<p class="heat-encoding-note" data-heat-encoding="false">HEAT OFF · openness fill is primary. Pass ?heat=1 for score heat.</p>'}
+            ${
+              this.heatEncoding
+                ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
+                : this.presentationMode === "curve"
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">CURVE-FOCUS · family series fill primary · openness glyph only. ?enc=openness for legacy fill.</p>'
+                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Default is curve-focus.</p>'
+            }
           </section>
 
           <details class="provider-disclosure"${open.provider ? " open" : ""}>

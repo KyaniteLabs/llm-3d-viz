@@ -21,10 +21,15 @@ import {
 } from "../lib/axis-metrics";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { aaPointFill, labColor, type SemanticPointClass } from "./palette";
-import { groupByFamily } from "../lib/family";
+import {
+  isSingleton,
+  pointEncoding,
+  type PresentationMode,
+  type SemanticPointClass,
+} from "./palette";
+import { familyIdOf, groupByFamily } from "../lib/family";
 import { displayName } from "../lib/display-name";
-import type { Stage3DSurface, StageCamera, StageRenderOptions } from "./stage-api";
+import type { Stage3DSurface, StageCamera, StageRenderOptions, StageFitMode } from "./stage-api";
 
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
   filament: "#E8F1E4",
@@ -53,7 +58,12 @@ const SHAPE_TO_GLYPH: Record<string, GlyphKind> = {
   x: "x",
 };
 
-type LabelSpec = { text: string; world: THREE.Vector3; kind: "title" | "tick" | "mark" };
+type LabelSpec = {
+  text: string;
+  world: THREE.Vector3;
+  kind: "title" | "tick" | "mark";
+  priority?: number;
+};
 
 /** Slight transparency on dim slate so occluded frontier marks read through. */
 function semanticOpacity(hex: string): number {
@@ -71,6 +81,9 @@ export class Stage3DThree implements Stage3DSurface {
   public readonly gd: HTMLDivElement;
 
   private readonly heatEncoding: boolean;
+  private presentationMode: PresentationMode = "curve";
+  private hasUserOrbited = false;
+  private lastFitKey = "";
   private readonly tokens: {
     filament: string;
     filamentDim: string;
@@ -190,6 +203,9 @@ export class Stage3DThree implements Stage3DSurface {
     this.controls.minDistance = 1.6;
     this.controls.maxDistance = 7;
     this.controls.target.set(0, 0, 0);
+    this.controls.addEventListener("start", () => {
+      this.hasUserOrbited = true;
+    });
     this.controls.addEventListener("change", () => {
       if (this.camera.position.y < EYE_Y_FLOOR) this.camera.position.y = EYE_Y_FLOOR;
       this.cameraState.eye = {
@@ -474,6 +490,9 @@ export class Stage3DThree implements Stage3DSurface {
 
   public render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
     this.axisMapping = normalizeAxisMapping(options?.axisMapping ?? this.axisMapping);
+    if (options?.presentationMode) this.presentationMode = options.presentationMode;
+    // Stash fit for end of paint (after points exist).
+    (this as any)._pendingFit = options?.fit ?? "none";
 
     // Plot models that have all three mapped metrics. Value-score / frontier still
     // use the classic speed×cost×intelligence contract among isScorable rows.
@@ -517,22 +536,47 @@ export class Stage3DThree implements Stage3DSurface {
           ? "frontier"
           : "dominated";
       const score = scores.find((c) => c.model.model === model.model)?.score ?? 0;
-      const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
-        slateCyan: this.tokens.slateCyan,
-        filamentDim: this.tokens.filamentDim,
-        filament: this.tokens.filament,
-        copper: "#C47A3A",
-        gold: "#F4D58A",
+      const fid = familyIdOf(model);
+      const singleton = isSingleton(model, plottable, familyIdOf);
+      const enc = pointEncoding({
+        openness: model.openness,
+        semanticClass,
+        score,
+        heatEncoding: this.heatEncoding,
+        presentationMode: this.presentationMode,
+        familyId: fid,
+        singleton,
+        provider: model.provider,
+        palette: {
+          slateCyan: this.tokens.slateCyan,
+          filamentDim: this.tokens.filamentDim,
+          filament: this.tokens.filament,
+          copper: "#C47A3A",
+          gold: "#F4D58A",
+        },
       });
+      const color = enc.fill;
       let size = 11;
       if (isOptimum) size = 22;
       else if (isFrontier) size = 15;
-      else size = 11;
+      else size = Math.max(4, 11 * enc.sizeScale);
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
       // Reasoning models use open wireframe mark when not already open-shaped.
       if (model.reasoning && !kind.endsWith("-open") && kind !== "cross" && kind !== "x") {
+        kind = (kind + "-open") as GlyphKind;
+      }
+      // Openness glyph: prefer open-style mark for open weights in curve-focus
+      // when not already distinguished by reasoning wireframe.
+      if (
+        this.presentationMode === "curve" &&
+        model.openness === "open" &&
+        !kind.endsWith("-open") &&
+        kind !== "cross" &&
+        kind !== "x" &&
+        !model.reasoning
+      ) {
         kind = (kind + "-open") as GlyphKind;
       }
       if (isOptimum) {
@@ -551,9 +595,16 @@ export class Stage3DThree implements Stage3DSurface {
 
       const mesh = this.makePointMesh(kind, color, size);
       mesh.position.copy(pos);
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      mat.transparent = enc.opacity < 0.99 || mat.transparent;
+      mat.opacity = Math.min(mat.opacity, enc.opacity);
+      if (enc.opacity < 0.99) mat.opacity = enc.opacity;
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
       mesh.userData.reasoning = Boolean(model.reasoning);
+      mesh.userData.familyId = fid;
+      mesh.userData.singleton = singleton;
+      mesh.userData.encOpacity = enc.opacity;
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
@@ -577,11 +628,22 @@ export class Stage3DThree implements Stage3DSurface {
         .filter((p): p is THREE.Vector3 => p !== null);
       if (pts.length < 2) continue;
       const geom = new THREE.BufferGeometry().setFromPoints(pts);
+      const trailEnc = pointEncoding({
+        openness: members[0].openness,
+        semanticClass: "dominated",
+        score: 0,
+        heatEncoding: false,
+        presentationMode: this.presentationMode,
+        familyId: familyIdOf(members[0]),
+        singleton: false,
+        provider: members[0].provider,
+      });
       const mat = new THREE.LineBasicMaterial({
-        color: new THREE.Color(labColor(members[0].provider)),
+        color: new THREE.Color(trailEnc.trailColor),
         transparent: true,
         opacity: 0.9,
         depthWrite: false,
+        linewidth: 2,
       });
       const line = new THREE.Line(geom, mat);
       line.renderOrder = 0;
@@ -604,8 +666,7 @@ export class Stage3DThree implements Stage3DSurface {
         : new THREE.BufferGeometry();
 
     // Labels: always mark optimum; when a small multi-effort set is focused
-    // (≤12 plottable points), label every point with effort tier for navigability.
-    // Keep axis title/tick specs from buildAxes — only replace mark labels.
+    // (≤12 plottable points), label with short tier tags + NMS in paintLabels.
     this.labelSpecs = this.labelSpecs.filter((s) => s.kind !== "mark");
     const focusLabels = plottable.length > 0 && plottable.length <= 12;
     for (const mesh of this.pointMeshes) {
@@ -613,22 +674,40 @@ export class Stage3DThree implements Stage3DSurface {
       const model = plottable.find((m) => m.model === id);
       if (!model) continue;
       const isOptimum = mesh.userData.semanticClass === "optimum";
+      const isFrontier = mesh.userData.semanticClass === "frontier";
       if (!isOptimum && !focusLabels) continue;
-      const tier = (model.effort_tier || "").toString();
-      const shortBase = displayName(id);
-      const short = shortBase.length > 28 ? shortBase.slice(0, 26) + "…" : shortBase;
-      const reasonMark = isOptimum ? (mesh.userData.reasoning ? "⚡ " : "★ ") : "";
-      const tierMark =
-        tier && tier !== "default" && tier !== "none"
-          ? ` · ${tier}`
-          : tier === "none"
-            ? " · non-reason"
-            : "";
+      const tier = (model.effort_tier || "").toString().toLowerCase();
+      let text: string;
+      if (isOptimum) {
+        const shortBase = displayName(id);
+        const short = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
+        text = `${mesh.userData.reasoning ? "⚡ " : "★ "}${short}`;
+      } else if (focusLabels) {
+        // Solo/focus: effort tier primary (optional short stem).
+        const stem = displayName(id).split(/[\s(]/)[0]?.slice(0, 8) ?? "";
+        const tierLabel =
+          tier && tier !== "default" && tier !== "none"
+            ? tier
+            : tier === "none"
+              ? "non-r"
+              : stem || "?";
+        text = tier && tier !== "default" ? tierLabel : `${stem} ${tierLabel}`.trim();
+      } else {
+        continue;
+      }
+      const priority = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.labelSpecs.push({
-        text: `${reasonMark}${short}${tierMark}`,
+        text,
         world: mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)),
         kind: "mark",
+        priority,
       });
+    }
+
+    // Soft-fit multi-effort bounds on first paint / filter catalog change.
+    const fitMode = (this as any)._pendingFit as StageFitMode | undefined;
+    if (fitMode && fitMode !== "none") {
+      this.fitToVisible(plottable, fitMode);
     }
 
     // Accessible name tracks current optimum.
@@ -706,12 +785,42 @@ export class Stage3DThree implements Stage3DSurface {
     const w = this.el.clientWidth;
     const h = this.el.clientHeight;
     if (w < 2 || h < 2) return;
-    for (const { text, world, kind } of this.labelSpecs) {
+
+    type Placed = { text: string; x: number; y: number; kind: LabelSpec["kind"]; priority: number };
+    const candidates: Placed[] = [];
+    for (const { text, world, kind, priority } of this.labelSpecs) {
       const projected = world.clone().project(this.camera);
       if (projected.z > 1 || projected.z < -1) continue;
       if (projected.x < -1.2 || projected.x > 1.2 || projected.y < -1.2 || projected.y > 1.2) continue;
       const x = (projected.x * 0.5 + 0.5) * w;
       const y = (-projected.y * 0.5 + 0.5) * h;
+      candidates.push({ text, x, y, kind, priority: priority ?? (kind === "title" ? 4 : kind === "mark" ? 1 : 0) });
+    }
+
+    // NMS for mark labels: higher priority wins; axis titles/ticks always keep.
+    const kept: Placed[] = [];
+    const markBox = (p: Placed) => ({
+      l: p.x - 36,
+      r: p.x + 36,
+      t: p.y - 14,
+      b: p.y + 2,
+    });
+    const overlap = (a: ReturnType<typeof markBox>, b: ReturnType<typeof markBox>) =>
+      !(a.r < b.l || a.l > b.r || a.b < b.t || a.t > b.b);
+
+    const nonMarks = candidates.filter((c) => c.kind !== "mark");
+    const marks = candidates
+      .filter((c) => c.kind === "mark")
+      .sort((a, b) => b.priority - a.priority);
+    const acceptedMarks: Placed[] = [];
+    for (const m of marks) {
+      const box = markBox(m);
+      if (acceptedMarks.some((k) => overlap(box, markBox(k)))) continue;
+      acceptedMarks.push(m);
+    }
+    kept.push(...nonMarks, ...acceptedMarks);
+
+    for (const { text, x, y, kind } of kept) {
       const el = document.createElement("span");
       el.textContent = text;
       const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : "9px";
@@ -724,6 +833,46 @@ export class Stage3DThree implements Stage3DSurface {
         max-width:12rem;overflow:hidden;text-overflow:ellipsis;pointer-events:none;`;
       this.labelRoot.appendChild(el);
     }
+  }
+
+  /**
+   * Soft-fit camera to multi-effort (or all) point bounds. Skips if user has
+   * already orbited unless fit key (model set) changed and fit forced via options.
+   */
+  public fitToVisible(models: Model[], mode: StageFitMode = "multi-effort"): void {
+    if (mode === "none") return;
+    const plottable = models.filter((m) => hasMappedAxes(m, this.axisMapping));
+    let targets = plottable;
+    if (mode === "multi-effort") {
+      const byFam = groupByFamily(plottable);
+      targets = plottable.filter((m) => (byFam.get(familyIdOf(m))?.length ?? 0) >= 2);
+      if (targets.length < 2) targets = plottable;
+    }
+    const pts = targets
+      .map((m) => this.modelToScene(m))
+      .filter((p): p is THREE.Vector3 => p !== null);
+    if (pts.length === 0) return;
+
+    const key = `${mode}:${targets.map((m) => m.model).sort().join("|")}`;
+    // Fit once per catalog key (avoid thrashing on re-render).
+    if (key === this.lastFitKey) return;
+    this.lastFitKey = key;
+
+    const box = new THREE.Box3().setFromPoints(pts);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z, 0.4);
+    const padding = 1.15;
+    const dist = Math.max(2.2, maxDim * 2.4 * padding);
+    // Keep similar corner viewing angle as product default.
+    const dir = new THREE.Vector3(-0.75, 0.5, 0.68).normalize();
+    const eye = center.clone().add(dir.multiplyScalar(dist));
+    if (eye.y < EYE_Y_FLOOR) eye.y = EYE_Y_FLOOR;
+    this.setCamera({
+      eye: { x: eye.x, y: eye.y, z: eye.z },
+      center: { x: center.x, y: center.y, z: center.z },
+      up: { x: 0, y: 1, z: 0 },
+    });
   }
 
   destroy() {

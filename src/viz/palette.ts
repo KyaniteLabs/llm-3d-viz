@@ -227,7 +227,7 @@ export function semanticPointFill(
   return semanticFloorFill(semanticClass, palette);
 }
 
-/** AA-style openness fills (primary canvas story when heat is off). */
+/** AA-style openness fills — used only when presentationMode is "openness" or ?enc=openness. */
 export const OPENNESS_FILL = {
   open: "#5B9BD5",
   // Lifted near-black so closed marks stay ≥~3:1 on ink-field (FIX-C visibility).
@@ -260,8 +260,8 @@ export function labColor(provider: string, fallback = "#89939E"): string {
 }
 
 /**
- * Product default fill (heat off): openness for dominated; frontier/optimum keep
- * filament hierarchy so ridge remains the hot story.
+ * Legacy openness-primary fill (heat off): openness for dominated; frontier/optimum keep
+ * filament hierarchy. Used when presentationMode is "openness" / ?enc=openness only.
  */
 export function aaPointFill(
   openness: "open" | "closed",
@@ -274,4 +274,202 @@ export function aaPointFill(
   if (semanticClass === "optimum") return palette.gold ?? palette.filament;
   if (semanticClass === "frontier") return palette.filamentDim;
   return openness === "open" ? OPENNESS_FILL.open : OPENNESS_FILL.closed;
+}
+
+
+// ---------------------------------------------------------------------------
+// Curve-focus product default (RALPLAN A2 / PRD #86)
+// ---------------------------------------------------------------------------
+
+export type PresentationMode = "curve" | "openness";
+
+/** Singleton dim recipe (visual only — still in score/frontier). */
+export const SINGLETON_OPACITY = 0.3;
+export const SINGLETON_SIZE_SCALE = 0.55;
+
+/** Slate fill for post-filter single-effort points under curve-focus. */
+export const SINGLETON_FILL = "#3D5560";
+
+/** Curated multi-effort family series colors (known AA families). */
+export const FAMILY_SERIES_COLORS: Readonly<Record<string, string>> = {
+  "GPT-5.6 Sol": "#10A37F",
+  "GPT-5.6": "#0D8F6E",
+  "GPT-5.4": "#0B7A5E",
+  "GPT-5.3": "#09664F",
+  "GPT-5.2": "#12B886",
+  "o3": "#20C997",
+  "o4-mini": "#38D9A9",
+  "Claude Opus 5": "#D4A27F",
+  "Claude Opus 4.6": "#C4926F",
+  "Claude Opus 4.5": "#B8926A",
+  "Claude Sonnet 4.6": "#E0B48F",
+  "Claude Sonnet 4.5": "#C9A07A",
+  "Claude Haiku 4.5": "#A8825A",
+  "Gemini 3.1 Pro": "#4285F4",
+  "Gemini 3 Pro": "#5A9BF5",
+  "Gemini 2.5 Pro": "#6BA3F7",
+  "Gemini 2.5 Flash": "#8AB4F8",
+  "Grok 4": "#1DA1F2",
+  "Grok 3": "#4DB5F5",
+  "DeepSeek-R1": "#4D6BFE",
+  "DeepSeek-V3": "#6B84FE",
+  "Qwen3": "#FF6A00",
+  "Qwen2.5": "#FF8533",
+  "Llama 4": "#0668E1",
+  "Mistral Large": "#F54E42",
+  "Kimi K2": "#1A73E8",
+  "MiniMax M2": "#7C5CFF",
+};
+
+/** FNV-1a style hash → stable hex family color (always #rrggbb for Plotly/Three). */
+export function familySeriesColor(familyId: string, _fallbackLab?: string): string {
+  const curated = FAMILY_SERIES_COLORS[familyId];
+  if (curated) return curated;
+  // Hash first so distinct multi-effort families never collapse to one lab color.
+  let h = 2166136261;
+  for (let i = 0; i < familyId.length; i++) {
+    h ^= familyId.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  // Spread hue-ish channels across mid-range RGB (always #rrggbb).
+  const r = 55 + (Math.abs(h) % 160);
+  const g = 60 + (Math.abs(h >> 7) % 150);
+  const b = 70 + (Math.abs(h >> 15) % 140);
+  return toHex([r, g, b]);
+}
+
+export function isSingleton(
+  model: { family_id?: string; model: string },
+  visibleModels: readonly { family_id?: string; model: string }[],
+  familyOf: (m: any) => string,
+): boolean {
+  const fid = familyOf(model);
+  let count = 0;
+  for (const m of visibleModels) {
+    if (familyOf(m) === fid) {
+      count += 1;
+      if (count >= 2) return false;
+    }
+  }
+  return true;
+}
+
+export interface PointEncodingInput {
+  openness: "open" | "closed";
+  semanticClass: SemanticPointClass;
+  score: number;
+  heatEncoding: boolean;
+  presentationMode: PresentationMode;
+  familyId: string;
+  singleton: boolean;
+  provider?: string;
+  palette?: SemanticPalette;
+}
+
+export interface PointEncoding {
+  fill: string;
+  opacity: number;
+  sizeScale: number;
+  trailColor: string;
+  seriesColor: string;
+}
+
+/**
+ * Single product encoding contract for stage, projections, sweep, and legend.
+ * Curve-focus (default): family series fill+trail; openness never primary fill.
+ * Openness mode: legacy aaPointFill for regression / AA screenshots.
+ */
+export function pointEncoding(input: PointEncodingInput): PointEncoding {
+  const palette = input.palette ?? DEFAULT_SEMANTIC_PALETTE;
+  const series = familySeriesColor(input.familyId, input.provider);
+  const trailColor = series;
+
+  if (input.presentationMode === "openness") {
+    return {
+      fill: aaPointFill(
+        input.openness,
+        input.semanticClass,
+        input.score,
+        input.heatEncoding,
+        palette,
+      ),
+      opacity: 1,
+      sizeScale: 1,
+      trailColor: labColor(input.provider ?? "", series),
+      seriesColor: series,
+    };
+  }
+
+  // Curve-focus: family series is the primary fill channel for multi-effort marks.
+  // Optimum keeps gold; frontier keeps size hierarchy (not filament fill override).
+  if (input.heatEncoding) {
+    return {
+      fill: semanticPointFill(input.semanticClass, input.score, true, palette),
+      opacity: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_OPACITY : 1,
+      sizeScale: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_SIZE_SCALE : 1,
+      trailColor,
+      seriesColor: series,
+    };
+  }
+
+  if (input.semanticClass === "optimum") {
+    return {
+      fill: palette.gold ?? palette.filament,
+      opacity: 1,
+      sizeScale: 1,
+      trailColor,
+      seriesColor: series,
+    };
+  }
+
+  // Singleton (any non-optimum): dim slate; still in score/frontier sets.
+  if (input.singleton) {
+    return {
+      fill: SINGLETON_FILL,
+      opacity: SINGLETON_OPACITY,
+      sizeScale: SINGLETON_SIZE_SCALE,
+      trailColor,
+      seriesColor: series,
+    };
+  }
+
+  // Multi-effort dominated + frontier: family series fill (size/★ handle hierarchy).
+  return {
+    fill: series,
+    opacity: 1,
+    sizeScale: 1,
+    trailColor,
+    seriesColor: series,
+  };
+}
+
+/** Legend entries for the active presentation mode (1:1 with marks). */
+export function legendEntries(
+  mode: PresentationMode,
+  heatEncoding: boolean,
+): Array<{ id: string; title: string; detail: string }> {
+  if (mode === "openness") {
+    return [
+      { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge / efficient boundary" },
+      { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest" },
+      { id: "open-point", title: "Open weights", detail: "blue fill (dominated)" },
+      { id: "closed-point", title: "Closed / proprietary", detail: "slate fill (dominated)" },
+      { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
+      { id: "frontier-point", title: "Frontier point", detail: "filament-dim size" },
+    ];
+  }
+  const heatNote = heatEncoding
+    ? "HEAT ON · copper→filament by value score"
+    : "family series color on multi-effort paths";
+  return [
+    { id: "family-trail", title: "Family trail", detail: "series color · effort path low→xhigh" },
+    { id: "effort-path", title: "Effort path", detail: "real points only · ordered intensity" },
+    { id: "singleton-dim", title: "Singleton", detail: "dim slate · single-effort in visible set" },
+    { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge / efficient boundary" },
+    { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest" },
+    { id: "open-closed-glyph", title: "Open / closed", detail: "glyph only · not primary fill" },
+    { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
+    { id: "frontier-point", title: "Frontier point", detail: "larger size · series fill on multi-effort" },
+    { id: "heat-note", title: heatEncoding ? "Heat" : "Curve-focus", detail: heatNote },
+  ];
 }

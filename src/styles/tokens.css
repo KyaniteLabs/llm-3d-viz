@@ -290,3 +290,30 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .score-table tbody tr[data-role="frontier"] th { color: var(--filament-dim); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .stage-3d-three canvas:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
+
+/* Curve-focus instrument: family nav, effort strip, advanced filters */
+.family-nav { margin-top: 0.65rem; border-top: 1px solid var(--color-border); padding-top: 0.55rem; }
+.filter-disclosure { margin-top: 0.75rem; border-top: 1px solid var(--color-border); padding-top: 0.45rem; }
+.filter-disclosure > summary { cursor: pointer; list-style: none; color: var(--color-text-muted); letter-spacing: 0.1em; }
+.filter-disclosure > summary::-webkit-details-marker { display: none; }
+.filter-disclosure .filter-controls { border-top: 0; margin-top: 0.35rem; }
+.effort-strip { grid-area: projections; margin-bottom: 0.5rem; padding: 0.55rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: rgba(16, 22, 29, 0.92); }
+.effort-strip[hidden] { display: none !important; }
+.effort-ladder { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0; padding: 0; list-style: none; }
+.effort-step { display: flex; flex-direction: column; gap: 0.15rem; min-width: 5.5rem; padding: 0.35rem 0.45rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); cursor: default; font-family: var(--font-mono); }
+.effort-step.is-active { border-color: var(--filament); background: rgba(232, 241, 228, 0.08); }
+.effort-tier { color: var(--filament-dim); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.effort-step strong { color: var(--color-text); font-size: 0.68rem; font-weight: 500; }
+.key-mark--family-trail { width: 1rem; height: 0.12rem; margin-top: 0.4rem; background: #10a37f; }
+.key-mark--effort-path { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: #10a37f; box-shadow: 0.35rem 0 0 -0.15rem #0d8f6e, 0.7rem 0 0 -0.25rem #09664f; }
+.key-mark--singleton-dim { border-radius: 50%; background: #3d5560; opacity: 0.35; }
+.key-mark--open-closed-glyph { border-radius: 50%; border: 1.5px solid var(--filament-dim); background: transparent; }
+.key-mark--open, .key-mark--open-point { border-radius: 50%; background: #5b9bd5; }
+.key-mark--closed, .key-mark--closed-point { border-radius: 50%; background: #6a7580; }
+.key-mark--reasoning-mark { border-radius: 50%; border: 1.5px dashed var(--filament-dim); background: transparent; }
+.is-cinema .effort-strip { display: none; }
+
+/* Legend id aliases (curve-focus legendEntries) */
+.key-mark--frontier-ridge { width: 1rem; height: 0.15rem; margin-top: 0.4rem; background: var(--filament); }
+.key-mark--optimum-marker { border-radius: 50%; background: var(--filament); box-shadow: 0 0 0 2px rgba(232, 241, 228, 0.24); }
+.key-mark--frontier-point { border-radius: 50%; background: linear-gradient(135deg, var(--copper), var(--filament-dim)); }

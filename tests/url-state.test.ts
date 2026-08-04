@@ -60,3 +60,19 @@ describe("url-state", () => {
     expect(again.weights).toEqual(state.weights);
   });
 });
+
+describe("enc presentation flag", () => {
+  it("preserves enc=openness when serializing shareable state", () => {
+    const existing = new URLSearchParams("enc=openness&heat=1");
+    const params = serializeShareableState(
+      {
+        filters: { ...DEFAULT_FILTERS },
+        axisMapping: { ...DEFAULT_AXIS_MAPPING },
+        weights: { ...presets.chat },
+      },
+      existing,
+    );
+    expect(params.get("enc")).toBe("openness");
+    expect(params.get("heat")).toBe("1");
+  });
+});

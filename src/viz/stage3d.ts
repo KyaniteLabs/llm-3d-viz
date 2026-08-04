@@ -2,7 +2,8 @@ import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { aaPointFill, type SemanticPointClass } from "./palette";
+import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
+import { familyIdOf } from "../lib/family";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -35,6 +36,7 @@ export class Stage3D {
   // otherwise flip the camera below the stage plane).
   private relayoutClampInFlight = false;
   private isInitialized = false;
+  private presentationMode: PresentationMode = "curve";
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
   private renderGen = 0; // default fallback, will be computed dynamically
@@ -182,9 +184,10 @@ export class Stage3D {
     });
   }
 
-  public render(weights: ScoreWeights, modelsList: Model[], _options?: import("./stage-api").StageRenderOptions) {
+  public render(weights: ScoreWeights, modelsList: Model[], options?: import("./stage-api").StageRenderOptions) {
+    if (options?.presentationMode) this.presentationMode = options.presentationMode;
     // Plotly fallback keeps the product default axes; remapping is Three-primary.
-    void _options;
+    void options;
     void this.renderWithPlotly(weights, modelsList);
   }
 
@@ -256,14 +259,24 @@ export class Stage3D {
       symbols.push(symbol);
 
       const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
-      const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
-        slateCyan: this.tokens.slateCyan,
-        filamentDim: this.tokens.filamentDim,
-        filament: this.tokens.filament,
-        copper: "#C47A3A",
-        gold: "#F4D58A",
+      const enc = pointEncoding({
+        openness: model.openness,
+        semanticClass,
+        score,
+        heatEncoding: this.heatEncoding,
+        presentationMode: this.presentationMode,
+        familyId: familyIdOf(model),
+        singleton: isSingleton(model, scorable, familyIdOf),
+        provider: model.provider,
+        palette: {
+          slateCyan: this.tokens.slateCyan,
+          filamentDim: this.tokens.filamentDim,
+          filament: this.tokens.filament,
+          copper: "#C47A3A",
+          gold: "#F4D58A",
+        },
       });
-      colors.push(color);
+      colors.push(enc.fill);
 
       // Keep sizes aligned with SweepScheduler (optimum 16, frontier 11, rest 8)
       // so restyle/settled contracts stay consistent across stage + sweep.
@@ -272,6 +285,8 @@ export class Stage3D {
         size = 16;
       } else if (isFrontier) {
         size = 11;
+      } else {
+        size = Math.max(4, Math.round(size * enc.sizeScale));
       }
       sizes.push(size);
 

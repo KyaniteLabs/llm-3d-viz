@@ -2,7 +2,8 @@ import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
-import { aaPointFill, type SemanticPointClass } from "./palette";
+import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
+import { familyIdOf } from "../lib/family";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -86,6 +87,7 @@ export class Projections {
   public readonly gds: PlotlyGraphDiv[] = [];
   private readonly specs: ProjectionSpec[];
   private initialized = false;
+  private presentationMode: PresentationMode = "curve";
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
   /** Incremented every render so Plotly.react never silently skips a data diff. */
@@ -186,6 +188,7 @@ export class Projections {
     isFrontier: boolean,
     otherFrontierSymbols: Set<Plotly3dSymbol>,
     score: number,
+    visible: readonly Model[],
   ): { color: string; size: number; symbol: Plotly3dSymbol } {
     const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
     const symbolCandidates: Plotly3dSymbol[] = [
@@ -211,19 +214,34 @@ export class Projections {
       : isFrontier
         ? "frontier"
         : "dominated";
-    const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
-      slateCyan: this.tokens.slateCyan,
-      filamentDim: this.tokens.filamentDim,
-      filament: this.tokens.filament,
-      copper: "#C47A3A",
-      gold: "#F4D58A",
+    const enc = pointEncoding({
+      openness: model.openness,
+      semanticClass,
+      score,
+      heatEncoding: this.heatEncoding,
+      presentationMode: this.presentationMode,
+      familyId: familyIdOf(model),
+      singleton: isSingleton(model, visible, familyIdOf),
+      provider: model.provider,
+      palette: {
+        slateCyan: this.tokens.slateCyan,
+        filamentDim: this.tokens.filamentDim,
+        filament: this.tokens.filament,
+        copper: "#C47A3A",
+        gold: "#F4D58A",
+      },
     });
 
     let size = 8;
     if (isOptimum) size = 16;
     else if (isFrontier) size = 11;
+    else size = Math.max(4, Math.round(size * enc.sizeScale));
 
-    return { color, size, symbol };
+    return { color: enc.fill, size, symbol };
+  }
+
+  setPresentationMode(mode: PresentationMode) {
+    this.presentationMode = mode;
   }
 
   private axisLayout(kind: AxisKind): Record<string, unknown> {
@@ -323,6 +341,7 @@ export class Projections {
           frontierIds.has(model.model),
           otherFrontierSymbols,
           scoreById.get(model.model) ?? 0,
+          scorable,
         );
         colors.push(style.color);
         sizes.push(style.size);
