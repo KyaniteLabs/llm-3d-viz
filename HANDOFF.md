@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-03 (v6 — Three stage visual bootstrap fixed; Plotly default; `?stage=r3f`)
+Last updated: 2026-08-03 (v7 — **Simon: not doing Plotly for 3D hero**; Three is the path)
 
 ## What this is
 Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
@@ -8,13 +8,15 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 - **Repo (Forgejo, private):** https://git.kyanitelabs.tech/simon/llm-3d-viz
 - **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
-- **Three stage spike:** add `?stage=r3f` (default remains frozen Plotly)
+- **Three stage:** default hero on this branch; `?stage=plotly` is debug-only / kill-path, not product
 
-## Status: Plotly v0 frozen — R3F/Three spike on `spike/r3f-stage`
+## Status: Three is the 3D hero — Plotly stage is out (Simon 2026-08-03)
 
-**Do not publish** until Simon re-approves after looking. Suites green ≠ product ready.
+**Decision (Simon, explicit):** we are **not** shipping/polishing Plotly as the 3D hero. Path is **Three.js stage** (`Stage3DThree`) → visual go → production default.
 
-**Plotly is not the end-state renderer** (SPEC D7). Further Plotly stage polish is **out of scope** unless P0 crash or explicit publish blocker.
+- Plotly may remain **only** for linked **2D projections** until those are replaced (spike contract: do not port 2D in the same train).
+- No more “freeze Plotly v0 and film that instead.”
+- **Do not publish** until Simon visual go on the **Three** hero. Suites green ≠ product ready.
 
 ### Landed
 - PR #38 comprehension pass, #40 residual closeout, #42 cream plane kill + axis camera orientation.
@@ -39,7 +41,7 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 npm test          # 45 vitest
 npx tsc --noEmit
 npm run build
-npx vite preview  # open /?stage=r3f  and / (plotly default)
+npm run preview   # http://127.0.0.1:4200/  (Safari-safe; Three default)
 ```
 
 **Look at:** first paint axes (high up/away, no cream plane), ridge + heat, cinema (`C` / button), console hover by model id, threshold sweep markers.
@@ -51,9 +53,9 @@ npx vite preview  # open /?stage=r3f  and / (plotly default)
 - Product encoding gaps (effort levels, class contrast, filters) remain **after** stage go/kill — separate from renderer critical path.
 
 ### Next — Simon
-- **Visual go/kill** on `?stage=r3f` vs default Plotly.
-- Optional honest v0 publish of Plotly concept after look.
-- Videos needing hero quality → wait for go + production swap, or accept Plotly.
+- **Visual go/kill on Three only** (http://127.0.0.1:4200/).
+- If go → production: default Three, delete or bury Plotly stage path; keep 2D Plotly only until replaced.
+- Videos = Three cinema path, not Plotly gl3d.
 
 ### Local preview (Safari)
 - **Do not use `vite preview` on :4190** — Vite hangs WebKit; port 4190 is blocked for Safari on this Mac.
