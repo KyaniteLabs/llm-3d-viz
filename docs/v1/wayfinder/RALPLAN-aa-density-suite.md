@@ -1,9 +1,9 @@
 # RALPLAN — AA-density graph suite
 
-**Status:** `pending approval`  
-**Mode:** wayfinder chart + consensus plan (no execution)  
+**Status:** **superseded by consensus** — see `.omx/plans/prd-aa-density-suite.md` (A′, Architect+Critic APPROVE)  
+**Mode:** wayfinder chart → ralplan consensus complete (no execution until explicit handoff)  
 **Map:** [MAP: AA-density graph suite…](https://git.kyanitelabs.tech/simon/llm-3d-viz/issues/47)  
-**User ask:** “I want all of them” (filters · multi-effort · semantic color · multi-chart · cost/task) · Three only
+**User ask:** “I want all of them” (filters · multi-effort · semantic color · multi-chart · cost/task) · Three only · remappable axes
 
 ---
 
@@ -71,4 +71,6 @@ Cost axis: **decide in #50** after #49 research (recommendation: $/M on 3D, $/ta
 
 ## Approval
 
-**pending approval** — do not implement the suite until Simon approves execution after key decisions (or explicitly says “execute the map”).
+**Ralplan consensus APPROVED 2026-08-04** (Architect → Critic on revise-2).  
+Durable gate: `.omx/state/ralplan-consensus-aa-density-suite.json`.  
+**Do not implement until Simon picks an execution lane** (`$ultragoal` default, `$team`, or explicit `$ralph`).

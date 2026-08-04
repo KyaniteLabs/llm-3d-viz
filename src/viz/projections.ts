@@ -2,7 +2,7 @@ import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
-import { semanticPointFill, type SemanticPointClass } from "./palette";
+import { aaPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -211,7 +211,7 @@ export class Projections {
       : isFrontier
         ? "frontier"
         : "dominated";
-    const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+    const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
       slateCyan: this.tokens.slateCyan,
       filamentDim: this.tokens.filamentDim,
       filament: this.tokens.filament,

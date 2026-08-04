@@ -226,3 +226,51 @@ export function semanticPointFill(
   if (semanticClass === "optimum") return palette.filament;
   return semanticFloorFill(semanticClass, palette);
 }
+
+/** AA-style openness fills (primary canvas story when heat is off). */
+export const OPENNESS_FILL = {
+  open: "#5B9BD5",
+  closed: "#2A2A2A",
+} as const;
+
+/** Stable lab identity colors for outlines / trails / legend (not fill primary). */
+export const LAB_COLORS: Readonly<Record<string, string>> = {
+  OpenAI: "#10A37F",
+  Anthropic: "#D4A27F",
+  Google: "#4285F4",
+  Meta: "#0668E1",
+  DeepSeek: "#4D6BFE",
+  Alibaba: "#FF6A00",
+  Mistral: "#F54E42",
+  Cohere: "#39594D",
+  Amazon: "#FF9900",
+  Kimi: "#1A73E8",
+  Microsoft: "#00A4EF",
+  MiniMax: "#7C5CFF",
+  NVIDIA: "#76B900",
+  SpaceXAI: "#E8F1E4",
+  "Thinking Machines": "#C47A3A",
+  Xiaomi: "#FF6900",
+  "Z AI": "#6366F1",
+};
+
+export function labColor(provider: string, fallback = "#89939E"): string {
+  return LAB_COLORS[provider] ?? fallback;
+}
+
+/**
+ * Product default fill (heat off): openness for dominated; frontier/optimum keep
+ * filament hierarchy so ridge remains the hot story.
+ */
+export function aaPointFill(
+  openness: "open" | "closed",
+  semanticClass: SemanticPointClass,
+  score: number,
+  heatEncoding: boolean,
+  palette: SemanticPalette = DEFAULT_SEMANTIC_PALETTE,
+): string {
+  if (heatEncoding) return semanticPointFill(semanticClass, score, true, palette);
+  if (semanticClass === "optimum") return palette.gold ?? palette.filament;
+  if (semanticClass === "frontier") return palette.filamentDim;
+  return openness === "open" ? OPENNESS_FILL.open : OPENNESS_FILL.closed;
+}

@@ -1,4 +1,5 @@
 import type { Model } from "../data/models";
+import type { AxisMapping } from "../lib/axis-metrics";
 import type { ScoreWeights } from "../lib/score";
 
 /** Plotly-compatible camera shape (also used by Three stage). */
@@ -6,6 +7,11 @@ export interface StageCamera {
   eye: { x: number; y: number; z: number };
   up: { x: number; y: number; z: number };
   center: { x: number; y: number; z: number };
+}
+
+export interface StageRenderOptions {
+  /** Metric bound to each scene axis. Defaults to cost × intelligence × speed. */
+  axisMapping?: AxisMapping;
 }
 
 /**
@@ -17,7 +23,7 @@ export interface Stage3DSurface {
   readonly el: HTMLElement;
   /** Graph / event root — Plotly div or Three host. */
   readonly gd: HTMLDivElement;
-  render(weights: ScoreWeights, models: Model[]): void;
+  render(weights: ScoreWeights, models: Model[], options?: StageRenderOptions): void;
   setCamera(camera: Partial<StageCamera> | StageCamera): void;
   orbitTo(angleRad: number): void;
   /** Per-scorable-index colors/sizes for threshold-sweep (optional). */

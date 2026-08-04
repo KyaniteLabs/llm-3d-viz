@@ -10,10 +10,11 @@ import {
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
 import {
+  aaPointFill,
   semanticFloorFill,
-  semanticPointFill,
   type SemanticPointClass,
 } from "./palette";
+import { sameFilters, type ModelFilters } from "../lib/filters";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
@@ -67,12 +68,13 @@ function graphIds(gd: Graph): string[] {
 export class SweepScheduler {
   private readonly stage: Graph;
   private readonly projections: readonly Graph[];
-  private readonly models: readonly Model[];
+  private models: readonly Model[];
   private readonly store: AppStore;
   private cancelScheduled: (() => void) | null = null;
   private run = 0;
   private interacted = false;
   private previousWeights: ScoreWeights | null = null;
+  private previousFilters: ModelFilters | null = null;
   private lastBatch = -1;
   private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
@@ -107,21 +109,45 @@ export class SweepScheduler {
     }
     this.store.subscribe((state) => {
       this.ensureAfterPlotListeners();
-      const changed = !this.previousWeights || Object.keys(state.weights).some(
-        (key) => state.weights[key as keyof ScoreWeights] !== this.previousWeights![key as keyof ScoreWeights],
-      );
-      if (!changed && this.previousWeights) {
+      const weightsChanged =
+        !this.previousWeights ||
+        Object.keys(state.weights).some(
+          (key) =>
+            state.weights[key as keyof ScoreWeights] !==
+            this.previousWeights![key as keyof ScoreWeights],
+        );
+      const filtersChanged =
+        !this.previousFilters || !sameFilters(this.previousFilters, state.filters);
+      if (!weightsChanged && !filtersChanged && this.previousWeights) {
         // Store updates such as cinema mode re-render Plotly without starting a
-        // sweep. Re-assert the last scheduler-owned appearance because those
-        // renders intentionally omit marker color/size and Plotly otherwise
-        // restores its default palette.
+        // sweep. Re-assert only when the visible universe is unchanged — never
+        // clobber a filter-correct stage with stale full-catalog colors.
         this.reassertAppearance();
         return;
       }
-      if (this.previousWeights) this.interacted = true;
+      if (this.previousWeights && weightsChanged) this.interacted = true;
       this.previousWeights = { ...state.weights };
+      this.previousFilters = {
+        ...state.filters,
+        providers: [...state.filters.providers],
+        families: [...state.filters.families],
+      };
+      // Filter-only: recompute appearance from current models (visible set) without
+      // treating it as a weight interaction unless weights also changed.
       this.start(state);
     });
+  }
+
+  /** Replace the scoring/appearance catalog (must be the current visible set). */
+  setModels(models: readonly Model[]) {
+    this.models = models;
+    const state = this.store.getState();
+    this.previousFilters = {
+      ...state.filters,
+      providers: [...state.filters.providers],
+      families: [...state.filters.families],
+    };
+    this.start(state);
   }
 
   destroy() {
@@ -139,6 +165,7 @@ export class SweepScheduler {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
     const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
+    const modelById = new Map(this.models.map((m) => [m.model, m]));
     const optimum = weightedOptimum(scores)?.model.model;
     const targetIds = new Set(ignitionOrder(this.models, weights, this.interacted));
     const semanticClassFor = (id: string): SemanticPointClass =>
@@ -147,8 +174,10 @@ export class SweepScheduler {
       const ids = graphIds(gd);
       const colors = ids.map((id) => {
         const semanticClass = semanticClassFor(id);
+        const model = modelById.get(id);
+        const openness = model?.openness ?? "closed";
         return target
-          ? semanticPointFill(semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
+          ? aaPointFill(openness, semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
           : semanticFloorFill(semanticClass);
       });
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 11 : 8);

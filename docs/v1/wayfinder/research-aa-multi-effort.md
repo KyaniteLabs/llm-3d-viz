@@ -39,3 +39,7 @@ Exact current AA matrix (which families have low/medium/high/max today) needs a 
 
 - Schema + UX decision ([Decide multi-effort representation…](https://git.kyanitelabs.tech/simon/llm-3d-viz/issues/52)) can proceed with **family_id + effort_tier + default = max/high**.
 - Task ticket (not yet filed) later: expand `models.v0` with multi-effort rows from AA.
+
+## Supersession (ralplan A′ · 2026-08-04)
+
+Product lock in `decision-filters-and-effort-curves.md` **supersedes** “default max/high only” as the density control: **all tiers plottable** on the same graph; density is **age ≤6 months + provider + family** filters. Effort-tier multiselect is out of the AA-density train unless reopened. Scrape expansion remains #64.

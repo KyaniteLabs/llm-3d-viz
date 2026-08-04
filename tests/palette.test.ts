@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   dominatedFill,
   semanticPointFill,
+  aaPointFill,
+  OPENNESS_FILL,
   lighten,
   contrastRatio,
   relativeLuminance,
@@ -106,5 +108,15 @@ describe("class-bounded heat ramp — review #27 P1a", () => {
     const highScore = semanticPointFill("dominated", 1, true);
     expect(relativeLuminance(highScore)).toBeLessThan(relativeLuminance(FILAMENT_DIM));
     expect(parseChannels(highScore)![2]).toBeGreaterThanOrEqual(parseChannels(highScore)![1]);
+  });
+});
+
+describe("AA openness fill (heat off default)", () => {
+  it("uses distinct open vs closed fills for dominated points", () => {
+    const open = aaPointFill("open", "dominated", 0.5, false);
+    const closed = aaPointFill("closed", "dominated", 0.5, false);
+    expect(open).toBe(OPENNESS_FILL.open);
+    expect(closed).toBe(OPENNESS_FILL.closed);
+    expect(open).not.toBe(closed);
   });
 });

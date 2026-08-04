@@ -12,7 +12,23 @@
 - **Personality:** instrument-grade calm (chrome) + cinematic-drama (canvas). Pole: **instrument, not dashboard; object, not website.** Restrained, expensive, precise, anti-festive.
 - **Structure and rhythm:** asymmetric "stage + console"; canvas slow/heavy, console snappy/even. (See Structure block.)
 - **Signature:** the **threshold-sweep** — on every re-weight, a staged filament ignition propagates from the frontier outward, synced to the 2D projections snapping into registration. Both the motion signature and the video hero shot.
-- **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…), never categorical color.
+- **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…) **plus** AA-style semantic channels below (shape remains useful when many labs share a color class).
+
+## Canvas encoding channel matrix (AA-density suite · 2026-08-04)
+
+Supersedes “never categorical color on canvas” and “copper never on canvas” for **data marks only**. Chrome copper (sliders/focus) is unchanged.
+
+| Channel | Meaning | Default |
+|---------|---------|---------|
+| **Fill** | Openness: open weights vs closed/proprietary | **On** — primary story |
+| **Glyph / icon** | Reasoning / thinking-effort (`reasoning === true`) | **On** |
+| **Size / ridge / ★** | Frontier / optimum | **On** |
+| **Lab / provider color** | Identity (outline, legend swatch, family trail stroke) | **On** when multi-lab |
+| **Score heat (copper→filament)** | Diagnostic value-score ramp | **Off**; opt-in `?heat=1` only |
+
+- Legend must match stage 1:1 (Open / Closed, Reasoning, lab swatches when used).
+- Family effort **trails** keep one family color along real points only (no invented vertices).
+- Value-score weights remain independent of display-axis remapping.
 
 ## Typography specimen (→ web-typography)
 - **Display / labels:** refined grotesque — **Söhne / Neue Haas Grotesk** if licensed, else **Inter Tight** (NOT default Inter) / Geist. Tight tracking.

@@ -2,17 +2,28 @@
  * Three.js 3D hero stage (docs/v1/r3f-stage-contract.md).
  * Vanilla TS — no React/R3F.
  *
- * Product axes: x=cost (log), y=intelligence (linear 0–100), z=speed (log).
- * Scene is Three Y-up with that assignment (x,y,z) = (cost, intel, speed).
+ * Default product axes: x=cost (log), y=intelligence (linear 0–100), z=speed (log).
+ * Scene is Three Y-up with that assignment. Metrics on X/Y/Z are remappable via
+ * AxisMapping so cost definition (and other metrics) need not be permanently chosen.
  * Visual target: Plotly-parity cube + grid + ticks; monochrome heat (design system).
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Model, isScorable, PROVIDER_SHAPES } from "../data/models";
+import { Model, PROVIDER_SHAPES } from "../data/models";
+import {
+  DEFAULT_AXIS_MAPPING,
+  buildAxisDomain,
+  hasMappedAxes,
+  modelToSceneCoords,
+  normalizeAxisMapping,
+  type AxisDomain,
+  type AxisMapping,
+} from "../lib/axis-metrics";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { semanticPointFill, type SemanticPointClass } from "./palette";
-import type { Stage3DSurface, StageCamera } from "./stage-api";
+import { aaPointFill, labColor, type SemanticPointClass } from "./palette";
+import { groupByFamily } from "../lib/family";
+import type { Stage3DSurface, StageCamera, StageRenderOptions } from "./stage-api";
 
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
   filament: "#E8F1E4",
@@ -77,18 +88,20 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly pointer = new THREE.Vector2();
   private readonly pointsGroup = new THREE.Group();
   private readonly ridgeLine: THREE.Line;
+  private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
   private readonly labelRoot: HTMLDivElement;
   private labelSpecs: LabelSpec[] = [];
 
-  /** Product camera: x=cost, y=intel, z=speed (same as scene). */
+  /** Product camera: default x=cost, y=intel, z=speed (same as scene). */
   private cameraState: StageCamera = {
     // Corner view of the cube — all three axes readable (Plotly-like hero).
     eye: { x: -2.35, y: 1.55, z: 2.15 },
     up: { x: 0, y: 1, z: 0 },
     center: { x: 0, y: 0, z: 0 },
   };
-  private priceFloor = 0.08125;
+  private axisMapping: AxisMapping = { ...DEFAULT_AXIS_MAPPING };
+  private domains: { x: AxisDomain; y: AxisDomain; z: AxisDomain } | null = null;
   private modelIds: string[] = [];
   private pointMeshes: THREE.Mesh[] = [];
   private hoverId: string | null = null;
@@ -187,6 +200,7 @@ export class Stage3DThree implements Stage3DSurface {
     });
 
     this.scene.add(this.pointsGroup);
+    this.scene.add(this.trailsGroup);
     this.scene.add(this.axisGroup);
 
     const ridgeMat = new THREE.LineBasicMaterial({
@@ -294,18 +308,31 @@ export class Stage3DThree implements Stage3DSurface {
     });
   }
 
-  /** Map data → cube: each axis spans [-S, S]. */
-  private toScene(cost: number, intel: number, speed: number): THREE.Vector3 {
-    const logCost = Math.log10(Math.max(cost, this.priceFloor));
-    const logCostMin = Math.log10(this.priceFloor);
-    const logCostMax = Math.log10(100);
-    const logSpeed = Math.log10(Math.max(speed, 10));
-    const logSpeedMin = Math.log10(10);
-    const logSpeedMax = Math.log10(1000);
-    const nx = ((logCost - logCostMin) / (logCostMax - logCostMin)) * 2 * S - S;
-    const ny = (intel / 100) * 2 * S - S;
-    const nz = ((logSpeed - logSpeedMin) / (logSpeedMax - logSpeedMin)) * 2 * S - S;
-    return new THREE.Vector3(nx, ny, nz);
+  /** Map a model through the current axis domains into the cube [-S, S]³. */
+  private modelToScene(model: Model): THREE.Vector3 | null {
+    if (!this.domains) return null;
+    const coords = modelToSceneCoords(model, this.axisMapping, this.domains, S);
+    if (!coords) return null;
+    return new THREE.Vector3(coords.x, coords.y, coords.z);
+  }
+
+  /** Map a raw tick value on a scene axis into a world coordinate on that axis. */
+  private tickToSceneAxis(axis: "x" | "y" | "z", value: number): number {
+    if (!this.domains) return 0;
+    const domain = this.domains[axis];
+    const unit =
+      domain.scale === "log"
+        ? (() => {
+            const v = Math.max(value <= 0 ? domain.floor : value, domain.floor);
+            const logV = Math.log10(v);
+            const logMin = Math.log10(domain.min);
+            const logMax = Math.log10(domain.max);
+            return logMax === logMin ? 0.5 : (logV - logMin) / (logMax - logMin);
+          })()
+        : domain.max === domain.min
+          ? 0.5
+          : (value - domain.min) / (domain.max - domain.min);
+    return Math.min(1, Math.max(0, unit)) * 2 * S - S;
   }
 
   private addLine(
@@ -367,51 +394,37 @@ export class Stage3DThree implements Stage3DSurface {
       this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(-S, S, t), grid, 0.1);
     }
 
-    // Axis titles at high ends.
+    const domains = this.domains;
+    if (!domains) return;
+
+    // Axis titles at high ends (labels follow the remapped metrics).
     this.labelSpecs.push(
-      { text: "COST ($/M)", world: new THREE.Vector3(S + 0.12, -S, -S), kind: "title" },
-      { text: "INTELLIGENCE", world: new THREE.Vector3(-S, S + 0.12, -S), kind: "title" },
-      { text: "SPEED (TPS)", world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
+      { text: domains.x.title, world: new THREE.Vector3(S + 0.12, -S, -S), kind: "title" },
+      { text: domains.y.title, world: new THREE.Vector3(-S, S + 0.12, -S), kind: "title" },
+      { text: domains.z.title, world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
     );
 
-    // Tick labels — full set desktop; sparse on narrow (Plotly FIX-D parity).
-    const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
-    const costTicks: Array<{ v: number; label: string }> = narrow
-      ? [
-          { v: 1, label: "1" },
-          { v: 100, label: "100" },
-        ]
-      : [
-          { v: this.priceFloor, label: "≤fl" },
-          { v: 0.1, label: "0.1" },
-          { v: 1, label: "1" },
-          { v: 10, label: "10" },
-          { v: 100, label: "100" },
-        ];
-    const intelTicks = narrow ? [50, 100] : [0, 20, 40, 60, 80, 100];
-    const speedTicks = narrow ? [100, 1000] : [10, 100, 1000];
-
-    for (const t of costTicks) {
-      const p = this.toScene(t.v, 0, 10);
+    for (const t of domains.x.ticks) {
+      const sx = this.tickToSceneAxis("x", t.value);
       this.labelSpecs.push({
         text: t.label,
-        world: new THREE.Vector3(p.x, -S - 0.08, -S - 0.02),
+        world: new THREE.Vector3(sx, -S - 0.08, -S - 0.02),
         kind: "tick",
       });
     }
-    for (const t of intelTicks) {
-      const p = this.toScene(this.priceFloor, t, 10);
+    for (const t of domains.y.ticks) {
+      const sy = this.tickToSceneAxis("y", t.value);
       this.labelSpecs.push({
-        text: String(t),
-        world: new THREE.Vector3(-S - 0.08, p.y, -S - 0.02),
+        text: t.label,
+        world: new THREE.Vector3(-S - 0.08, sy, -S - 0.02),
         kind: "tick",
       });
     }
-    for (const t of speedTicks) {
-      const p = this.toScene(this.priceFloor, 0, t);
+    for (const t of domains.z.ticks) {
+      const sz = this.tickToSceneAxis("z", t.value);
       this.labelSpecs.push({
-        text: String(t),
-        world: new THREE.Vector3(-S - 0.02, -S - 0.08, p.z),
+        text: t.label,
+        world: new THREE.Vector3(-S - 0.02, -S - 0.08, sz),
         kind: "tick",
       });
     }
@@ -458,17 +471,23 @@ export class Stage3DThree implements Stage3DSurface {
     return mesh;
   }
 
-  public render(weights: ScoreWeights, modelsList: Model[]) {
-    const scorable = modelsList.filter(isScorable);
+  public render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
+    this.axisMapping = normalizeAxisMapping(options?.axisMapping ?? this.axisMapping);
+
+    // Plot models that have all three mapped metrics. Value-score / frontier still
+    // use the classic speed×cost×intelligence contract among isScorable rows.
+    const plottable = modelsList.filter((m) => hasMappedAxes(m, this.axisMapping));
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
     const optimumModel = weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((m) => m.model));
 
-    const positivePrices = scorable
-      .map((m) => m.blended_price_per_M!)
-      .filter((p) => p > 0);
-    this.priceFloor = positivePrices.length > 0 ? Math.min(...positivePrices) / 2 : 0.08125;
+    const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
+    this.domains = {
+      x: buildAxisDomain(this.axisMapping.x, plottable, { narrow }),
+      y: buildAxisDomain(this.axisMapping.y, plottable, { narrow }),
+      z: buildAxisDomain(this.axisMapping.z, plottable, { narrow }),
+    };
     this.buildAxes();
 
     while (this.pointsGroup.children.length) {
@@ -481,12 +500,14 @@ export class Stage3DThree implements Stage3DSurface {
     this.modelIds = [];
 
     const otherFrontierKinds = new Set(
-      scorable
+      plottable
         .filter((m) => frontierIds.has(m.model) && m.model !== optimumModel?.model)
         .map((m) => SHAPE_TO_GLYPH[PROVIDER_SHAPES[m.provider] || "circle"] || "sphere"),
     );
 
-    scorable.forEach((model) => {
+    plottable.forEach((model) => {
+      const pos = this.modelToScene(model);
+      if (!pos) return;
       const isOptimum = Boolean(optimumModel && model.model === optimumModel.model);
       const isFrontier = frontierIds.has(model.model);
       const semanticClass: SemanticPointClass = isOptimum
@@ -494,11 +515,8 @@ export class Stage3DThree implements Stage3DSurface {
         : isFrontier
           ? "frontier"
           : "dominated";
-      const price =
-        model.blended_price_per_M! <= 0 ? this.priceFloor : model.blended_price_per_M!;
-      const pos = this.toScene(price, model.aa_intelligence_index!, model.tps!);
       const score = scores.find((c) => c.model.model === model.model)?.score ?? 0;
-      const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+      const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
@@ -512,6 +530,10 @@ export class Stage3DThree implements Stage3DSurface {
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
+      // Reasoning models use open wireframe mark when not already open-shaped.
+      if (model.reasoning && !kind.endsWith("-open") && kind !== "cross" && kind !== "x") {
+        kind = (kind + "-open") as GlyphKind;
+      }
       if (isOptimum) {
         const candidates: GlyphKind[] = [
           "sphere",
@@ -530,18 +552,43 @@ export class Stage3DThree implements Stage3DSurface {
       mesh.position.copy(pos);
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
+      mesh.userData.reasoning = Boolean(model.reasoning);
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
       this.modelIds.push(model.model);
     });
 
-    const vertices = ridgeOrder(frontierModels);
-    const ridgePts = vertices.map((v) => {
-      const p =
-        v.model.blended_price_per_M! <= 0 ? this.priceFloor : v.model.blended_price_per_M!;
-      return this.toScene(p, v.model.aa_intelligence_index!, v.model.tps!);
-    });
+    // Family effort trails (real points only; no-op when <2 plottable per family).
+    while (this.trailsGroup.children.length) {
+      const child = this.trailsGroup.children[0] as THREE.Line;
+      this.trailsGroup.remove(child);
+      child.geometry.dispose();
+      (child.material as THREE.Material).dispose();
+    }
+    const byFamily = groupByFamily(plottable);
+    for (const [, members] of byFamily) {
+      if (members.length < 2) continue;
+      const pts = members
+        .map((m) => this.modelToScene(m))
+        .filter((p): p is THREE.Vector3 => p !== null);
+      if (pts.length < 2) continue;
+      const geom = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = new THREE.LineBasicMaterial({
+        color: new THREE.Color(labColor(members[0].provider)),
+        transparent: true,
+        opacity: 0.55,
+        depthWrite: false,
+      });
+      this.trailsGroup.add(new THREE.Line(geom, mat));
+    }
+
+    // Ridge only among frontier models that are also plottable on the current axes.
+    const ridgeSource = frontierModels.filter((m) => hasMappedAxes(m, this.axisMapping));
+    const vertices = ridgeOrder(ridgeSource);
+    const ridgePts = vertices
+      .map((v) => this.modelToScene(v.model))
+      .filter((p): p is THREE.Vector3 => p !== null);
     this.ridgeLine.geometry.dispose();
     this.ridgeLine.geometry =
       ridgePts.length >= 2
@@ -553,8 +600,9 @@ export class Stage3DThree implements Stage3DSurface {
       if (mesh.userData.semanticClass !== "optimum") continue;
       const id = mesh.userData.modelId as string;
       const short = id.length > 32 ? id.slice(0, 30) + "…" : id;
+      const reasonMark = mesh.userData.reasoning ? "⚡ " : "★ ";
       this.labelSpecs.push({
-        text: "★ " + short,
+        text: reasonMark + short,
         world: mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)),
         kind: "mark",
       });

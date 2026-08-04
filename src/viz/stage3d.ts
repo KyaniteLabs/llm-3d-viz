@@ -178,7 +178,9 @@ export class Stage3D {
     });
   }
 
-  public render(weights: ScoreWeights, modelsList: Model[]) {
+  public render(weights: ScoreWeights, modelsList: Model[], _options?: import("./stage-api").StageRenderOptions) {
+    // Plotly fallback keeps the product default axes; remapping is Three-primary.
+    void _options;
     void this.renderWithPlotly(weights, modelsList);
   }
 

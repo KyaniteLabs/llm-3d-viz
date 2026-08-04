@@ -1,5 +1,7 @@
 import "./styles/tokens.css";
 import { models } from "./data/models";
+import { sameAxisMapping, type AxisMapping } from "./lib/axis-metrics";
+import { applyFilters, sameFilters, type ModelFilters } from "./lib/filters";
 import { Stage3DThree } from "./viz/stage3d-three";
 import type { Stage3DSurface } from "./viz/stage-api";
 import { createStore, type AppState } from "./state";
@@ -17,10 +19,21 @@ function modelIdFromPlotlyPoint(point: any): string | null {
 
 document.documentElement.dataset.modelCount = String(models.length);
 const searchParams = new URLSearchParams(window.location.search);
-const heatEncoding = searchParams.get("heat") !== "0";
+// AA-density default: openness fill primary; score heat is diagnostic opt-in only.
+const heatEncoding = searchParams.get("heat") === "1";
 // Spike default: Three hero. Opt out: ?stage=plotly
 const stageBackend = searchParams.get("stage") === "plotly" ? "plotly" : "r3f";
 const debugStage = searchParams.get("debug") === "1";
+
+/** Session wall clock for age filter; tests can override via __viz.referenceDate. */
+function sessionReferenceDate(): Date {
+  const override = (window as any).__viz?.referenceDate;
+  if (override instanceof Date) return override;
+  if (typeof override === "string" && Number.isFinite(Date.parse(override))) {
+    return new Date(override);
+  }
+  return new Date();
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   void boot();
@@ -61,47 +74,100 @@ async function boot() {
     stage = new Stage3D(plotContainer, heatEncoding);
   }
   document.documentElement.dataset.stageBackend = activeBackend;
-  new StageGuide(stagePanel?.querySelector(".stage-guide") as HTMLElement, store, models, heatEncoding);
+  const stageGuide = new StageGuide(
+    stagePanel?.querySelector(".stage-guide") as HTMLElement,
+    store,
+    models,
+    heatEncoding,
+  );
 
   const cinema = new CinemaMode(stage, store);
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
 
-  // Stage paints first without waiting on Plotly (Three path).
   let renderedWeights: AppState["weights"] | null = null;
-  let pendingWeights: AppState["weights"] | null = null;
+  let renderedAxes: AxisMapping | null = null;
+  let renderedFilters: ModelFilters | null = null;
+  let pending: {
+    weights: AppState["weights"];
+    axisMapping: AxisMapping;
+    filters: ModelFilters;
+  } | null = null;
   let renderFrame: number | null = null;
   let projections: { render: (w: AppState["weights"], m: typeof models) => void; gds: HTMLDivElement[] } | null =
     null;
+  let sweep: { setModels: (m: typeof models) => void } | null = null;
 
   const sameWeights = (left: AppState["weights"], right: AppState["weights"]) =>
     left.speed === right.speed && left.cost === right.cost && left.intelligence === right.intelligence;
 
-  const renderVisuals = (weights: AppState["weights"]) => {
+  const renderVisuals = (
+    weights: AppState["weights"],
+    axisMapping: AxisMapping,
+    filters: ModelFilters,
+  ) => {
     renderedWeights = { ...weights };
-    stage.render(weights, models);
-    projections?.render(weights, models);
+    renderedAxes = { ...axisMapping };
+    renderedFilters = {
+      ...filters,
+      providers: [...filters.providers],
+      families: [...filters.families],
+    };
+
+    const visibleSet = applyFilters(models, filters, sessionReferenceDate());
+    // Drop pin/hover if filtered out.
+    const state = store.getState();
+    const stillVisible = (id: string | null) =>
+      id === null || visibleSet.some((m) => m.model === id);
+    if (!stillVisible(state.hoveredModelId) || !stillVisible(state.pinnedModelId)) {
+      store.update({
+        hoveredModelId: stillVisible(state.hoveredModelId) ? state.hoveredModelId : null,
+        pinnedModelId: stillVisible(state.pinnedModelId) ? state.pinnedModelId : null,
+      });
+    }
+
+    stage.render(weights, visibleSet, { axisMapping });
+    projections?.render(weights, visibleSet);
+    consoleUi.setModels(visibleSet);
+    stageGuide.setModels(visibleSet);
+    sweep?.setModels(visibleSet);
     consoleUi.renderScoreTable(weights);
+
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
       const viz = (window as any).__viz ?? {};
       viz.stage = stage;
       viz.projectionsInstance = projections;
+      viz.axisMapping = { ...axisMapping };
+      viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
+      viz.visibleCount = visibleSet.length;
+      viz.pointCount = (stage as any).pointMeshes?.length ?? (window as any).__viz?.pointCount;
       (window as any).__viz = viz;
     }
   };
 
   store.subscribe((state) => {
-    if (!renderedWeights) {
-      renderVisuals(state.weights);
+    if (!renderedWeights || !renderedAxes || !renderedFilters) {
+      renderVisuals(state.weights, state.axisMapping, state.filters);
       return;
     }
-    if (sameWeights(renderedWeights, state.weights)) return;
-    pendingWeights = { ...state.weights };
+    const weightsSame = sameWeights(renderedWeights, state.weights);
+    const axesSame = sameAxisMapping(renderedAxes, state.axisMapping);
+    const filtersSame = sameFilters(renderedFilters, state.filters);
+    if (weightsSame && axesSame && filtersSame) return;
+    pending = {
+      weights: { ...state.weights },
+      axisMapping: { ...state.axisMapping },
+      filters: {
+        ...state.filters,
+        providers: [...state.filters.providers],
+        families: [...state.filters.families],
+      },
+    };
     if (renderFrame !== null) return;
     renderFrame = window.requestAnimationFrame(() => {
       renderFrame = null;
-      const weights = pendingWeights;
-      pendingWeights = null;
-      if (weights) renderVisuals(weights);
+      const next = pending;
+      pending = null;
+      if (next) renderVisuals(next.weights, next.axisMapping, next.filters);
     });
   });
 
@@ -150,11 +216,18 @@ async function boot() {
     projectionContainers.length > 0
       ? new Projections(projectionContainers, stage.gd, heatEncoding)
       : null;
-  new SweepScheduler(stage.gd, projections?.gds ?? [], store, models, heatEncoding);
+  const sweepScheduler = new SweepScheduler(
+    stage.gd,
+    projections?.gds ?? [],
+    store,
+    applyFilters(models, store.getState().filters, sessionReferenceDate()),
+    heatEncoding,
+  );
+  sweep = sweepScheduler;
 
   // Re-render once projections exist so 2D views fill.
-  if (renderedWeights) renderVisuals(renderedWeights);
-  else renderVisuals(store.getState().weights);
+  const latest = store.getState();
+  renderVisuals(latest.weights, latest.axisMapping, latest.filters);
 
   const plotlyOn = (stage.gd as any).on;
   if (typeof plotlyOn === "function") {
