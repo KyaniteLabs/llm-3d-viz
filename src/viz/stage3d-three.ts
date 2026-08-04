@@ -559,7 +559,8 @@ export class Stage3DThree implements Stage3DSurface {
       this.modelIds.push(model.model);
     });
 
-    // Family effort trails (real points only; no-op when <2 plottable per family).
+    // Family effort trails: connect every measured intensity step for a family
+    // (ordered low→xhigh by effort rank). Real points only — no invented vertices.
     while (this.trailsGroup.children.length) {
       const child = this.trailsGroup.children[0] as THREE.Line;
       this.trailsGroup.remove(child);
@@ -567,6 +568,7 @@ export class Stage3DThree implements Stage3DSurface {
       (child.material as THREE.Material).dispose();
     }
     const byFamily = groupByFamily(plottable);
+    let trailCount = 0;
     for (const [, members] of byFamily) {
       if (members.length < 2) continue;
       const pts = members
@@ -577,11 +579,16 @@ export class Stage3DThree implements Stage3DSurface {
       const mat = new THREE.LineBasicMaterial({
         color: new THREE.Color(labColor(members[0].provider)),
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.9,
         depthWrite: false,
       });
-      this.trailsGroup.add(new THREE.Line(geom, mat));
+      const line = new THREE.Line(geom, mat);
+      line.renderOrder = 0;
+      this.trailsGroup.add(line);
+      trailCount += 1;
     }
+    // Expose for QA / UI readout of how many multi-effort curves are live.
+    (this.gd as any).__familyTrailCount = trailCount;
 
     // Ridge only among frontier models that are also plottable on the current axes.
     const ridgeSource = frontierModels.filter((m) => hasMappedAxes(m, this.axisMapping));

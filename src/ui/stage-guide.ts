@@ -26,14 +26,14 @@ function escapeHtml(value: string): string {
 }
 
 function providerGroups(models: readonly Model[]): Array<{ shape: string; providers: string[] }> {
-  const present = new Set(models.map((model) => model.provider));
+  const present = [...new Set(models.map((model) => model.provider))].sort();
   const groups = new Map<string, string[]>();
-  Object.entries(PROVIDER_SHAPES).forEach(([provider, shape]) => {
-    if (!present.has(provider)) return;
+  for (const provider of present) {
+    const shape = PROVIDER_SHAPES[provider] || "circle";
     const names = groups.get(shape) ?? [];
     names.push(provider);
     groups.set(shape, names);
-  });
+  }
   return [...groups.entries()].map(([shape, providers]) => ({ shape, providers }));
 }
 
@@ -106,7 +106,7 @@ export class StageGuide {
           </section>
 
           <details class="provider-disclosure"${open.provider ? " open" : ""}>
-            <summary class="stage-guide-heading">PROVIDER SHAPES · ${Object.keys(PROVIDER_SHAPES).length} PROVIDERS</summary>
+            <summary class="stage-guide-heading">PROVIDER SHAPES · ${groups.reduce((n, g) => n + g.providers.length, 0)} PROVIDERS</summary>
             <section class="provider-key" aria-label="Provider shape key">
               <ul class="provider-shape-list">
                 ${groups.map(({ shape, providers }) => `<li data-provider-shape="${escapeHtml(shape)}">
