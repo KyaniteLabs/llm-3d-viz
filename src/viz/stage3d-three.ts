@@ -96,6 +96,17 @@ export class Stage3DThree implements Stage3DSurface {
     container.appendChild(this.el);
     this.gd = this.el;
 
+    // Badge first so the spike is always distinguishable even if WebGL init fails.
+    const badge = document.createElement("div");
+    badge.className = "stage-backend-badge";
+    badge.textContent = "STAGE · THREE";
+    badge.setAttribute("data-stage-backend", "three");
+    badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
+      font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
+      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.28);
+      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.72);pointer-events:none;`;
+    this.el.appendChild(badge);
+
     this.scene.background = new THREE.Color(this.tokens.inkField);
 
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.05, 50);
@@ -104,11 +115,15 @@ export class Stage3DThree implements Stage3DSurface {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setClearColor(this.tokens.inkField, 1);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    if ("outputColorSpace" in this.renderer) {
+      (this.renderer as THREE.WebGLRenderer).outputColorSpace = THREE.SRGBColorSpace;
+    }
     this.el.appendChild(this.renderer.domElement);
     this.renderer.domElement.style.width = "100%";
     this.renderer.domElement.style.height = "100%";
     this.renderer.domElement.style.display = "block";
+    this.renderer.domElement.style.position = "absolute";
+    this.renderer.domElement.style.inset = "0";
 
     // Key lights so points read as solid volumes (MeshBasicMaterial was flat/invisible).
     const amb = new THREE.AmbientLight(0xffffff, 0.55);
@@ -123,17 +138,6 @@ export class Stage3DThree implements Stage3DSurface {
     this.labelRoot.style.cssText =
       "position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:var(--font-mono);";
     this.el.appendChild(this.labelRoot);
-
-    // Unmistakable spike marker so Simon never confuses this with frozen Plotly.
-    const badge = document.createElement("div");
-    badge.className = "stage-backend-badge";
-    badge.textContent = "STAGE · THREE";
-    badge.setAttribute("data-stage-backend", "three");
-    badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
-      font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
-      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.28);
-      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.72);pointer-events:none;`;
-    this.el.appendChild(badge);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
