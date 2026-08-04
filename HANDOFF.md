@@ -55,6 +55,11 @@ npx vite preview  # open /?stage=r3f  and / (plotly default)
 - Optional honest v0 publish of Plotly concept after look.
 - Videos needing hero quality → wait for go + production swap, or accept Plotly.
 
+### Local preview (Safari)
+- **Do not use `vite preview` on :4190** — Vite hangs WebKit; port 4190 is blocked for Safari on this Mac.
+- **Use:** `npm run build && npm run preview` → **http://127.0.0.1:4200/** (Python static server; Safari + Chrome).
+- Chrome-only emergency: `npx vite preview --host 127.0.0.1 --port 5173`
+
 ## Ops
 - **Workers:** codex luna/terra (implement), claude-glm (review ≠ implementer), vision models only for screenshots/taste.
 - **Forgejo:** write token = `git.kyanitelabs.tech` line in `~/.git-credentials` + browser UA.

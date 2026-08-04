@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "node scripts/preview.mjs",
     "test": "vitest run",
     "test:render": "playwright test",
-    "deploy:pages": "node -e \"console.error('REFUSED: live publish is approval-gated. Read docs/deploy/cloudflare-pages.md and get Simon\\'s explicit go-ahead in this session.'); process.exit(2)\""
+    "deploy:pages": "node -e \"console.error('REFUSED: live publish is approval-gated. Read docs/deploy/cloudflare-pages.md and get Simon\\'s explicit go-ahead in this session.'); process.exit(2)\"",
+    "preview:vite": "vite preview --host 127.0.0.1 --port 5173"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
