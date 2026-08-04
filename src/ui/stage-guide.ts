@@ -90,11 +90,11 @@ export class StageGuide {
             <p class="stage-guide-heading">ENCODING</p>
             <ul class="semantic-key">
               <li data-legend-entry="frontier-ridge"><span class="key-mark key-mark--ridge" aria-hidden="true"></span><span><strong>Pareto frontier</strong><small>white ridge / efficient boundary</small></span></li>
-              <li data-legend-entry="optimum-marker"><span class="key-mark key-mark--optimum" aria-hidden="true"></span><span><strong>Optimum marker</strong><small>filament / largest point</small></span></li>
-              <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>filament-dim / efficient model</small></span></li>
+              <li data-legend-entry="optimum-marker"><span class="key-mark key-mark--optimum" aria-hidden="true"></span><span><strong>Optimum marker</strong><small>bright filament / largest</small></span></li>
+              <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>copper→filament by value score</small></span></li>
               <li data-legend-entry="dominated-point"><span class="key-mark key-mark--dominated" aria-hidden="true"></span><span><strong>Dominated point</strong><small>dim slate / tradeoff set</small></span></li>
             </ul>
-            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · point luminance follows the current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
+            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · copper (lower score) → filament (higher score) on the frontier; optimum is brightest; dominated stay cool slate. Provider = shape, not hue.</p>' : ""}
           </section>
 
           <details class="provider-disclosure"${open.provider ? " open" : ""}>

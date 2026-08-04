@@ -215,6 +215,8 @@ export class Projections {
       slateCyan: this.tokens.slateCyan,
       filamentDim: this.tokens.filamentDim,
       filament: this.tokens.filament,
+      copper: "#C47A3A",
+      gold: "#F4D58A",
     });
 
     let size = 8;

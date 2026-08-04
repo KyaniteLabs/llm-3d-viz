@@ -190,9 +190,9 @@ export class Stage3DThree implements Stage3DSurface {
     this.scene.add(this.axisGroup);
 
     const ridgeMat = new THREE.LineBasicMaterial({
-      color: new THREE.Color(this.tokens.filament),
-      transparent: true,
-      opacity: 0.95,
+      color: new THREE.Color("#F4D58A"),
+      transparent: false,
+      opacity: 1,
       linewidth: 2,
     });
     this.ridgeLine = new THREE.Line(new THREE.BufferGeometry(), ridgeMat);
@@ -343,13 +343,13 @@ export class Stage3DThree implements Stage3DSurface {
     // Full wireframe cube (Plotly-style bounding box).
     const c = [-S, S];
     for (const y of c) {
-      for (const z of c) this.addLine(new THREE.Vector3(-S, y, z), new THREE.Vector3(S, y, z), edge, 0.35);
+      for (const z of c) this.addLine(new THREE.Vector3(-S, y, z), new THREE.Vector3(S, y, z), edge, 0.55);
     }
     for (const x of c) {
-      for (const z of c) this.addLine(new THREE.Vector3(x, -S, z), new THREE.Vector3(x, S, z), edge, 0.35);
+      for (const z of c) this.addLine(new THREE.Vector3(x, -S, z), new THREE.Vector3(x, S, z), edge, 0.55);
     }
     for (const x of c) {
-      for (const y of c) this.addLine(new THREE.Vector3(x, y, -S), new THREE.Vector3(x, y, S), edge, 0.35);
+      for (const y of c) this.addLine(new THREE.Vector3(x, y, -S), new THREE.Vector3(x, y, S), edge, 0.55);
     }
 
     // Face grids (cost–intel at low speed; cost–speed at low intel; intel–speed at low cost).
@@ -357,8 +357,8 @@ export class Stage3DThree implements Stage3DSurface {
     for (let i = 0; i <= steps; i++) {
       const t = (i / steps) * 2 * S - S;
       // Floor (y = -S): cost × speed
-      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, -S, S), grid, 0.12);
-      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(S, -S, t), grid, 0.12);
+      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, -S, S), grid, 0.22);
+      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(S, -S, t), grid, 0.22);
       // Back (z = -S): cost × intel
       this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, S, -S), grid, 0.1);
       this.addLine(new THREE.Vector3(-S, t, -S), new THREE.Vector3(S, t, -S), grid, 0.1);
@@ -435,7 +435,7 @@ export class Stage3DThree implements Stage3DSurface {
 
   /** Plotly sizes are ~8–16 px; map to scene radius that does not fill the cube. */
   private radiusForSize(sizePx: number): number {
-    return 0.012 + (sizePx / 16) * 0.018;
+    return 0.045 + (sizePx / 16) * 0.055;
   }
 
   private makePointMesh(kind: GlyphKind, color: string, sizePx: number): THREE.Mesh {
@@ -446,9 +446,9 @@ export class Stage3DThree implements Stage3DSurface {
       color: new THREE.Color(color),
       wireframe: open,
       transparent: true,
-      opacity: open ? 0.9 : semanticOpacity(color),
+      opacity: open ? 0.95 : 1,
       depthTest: true,
-      depthWrite: !open,
+      depthWrite: true,
     });
     const mesh = new THREE.Mesh(geom, mat);
     if (kind === "x") mesh.rotation.z = Math.PI / 4;
@@ -502,11 +502,13 @@ export class Stage3DThree implements Stage3DSurface {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
+        copper: "#C47A3A",
+        gold: "#F4D58A",
       });
-      let size = 9;
-      if (isOptimum) size = 16;
-      else if (isFrontier) size = 12;
-      else size = 8;
+      let size = 11;
+      if (isOptimum) size = 22;
+      else if (isFrontier) size = 15;
+      else size = 11;
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
@@ -546,19 +548,16 @@ export class Stage3DThree implements Stage3DSurface {
         ? new THREE.BufferGeometry().setFromPoints(ridgePts)
         : new THREE.BufferGeometry();
 
-    // Direct labels: optimum always; frontier when stage is wide enough.
-    const wide = this.el.clientWidth >= 560;
+    // Direct label: optimum only (frontier names live in STAGE KEY + table).
     for (const mesh of this.pointMeshes) {
-      const cls = mesh.userData.semanticClass as SemanticPointClass;
+      if (mesh.userData.semanticClass !== "optimum") continue;
       const id = mesh.userData.modelId as string;
-      if (cls === "optimum" || (wide && cls === "frontier")) {
-        const short = id.length > 28 ? id.slice(0, 26) + "…" : id;
-        this.labelSpecs.push({
-          text: short,
-          world: mesh.position.clone().add(new THREE.Vector3(0, 0.06, 0)),
-          kind: "mark",
-        });
-      }
+      const short = id.length > 32 ? id.slice(0, 30) + "…" : id;
+      this.labelSpecs.push({
+        text: "★ " + short,
+        world: mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)),
+        kind: "mark",
+      });
     }
 
     // Accessible name tracks current optimum.

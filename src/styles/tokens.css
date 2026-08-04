@@ -200,7 +200,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .key-mark { display: block; width: 0.85rem; height: 0.85rem; margin-top: 0.08rem; }
 .key-mark--ridge { width: 1rem; height: 0.15rem; margin-top: 0.4rem; background: var(--filament); }
 .key-mark--optimum { border-radius: 50%; background: var(--filament); box-shadow: 0 0 0 2px rgba(232, 241, 228, 0.24); }
-.key-mark--frontier { border-radius: 50%; background: var(--filament-dim); }
+.key-mark--frontier { border-radius: 50%; background: linear-gradient(135deg, var(--copper), var(--filament-dim)); }
 .key-mark--dominated { border-radius: 50%; background: var(--viz-dominated); opacity: 0.85; }
 .frontier-model-list { counter-reset: frontier; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem 0.65rem; }
 .frontier-model-list li { position: relative; display: block; min-width: 0; padding-left: 0.6rem; border-left: 2px solid var(--filament-dim); }

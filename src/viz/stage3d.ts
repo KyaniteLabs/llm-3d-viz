@@ -254,16 +254,18 @@ export class Stage3D {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
+        copper: "#C47A3A",
+        gold: "#F4D58A",
       });
       colors.push(color);
 
-      let size = 9; // standard pearl base size
+      let size = 12;
       if (isOptimum) {
-        size = 16; // Optimum gets larger size
+        size = 20;
       } else if (isFrontier) {
-        size = 11; // Frontier slightly larger
+        size = 14;
       } else {
-        size = 8; // Dominated still readable against the void
+        size = 11;
       }
       sizes.push(size);
 

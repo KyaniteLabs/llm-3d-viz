@@ -17,22 +17,26 @@ export interface SemanticPalette {
   slateCyan: string;
   filamentDim: string;
   filament: string;
+  /** Low-score frontier heat (DESIGN-SYSTEM copper — chrome accent, reused for visible score heat). */
+  copper: string;
+  /** Optimum hot core (DESIGN-SYSTEM mineral-gold alt — maximum legibility). */
+  gold: string;
 }
 
 export const DEFAULT_SEMANTIC_PALETTE: SemanticPalette = {
   slateCyan: "#3D5560",
   filamentDim: "#C9D4C4",
   filament: "#E8F1E4",
+  copper: "#C47A3A",
+  gold: "#F4D58A",
 };
 
-// Heat is deliberately clipped at both semantic boundaries. The frontier
-// starts above its dim floor so an unlit point has a visible transition, but
-// never reaches the fixed optimum filament. Dominated heat stays in slate and
-// is capped below the frontier floor by boundedSlateCeiling().
-const FRONTIER_HEAT_FLOOR = 0.12;
-const FRONTIER_HEAT_CEILING = 0.92;
-const DOMINATED_HEAT_FLOOR = 0.08;
-const DOMINATED_LUMINANCE_CEILING = 0.8;
+// Frontier heat is a *visible* copper→filament ramp (not near-white-on-near-white).
+// Dominated stays cool slate, capped below the copper floor so class stays readable.
+const FRONTIER_HEAT_FLOOR = 0.08;
+const FRONTIER_HEAT_CEILING = 0.95;
+const DOMINATED_HEAT_FLOOR = 0.15;
+const DOMINATED_LUMINANCE_CEILING = 0.35;
 
 const HEX6 = /^#([\da-f]{6})$/i;
 const HEX3 = /^#([\da-f]{3})$/i;
@@ -85,18 +89,20 @@ export function mixColors(from: string, to: string, ratio: number): string {
 }
 
 /**
- * Frontier-only value-score encoding. The ramp begins above filament-dim and
- * stops short of filament so the optimum retains exclusive maximum luminance.
+ * Frontier value-score encoding: copper (low score) → filament (high score).
+ * Readable on ink; still not a provider rainbow (one sequential heat channel).
  */
 export function scoreLuminanceFill(
   score: number,
   filamentDim = "#C9D4C4",
-  filament = "#E8F1E4",
+  _filament = "#E8F1E4",
+  copper = DEFAULT_SEMANTIC_PALETTE.copper,
 ): string {
   const amount =
     FRONTIER_HEAT_FLOOR +
     Math.max(0, Math.min(1, score)) * (FRONTIER_HEAT_CEILING - FRONTIER_HEAT_FLOOR);
-  return mixColors(filamentDim, filament, amount);
+  // Ramp copper → filament-dim so optimum (filament/gold) stays the brightest mark.
+  return mixColors(copper, filamentDim, amount);
 }
 
 function channelLinear(c8bit: number): number {
@@ -199,7 +205,12 @@ export function semanticHeatFill(
 ): string {
   if (semanticClass === "optimum") return palette.filament;
   if (semanticClass === "frontier") {
-    return scoreLuminanceFill(score, palette.filamentDim, palette.filament);
+    return scoreLuminanceFill(
+      score,
+      palette.filamentDim,
+      palette.filament,
+      palette.copper ?? DEFAULT_SEMANTIC_PALETTE.copper,
+    );
   }
   return dominatedScoreLuminanceFill(score, palette.slateCyan, palette.filamentDim);
 }
@@ -212,5 +223,6 @@ export function semanticPointFill(
   palette: SemanticPalette = DEFAULT_SEMANTIC_PALETTE,
 ): string {
   if (heatEncoding) return semanticHeatFill(semanticClass, score, palette);
-  return semanticClass === "optimum" ? palette.filament : semanticFloorFill(semanticClass, palette);
+  if (semanticClass === "optimum") return palette.filament;
+  return semanticFloorFill(semanticClass, palette);
 }
