@@ -82,3 +82,20 @@ describe("family", () => {
     expect(deriveEffortTier(fam[1])).toBe("max");
   });
 });
+
+describe("listMultiEffortFamilies", () => {
+  it("returns only families with 2+ rows, largest first", async () => {
+    const { listMultiEffortFamilies } = await import("../src/lib/filters");
+    const rows = [
+      stub({ model: "A (low)", provider: "X", release_date: "2026-07-01" }),
+      stub({ model: "A (max)", provider: "X", release_date: "2026-07-01" }),
+      stub({ model: "A (high)", provider: "X", release_date: "2026-07-01" }),
+      stub({ model: "B (max)", provider: "Y", release_date: "2026-07-01" }),
+      stub({ model: "C (low)", provider: "Z", release_date: "2026-07-01" }),
+      stub({ model: "C (max)", provider: "Z", release_date: "2026-07-01" }),
+    ];
+    const multi = listMultiEffortFamilies(rows);
+    expect(multi.map((m) => m.family)).toEqual(["A", "C"]);
+    expect(multi[0].count).toBe(3);
+  });
+});

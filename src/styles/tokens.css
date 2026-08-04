@@ -129,6 +129,22 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 .is-cinema .stage { grid-template-columns: minmax(0, 1fr); }
 .is-cinema .model-readout { font-size: var(--step-1); }
 .axis-controls, .filter-controls, .task-charts { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
+.filter-count { float: right; color: var(--filament-dim); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.65rem; }
+.filter-toolbar { display: flex; flex-wrap: wrap; gap: 0.45rem 0.75rem; align-items: center; margin: 0.35rem 0 0.5rem; }
+.filter-clear, .text-link { appearance: none; background: transparent; border: 1px solid var(--color-border); color: var(--filament-dim); font: 500 0.65rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: var(--radius-control); cursor: pointer; }
+.filter-clear:hover, .text-link:hover { border-color: var(--filament); color: var(--filament); }
+.text-link { border: none; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.family-chip-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0.55rem; max-height: 6.5rem; overflow: auto; }
+.family-chip { appearance: none; background: rgba(201, 212, 196, 0.06); border: 1px solid var(--color-border); color: var(--color-text-muted); font: 400 0.62rem/1.3 var(--font-mono); padding: 0.28rem 0.45rem; border-radius: var(--radius-control); cursor: pointer; max-width: 100%; text-align: left; }
+.family-chip em { color: var(--filament-dim); font-style: normal; margin-left: 0.2rem; }
+.family-chip:hover { border-color: rgba(232, 241, 228, 0.35); color: var(--color-text); }
+.family-chip.is-active, .family-chip.is-action:active { border-color: var(--filament); color: var(--filament); background: rgba(232, 241, 228, 0.08); }
+.family-chip.is-action { margin-top: 0.55rem; width: 100%; text-align: center; letter-spacing: 0.06em; text-transform: uppercase; }
+#filter-family-search { width: 100%; background: var(--ink-panel-2); border: 1px solid var(--color-border); color: var(--color-text); font: 400 0.75rem var(--font-mono); padding: 0.35rem 0.45rem; border-radius: var(--radius-control); }
+.filter-controls select[multiple] { min-height: 5.5rem; }
+.value-leaderboard li small, .model-readout em { color: var(--filament-dim); font-style: normal; }
+.value-leaderboard li { cursor: pointer; }
+.value-leaderboard li:hover { color: var(--filament); }
 .axis-hint, .axis-note { margin: 0.25rem 0 0.35rem; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); line-height: 1.45; letter-spacing: 0.02em; text-transform: none; }
 .axis-note { opacity: 0.85; }
 .axis-control { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.45rem; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }

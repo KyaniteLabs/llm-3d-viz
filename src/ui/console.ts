@@ -6,8 +6,8 @@ import {
   type AxisMetricId,
   type SceneAxis,
 } from "../lib/axis-metrics";
-import { familyIdOf } from "../lib/family";
-import { listFamilies, listProviders } from "../lib/filters";
+import { deriveEffortTier, familyIdOf, groupByFamily } from "../lib/family";
+import { listFamilies, listMultiEffortFamilies, listProviders } from "../lib/filters";
 import { normalizedScores, presets, weightedOptimum, type ScoreWeights } from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
@@ -55,6 +55,8 @@ export class DecisionConsole {
   private readonly tooltip: HTMLElement;
   private cursor = { x: 0, y: 0 };
   private filtersBound = false;
+  private familySearch = "";
+  private multiEffortOnly = false;
 
   constructor(root: HTMLElement, store: AppStore, models: readonly Model[], onCinemaToggle: () => void) {
     this.root = root;
@@ -82,6 +84,7 @@ export class DecisionConsole {
     this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]")!.addEventListener("click", () => {
       onCinemaToggle();
     });
+    this.root.addEventListener("click", (event) => this.onConsoleClick(event));
     this.renderIncompleteData();
     this.tooltip = document.createElement("aside");
     this.tooltip.className = "stage-tooltip";
@@ -96,49 +99,174 @@ export class DecisionConsole {
     this.render(this.store.getState());
   }
 
+  private multiEffortCatalog() {
+    return listMultiEffortFamilies(this.catalog);
+  }
+
+  private filteredFamilyOptions(): string[] {
+    const multi = new Set(this.multiEffortCatalog().map((m) => m.family));
+    let families = listFamilies(this.catalog);
+    if (this.multiEffortOnly) families = families.filter((f) => multi.has(f));
+    const q = this.familySearch.trim().toLowerCase();
+    if (q) families = families.filter((f) => f.toLowerCase().includes(q));
+    // Multi-effort first for navigability.
+    return families.sort((a, b) => {
+      const am = multi.has(a) ? 0 : 1;
+      const bm = multi.has(b) ? 0 : 1;
+      return am - bm || a.localeCompare(b);
+    });
+  }
+
   private renderFilterControls() {
     const section = this.root.querySelector(".filter-controls")!;
     const providers = listProviders(this.catalog);
-    const families = listFamilies(this.catalog);
+    const families = this.filteredFamilyOptions();
+    const multi = this.multiEffortCatalog();
+    const state = this.store.getState();
+    const selectedFamilies = new Set(state.filters.families);
+    const selectedProviders = new Set(state.filters.providers);
+    const chipLimit = 14;
+    const chips = multi.slice(0, chipLimit);
+
     section.innerHTML = `
-      <p class="weight-heading">VISIBLE SET / FILTERS</p>
-      <label class="filter-toggle">
-        <input type="checkbox" data-filter-age checked />
-        <span>Age ≤ 6 months (default on)</span>
+      <p class="weight-heading">VISIBLE SET / FILTERS <span class="filter-count" data-visible-count>${this.models.length} visible</span></p>
+      <div class="filter-toolbar">
+        <label class="filter-toggle">
+          <input type="checkbox" data-filter-age ${state.filters.ageEnabled ? "checked" : ""} />
+          <span>Age ≤ 6 months</span>
+        </label>
+        <label class="filter-toggle">
+          <input type="checkbox" data-filter-multi-only ${this.multiEffortOnly ? "checked" : ""} />
+          <span>Multi-effort only</span>
+        </label>
+        <button type="button" class="filter-clear" data-filter-clear>Clear filters</button>
+      </div>
+      <p class="axis-hint">Pick a family chip to solo its intensity curve. Empty multi-select = all.</p>
+      <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
+        ${chips
+          .map(
+            ({ family, count }) =>
+              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps">${family} <em>${count}</em></button>`,
+          )
+          .join("")}
+        ${multi.length > chipLimit ? `<span class="axis-hint">+${multi.length - chipLimit} more via search</span>` : ""}
+      </div>
+      <label class="axis-control" for="filter-family-search">
+        <span>Find family</span>
+        <input id="filter-family-search" type="search" data-filter-family-search value="${this.familySearch.replace(/"/g, "&quot;")}" placeholder="e.g. Opus, Sol, Gemini" autocomplete="off" />
       </label>
       <label class="axis-control" for="filter-providers">
         <span>Providers</span>
-        <select id="filter-providers" data-filter-providers multiple size="3" aria-label="Filter by provider">
-          ${providers.map((p) => `<option value="${p}">${p}</option>`).join("")}
+        <select id="filter-providers" data-filter-providers multiple size="4" aria-label="Filter by provider">
+          ${providers
+            .map(
+              (p) =>
+                `<option value="${p}"${selectedProviders.has(p) ? " selected" : ""}>${p}</option>`,
+            )
+            .join("")}
         </select>
       </label>
       <label class="axis-control" for="filter-families">
-        <span>Families</span>
-        <select id="filter-families" data-filter-families multiple size="3" aria-label="Filter by family">
-          ${families.map((f) => `<option value="${f}">${f}</option>`).join("")}
+        <span>Families <small>${families.length} listed</small></span>
+        <select id="filter-families" data-filter-families multiple size="6" aria-label="Filter by family">
+          ${families
+            .map((f) => {
+              const n = multi.find((m) => m.family === f)?.count;
+              const label = n && n >= 2 ? `${f} · ${n} steps` : f;
+              return `<option value="${f}"${selectedFamilies.has(f) ? " selected" : ""}>${label}</option>`;
+            })
+            .join("")}
         </select>
-      </label>
-      <p class="axis-hint">Empty multi-select = all. Visible count drives stage, projections, score, and sweep.</p>`;
+      </label>`;
 
     if (this.filtersBound) return;
     this.filtersBound = true;
     section.addEventListener("change", (event) => {
       const target = event.target as HTMLElement;
+      if (target instanceof HTMLInputElement && target.matches("[data-filter-multi-only]")) {
+        this.multiEffortOnly = target.checked;
+        this.renderFilterControls();
+        return;
+      }
       if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
-      const age = section.querySelector<HTMLInputElement>("[data-filter-age]")!;
-      const prov = section.querySelector<HTMLSelectElement>("[data-filter-providers]")!;
-      const fam = section.querySelector<HTMLSelectElement>("[data-filter-families]")!;
-      const providersSelected = Array.from(prov.selectedOptions).map((o) => o.value);
-      const familiesSelected = Array.from(fam.selectedOptions).map((o) => o.value);
-      this.store.update({
-        filters: {
-          ageEnabled: age.checked,
-          ageMonths: 6,
-          providers: providersSelected,
-          families: familiesSelected,
-        },
-      });
+      if (target.matches("[data-filter-family-search]")) return;
+      this.pushFiltersFromDom();
     });
+    section.addEventListener("input", (event) => {
+      const target = event.target as HTMLElement;
+      if (target instanceof HTMLInputElement && target.matches("[data-filter-family-search]")) {
+        this.familySearch = target.value;
+        // Rebuild options while keeping search focus.
+        const start = target.selectionStart;
+        this.renderFilterControls();
+        const again = section.querySelector<HTMLInputElement>("[data-filter-family-search]");
+        if (again) {
+          again.focus();
+          if (start != null) again.setSelectionRange(start, start);
+        }
+      }
+    });
+  }
+
+  private pushFiltersFromDom() {
+    const section = this.root.querySelector(".filter-controls");
+    if (!section) return;
+    const age = section.querySelector<HTMLInputElement>("[data-filter-age]")!;
+    const prov = section.querySelector<HTMLSelectElement>("[data-filter-providers]")!;
+    const fam = section.querySelector<HTMLSelectElement>("[data-filter-families]")!;
+    this.store.update({
+      filters: {
+        ageEnabled: age.checked,
+        ageMonths: 6,
+        providers: Array.from(prov.selectedOptions).map((o) => o.value),
+        families: Array.from(fam.selectedOptions).map((o) => o.value),
+      },
+    });
+  }
+
+  private soloFamily(family: string) {
+    this.store.update({
+      filters: {
+        ...this.store.getState().filters,
+        families: [family],
+      },
+      pinnedModelId: null,
+      hoveredModelId: null,
+    });
+  }
+
+  private clearFilters() {
+    this.familySearch = "";
+    this.multiEffortOnly = false;
+    this.store.update({
+      filters: { ageEnabled: true, ageMonths: 6, providers: [], families: [] },
+      pinnedModelId: null,
+      hoveredModelId: null,
+    });
+    this.renderFilterControls();
+  }
+
+  private onConsoleClick(event: Event) {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    const solo = target.closest<HTMLElement>("[data-solo-family]");
+    if (solo?.dataset.soloFamily) {
+      event.preventDefault();
+      this.soloFamily(solo.dataset.soloFamily);
+      this.renderFilterControls();
+      return;
+    }
+    if (target.closest("[data-filter-clear]")) {
+      event.preventDefault();
+      this.clearFilters();
+      return;
+    }
+    const row = target.closest<HTMLElement>("[data-focus-family]");
+    if (row?.dataset.focusFamily) {
+      event.preventDefault();
+      this.soloFamily(row.dataset.focusFamily);
+      this.renderFilterControls();
+    }
   }
 
   private renderAxisControls() {
@@ -231,18 +359,29 @@ export class DecisionConsole {
     const ttftCell = caveat
       ? `${formatTtftSeconds(model.ttft)}<span class="ttft-caveat">${caveat}</span>`
       : formatTtftSeconds(model.ttft);
-    return `<strong data-model-id="${model.model}">${model.model}</strong><span>${model.provider} · ${model.openness}${model.reasoning ? " · reasoning" : ""}</span>
+    const family = familyIdOf(model);
+    const tier = deriveEffortTier(model);
+    const curveSteps = groupByFamily(this.catalog).get(family)?.length ?? 1;
+    const soloActive = state.filters.families.length === 1 && state.filters.families[0] === family;
+    return `<strong data-model-id="${model.model}">${model.model}</strong><span>${model.provider} · ${model.openness}${model.reasoning ? " · reasoning" : ""} · effort <em>${tier}</em>${curveSteps >= 2 ? ` · ${curveSteps}-step curve` : ""}</span>
       <dl><div><dt>TPS</dt><dd>${formatTps(model.tps)}</dd></div>
       <div><dt>TTFT</dt><dd>${ttftCell}</dd></div>
       <div><dt>Blended price</dt><dd>${formatPricePerM(model.blended_price_per_M)}</dd></div>
       <div><dt>AA index</dt><dd>${formatIntelligence(model.aa_intelligence_index)}</dd></div>
-      <div><dt>Family</dt><dd>${familyIdOf(model)}</dd></div>
-      <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>`;
+      <div><dt>Family</dt><dd>${family}</dd></div>
+      <div><dt>Effort tier</dt><dd>${tier}</dd></div>
+      <div><dt>Curve steps</dt><dd>${curveSteps}${curveSteps >= 2 ? " (multi-effort)" : ""}</dd></div>
+      <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>
+      ${
+        curveSteps >= 2
+          ? `<button type="button" class="family-chip is-action" data-solo-family="${family}">${soloActive ? "Showing family curve" : "Solo family curve"}</button>`
+          : ""
+      }`;
   }
 
   private leaderboard(state: Readonly<AppState>, activePreset: string | undefined) {
     if (this.models.length === 0) {
-      return `<p class="console-note">No models in the visible set. Relax age, provider, or family filters.</p>`;
+      return `<p class="console-note">No models in the visible set. Relax age, provider, or family filters — or Clear filters.</p>`;
     }
     const scores = normalizedScores(this.models, state.weights, this.models)
       .slice()
@@ -251,17 +390,25 @@ export class DecisionConsole {
     if (!optimum) return `<p class="console-note">No complete benchmark rows are available in the visible set.</p>`;
     const shares = weightShares(state.weights);
     const presetLabel = activePreset ?? "custom weights";
+    const multiN = [...groupByFamily(this.models).values()].filter((rows) => rows.length >= 2).length;
+    const solo =
+      state.filters.families.length === 1
+        ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-filter-clear>show all</button></p>`
+        : multiN > 0
+          ? `<p class="axis-hint">${multiN} multi-effort curves in view — chip a family to solo.</p>`
+          : "";
     return `<section class="value-leaderboard" aria-label="Current value-score leaderboard">
       <p class="eyebrow">CURRENT OPTIMUM · ${this.models.length} VISIBLE</p>
-      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} VALUE SCORE</span></p>
+      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}" data-focus-family="${familyIdOf(optimum.model)}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} VALUE SCORE · ${deriveEffortTier(optimum.model)}</span></p>
       <ol>${scores
-        .slice(0, 3)
+        .slice(0, 5)
         .map(
           ({ model, score }) =>
-            `<li data-model-id="${model.model}"><span>${displayName(model.model)}</span><strong>${score.toFixed(3)}</strong></li>`,
+            `<li data-model-id="${model.model}" data-focus-family="${familyIdOf(model)}"><span>${displayName(model.model)} <small>${deriveEffortTier(model)}</small></span><strong>${score.toFixed(3)}</strong></li>`,
         )
         .join("")}</ol>
       <p class="preset-outcome" data-preset-outcome="${activePreset ?? "custom"}">${presetLabel} · ${shares.speed}% speed / ${shares.cost}% cost / ${shares.intelligence}% intelligence → ${displayName(optimum.model.model)}</p>
+      ${solo}
     </section>`;
   }
 
@@ -327,6 +474,30 @@ export class DecisionConsole {
     });
     const age = this.root.querySelector<HTMLInputElement>("[data-filter-age]");
     if (age) age.checked = state.filters.ageEnabled;
+    const count = this.root.querySelector("[data-visible-count]");
+    if (count) count.textContent = `${this.models.length} visible`;
+    // Keep multi-selects in sync when filters change from chips/URL/clear.
+    const prov = this.root.querySelector<HTMLSelectElement>("[data-filter-providers]");
+    const fam = this.root.querySelector<HTMLSelectElement>("[data-filter-families]");
+    if (prov) {
+      const set = new Set(state.filters.providers);
+      Array.from(prov.options).forEach((o) => {
+        o.selected = set.has(o.value);
+      });
+    }
+    if (fam) {
+      const set = new Set(state.filters.families);
+      Array.from(fam.options).forEach((o) => {
+        o.selected = set.has(o.value);
+      });
+    }
+    this.root.querySelectorAll<HTMLButtonElement>("[data-solo-family]").forEach((btn) => {
+      const famId = btn.dataset.soloFamily ?? "";
+      btn.classList.toggle(
+        "is-active",
+        state.filters.families.length === 1 && state.filters.families[0] === famId,
+      );
+    });
 
     const stageTitle = document.getElementById("stage-title");
     if (stageTitle) stageTitle.textContent = mappingHeading(state.axisMapping);

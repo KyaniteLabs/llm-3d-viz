@@ -23,6 +23,7 @@ import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import { aaPointFill, labColor, type SemanticPointClass } from "./palette";
 import { groupByFamily } from "../lib/family";
+import { displayName } from "../lib/display-name";
 import type { Stage3DSurface, StageCamera, StageRenderOptions } from "./stage-api";
 
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -602,14 +603,29 @@ export class Stage3DThree implements Stage3DSurface {
         ? new THREE.BufferGeometry().setFromPoints(ridgePts)
         : new THREE.BufferGeometry();
 
-    // Direct label: optimum only (frontier names live in STAGE KEY + table).
+    // Labels: always mark optimum; when a small multi-effort set is focused
+    // (≤12 plottable points), label every point with effort tier for navigability.
+    // Keep axis title/tick specs from buildAxes — only replace mark labels.
+    this.labelSpecs = this.labelSpecs.filter((s) => s.kind !== "mark");
+    const focusLabels = plottable.length > 0 && plottable.length <= 12;
     for (const mesh of this.pointMeshes) {
-      if (mesh.userData.semanticClass !== "optimum") continue;
       const id = mesh.userData.modelId as string;
-      const short = id.length > 32 ? id.slice(0, 30) + "…" : id;
-      const reasonMark = mesh.userData.reasoning ? "⚡ " : "★ ";
+      const model = plottable.find((m) => m.model === id);
+      if (!model) continue;
+      const isOptimum = mesh.userData.semanticClass === "optimum";
+      if (!isOptimum && !focusLabels) continue;
+      const tier = (model.effort_tier || "").toString();
+      const shortBase = displayName(id);
+      const short = shortBase.length > 28 ? shortBase.slice(0, 26) + "…" : shortBase;
+      const reasonMark = isOptimum ? (mesh.userData.reasoning ? "⚡ " : "★ ") : "";
+      const tierMark =
+        tier && tier !== "default" && tier !== "none"
+          ? ` · ${tier}`
+          : tier === "none"
+            ? " · non-reason"
+            : "";
       this.labelSpecs.push({
-        text: reasonMark + short,
+        text: `${reasonMark}${short}${tierMark}`,
         world: mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)),
         kind: "mark",
       });

@@ -82,3 +82,16 @@ export function listProviders(models: readonly Model[]): string[] {
 export function listFamilies(models: readonly Model[]): string[] {
   return [...new Set(models.map((m) => familyIdOf(m)))].sort((a, b) => a.localeCompare(b));
 }
+
+/** Families that have 2+ rows (multi-effort curves), largest first then name. */
+export function listMultiEffortFamilies(models: readonly Model[]): Array<{ family: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const model of models) {
+    const id = familyIdOf(model);
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count >= 2)
+    .map(([family, count]) => ({ family, count }))
+    .sort((a, b) => b.count - a.count || a.family.localeCompare(b.family));
+}
