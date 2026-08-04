@@ -197,21 +197,38 @@ export class SweepScheduler {
   }
 
   private write(gd: Graph, colors: string[], sizes: number[]) {
-    if (!graphIds(gd).length) return;
+    const ids = graphIds(gd);
+    // Guard the stage-ready race: SweepScheduler can start before Plotly/Three
+    // has model ids on the graph. Never clobber intentional marker mirrors with
+    // empty arrays from that premature start.
+    if (!ids.length || colors.length !== ids.length || sizes.length !== ids.length) return;
     // Three stage (or any non-Plotly host) registers a restyle-free appearance hook.
     const setAppearance = (gd as any).__setPointAppearance;
     if (typeof setAppearance === "function") {
       setAppearance(colors, sizes);
+      if (gd === this.stage) {
+        const viz = (window as any).__viz ?? {};
+        viz.markerColors = colors.slice();
+        viz.markerSizes = sizes.slice();
+        (window as any).__viz = viz;
+      }
       return;
     }
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
+    const colorCopy = colors.slice();
+    const sizeCopy = sizes.slice();
     void loadPlotly().then((Plotly) => {
-      const plotly = import.meta.env.DEV
-        ? (window as any).__viz?.Plotly ?? Plotly
-        : Plotly;
-      void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+      const plotly = (window as any).__viz?.Plotly ?? Plotly;
+      void plotly.restyle(gd, { "marker.color": [colorCopy], "marker.size": [sizeCopy] }, [0]);
+      // Keep intentional QA mirrors in sync with the last written appearance.
+      if (gd === this.stage) {
+        const viz = (window as any).__viz ?? {};
+        viz.markerColors = colorCopy.slice();
+        viz.markerSizes = sizeCopy.slice();
+        (window as any).__viz = viz;
+      }
     });
   }
 
@@ -365,6 +382,24 @@ export class SweepScheduler {
   private start(state: Readonly<AppState>) {
     this.cancel();
     this.lastBatch = -1;
+    // Stage graph may still be empty while Plotly newPlot is in flight — defer
+    // until model ids exist so we don't capture an empty MarkerState for the run.
+    if (!graphIds(this.stage).length) {
+      const deferredRun = this.run;
+      requestAnimationFrame(() => {
+        if (this.run !== deferredRun) return;
+        if (!graphIds(this.stage).length) {
+          // One more frame; still empty → give up until next store/setModels tick.
+          requestAnimationFrame(() => {
+            if (this.run !== deferredRun) return;
+            if (graphIds(this.stage).length) this.start(this.store.getState());
+          });
+          return;
+        }
+        this.start(this.store.getState());
+      });
+      return;
+    }
     const currentRun = this.run;
     const states = this.markerStates(state.weights);
     if (this.reduced) {

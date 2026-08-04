@@ -2,6 +2,7 @@ import "./styles/tokens.css";
 import { models } from "./data/models";
 import { sameAxisMapping, type AxisMapping } from "./lib/axis-metrics";
 import { applyFilters, sameFilters, type ModelFilters } from "./lib/filters";
+import { parseShareableState, writeShareableUrl } from "./lib/url-state";
 import { Stage3DThree } from "./viz/stage3d-three";
 import type { Stage3DSurface } from "./viz/stage-api";
 import { createStore, type AppState } from "./state";
@@ -55,11 +56,14 @@ async function boot() {
   stageVisual?.appendChild(plotContainer);
 
   const consoleRoot = document.querySelector(".console") as HTMLElement;
-  // `?age=0` disables the default 6-month filter (used by regression suite / full-catalog look).
-  const ageDisabled = searchParams.get("age") === "0";
-  const store = createStore(
-    ageDisabled ? { filters: { ageEnabled: false, ageMonths: 6, providers: [], families: [] } } : {},
-  );
+  // Shareable URL: filters, axes, weights. Session-only: hover/pin/cinema.
+  // `?age=0` remains the regression-suite escape hatch for the full catalog.
+  const fromUrl = parseShareableState(searchParams);
+  const store = createStore({
+    filters: fromUrl.filters,
+    axisMapping: fromUrl.axisMapping,
+    weights: fromUrl.weights,
+  });
 
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
@@ -131,10 +135,12 @@ async function boot() {
 
     stage.render(weights, visibleSet, { axisMapping });
     projections?.render(weights, visibleSet);
-    // setModels already applied synchronously on store tick; refresh after stage ids update.
+    // Console/guide track the visible set; do NOT restart the sweep here.
+    // SweepScheduler owns weight-driven ignition; setModels is only for catalog
+    // (filter) changes — restarting on every paint raced mid-sweep size=11 frames
+    // and made Playwright settle checks flaky.
     consoleUi.setModels(visibleSet);
     stageGuide.setModels(visibleSet);
-    sweep?.setModels(visibleSet);
 
     // Always publish instrument state for Playwright/QA (preview + prod).
     const viz = (window as any).__viz ?? {};
@@ -159,12 +165,15 @@ async function boot() {
     const filtersSame = sameFilters(renderedFilters, state.filters);
     if (weightsSame && axesSame && filtersSame) return;
 
-    // Sync visible-set consumers immediately on filter/weight/axis paint triggers
-    // (not on hover-only ticks) so console/sweep don't lag a frame.
-    const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
-    consoleUi.setModels(visibleNow);
-    stageGuide.setModels(visibleNow);
-    sweep?.setModels(visibleNow);
+    // Filter changes rewrite the visible catalog — console, guide, and sweep need
+    // the new set immediately. Weight/axis-only changes leave membership alone;
+    // SweepScheduler starts its own ignition from its store subscription.
+    if (!filtersSame) {
+      const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
+      consoleUi.setModels(visibleNow);
+      stageGuide.setModels(visibleNow);
+      sweep?.setModels(visibleNow);
+    }
 
     pending = {
       weights: { ...state.weights },
@@ -181,6 +190,15 @@ async function boot() {
       const next = pending;
       pending = null;
       if (next) renderVisuals(next.weights, next.axisMapping, next.filters);
+    });
+  });
+
+  // Keep the address bar in sync with shareable instrument state (replaceState).
+  store.subscribe((state) => {
+    writeShareableUrl({
+      filters: state.filters,
+      axisMapping: state.axisMapping,
+      weights: state.weights,
     });
   });
 
@@ -229,18 +247,21 @@ async function boot() {
     projectionContainers.length > 0
       ? new Projections(projectionContainers, stage.gd, heatEncoding)
       : null;
+  const initialVisible = applyFilters(models, store.getState().filters, sessionReferenceDate());
   const sweepScheduler = new SweepScheduler(
     stage.gd,
     projections?.gds ?? [],
     store,
-    applyFilters(models, store.getState().filters, sessionReferenceDate()),
+    initialVisible,
     heatEncoding,
   );
   sweep = sweepScheduler;
 
-  // Re-render once projections exist so 2D views fill.
+  // Re-render once projections exist so 2D views fill, then arm sweep once the
+  // stage graph has model ids (setModels restarts ignition against the live set).
   const latest = store.getState();
   renderVisuals(latest.weights, latest.axisMapping, latest.filters);
+  sweepScheduler.setModels(initialVisible);
 
   const plotlyOn = (stage.gd as any).on;
   if (typeof plotlyOn === "function") {

@@ -160,7 +160,11 @@ export class Stage3D {
       ...camera,
     };
     this.clampCameraEye();
-    void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera }));
+    // Prefer the QA-instrumented Plotly on __viz when present (cinema orbit tests).
+    void loadPlotly().then((Plotly) => {
+      const plotly = (window as any).__viz?.Plotly ?? Plotly;
+      return plotly.relayout(this.gd, { "scene.camera": this.camera });
+    });
   }
 
   public orbitTo(angleRad: number) {
@@ -261,12 +265,12 @@ export class Stage3D {
       });
       colors.push(color);
 
-      let size = 12;
+      // Keep sizes aligned with SweepScheduler (optimum 16, frontier 11, rest 8)
+      // so restyle/settled contracts stay consistent across stage + sweep.
+      let size = 8;
       if (isOptimum) {
-        size = 20;
+        size = 16;
       } else if (isFrontier) {
-        size = 14;
-      } else {
         size = 11;
       }
       sizes.push(size);
@@ -274,20 +278,21 @@ export class Stage3D {
       textLabels.push(model.model);
     });
 
-    // Trace 0: Scorable models as points
+    // Trace 0: Scorable models as points.
+    // Pass *copies* into Plotly — gl3d can empty/replace per-point arrays in place.
     const pointsTrace = {
       type: "scatter3d",
       mode: "markers",
-      x,
-      y,
-      z,
-      text: textLabels,
+      x: x.slice(),
+      y: y.slice(),
+      z: z.slice(),
+      text: textLabels.slice(),
       marker: {
         // Always re-apply AA/heat colors + sizes. Omitting them after first paint
         // left Plotly without per-point arrays when sweep restyle lagged (Playwright flake).
-        color: colors,
-        size: sizes,
-        symbol: symbols,
+        color: colors.slice(),
+        size: sizes.slice(),
+        symbol: symbols.slice(),
         line: { color: this.tokens.inkField, width: 1 },
       },
       hoverinfo: "none",
@@ -446,26 +451,8 @@ export class Stage3D {
       showTips: false,
     };
 
-    const applyMarkers = () => {
+    const publishViz = () => {
       if (gen !== this.renderGen) return;
-      // gl3d can drop per-point marker arrays; re-assert after plot.
-      void Plotly.restyle(this.gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
-    };
-
-    if (!this.isInitialized) {
-      if (gen !== this.renderGen) return;
-      const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
-      this.isInitialized = true;
-      void plotReady.then(() => {
-        this.setupPlotlyListeners();
-        applyMarkers();
-      });
-    } else {
-      if (gen !== this.renderGen) return;
-      void Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config).then(applyMarkers);
-    }
-
-    if (import.meta.env.DEV || import.meta.env.MODE === "test") {
       const modelIndexToPointNumber: Record<number, number> = {};
       const pointNumberToModelIndex: Record<number, number> = {};
       const pointNumberToModelId: Record<number, string> = {};
@@ -478,7 +465,10 @@ export class Stage3D {
         modelIdToPointNumber[model.model] = index;
       });
 
+      // Always publish intentional marker arrays for QA (gl3d data[] can drop them).
+      const prev = (window as any).__viz ?? {};
       (window as any).__viz = {
+        ...prev,
         modelIndexToPointNumber,
         pointNumberToModelIndex,
         pointNumberToModelId,
@@ -491,8 +481,37 @@ export class Stage3D {
         gd: this.gd,
         priceFloor: this.priceFloor,
         Plotly,
+        markerColors: colors.slice(),
+        markerSizes: sizes.slice(),
+        markerSymbols: symbols.slice(),
       };
+    };
+
+    const applyMarkers = async () => {
+      if (gen !== this.renderGen) return;
+      // gl3d can drop per-point marker arrays; re-assert after plot and mirror on __viz.
+      // Copies so Plotly cannot empty the intentional arrays we keep for QA.
+      const colorCopy = colors.slice();
+      const sizeCopy = sizes.slice();
+      await Plotly.restyle(this.gd, { "marker.color": [colorCopy], "marker.size": [sizeCopy] }, [0]);
+      publishViz();
+    };
+
+    if (!this.isInitialized) {
+      if (gen !== this.renderGen) return;
+      const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
+      this.isInitialized = true;
+      void plotReady.then(async () => {
+        this.setupPlotlyListeners();
+        await applyMarkers();
+      });
+    } else {
+      if (gen !== this.renderGen) return;
+      void Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config).then(applyMarkers);
     }
+
+    // Publish immediately with intentional arrays so tests don't race plotReady.
+    publishViz();
   }
 
   private setupPlotlyListeners() {
@@ -501,6 +520,26 @@ export class Stage3D {
 
     on.call(this.gd, "plotly_webglcontextlost", () => {
       this.showReloadPrompt();
+    });
+    // Bridge gl3d hover into the Stage API's stage:hover CustomEvent (same as
+    // Stage3DThree). Main + projections listen on that event. Registering here
+    // (after first newPlot) avoids the race where main attaches plotly_hover
+    // before newPlot and Plotly drops those listeners on first paint.
+    on.call(this.gd, "plotly_hover", (event: any) => {
+      const point = event?.points?.[0];
+      const text = point?.data?.text ?? point?.fullData?.text;
+      const modelId = Array.isArray(text) ? text[point?.pointNumber] : null;
+      this.gd.dispatchEvent(
+        new CustomEvent("stage:hover", {
+          detail: { modelId: typeof modelId === "string" ? modelId : null },
+          bubbles: true,
+        }),
+      );
+    });
+    on.call(this.gd, "plotly_unhover", () => {
+      this.gd.dispatchEvent(
+        new CustomEvent("stage:hover", { detail: { modelId: null }, bubbles: true }),
+      );
     });
     on.call(this.gd, "plotly_relayout", (eventData: any) => {
       // FIX-D (#29) review: Plotly emits camera drags in three shapes — the full
