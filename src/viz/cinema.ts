@@ -1,5 +1,5 @@
 import type { AppStore, AppState } from "../state";
-import { motionPreference } from "./sweep";
+import { motionPreference } from "./sweep-timing";
 import type { Stage3DSurface } from "./stage-api";
 
 const ORBIT_SPEED = 0.00012;

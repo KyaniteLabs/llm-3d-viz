@@ -1,5 +1,6 @@
 import { incompleteModels, incompleteAxisCoverage, quarantinedModels, type Model } from "../data/models";
-import { normalizedScores, presets, weightedOptimum } from "../lib/score";
+import { normalizedScores, presets, weightedOptimum, type ScoreWeights } from "../lib/score";
+import { frontier } from "../lib/pareto";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
 import { displayName } from "../lib/display-name";
 import type { AppStore, AppState } from "../state";
@@ -45,6 +46,7 @@ export class DecisionConsole {
       <section class="weight-controls" aria-label="Value-score weight shares"><p class="weight-heading">VALUE SCORE / WEIGHT SHARE</p></section>
       <section class="preset-controls" aria-label="Workload presets"></section>
       <section class="model-readout" aria-live="polite"></section>
+      <section class="score-table-host" aria-label="Model score table"></section>
       <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>`;
 
     this.renderControls();
@@ -172,6 +174,7 @@ export class DecisionConsole {
     const readout = this.root.querySelector(".model-readout")!;
     const model = this.activeModel(state);
     readout.innerHTML = model ? this.details(model, state) : this.leaderboard(state, activePreset);
+    this.renderScoreTable(state.weights);
     if (model) {
       this.tooltip.innerHTML = this.details(model, state);
       this.tooltip.hidden = false;
@@ -179,6 +182,60 @@ export class DecisionConsole {
     } else {
       this.tooltip.hidden = true;
     }
+  }
+
+
+  /** Accessible table parity for the 3D stage (TC-DV-01). */
+  renderScoreTable(weights: ScoreWeights) {
+    const host = this.root.querySelector(".score-table-host");
+    if (!host) return;
+    const scores = normalizedScores(this.models, weights, this.models)
+      .slice()
+      .sort((a, b) => b.score - a.score || a.model.model.localeCompare(b.model.model));
+    const frontierIds = new Set(frontier(this.models).map((m) => m.model));
+    const optimum = weightedOptimum(scores)?.model.model;
+    const rows = scores
+      .map(({ model, score }) => {
+        const role =
+          model.model === optimum ? "optimum" : frontierIds.has(model.model) ? "frontier" : "dominated";
+        return `<tr data-model-id="${model.model}" data-role="${role}" tabindex="0">
+          <th scope="row">${displayName(model.model)}</th>
+          <td>${model.provider}</td>
+          <td>${formatTps(model.tps)}</td>
+          <td>${formatPricePerM(model.blended_price_per_M)}</td>
+          <td>${formatIntelligence(model.aa_intelligence_index)}</td>
+          <td>${score.toFixed(3)}</td>
+          <td>${role}</td>
+        </tr>`;
+      })
+      .join("");
+    host.innerHTML = `<details class="score-table-disclosure" open>
+      <summary>MODEL TABLE · ${scores.length} SCORABLE</summary>
+      <div class="score-table-wrap" role="region" aria-label="Scorable models by value score">
+        <table class="score-table">
+          <caption class="visually-hidden">Scorable models with speed, cost, intelligence, and value score. Use arrow keys or click a row to inspect.</caption>
+          <thead><tr>
+            <th scope="col">Model</th><th scope="col">Provider</th><th scope="col">TPS</th>
+            <th scope="col">Cost $/M</th><th scope="col">Intel</th><th scope="col">Score</th><th scope="col">Class</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </details>`;
+    host.querySelectorAll<HTMLTableRowElement>("tbody tr").forEach((row) => {
+      const activate = () => {
+        const id = row.dataset.modelId;
+        if (!id) return;
+        this.store.update({ hoveredModelId: id, pinnedModelId: id });
+      };
+      row.addEventListener("click", activate);
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activate();
+        }
+      });
+    });
   }
 
   setCursor(clientX: number, clientY: number) {

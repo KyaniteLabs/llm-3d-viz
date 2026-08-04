@@ -1,4 +1,4 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
@@ -36,7 +36,8 @@ export class Stage3D {
   private relayoutClampInFlight = false;
   private isInitialized = false;
   private readonly heatEncoding: boolean;
-  private priceFloor = 0.08125; // default fallback, will be computed dynamically
+  private priceFloor = 0.08125;
+  private renderGen = 0; // default fallback, will be computed dynamically
 
   constructor(container: HTMLElement, heatEncoding = true) {
     this.container = container;
@@ -59,6 +60,8 @@ export class Stage3D {
     this.el = this.gd;
     this.container.appendChild(this.gd);
     (this.gd as any).__stageBackend = "plotly";
+    this.gd.setAttribute("role", "img");
+    this.gd.setAttribute("aria-label", "3D model benchmark stage: speed, cost, and intelligence");
 
     this.camera = {
       // Hero eye sits in the −cost / −intelligence octant so floor-axis ticks
@@ -157,7 +160,7 @@ export class Stage3D {
       ...camera,
     };
     this.clampCameraEye();
-    Plotly.relayout(this.gd, { "scene.camera": this.camera });
+    void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera }));
   }
 
   public orbitTo(angleRad: number) {
@@ -176,6 +179,12 @@ export class Stage3D {
   }
 
   public render(weights: ScoreWeights, modelsList: Model[]) {
+    void this.renderWithPlotly(weights, modelsList);
+  }
+
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]) {
+    const Plotly = await loadPlotly();
+    const gen = ++this.renderGen;
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
@@ -431,10 +440,12 @@ export class Stage3D {
     };
 
     if (!this.isInitialized) {
+      if (gen !== this.renderGen) return;
       const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
       this.isInitialized = true;
       void plotReady.then(() => this.setupPlotlyListeners());
     } else {
+      if (gen !== this.renderGen) return;
       Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
     }
 
@@ -515,7 +526,7 @@ export class Stage3D {
       // guard is belt-and-suspenders against any re-entrant scheduling.
       if (updated && this.clampCameraEye() && !this.relayoutClampInFlight) {
         this.relayoutClampInFlight = true;
-        void Plotly.relayout(this.gd, { "scene.camera": this.camera }).then(
+        void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera })).then(
           () => { this.relayoutClampInFlight = false; },
         );
       }

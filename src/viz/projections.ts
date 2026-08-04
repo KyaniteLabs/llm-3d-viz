@@ -1,4 +1,4 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
@@ -93,6 +93,7 @@ export class Projections {
   /** True while either direction of a coupling fan-out is driving Fx.hover. */
   private isProgrammatic = false;
   private coupled = false;
+  private renderGen = 0;
 
   constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
     this.containers = containers;
@@ -284,6 +285,12 @@ export class Projections {
   }
 
   render(weights: ScoreWeights, modelsList: Model[]): void {
+    void this.renderWithPlotly(weights, modelsList);
+  }
+
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]): Promise<void> {
+    const Plotly = await loadPlotly();
+    const gen = ++this.renderGen;
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
@@ -365,8 +372,10 @@ export class Projections {
         yaxis: this.axisLayout(spec.y),
       };
       if (!this.initialized || gd.data === undefined) {
+        if (gen !== this.renderGen) return;
         Plotly.newPlot(gd, [traces[index]], layout as any, config);
       } else {
+        if (gen !== this.renderGen) return;
         Plotly.react(gd, [traces[index]], layout as any, config);
       }
     });
@@ -439,7 +448,9 @@ export class Projections {
     const pointNumber = pointNumberForModelId(gd, modelId);
     if (pointNumber === null) return; // model not present on this view
     try {
-      Plotly.Fx.hover(gd, [{ curveNumber: 0, pointNumber }], subplot);
+      void loadPlotly().then((Plotly) => {
+        Plotly.Fx.hover(gd, [{ curveNumber: 0, pointNumber }], subplot);
+      });
     } catch {
       // Programmatic hover on a de-chromed plot (hoverinfo 'none') is
       // best-effort; the coupling contract is the Fx.hover call by model id.

@@ -29,6 +29,11 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 
 **Do not:** keep polishing Plotly; rewrite console/math/2D in the same train; add Three demo slop (particles, bloom soup, starfields).
 
+### Spike analysis (2026-08-03)
+- Full best-practice + TasteCheck ledger: `docs/v1/three-stage-deep-analysis-and-tastecheck-2026-08.md`
+- Verdict: **HOLD** (visual veto + a11y table + Plotly code-split + occlusion)
+- Evidence PNGs: `docs/v1/tastecheck-evidence/`
+
 ### Spike verify
 ```bash
 npm test          # 45 vitest

@@ -1,4 +1,4 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { isScorable, type Model } from "../data/models";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import {
@@ -17,9 +17,8 @@ import {
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
-export function motionPreference(): MediaQueryList | null {
-  return typeof window.matchMedia === "function" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-}
+import { motionPreference } from "./sweep-timing";
+export { motionPreference } from "./sweep-timing";
 
 export function ignitionOrder(models: readonly Model[], weights: ScoreWeights, interacted: boolean): string[] {
   const frontierModels = frontier(models);
@@ -179,10 +178,12 @@ export class SweepScheduler {
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
-    const plotly = import.meta.env.DEV
-      ? (window as any).__viz?.Plotly ?? Plotly
-      : Plotly;
-    void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+    void loadPlotly().then((Plotly) => {
+      const plotly = import.meta.env.DEV
+        ? (window as any).__viz?.Plotly ?? Plotly
+        : Plotly;
+      void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+    });
   }
 
   private writeAppearance(appearance: CurrentAppearance) {

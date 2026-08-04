@@ -41,7 +41,18 @@ const SHAPE_TO_GLYPH: Record<string, GlyphKind> = {
   x: "x",
 };
 
-type LabelSpec = { text: string; world: THREE.Vector3; kind: "title" | "tick" };
+type LabelSpec = { text: string; world: THREE.Vector3; kind: "title" | "tick" | "mark" };
+
+/** Slight transparency on dim slate so occluded frontier marks read through. */
+function semanticOpacity(hex: string): number {
+  const h = hex.toLowerCase();
+  // dominated slate family stays more transparent
+  if (h.startsWith("#3") || h.startsWith("#4") || h.startsWith("#5") || h.startsWith("#6") || h.startsWith("#7") || h.startsWith("#8") || h.startsWith("#9")) {
+    return 0.82;
+  }
+  return 1;
+}
+
 
 export class Stage3DThree implements Stage3DSurface {
   public readonly el: HTMLDivElement;
@@ -84,7 +95,11 @@ export class Stage3DThree implements Stage3DSurface {
   private animFrame: number | null = null;
   private resizeObs: ResizeObserver | null = null;
 
-  constructor(container: HTMLElement, heatEncoding = true) {
+  constructor(
+    container: HTMLElement,
+    heatEncoding = true,
+    options: { debugBadge?: boolean } = {},
+  ) {
     this.heatEncoding = heatEncoding;
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
@@ -105,15 +120,17 @@ export class Stage3DThree implements Stage3DSurface {
     container.appendChild(this.el);
     this.gd = this.el;
 
-    const badge = document.createElement("div");
-    badge.className = "stage-backend-badge";
-    badge.textContent = "STAGE · THREE";
-    badge.setAttribute("data-stage-backend", "three");
-    badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
-      font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
-      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.45);
-      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.82);pointer-events:none;`;
-    this.el.appendChild(badge);
+    if (options.debugBadge) {
+      const badge = document.createElement("div");
+      badge.className = "stage-backend-badge";
+      badge.textContent = "STAGE · THREE";
+      badge.setAttribute("data-stage-backend", "three");
+      badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
+        font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
+        color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.45);
+        padding:0.28rem 0.45rem;background:rgba(7,12,11,0.82);pointer-events:none;`;
+      this.el.appendChild(badge);
+    }
 
     this.scene.background = new THREE.Color(this.tokens.inkField);
 
@@ -136,6 +153,12 @@ export class Stage3DThree implements Stage3DSurface {
       height: "100%",
       display: "block",
     });
+    this.renderer.domElement.setAttribute("role", "img");
+    this.renderer.domElement.setAttribute(
+      "aria-label",
+      "3D model benchmark stage plotting speed, cost, and intelligence. Use the model table in the console for accessible data.",
+    );
+    this.renderer.domElement.tabIndex = 0;
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
@@ -351,16 +374,22 @@ export class Stage3DThree implements Stage3DSurface {
       { text: "SPEED (TPS)", world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
     );
 
-    // Tick labels (match Plotly stage tick set).
-    const costTicks: Array<{ v: number; label: string }> = [
-      { v: this.priceFloor, label: "≤fl" },
-      { v: 0.1, label: "0.1" },
-      { v: 1, label: "1" },
-      { v: 10, label: "10" },
-      { v: 100, label: "100" },
-    ];
-    const intelTicks = [0, 20, 40, 60, 80, 100];
-    const speedTicks = [10, 100, 1000];
+    // Tick labels — full set desktop; sparse on narrow (Plotly FIX-D parity).
+    const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
+    const costTicks: Array<{ v: number; label: string }> = narrow
+      ? [
+          { v: 1, label: "1" },
+          { v: 100, label: "100" },
+        ]
+      : [
+          { v: this.priceFloor, label: "≤fl" },
+          { v: 0.1, label: "0.1" },
+          { v: 1, label: "1" },
+          { v: 10, label: "10" },
+          { v: 100, label: "100" },
+        ];
+    const intelTicks = narrow ? [50, 100] : [0, 20, 40, 60, 80, 100];
+    const speedTicks = narrow ? [100, 1000] : [10, 100, 1000];
 
     for (const t of costTicks) {
       const p = this.toScene(t.v, 0, 10);
@@ -406,7 +435,7 @@ export class Stage3DThree implements Stage3DSurface {
 
   /** Plotly sizes are ~8–16 px; map to scene radius that does not fill the cube. */
   private radiusForSize(sizePx: number): number {
-    return 0.018 + (sizePx / 16) * 0.028;
+    return 0.012 + (sizePx / 16) * 0.018;
   }
 
   private makePointMesh(kind: GlyphKind, color: string, sizePx: number): THREE.Mesh {
@@ -417,8 +446,9 @@ export class Stage3DThree implements Stage3DSurface {
       color: new THREE.Color(color),
       wireframe: open,
       transparent: true,
-      opacity: open ? 0.92 : 1,
+      opacity: open ? 0.9 : semanticOpacity(color),
       depthTest: true,
+      depthWrite: !open,
     });
     const mesh = new THREE.Mesh(geom, mat);
     if (kind === "x") mesh.rotation.z = Math.PI / 4;
@@ -498,6 +528,7 @@ export class Stage3DThree implements Stage3DSurface {
       mesh.position.copy(pos);
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
+      mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
       this.modelIds.push(model.model);
@@ -514,6 +545,28 @@ export class Stage3DThree implements Stage3DSurface {
       ridgePts.length >= 2
         ? new THREE.BufferGeometry().setFromPoints(ridgePts)
         : new THREE.BufferGeometry();
+
+    // Direct labels: optimum always; frontier when stage is wide enough.
+    const wide = this.el.clientWidth >= 560;
+    for (const mesh of this.pointMeshes) {
+      const cls = mesh.userData.semanticClass as SemanticPointClass;
+      const id = mesh.userData.modelId as string;
+      if (cls === "optimum" || (wide && cls === "frontier")) {
+        const short = id.length > 28 ? id.slice(0, 26) + "…" : id;
+        this.labelSpecs.push({
+          text: short,
+          world: mesh.position.clone().add(new THREE.Vector3(0, 0.06, 0)),
+          kind: "mark",
+        });
+      }
+    }
+
+    // Accessible name tracks current optimum.
+    const optName = optimumModel?.model ?? "none";
+    this.renderer.domElement.setAttribute(
+      "aria-label",
+      `3D benchmark stage. ${this.pointMeshes.length} models. Current optimum ${optName}. ${frontierIds.size} on Pareto frontier. Full table in instrument console.`,
+    );
 
     (this.gd as any).__stageModelIds = this.modelIds.slice();
     (this.gd as any).__stageBackend = "three";
@@ -591,12 +644,14 @@ export class Stage3DThree implements Stage3DSurface {
       const y = (-projected.y * 0.5 + 0.5) * h;
       const el = document.createElement("span");
       el.textContent = text;
-      const size = kind === "title" ? "11px" : "9px";
-      const color = kind === "title" ? this.tokens.textWarm : this.tokens.textMuted;
-      const weight = kind === "title" ? "500" : "400";
-      el.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);
-        color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.04em;white-space:nowrap;
-        opacity:${kind === "title" ? 0.95 : 0.75};text-shadow:0 0 6px ${this.tokens.inkField};`;
+      const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : "9px";
+      const color =
+        kind === "title" ? this.tokens.textWarm : kind === "mark" ? this.tokens.filament : this.tokens.textMuted;
+      const weight = kind === "title" || kind === "mark" ? "500" : "400";
+      el.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-100%);
+        color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.03em;white-space:nowrap;
+        opacity:${kind === "mark" ? 0.92 : kind === "title" ? 0.95 : 0.75};text-shadow:0 0 6px ${this.tokens.inkField};
+        max-width:12rem;overflow:hidden;text-overflow:ellipsis;pointer-events:none;`;
       this.labelRoot.appendChild(el);
     }
   }
