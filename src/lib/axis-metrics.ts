@@ -143,8 +143,11 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     label: "Cost / Index task",
     title: "COST / TASK",
     scale: "log",
-    available: false,
-    getValue: (m) => m.cost_per_index_task_usd ?? null,
+    available: true,
+    getValue: (m) =>
+      m.cost_per_index_task_usd != null && m.cost_per_index_task_usd > 0
+        ? m.cost_per_index_task_usd
+        : null,
     formatTick: formatPriceTick,
   },
   {
@@ -152,9 +155,12 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     label: "Time / Index task",
     title: "TIME / TASK",
     scale: "log",
-    available: false,
-    getValue: (m) => m.time_per_index_task_s ?? null,
-    formatTick: (v) => `${v}`,
+    available: true,
+    getValue: (m) =>
+      m.time_per_index_task_s != null && m.time_per_index_task_s > 0
+        ? m.time_per_index_task_s
+        : null,
+    formatTick: (v) => (v >= 100 ? `${Math.round(v)}s` : `${Number(v.toPrecision(3))}s`),
   },
 ] as const;
 

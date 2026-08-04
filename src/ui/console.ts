@@ -23,7 +23,7 @@ const axisRoleLabel: Record<SceneAxis, string> = {
   z: "Z axis",
 };
 const AXIS_STUB_NOTE =
-  "Cost/time per Index task axes unlock when those fields ship in the dataset.";
+  "Cost/time per Index task use AA Intelligence Index task metrics when present for a model.";
 
 function weightShares(weights: AppState["weights"]): Record<WeightKey, number> {
   const total = weightKeys.reduce((sum, weightKey) => sum + Math.max(0, weights[weightKey]), 0);
@@ -108,13 +108,13 @@ export class DecisionConsole {
       </label>
       <label class="axis-control" for="filter-providers">
         <span>Providers</span>
-        <select id="filter-providers" data-filter-providers multiple size="5" aria-label="Filter by provider">
+        <select id="filter-providers" data-filter-providers multiple size="3" aria-label="Filter by provider">
           ${providers.map((p) => `<option value="${p}">${p}</option>`).join("")}
         </select>
       </label>
       <label class="axis-control" for="filter-families">
         <span>Families</span>
-        <select id="filter-families" data-filter-families multiple size="5" aria-label="Filter by family">
+        <select id="filter-families" data-filter-families multiple size="3" aria-label="Filter by family">
           ${families.map((f) => `<option value="${f}">${f}</option>`).join("")}
         </select>
       </label>

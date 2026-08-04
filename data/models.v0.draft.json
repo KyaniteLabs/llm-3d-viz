@@ -21,8 +21,10 @@
     "gpqa": 94.1,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-02",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 1.232549,
+    "time_per_index_task_s": 235.292
   },
   {
     "model": "GPT-5.6 Terra (max)",
@@ -46,8 +48,10 @@
     "gpqa": 92.5,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-02",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.50982,
+    "time_per_index_task_s": 150.803
   },
   {
     "model": "GPT-5.6 Luna (max)",
@@ -71,8 +75,10 @@
     "gpqa": 91.1,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-02",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.047349,
+    "time_per_index_task_s": 111.205
   },
   {
     "model": "GPT-5.5 Pro (xhigh)",
@@ -96,9 +102,11 @@
     "gpqa": null,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
+    "data_date": "2026-08-04",
     "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
-    "null_reason": "not_measured"
+    "null_reason": "not_measured",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null
   },
   {
     "model": "gpt-oss-120b (high)",
@@ -121,8 +129,10 @@
     "gpqa": 78.2,
     "swe_bench": null,
     "aider_pct": 41.8,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.075048,
+    "time_per_index_task_s": 182.482
   },
   {
     "model": "GPT-5 (high)",
@@ -146,8 +156,10 @@
     "gpqa": 85.4,
     "swe_bench": null,
     "aider_pct": 88.0,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.257019,
+    "time_per_index_task_s": 170.954
   },
   {
     "model": "GPT-4o (Nov '24)",
@@ -171,8 +183,10 @@
     "gpqa": 54.3,
     "swe_bench": null,
     "aider_pct": 18.2,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
@@ -196,8 +210,10 @@
     "gpqa": 93.2,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 2.336463,
+    "time_per_index_task_s": 445.959
   },
   {
     "model": "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
@@ -221,8 +237,10 @@
     "gpqa": 92.6,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 3.148707,
+    "time_per_index_task_s": 300.613
   },
   {
     "model": "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)",
@@ -246,8 +264,10 @@
     "gpqa": 91.1,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 1.716708,
+    "time_per_index_task_s": 559.206
   },
   {
     "model": "Claude 4.5 Haiku (Reasoning)",
@@ -271,8 +291,10 @@
     "gpqa": 67.2,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.216327,
+    "time_per_index_task_s": 196.842
   },
   {
     "model": "Gemini 3.6 Flash (high)",
@@ -298,8 +320,10 @@
     "gpqa": 92.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.556934,
+    "time_per_index_task_s": 114.259
   },
   {
     "model": "Gemini 3.5 Flash-Lite",
@@ -325,8 +349,10 @@
     "gpqa": 83.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.096076,
+    "time_per_index_task_s": 34.795
   },
   {
     "model": "Gemini 2.5 Pro",
@@ -352,8 +378,10 @@
     "gpqa": 84.4,
     "swe_bench": null,
     "aider_pct": 79.1,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.215392,
+    "time_per_index_task_s": 85.226
   },
   {
     "model": "Gemma 4 31B (Reasoning)",
@@ -378,8 +406,10 @@
     "gpqa": 85.7,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": 345.801
   },
   {
     "model": "Muse Spark 1.1 (xhigh)",
@@ -403,8 +433,10 @@
     "gpqa": 89.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.292409,
+    "time_per_index_task_s": 102.352
   },
   {
     "model": "Llama 4 Maverick",
@@ -428,8 +460,10 @@
     "gpqa": 67.1,
     "swe_bench": null,
     "aider_pct": 15.6,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.035305,
+    "time_per_index_task_s": 21.682
   },
   {
     "model": "Llama 4 Scout",
@@ -453,8 +487,10 @@
     "gpqa": 58.7,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.010475,
+    "time_per_index_task_s": 10.093
   },
   {
     "model": "Llama 3.3 Instruct 70B",
@@ -477,8 +513,10 @@
     "gpqa": 49.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.090249,
+    "time_per_index_task_s": 20.683
   },
   {
     "model": "Grok 4.5 (high)",
@@ -502,8 +540,10 @@
     "gpqa": 93.1,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.364788,
+    "time_per_index_task_s": 233.452
   },
   {
     "model": "DeepSeek V4 Pro (Reasoning, Max Effort)",
@@ -526,8 +566,10 @@
     "gpqa": 88.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.047531,
+    "time_per_index_task_s": 479.464
   },
   {
     "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
@@ -550,9 +592,11 @@
     "gpqa": 90.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
+    "data_date": "2026-08-04",
     "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
-    "null_reason": "not_measured"
+    "null_reason": "not_measured",
+    "cost_per_index_task_usd": 0.027131,
+    "time_per_index_task_s": 291.617
   },
   {
     "model": "Kimi K3 (max)",
@@ -576,8 +620,10 @@
     "gpqa": 93.5,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.855204,
+    "time_per_index_task_s": 658.944
   },
   {
     "model": "GLM-5.2 (max)",
@@ -600,8 +646,10 @@
     "gpqa": 89.5,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.566753,
+    "time_per_index_task_s": 240.884
   },
   {
     "model": "Qwen3.7 Max",
@@ -624,8 +672,10 @@
     "gpqa": 92.3,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 1.07526,
+    "time_per_index_task_s": 97.055
   },
   {
     "model": "Qwen3.5 397B A17B (Reasoning)",
@@ -649,8 +699,10 @@
     "gpqa": 89.3,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.358621,
+    "time_per_index_task_s": 233.798
   },
   {
     "model": "Mistral Large 3",
@@ -674,8 +726,10 @@
     "gpqa": 68.0,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.080468,
+    "time_per_index_task_s": 68.103
   },
   {
     "model": "Mistral Medium 3.5",
@@ -699,8 +753,10 @@
     "gpqa": 74.8,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.460306,
+    "time_per_index_task_s": 164.804
   },
   {
     "model": "MiniMax-M3",
@@ -725,8 +781,10 @@
     "gpqa": 92.9,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.137325,
+    "time_per_index_task_s": 244.582
   },
   {
     "model": "MiMo-V2.5-Pro",
@@ -749,8 +807,10 @@
     "gpqa": 86.6,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.033991,
+    "time_per_index_task_s": 395.24
   },
   {
     "model": "Nemotron 3 Ultra 550B A55B (Reasoning)",
@@ -773,8 +833,10 @@
     "gpqa": 86.7,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": 0.376221,
+    "time_per_index_task_s": 169.951
   },
   {
     "model": "Command A+",
@@ -798,8 +860,10 @@
     "gpqa": 76.1,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": 103.727
   },
   {
     "model": "Inkling (xhigh)",
@@ -824,8 +888,10 @@
     "gpqa": 87.2,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": 280.052
   },
   {
     "model": "Nova Premier",
@@ -848,8 +914,10 @@
     "gpqa": 56.9,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null
   },
   {
     "model": "Phi-4",
@@ -872,7 +940,9 @@
     "gpqa": 57.5,
     "swe_bench": null,
     "aider_pct": null,
-    "data_date": "2026-08-01",
-    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset"
+    "data_date": "2026-08-04",
+    "source": "Artificial Analysis (artificialanalysis.ai) embedded model dataset",
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null
   }
 ]

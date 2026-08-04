@@ -21,7 +21,7 @@ describe("axis-metrics", () => {
     expect(mappingHeading(DEFAULT_AXIS_MAPPING)).toBe("Speed × cost × intelligence");
   });
 
-  it("exposes only available metrics in the console list", () => {
+  it("exposes available metrics including task axes when data exists", () => {
     const ids = availableAxisMetrics().map((m) => m.id);
     expect(ids).toContain("blended_price");
     expect(ids).toContain("price_in");
@@ -29,17 +29,23 @@ describe("axis-metrics", () => {
     expect(ids).toContain("tps");
     expect(ids).toContain("ttft");
     expect(ids).toContain("intelligence");
-    expect(ids).not.toContain("cost_per_index");
-    expect(ids).not.toContain("time_per_index");
+    expect(ids).toContain("cost_per_index");
+    expect(ids).toContain("time_per_index");
   });
 
-  it("falls back from unavailable stub metrics", () => {
+  it("accepts cost_per_index when available and rejects unknown ids", () => {
     const mapping = normalizeAxisMapping({
       x: "cost_per_index",
       y: "intelligence",
       z: "tps",
     });
-    expect(mapping.x).toBe("blended_price");
+    expect(mapping.x).toBe("cost_per_index");
+    const bad = normalizeAxisMapping({
+      x: "not_a_metric" as any,
+      y: "intelligence",
+      z: "tps",
+    });
+    expect(bad.x).toBe("blended_price");
   });
 
   it("maps intelligence linearly on a fixed 0–100 domain", () => {

@@ -133,7 +133,9 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 .axis-note { opacity: 0.85; }
 .axis-control { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.45rem; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
 .axis-control select { width: 100%; min-height: 2rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--ink-field); color: var(--filament); font: 400 var(--step--1) var(--font-mono); padding: 0.25rem 0.4rem; cursor: pointer; text-transform: none; letter-spacing: 0.02em; }
-.axis-control select[multiple] { min-height: 5.5rem; }
+.axis-control select[multiple] { min-height: 3.6rem; max-height: 4.5rem; }
+body { min-height: 100dvh; overflow: hidden; }
+html, body { height: 100%; }
 .axis-control select:hover, .axis-control select:focus-visible { border-color: var(--filament-dim); }
 .axis-control select:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
 .filter-toggle { display: flex; gap: 0.5rem; align-items: center; padding: 0.45rem 0; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); }

@@ -55,7 +55,11 @@ async function boot() {
   stageVisual?.appendChild(plotContainer);
 
   const consoleRoot = document.querySelector(".console") as HTMLElement;
-  const store = createStore();
+  // `?age=0` disables the default 6-month filter (used by regression suite / full-catalog look).
+  const ageDisabled = searchParams.get("age") === "0";
+  const store = createStore(
+    ageDisabled ? { filters: { ageEnabled: false, ageMonths: 6, providers: [], families: [] } } : {},
+  );
 
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
@@ -132,18 +136,17 @@ async function boot() {
     stageGuide.setModels(visibleSet);
     sweep?.setModels(visibleSet);
 
-    if (import.meta.env.DEV || import.meta.env.MODE === "test") {
-      const viz = (window as any).__viz ?? {};
-      viz.stage = stage;
-      viz.gd = stage.gd;
-      viz.heatEncoding = heatEncoding;
-      viz.projectionsInstance = projections;
-      viz.axisMapping = { ...axisMapping };
-      viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
-      viz.visibleCount = visibleSet.length;
-      viz.pointCount = (window as any).__viz?.pointCount;
-      (window as any).__viz = viz;
-    }
+    // Always publish instrument state for Playwright/QA (preview + prod).
+    const viz = (window as any).__viz ?? {};
+    viz.stage = stage;
+    viz.gd = stage.gd;
+    viz.heatEncoding = heatEncoding;
+    viz.projectionsInstance = projections;
+    viz.axisMapping = { ...axisMapping };
+    viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
+    viz.visibleCount = visibleSet.length;
+    viz.pointCount = (window as any).__viz?.pointCount ?? visibleSet.length;
+    (window as any).__viz = viz;
   };
 
   store.subscribe((state) => {

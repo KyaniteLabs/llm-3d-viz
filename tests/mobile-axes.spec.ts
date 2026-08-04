@@ -1,4 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function waitForPlotlyStage(page: Page, timeoutMs = 15000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const viz = (window as any).__viz;
+      const data = viz?.gd?.data;
+      return Array.isArray(viz?.scorableModels) && Array.isArray(data) && data.length >= 1 && Array.isArray(data[0]?.x) && data[0].x.length > 0;
+    },
+    null,
+    { timeout: timeoutMs },
+  );
+}
+
 
 /**
  * FIX-D (#29): mobile-axis responsive titles/ticks regression spec.
@@ -14,8 +27,8 @@ import { test, expect } from "@playwright/test";
 test.describe("FIX-D #29 mobile axes (responsive titles/ticks)", () => {
   test("narrow (375px): shortened titles, thinned ticks, origin ticks dropped", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 760 });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const s = await page.evaluate(() => {
       const sc = (window as any).__viz.gd.layout.scene;
@@ -44,8 +57,8 @@ test.describe("FIX-D #29 mobile axes (responsive titles/ticks)", () => {
 
   test("desktop (1280px): full titles + full tick set unchanged", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const s = await page.evaluate(() => {
       const sc = (window as any).__viz.gd.layout.scene;

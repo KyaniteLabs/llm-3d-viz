@@ -2,7 +2,7 @@ import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
-import { semanticPointFill, type SemanticPointClass } from "./palette";
+import { aaPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -252,7 +252,7 @@ export class Stage3D {
       symbols.push(symbol);
 
       const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
-      const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+      const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
@@ -283,7 +283,10 @@ export class Stage3D {
       z,
       text: textLabels,
       marker: {
-        ...(this.isInitialized ? {} : { color: colors, size: sizes }),
+        // Always re-apply AA/heat colors + sizes. Omitting them after first paint
+        // left Plotly without per-point arrays when sweep restyle lagged (Playwright flake).
+        color: colors,
+        size: sizes,
         symbol: symbols,
         line: { color: this.tokens.inkField, width: 1 },
       },
@@ -443,14 +446,23 @@ export class Stage3D {
       showTips: false,
     };
 
+    const applyMarkers = () => {
+      if (gen !== this.renderGen) return;
+      // gl3d can drop per-point marker arrays; re-assert after plot.
+      void Plotly.restyle(this.gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+    };
+
     if (!this.isInitialized) {
       if (gen !== this.renderGen) return;
       const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
       this.isInitialized = true;
-      void plotReady.then(() => this.setupPlotlyListeners());
+      void plotReady.then(() => {
+        this.setupPlotlyListeners();
+        applyMarkers();
+      });
     } else {
       if (gen !== this.renderGen) return;
-      Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
+      void Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config).then(applyMarkers);
     }
 
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {

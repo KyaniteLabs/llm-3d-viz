@@ -42,3 +42,10 @@ Until cost-per-task is in the dataset:
 ## Done criteria met?
 
 Yes for decision enablement: metric exists at AA; we lack fields; acquisition is “same public page JSON if present, else dedicated extraction task.” Live field confirmation is residual, not blocking the *architecture* decision.
+
+## Live scrape (2026-08-04)
+
+- Extracted `intelligenceIndexCostPerTask.cost.total` → `cost_per_index_task_usd`
+- Extracted `intelligenceIndexTimePerTask` → `time_per_index_task_s`
+- Path: escaped `currentModel` on each model page (`scripts/scrape-aa-task-metrics.mjs`)
+- Coverage on v0 catalog: **28/35** cost, **31/35** time (nulls remain honest when AA has no Index task figure)

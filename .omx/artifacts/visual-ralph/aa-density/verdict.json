@@ -1,0 +1,27 @@
+{
+  "score": 91,
+  "verdict": "PASS",
+  "category_match": {
+    "layout": 90,
+    "density_controls": 92,
+    "semantic_color": 93,
+    "axes_remappable": 94,
+    "task_charts": 90,
+    "typography_chrome": 88
+  },
+  "differences": [
+    "Console multi-selects still dense on short viewports (mitigated size=3).",
+    "Playwright Plotly gl3d marker.size/color arrays remain flaky under filter fan-out (unit/build green).",
+    "Multi-effort dataset still max/high curated rows; trails light up when siblings are scraped."
+  ],
+  "suggestions": [
+    "Optional: URL-persist filters/axes (#56).",
+    "Continue Playwright marker-array hardening for Plotly fallback path only."
+  ],
+  "reasoning": "Three hero shows AA openness encoding, age filter, remappable axes (cost/task live), task rankings populated from AA scrape, DESIGN-SYSTEM channel matrix in legend. Layout fills 1440×900 viewport without decorative chrome.",
+  "artifacts": {
+    "reference": "reference-full.png",
+    "final": "final-viewport.png",
+    "cost_axis": "axis-cost-per-task.png"
+  }
+}

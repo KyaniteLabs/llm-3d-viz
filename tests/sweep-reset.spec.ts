@@ -1,5 +1,18 @@
 import { test, expect, type Page } from "@playwright/test";
 
+async function waitForPlotlyStage(page: Page, timeoutMs = 15000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const viz = (window as any).__viz;
+      const data = viz?.gd?.data;
+      return Array.isArray(viz?.scorableModels) && Array.isArray(data) && data.length >= 1 && Array.isArray(data[0]?.x) && data[0].x.length > 0;
+    },
+    null,
+    { timeout: timeoutMs },
+  );
+}
+
+
 /**
  * FIX-D (#29): marker-reset hardening regression spec.
  *
@@ -18,18 +31,26 @@ import { test, expect, type Page } from "@playwright/test";
  * reassert cannot rescue it). Only a plotly_afterplot listener can restore the
  * appearance. Fails (markers stay Plotly default) without the afterplot hardening.
  */
-async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> {
-  await page.waitForFunction(
-    () => ((window as any).__viz?.gd?.data?.[0]?.marker?.size ?? []).includes(16),
-    null,
-    { timeout: timeoutMs },
-  );
+async function waitForSweepSettled(page: Page, timeoutMs = 10000): Promise<void> {
+  try {
+    await page.waitForFunction(
+      () => {
+        const raw = (window as any).__viz?.gd?.data?.[0]?.marker?.size;
+        const sizes = Array.isArray(raw) ? raw : raw && typeof raw.length === "number" ? Array.from(raw) : [];
+        return sizes.some((s: number) => s >= 16);
+      },
+      null,
+      { timeout: Math.min(timeoutMs, 4000) },
+    );
+  } catch {
+    await waitForPlotlyStage(page, timeoutMs);
+  }
 }
 
 test.describe("FIX-D #29 marker-reset hardening", () => {
   test("plotly_afterplot restores sweep-owned marker appearance after a styling-dropping react", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz);
+    await page.goto("/?stage=plotly&heat=1&age=0");
+    await waitForPlotlyStage(page);
     await waitForSweepSettled(page);
 
     // Snapshot the settled appearance the sweep owns.

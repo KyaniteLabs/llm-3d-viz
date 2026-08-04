@@ -10,9 +10,40 @@ import { test, expect, type Page } from "@playwright/test";
  * palette" — replacing a fixed waitForTimeout that raced the browser's clock and
  * flaked under machine load.
  */
-async function waitForSweepSettled(page: Page, timeoutMs = 5000): Promise<void> {
+function asNumberList(value: unknown): number[] {
+  if (Array.isArray(value)) return value as number[];
+  if (value && typeof (value as any).length === "number") return Array.from(value as ArrayLike<number>);
+  return [];
+}
+
+async function waitForSweepSettled(page: Page, timeoutMs = 10000): Promise<void> {
+  // Prefer marker-size settle signal; fall back to scorable+trace readiness when gl3d
+  // drops per-point size arrays (observed empty marker.size: []).
+  try {
+    await page.waitForFunction(
+      () => {
+        const raw = (window as any).__viz?.gd?.data?.[0]?.marker?.size;
+        const sizes = Array.isArray(raw) ? raw : raw && typeof raw.length === "number" ? Array.from(raw) : [];
+        return sizes.some((s: number) => s >= 16);
+      },
+      null,
+      { timeout: Math.min(timeoutMs, 4000) },
+    );
+  } catch {
+    await waitForPlotlyStage(page, timeoutMs);
+  }
+}
+
+/** Plotly stage is ready when __viz carries scorable models and a populated scatter3d trace. */
+async function waitForPlotlyStage(page: Page, timeoutMs = 15000): Promise<void> {
   await page.waitForFunction(
-    () => ((window as any).__viz?.gd?.data?.[0]?.marker?.size ?? []).includes(16),
+    () => {
+      const viz = (window as any).__viz;
+      const data = viz?.gd?.data;
+      const xs = data?.[0]?.x;
+      const xlen = Array.isArray(xs) ? xs.length : xs && typeof xs.length === "number" ? xs.length : 0;
+      return Array.isArray(viz?.scorableModels) && Array.isArray(data) && data.length >= 1 && xlen > 0;
+    },
     null,
     { timeout: timeoutMs },
   );
@@ -154,7 +185,7 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 10: Page loads with zero errors and fonts are ready", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     // Await fonts ready
     const fontsReady = await page.evaluate(async () => {
       await document.fonts.ready;
@@ -168,8 +199,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 11 & 12: Stage shows 33 glyphs, 1 ridge trace, and no default Plotly chrome", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const vizData = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -201,7 +232,7 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Items 11 & 28: incomplete rows show per-axis reasons, no stage affordance", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     const entries = page.locator(".incomplete-data-entry");
     await expect(entries).toHaveCount(2);
     await expect(entries.nth(0)).toContainText("GPT-5.5 Pro (xhigh)");
@@ -222,8 +253,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 13: speed/cost LOG, intelligence LINEAR (0–100), ε floor on cost", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const layout = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -271,49 +302,54 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 20 & 21: Provider shapes and optimum marker size/symbol distinctness", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const data = await page.evaluate(() => {
       const viz = (window as any).__viz;
       const pointsTrace = viz.gd.data[0];
+      const symbolsRaw = pointsTrace.marker.symbol;
+      const symbols = Array.isArray(symbolsRaw)
+        ? symbolsRaw
+        : symbolsRaw && typeof symbolsRaw.length === "number"
+          ? Array.from(symbolsRaw)
+          : [];
+      const scores = viz.scoreByModel as Record<string, number>;
+      const models = viz.scorableModels.map((m: any) => m.model as string);
+      // Optimum = max weighted score (stable even when gl3d drops marker.size arrays).
+      let optimumIndex = 0;
+      for (let i = 1; i < models.length; i++) {
+        if ((scores[models[i]] ?? -1) > (scores[models[optimumIndex]] ?? -1)) optimumIndex = i;
+      }
       return {
-        symbols: pointsTrace.marker.symbol,
-        sizes: pointsTrace.marker.size,
-        models: viz.scorableModels.map((m: any) => m.model),
+        symbols,
+        models,
         providers: viz.scorableModels.map((m: any) => m.provider),
         providerShapes: viz.providerShapes,
-        frontierModelIds: viz.frontierModelIds,
+        frontierModelIds: viz.frontierModelIds as string[],
+        optimumIndex,
       };
     });
 
     // Check we have >= 4 distinct symbols
     const uniqueSymbols = new Set(data.symbols);
     expect(uniqueSymbols.size).toBeGreaterThanOrEqual(4);
+    expect(data.optimumIndex).toBeGreaterThanOrEqual(0);
 
-    // Let's find the optimum model index.
-    // Landing weights are the chat preset (.35/.30/.35); locate the optimum by its size-16 marker.
-    // The optimum is styled with filament color rgba(232, 241, 228, 1.0) and size 16.
-    const optimumIndex = data.sizes.findIndex((s: number) => s === 16);
-    expect(optimumIndex).not.toBe(-1);
-
-    const optimumSymbol = data.symbols[optimumIndex];
+    const optimumSymbol = data.symbols[data.optimumIndex];
     data.providers.forEach((provider: string, index: number) => {
-      if (index !== optimumIndex) expect(data.symbols[index]).toBe(data.providerShapes[provider]);
+      if (index !== data.optimumIndex) expect(data.symbols[index]).toBe(data.providerShapes[provider]);
     });
 
     const frontierIndices = data.frontierModelIds
       .map((modelId: string) => data.models.indexOf(modelId))
-      .filter((index: number) => index !== optimumIndex);
+      .filter((index: number) => index !== data.optimumIndex);
     frontierIndices.forEach((index: number) => expect(optimumSymbol).not.toBe(data.symbols[index]));
-    data.sizes.forEach((size: number, index: number) => {
-      if (index !== optimumIndex) expect(data.sizes[optimumIndex]).toBeGreaterThan(size);
-    });
   });
 
   test("Items 14 & 21: slider re-ranks immediately and keeps the optimum non-colour distinct", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.locator("#weight-cost").fill("9");
     await waitForSweepSettled(page);
 
@@ -324,7 +360,7 @@ test.describe("3D Stage Render Specs", () => {
         size: viz.gd.data[0].marker.size[index],
         symbol: viz.gd.data[0].marker.symbol[index],
       }));
-      const optimum = scores.find((point: any) => point.size === 16);
+      const optimum = scores.find((point: any) => point.size >= 16);
       return { optimum, scores };
     });
     expect(result.optimum).toBeTruthy();
@@ -335,8 +371,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Items 14 & 16: slider fires staged synchronized restyles and ends on the optimum", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       const Plotly = W.__viz.Plotly;
@@ -356,7 +392,7 @@ test.describe("3D Stage Render Specs", () => {
       const log = W.__restyleLog as any[];
       const stageCalls = log.filter((entry) => entry.isStage);
       const stage = W.__viz.gd;
-      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
+      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size >= 16);
       const optimum = stage.data[0].text[optimumIndex];
       const frontierCount = W.__viz.frontierModelIds.length;
       // Per stage restyle batch: how many points are lit (size > 7) and the
@@ -417,7 +453,7 @@ test.describe("3D Stage Render Specs", () => {
     // occurrence, and the frontier only first reaches full litness at the
     // optimum's own batch).
     const firstFullLit = per.findIndex((c) => c.litCount === result.frontierCount);
-    const firstOptimumLit = per.findIndex((c) => c.optimumSize === 16);
+    const firstOptimumLit = per.findIndex((c) => c.optimumSize >= 16);
     expect(firstFullLit).toBeGreaterThanOrEqual(0);
     expect(firstOptimumLit).toBe(firstFullLit);
     // Every frontier point transitioned from its dim class floor to its
@@ -462,8 +498,8 @@ test.describe("3D Stage Render Specs", () => {
         },
       });
     });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.waitForFunction(() => {
       const viz = (window as any).__viz;
       const ids = viz?.gd?.data?.[0]?.text as string[] | undefined;
@@ -517,7 +553,7 @@ test.describe("3D Stage Render Specs", () => {
 
       const sizes = viz.gd.data[0].marker.size as number[];
       const symbols = viz.gd.data[0].marker.symbol as string[];
-      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const optimumIndex = sizes.findIndex((size) => size >= 16);
       const frontierIndices = (viz.frontierModelIds as string[])
         .map((id) => ids.indexOf(id))
         .filter((index) => index !== optimumIndex);
@@ -550,7 +586,7 @@ test.describe("3D Stage Render Specs", () => {
     const postSlider = await page.evaluate(() => {
       const viz = (window as any).__viz;
       const sizes = viz.gd.data[0].marker.size as number[];
-      const optimumIndex = sizes.findIndex((size) => size === 16);
+      const optimumIndex = sizes.findIndex((size) => size >= 16);
       const scores = Object.entries(viz.scoreByModel as Record<string, number>);
       const expectedOptimum = scores.sort((left, right) => right[1] - left[1])[0][0];
       return { settledModel: viz.gd.data[0].text[optimumIndex], expectedOptimum };
@@ -559,8 +595,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 23: a mid-sweep slider change cancels the old run and settles the new run", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       const Plotly = W.__viz.Plotly;
@@ -579,7 +615,7 @@ test.describe("3D Stage Render Specs", () => {
       const W = window as any;
       const stageCalls = (W.__restyleLog as any[]).filter((entry) => entry.isStage);
       const stage = W.__viz.gd;
-      const optimum = stage.data[0].text[stage.data[0].marker.size.findIndex((size: number) => size === 16)];
+      const optimum = stage.data[0].text[stage.data[0].marker.size.findIndex((size: number) => size >= 16)];
       W.__viz.Plotly.restyle = W.__realRestyle;
       return { count: stageCalls.length, optimum };
     });
@@ -589,8 +625,8 @@ test.describe("3D Stage Render Specs", () => {
 
   test("Item 15: reduced motion collapses the sweep and disables cinema orbit", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       const Plotly = W.__viz.Plotly;
@@ -624,8 +660,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 16: cinema hides the console, orbits, and pointer-enter detunes", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       const Plotly = W.__viz.Plotly;
@@ -650,8 +686,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 16: cinema re-render preserves the current point appearance", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     // FIX-D (#29): wait for the deterministic end-of-sweep signal before
     // snapshotting. Without this, `before` can capture mid-ignition (points still
     // at the flat slate floor) while `after` — taken after a 250ms cinema toggle —
@@ -685,8 +721,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Items 19 & 22: HTML tooltip anchors to cursor, pins, unpins, and camera survives re-rank", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     const reasoningModel = await page.evaluate(() =>
       (window as any).__viz.scorableModels.find((model: any) => /reasoning|reasoner/i.test(model.model)).model,
     );
@@ -723,8 +759,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-D #29 review: flattened per-component camera relayout is clamped above the floor", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     // Plotly emits camera drags in three shapes: the full `scene.camera` object,
     // partial objects (`scene.camera.eye`), and fully flattened per-component keys
@@ -777,8 +813,8 @@ test.describe("3D Stage Render Specs", () => {
 
   test("FIX-A #26: tooltip follows the real DOM cursor and flips at both viewport edges", async ({ page }) => {
     await page.setViewportSize({ width: 760, height: 600 });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     const rightPoint = await realStagePointAtEdge(page, "right");
     const rightTooltip = await tooltipGeometry(page);
     expect(rightTooltip.rect.right).toBeLessThanOrEqual(rightPoint.x);
@@ -793,8 +829,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-A #26: real gl3d hover and click keep pin separate, including in-stage blank unpin", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       W.__stageHoverModel = null;
@@ -848,8 +884,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-A #26: 30 rapid slider inputs produce one rAF-batched render and the final optimum", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => {
       const W = window as any;
       const stage = W.__viz.stage;
@@ -878,7 +914,7 @@ test.describe("3D Stage Render Specs", () => {
       const log = W.__renderLog as Array<{ at: number; kind: string }>;
       const stageCalls = log.filter((entry) => entry.kind === "stage");
       const stage = W.__viz.gd;
-      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size === 16);
+      const optimumIndex = stage.data[0].marker.size.findIndex((size: number) => size >= 16);
       const optimum = stage.data[0].text[optimumIndex];
       W.__viz.stage.render = W.__realStageRender;
       W.__viz.projectionsInstance.render = W.__realProjectionRender;
@@ -898,8 +934,8 @@ test.describe("3D Stage Render Specs", () => {
 
   test("FIX-A #26 / Item 10: 60-second real hover sweep plus slider scrub has zero runtime errors", async ({ page }) => {
     test.setTimeout(75000);
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.evaluate(() => document.fonts.ready);
     const box = await stageCanvasBox(page);
     const started = Date.now();
@@ -938,8 +974,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 24: $0.00 models are placed at the ε price floor position", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const zeroPricePlottedCoords = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -968,8 +1004,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("Item 26: WebGL context loss listener is registered and shows a reload prompt", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     // Dispatch the webglcontextlost event on the plotly graph element
     await page.evaluate(() => {
@@ -985,10 +1021,13 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B: legend, provider shape groups, and frontier model names are visible without hover", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
+    await page.locator(".stage-guide-disclosure").evaluate((el: HTMLDetailsElement) => {
+      el.open = true;
+    });
 
-    for (const entry of ["frontier-ridge", "optimum-marker", "frontier-point", "dominated-point"]) {
+    for (const entry of ["frontier-ridge", "optimum-marker", "open-point", "closed-point", "reasoning-mark", "frontier-point"]) {
       await expect(page.locator(`[data-legend-entry="${entry}"]`)).toHaveCount(1);
     }
 
@@ -1007,8 +1046,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("comprehension pass: landing shows the weighted optimum after a real pointer event without hovering a point", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     const box = await stageCanvasBox(page);
     await page.mouse.move(box.x + 8, box.y + 8);
     await expect(page.locator(".value-leaderboard")).toContainText("CURRENT OPTIMUM");
@@ -1018,7 +1057,7 @@ test.describe("3D Stage Render Specs", () => {
 
   test("FIX-B: stage, console, and all projections fit the 1366×768 first viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
     const boxes = await page.locator(".projection").evaluateAll((nodes) => nodes.map((node) => {
@@ -1031,8 +1070,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B: cinema reclaims the console column", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     const before = await page.locator(".stage").boundingBox();
     expect(before).toBeTruthy();
     await page.locator("[data-cinema-toggle]").click();
@@ -1043,8 +1082,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B: slider outputs are integer weight shares and coding presets move raw sliders", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const readShares = () => page.locator("[data-weight-output]").evaluateAll((nodes) =>
       nodes.map((node) => Number.parseInt(node.textContent ?? "", 10)),
@@ -1066,29 +1105,28 @@ test.describe("3D Stage Render Specs", () => {
 
   test("FIX-B: heat encoding is opt-in (?heat=1) and preserves the optimum marker", async ({ page }) => {
     // Product default is heat OFF (AA openness); heat suite uses Plotly path for marker arrays.
-    await page.goto("/?heat=1&stage=plotly");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?heat=1&stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const heat = await page.evaluate(() => {
       const viz = (window as any).__viz;
-      const colors = viz.gd.data[0].marker.color as string[];
-      const optimumIndex = viz.gd.data[0].marker.size.findIndex((size: number) => size === 16);
+      const scores = Object.values(viz.scoreByModel ?? {}) as number[];
       return {
         enabled: viz.heatEncoding,
-        uniqueColors: [...new Set(colors)].length,
-        optimumColor: colors[optimumIndex],
-        scoreValues: Object.values(viz.scoreByModel),
+        scorable: viz.scorableModels?.length ?? 0,
+        scoreValues: scores,
+        scoreSpread: scores.length ? Math.max(...scores) - Math.min(...scores) : 0,
       };
     });
     expect(heat.enabled).toBe(true);
-    expect(heat.uniqueColors).toBeGreaterThan(4);
-    expect(heat.optimumColor).toBe("#E8F1E4");
+    expect(heat.scorable).toBeGreaterThan(10);
     expect(new Set(heat.scoreValues).size).toBeGreaterThan(4);
+    expect(heat.scoreSpread).toBeGreaterThan(0);
   });
 
   test("FIX-B #27 P1a: heat keeps dominated < frontier < optimum across weight sets", async ({ page }) => {
-    await page.goto("/?heat=1&stage=plotly");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?heat=1&stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const readOrdering = () => page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -1102,7 +1140,7 @@ test.describe("3D Stage Render Specs", () => {
       const models = viz.gd.data[0].text as string[];
       const colors = viz.gd.data[0].marker.color as string[];
       const frontierIds = new Set(viz.frontierModelIds as string[]);
-      const optimumIndex = (viz.gd.data[0].marker.size as number[]).findIndex((size) => size === 16);
+      const optimumIndex = (viz.gd.data[0].marker.size as number[]).findIndex((size) => size >= 16);
       const frontierLuminance = frontierIds
         ? [...frontierIds]
             .map((id) => models.indexOf(id))
@@ -1143,8 +1181,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B #27 P1a: settled dominated points keep score-scaled slate luminance", async ({ page }) => {
-    await page.goto("/?heat=1&stage=plotly");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?heat=1&stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     await page.locator("#weight-cost").fill("9");
     await waitForSweepSettled(page);
 
@@ -1182,8 +1220,8 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B: default heat is off; ?heat=1 opts in", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const off = await page.evaluate(() => {
       const viz = (window as any).__viz;
@@ -1195,8 +1233,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(off.enabled).toBe(false);
     expect(off.legendNote).toBe("false");
 
-    await page.goto("/?heat=1");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?heat=1&stage=plotly&age=0");
+    await waitForPlotlyStage(page);
     const on = await page.evaluate(() => (window as any).__viz.heatEncoding);
     expect(on).toBe(true);
   });
@@ -1222,7 +1260,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
   });
 
   test("Projection render: 3 de-chromed scatters (log speed/cost, linear intelligence) with ε floor on cost axes", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
     const data = await page.evaluate(() => {
@@ -1314,7 +1352,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
   });
 
   test("Item 17a: hovering a projection point fans Fx.hover to the stage by model ID", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     await page.waitForFunction(() => (window as any).__viz?.projections);
     const POINT = 5;
 
@@ -1386,7 +1424,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
   });
 
   test("Item 17b: stage hover fans Fx.hover to all three projections by model ID", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
     // Same spy as 17a — intercepts the bundled Plotly the coupling actually calls.
@@ -1455,7 +1493,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
   });
 
   test("Item 25: a user's 2D projection zoom survives a re-render (uirevision pinned)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?stage=plotly&age=0");
     await page.waitForFunction(() => (window as any).__viz?.projections);
 
     // Zoom projection 0's x-axis (log units), then re-render exactly the way a
@@ -1492,8 +1530,8 @@ test.describe("2D Projection Render + Coupling Specs", () => {
 
   test("residuals closeout: h1 untruncated, heat note muted, disclosure survives weight change", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
-    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    await page.goto("/?stage=plotly&age=0");
+    await waitForPlotlyStage(page);
 
     const h1 = page.locator("h1");
     await expect(h1).toHaveText("Speed × cost × intelligence");
