@@ -854,8 +854,8 @@ export class Stage3DThree implements Stage3DSurface {
     if (pts.length === 0) return;
 
     const key = `${mode}:${targets.map((m) => m.model).sort().join("|")}`;
-    // Fit once per catalog key unless user has not orbited yet.
-    if (this.hasUserOrbited && key === this.lastFitKey) return;
+    // Fit once per catalog key (avoid thrashing on re-render).
+    if (key === this.lastFitKey) return;
     this.lastFitKey = key;
 
     const box = new THREE.Box3().setFromPoints(pts);
@@ -873,8 +873,6 @@ export class Stage3DThree implements Stage3DSurface {
       center: { x: center.x, y: center.y, z: center.z },
       up: { x: 0, y: 1, z: 0 },
     });
-    // Soft fit is instrument-driven, not a user orbit.
-    this.hasUserOrbited = false;
   }
 
   destroy() {

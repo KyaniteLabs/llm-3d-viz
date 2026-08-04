@@ -22,7 +22,7 @@ function modelIdFromPlotlyPoint(point: any): string | null {
 
 document.documentElement.dataset.modelCount = String(models.length);
 const searchParams = new URLSearchParams(window.location.search);
-// AA-density default: openness fill primary; score heat is diagnostic opt-in only.
+// Curve-focus product default; score heat is diagnostic opt-in only.
 const heatEncoding = searchParams.get("heat") === "1";
 // Product default: curve-focus. Legacy openness fill: ?enc=openness
 const presentationMode = searchParams.get("enc") === "openness" ? "openness" as const : "curve" as const;
@@ -273,6 +273,18 @@ async function boot() {
       axisMapping: state.axisMapping,
       weights: state.weights,
     });
+
+  // Effort strip active state follows hover/pin without waiting for filter re-render.
+  let lastStripHover: string | null | undefined = undefined;
+  let lastStripPin: string | null | undefined = undefined;
+  store.subscribe((state) => {
+    if (state.hoveredModelId === lastStripHover && state.pinnedModelId === lastStripPin) return;
+    lastStripHover = state.hoveredModelId;
+    lastStripPin = state.pinnedModelId;
+    const visibleSet = applyFilters(models, state.filters, sessionReferenceDate());
+    updateEffortStrip(visibleSet, state, store);
+  });
+
   });
 
   // Wire stage interaction immediately.

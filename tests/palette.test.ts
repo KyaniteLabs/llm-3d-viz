@@ -195,3 +195,53 @@ describe("curve-focus pointEncoding (product default)", () => {
     expect(open).toContain("closed-point");
   });
 });
+
+describe("curve-focus family continuity", () => {
+  it("uses family series fill for multi-effort frontier (not filament override)", () => {
+    const series = familySeriesColor("GPT-5.6 Sol");
+    const enc = pointEncoding({
+      openness: "closed",
+      semanticClass: "frontier",
+      score: 0.8,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "GPT-5.6 Sol",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(enc.fill).toBe(series);
+    expect(enc.fill).not.toBe("#C9D4C4");
+  });
+
+  it("gives distinct series colors to different OpenAI multi-effort families", () => {
+    const a = familySeriesColor("GPT-5.6 Sol", "OpenAI");
+    const b = familySeriesColor("o3", "OpenAI");
+    const c = familySeriesColor("Unknown OpenAI Family XYZ", "OpenAI");
+    expect(a).not.toBe(c);
+    expect(b).not.toBe(c);
+  });
+
+  it("dims singleton frontier marks without dropping optimum gold", () => {
+    const solo = pointEncoding({
+      openness: "closed",
+      semanticClass: "frontier",
+      score: 0.7,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "Lonely",
+      singleton: true,
+    });
+    expect(solo.opacity).toBe(SINGLETON_OPACITY);
+    const opt = pointEncoding({
+      openness: "closed",
+      semanticClass: "optimum",
+      score: 1,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "Lonely",
+      singleton: true,
+    });
+    expect(opt.fill.toLowerCase()).toMatch(/#f4d58a|#e8f1e4/);
+    expect(opt.opacity).toBe(1);
+  });
+});

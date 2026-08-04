@@ -312,3 +312,8 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .key-mark--closed, .key-mark--closed-point { border-radius: 50%; background: #6a7580; }
 .key-mark--reasoning-mark { border-radius: 50%; border: 1.5px dashed var(--filament-dim); background: transparent; }
 .is-cinema .effort-strip { display: none; }
+
+/* Legend id aliases (curve-focus legendEntries) */
+.key-mark--frontier-ridge { width: 1rem; height: 0.15rem; margin-top: 0.4rem; background: var(--filament); }
+.key-mark--optimum-marker { border-radius: 50%; background: var(--filament); box-shadow: 0 0 0 2px rgba(232, 241, 228, 0.24); }
+.key-mark--frontier-point { border-radius: 50%; background: linear-gradient(135deg, var(--copper), var(--filament-dim)); }
