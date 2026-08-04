@@ -24,8 +24,8 @@ document.documentElement.dataset.modelCount = String(models.length);
 // opt-out for A/B comparison and capture work: `?heat=0`.
 const searchParams = new URLSearchParams(window.location.search);
 const heatEncoding = searchParams.get("heat") !== "0";
-// Default Plotly (works in Safari). Opt into Three with ?stage=r3f.
-const stageBackend = searchParams.get("stage") === "r3f" ? "r3f" : "plotly";
+// Spike default: Three hero so the work is visible. Opt out: ?stage=plotly
+const stageBackend = searchParams.get("stage") === "plotly" ? "plotly" : "r3f";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;

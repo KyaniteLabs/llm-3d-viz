@@ -1,9 +1,10 @@
 /**
  * Three.js 3D hero stage (docs/v1/r3f-stage-contract.md).
- * Vanilla TS — no React/R3F required for this SPA.
+ * Vanilla TS — no React/R3F.
  *
- * Scene uses Three's default Y-up: x=cost, y=intelligence, z=speed.
- * (Plotly camera "up" was +Z=speed; we keep the product axes, Y-up for stable OrbitControls.)
+ * Product axes: x=cost (log), y=intelligence (linear 0–100), z=speed (log).
+ * Scene is Three Y-up with that assignment (x,y,z) = (cost, intel, speed).
+ * Visual target: Plotly-parity cube + grid + ticks; monochrome heat (design system).
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -23,8 +24,9 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
   fontMono: '"IBM Plex Mono", "Geist Mono", ui-monospace, monospace',
 } as const;
 
-/** Floor clamp on camera Y so we never go under the stage. */
-const EYE_Y_FLOOR = 0.25;
+/** Scene half-extent of the data cube (cube spans [-S, S] on each axis). */
+const S = 1;
+const EYE_Y_FLOOR = 0.15;
 
 type GlyphKind = "sphere" | "sphere-open" | "box" | "box-open" | "octa" | "octa-open" | "cross" | "x";
 
@@ -38,6 +40,8 @@ const SHAPE_TO_GLYPH: Record<string, GlyphKind> = {
   cross: "cross",
   x: "x",
 };
+
+type LabelSpec = { text: string; world: THREE.Vector3; kind: "title" | "tick" };
 
 export class Stage3DThree implements Stage3DSurface {
   public readonly el: HTMLDivElement;
@@ -64,11 +68,13 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly ridgeLine: THREE.Line;
   private readonly axisGroup = new THREE.Group();
   private readonly labelRoot: HTMLDivElement;
+  private labelSpecs: LabelSpec[] = [];
 
-  /** Product camera (cost, intelligence, speed) — mapped into Three Y-up scene. */
+  /** Product camera: x=cost, y=intel, z=speed (same as scene). */
   private cameraState: StageCamera = {
-    eye: { x: -1.55, y: -1.35, z: 1.25 },
-    up: { x: 0, y: 0, z: 1 },
+    // Corner view of the cube — all three axes readable (Plotly-like hero).
+    eye: { x: -2.35, y: 1.55, z: 2.15 },
+    up: { x: 0, y: 1, z: 0 },
     center: { x: 0, y: 0, z: 0 },
   };
   private priceFloor = 0.08125;
@@ -95,7 +101,6 @@ export class Stage3DThree implements Stage3DSurface {
 
     this.el = document.createElement("div");
     this.el.className = "stage-3d-canvas stage-3d-three";
-    // Keep .stage-3d-canvas absolute inset:0 — do not force position:relative.
     this.el.style.touchAction = "none";
     container.appendChild(this.el);
     this.gd = this.el;
@@ -106,20 +111,19 @@ export class Stage3DThree implements Stage3DSurface {
     badge.setAttribute("data-stage-backend", "three");
     badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
       font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
-      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.35);
-      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.78);pointer-events:none;`;
+      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.45);
+      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.82);pointer-events:none;`;
     this.el.appendChild(badge);
 
     this.scene.background = new THREE.Color(this.tokens.inkField);
 
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 100);
+    this.camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
     this.camera.up.set(0, 1, 0);
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
       powerPreference: "high-performance",
-      // Needed for Playwright/readPixels QA and some multi-GPU browsers.
       preserveDrawingBuffer: true,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -133,9 +137,7 @@ export class Stage3DThree implements Stage3DSurface {
       display: "block",
     });
 
-    // Unlit materials stay readable without depending on light setup.
-    const amb = new THREE.AmbientLight(0xffffff, 1.0);
-    this.scene.add(amb);
+    this.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     this.labelRoot = document.createElement("div");
     this.labelRoot.className = "stage-3d-axis-labels";
@@ -146,14 +148,13 @@ export class Stage3DThree implements Stage3DSurface {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.minPolarAngle = 0.12;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.06;
-    this.controls.minDistance = 1.2;
-    this.controls.maxDistance = 6;
+    this.controls.minPolarAngle = 0.18;
+    this.controls.maxPolarAngle = Math.PI / 2 - 0.04;
+    this.controls.minDistance = 1.6;
+    this.controls.maxDistance = 7;
     this.controls.target.set(0, 0, 0);
     this.controls.addEventListener("change", () => {
       if (this.camera.position.y < EYE_Y_FLOOR) this.camera.position.y = EYE_Y_FLOOR;
-      // Sync product camera state (x=cost, y=intel, z=speed) from Three (x,y,z)=(cost,intel,speed)
       this.cameraState.eye = {
         x: this.camera.position.x,
         y: this.camera.position.y,
@@ -165,11 +166,13 @@ export class Stage3DThree implements Stage3DSurface {
     this.scene.add(this.pointsGroup);
     this.scene.add(this.axisGroup);
 
-    const ridgeGeom = new THREE.BufferGeometry();
     const ridgeMat = new THREE.LineBasicMaterial({
       color: new THREE.Color(this.tokens.filament),
+      transparent: true,
+      opacity: 0.95,
+      linewidth: 2,
     });
-    this.ridgeLine = new THREE.Line(ridgeGeom, ridgeMat);
+    this.ridgeLine = new THREE.Line(new THREE.BufferGeometry(), ridgeMat);
     this.scene.add(this.ridgeLine);
 
     this.applyCameraState();
@@ -230,10 +233,6 @@ export class Stage3DThree implements Stage3DSurface {
     tick();
   }
 
-  /**
-   * Product camera uses Plotly-style eye (x=cost, y=intel, z=speed, up=+z).
-   * Three scene is Y-up with the same axis assignment, so product eye maps 1:1.
-   */
   private applyCameraState() {
     const { eye, center } = this.cameraState;
     const y = Math.max(eye.y, EYE_Y_FLOOR);
@@ -241,6 +240,7 @@ export class Stage3DThree implements Stage3DSurface {
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(center.x, center.y, center.z);
     this.controls?.target.set(center.x, center.y, center.z);
+    this.controls?.update();
   }
 
   public setCamera(camera: Partial<StageCamera> | StageCamera) {
@@ -257,8 +257,8 @@ export class Stage3DThree implements Stage3DSurface {
   }
 
   public orbitTo(angleRad: number) {
-    const radius = 2.1;
-    const height = 1.15;
+    const radius = 3.1;
+    const height = 1.45;
     const phase = (Math.PI * 5) / 4;
     this.setCamera({
       eye: {
@@ -271,7 +271,7 @@ export class Stage3DThree implements Stage3DSurface {
     });
   }
 
-  /** Map data → scene: x=cost, y=intelligence, z=speed, range ~[-0.9, 0.9]. */
+  /** Map data → cube: each axis spans [-S, S]. */
   private toScene(cost: number, intel: number, speed: number): THREE.Vector3 {
     const logCost = Math.log10(Math.max(cost, this.priceFloor));
     const logCostMin = Math.log10(this.priceFloor);
@@ -279,114 +279,152 @@ export class Stage3DThree implements Stage3DSurface {
     const logSpeed = Math.log10(Math.max(speed, 10));
     const logSpeedMin = Math.log10(10);
     const logSpeedMax = Math.log10(1000);
-    const nx = ((logCost - logCostMin) / (logCostMax - logCostMin)) * 1.8 - 0.9;
-    const ny = (intel / 100) * 1.8 - 0.9;
-    const nz = ((logSpeed - logSpeedMin) / (logSpeedMax - logSpeedMin)) * 1.8 - 0.9;
+    const nx = ((logCost - logCostMin) / (logCostMax - logCostMin)) * 2 * S - S;
+    const ny = (intel / 100) * 2 * S - S;
+    const nz = ((logSpeed - logSpeedMin) / (logSpeedMax - logSpeedMin)) * 2 * S - S;
     return new THREE.Vector3(nx, ny, nz);
+  }
+
+  private addLine(
+    from: THREE.Vector3,
+    to: THREE.Vector3,
+    color: THREE.Color,
+    opacity: number,
+  ) {
+    const geom = new THREE.BufferGeometry().setFromPoints([from, to]);
+    const mat = new THREE.LineBasicMaterial({
+      color,
+      transparent: opacity < 1,
+      opacity,
+      depthWrite: false,
+    });
+    this.axisGroup.add(new THREE.Line(geom, mat));
   }
 
   private buildAxes() {
     while (this.axisGroup.children.length) {
       const child = this.axisGroup.children[0];
       this.axisGroup.remove(child);
-      if (child instanceof THREE.Line) {
+      if (child instanceof THREE.Line || child instanceof THREE.Mesh) {
         child.geometry.dispose();
-        (child.material as THREE.Material).dispose();
-      }
-      if (child instanceof THREE.Mesh) {
-        child.geometry.dispose();
-        (child.material as THREE.Material).dispose();
+        const mat = child.material;
+        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+        else (mat as THREE.Material).dispose();
       }
     }
-    const axisColor = new THREE.Color(this.tokens.textWarm);
-    const makeAxis = (from: THREE.Vector3, to: THREE.Vector3, opacity: number) => {
-      const geom = new THREE.BufferGeometry().setFromPoints([from, to]);
-      const mat = new THREE.LineBasicMaterial({
-        color: axisColor,
-        transparent: true,
-        opacity,
-      });
-      this.axisGroup.add(new THREE.Line(geom, mat));
-    };
-    const o = this.toScene(this.priceFloor, 0, 10);
-    const cx = this.toScene(100, 0, 10);
-    const cy = this.toScene(this.priceFloor, 100, 10);
-    const cz = this.toScene(this.priceFloor, 0, 1000);
-    makeAxis(o, cx, 0.85);
-    makeAxis(o, cy, 0.85);
-    makeAxis(o, cz, 0.85);
+    this.labelSpecs = [];
 
-    // Floor plane so the stage never reads as pure void.
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.0, 2.0),
-      new THREE.MeshBasicMaterial({
-        color: new THREE.Color(this.tokens.slateCyan),
-        transparent: true,
-        opacity: 0.12,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      }),
+    const edge = new THREE.Color(this.tokens.textWarm);
+    const grid = new THREE.Color(this.tokens.textWarm);
+
+    // Full wireframe cube (Plotly-style bounding box).
+    const c = [-S, S];
+    for (const y of c) {
+      for (const z of c) this.addLine(new THREE.Vector3(-S, y, z), new THREE.Vector3(S, y, z), edge, 0.35);
+    }
+    for (const x of c) {
+      for (const z of c) this.addLine(new THREE.Vector3(x, -S, z), new THREE.Vector3(x, S, z), edge, 0.35);
+    }
+    for (const x of c) {
+      for (const y of c) this.addLine(new THREE.Vector3(x, y, -S), new THREE.Vector3(x, y, S), edge, 0.35);
+    }
+
+    // Face grids (cost–intel at low speed; cost–speed at low intel; intel–speed at low cost).
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * 2 * S - S;
+      // Floor (y = -S): cost × speed
+      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, -S, S), grid, 0.12);
+      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(S, -S, t), grid, 0.12);
+      // Back (z = -S): cost × intel
+      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, S, -S), grid, 0.1);
+      this.addLine(new THREE.Vector3(-S, t, -S), new THREE.Vector3(S, t, -S), grid, 0.1);
+      // Side (x = -S): intel × speed
+      this.addLine(new THREE.Vector3(-S, t, -S), new THREE.Vector3(-S, t, S), grid, 0.1);
+      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(-S, S, t), grid, 0.1);
+    }
+
+    // Axis titles at high ends.
+    this.labelSpecs.push(
+      { text: "COST ($/M)", world: new THREE.Vector3(S + 0.12, -S, -S), kind: "title" },
+      { text: "INTELLIGENCE", world: new THREE.Vector3(-S, S + 0.12, -S), kind: "title" },
+      { text: "SPEED (TPS)", world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
     );
-    // Cost–speed floor at intel=0 (y = low)
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.copy(this.toScene(Math.sqrt(this.priceFloor * 100), 0, Math.sqrt(10 * 1000)));
-    floor.position.y = this.toScene(this.priceFloor, 0, 10).y;
-    this.axisGroup.add(floor);
 
-    const gridMat = new THREE.LineBasicMaterial({
-      color: axisColor,
-      transparent: true,
-      opacity: 0.28,
-    });
-    for (let i = 0; i <= 4; i++) {
-      const t = i / 4;
-      const cost = this.priceFloor * Math.pow(100 / this.priceFloor, t);
-      const intel = t * 100;
-      const a = this.toScene(cost, 0, 10);
-      const b = this.toScene(cost, 100, 10);
-      const c = this.toScene(this.priceFloor, intel, 10);
-      const d = this.toScene(100, intel, 10);
-      this.axisGroup.add(
-        new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), gridMat.clone()),
-      );
-      this.axisGroup.add(
-        new THREE.Line(new THREE.BufferGeometry().setFromPoints([c, d]), gridMat.clone()),
-      );
+    // Tick labels (match Plotly stage tick set).
+    const costTicks: Array<{ v: number; label: string }> = [
+      { v: this.priceFloor, label: "≤fl" },
+      { v: 0.1, label: "0.1" },
+      { v: 1, label: "1" },
+      { v: 10, label: "10" },
+      { v: 100, label: "100" },
+    ];
+    const intelTicks = [0, 20, 40, 60, 80, 100];
+    const speedTicks = [10, 100, 1000];
+
+    for (const t of costTicks) {
+      const p = this.toScene(t.v, 0, 10);
+      this.labelSpecs.push({
+        text: t.label,
+        world: new THREE.Vector3(p.x, -S - 0.08, -S - 0.02),
+        kind: "tick",
+      });
+    }
+    for (const t of intelTicks) {
+      const p = this.toScene(this.priceFloor, t, 10);
+      this.labelSpecs.push({
+        text: String(t),
+        world: new THREE.Vector3(-S - 0.08, p.y, -S - 0.02),
+        kind: "tick",
+      });
+    }
+    for (const t of speedTicks) {
+      const p = this.toScene(this.priceFloor, 0, t);
+      this.labelSpecs.push({
+        text: String(t),
+        world: new THREE.Vector3(-S - 0.02, -S - 0.08, p.z),
+        kind: "tick",
+      });
     }
   }
 
-  private glyphGeometry(kind: GlyphKind, scale: number): THREE.BufferGeometry {
-    // Large enough to read at n≈35 without looking like dust.
-    const s = scale * 0.07;
+  private glyphGeometry(kind: GlyphKind, radius: number): THREE.BufferGeometry {
     switch (kind) {
       case "box":
       case "box-open":
-        return new THREE.BoxGeometry(s * 1.6, s * 1.6, s * 1.6);
+        return new THREE.BoxGeometry(radius * 1.7, radius * 1.7, radius * 1.7);
       case "octa":
       case "octa-open":
-        return new THREE.OctahedronGeometry(s * 1.15, 0);
+        return new THREE.OctahedronGeometry(radius * 1.25, 0);
       case "cross":
       case "x":
-        return new THREE.BoxGeometry(s * 1.9, s * 0.5, s * 0.5);
+        return new THREE.BoxGeometry(radius * 2.1, radius * 0.45, radius * 0.45);
       default:
-        return new THREE.SphereGeometry(s, 20, 16);
+        return new THREE.SphereGeometry(radius, 16, 12);
     }
   }
 
+  /** Plotly sizes are ~8–16 px; map to scene radius that does not fill the cube. */
+  private radiusForSize(sizePx: number): number {
+    return 0.018 + (sizePx / 16) * 0.028;
+  }
+
   private makePointMesh(kind: GlyphKind, color: string, sizePx: number): THREE.Mesh {
-    const scale = sizePx / 10;
-    const geom = this.glyphGeometry(kind, scale);
+    const radius = this.radiusForSize(sizePx);
+    const geom = this.glyphGeometry(kind, radius);
     const open = kind.endsWith("-open") || kind === "cross" || kind === "x";
-    // MeshBasicMaterial: always visible, no lighting dependency.
     const mat = new THREE.MeshBasicMaterial({
       color: new THREE.Color(color),
       wireframe: open,
       transparent: true,
-      opacity: open ? 0.95 : 1,
+      opacity: open ? 0.92 : 1,
       depthTest: true,
     });
     const mesh = new THREE.Mesh(geom, mat);
     if (kind === "x") mesh.rotation.z = Math.PI / 4;
+    // Store base radius for sweep scale updates.
+    mesh.userData.baseRadius = radius;
+    mesh.userData.baseSizePx = sizePx;
     return mesh;
   }
 
@@ -435,10 +473,10 @@ export class Stage3DThree implements Stage3DSurface {
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
       });
-      let size = 10;
-      if (isOptimum) size = 18;
-      else if (isFrontier) size = 13;
-      else size = 9;
+      let size = 9;
+      if (isOptimum) size = 16;
+      else if (isFrontier) size = 12;
+      else size = 8;
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
@@ -459,6 +497,7 @@ export class Stage3DThree implements Stage3DSurface {
       const mesh = this.makePointMesh(kind, color, size);
       mesh.position.copy(pos);
       mesh.userData.modelId = model.model;
+      mesh.userData.semanticClass = semanticClass;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
       this.modelIds.push(model.model);
@@ -481,7 +520,6 @@ export class Stage3DThree implements Stage3DSurface {
     (this.gd as any).__setPointAppearance = (colors: string[], sizes: number[]) =>
       this.setPointAppearance(colors, sizes);
 
-    // Always expose for visual QA (preview is production mode).
     const viz = (window as any).__viz ?? {};
     viz.stageThree = this;
     viz.stageModelIds = this.modelIds.slice();
@@ -498,8 +536,9 @@ export class Stage3DThree implements Stage3DSurface {
       const mesh = this.pointMeshes[i];
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.color.set(colors[i]);
-      const scale = sizes[i] / 10;
-      mesh.scale.setScalar(Math.max(0.45, scale));
+      const base = (mesh.userData.baseSizePx as number) || 10;
+      const scale = Math.max(0.4, sizes[i] / base);
+      mesh.scale.setScalar(scale);
     }
   }
 
@@ -512,8 +551,7 @@ export class Stage3DThree implements Stage3DSurface {
       this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     };
 
-    // Larger pick radius for small glyphs.
-    this.raycaster.params.Mesh = { threshold: 0.08 };
+    this.raycaster.params.Mesh = { threshold: 0.05 };
 
     canvas.addEventListener("pointermove", (event) => {
       updatePointer(event);
@@ -542,26 +580,25 @@ export class Stage3DThree implements Stage3DSurface {
 
   private paintLabels() {
     this.labelRoot.innerHTML = "";
-    const ends: Array<{ text: string; world: THREE.Vector3 }> = [
-      { text: "COST ($/M)", world: this.toScene(100, 0, 10) },
-      { text: "INTELLIGENCE", world: this.toScene(this.priceFloor, 100, 10) },
-      { text: "SPEED (TPS)", world: this.toScene(this.priceFloor, 0, 1000) },
-    ];
     const w = this.el.clientWidth;
     const h = this.el.clientHeight;
     if (w < 2 || h < 2) return;
-    ends.forEach(({ text, world }) => {
+    for (const { text, world, kind } of this.labelSpecs) {
       const projected = world.clone().project(this.camera);
-      if (projected.z > 1) return;
+      if (projected.z > 1 || projected.z < -1) continue;
+      if (projected.x < -1.2 || projected.x > 1.2 || projected.y < -1.2 || projected.y > 1.2) continue;
       const x = (projected.x * 0.5 + 0.5) * w;
       const y = (-projected.y * 0.5 + 0.5) * h;
       const el = document.createElement("span");
       el.textContent = text;
+      const size = kind === "title" ? "11px" : "9px";
+      const color = kind === "title" ? this.tokens.textWarm : this.tokens.textMuted;
+      const weight = kind === "title" ? "500" : "400";
       el.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);
-        color:${this.tokens.textWarm};font-size:11px;letter-spacing:0.06em;white-space:nowrap;
-        opacity:0.9;text-shadow:0 0 8px ${this.tokens.inkField};`;
+        color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.04em;white-space:nowrap;
+        opacity:${kind === "title" ? 0.95 : 0.75};text-shadow:0 0 6px ${this.tokens.inkField};`;
       this.labelRoot.appendChild(el);
-    });
+    }
   }
 
   destroy() {
