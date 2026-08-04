@@ -1064,8 +1064,9 @@ test.describe("3D Stage Render Specs", () => {
     expect(coding.shares).toEqual(["25%", "15%", "60%"]);
   });
 
-  test("FIX-B: heat encoding is on by default and preserves the optimum marker", async ({ page }) => {
-    await page.goto("/");
+  test("FIX-B: heat encoding is opt-in (?heat=1) and preserves the optimum marker", async ({ page }) => {
+    // Product default is heat OFF (AA openness); heat suite uses Plotly path for marker arrays.
+    await page.goto("/?heat=1&stage=plotly");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
     const heat = await page.evaluate(() => {
@@ -1086,7 +1087,7 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B #27 P1a: heat keeps dominated < frontier < optimum across weight sets", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?heat=1&stage=plotly");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
     const readOrdering = () => page.evaluate(() => {
@@ -1142,7 +1143,7 @@ test.describe("3D Stage Render Specs", () => {
   });
 
   test("FIX-B #27 P1a: settled dominated points keep score-scaled slate luminance", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?heat=1&stage=plotly");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
     await page.locator("#weight-cost").fill("9");
     await waitForSweepSettled(page);
@@ -1180,19 +1181,24 @@ test.describe("3D Stage Render Specs", () => {
     )).toBe(true);
   });
 
-  test("FIX-B: ?heat=0 opts out of score luminance encoding", async ({ page }) => {
-    await page.goto("/?heat=0");
+  test("FIX-B: default heat is off; ?heat=1 opts in", async ({ page }) => {
+    await page.goto("/");
     await page.waitForFunction(() => (window as any).__viz !== undefined);
 
-    const heat = await page.evaluate(() => {
+    const off = await page.evaluate(() => {
       const viz = (window as any).__viz;
       return {
         enabled: viz.heatEncoding,
-        legendNote: document.querySelector("[data-heat-encoding]")?.textContent ?? null,
+        legendNote: document.querySelector("[data-heat-encoding]")?.getAttribute("data-heat-encoding") ?? null,
       };
     });
-    expect(heat.enabled).toBe(false);
-    expect(heat.legendNote).toBeNull();
+    expect(off.enabled).toBe(false);
+    expect(off.legendNote).toBe("false");
+
+    await page.goto("/?heat=1");
+    await page.waitForFunction(() => (window as any).__viz !== undefined);
+    const on = await page.evaluate(() => (window as any).__viz.heatEncoding);
+    expect(on).toBe(true);
   });
 });
 

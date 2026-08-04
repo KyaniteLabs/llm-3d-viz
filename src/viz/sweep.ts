@@ -249,10 +249,18 @@ export class SweepScheduler {
    */
   private ensureAfterPlotListeners() {
     if (this.afterPlotRegistered) return;
-    const graphs = [this.stage, ...this.projections];
-    if (!graphs.every((gd) => typeof (gd as any).on === "function")) return;
+    // Three stage has no Plotly `.on`; still arm projections so afterplot
+    // re-assert self-heals 2D markers after react races.
+    const plotlyGraphs = [this.stage, ...this.projections].filter(
+      (gd) => typeof (gd as any).on === "function",
+    );
+    if (plotlyGraphs.length === 0) return;
+    // Wait until projections exist (chunk may load after stage).
+    if (this.projections.length > 0 && plotlyGraphs.length < this.projections.length) return;
     this.afterPlotRegistered = true;
-    graphs.forEach((gd) => (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)));
+    plotlyGraphs.forEach((gd) =>
+      (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)),
+    );
   }
 
   /** The appearance slice the scheduler owns for one graph div (stage or a projection). */

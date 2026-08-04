@@ -143,7 +143,7 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 .task-rank li { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.15rem 0; }
 .task-rank strong { color: var(--filament); font-variant-numeric: tabular-nums; }
 .key-mark--open { background: #5B9BD5; }
-.key-mark--closed { background: #2A2A2A; border: 1px solid var(--color-border); }
+.key-mark--closed { background: #6A7580; border: 1px solid var(--color-border); }
 .key-mark--reasoning { background: transparent; border: 1px solid var(--filament-dim); border-radius: 50%; }
 .weight-controls { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
 .weight-heading { margin: 0; padding: 0.45rem 0 0.1rem; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); letter-spacing: 0.1em; }

@@ -230,7 +230,8 @@ export function semanticPointFill(
 /** AA-style openness fills (primary canvas story when heat is off). */
 export const OPENNESS_FILL = {
   open: "#5B9BD5",
-  closed: "#2A2A2A",
+  // Lifted near-black so closed marks stay ≥~3:1 on ink-field (FIX-C visibility).
+  closed: "#6A7580",
 } as const;
 
 /** Stable lab identity colors for outlines / trails / legend (not fill primary). */

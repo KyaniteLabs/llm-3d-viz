@@ -127,19 +127,21 @@ async function boot() {
 
     stage.render(weights, visibleSet, { axisMapping });
     projections?.render(weights, visibleSet);
+    // setModels already applied synchronously on store tick; refresh after stage ids update.
     consoleUi.setModels(visibleSet);
     stageGuide.setModels(visibleSet);
     sweep?.setModels(visibleSet);
-    consoleUi.renderScoreTable(weights);
 
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
       const viz = (window as any).__viz ?? {};
       viz.stage = stage;
+      viz.gd = stage.gd;
+      viz.heatEncoding = heatEncoding;
       viz.projectionsInstance = projections;
       viz.axisMapping = { ...axisMapping };
       viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
       viz.visibleCount = visibleSet.length;
-      viz.pointCount = (stage as any).pointMeshes?.length ?? (window as any).__viz?.pointCount;
+      viz.pointCount = (window as any).__viz?.pointCount;
       (window as any).__viz = viz;
     }
   };
@@ -153,6 +155,14 @@ async function boot() {
     const axesSame = sameAxisMapping(renderedAxes, state.axisMapping);
     const filtersSame = sameFilters(renderedFilters, state.filters);
     if (weightsSame && axesSame && filtersSame) return;
+
+    // Sync visible-set consumers immediately on filter/weight/axis paint triggers
+    // (not on hover-only ticks) so console/sweep don't lag a frame.
+    const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
+    consoleUi.setModels(visibleNow);
+    stageGuide.setModels(visibleNow);
+    sweep?.setModels(visibleNow);
+
     pending = {
       weights: { ...state.weights },
       axisMapping: { ...state.axisMapping },
