@@ -24,9 +24,8 @@ document.documentElement.dataset.modelCount = String(models.length);
 // opt-out for A/B comparison and capture work: `?heat=0`.
 const searchParams = new URLSearchParams(window.location.search);
 const heatEncoding = searchParams.get("heat") !== "0";
-// Spike flag per docs/v1/r3f-stage-contract.md — default remains Plotly frozen stage.
-// Spike branch default: Three hero. Opt out with ?stage=plotly.
-const stageBackend = searchParams.get("stage") === "plotly" ? "plotly" : "r3f";
+// Default Plotly (works in Safari). Opt into Three with ?stage=r3f.
+const stageBackend = searchParams.get("stage") === "r3f" ? "r3f" : "plotly";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;
@@ -46,11 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
   stageVisual?.appendChild(plotContainer);
   const consoleRoot = document.querySelector(".console") as HTMLElement;
   const store = createStore();
-  const stage: Stage3DSurface =
-    stageBackend === "r3f"
-      ? new Stage3DThree(plotContainer, heatEncoding)
-      : new Stage3D(plotContainer, heatEncoding);
-  document.documentElement.dataset.stageBackend = stageBackend;
+  // Prefer Three on this spike; if WebGL init throws, fall back to Plotly so the
+  // page never dies as a blank shell.
+  let stage: Stage3DSurface;
+  let activeBackend = stageBackend;
+  if (stageBackend === "r3f") {
+    try {
+      stage = new Stage3DThree(plotContainer, heatEncoding);
+    } catch (err) {
+      console.error("[stage] Three init failed; falling back to Plotly", err);
+      plotContainer.replaceChildren();
+      stage = new Stage3D(plotContainer, heatEncoding);
+      activeBackend = "plotly";
+    }
+  } else {
+    stage = new Stage3D(plotContainer, heatEncoding);
+  }
+  document.documentElement.dataset.stageBackend = activeBackend;
   new StageGuide(stagePanel?.querySelector(".stage-guide") as HTMLElement, store, models, heatEncoding);
 
   // Linked 2D projections couple to the stage bidirectionally by model ID (hover

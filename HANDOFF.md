@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-03 (v5 — R3F/Three stage spike wired behind `?stage=r3f`)
+Last updated: 2026-08-03 (v6 — Three stage visual bootstrap fixed; Plotly default; `?stage=r3f`)
 
 ## What this is
 Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
@@ -18,7 +18,7 @@ Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLI
 
 ### Landed
 - PR #38 comprehension pass, #40 residual closeout, #42 cream plane kill + axis camera orientation.
-- **Spike (this branch):** `Stage3DSurface` API, `Stage3DThree` (vanilla Three.js — no React/R3F), `?stage=r3f` wire into main/cinema/sweep/projections hover.
+- **Spike (this branch):** `Stage3DSurface` API, `Stage3DThree` (vanilla Three — Y-up scene, MeshBasic points, floor/grid, STAGE·THREE badge), cinema/sweep/hover by model id, Plotly default + WebGL fail-soft fallback.
 
 ### Critical path
 1. ~~Merge #42~~ done

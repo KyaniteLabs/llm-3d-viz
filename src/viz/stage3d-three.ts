@@ -1,6 +1,9 @@
 /**
  * Three.js 3D hero stage (docs/v1/r3f-stage-contract.md).
  * Vanilla TS — no React/R3F required for this SPA.
+ *
+ * Scene uses Three's default Y-up: x=cost, y=intelligence, z=speed.
+ * (Plotly camera "up" was +Z=speed; we keep the product axes, Y-up for stable OrbitControls.)
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -20,7 +23,8 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
   fontMono: '"IBM Plex Mono", "Geist Mono", ui-monospace, monospace',
 } as const;
 
-const EYE_Z_FLOOR = 0.2;
+/** Floor clamp on camera Y so we never go under the stage. */
+const EYE_Y_FLOOR = 0.25;
 
 type GlyphKind = "sphere" | "sphere-open" | "box" | "box-open" | "octa" | "octa-open" | "cross" | "x";
 
@@ -61,8 +65,9 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly axisGroup = new THREE.Group();
   private readonly labelRoot: HTMLDivElement;
 
+  /** Product camera (cost, intelligence, speed) — mapped into Three Y-up scene. */
   private cameraState: StageCamera = {
-    eye: { x: -1.45, y: -1.25, z: 1.15 },
+    eye: { x: -1.55, y: -1.35, z: 1.25 },
     up: { x: 0, y: 0, z: 1 },
     center: { x: 0, y: 0, z: 0 },
   };
@@ -90,65 +95,65 @@ export class Stage3DThree implements Stage3DSurface {
 
     this.el = document.createElement("div");
     this.el.className = "stage-3d-canvas stage-3d-three";
-    // Do NOT override .stage-3d-canvas { position:absolute; inset:0 } — relative
-    // collapsed the hero to an empty strip and made the spike look like "no change".
+    // Keep .stage-3d-canvas absolute inset:0 — do not force position:relative.
     this.el.style.touchAction = "none";
     container.appendChild(this.el);
     this.gd = this.el;
 
-    // Badge first so the spike is always distinguishable even if WebGL init fails.
     const badge = document.createElement("div");
     badge.className = "stage-backend-badge";
     badge.textContent = "STAGE · THREE";
     badge.setAttribute("data-stage-backend", "three");
     badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
       font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
-      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.28);
-      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.72);pointer-events:none;`;
+      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.35);
+      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.78);pointer-events:none;`;
     this.el.appendChild(badge);
 
     this.scene.background = new THREE.Color(this.tokens.inkField);
 
-    this.camera = new THREE.PerspectiveCamera(42, 1, 0.05, 50);
-    this.applyCameraState();
+    this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 100);
+    this.camera.up.set(0, 1, 0);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+      // Needed for Playwright/readPixels QA and some multi-GPU browsers.
+      preserveDrawingBuffer: true,
+    });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    this.renderer.setClearColor(this.tokens.inkField, 1);
-    if ("outputColorSpace" in this.renderer) {
-      (this.renderer as THREE.WebGLRenderer).outputColorSpace = THREE.SRGBColorSpace;
-    }
+    this.renderer.setClearColor(new THREE.Color(this.tokens.inkField), 1);
     this.el.appendChild(this.renderer.domElement);
-    this.renderer.domElement.style.width = "100%";
-    this.renderer.domElement.style.height = "100%";
-    this.renderer.domElement.style.display = "block";
-    this.renderer.domElement.style.position = "absolute";
-    this.renderer.domElement.style.inset = "0";
+    Object.assign(this.renderer.domElement.style, {
+      position: "absolute",
+      inset: "0",
+      width: "100%",
+      height: "100%",
+      display: "block",
+    });
 
-    // Key lights so points read as solid volumes (MeshBasicMaterial was flat/invisible).
-    const amb = new THREE.AmbientLight(0xffffff, 0.55);
-    const key = new THREE.DirectionalLight(0xffffff, 1.15);
-    key.position.set(-2.2, -1.4, 3.2);
-    const fill = new THREE.DirectionalLight(0xb8c8d0, 0.45);
-    fill.position.set(2.0, 1.6, 1.2);
-    this.scene.add(amb, key, fill);
+    // Unlit materials stay readable without depending on light setup.
+    const amb = new THREE.AmbientLight(0xffffff, 1.0);
+    this.scene.add(amb);
 
     this.labelRoot = document.createElement("div");
     this.labelRoot.className = "stage-3d-axis-labels";
     this.labelRoot.style.cssText =
-      "position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:var(--font-mono);";
+      "position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:var(--font-mono);z-index:2;";
     this.el.appendChild(this.labelRoot);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.minPolarAngle = 0.15;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    this.controls.minPolarAngle = 0.12;
+    this.controls.maxPolarAngle = Math.PI / 2 - 0.06;
+    this.controls.minDistance = 1.2;
+    this.controls.maxDistance = 6;
     this.controls.target.set(0, 0, 0);
     this.controls.addEventListener("change", () => {
-      if (this.camera.position.z < EYE_Z_FLOOR) {
-        this.camera.position.z = EYE_Z_FLOOR;
-      }
+      if (this.camera.position.y < EYE_Y_FLOOR) this.camera.position.y = EYE_Y_FLOOR;
+      // Sync product camera state (x=cost, y=intel, z=speed) from Three (x,y,z)=(cost,intel,speed)
       this.cameraState.eye = {
         x: this.camera.position.x,
         y: this.camera.position.y,
@@ -163,11 +168,11 @@ export class Stage3DThree implements Stage3DSurface {
     const ridgeGeom = new THREE.BufferGeometry();
     const ridgeMat = new THREE.LineBasicMaterial({
       color: new THREE.Color(this.tokens.filament),
-      linewidth: 2,
     });
     this.ridgeLine = new THREE.Line(ridgeGeom, ridgeMat);
     this.scene.add(this.ridgeLine);
 
+    this.applyCameraState();
     this.buildAxes();
     this.bindPointer();
     this.bindResize(container);
@@ -181,6 +186,10 @@ export class Stage3DThree implements Stage3DSurface {
       },
       false,
     );
+
+    (this.gd as any).__stageBackend = "three";
+    (this.gd as any).__setPointAppearance = (colors: string[], sizes: number[]) =>
+      this.setPointAppearance(colors, sizes);
   }
 
   private showReloadPrompt() {
@@ -221,12 +230,17 @@ export class Stage3DThree implements Stage3DSurface {
     tick();
   }
 
+  /**
+   * Product camera uses Plotly-style eye (x=cost, y=intel, z=speed, up=+z).
+   * Three scene is Y-up with the same axis assignment, so product eye maps 1:1.
+   */
   private applyCameraState() {
-    const { eye, center, up } = this.cameraState;
-    if (eye.z < EYE_Z_FLOOR) eye.z = EYE_Z_FLOOR;
-    this.camera.position.set(eye.x, eye.y, eye.z);
-    this.camera.up.set(up.x, up.y, up.z);
+    const { eye, center } = this.cameraState;
+    const y = Math.max(eye.y, EYE_Y_FLOOR);
+    this.camera.position.set(eye.x, y, eye.z);
+    this.camera.up.set(0, 1, 0);
     this.camera.lookAt(center.x, center.y, center.z);
+    this.controls?.target.set(center.x, center.y, center.z);
   }
 
   public setCamera(camera: Partial<StageCamera> | StageCamera) {
@@ -236,32 +250,28 @@ export class Stage3DThree implements Stage3DSurface {
       up: { ...this.cameraState.up, ...(next.up || {}) },
       center: { ...this.cameraState.center, ...(next.center || {}) },
     };
-    if (this.cameraState.eye.z < EYE_Z_FLOOR) this.cameraState.eye.z = EYE_Z_FLOOR;
+    if (this.cameraState.eye.y < EYE_Y_FLOOR) this.cameraState.eye.y = EYE_Y_FLOOR;
     this.applyCameraState();
-    this.controls.target.set(
-      this.cameraState.center.x,
-      this.cameraState.center.y,
-      this.cameraState.center.z,
-    );
     this.controls.update();
     this.paintLabels();
   }
 
   public orbitTo(angleRad: number) {
-    const radius = 1.9;
+    const radius = 2.1;
     const height = 1.15;
     const phase = (Math.PI * 5) / 4;
     this.setCamera({
       eye: {
         x: radius * Math.cos(angleRad + phase),
-        y: radius * Math.sin(angleRad + phase),
-        z: height,
+        y: height,
+        z: radius * Math.sin(angleRad + phase),
       },
-      up: { x: 0, y: 0, z: 1 },
+      up: { x: 0, y: 1, z: 0 },
       center: { x: 0, y: 0, z: 0 },
     });
   }
 
+  /** Map data → scene: x=cost, y=intelligence, z=speed, range ~[-0.9, 0.9]. */
   private toScene(cost: number, intel: number, speed: number): THREE.Vector3 {
     const logCost = Math.log10(Math.max(cost, this.priceFloor));
     const logCostMin = Math.log10(this.priceFloor);
@@ -283,6 +293,10 @@ export class Stage3DThree implements Stage3DSurface {
         child.geometry.dispose();
         (child.material as THREE.Material).dispose();
       }
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        (child.material as THREE.Material).dispose();
+      }
     }
     const axisColor = new THREE.Color(this.tokens.textWarm);
     const makeAxis = (from: THREE.Vector3, to: THREE.Vector3, opacity: number) => {
@@ -298,14 +312,31 @@ export class Stage3DThree implements Stage3DSurface {
     const cx = this.toScene(100, 0, 10);
     const cy = this.toScene(this.priceFloor, 100, 10);
     const cz = this.toScene(this.priceFloor, 0, 1000);
-    makeAxis(o, cx, 0.7);
-    makeAxis(o, cy, 0.7);
-    makeAxis(o, cz, 0.7);
+    makeAxis(o, cx, 0.85);
+    makeAxis(o, cy, 0.85);
+    makeAxis(o, cz, 0.85);
+
+    // Floor plane so the stage never reads as pure void.
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 2.0),
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(this.tokens.slateCyan),
+        transparent: true,
+        opacity: 0.12,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }),
+    );
+    // Cost–speed floor at intel=0 (y = low)
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.copy(this.toScene(Math.sqrt(this.priceFloor * 100), 0, Math.sqrt(10 * 1000)));
+    floor.position.y = this.toScene(this.priceFloor, 0, 10).y;
+    this.axisGroup.add(floor);
 
     const gridMat = new THREE.LineBasicMaterial({
       color: axisColor,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.28,
     });
     for (let i = 0; i <= 4; i++) {
       const t = i / 4;
@@ -325,19 +356,20 @@ export class Stage3DThree implements Stage3DSurface {
   }
 
   private glyphGeometry(kind: GlyphKind, scale: number): THREE.BufferGeometry {
-    const s = scale * 0.045;
+    // Large enough to read at n≈35 without looking like dust.
+    const s = scale * 0.07;
     switch (kind) {
       case "box":
       case "box-open":
         return new THREE.BoxGeometry(s * 1.6, s * 1.6, s * 1.6);
       case "octa":
       case "octa-open":
-        return new THREE.OctahedronGeometry(s * 1.1, 0);
+        return new THREE.OctahedronGeometry(s * 1.15, 0);
       case "cross":
       case "x":
-        return new THREE.BoxGeometry(s * 1.8, s * 0.45, s * 0.45);
+        return new THREE.BoxGeometry(s * 1.9, s * 0.5, s * 0.5);
       default:
-        return new THREE.SphereGeometry(s, 16, 12);
+        return new THREE.SphereGeometry(s, 20, 16);
     }
   }
 
@@ -345,15 +377,13 @@ export class Stage3DThree implements Stage3DSurface {
     const scale = sizePx / 10;
     const geom = this.glyphGeometry(kind, scale);
     const open = kind.endsWith("-open") || kind === "cross" || kind === "x";
-    const mat = new THREE.MeshStandardMaterial({
+    // MeshBasicMaterial: always visible, no lighting dependency.
+    const mat = new THREE.MeshBasicMaterial({
       color: new THREE.Color(color),
-      emissive: new THREE.Color(color),
-      emissiveIntensity: open ? 0.15 : 0.35,
-      metalness: 0.12,
-      roughness: 0.42,
       wireframe: open,
       transparent: true,
       opacity: open ? 0.95 : 1,
+      depthTest: true,
     });
     const mesh = new THREE.Mesh(geom, mat);
     if (kind === "x") mesh.rotation.z = Math.PI / 4;
@@ -405,10 +435,10 @@ export class Stage3DThree implements Stage3DSurface {
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
       });
-      let size = 9;
-      if (isOptimum) size = 16;
-      else if (isFrontier) size = 11;
-      else size = 8;
+      let size = 10;
+      if (isOptimum) size = 18;
+      else if (isFrontier) size = 13;
+      else size = 9;
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
@@ -451,13 +481,13 @@ export class Stage3DThree implements Stage3DSurface {
     (this.gd as any).__setPointAppearance = (colors: string[], sizes: number[]) =>
       this.setPointAppearance(colors, sizes);
 
-    if (import.meta.env.DEV || import.meta.env.MODE === "test") {
-      const viz = (window as any).__viz ?? {};
-      viz.stageThree = this;
-      viz.stageModelIds = this.modelIds.slice();
-      viz.stageBackend = "three";
-      (window as any).__viz = viz;
-    }
+    // Always expose for visual QA (preview is production mode).
+    const viz = (window as any).__viz ?? {};
+    viz.stageThree = this;
+    viz.stageModelIds = this.modelIds.slice();
+    viz.stageBackend = "three";
+    viz.pointCount = this.pointMeshes.length;
+    (window as any).__viz = viz;
 
     this.paintLabels();
   }
@@ -466,11 +496,10 @@ export class Stage3DThree implements Stage3DSurface {
     const n = Math.min(colors.length, sizes.length, this.pointMeshes.length);
     for (let i = 0; i < n; i++) {
       const mesh = this.pointMeshes[i];
-      const mat = mesh.material as THREE.MeshStandardMaterial;
+      const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.color.set(colors[i]);
-      mat.emissive.set(colors[i]);
       const scale = sizes[i] / 10;
-      mesh.scale.setScalar(Math.max(0.4, scale));
+      mesh.scale.setScalar(Math.max(0.45, scale));
     }
   }
 
@@ -478,9 +507,13 @@ export class Stage3DThree implements Stage3DSurface {
     const canvas = this.renderer.domElement;
     const updatePointer = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) return;
       this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     };
+
+    // Larger pick radius for small glyphs.
+    this.raycaster.params.Mesh = { threshold: 0.08 };
 
     canvas.addEventListener("pointermove", (event) => {
       updatePointer(event);
@@ -525,8 +558,8 @@ export class Stage3DThree implements Stage3DSurface {
       const el = document.createElement("span");
       el.textContent = text;
       el.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);
-        color:${this.tokens.textWarm};font-size:10px;letter-spacing:0.06em;white-space:nowrap;
-        opacity:0.85;text-shadow:0 0 6px ${this.tokens.inkField};`;
+        color:${this.tokens.textWarm};font-size:11px;letter-spacing:0.06em;white-space:nowrap;
+        opacity:0.9;text-shadow:0 0 8px ${this.tokens.inkField};`;
       this.labelRoot.appendChild(el);
     });
   }
