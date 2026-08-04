@@ -137,3 +137,14 @@
 
 ## Build order
 design-system-interview (this, done) → color-system + web-typography + theming + spacing-system → responsive-layout → component-states + form-ux + empty-states → micro-motion + data-viz + art-direction → a11y-pass + cognitive-a11y. Audit with **deslop-ui** + humanize-copy **against this spec**; gate the ship with **tastecheck-pass**. The multi-phase build (v0→v1→v2→publish) is orchestrated by **wayfinder** (decision-ticket map).
+
+## Amendment — semantic color on canvas (Simon 2026-08-03)
+
+**Supersedes** the strict “provider differentiation = shape never color” / “copper never in the canvas” rules **for data marks on the stage and multi-charts**, following Artificial Analysis:
+
+- **Fill color (primary):** open vs closed (license class).
+- **Reasoning:** icon/glyph (AA lightbulb pattern), not a hue series.
+- **Lab/provider:** may use stable identity colors when many labs are visible; family effort curves share one family color.
+- **Not default:** continuous score heat as the only fill story.
+
+Chrome copper for focus/sliders unchanged. Full decision: `docs/v1/wayfinder/decision-semantic-color-aa.md`.
