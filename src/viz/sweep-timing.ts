@@ -30,3 +30,10 @@ export function scheduleSweep(onProgress: (progress: number) => void, duration =
     frame = null;
   };
 }
+
+export function motionPreference(): MediaQueryList | null {
+  return typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : null;
+}
+

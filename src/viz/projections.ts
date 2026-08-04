@@ -1,8 +1,8 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
-import { semanticPointFill, type SemanticPointClass } from "./palette";
+import { aaPointFill, type SemanticPointClass } from "./palette";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -93,6 +93,7 @@ export class Projections {
   /** True while either direction of a coupling fan-out is driving Fx.hover. */
   private isProgrammatic = false;
   private coupled = false;
+  private renderGen = 0;
 
   constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
     this.containers = containers;
@@ -210,10 +211,12 @@ export class Projections {
       : isFrontier
         ? "frontier"
         : "dominated";
-    const color = semanticPointFill(semanticClass, score, this.heatEncoding, {
+    const color = aaPointFill(model.openness, semanticClass, score, this.heatEncoding, {
       slateCyan: this.tokens.slateCyan,
       filamentDim: this.tokens.filamentDim,
       filament: this.tokens.filament,
+      copper: "#C47A3A",
+      gold: "#F4D58A",
     });
 
     let size = 8;
@@ -284,6 +287,12 @@ export class Projections {
   }
 
   render(weights: ScoreWeights, modelsList: Model[]): void {
+    void this.renderWithPlotly(weights, modelsList);
+  }
+
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]): Promise<void> {
+    const Plotly = await loadPlotly();
+    const gen = ++this.renderGen;
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
@@ -365,8 +374,10 @@ export class Projections {
         yaxis: this.axisLayout(spec.y),
       };
       if (!this.initialized || gd.data === undefined) {
+        if (gen !== this.renderGen) return;
         Plotly.newPlot(gd, [traces[index]], layout as any, config);
       } else {
+        if (gen !== this.renderGen) return;
         Plotly.react(gd, [traces[index]], layout as any, config);
       }
     });
@@ -405,6 +416,13 @@ export class Projections {
     });
     const stageOn = (this.stageGd as any).on;
     if (typeof stageOn === "function") stageOn.call(this.stageGd, "plotly_hover", onHover);
+    // Three stage emits stage:hover with model id (no plotly_hover path).
+    this.stageGd.addEventListener("stage:hover", ((event: CustomEvent<{ modelId: string | null }>) => {
+      if (this.isProgrammatic) return;
+      const modelId = event.detail?.modelId;
+      if (!modelId) return;
+      this.fanOut(modelId);
+    }) as EventListener);
   }
 
   /**
@@ -418,7 +436,10 @@ export class Projections {
     const previous = this.isProgrammatic;
     this.isProgrammatic = true;
     try {
-      this.programmaticHover(this.stageGd, modelId, "scene");
+      // Plotly stage only — Three has no Fx.hover surface; 2D still fans by id.
+      if ((this.stageGd as any).__stageBackend !== "three") {
+        this.programmaticHover(this.stageGd, modelId, "scene");
+      }
       this.gds.forEach((gd) => this.programmaticHover(gd, modelId, "xy"));
     } finally {
       this.isProgrammatic = previous;
@@ -429,7 +450,9 @@ export class Projections {
     const pointNumber = pointNumberForModelId(gd, modelId);
     if (pointNumber === null) return; // model not present on this view
     try {
-      Plotly.Fx.hover(gd, [{ curveNumber: 0, pointNumber }], subplot);
+      void loadPlotly().then((Plotly) => {
+        Plotly.Fx.hover(gd, [{ curveNumber: 0, pointNumber }], subplot);
+      });
     } catch {
       // Programmatic hover on a de-chromed plot (hoverinfo 'none') is
       // best-effort; the coupling contract is the Fx.hover call by model id.

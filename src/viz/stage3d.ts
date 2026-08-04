@@ -1,4 +1,4 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
@@ -17,6 +17,8 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 
 export class Stage3D {
   private readonly container: HTMLElement;
+  /** Stage API mount root — same as gd for the Plotly implementation. */
+  public readonly el: HTMLDivElement;
   public readonly gd: HTMLDivElement;
   private readonly tokens: {
     filament: string;
@@ -34,7 +36,8 @@ export class Stage3D {
   private relayoutClampInFlight = false;
   private isInitialized = false;
   private readonly heatEncoding: boolean;
-  private priceFloor = 0.08125; // default fallback, will be computed dynamically
+  private priceFloor = 0.08125;
+  private renderGen = 0; // default fallback, will be computed dynamically
 
   constructor(container: HTMLElement, heatEncoding = true) {
     this.container = container;
@@ -54,7 +57,11 @@ export class Stage3D {
     this.gd.className = "stage-3d-canvas";
     this.gd.style.width = "100%";
     this.gd.style.height = "100%";
+    this.el = this.gd;
     this.container.appendChild(this.gd);
+    (this.gd as any).__stageBackend = "plotly";
+    this.gd.setAttribute("role", "img");
+    this.gd.setAttribute("aria-label", "3D model benchmark stage: speed, cost, and intelligence");
 
     this.camera = {
       // Hero eye sits in the −cost / −intelligence octant so floor-axis ticks
@@ -153,7 +160,7 @@ export class Stage3D {
       ...camera,
     };
     this.clampCameraEye();
-    Plotly.relayout(this.gd, { "scene.camera": this.camera });
+    void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera }));
   }
 
   public orbitTo(angleRad: number) {
@@ -171,7 +178,15 @@ export class Stage3D {
     });
   }
 
-  public render(weights: ScoreWeights, modelsList: Model[]) {
+  public render(weights: ScoreWeights, modelsList: Model[], _options?: import("./stage-api").StageRenderOptions) {
+    // Plotly fallback keeps the product default axes; remapping is Three-primary.
+    void _options;
+    void this.renderWithPlotly(weights, modelsList);
+  }
+
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]) {
+    const Plotly = await loadPlotly();
+    const gen = ++this.renderGen;
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
@@ -241,16 +256,18 @@ export class Stage3D {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,
         filament: this.tokens.filament,
+        copper: "#C47A3A",
+        gold: "#F4D58A",
       });
       colors.push(color);
 
-      let size = 9; // standard pearl base size
+      let size = 12;
       if (isOptimum) {
-        size = 16; // Optimum gets larger size
+        size = 20;
       } else if (isFrontier) {
-        size = 11; // Frontier slightly larger
+        size = 14;
       } else {
-        size = 8; // Dominated still readable against the void
+        size = 11;
       }
       sizes.push(size);
 
@@ -427,10 +444,12 @@ export class Stage3D {
     };
 
     if (!this.isInitialized) {
+      if (gen !== this.renderGen) return;
       const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
       this.isInitialized = true;
       void plotReady.then(() => this.setupPlotlyListeners());
     } else {
+      if (gen !== this.renderGen) return;
       Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
     }
 
@@ -511,7 +530,7 @@ export class Stage3D {
       // guard is belt-and-suspenders against any re-entrant scheduling.
       if (updated && this.clampCameraEye() && !this.relayoutClampInFlight) {
         this.relayoutClampInFlight = true;
-        void Plotly.relayout(this.gd, { "scene.camera": this.camera }).then(
+        void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera })).then(
           () => { this.relayoutClampInFlight = false; },
         );
       }

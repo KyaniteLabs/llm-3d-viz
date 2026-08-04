@@ -45,7 +45,7 @@ function providerGroups(models: readonly Model[]): Array<{ shape: string; provid
 export class StageGuide {
   private readonly root: HTMLElement;
   private readonly store: AppStore;
-  private readonly models: readonly Model[];
+  private models: readonly Model[];
   private readonly heatEncoding: boolean;
   /** User-controlled open state; null until first paint (then defaults apply). */
   private stageKeyOpen: boolean | null = null;
@@ -57,6 +57,12 @@ export class StageGuide {
     this.models = models;
     this.heatEncoding = heatEncoding;
     this.store.subscribe((state) => this.render(state));
+  }
+
+  /** Replace catalog with the current visible set (score/frontier must match stage). */
+  setModels(models: readonly Model[]) {
+    this.models = models;
+    this.render(this.store.getState());
   }
 
   private captureDisclosureState() {
@@ -90,11 +96,13 @@ export class StageGuide {
             <p class="stage-guide-heading">ENCODING</p>
             <ul class="semantic-key">
               <li data-legend-entry="frontier-ridge"><span class="key-mark key-mark--ridge" aria-hidden="true"></span><span><strong>Pareto frontier</strong><small>white ridge / efficient boundary</small></span></li>
-              <li data-legend-entry="optimum-marker"><span class="key-mark key-mark--optimum" aria-hidden="true"></span><span><strong>Optimum marker</strong><small>filament / largest point</small></span></li>
-              <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>filament-dim / efficient model</small></span></li>
-              <li data-legend-entry="dominated-point"><span class="key-mark key-mark--dominated" aria-hidden="true"></span><span><strong>Dominated point</strong><small>dim slate / tradeoff set</small></span></li>
+              <li data-legend-entry="optimum-marker"><span class="key-mark key-mark--optimum" aria-hidden="true"></span><span><strong>Optimum marker</strong><small>bright gold / largest</small></span></li>
+              <li data-legend-entry="open-point"><span class="key-mark key-mark--open" aria-hidden="true"></span><span><strong>Open weights</strong><small>blue fill (dominated)</small></span></li>
+              <li data-legend-entry="closed-point"><span class="key-mark key-mark--closed" aria-hidden="true"></span><span><strong>Closed / proprietary</strong><small>near-black fill (dominated)</small></span></li>
+              <li data-legend-entry="reasoning-mark"><span class="key-mark key-mark--reasoning" aria-hidden="true"></span><span><strong>Reasoning</strong><small>open / wireframe glyph</small></span></li>
+              <li data-legend-entry="frontier-point"><span class="key-mark key-mark--frontier" aria-hidden="true"></span><span><strong>Frontier point</strong><small>filament-dim size</small></span></li>
             </ul>
-            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT · point luminance follows the current value score; glyphs and frontier ridge retain their meaning.</p>' : ""}
+            ${this.heatEncoding ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1). Openness still secondary.</p>' : '<p class="heat-encoding-note" data-heat-encoding="false">HEAT OFF · openness fill is primary. Pass ?heat=1 for score heat.</p>'}
           </section>
 
           <details class="provider-disclosure"${open.provider ? " open" : ""}>

@@ -1,4 +1,4 @@
-import * as Plotly from "plotly.js-dist-min";
+import { loadPlotly } from "./plotly-loader";
 import { isScorable, type Model } from "../data/models";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import {
@@ -10,16 +10,16 @@ import {
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
 import {
+  aaPointFill,
   semanticFloorFill,
-  semanticPointFill,
   type SemanticPointClass,
 } from "./palette";
+import { sameFilters, type ModelFilters } from "../lib/filters";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
 
-export function motionPreference(): MediaQueryList | null {
-  return typeof window.matchMedia === "function" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-}
+import { motionPreference } from "./sweep-timing";
+export { motionPreference } from "./sweep-timing";
 
 export function ignitionOrder(models: readonly Model[], weights: ScoreWeights, interacted: boolean): string[] {
   const frontierModels = frontier(models);
@@ -58,18 +58,23 @@ interface CurrentAppearance {
 }
 
 function graphIds(gd: Graph): string[] {
+  // Three stage exposes ordered scorable ids; Plotly carries them on text.
+  if (Array.isArray((gd as any).__stageModelIds)) {
+    return (gd as any).__stageModelIds.slice();
+  }
   return Array.isArray((gd as any).data?.[0]?.text) ? (gd as any).data[0].text.slice() : [];
 }
 
 export class SweepScheduler {
   private readonly stage: Graph;
   private readonly projections: readonly Graph[];
-  private readonly models: readonly Model[];
+  private models: readonly Model[];
   private readonly store: AppStore;
   private cancelScheduled: (() => void) | null = null;
   private run = 0;
   private interacted = false;
   private previousWeights: ScoreWeights | null = null;
+  private previousFilters: ModelFilters | null = null;
   private lastBatch = -1;
   private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
@@ -104,21 +109,45 @@ export class SweepScheduler {
     }
     this.store.subscribe((state) => {
       this.ensureAfterPlotListeners();
-      const changed = !this.previousWeights || Object.keys(state.weights).some(
-        (key) => state.weights[key as keyof ScoreWeights] !== this.previousWeights![key as keyof ScoreWeights],
-      );
-      if (!changed && this.previousWeights) {
+      const weightsChanged =
+        !this.previousWeights ||
+        Object.keys(state.weights).some(
+          (key) =>
+            state.weights[key as keyof ScoreWeights] !==
+            this.previousWeights![key as keyof ScoreWeights],
+        );
+      const filtersChanged =
+        !this.previousFilters || !sameFilters(this.previousFilters, state.filters);
+      if (!weightsChanged && !filtersChanged && this.previousWeights) {
         // Store updates such as cinema mode re-render Plotly without starting a
-        // sweep. Re-assert the last scheduler-owned appearance because those
-        // renders intentionally omit marker color/size and Plotly otherwise
-        // restores its default palette.
+        // sweep. Re-assert only when the visible universe is unchanged — never
+        // clobber a filter-correct stage with stale full-catalog colors.
         this.reassertAppearance();
         return;
       }
-      if (this.previousWeights) this.interacted = true;
+      if (this.previousWeights && weightsChanged) this.interacted = true;
       this.previousWeights = { ...state.weights };
+      this.previousFilters = {
+        ...state.filters,
+        providers: [...state.filters.providers],
+        families: [...state.filters.families],
+      };
+      // Filter-only: recompute appearance from current models (visible set) without
+      // treating it as a weight interaction unless weights also changed.
       this.start(state);
     });
+  }
+
+  /** Replace the scoring/appearance catalog (must be the current visible set). */
+  setModels(models: readonly Model[]) {
+    this.models = models;
+    const state = this.store.getState();
+    this.previousFilters = {
+      ...state.filters,
+      providers: [...state.filters.providers],
+      families: [...state.filters.families],
+    };
+    this.start(state);
   }
 
   destroy() {
@@ -136,6 +165,7 @@ export class SweepScheduler {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
     const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
+    const modelById = new Map(this.models.map((m) => [m.model, m]));
     const optimum = weightedOptimum(scores)?.model.model;
     const targetIds = new Set(ignitionOrder(this.models, weights, this.interacted));
     const semanticClassFor = (id: string): SemanticPointClass =>
@@ -144,8 +174,10 @@ export class SweepScheduler {
       const ids = graphIds(gd);
       const colors = ids.map((id) => {
         const semanticClass = semanticClassFor(id);
+        const model = modelById.get(id);
+        const openness = model?.openness ?? "closed";
         return target
-          ? semanticPointFill(semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
+          ? aaPointFill(openness, semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
           : semanticFloorFill(semanticClass);
       });
       const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 11 : 8);
@@ -166,13 +198,21 @@ export class SweepScheduler {
 
   private write(gd: Graph, colors: string[], sizes: number[]) {
     if (!graphIds(gd).length) return;
+    // Three stage (or any non-Plotly host) registers a restyle-free appearance hook.
+    const setAppearance = (gd as any).__setPointAppearance;
+    if (typeof setAppearance === "function") {
+      setAppearance(colors, sizes);
+      return;
+    }
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
-    const plotly = import.meta.env.DEV
-      ? (window as any).__viz?.Plotly ?? Plotly
-      : Plotly;
-    void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+    void loadPlotly().then((Plotly) => {
+      const plotly = import.meta.env.DEV
+        ? (window as any).__viz?.Plotly ?? Plotly
+        : Plotly;
+      void plotly.restyle(gd, { "marker.color": [colors], "marker.size": [sizes] }, [0]);
+    });
   }
 
   private writeAppearance(appearance: CurrentAppearance) {
@@ -209,10 +249,18 @@ export class SweepScheduler {
    */
   private ensureAfterPlotListeners() {
     if (this.afterPlotRegistered) return;
-    const graphs = [this.stage, ...this.projections];
-    if (!graphs.every((gd) => typeof (gd as any).on === "function")) return;
+    // Three stage has no Plotly `.on`; still arm projections so afterplot
+    // re-assert self-heals 2D markers after react races.
+    const plotlyGraphs = [this.stage, ...this.projections].filter(
+      (gd) => typeof (gd as any).on === "function",
+    );
+    if (plotlyGraphs.length === 0) return;
+    // Wait until projections exist (chunk may load after stage).
+    if (this.projections.length > 0 && plotlyGraphs.length < this.projections.length) return;
     this.afterPlotRegistered = true;
-    graphs.forEach((gd) => (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)));
+    plotlyGraphs.forEach((gd) =>
+      (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)),
+    );
   }
 
   /** The appearance slice the scheduler owns for one graph div (stage or a projection). */

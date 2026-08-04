@@ -1,5 +1,6 @@
 import rawModels from "../../data/models.v0.draft.json";
 import { formatTps, formatPricePerM, formatIntelligence } from "../lib/format";
+import { deriveEffortTier, deriveFamilyId } from "../lib/family";
 
 export type Openness = "open" | "closed";
 export type Modality = "text" | "vision" | "audio" | "video";
@@ -28,6 +29,10 @@ export interface Model {
    * for legacy/incomplete rows.
    */
   reasoning?: boolean;
+  /** Stable family key for multi-effort trails; derived from name when absent. */
+  family_id?: string;
+  /** Effort intensity tier (none|low|medium|high|max|xhigh|…); derived when absent. */
+  effort_tier?: string;
   context_length: number;
   release_date: string;
   source_url: string;
@@ -37,6 +42,10 @@ export interface Model {
   price_out_per_M: number | null;
   blended_price_per_M: number | null;
   aa_intelligence_index: number | null;
+  /** AA Cost per Intelligence Index Task (USD); null until scraped. */
+  cost_per_index_task_usd?: number | null;
+  /** AA Time per Intelligence Index Task (seconds); null until scraped. */
+  time_per_index_task_s?: number | null;
   arena_elo: number | null;
   gpqa: number | null;
   swe_bench: number | null;
@@ -74,7 +83,14 @@ export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {
   "Z AI": "circle-open",
 };
 
-export const models: Model[] = rawModels as Model[];
+/** Enrich curated rows with family/effort keys and null-safe task metrics. */
+export const models: Model[] = (rawModels as Model[]).map((row) => ({
+  ...row,
+  family_id: row.family_id?.trim() || deriveFamilyId(row.model),
+  effort_tier: row.effort_tier?.trim() || deriveEffortTier(row),
+  cost_per_index_task_usd: row.cost_per_index_task_usd ?? null,
+  time_per_index_task_s: row.time_per_index_task_s ?? null,
+}));
 
 /** Complete rows eligible for three-axis frontier and value-score math. */
 export function isScorable(model: Model): boolean {

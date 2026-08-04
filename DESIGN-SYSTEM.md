@@ -12,7 +12,23 @@
 - **Personality:** instrument-grade calm (chrome) + cinematic-drama (canvas). Pole: **instrument, not dashboard; object, not website.** Restrained, expensive, precise, anti-festive.
 - **Structure and rhythm:** asymmetric "stage + console"; canvas slow/heavy, console snappy/even. (See Structure block.)
 - **Signature:** the **threshold-sweep** — on every re-weight, a staged filament ignition propagates from the frontier outward, synced to the 2D projections snapping into registration. Both the motion signature and the video hero shot.
-- **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…), never categorical color.
+- **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…) **plus** AA-style semantic channels below (shape remains useful when many labs share a color class).
+
+## Canvas encoding channel matrix (AA-density suite · 2026-08-04)
+
+Supersedes “never categorical color on canvas” and “copper never on canvas” for **data marks only**. Chrome copper (sliders/focus) is unchanged.
+
+| Channel | Meaning | Default |
+|---------|---------|---------|
+| **Fill** | Openness: open weights vs closed/proprietary | **On** — primary story |
+| **Glyph / icon** | Reasoning / thinking-effort (`reasoning === true`) | **On** |
+| **Size / ridge / ★** | Frontier / optimum | **On** |
+| **Lab / provider color** | Identity (outline, legend swatch, family trail stroke) | **On** when multi-lab |
+| **Score heat (copper→filament)** | Diagnostic value-score ramp | **Off**; opt-in `?heat=1` only |
+
+- Legend must match stage 1:1 (Open / Closed, Reasoning, lab swatches when used).
+- Family effort **trails** keep one family color along real points only (no invented vertices).
+- Value-score weights remain independent of display-axis remapping.
 
 ## Typography specimen (→ web-typography)
 - **Display / labels:** refined grotesque — **Söhne / Neue Haas Grotesk** if licensed, else **Inter Tight** (NOT default Inter) / Geist. Tight tracking.
@@ -137,3 +153,14 @@
 
 ## Build order
 design-system-interview (this, done) → color-system + web-typography + theming + spacing-system → responsive-layout → component-states + form-ux + empty-states → micro-motion + data-viz + art-direction → a11y-pass + cognitive-a11y. Audit with **deslop-ui** + humanize-copy **against this spec**; gate the ship with **tastecheck-pass**. The multi-phase build (v0→v1→v2→publish) is orchestrated by **wayfinder** (decision-ticket map).
+
+## Amendment — semantic color on canvas (Simon 2026-08-03)
+
+**Supersedes** the strict “provider differentiation = shape never color” / “copper never in the canvas” rules **for data marks on the stage and multi-charts**, following Artificial Analysis:
+
+- **Fill color (primary):** open vs closed (license class).
+- **Reasoning:** icon/glyph (AA lightbulb pattern), not a hue series.
+- **Lab/provider:** may use stable identity colors when many labs are visible; family effort curves share one family color.
+- **Not default:** continuous score heat as the only fill story.
+
+Chrome copper for focus/sliders unchanged. Full decision: `docs/v1/wayfinder/decision-semantic-color-aa.md`.

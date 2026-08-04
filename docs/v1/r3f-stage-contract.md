@@ -1,6 +1,6 @@
 # R3F stage contract — critical path (v1 hero)
 
-**Status:** locked direction (Simon 2026-08-03)  
+**Status:** locked direction (Simon 2026-08-03) · **2026-08-03 update: Three is the 3D product path; Plotly stage is not a publish option** (see `decision-three-not-plotly.md`)  
 **Authority:** SPEC D7, DESIGN-SYSTEM (Plotly v0; true atmosphere = R3F v1+)  
 **Scope:** replace the **3D hero only**. Do not rewrite console, scoring, Pareto math, models, or 2D projections in the same PR train.
 
