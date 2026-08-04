@@ -469,7 +469,7 @@ export function legendEntries(
     { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest" },
     { id: "open-closed-glyph", title: "Open / closed", detail: "glyph only · not primary fill" },
     { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
-    { id: "frontier-point", title: "Frontier point", detail: "filament-dim size" },
+    { id: "frontier-point", title: "Frontier point", detail: "larger size · series fill on multi-effort" },
     { id: "heat-note", title: heatEncoding ? "Heat" : "Curve-focus", detail: heatNote },
   ];
 }

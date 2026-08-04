@@ -16,7 +16,6 @@ import {
   SINGLETON_SIZE_SCALE,
   legendEntries,
 } from "../src/viz/palette";
-import { familyIdOf } from "../src/lib/family";
 import { models } from "../src/data/models";
 import { frontier } from "../src/lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../src/lib/score";
@@ -217,6 +216,7 @@ describe("curve-focus family continuity", () => {
     const a = familySeriesColor("GPT-5.6 Sol", "OpenAI");
     const b = familySeriesColor("o3", "OpenAI");
     const c = familySeriesColor("Unknown OpenAI Family XYZ", "OpenAI");
+    expect(a).not.toBe(b);
     expect(a).not.toBe(c);
     expect(b).not.toBe(c);
   });

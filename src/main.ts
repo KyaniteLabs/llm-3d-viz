@@ -273,6 +273,7 @@ async function boot() {
       axisMapping: state.axisMapping,
       weights: state.weights,
     });
+  });
 
   // Effort strip active state follows hover/pin without waiting for filter re-render.
   let lastStripHover: string | null | undefined = undefined;
@@ -283,8 +284,6 @@ async function boot() {
     lastStripPin = state.pinnedModelId;
     const visibleSet = applyFilters(models, state.filters, sessionReferenceDate());
     updateEffortStrip(visibleSet, state, store);
-  });
-
   });
 
   // Wire stage interaction immediately.
