@@ -9,7 +9,14 @@ import {
   relativeLuminance,
   parseChannels,
   SLATE_CYAN_FALLBACK,
+  pointEncoding,
+  isSingleton,
+  familySeriesColor,
+  SINGLETON_OPACITY,
+  SINGLETON_SIZE_SCALE,
+  legendEntries,
 } from "../src/viz/palette";
+import { familyIdOf } from "../src/lib/family";
 import { models } from "../src/data/models";
 import { frontier } from "../src/lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../src/lib/score";
@@ -118,5 +125,73 @@ describe("AA openness fill (heat off default)", () => {
     expect(open).toBe(OPENNESS_FILL.open);
     expect(closed).toBe(OPENNESS_FILL.closed);
     expect(open).not.toBe(closed);
+  });
+});
+
+
+describe("curve-focus pointEncoding (product default)", () => {
+  const visible = [
+    { model: "A (low)", family_id: "A", openness: "open" as const },
+    { model: "A (high)", family_id: "A", openness: "open" as const },
+    { model: "B solo", family_id: "B", openness: "closed" as const },
+  ];
+
+  it("colors multi-effort dominated points with family series fill, not openness blue", () => {
+    const enc = pointEncoding({
+      openness: "open",
+      semanticClass: "dominated",
+      score: 0.4,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "A",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(enc.fill).not.toBe(OPENNESS_FILL.open);
+    expect(enc.fill).toBe(familySeriesColor("A", "OpenAI"));
+    expect(enc.opacity).toBe(1);
+    expect(enc.trailColor).toBe(enc.seriesColor);
+  });
+
+  it("dims singletons visually without changing openness mode semantics", () => {
+    const enc = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.2,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "B",
+      singleton: true,
+    });
+    expect(enc.opacity).toBe(SINGLETON_OPACITY);
+    expect(enc.sizeScale).toBe(SINGLETON_SIZE_SCALE);
+  });
+
+  it("isSingleton uses post-filter visible set family counts", () => {
+    expect(isSingleton(visible[0], visible, (m) => m.family_id!)).toBe(false);
+    expect(isSingleton(visible[2], visible, (m) => m.family_id!)).toBe(true);
+  });
+
+  it("openness mode restores aaPointFill for dominated", () => {
+    const enc = pointEncoding({
+      openness: "open",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "openness",
+      familyId: "A",
+      singleton: false,
+    });
+    expect(enc.fill).toBe(OPENNESS_FILL.open);
+  });
+
+  it("legend entries 1:1 for curve vs openness", () => {
+    const curve = legendEntries("curve", false).map((e) => e.id);
+    expect(curve).toContain("family-trail");
+    expect(curve).toContain("singleton-dim");
+    expect(curve).not.toContain("open-point");
+    const open = legendEntries("openness", false).map((e) => e.id);
+    expect(open).toContain("open-point");
+    expect(open).toContain("closed-point");
   });
 });

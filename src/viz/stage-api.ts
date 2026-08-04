@@ -1,6 +1,7 @@
 import type { Model } from "../data/models";
 import type { AxisMapping } from "../lib/axis-metrics";
 import type { ScoreWeights } from "../lib/score";
+import type { PresentationMode } from "./palette";
 
 /** Plotly-compatible camera shape (also used by Three stage). */
 export interface StageCamera {
@@ -9,9 +10,20 @@ export interface StageCamera {
   center: { x: number; y: number; z: number };
 }
 
+export type StageFitMode = "multi-effort" | "all" | "none";
+
 export interface StageRenderOptions {
   /** Metric bound to each scene axis. Defaults to cost × intelligence × speed. */
   axisMapping?: AxisMapping;
+  /** Product encoding mode. Default curve-focus. */
+  presentationMode?: PresentationMode;
+  /**
+   * Camera fit policy for this paint.
+   * - multi-effort: soft-fit multi-effort subset bounds (first paint / filter change)
+   * - all: fit full plottable set
+   * - none: leave camera (user orbit / cinema)
+   */
+  fit?: StageFitMode;
 }
 
 /**
@@ -28,5 +40,7 @@ export interface Stage3DSurface {
   orbitTo(angleRad: number): void;
   /** Per-scorable-index colors/sizes for threshold-sweep (optional). */
   setPointAppearance?(colors: string[], sizes: number[]): void;
+  /** Optional explicit fit after render (Three); Plotly no-ops. */
+  fitToVisible?(models: Model[], mode?: StageFitMode): void;
   destroy?(): void;
 }

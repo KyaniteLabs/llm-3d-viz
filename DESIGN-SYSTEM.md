@@ -14,21 +14,26 @@
 - **Signature:** the **threshold-sweep** — on every re-weight, a staged filament ignition propagates from the frontier outward, synced to the 2D projections snapping into registration. Both the motion signature and the video hero shot.
 - **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…) **plus** AA-style semantic channels below (shape remains useful when many labs share a color class).
 
-## Canvas encoding channel matrix (AA-density suite · 2026-08-04)
+## Canvas encoding channel matrix (curve-focus default · 2026-08-04)
 
 Supersedes “never categorical color on canvas” and “copper never on canvas” for **data marks only**. Chrome copper (sliders/focus) is unchanged.
 
-| Channel | Meaning | Default |
-|---------|---------|---------|
-| **Fill** | Openness: open weights vs closed/proprietary | **On** — primary story |
-| **Glyph / icon** | Reasoning / thinking-effort (`reasoning === true`) | **On** |
+**Product default = curve-focus** (RALPLAN A2 / PRD #86). Openness-primary fill is regression-only (`?enc=openness`).
+
+| Channel | Meaning | Default (curve-focus) |
+|---------|---------|----------------------|
+| **Fill** | Multi-effort **family series color**; singleton = dim slate | **On** — primary story |
+| **Trail** | Same family series color; effort-rank ordered; real points only | **On** |
+| **Glyph / icon** | Openness (open/closed) + reasoning / thinking-effort | **On** — secondary |
 | **Size / ridge / ★** | Frontier / optimum | **On** |
-| **Lab / provider color** | Identity (outline, legend swatch, family trail stroke) | **On** when multi-lab |
+| **Lab / provider color** | Outline / identity when multi-lab | Secondary |
+| **Singleton dim** | Post-filter family count &lt; 2: opacity 0.30, size ×0.55 | Visual only (still in score/frontier) |
 | **Score heat (copper→filament)** | Diagnostic value-score ramp | **Off**; opt-in `?heat=1` only |
 
-- Legend must match stage 1:1 (Open / Closed, Reasoning, lab swatches when used).
+- Legend must match stage 1:1 (family trail, effort path, singleton, frontier, optimum, open/closed glyph, reasoning).
 - Family effort **trails** keep one family color along real points only (no invented vertices).
 - Value-score weights remain independent of display-axis remapping.
+- First paint: soft-fit multi-effort subset bounds; age ≤ 6 months remains density floor.
 
 ## Typography specimen (→ web-typography)
 - **Display / labels:** refined grotesque — **Söhne / Neue Haas Grotesk** if licensed, else **Inter Tight** (NOT default Inter) / Geist. Tight tracking.

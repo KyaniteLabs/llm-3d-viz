@@ -66,14 +66,18 @@ export class DecisionConsole {
     this.root.innerHTML = `
       <p class="eyebrow">INSTRUMENT CONSOLE</p>
       <h2 id="console-title">Value readout</h2>
-      <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
-      <section class="filter-controls" aria-label="Visible-set filters">
-        <p class="weight-heading">VISIBLE SET / FILTERS</p>
-      </section>
-      <section class="axis-controls" aria-label="Stage axis metrics"></section>
+      <section class="model-readout" aria-live="polite"></section>
+      <section class="family-nav" aria-label="Multi-effort family navigation"></section>
       <section class="weight-controls" aria-label="Value-score weight shares"></section>
       <section class="preset-controls" aria-label="Workload presets"></section>
-      <section class="model-readout" aria-live="polite"></section>
+      <section class="axis-controls" aria-label="Stage axis metrics"></section>
+      <details class="filter-disclosure">
+        <summary class="weight-heading">ADVANCED FILTERS</summary>
+        <section class="filter-controls" aria-label="Visible-set filters">
+          <p class="weight-heading">VISIBLE SET / FILTERS</p>
+        </section>
+      </details>
+      <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
       <section class="task-charts" aria-label="Cost and time per Index task"></section>
       <section class="score-table-host" aria-label="Model score table"></section>
       <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>`;
@@ -81,6 +85,7 @@ export class DecisionConsole {
     this.renderControls();
     this.renderAxisControls();
     this.renderFilterControls();
+    this.renderFamilyNav();
     this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]")!.addEventListener("click", () => {
       onCinemaToggle();
     });
@@ -101,6 +106,29 @@ export class DecisionConsole {
 
   private multiEffortCatalog() {
     return listMultiEffortFamilies(this.catalog);
+  }
+
+
+  private renderFamilyNav() {
+    const section = this.root.querySelector(".family-nav");
+    if (!section) return;
+    const multi = this.multiEffortCatalog();
+    const state = this.store.getState();
+    const selectedFamilies = new Set(state.filters.families);
+    const chipLimit = 14;
+    const chips = multi.slice(0, chipLimit);
+    section.innerHTML = `
+      <p class="weight-heading">FAMILY CURVES <span class="filter-count">${multi.length} multi-effort</span></p>
+      <p class="axis-hint">Solo a family chip to read its intensity ladder. Empty filter = all families in age window.</p>
+      <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
+        ${chips
+          .map(
+            ({ family, count }) =>
+              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps">${family} <em>${count}</em></button>`,
+          )
+          .join("")}
+        ${multi.length > chipLimit ? `<span class="axis-hint">+${multi.length - chipLimit} more via advanced filters</span>` : ""}
+      </div>`;
   }
 
   private filteredFamilyOptions(): string[] {
@@ -129,7 +157,7 @@ export class DecisionConsole {
     const chips = multi.slice(0, chipLimit);
 
     section.innerHTML = `
-      <p class="weight-heading">VISIBLE SET / FILTERS <span class="filter-count" data-visible-count>${this.models.length} visible</span></p>
+      <p class="weight-heading">VISIBLE SET <span class="filter-count" data-visible-count>${this.models.length} visible</span></p>
       <div class="filter-toolbar">
         <label class="filter-toggle">
           <input type="checkbox" data-filter-age ${state.filters.ageEnabled ? "checked" : ""} />
@@ -137,19 +165,9 @@ export class DecisionConsole {
         </label>
         <label class="filter-toggle">
           <input type="checkbox" data-filter-multi-only ${this.multiEffortOnly ? "checked" : ""} />
-          <span>Multi-effort only</span>
+          <span>Family list: multi-effort only</span>
         </label>
         <button type="button" class="filter-clear" data-filter-clear>Clear filters</button>
-      </div>
-      <p class="axis-hint">Pick a family chip to solo its intensity curve. Empty multi-select = all.</p>
-      <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
-        ${chips
-          .map(
-            ({ family, count }) =>
-              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps">${family} <em>${count}</em></button>`,
-          )
-          .join("")}
-        ${multi.length > chipLimit ? `<span class="axis-hint">+${multi.length - chipLimit} more via search</span>` : ""}
       </div>
       <label class="axis-control" for="filter-family-search">
         <span>Find family</span>
@@ -186,6 +204,7 @@ export class DecisionConsole {
       if (target instanceof HTMLInputElement && target.matches("[data-filter-multi-only]")) {
         this.multiEffortOnly = target.checked;
         this.renderFilterControls();
+        this.renderFamilyNav();
         return;
       }
       if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
@@ -244,6 +263,7 @@ export class DecisionConsole {
       hoveredModelId: null,
     });
     this.renderFilterControls();
+    this.renderFamilyNav();
   }
 
   private onConsoleClick(event: Event) {
@@ -254,6 +274,7 @@ export class DecisionConsole {
       event.preventDefault();
       this.soloFamily(solo.dataset.soloFamily);
       this.renderFilterControls();
+      this.renderFamilyNav();
       return;
     }
     if (target.closest("[data-filter-clear]")) {
@@ -266,6 +287,7 @@ export class DecisionConsole {
       event.preventDefault();
       this.soloFamily(row.dataset.focusFamily);
       this.renderFilterControls();
+      this.renderFamilyNav();
     }
   }
 

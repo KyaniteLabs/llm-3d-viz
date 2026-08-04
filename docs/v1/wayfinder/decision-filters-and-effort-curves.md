@@ -31,3 +31,8 @@ Default visible set = **age ≤ 6 months**, all providers/families in that windo
 - Age filter is the density fix Simon asked for first.
 - Trails must not invent intermediate models (same honesty rule as Pareto ridge: chords between real points only).
 - Filtering re-normalizes value score / frontier over **visible set** (frontier-math).
+
+
+## Encoding note (2026-08-04)
+
+Under curve-focus, **singleton dimming** (single-effort families in the post-filter visible set) is a visual hierarchy only. Dimmed points remain in the visible set, value-score, and frontier. Age ≤ 6 months remains the density floor. A real multi-effort-only *stage* filter is not the product default; only if first-paint gate fails should that filter decision be reopened.

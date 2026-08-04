@@ -1161,7 +1161,17 @@ test.describe("3D Stage Render Specs", () => {
       el.open = true;
     });
 
-    for (const entry of ["frontier-ridge", "optimum-marker", "open-point", "closed-point", "reasoning-mark", "frontier-point"]) {
+    // Default product legend is curve-focus (openness glyph, not open/closed fill).
+    for (const entry of [
+      "family-trail",
+      "effort-path",
+      "singleton-dim",
+      "frontier-ridge",
+      "optimum-marker",
+      "open-closed-glyph",
+      "reasoning-mark",
+      "frontier-point",
+    ]) {
       await expect(page.locator(`[data-legend-entry="${entry}"]`)).toHaveCount(1);
     }
 

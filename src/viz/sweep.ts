@@ -10,10 +10,14 @@ import {
 import type { AppStore, AppState } from "../state";
 import { scheduleSweep } from "./sweep-timing";
 import {
-  aaPointFill,
+  isSingleton,
+  pointEncoding,
   semanticFloorFill,
+  SINGLETON_SIZE_SCALE,
+  type PresentationMode,
   type SemanticPointClass,
 } from "./palette";
+import { familyIdOf } from "../lib/family";
 import { sameFilters, type ModelFilters } from "../lib/filters";
 
 export { SWEEP_DURATION_MS, timingProgress } from "./sweep-timing";
@@ -79,6 +83,7 @@ export class SweepScheduler {
   private currentAppearance: CurrentAppearance | null = null;
   private reduced = motionPreference()?.matches ?? false;
   private readonly heatEncoding: boolean;
+  private presentationMode: PresentationMode = "curve";
   private removeMotionListener: (() => void) | null = null;
   // FIX-D (#29): plotly_afterplot re-assert hardening. `afterPlotRegistered` is
   // set once a listener is attached to every plot (stage + projections). The
@@ -161,6 +166,10 @@ export class SweepScheduler {
     this.run += 1;
   }
 
+  setPresentationMode(mode: PresentationMode) {
+    this.presentationMode = mode;
+  }
+
   private markerStates(weights: ScoreWeights): SweepStates {
     const frontierIds = new Set(frontier(this.models).map((model) => model.model));
     const scores = normalizedScores(this.models, weights, this.models);
@@ -176,11 +185,39 @@ export class SweepScheduler {
         const semanticClass = semanticClassFor(id);
         const model = modelById.get(id);
         const openness = model?.openness ?? "closed";
-        return target
-          ? aaPointFill(openness, semanticClass, scoreById.get(id) ?? 0, this.heatEncoding)
-          : semanticFloorFill(semanticClass);
+        if (!target) return semanticFloorFill(semanticClass);
+        if (!model) {
+          return pointEncoding({
+            openness,
+            semanticClass,
+            score: scoreById.get(id) ?? 0,
+            heatEncoding: this.heatEncoding,
+            presentationMode: this.presentationMode,
+            familyId: id,
+            singleton: true,
+          }).fill;
+        }
+        return pointEncoding({
+          openness,
+          semanticClass,
+          score: scoreById.get(id) ?? 0,
+          heatEncoding: this.heatEncoding,
+          presentationMode: this.presentationMode,
+          familyId: familyIdOf(model),
+          singleton: isSingleton(model, this.models, familyIdOf),
+          provider: model.provider,
+        }).fill;
       });
-      const sizes = ids.map((id) => target && id === optimum ? 16 : target && frontierIds.has(id) ? 11 : 8);
+      const sizes = ids.map((id) => {
+        if (target && id === optimum) return 16;
+        if (target && frontierIds.has(id)) return 11;
+        let size = 8;
+        const model = modelById.get(id);
+        if (model && this.presentationMode === "curve" && isSingleton(model, this.models, familyIdOf)) {
+          size = Math.max(4, Math.round(size * SINGLETON_SIZE_SCALE));
+        }
+        return size;
+      });
       return { ids, colors, sizes };
     };
     const base = make(this.stage, false);

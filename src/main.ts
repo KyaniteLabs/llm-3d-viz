@@ -9,6 +9,8 @@ import { createStore, type AppState } from "./state";
 import { DecisionConsole } from "./ui/console";
 import { CinemaMode } from "./viz/cinema";
 import { StageGuide } from "./ui/stage-guide";
+import { groupByFamily, deriveEffortTier } from "./lib/family";
+import { displayName } from "./lib/display-name";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -22,6 +24,8 @@ document.documentElement.dataset.modelCount = String(models.length);
 const searchParams = new URLSearchParams(window.location.search);
 // AA-density default: openness fill primary; score heat is diagnostic opt-in only.
 const heatEncoding = searchParams.get("heat") === "1";
+// Product default: curve-focus. Legacy openness fill: ?enc=openness
+const presentationMode = searchParams.get("enc") === "openness" ? "openness" as const : "curve" as const;
 // Spike default: Three hero. Opt out: ?stage=plotly
 const stageBackend = searchParams.get("stage") === "plotly" ? "plotly" : "r3f";
 const debugStage = searchParams.get("debug") === "1";
@@ -34,6 +38,47 @@ function sessionReferenceDate(): Date {
     return new Date(override);
   }
   return new Date();
+}
+
+
+function updateEffortStrip(
+  visible: readonly import("./data/models").Model[],
+  state: AppState,
+  store: import("./state").AppStore,
+) {
+  const host = document.querySelector("[data-effort-strip]") as HTMLElement | null;
+  if (!host) return;
+  const byFam = groupByFamily(visible);
+  const multi = [...byFam.entries()].filter(([, m]) => m.length >= 2);
+  const soloFamily =
+    state.filters.families.length === 1
+      ? state.filters.families[0]
+      : multi.length === 1
+        ? multi[0][0]
+        : null;
+  if (!soloFamily || !byFam.has(soloFamily) || (byFam.get(soloFamily)?.length ?? 0) < 2) {
+    host.hidden = true;
+    host.innerHTML = "";
+    return;
+  }
+  const members = byFam.get(soloFamily)!;
+  host.hidden = false;
+  host.innerHTML = `
+    <p class="eyebrow">EFFORT LADDER · ${soloFamily.replace(/</g, "")}</p>
+    <ol class="effort-ladder" aria-label="Effort intensity steps">
+      ${members
+        .map((m) => {
+          const tier = deriveEffortTier(m);
+          const active =
+            state.hoveredModelId === m.model || state.pinnedModelId === m.model ? " is-active" : "";
+          return `<li class="effort-step${active}" data-model-id="${m.model}"><span class="effort-tier">${tier}</span><strong>${displayName(m.model)}</strong></li>`;
+        })
+        .join("")}
+    </ol>`;
+  host.querySelectorAll<HTMLElement>("[data-model-id]").forEach((el) => {
+    el.onpointerenter = () => store.update({ hoveredModelId: el.dataset.modelId ?? null });
+    el.onpointerleave = () => store.update({ hoveredModelId: null });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -87,6 +132,7 @@ async function boot() {
     store,
     models,
     heatEncoding,
+    presentationMode,
   );
 
   const cinema = new CinemaMode(stage, store);
@@ -101,9 +147,17 @@ async function boot() {
     filters: ModelFilters;
   } | null = null;
   let renderFrame: number | null = null;
-  let projections: { render: (w: AppState["weights"], m: typeof models) => void; gds: HTMLDivElement[] } | null =
-    null;
-  let sweep: { setModels: (m: typeof models) => void } | null = null;
+  let projections: {
+    render: (w: AppState["weights"], m: typeof models) => void;
+    gds: HTMLDivElement[];
+    setPresentationMode?: (m: "curve" | "openness") => void;
+  } | null = null;
+  let sweep: {
+    setModels: (m: typeof models) => void;
+    setPresentationMode?: (m: "curve" | "openness") => void;
+  } | null = null;
+  let didInitialFit = false;
+  let lastFilterFitKey = "";
 
   const sameWeights = (left: AppState["weights"], right: AppState["weights"]) =>
     left.speed === right.speed && left.cost === right.cost && left.intelligence === right.intelligence;
@@ -133,8 +187,26 @@ async function boot() {
       });
     }
 
-    stage.render(weights, visibleSet, { axisMapping });
+    const filterKey = JSON.stringify({
+      age: filters.ageEnabled,
+      providers: [...filters.providers].sort(),
+      families: [...filters.families].sort(),
+    });
+    const shouldFit =
+      !didInitialFit || filterKey !== lastFilterFitKey;
+    if (shouldFit) {
+      didInitialFit = true;
+      lastFilterFitKey = filterKey;
+    }
+    stage.render(weights, visibleSet, {
+      axisMapping,
+      presentationMode,
+      fit: shouldFit ? "multi-effort" : "none",
+    });
+    projections?.setPresentationMode?.(presentationMode);
     projections?.render(weights, visibleSet);
+    sweep?.setPresentationMode?.(presentationMode);
+    updateEffortStrip(visibleSet, store.getState(), store);
     // Console/guide track the visible set; do NOT restart the sweep here.
     // SweepScheduler owns weight-driven ignition; setModels is only for catalog
     // (filter) changes — restarting on every paint raced mid-sweep size=11 frames
@@ -147,6 +219,7 @@ async function boot() {
     viz.stage = stage;
     viz.gd = stage.gd;
     viz.heatEncoding = heatEncoding;
+    viz.presentationMode = presentationMode;
     viz.projectionsInstance = projections;
     viz.axisMapping = { ...axisMapping };
     viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
