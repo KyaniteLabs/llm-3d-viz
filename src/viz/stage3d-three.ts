@@ -90,9 +90,8 @@ export class Stage3DThree implements Stage3DSurface {
 
     this.el = document.createElement("div");
     this.el.className = "stage-3d-canvas stage-3d-three";
-    this.el.style.width = "100%";
-    this.el.style.height = "100%";
-    this.el.style.position = "relative";
+    // Do NOT override .stage-3d-canvas { position:absolute; inset:0 } — relative
+    // collapsed the hero to an empty strip and made the spike look like "no change".
     this.el.style.touchAction = "none";
     container.appendChild(this.el);
     this.gd = this.el;
@@ -105,16 +104,36 @@ export class Stage3DThree implements Stage3DSurface {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setClearColor(this.tokens.inkField, 1);
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.el.appendChild(this.renderer.domElement);
     this.renderer.domElement.style.width = "100%";
     this.renderer.domElement.style.height = "100%";
     this.renderer.domElement.style.display = "block";
+
+    // Key lights so points read as solid volumes (MeshBasicMaterial was flat/invisible).
+    const amb = new THREE.AmbientLight(0xffffff, 0.55);
+    const key = new THREE.DirectionalLight(0xffffff, 1.15);
+    key.position.set(-2.2, -1.4, 3.2);
+    const fill = new THREE.DirectionalLight(0xb8c8d0, 0.45);
+    fill.position.set(2.0, 1.6, 1.2);
+    this.scene.add(amb, key, fill);
 
     this.labelRoot = document.createElement("div");
     this.labelRoot.className = "stage-3d-axis-labels";
     this.labelRoot.style.cssText =
       "position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:var(--font-mono);";
     this.el.appendChild(this.labelRoot);
+
+    // Unmistakable spike marker so Simon never confuses this with frozen Plotly.
+    const badge = document.createElement("div");
+    badge.className = "stage-backend-badge";
+    badge.textContent = "STAGE · THREE";
+    badge.setAttribute("data-stage-backend", "three");
+    badge.style.cssText = `position:absolute;top:0.55rem;left:0.65rem;z-index:4;
+      font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;
+      color:${this.tokens.filament};border:1px solid rgba(232,241,228,0.28);
+      padding:0.28rem 0.45rem;background:rgba(7,12,11,0.72);pointer-events:none;`;
+    this.el.appendChild(badge);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -140,6 +159,7 @@ export class Stage3DThree implements Stage3DSurface {
     const ridgeGeom = new THREE.BufferGeometry();
     const ridgeMat = new THREE.LineBasicMaterial({
       color: new THREE.Color(this.tokens.filament),
+      linewidth: 2,
     });
     this.ridgeLine = new THREE.Line(ridgeGeom, ridgeMat);
     this.scene.add(this.ridgeLine);
@@ -274,14 +294,14 @@ export class Stage3DThree implements Stage3DSurface {
     const cx = this.toScene(100, 0, 10);
     const cy = this.toScene(this.priceFloor, 100, 10);
     const cz = this.toScene(this.priceFloor, 0, 1000);
-    makeAxis(o, cx, 0.45);
-    makeAxis(o, cy, 0.45);
-    makeAxis(o, cz, 0.45);
+    makeAxis(o, cx, 0.7);
+    makeAxis(o, cy, 0.7);
+    makeAxis(o, cz, 0.7);
 
     const gridMat = new THREE.LineBasicMaterial({
       color: axisColor,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.22,
     });
     for (let i = 0; i <= 4; i++) {
       const t = i / 4;
@@ -301,7 +321,7 @@ export class Stage3DThree implements Stage3DSurface {
   }
 
   private glyphGeometry(kind: GlyphKind, scale: number): THREE.BufferGeometry {
-    const s = scale * 0.028;
+    const s = scale * 0.045;
     switch (kind) {
       case "box":
       case "box-open":
@@ -321,8 +341,12 @@ export class Stage3DThree implements Stage3DSurface {
     const scale = sizePx / 10;
     const geom = this.glyphGeometry(kind, scale);
     const open = kind.endsWith("-open") || kind === "cross" || kind === "x";
-    const mat = new THREE.MeshBasicMaterial({
+    const mat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(color),
+      emissive: new THREE.Color(color),
+      emissiveIntensity: open ? 0.15 : 0.35,
+      metalness: 0.12,
+      roughness: 0.42,
       wireframe: open,
       transparent: true,
       opacity: open ? 0.95 : 1,
@@ -438,8 +462,9 @@ export class Stage3DThree implements Stage3DSurface {
     const n = Math.min(colors.length, sizes.length, this.pointMeshes.length);
     for (let i = 0; i < n; i++) {
       const mesh = this.pointMeshes[i];
-      const mat = mesh.material as THREE.MeshBasicMaterial;
+      const mat = mesh.material as THREE.MeshStandardMaterial;
       mat.color.set(colors[i]);
+      mat.emissive.set(colors[i]);
       const scale = sizes[i] / 10;
       mesh.scale.setScalar(Math.max(0.4, scale));
     }

@@ -25,7 +25,8 @@ document.documentElement.dataset.modelCount = String(models.length);
 const searchParams = new URLSearchParams(window.location.search);
 const heatEncoding = searchParams.get("heat") !== "0";
 // Spike flag per docs/v1/r3f-stage-contract.md — default remains Plotly frozen stage.
-const stageBackend = searchParams.get("stage") === "r3f" ? "r3f" : "plotly";
+// Spike branch default: Three hero. Opt out with ?stage=plotly.
+const stageBackend = searchParams.get("stage") === "plotly" ? "plotly" : "r3f";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;
