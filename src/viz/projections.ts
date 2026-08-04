@@ -405,6 +405,13 @@ export class Projections {
     });
     const stageOn = (this.stageGd as any).on;
     if (typeof stageOn === "function") stageOn.call(this.stageGd, "plotly_hover", onHover);
+    // Three stage emits stage:hover with model id (no plotly_hover path).
+    this.stageGd.addEventListener("stage:hover", ((event: CustomEvent<{ modelId: string | null }>) => {
+      if (this.isProgrammatic) return;
+      const modelId = event.detail?.modelId;
+      if (!modelId) return;
+      this.fanOut(modelId);
+    }) as EventListener);
   }
 
   /**
@@ -418,7 +425,10 @@ export class Projections {
     const previous = this.isProgrammatic;
     this.isProgrammatic = true;
     try {
-      this.programmaticHover(this.stageGd, modelId, "scene");
+      // Plotly stage only — Three has no Fx.hover surface; 2D still fans by id.
+      if ((this.stageGd as any).__stageBackend !== "three") {
+        this.programmaticHover(this.stageGd, modelId, "scene");
+      }
       this.gds.forEach((gd) => this.programmaticHover(gd, modelId, "xy"));
     } finally {
       this.isProgrammatic = previous;

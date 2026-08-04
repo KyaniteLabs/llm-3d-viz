@@ -1,6 +1,8 @@
 import "./styles/tokens.css";
 import { models } from "./data/models";
 import { Stage3D } from "./viz/stage3d";
+import { Stage3DThree } from "./viz/stage3d-three";
+import type { Stage3DSurface } from "./viz/stage-api";
 import { Projections } from "./viz/projections";
 import { createStore, type AppState } from "./state";
 import { DecisionConsole } from "./ui/console";
@@ -20,7 +22,10 @@ function modelIdFromPlotlyPoint(point: any): string | null {
 document.documentElement.dataset.modelCount = String(models.length);
 // The score-luminance encoding is the shipped default. Keep a reversible URL
 // opt-out for A/B comparison and capture work: `?heat=0`.
-const heatEncoding = new URLSearchParams(window.location.search).get("heat") !== "0";
+const searchParams = new URLSearchParams(window.location.search);
+const heatEncoding = searchParams.get("heat") !== "0";
+// Spike flag per docs/v1/r3f-stage-contract.md — default remains Plotly frozen stage.
+const stageBackend = searchParams.get("stage") === "r3f" ? "r3f" : "plotly";
 
 document.addEventListener("DOMContentLoaded", () => {
   const stagePanel = document.querySelector(".stage") as HTMLElement;
@@ -35,10 +40,16 @@ document.addEventListener("DOMContentLoaded", () => {
   plotContainer.style.flex = "1";
   plotContainer.style.minHeight = "300px";
   plotContainer.style.width = "100%";
+  plotContainer.style.height = "100%";
+  plotContainer.style.position = "relative";
   stageVisual?.appendChild(plotContainer);
   const consoleRoot = document.querySelector(".console") as HTMLElement;
   const store = createStore();
-  const stage = new Stage3D(plotContainer, heatEncoding);
+  const stage: Stage3DSurface =
+    stageBackend === "r3f"
+      ? new Stage3DThree(plotContainer, heatEncoding)
+      : new Stage3D(plotContainer, heatEncoding);
+  document.documentElement.dataset.stageBackend = stageBackend;
   new StageGuide(stagePanel?.querySelector(".stage-guide") as HTMLElement, store, models, heatEncoding);
 
   // Linked 2D projections couple to the stage bidirectionally by model ID (hover
@@ -113,20 +124,26 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Console wiring: the graph div owns cursor truth because gl3d plotly_hover
-  // payloads do not reliably include event coordinates.
-  let pointer = { x: 0, y: 0 };
-  stage.gd.addEventListener("mouseenter", () => {
+  // payloads do not reliably include event coordinates. Three emits stage:hover.
+  const pointerRoot = stage.el ?? stage.gd;
+  pointerRoot.addEventListener("mouseenter", () => {
     // Re-entering the stage starts a fresh hover snapshot. If the pointer then
     // lands on a point, Plotly's hover event immediately replaces this null.
     consoleUi.handleStageEnter();
   });
-  stage.gd.addEventListener("mousemove", (event) => {
-    pointer = { x: event.clientX, y: event.clientY };
+  pointerRoot.addEventListener("mousemove", (event) => {
     consoleUi.setCursor(event.clientX, event.clientY);
   });
-  stage.gd.addEventListener("mouseleave", () => {
+  pointerRoot.addEventListener("mouseleave", () => {
     consoleUi.handleStageLeave();
   });
+
+  // Three / Stage API: model-id hover CustomEvent (docs/v1/r3f-stage-contract.md).
+  pointerRoot.addEventListener("stage:hover", ((event: CustomEvent<{ modelId: string | null }>) => {
+    const modelId = event.detail?.modelId ?? null;
+    if (modelId) consoleUi.handleHover(modelId);
+    else consoleUi.handleStageLeave();
+  }) as EventListener);
 
   const plotlyOn = (stage.gd as any).on;
   if (typeof plotlyOn === "function") {
@@ -142,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       consoleUi.handleStageLeave();
     });
   }
-  stage.gd.addEventListener("click", (event) => {
+  pointerRoot.addEventListener("click", (event) => {
     // The store is the authoritative hover snapshot. A DOM click can arrive
     // after Plotly's hover event and must not be resolved through a time/space
     // heuristic that can turn a real point click into an empty click.

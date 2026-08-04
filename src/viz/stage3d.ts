@@ -17,6 +17,8 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 
 export class Stage3D {
   private readonly container: HTMLElement;
+  /** Stage API mount root — same as gd for the Plotly implementation. */
+  public readonly el: HTMLDivElement;
   public readonly gd: HTMLDivElement;
   private readonly tokens: {
     filament: string;
@@ -54,7 +56,9 @@ export class Stage3D {
     this.gd.className = "stage-3d-canvas";
     this.gd.style.width = "100%";
     this.gd.style.height = "100%";
+    this.el = this.gd;
     this.container.appendChild(this.gd);
+    (this.gd as any).__stageBackend = "plotly";
 
     this.camera = {
       // Hero eye sits in the −cost / −intelligence octant so floor-axis ticks

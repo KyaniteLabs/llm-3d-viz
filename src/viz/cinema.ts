@@ -1,18 +1,18 @@
 import type { AppStore, AppState } from "../state";
 import { motionPreference } from "./sweep";
-import { Stage3D } from "./stage3d";
+import type { Stage3DSurface } from "./stage-api";
 
 const ORBIT_SPEED = 0.00012;
 
 export class CinemaMode {
-  private readonly stage: Stage3D;
+  private readonly stage: Stage3DSurface;
   private readonly store: AppStore;
   private frame: number | null = null;
   private started = 0;
   private reduced = motionPreference()?.matches ?? false;
   private removeMotionListener: (() => void) | null = null;
 
-  constructor(stage: Stage3D, store: AppStore) {
+  constructor(stage: Stage3DSurface, store: AppStore) {
     this.stage = stage;
     this.store = store;
     const media = motionPreference();
@@ -26,7 +26,9 @@ export class CinemaMode {
       this.removeMotionListener = () => media.removeEventListener?.("change", onChange);
     }
     this.store.subscribe((state) => this.render(state));
-    this.stage.gd.addEventListener("pointerenter", () => {
+    // Prefer el (Stage API); gd is the same root for both Plotly and Three.
+    const pointerRoot = this.stage.el ?? this.stage.gd;
+    pointerRoot.addEventListener("pointerenter", () => {
       if (this.store.getState().cinemaMode) this.store.update({ cinemaMode: false });
     });
   }

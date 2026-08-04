@@ -58,6 +58,10 @@ interface CurrentAppearance {
 }
 
 function graphIds(gd: Graph): string[] {
+  // Three stage exposes ordered scorable ids; Plotly carries them on text.
+  if (Array.isArray((gd as any).__stageModelIds)) {
+    return (gd as any).__stageModelIds.slice();
+  }
   return Array.isArray((gd as any).data?.[0]?.text) ? (gd as any).data[0].text.slice() : [];
 }
 
@@ -166,6 +170,12 @@ export class SweepScheduler {
 
   private write(gd: Graph, colors: string[], sizes: number[]) {
     if (!graphIds(gd).length) return;
+    // Three stage (or any non-Plotly host) registers a restyle-free appearance hook.
+    const setAppearance = (gd as any).__setPointAppearance;
+    if (typeof setAppearance === "function") {
+      setAppearance(colors, sizes);
+      return;
+    }
     // Plotly requires each per-point array to be wrapped once for restyle.
     // Resolve the bundled namespace at call time so the render-suite spy
     // instruments the exact Plotly instance used by the scheduler.
