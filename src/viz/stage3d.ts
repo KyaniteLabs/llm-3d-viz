@@ -57,9 +57,13 @@ export class Stage3D {
     this.container.appendChild(this.gd);
 
     this.camera = {
-      // Slightly elevated/oblique hero framing so depth reads on first paint;
-      // user camera state still remains the single writer after Plotly init.
-      eye: { x: 1.25, y: 1.15, z: 1.05 },
+      // Hero eye sits in the −cost / −intelligence octant so floor-axis ticks
+      // read the natural way on screen: low values near the camera (lower on the
+      // floor plane) and high values recede (higher on screen). The old +x/+y eye
+      // put 0/cheap at the far edge, so intelligence/cost looked reversed
+      // (high numbers at the bottom of the axis). Z = speed stays camera-up.
+      // User camera state remains the single writer after Plotly init.
+      eye: { x: -1.45, y: -1.25, z: 1.15 },
       up: { x: 0, y: 0, z: 1 },
       center: { x: 0, y: 0, z: 0 },
     };
@@ -153,10 +157,13 @@ export class Stage3D {
   }
 
   public orbitTo(angleRad: number) {
-    const radius = 1.8;
-    const height = 1.0;
-    const x = radius * Math.cos(angleRad);
-    const y = radius * Math.sin(angleRad);
+    const radius = 1.9;
+    const height = 1.15;
+    // Phase offset so cinema starts near the default −x/−y hero octant rather
+    // than the +x axis (where floor ticks read reversed on first paint).
+    const phase = (Math.PI * 5) / 4; // 225° ≈ (−x, −y)
+    const x = radius * Math.cos(angleRad + phase);
+    const y = radius * Math.sin(angleRad + phase);
     this.setCamera({
       eye: { x, y, z: height },
       up: { x: 0, y: 0, z: 1 },
@@ -334,16 +341,15 @@ export class Stage3D {
       type: scale,
       ...(range ? { range, autorange: false as const } : {}),
       visible: true,
-      // Subtle grid + plane tint so the 3D volume reads as a volume, not a flat
-      // black disc. Opacity stays low to preserve observatory de-chrome.
+      // Grid only — never filled axis planes. Plotly gl3d ignores/wipes alpha on
+      // backgroundcolor and paints solid cream (visual regression #40 residual).
       showgrid: true,
-      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.07),
+      gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.10),
       gridwidth: 1,
       zeroline: false,
       showline: true,
-      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.22),
-      showbackground: true,
-      backgroundcolor: this.colorWithAlpha(this.tokens.textWarm, 0.03),
+      linecolor: this.colorWithAlpha(this.tokens.textWarm, 0.28),
+      showbackground: false,
       showspikes: false,
       tickmode: "array",
       tickvals,
@@ -377,7 +383,16 @@ export class Stage3D {
         uirevision: "constant_camera",
         aspectmode: "manual",
         aspectratio: { x: 1.15, y: 1, z: 1 },
-        xaxis: axisLayout(axisCfg.cost.title, axisCfg.cost.ticks, axisCfg.cost.labels),
+        // Explicit ascending ranges on every axis so Plotly never autoranges a
+        // log axis into a visually reversed tick run. Cost/speed ranges cover the
+        // scorable set with padding; intelligence stays the locked 0–100 index.
+        xaxis: axisLayout(
+          axisCfg.cost.title,
+          axisCfg.cost.ticks,
+          axisCfg.cost.labels,
+          "log",
+          [Math.log10(this.priceFloor), Math.log10(100)],
+        ),
         yaxis: axisLayout(
           axisCfg.intelligence.title,
           axisCfg.intelligence.ticks,
@@ -389,6 +404,8 @@ export class Stage3D {
           axisCfg.speed.title,
           axisCfg.speed.ticks,
           axisCfg.speed.labels,
+          "log",
+          [Math.log10(10), Math.log10(1000)],
         ),
         camera: this.camera,
         // 'closest' (not false) so the stage emits plotly_hover on hover and the
