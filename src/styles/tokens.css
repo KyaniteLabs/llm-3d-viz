@@ -435,7 +435,16 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   height: 0.75rem;
   margin-top: 0.1rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10a37f 0 33%, #d4a27f 33% 66%, #4285f4 66% 100%);
+  /* OpenAI green · Anthropic clay · Google blue (brand primaries) */
+  background: linear-gradient(135deg, #10a37f 0 33%, #d97757 33% 66%, #4285f4 66% 100%);
+}
+.lab-hex {
+  display: inline;
+  margin-left: 0.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
 }
 .key-mark--family-trail { width: 1rem; height: 0.12rem; margin-top: 0.4rem; background: #10a37f; }
 .lab-color-list {
