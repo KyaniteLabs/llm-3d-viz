@@ -1,0 +1,51 @@
+{
+  "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage — never to invent metrics.",
+  "updated": "2026-08-05",
+  "ladders": {
+    "Claude Fable 5": {
+      "provider": "Anthropic",
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+    },
+    "Claude Opus 5": {
+      "provider": "Anthropic",
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "notes": "AA publishes full adaptive ladder."
+    },
+    "Claude Sonnet 5": {
+      "provider": "Anthropic",
+      "expected_tiers": ["none", "high", "max"],
+      "notes": "Partial AA coverage common."
+    },
+    "GPT-5.6 Sol": {
+      "provider": "OpenAI",
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "notes": "OpenAI reasoning effort ladder."
+    },
+    "GPT-5.6 Luna": {
+      "provider": "OpenAI",
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "notes": "OpenAI reasoning effort ladder."
+    },
+    "GPT-5.6 Terra": {
+      "provider": "OpenAI",
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "notes": "OpenAI reasoning effort ladder."
+    },
+    "Gemini 3.5 Flash": {
+      "provider": "Google",
+      "expected_tiers": ["minimal", "medium", "high"],
+      "notes": "Thinking budget tiers when published by AA."
+    },
+    "DeepSeek V4 Pro": {
+      "provider": "DeepSeek",
+      "expected_tiers": ["none", "high", "max"],
+      "notes": "Reasoning on/off + effort when published."
+    },
+    "Kimi K3": {
+      "provider": "Kimi",
+      "expected_tiers": ["low", "max"],
+      "notes": "AA often publishes low + max."
+    }
+  }
+}

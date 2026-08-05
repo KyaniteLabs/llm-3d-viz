@@ -6,6 +6,7 @@ import {
   type AxisMetricId,
   type SceneAxis,
 } from "../lib/axis-metrics";
+import { effortGapForFamily, formatEffortGapNote } from "../data/effort-gaps";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../lib/family";
 import { listFamilies, listMultiEffortFamilies, listProviders } from "../lib/filters";
 import { normalizedScores, presets, weightedOptimum, type ScoreWeights } from "../lib/score";
@@ -245,6 +246,11 @@ export class DecisionConsole {
       <div class="nav-actions">
         <button type="button" class="family-chip is-action nav-show-all" data-nav-show-all ${solo ? "" : "disabled"}>Show all curves · Esc</button>
       </div>
+      ${(() => {
+        const gap = effortGapForFamily(solo);
+        if (!gap || gap.complete) return "";
+        return `<p class="axis-hint effort-gap-note" role="status" data-effort-gap="${gap.family.replace(/"/g, "")}">Incomplete ladder · ${formatEffortGapNote(gap).replace(/</g, "")}</p>`;
+      })()}
       <label class="axis-control nav-search" for="nav-family-search">
         <span>Find</span>
         <input id="nav-family-search" type="search" data-nav-family-search value="${this.familySearch.replace(/"/g, "&quot;")}" placeholder="Fable, Sol, Opus…" autocomplete="off" />

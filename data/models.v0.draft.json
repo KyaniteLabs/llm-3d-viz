@@ -1700,8 +1700,8 @@
     "aider_pct": null,
     "gpqa": 82.8282828282828,
     "reasoning": false,
-    "family_id": "Gemini 3.5 Flash (minimal)",
-    "effort_tier": "none",
+    "family_id": "Gemini 3.5 Flash",
+    "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null
   },

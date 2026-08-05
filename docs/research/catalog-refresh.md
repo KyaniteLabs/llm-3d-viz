@@ -10,6 +10,19 @@ instance (`http://100.92.68.103:4242/`).
 This is **not** a one-off “add Qwen 3.8” fetch. Every release AA publishes (with
 Intelligence Index + speed + blended price) lands on the next successful run.
 
+## Sources (multi-source, honest)
+
+| Priority | Source | Contributes |
+|----------|--------|-------------|
+| 1 | AA public leaderboard HTML | Scored IQ + TPS + blended $/M |
+| 2 | AA `/models` catalog HTML | Extra scored rows when extractable |
+| 3 | OpenRouter public models API | Pricing overlay only if AA price missing — never invents IQ/speed |
+| 4 | `data/expected-effort-ladders.json` | Expected ladders → `data/effort-gaps.generated.json` |
+
+**Claude Fable 5:** product supports low/medium/high/xhigh/max. AA public data only scores **max** (with Opus 4.8 fallback). Missing tiers are tracked as an effort gap and shown when you solo Fable — we do **not** invent scores. When AA publishes them, the thrice-daily job ingests them automatically.
+
+Optional paid AA API (`AA_API_KEY`) can be wired later; not configured.
+
 ## How it works
 
 ```
@@ -61,14 +74,20 @@ tail -50 logs/catalog-auto-update.log
 cat .cache/catalog-sync/last-status.json
 ```
 
-## Why a model can still be “missing”
+## Why a model / effort can still be “missing”
 
-1. AA has not published the model / effort tier yet  
-2. AA published it without all three required metrics  
-3. It fails the release floor or cloud-lab filter  
+1. **No scored source has published that effort tier yet** (Fable low/medium/high/xhigh on AA public as of 2026-08)  
+2. Published without all three required metrics (IQ + TPS + blended $/M)  
+3. Fails release floor or cloud-lab filter  
+4. Product supports multi-effort, but independent benchmarks only ran one setting  
 
-Example: if “Qwen 3.8” is not on the AA public leaderboard payload, no scrape can invent it.
-When AA ships it, the next of the three daily runs picks it up automatically.
+Example: **Claude Fable 5** has a full product effort ladder; AA public data only scores **max** (with Opus 4.8 fallback). The gap is tracked in `data/effort-gaps.generated.json` and shown when you solo Fable. We do **not** invent the other tiers.
+
+Check gaps anytime:
+
+```bash
+node -e 'console.log(JSON.stringify(require("./data/effort-gaps.generated.json").fable,null,2))'
+```
 
 ## Uninstall cron
 

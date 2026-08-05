@@ -6,3 +6,5 @@ test-results/
 # Catalog auto-update runtime
 logs/
 .cache/
+
+data/openrouter-snapshot.json
