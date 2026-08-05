@@ -284,11 +284,11 @@ export function aaPointFill(
 export type PresentationMode = "curve" | "openness";
 
 /** Singleton dim recipe (visual only — still in score/frontier). */
-export const SINGLETON_OPACITY = 0.3;
+export const SINGLETON_OPACITY = 0.42;
 export const SINGLETON_SIZE_SCALE = 0.55;
 
 /** Slate fill for post-filter single-effort points under curve-focus. */
-export const SINGLETON_FILL = "#3D5560";
+export const SINGLETON_FILL = "#5A6E78"; // raised for ≥~3:1 on ink (tastecheck CL-03)
 
 /** Curated multi-effort family series colors (known AA families). */
 export const FAMILY_SERIES_COLORS: Readonly<Record<string, string>> = {

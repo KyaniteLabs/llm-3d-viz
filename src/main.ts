@@ -9,7 +9,7 @@ import { createStore, type AppState } from "./state";
 import { DecisionConsole } from "./ui/console";
 import { CinemaMode } from "./viz/cinema";
 import { StageGuide } from "./ui/stage-guide";
-import { groupByFamily, deriveEffortTier } from "./lib/family";
+import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
 import { displayName } from "./lib/display-name";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
@@ -63,22 +63,59 @@ function updateEffortStrip(
   }
   const members = byFam.get(soloFamily)!;
   host.hidden = false;
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
   host.innerHTML = `
-    <p class="eyebrow">EFFORT LADDER · ${soloFamily.replace(/</g, "")}</p>
-    <ol class="effort-ladder" aria-label="Effort intensity steps">
+    <p class="eyebrow">EFFORT LADDER · ${esc(soloFamily)}</p>
+    <ol class="effort-ladder" aria-label="Effort intensity steps for ${esc(soloFamily)}">
       ${members
         .map((m) => {
           const tier = deriveEffortTier(m);
           const active =
             state.hoveredModelId === m.model || state.pinnedModelId === m.model ? " is-active" : "";
-          return `<li class="effort-step${active}" data-model-id="${m.model}"><span class="effort-tier">${tier}</span><strong>${displayName(m.model)}</strong></li>`;
+          const intel =
+            m.aa_intelligence_index != null ? m.aa_intelligence_index.toFixed(0) : "—";
+          const cost =
+            m.blended_price_per_M != null ? `$${m.blended_price_per_M.toFixed(2)}` : "—";
+          const tps = m.tps != null ? `${Math.round(m.tps)} t/s` : "—";
+          return `<li class="effort-step${active}" data-model-id="${esc(m.model)}" tabindex="0">
+            <span class="effort-tier">${esc(tier)}</span>
+            <strong>${esc(displayName(m.model))}</strong>
+            <span class="effort-metrics"><span>IQ ${intel}</span><span>${esc(cost)}/M</span><span>${esc(tps)}</span></span>
+          </li>`;
         })
         .join("")}
     </ol>`;
   host.querySelectorAll<HTMLElement>("[data-model-id]").forEach((el) => {
     el.onpointerenter = () => store.update({ hoveredModelId: el.dataset.modelId ?? null });
     el.onpointerleave = () => store.update({ hoveredModelId: null });
+    el.onclick = () =>
+      store.update({
+        pinnedModelId: el.dataset.modelId ?? null,
+        hoveredModelId: el.dataset.modelId ?? null,
+      });
   });
+}
+
+function updateEmptyState(visibleCount: number) {
+  const stage = document.querySelector(".stage-visual") as HTMLElement | null;
+  if (!stage) return;
+  let banner = stage.querySelector("[data-empty-visible]") as HTMLElement | null;
+  if (visibleCount > 0) {
+    banner?.remove();
+    return;
+  }
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.dataset.emptyVisible = "1";
+    banner.className = "empty-visible-banner";
+    banner.setAttribute("role", "status");
+    banner.innerHTML = `
+      <p class="eyebrow">NO MODELS IN VIEW</p>
+      <p>Nothing matches the current filters. Clear filters or turn off <strong>Multi-effort curves only</strong> / age to widen the set.</p>
+      <p class="axis-hint">Tip: ?me=0 shows single-effort models; ?age=0 removes the age window.</p>`;
+    stage.appendChild(banner);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -190,6 +227,7 @@ async function boot() {
 
     const filterKey = JSON.stringify({
       age: filters.ageEnabled,
+      me: filters.multiEffortOnly,
       providers: [...filters.providers].sort(),
       families: [...filters.families].sort(),
     });
@@ -199,11 +237,18 @@ async function boot() {
       didInitialFit = true;
       lastFilterFitKey = filterKey;
     }
+    const soloFamily = filters.families.length === 1;
+    const hoverId = store.getState().hoveredModelId ?? store.getState().pinnedModelId;
+    const hoverModel = hoverId ? visibleSet.find((m) => m.model === hoverId) : null;
+    const highlightFamilyId = hoverModel ? familyIdOf(hoverModel) : null;
     stage.render(weights, visibleSet, {
       axisMapping,
       presentationMode,
-      fit: shouldFit ? "multi-effort" : "none",
+      fit: shouldFit ? (soloFamily ? "all" : "multi-effort") : "none",
+      soloFamily,
+      highlightFamilyId: soloFamily ? filters.families[0] : highlightFamilyId,
     });
+    updateEmptyState(visibleSet.length);
     projections?.setPresentationMode?.(presentationMode);
     projections?.render(weights, visibleSet);
     sweep?.setPresentationMode?.(presentationMode);
@@ -237,7 +282,20 @@ async function boot() {
     const weightsSame = sameWeights(renderedWeights, state.weights);
     const axesSame = sameAxisMapping(renderedAxes, state.axisMapping);
     const filtersSame = sameFilters(renderedFilters, state.filters);
-    if (weightsSame && axesSame && filtersSame) return;
+    // Hover/pin: lightweight family emphasis (no full rebuild / no sweep race).
+    if (weightsSame && axesSame && filtersSame) {
+      const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
+      const soloFamily = state.filters.families.length === 1;
+      const hoverId = state.hoveredModelId ?? state.pinnedModelId;
+      const hoverModel = hoverId ? visibleNow.find((m) => m.model === hoverId) : null;
+      const highlightFamilyId = soloFamily
+        ? state.filters.families[0]
+        : hoverModel
+          ? familyIdOf(hoverModel)
+          : null;
+      stage.setFamilyHighlight?.(highlightFamilyId);
+      return;
+    }
 
     // Filter changes rewrite the visible catalog — console, guide, and sweep need
     // the new set immediately. Weight/axis-only changes leave membership alone;
@@ -254,6 +312,7 @@ async function boot() {
       axisMapping: { ...state.axisMapping },
       filters: {
         ...state.filters,
+        multiEffortOnly: state.filters.multiEffortOnly,
         providers: [...state.filters.providers],
         families: [...state.filters.families],
       },

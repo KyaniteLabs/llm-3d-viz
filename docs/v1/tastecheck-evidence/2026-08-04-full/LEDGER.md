@@ -1,3 +1,22 @@
+## HOLD residual closeout (2026-08-04 evening)
+
+Implemented on `fix/tastecheck-hold-blockers` after Simon locked forks:
+
+| Blocker | Fix |
+|---------|-----|
+| Multi-effort default | `multiEffortOnly: true` + URL `me=0` |
+| STAGE KEY open | collapsed by default |
+| Solo sparse camera | tighter `fitToVisible` when n≤8; solo uses fit=all |
+| Effort strip | metrics (IQ, $/M, tps); pin on click; keyboard focus |
+| Hover family | `setFamilyHighlight` dims other families/trails |
+| Projection void | max-height 12rem band |
+| Mobile wall | hide advanced/task/table on narrow |
+| Singleton contrast | fill `#5A6E78` opacity 0.42 |
+| Empty set | banner with recovery tips |
+| Keyboard stage | arrow orbit +/− zoom when canvas focused |
+
+**Still human gate:** Simon visual go on private VPS for SHIP.
+
 # TasteCheck Pass — llm-3d-viz (private VPS artifact)
 
 **Date:** 2026-08-04  
