@@ -35,6 +35,7 @@ import {
 import {
   mergeBySpine,
   applyOpenRouterPricing,
+  applyAaDerivedBlend,
   applyArenaElo,
   extractArenaEntriesFromHtml,
   stampAaMeasured,
@@ -289,7 +290,8 @@ sourceStats.push({
   log_sample: arenaLogs.slice(0, 8),
 });
 
-// --- 4. OpenRouter price overlay ---
+// --- 4. AA-derived blend (when in/out present), then OpenRouter list overlay ---
+merged = applyAaDerivedBlend(merged);
 const or = await scrapeOpenRouter();
 if (or.ok) {
   fs.writeFileSync(

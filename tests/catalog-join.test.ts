@@ -174,6 +174,39 @@ describe("catalog-join", () => {
     expect(candidatesForArena([fable], id)).toHaveLength(1);
   });
 
+  it("does not prefix-match Arena gpt-5 onto gpt-5-6-sol", () => {
+    const sol = aaRow({
+      model: "GPT-5.6 Sol (High)",
+      provider: "OpenAI",
+      family_id: "GPT-5.6 Sol",
+      effort_tier: "high",
+      source_url: "https://artificialanalysis.ai/models/gpt-5-6-sol-high",
+    });
+    const { attaches, rows } = applyArenaElo([sol], [
+      {
+        modelDisplayName: "gpt-5-high",
+        modelKey: "gpt-5-high",
+        modelOrganization: "OpenAI",
+        rating: 1400,
+      },
+    ]);
+    expect(attaches).toBe(0);
+    expect(rows[0].arena_elo).toBeNull();
+  });
+
+  it("AA-derived blend when in/out present and blend missing", () => {
+    const row = aaRow({
+      blended_price_per_M: null,
+      price_in_per_M: 10,
+      price_out_per_M: 50,
+    });
+    const out = joinCatalog([row]);
+    expect(out.scorable).toHaveLength(1);
+    expect(out.scorable[0].blended_price_per_M).toBeCloseTo((10 * 7 + 50 * 2) / 10);
+    expect(out.scorable[0].sources?.blended_price_per_M?.origin).toBe("aa");
+    expect(out.scorable[0].sources?.blended_price_per_M?.kind).toBe("derived");
+  });
+
   it("fixture set attaches at least 3 Elo rows", () => {
     const rows = [
       aaRow({

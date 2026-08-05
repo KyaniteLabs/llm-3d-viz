@@ -25,7 +25,33 @@
     "family_id": "Jamba 1.7 Large",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3 Coder Next",
@@ -53,7 +79,33 @@
     "family_id": "Qwen3 Coder Next",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.33403925183314975,
-    "time_per_index_task_s": 114.44459835358217
+    "time_per_index_task_s": 114.44459835358217,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3 Next 80B A3B (Reasoning)",
@@ -81,7 +133,33 @@
     "family_id": "Qwen3 Next 80B A3B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.19140490030119592,
-    "time_per_index_task_s": 105.64921745816508
+    "time_per_index_task_s": 105.64921745816508,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3 Next 80B A3B Instruct",
@@ -109,7 +187,33 @@
     "family_id": "Qwen3 Next 80B A3B Instruct",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3 Omni 30B A3B (Reasoning)",
@@ -139,7 +243,33 @@
     "family_id": "Qwen3 Omni 30B A3B",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3 Omni 30B A3B Instruct",
@@ -169,7 +299,33 @@
     "family_id": "Qwen3 Omni 30B A3B Instruct",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 122B A10B (Non-reasoning)",
@@ -198,7 +354,33 @@
     "family_id": "Qwen3.5 122B A10B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.19283752554239794,
-    "time_per_index_task_s": 65.11085128114837
+    "time_per_index_task_s": 65.11085128114837,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 122B A10B (Reasoning)",
@@ -227,7 +409,33 @@
     "family_id": "Qwen3.5 122B A10B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.25721283017687263,
-    "time_per_index_task_s": 134.71302829295723
+    "time_per_index_task_s": 134.71302829295723,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 35B A3B (Non-reasoning)",
@@ -256,7 +464,33 @@
     "family_id": "Qwen3.5 35B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.24097290015081077,
-    "time_per_index_task_s": 76.04905293460166
+    "time_per_index_task_s": 76.04905293460166,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 397B A17B (Non-reasoning)",
@@ -285,7 +519,33 @@
     "family_id": "Qwen3.5 397B A17B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 397B A17B (Reasoning)",
@@ -314,7 +574,33 @@
     "family_id": "Qwen3.5 397B A17B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.3586209530240026,
-    "time_per_index_task_s": 220.1165142517819
+    "time_per_index_task_s": 220.1165142517819,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 4B (Non-reasoning)",
@@ -343,7 +629,33 @@
     "family_id": "Qwen3.5 4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 4B (Reasoning)",
@@ -372,7 +684,33 @@
     "family_id": "Qwen3.5 4B",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 9B (Reasoning)",
@@ -401,7 +739,33 @@
     "family_id": "Qwen3.5 9B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.24283940024719272,
-    "time_per_index_task_s": 421.56380235776555
+    "time_per_index_task_s": 421.56380235776555,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 Omni Flash",
@@ -431,7 +795,33 @@
     "family_id": "Qwen3.5 Omni Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.5 Omni Plus",
@@ -461,7 +851,33 @@
     "family_id": "Qwen3.5 Omni Plus",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.6 27B (Non-reasoning)",
@@ -490,7 +906,33 @@
     "family_id": "Qwen3.6 27B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.39568868699090354,
-    "time_per_index_task_s": 212.3696977059595
+    "time_per_index_task_s": 212.3696977059595,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.6 27B (Reasoning)",
@@ -519,7 +961,33 @@
     "family_id": "Qwen3.6 27B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.2927247783618784,
-    "time_per_index_task_s": 439.96775349251595
+    "time_per_index_task_s": 439.96775349251595,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.6 35B A3B (Non-reasoning)",
@@ -548,7 +1016,33 @@
     "family_id": "Qwen3.6 35B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.6299576091432859,
-    "time_per_index_task_s": 104.68262271188344
+    "time_per_index_task_s": 104.68262271188344,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.6 35B A3B (Reasoning)",
@@ -577,7 +1071,33 @@
     "family_id": "Qwen3.6 35B A3B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.19401059667998605,
-    "time_per_index_task_s": 208.8745800859288
+    "time_per_index_task_s": 208.8745800859288,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.6 Plus",
@@ -606,7 +1126,33 @@
     "family_id": "Qwen3.6 Plus",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.3569350085980533,
-    "time_per_index_task_s": 385.5941752980616
+    "time_per_index_task_s": 385.5941752980616,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.7 Max",
@@ -634,7 +1180,33 @@
     "family_id": "Qwen3.7",
     "effort_tier": "max",
     "cost_per_index_task_usd": 1.0752598127130266,
-    "time_per_index_task_s": 95.70368513050641
+    "time_per_index_task_s": 95.70368513050641,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Qwen3.7 Plus",
@@ -663,7 +1235,33 @@
     "family_id": "Qwen3.7 Plus",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.22625860397529413,
-    "time_per_index_task_s": 379.45461940725176
+    "time_per_index_task_s": 379.45461940725176,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Lite (high)",
@@ -692,7 +1290,33 @@
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.24149821316277362,
-    "time_per_index_task_s": 316.31300681438387
+    "time_per_index_task_s": 316.31300681438387,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Lite (low)",
@@ -721,7 +1345,33 @@
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Lite (medium)",
@@ -750,7 +1400,33 @@
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Lite (Non-reasoning)",
@@ -779,7 +1455,33 @@
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Pro Preview (low)",
@@ -808,7 +1510,33 @@
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.22678934431901865,
-    "time_per_index_task_s": 44.49068685611474
+    "time_per_index_task_s": 44.49068685611474,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Pro Preview (medium)",
@@ -837,7 +1565,33 @@
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.18346641025847,
-    "time_per_index_task_s": 100.24177754593725
+    "time_per_index_task_s": 100.24177754593725,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova 2.0 Pro Preview (Non-reasoning)",
@@ -866,7 +1620,33 @@
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.25922913387001884,
-    "time_per_index_task_s": 41.57154414233694
+    "time_per_index_task_s": 41.57154414233694,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova Micro",
@@ -894,7 +1674,33 @@
     "family_id": "Nova Micro",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nova Premier",
@@ -922,7 +1728,33 @@
     "family_id": "Nova Premier",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude 4.5 Haiku (Non-reasoning)",
@@ -951,7 +1783,33 @@
     "family_id": "Claude 4.5 Haiku",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude 4.5 Haiku (Reasoning)",
@@ -980,7 +1838,33 @@
     "family_id": "Claude 4.5 Haiku",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.21632698216632235,
-    "time_per_index_task_s": 172.76955521734374
+    "time_per_index_task_s": 172.76955521734374,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
@@ -1001,7 +1885,7 @@
     "price_out_per_M": 50,
     "blended_price_per_M": 7.7,
     "aa_intelligence_index": 59.8606463217303,
-    "arena_elo": null,
+    "arena_elo": 1508.576,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": 92.6262626262626,
@@ -1009,7 +1893,37 @@
     "family_id": "Claude Fable 5",
     "effort_tier": "max",
     "cost_per_index_task_usd": 3.148706712412073,
-    "time_per_index_task_s": 300.6131262693349
+    "time_per_index_task_s": 300.6131262693349,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, High Effort)",
@@ -1030,7 +1944,7 @@
     "price_out_per_M": 25,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 58.8641803200348,
-    "arena_elo": null,
+    "arena_elo": 1491.815,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": 93.7373737373737,
@@ -1038,7 +1952,37 @@
     "family_id": "Claude Opus 5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 1.2259161925931654,
-    "time_per_index_task_s": 240.45293812602577
+    "time_per_index_task_s": 240.45293812602577,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Low Effort)",
@@ -1067,7 +2011,33 @@
     "family_id": "Claude Opus 5",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.4263273182673873,
-    "time_per_index_task_s": 76.56977082023015
+    "time_per_index_task_s": 76.56977082023015,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
@@ -1088,7 +2058,7 @@
     "price_out_per_M": 25,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 60.6918740157091,
-    "arena_elo": null,
+    "arena_elo": 1490.357,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": 93.2323232323232,
@@ -1096,7 +2066,37 @@
     "family_id": "Claude Opus 5",
     "effort_tier": "max",
     "cost_per_index_task_usd": 2.3364632606812896,
-    "time_per_index_task_s": 459.4701679592355
+    "time_per_index_task_s": 459.4701679592355,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Medium Effort)",
@@ -1125,7 +2125,33 @@
     "family_id": "Claude Opus 5",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.7224261397230394,
-    "time_per_index_task_s": 142.380873328537
+    "time_per_index_task_s": 142.380873328537,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Opus 5 (Adaptive Reasoning, Xhigh Effort)",
@@ -1154,7 +2180,33 @@
     "family_id": "Claude Opus 5",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 1.802080556320042,
-    "time_per_index_task_s": 341.93078516726956
+    "time_per_index_task_s": 341.93078516726956,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Sonnet 4.6 (Non-reasoning, Low Effort)",
@@ -1183,7 +2235,33 @@
     "family_id": "Claude Sonnet 4.6",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Sonnet 5 (Adaptive Reasoning, Max Effort)",
@@ -1212,7 +2290,33 @@
     "family_id": "Claude Sonnet 5",
     "effort_tier": "max",
     "cost_per_index_task_usd": 1.7167083757728232,
-    "time_per_index_task_s": 561.314677441653
+    "time_per_index_task_s": 561.314677441653,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Claude Sonnet 5 (Non-reasoning, High Effort)",
@@ -1233,7 +2337,7 @@
     "price_out_per_M": 10,
     "blended_price_per_M": 1.54,
     "aa_intelligence_index": 41.7305068119089,
-    "arena_elo": null,
+    "arena_elo": 1462.4,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": 80,
@@ -1241,7 +2345,37 @@
     "family_id": "Claude Sonnet 5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.4219329289664341,
-    "time_per_index_task_s": 105.68549480203961
+    "time_per_index_task_s": 105.68549480203961,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Trinity Large Thinking",
@@ -1269,7 +2403,33 @@
     "family_id": "Trinity Large Thinking",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.16448501660985854,
-    "time_per_index_task_s": 210.8926782257259
+    "time_per_index_task_s": 210.8926782257259,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Celeris-1",
@@ -1298,7 +2458,33 @@
     "family_id": "Celeris-1",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.434624560799827
+    "time_per_index_task_s": 6.434624560799827,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Command A",
@@ -1326,7 +2512,33 @@
     "family_id": "Command A",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Command A+",
@@ -1355,7 +2567,33 @@
     "family_id": "Command A+",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 97.59112607661693
+    "time_per_index_task_s": 97.59112607661693,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "North Mini Code",
@@ -1383,7 +2621,33 @@
     "family_id": "North Mini Code",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 793.869465497576
+    "time_per_index_task_s": 793.869465497576,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "DeepSeek V4 Flash (Non-reasoning)",
@@ -1411,7 +2675,33 @@
     "family_id": "DeepSeek V4 Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
@@ -1439,7 +2729,33 @@
     "family_id": "DeepSeek V4 Flash 0731",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.02713078866137895,
-    "time_per_index_task_s": 288.94841232647394
+    "time_per_index_task_s": 288.94841232647394,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "DeepSeek V4 Pro (Non-reasoning)",
@@ -1467,7 +2783,33 @@
     "family_id": "DeepSeek V4 Pro",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "DeepSeek V4 Pro (Reasoning, High Effort)",
@@ -1495,7 +2837,33 @@
     "family_id": "DeepSeek V4 Pro",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.043199357656672405,
-    "time_per_index_task_s": 386.3997299538144
+    "time_per_index_task_s": 386.3997299538144,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "DeepSeek V4 Pro (Reasoning, Max Effort)",
@@ -1523,7 +2891,33 @@
     "family_id": "DeepSeek V4 Pro",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.04753091824130439,
-    "time_per_index_task_s": 479.4641260740062
+    "time_per_index_task_s": 479.4641260740062,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 2.5 Pro",
@@ -1553,7 +2947,33 @@
     "family_id": "Gemini 2.5 Pro",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.21539247323253438,
-    "time_per_index_task_s": 93.82356531766295
+    "time_per_index_task_s": 93.82356531766295,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.1 Flash-Lite",
@@ -1583,7 +3003,33 @@
     "family_id": "Gemini 3.1 Flash-Lite",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.04312241890358433,
-    "time_per_index_task_s": 63.78275600055462
+    "time_per_index_task_s": 63.78275600055462,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.1 Pro Preview",
@@ -1613,7 +3059,33 @@
     "family_id": "Gemini 3.1 Pro Preview",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.3391979820842098,
-    "time_per_index_task_s": 106.09838244142925
+    "time_per_index_task_s": 106.09838244142925,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.5 Flash (high)",
@@ -1643,7 +3115,33 @@
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.6911525063081332,
-    "time_per_index_task_s": 172.53367762555496
+    "time_per_index_task_s": 172.53367762555496,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.5 Flash (medium)",
@@ -1673,7 +3171,33 @@
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.5 Flash (minimal)",
@@ -1703,7 +3227,33 @@
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.5 Flash-Lite",
@@ -1733,7 +3283,33 @@
     "family_id": "Gemini 3.5 Flash-Lite",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.09607608832282725,
-    "time_per_index_task_s": 39.17439617715505
+    "time_per_index_task_s": 39.17439617715505,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemini 3.6 Flash (high)",
@@ -1763,7 +3339,33 @@
     "family_id": "Gemini 3.6 Flash",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.5569335790394195,
-    "time_per_index_task_s": 122.38002400209248
+    "time_per_index_task_s": 122.38002400209248,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 12B (Non-reasoning)",
@@ -1793,7 +3395,33 @@
     "family_id": "Gemma 4 12B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 12B (Reasoning)",
@@ -1823,7 +3451,33 @@
     "family_id": "Gemma 4 12B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.07631015155223188,
-    "time_per_index_task_s": 210.50758707850622
+    "time_per_index_task_s": 210.50758707850622,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 26B A4B (Non-reasoning)",
@@ -1852,7 +3506,33 @@
     "family_id": "Gemma 4 26B A4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 31B (Non-reasoning)",
@@ -1881,7 +3561,33 @@
     "family_id": "Gemma 4 31B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.03818834204803524,
-    "time_per_index_task_s": 67.77567630728286
+    "time_per_index_task_s": 67.77567630728286,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 31B (Reasoning)",
@@ -1910,7 +3616,33 @@
     "family_id": "Gemma 4 31B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 346.4383415899135
+    "time_per_index_task_s": 346.4383415899135,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 E4B (Non-reasoning)",
@@ -1940,7 +3672,33 @@
     "family_id": "Gemma 4 E4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Gemma 4 E4B (Reasoning)",
@@ -1970,7 +3728,33 @@
     "family_id": "Gemma 4 E4B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.014907261791550967,
-    "time_per_index_task_s": 104.43524192032451
+    "time_per_index_task_s": 104.43524192032451,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Granite 4.0 H Small",
@@ -1998,7 +3782,33 @@
     "family_id": "Granite 4.0 H Small",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Granite 4.1 8B",
@@ -2026,7 +3836,33 @@
     "family_id": "Granite 4.1 8B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Mercury 2",
@@ -2054,7 +3890,33 @@
     "family_id": "Mercury 2",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.07928864952494241,
-    "time_per_index_task_s": 37.515978191886774
+    "time_per_index_task_s": 37.515978191886774,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Ling 2.6 Flash",
@@ -2082,7 +3944,33 @@
     "family_id": "Ling 2.6 Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 125.31077296064281
+    "time_per_index_task_s": 125.31077296064281,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Kimi K2.6 (Non-reasoning)",
@@ -2111,7 +3999,33 @@
     "family_id": "Kimi K2.6",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Kimi K2.7 Code",
@@ -2140,7 +4054,33 @@
     "family_id": "Kimi K2.7 Code",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.221366575128313,
-    "time_per_index_task_s": 402.13604665888664
+    "time_per_index_task_s": 402.13604665888664,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Kimi K3 (low)",
@@ -2169,7 +4109,33 @@
     "family_id": "Kimi K3",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.24287188846393187,
-    "time_per_index_task_s": 107.78523426998767
+    "time_per_index_task_s": 107.78523426998767,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Kimi K3 (max)",
@@ -2198,7 +4164,33 @@
     "family_id": "Kimi K3",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.8552042372493249,
-    "time_per_index_task_s": 640.9694347805379
+    "time_per_index_task_s": 640.9694347805379,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "KAT Coder Pro V2",
@@ -2226,7 +4218,33 @@
     "family_id": "KAT Coder Pro V2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 60.615531019802816
+    "time_per_index_task_s": 60.615531019802816,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "LFM2.5-8B-A1B",
@@ -2254,7 +4272,33 @@
     "family_id": "LFM2.5-8B-A1B",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "LFM2.5-VL-1.6B",
@@ -2283,7 +4327,33 @@
     "family_id": "LFM2.5-VL-1.6B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "LongCat 2.0",
@@ -2311,7 +4381,33 @@
     "family_id": "LongCat 2.0",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.12197011689885887,
-    "time_per_index_task_s": 424.1615590929662
+    "time_per_index_task_s": 424.1615590929662,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 3.2 Instruct 11B (Vision)",
@@ -2340,7 +4436,33 @@
     "family_id": "Llama 3.2 Instruct 11B (Vision)",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 3.3 Instruct 70B",
@@ -2368,7 +4490,33 @@
     "family_id": "Llama 3.3 Instruct 70B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.09024945677968915,
-    "time_per_index_task_s": 21.175974348406218
+    "time_per_index_task_s": 21.175974348406218,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 4 Maverick",
@@ -2397,7 +4545,33 @@
     "family_id": "Llama 4 Maverick",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.03530495501397347,
-    "time_per_index_task_s": 23.330863695041923
+    "time_per_index_task_s": 23.330863695041923,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 4 Scout",
@@ -2426,7 +4600,33 @@
     "family_id": "Llama 4 Scout",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.010475355434942223,
-    "time_per_index_task_s": 11.77332278722656
+    "time_per_index_task_s": 11.77332278722656,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Muse Spark 1.1 (xhigh)",
@@ -2455,7 +4655,33 @@
     "family_id": "Muse Spark 1.1",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.2924085748333458,
-    "time_per_index_task_s": 84.71677166040165
+    "time_per_index_task_s": 84.71677166040165,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Phi-4 Mini Instruct",
@@ -2483,7 +4709,33 @@
     "family_id": "Phi-4 Mini Instruct",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 799.0287239852182
+    "time_per_index_task_s": 799.0287239852182,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Phi-4 Multimodal Instruct",
@@ -2513,7 +4765,33 @@
     "family_id": "Phi-4 Multimodal Instruct",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "MiniMax-M3",
@@ -2542,7 +4820,33 @@
     "family_id": "MiniMax-M3",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.13732481761366438,
-    "time_per_index_task_s": 365.53106374063844
+    "time_per_index_task_s": 365.53106374063844,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Devstral 2",
@@ -2570,7 +4874,33 @@
     "family_id": "Devstral 2",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 148.5452388249124
+    "time_per_index_task_s": 148.5452388249124,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Devstral Small 2",
@@ -2599,7 +4929,33 @@
     "family_id": "Devstral Small 2",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 73.9411113510759
+    "time_per_index_task_s": 73.9411113510759,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Magistral Medium 1.2",
@@ -2628,7 +4984,33 @@
     "family_id": "Magistral Medium 1.2",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.8435475206599589,
-    "time_per_index_task_s": 85.10180979681753
+    "time_per_index_task_s": 85.10180979681753,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Magistral Small 1.2",
@@ -2657,7 +5039,33 @@
     "family_id": "Magistral Small 1.2",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.28624942593321756,
-    "time_per_index_task_s": 76.33565593765304
+    "time_per_index_task_s": 76.33565593765304,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Ministral 3 14B",
@@ -2686,7 +5094,33 @@
     "family_id": "Ministral 3 14B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.15895523479375973,
-    "time_per_index_task_s": 121.017887950536
+    "time_per_index_task_s": 121.017887950536,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Ministral 3 3B",
@@ -2715,7 +5149,33 @@
     "family_id": "Ministral 3 3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.12995980361637974,
-    "time_per_index_task_s": 102.44531957421913
+    "time_per_index_task_s": 102.44531957421913,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Ministral 3 8B",
@@ -2744,7 +5204,33 @@
     "family_id": "Ministral 3 8B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.18374494950096315,
-    "time_per_index_task_s": 129.2201931648035
+    "time_per_index_task_s": 129.2201931648035,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Mistral Large 3",
@@ -2773,7 +5259,33 @@
     "family_id": "Mistral Large 3",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.08046768051293474,
-    "time_per_index_task_s": 78.5128447514752
+    "time_per_index_task_s": 78.5128447514752,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Mistral Medium 3.5",
@@ -2802,7 +5314,33 @@
     "family_id": "Mistral Medium 3.5",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.4603060544349644,
-    "time_per_index_task_s": 176.5283780601898
+    "time_per_index_task_s": 176.5283780601898,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Mistral Small 4 (Non-reasoning)",
@@ -2831,7 +5369,33 @@
     "family_id": "Mistral Small 4",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Mistral Small 4 (Reasoning)",
@@ -2860,7 +5424,33 @@
     "family_id": "Mistral Small 4",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.10068548130920914,
-    "time_per_index_task_s": 128.03794631826077
+    "time_per_index_task_s": 128.03794631826077,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "HyperNova 60B 2605",
@@ -2888,7 +5478,33 @@
     "family_id": "HyperNova 60B 2605",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.023598870071429627,
-    "time_per_index_task_s": 91.7592033181328
+    "time_per_index_task_s": 91.7592033181328,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nex-N2-Pro",
@@ -2917,7 +5533,33 @@
     "family_id": "Nex-N2-Pro",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 228.02239931979702
+    "time_per_index_task_s": 228.02239931979702,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Hermes 4 - Llama-3.1 405B (Non-reasoning)",
@@ -2945,7 +5587,33 @@
     "family_id": "Hermes 4 - Llama-3.1 405B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Hermes 4 - Llama-3.1 405B (Reasoning)",
@@ -2973,7 +5641,33 @@
     "family_id": "Hermes 4 - Llama-3.1 405B",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Hermes 4 - Llama-3.1 70B (Non-reasoning)",
@@ -3001,7 +5695,33 @@
     "family_id": "Hermes 4 - Llama-3.1 70B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Hermes 4 - Llama-3.1 70B (Reasoning)",
@@ -3029,7 +5749,33 @@
     "family_id": "Hermes 4 - Llama-3.1 70B",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 3.1 Nemotron Instruct 70B",
@@ -3057,7 +5803,33 @@
     "family_id": "Llama 3.1 Nemotron Instruct 70B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama 3.1 Nemotron Ultra 253B v1 (Reasoning)",
@@ -3085,7 +5857,33 @@
     "family_id": "Llama 3.1 Nemotron Ultra 253B v1",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama Nemotron Super 49B v1.5 (Non-reasoning)",
@@ -3113,7 +5911,33 @@
     "family_id": "Llama Nemotron Super 49B v1.5",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Llama Nemotron Super 49B v1.5 (Reasoning)",
@@ -3141,7 +5965,33 @@
     "family_id": "Llama Nemotron Super 49B v1.5",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nemotron 3 Nano Omni 30B A3B Reasoning",
@@ -3171,7 +6021,33 @@
     "family_id": "Nemotron 3 Nano Omni 30B A3B Reasoning",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Nemotron 3 Ultra 550B A55B (Reasoning)",
@@ -3199,7 +6075,33 @@
     "family_id": "Nemotron 3 Ultra 550B A55B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.37622125744921825,
-    "time_per_index_task_s": 156.8707669858743
+    "time_per_index_task_s": 156.8707669858743,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron 3 Nano 30B A3B (Non-reasoning)",
@@ -3227,7 +6129,33 @@
     "family_id": "NVIDIA Nemotron 3 Nano 30B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron 3 Nano 30B A3B (Reasoning)",
@@ -3255,7 +6183,33 @@
     "family_id": "NVIDIA Nemotron 3 Nano 30B A3B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.024499810931032172,
-    "time_per_index_task_s": 118.30594846636406
+    "time_per_index_task_s": 118.30594846636406,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron 3 Super 120B A12B (Reasoning)",
@@ -3283,7 +6237,33 @@
     "family_id": "NVIDIA Nemotron 3 Super 120B A12B",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.23126287738556742,
-    "time_per_index_task_s": 180.1942893391312
+    "time_per_index_task_s": 180.1942893391312,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron Nano 12B v2 VL (Non-reasoning)",
@@ -3312,7 +6292,33 @@
     "family_id": "NVIDIA Nemotron Nano 12B v2 VL",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron Nano 12B v2 VL (Reasoning)",
@@ -3341,7 +6347,33 @@
     "family_id": "NVIDIA Nemotron Nano 12B v2 VL",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron Nano 9B V2 (Non-reasoning)",
@@ -3369,7 +6401,33 @@
     "family_id": "NVIDIA Nemotron Nano 9B V2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "NVIDIA Nemotron Nano 9B V2 (Reasoning)",
@@ -3397,7 +6455,33 @@
     "family_id": "NVIDIA Nemotron Nano 9B V2",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.3 Codex (xhigh)",
@@ -3426,7 +6510,33 @@
     "family_id": "GPT-5.3 Codex",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.5 Instant (June 2026)",
@@ -3455,7 +6565,33 @@
     "family_id": "GPT-5.5 Instant (June 2026)",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.5373395734785631,
-    "time_per_index_task_s": 14.353880736493824
+    "time_per_index_task_s": 14.353880736493824,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (high)",
@@ -3484,7 +6620,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.02155649390853384,
-    "time_per_index_task_s": 50.73789536208791
+    "time_per_index_task_s": 50.73789536208791,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (low)",
@@ -3513,7 +6675,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.00882557007120659,
-    "time_per_index_task_s": 17.469973356960544
+    "time_per_index_task_s": 17.469973356960544,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (max)",
@@ -3542,7 +6730,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.04734887394513826,
-    "time_per_index_task_s": 109.72661702102091
+    "time_per_index_task_s": 109.72661702102091,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (medium)",
@@ -3571,7 +6785,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.011298581483846184,
-    "time_per_index_task_s": 25.828852016369215
+    "time_per_index_task_s": 25.828852016369215,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (Non-reasoning)",
@@ -3600,7 +6840,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.01184277255903664,
-    "time_per_index_task_s": 13.828413038112279
+    "time_per_index_task_s": 13.828413038112279,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Luna (xhigh)",
@@ -3629,7 +6895,33 @@
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.031669432065124965,
-    "time_per_index_task_s": 76.81845956386925
+    "time_per_index_task_s": 76.81845956386925,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (high)",
@@ -3658,7 +6950,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.5486019223063272,
-    "time_per_index_task_s": 123.66880379279321
+    "time_per_index_task_s": 123.66880379279321,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (low)",
@@ -3687,7 +7005,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.24498631839211574,
-    "time_per_index_task_s": 47.861824133915604
+    "time_per_index_task_s": 47.861824133915604,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (max)",
@@ -3716,7 +7060,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "max",
     "cost_per_index_task_usd": 1.232549465224083,
-    "time_per_index_task_s": 257.6518442155383
+    "time_per_index_task_s": 257.6518442155383,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (medium)",
@@ -3745,7 +7115,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.39023913158954576,
-    "time_per_index_task_s": 80.8661203672491
+    "time_per_index_task_s": 80.8661203672491,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (Non-reasoning)",
@@ -3774,7 +7170,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.23801933908881495,
-    "time_per_index_task_s": 36.25873186657003
+    "time_per_index_task_s": 36.25873186657003,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Sol (xhigh)",
@@ -3803,7 +7225,33 @@
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.8324709680105505,
-    "time_per_index_task_s": 172.54289856873544
+    "time_per_index_task_s": 172.54289856873544,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (high)",
@@ -3832,7 +7280,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.22007242178392028,
-    "time_per_index_task_s": 73.37367620263059
+    "time_per_index_task_s": 73.37367620263059,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (low)",
@@ -3861,7 +7335,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.09122811040581184,
-    "time_per_index_task_s": 22.45735210229272
+    "time_per_index_task_s": 22.45735210229272,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (max)",
@@ -3890,7 +7390,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.5098199713917403,
-    "time_per_index_task_s": 160.29313916060008
+    "time_per_index_task_s": 160.29313916060008,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (medium)",
@@ -3919,7 +7445,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.1192053544019762,
-    "time_per_index_task_s": 35.76202494612674
+    "time_per_index_task_s": 35.76202494612674,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (Non-reasoning)",
@@ -3948,7 +7500,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.10261829022770237,
-    "time_per_index_task_s": 21.013080183203055
+    "time_per_index_task_s": 21.013080183203055,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GPT-5.6 Terra (xhigh)",
@@ -3977,7 +7555,33 @@
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.30535007250139834,
-    "time_per_index_task_s": 101.40939602684142
+    "time_per_index_task_s": 101.40939602684142,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "gpt-oss-120b (high)",
@@ -4005,7 +7609,33 @@
     "family_id": "gpt-oss-120b",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.07504775053603582,
-    "time_per_index_task_s": 196.77562473795984
+    "time_per_index_task_s": 196.77562473795984,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "gpt-oss-120b (low)",
@@ -4033,7 +7663,33 @@
     "family_id": "gpt-oss-120b",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.020254885405540154,
-    "time_per_index_task_s": 11.248904792942257
+    "time_per_index_task_s": 11.248904792942257,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "gpt-oss-20b (high)",
@@ -4061,7 +7717,33 @@
     "family_id": "gpt-oss-20b",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.028622091316386326,
-    "time_per_index_task_s": 143.90943321184437
+    "time_per_index_task_s": 143.90943321184437,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "gpt-oss-20b (low)",
@@ -4089,7 +7771,33 @@
     "family_id": "gpt-oss-20b",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "o3",
@@ -4118,7 +7826,33 @@
     "family_id": "o3",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Agnes 2.5 Pro Alpha",
@@ -4147,7 +7881,33 @@
     "family_id": "Agnes 2.5 Pro Alpha",
     "effort_tier": "default",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 168.87286675166186
+    "time_per_index_task_s": 168.87286675166186,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Grok 4.3 (low)",
@@ -4176,7 +7936,33 @@
     "family_id": "Grok 4.3",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Grok 4.3 (medium)",
@@ -4205,7 +7991,33 @@
     "family_id": "Grok 4.3",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Grok 4.3 (Non-reasoning)",
@@ -4234,7 +8046,33 @@
     "family_id": "Grok 4.3",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2944826879842512,
-    "time_per_index_task_s": 84.37126095643372
+    "time_per_index_task_s": 84.37126095643372,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Grok 4.5 (high)",
@@ -4263,7 +8101,33 @@
     "family_id": "Grok 4.5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.36478827124302676,
-    "time_per_index_task_s": 235.83488189649026
+    "time_per_index_task_s": 235.83488189649026,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Step 3.7 Flash",
@@ -4292,7 +8156,33 @@
     "family_id": "Step 3.7 Flash",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.0905900933887462,
-    "time_per_index_task_s": 103.00886404123749
+    "time_per_index_task_s": 103.00886404123749,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Hy3",
@@ -4320,7 +8210,33 @@
     "family_id": "Hy3",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.03566809929838962,
-    "time_per_index_task_s": 423.89424832206174
+    "time_per_index_task_s": 423.89424832206174,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Inkling (xhigh)",
@@ -4350,7 +8266,33 @@
     "family_id": "Inkling",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 313.4238618259625
+    "time_per_index_task_s": 313.4238618259625,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Inkling Small",
@@ -4380,7 +8322,33 @@
     "family_id": "Inkling Small",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.07330834684295441,
-    "time_per_index_task_s": 175.24139655767075
+    "time_per_index_task_s": 175.24139655767075,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "Solar Pro 3",
@@ -4408,7 +8376,33 @@
     "family_id": "Solar Pro 3",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.1445499797311309,
-    "time_per_index_task_s": 406.0989459222205
+    "time_per_index_task_s": 406.0989459222205,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "MiMo-V2.5",
@@ -4437,7 +8431,33 @@
     "family_id": "MiMo-V2.5",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.010378263734756104,
-    "time_per_index_task_s": 184.13817436403204
+    "time_per_index_task_s": 184.13817436403204,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "MiMo-V2.5-Pro",
@@ -4465,7 +8485,33 @@
     "family_id": "MiMo-V2.5-Pro",
     "effort_tier": "default",
     "cost_per_index_task_usd": 0.03399142971276329,
-    "time_per_index_task_s": 288.7507886259949
+    "time_per_index_task_s": 288.7507886259949,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "MiMo-V2.5-Pro (Non-reasoning)",
@@ -4493,7 +8539,33 @@
     "family_id": "MiMo-V2.5-Pro",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GLM-5.2 (max)",
@@ -4521,7 +8593,33 @@
     "family_id": "GLM-5.2",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.5667532562539149,
-    "time_per_index_task_s": 259.3224876417776
+    "time_per_index_task_s": 259.3224876417776,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   },
   {
     "model": "GLM-5.2 (Non-reasoning)",
@@ -4549,6 +8647,32 @@
     "family_id": "GLM-5.2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": null
+    "time_per_index_task_s": null,
+    "sources": {
+      "aa_intelligence_index": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "tps": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "ttft": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "blended_price_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_in_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      },
+      "price_out_per_M": {
+        "origin": "aa",
+        "kind": "measured"
+      }
+    }
   }
 ]

@@ -75,9 +75,26 @@ export function mergeBySpine(into, rows) {
   return [...byKey.values()];
 }
 
+/** AA 7:2:1 blend when in/out present and blend missing. */
+export function applyAaDerivedBlend(aaRows) {
+  return aaRows.map((row) => {
+    if (row.blended_price_per_M != null) return row;
+    const pin = row.price_in_per_M;
+    const pout = row.price_out_per_M;
+    if (pin == null || pout == null) return row;
+    if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
+    let next = {
+      ...row,
+      blended_price_per_M: (pin * 7 + pout * 2) / 10,
+    };
+    next = setSource(next, "blended_price_per_M", { origin: "aa", kind: "derived" });
+    return next;
+  });
+}
+
 /**
  * OpenRouter pricing overlay — never writes IQ/TPS.
- * May fill either missing price side; labels derived blends.
+ * May fill either missing price side; labels list / derived_list_blend.
  */
 export function applyOpenRouterPricing(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, overlays: 0 };
@@ -143,14 +160,15 @@ export function applyOpenRouterPricing(aaRows, orModels) {
 export function candidatesForArena(aaRows, arenaId) {
   return aaRows.filter((row) => {
     const aaSlug = aaSlugFromSourceUrl(row.source_url || "");
+    // Exact slug match (e.g. claude-fable-5 ↔ claude-fable-5)
     if (arenaId.slug && aaSlug && aaSlug === arenaId.slug) return true;
-    // modelKey like claude-opus-5-high → base slug family match via normalizeFamily of family_id
+    // Arena effort-suffixed key vs AA base slug: claude-opus-5-high ↔ claude-opus-5 (exact base only)
+    const baseArena = arenaId.slug.replace(/-(xhigh|max|high|medium|low|minimal)$/i, "");
+    if (baseArena && aaSlug && aaSlug === baseArena) return true;
+    // normalizeFamily equality only — never startsWith (avoids gpt-5 → gpt-5-6-sol)
     const famNorm = normalizeFamily(row.family_id || row.model || "");
     if (arenaId.familyNorm && famNorm && famNorm === arenaId.familyNorm) return true;
-    // strip effort suffix from arena slug for family match: claude-opus-5-high → claude-opus-5
-    const baseArena = arenaId.slug.replace(/-(xhigh|max|high|medium|low|minimal)$/i, "");
-    if (baseArena && aaSlug.startsWith(baseArena)) return true;
-    if (baseArena && famNorm === normalizeFamily(baseArena)) return true;
+    if (baseArena && famNorm && famNorm === normalizeFamily(baseArena)) return true;
     return false;
   });
 }
@@ -228,15 +246,17 @@ export function applyArenaElo(aaRows, arenaEntries) {
  */
 export function stampAaMeasured(row) {
   let next = { ...row, sources: { ...(row.sources || {}) } };
-  if (next.aa_intelligence_index != null && !next.sources.aa_intelligence_index) {
-    next.sources.aa_intelligence_index = { origin: "aa", kind: "measured" };
-  }
-  if (next.tps != null && !next.sources.tps) {
-    next.sources.tps = { origin: "aa", kind: "measured" };
-  }
-  if (next.blended_price_per_M != null && !next.sources.blended_price_per_M) {
-    next.sources.blended_price_per_M = { origin: "aa", kind: "measured" };
-  }
+  const stamp = (field) => {
+    if (next[field] != null && !next.sources[field]) {
+      next.sources[field] = { origin: "aa", kind: "measured" };
+    }
+  };
+  stamp("aa_intelligence_index");
+  stamp("tps");
+  stamp("ttft");
+  stamp("blended_price_per_M");
+  stamp("price_in_per_M");
+  stamp("price_out_per_M");
   return next;
 }
 
@@ -312,6 +332,7 @@ function parseEntriesArray(sub) {
  */
 export function joinCatalog(aaRows, overlays = {}) {
   let rows = mergeBySpine([], aaRows.map(stampAaMeasured));
+  rows = applyAaDerivedBlend(rows);
   const arena = applyArenaElo(rows, overlays.arenaEntries || []);
   rows = arena.rows;
   const priced = applyOpenRouterPricing(rows, overlays.orModels || []);
