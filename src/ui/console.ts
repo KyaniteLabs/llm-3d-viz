@@ -77,9 +77,12 @@ export class DecisionConsole {
         </section>
       </details>
       <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
-      <section class="task-charts" aria-label="Cost and time per Index task"></section>
-      <section class="score-table-host" aria-label="Model score table"></section>
-      <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>`;
+      <details class="console-secondary">
+        <summary class="weight-heading">MORE · TASKS / TABLE</summary>
+        <section class="task-charts" aria-label="Cost and time per Index task"></section>
+        <section class="score-table-host" aria-label="Model score table"></section>
+        <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
+      </details>`;
 
     this.renderControls();
     this.renderAxisControls();

@@ -108,25 +108,83 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
   max-width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-  grid-template-rows: minmax(0, 1fr) auto minmax(9rem, 12rem);
-  grid-template-areas: "stage console" "effort effort" "projections projections";
-  gap: 0.75rem;
-  padding: 0.75rem;
+  /* Stage-dominant: ~80%+ for 3D; slim console rail; compact instrument row */
+  grid-template-columns: minmax(0, 1fr) minmax(13.5rem, 15.5rem);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "stage console"
+    "effort console"
+    "projections console";
+  gap: 0.4rem;
+  padding: 0.4rem;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .panel { background: var(--color-surface-1); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
-.stage { grid-area: stage; min-height: 0; min-width: 0; max-width: 100%; padding: 1rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 12rem); grid-template-rows: auto minmax(0, 1fr); gap: 0.75rem; position: relative; overflow: hidden; }
-.region-heading { grid-column: 1 / -1; min-width: 0; }
-.console { grid-area: console; min-height: 0; min-width: 0; max-width: 100%; padding: 0.9rem 1rem; overflow: auto; }
+.stage {
+  grid-area: stage;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.45rem 0.55rem 0.35rem;
+  display: grid;
+  /* Full-bleed stage visual — legend overlays, does not steal columns */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.region-heading { grid-column: 1 / -1; min-width: 0; padding: 0 0.15rem; }
+.region-heading .eyebrow { font-size: 0.58rem; letter-spacing: 0.12em; }
+.region-heading h1 { margin: 0.1rem 0 0; font-size: clamp(0.95rem, 1.4vw, 1.25rem); line-height: 1.1; }
+.stage-visual {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+}
+#stage-3d-plot-container,
+.stage-3d-three,
+.stage-3d-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
+}
+/* STAGE KEY overlays the 3D, does not shrink it */
+.stage-guide {
+  position: absolute !important;
+  top: 2.4rem;
+  right: 0.45rem;
+  z-index: 6;
+  width: min(14rem, 32%);
+  max-height: calc(100% - 3rem);
+  overflow: auto;
+  grid-column: unset !important;
+  grid-row: unset !important;
+  border-left: 1px solid var(--color-border);
+  background: rgba(11, 17, 16, 0.88);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+.console {
+  grid-area: console;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.55rem 0.65rem;
+  overflow: auto;
+  font-size: 0.92em;
+}
 .cinema-toggle { margin-top: 0.8rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); padding: 0.35rem 0.55rem; background: transparent; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); cursor: pointer; }
 .cinema-toggle:hover, .cinema-toggle[aria-pressed="true"] { color: var(--filament); border-color: var(--filament-dim); }
 .cinema-toggle:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; }
 .is-cinema { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "stage"; }
-.is-cinema .console, .is-cinema .projection-row, .is-cinema .stage-guide { display: none; }
-.is-cinema .stage { grid-template-columns: minmax(0, 1fr); }
+.is-cinema .console, .is-cinema .projection-row, .is-cinema .stage-guide, .is-cinema .effort-strip { display: none !important; }
+.is-cinema .stage { grid-template-columns: minmax(0, 1fr); padding: 0.25rem; }
 .is-cinema .model-readout { font-size: var(--step-1); }
 .axis-controls, .filter-controls, .task-charts { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
 .filter-count { float: right; color: var(--filament-dim); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.65rem; }
@@ -190,15 +248,39 @@ html, body { height: 100%; }
 /* Multi-minute (reasoning-model) TTFT caveat — a muted footnote under the value,
    wherever TTFT is shown (readout + tooltip). */
 .ttft-caveat { display: block; color: var(--text-muted); font-size: var(--step--1); margin-top: 0.1rem; }
-.projection-row { grid-area: projections; min-height: 0; min-width: 0; max-height: 12rem; display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr) minmax(0, 0.92fr); gap: 0.55rem; }
-.projection-row .projection { min-height: 0; overflow: hidden; }
-.projection-row .projection .js-plotly-plot, .projection-row .projection .plot-container { max-height: 11rem !important; }
-.projection { min-height: 0; padding: 0.65rem 0.8rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); overflow: hidden; }
+.projection-row {
+  grid-area: projections;
+  min-height: 0;
+  min-width: 0;
+  height: 6.75rem;
+  max-height: 6.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.35rem;
+}
+.projection-row .projection { min-height: 0; overflow: hidden; padding: 0.3rem 0.4rem; }
+.projection-row .projection .eyebrow { font-size: 0.52rem; margin: 0 0 0.1rem; }
+.projection-row .projection .js-plotly-plot,
+.projection-row .projection .plot-container,
+.projection-row .projection .svg-container {
+  max-height: 5.6rem !important;
+  height: 5.6rem !important;
+}
+.projection {
+  min-height: 0;
+  padding: 0.3rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  overflow: hidden;
+}
 .eyebrow { margin: 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.14em; }
 h1, h2 { margin: 0.35rem 0 0; font-family: var(--font-display); font-weight: 500; letter-spacing: -0.04em; }
 h1 { font-size: var(--step-2); max-width: none; line-height: 1.05; text-wrap: balance; }
 h2 { font-size: var(--step-2); }
-.stage-visual { grid-column: 1; grid-row: 2; min-width: 0; min-height: 0; position: relative; }
+.stage-visual { grid-column: 1; grid-row: 2; min-width: 0; min-height: 0; position: relative; display: block; }
 .stage-3d-canvas { position: absolute; inset: 0; }
 .stage-placeholder { position: absolute; inset: 0; display: grid; place-items: center; border: 1px solid rgba(201, 212, 196, 0.2); color: var(--filament-dim); font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.12em; background: var(--color-bg); }
 .incomplete-data { margin-top: 0.65rem; padding-top: 0.55rem; border-top: 1px solid var(--color-border); font-family: var(--font-mono); font-size: var(--step--1); }
@@ -223,8 +305,16 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .value-leaderboard li strong { color: var(--filament-dim); font-variant-numeric: tabular-nums; }
 .preset-outcome { margin: 0.65rem 0 0; line-height: 1.45; }
 
-.stage-guide { grid-column: 2; grid-row: 2; min-width: 0; min-height: 0; overflow: auto; border-left: 1px solid var(--color-border); background: rgba(16, 22, 29, 0.94); color: var(--color-text); font-family: var(--font-mono); }
-.stage-guide-disclosure { padding: 0.65rem 0.75rem; }
+.stage-guide {
+  /* base chrome; position is absolute in stage-dominant rules above */
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.stage-guide-disclosure { padding: 0.4rem 0.5rem; }
 .stage-guide-disclosure > summary { display: flex; justify-content: space-between; gap: 0.5rem; cursor: pointer; color: var(--filament); font-size: var(--step--1); letter-spacing: 0.1em; list-style: none; }
 .stage-guide-disclosure > summary::-webkit-details-marker { display: none; }
 .stage-guide-count { color: var(--color-text-muted); font-size: 0.65rem; }
@@ -267,15 +357,32 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .heat-encoding-note { margin: 0.65rem 0 0; color: var(--color-text-muted); font-size: 0.62rem; line-height: 1.35; }
 
 @media (max-width: 760px) {
-  .observatory { height: auto; min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "stage" "effort" "console" "projections"; overflow: visible; }
-  .stage { max-height: 55dvh; }
-  .projection-row { max-height: none; }
+  .observatory {
+    height: 100dvh;
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 32dvh);
+    grid-template-areas: "stage" "effort" "projections" "console";
+    overflow: hidden;
+  }
+  .stage { max-height: none; min-height: 0; }
+  .stage-guide { width: min(12rem, 42%); top: 2.1rem; }
+  .projection-row { height: 5.5rem; max-height: 5.5rem; }
+  .console { max-height: 32dvh; }
   .console .task-charts, .console .score-table-host, .console .incomplete-data { display: none; }
   .console .filter-disclosure { display: none; }
+  .console .weight-controls, .console .axis-controls { display: none; }
   .stage { min-height: 0; display: flex; flex-direction: column; overflow: visible; }
   h1 { max-width: none; overflow-wrap: normal; }
-  .stage-visual { min-height: 18rem; }
-  .stage-guide { position: static; width: 100%; min-width: 0; max-height: none; margin-top: 0.75rem; border: 1px solid var(--color-border); }
+  .stage-visual { min-height: 0; }
+  .stage-guide {
+    position: absolute !important;
+    width: min(11rem, 40%);
+    max-height: 50%;
+    top: 2rem;
+    right: 0.3rem;
+    margin: 0;
+  }
   .projection-row { grid-template-columns: 1fr; }
 }
 
@@ -303,7 +410,19 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .filter-disclosure > summary { cursor: pointer; list-style: none; color: var(--color-text-muted); letter-spacing: 0.1em; }
 .filter-disclosure > summary::-webkit-details-marker { display: none; }
 .filter-disclosure .filter-controls { border-top: 0; margin-top: 0.35rem; }
-.effort-strip { grid-area: effort; margin: 0; padding: 0.45rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: rgba(16, 22, 29, 0.92); }
+.effort-strip {
+  grid-area: effort;
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: rgba(16, 22, 29, 0.92);
+  max-height: 4.5rem;
+  overflow: auto;
+}
+.effort-strip .eyebrow { font-size: 0.55rem; }
+.effort-ladder { gap: 0.25rem; margin: 0.2rem 0 0; }
+.effort-step { min-width: 4.5rem; padding: 0.22rem 0.35rem; }
 .effort-strip[hidden] { display: none !important; }
 .effort-ladder { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0; padding: 0; list-style: none; }
 .effort-step { display: flex; flex-direction: column; gap: 0.15rem; min-width: 5.5rem; padding: 0.35rem 0.45rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); cursor: default; font-family: var(--font-mono); }
@@ -412,3 +531,21 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   cursor: pointer;
 }
 .text-link:hover { color: var(--filament); }
+
+/* stage-dominant console density */
+.console .eyebrow { font-size: 0.55rem; }
+.console h2 { font-size: 0.95rem; margin-top: 0.15rem; }
+.console .model-readout { margin-top: 0.4rem; min-height: 0; }
+.console .value-leaderboard ol { max-height: 6.5rem; overflow: auto; }
+.console .family-chip-row { max-height: 4.5rem; }
+.console .nav-stepper { margin: 0.2rem 0; }
+.console .weight-controls, .console .preset-controls, .console .axis-controls { margin-top: 0.45rem; }
+.console .cinema-toggle { margin-top: 0.45rem; width: 100%; font-size: 0.6rem; }
+.console .task-charts, .console .score-table-host, .console .incomplete-data {
+  /* secondary: collapsed by default via details-like density */
+  opacity: 0.92;
+}
+
+.console-secondary { margin-top: 0.45rem; border-top: 1px solid var(--color-border); padding-top: 0.25rem; }
+.console-secondary > summary { cursor: pointer; list-style: none; }
+.console-secondary > summary::-webkit-details-marker { display: none; }
