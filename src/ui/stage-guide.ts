@@ -3,7 +3,7 @@ import { frontier } from "../lib/pareto";
 import { normalizedScores, weightedOptimum } from "../lib/score";
 import { displayName } from "../lib/display-name";
 import type { AppState, AppStore } from "../state";
-import { legendEntries, type PresentationMode } from "../viz/palette";
+import { legendEntries, labLegendEntries, type PresentationMode } from "../viz/palette";
 
 const SHAPE_LABELS: Record<string, string> = {
   circle: "circle",
@@ -117,10 +117,28 @@ export class StageGuide {
               this.heatEncoding
                 ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
                 : this.presentationMode === "curve"
-                  ? '<p class="heat-encoding-note" data-heat-encoding="false">CURVE-FOCUS · family series fill primary · openness glyph only. ?enc=openness for legacy fill.</p>'
-                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Default is curve-focus.</p>'
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">LAB-FOCUS · lab hue + family shade · trails connect effort steps · openness glyph only. ?enc=openness for legacy fill.</p>'
+                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Default is lab-focus.</p>'
             }
           </section>
+
+          <details class="lab-disclosure" open>
+            <summary class="stage-guide-heading">LAB COLORS · ${[...new Set(this.models.map((m) => m.provider))].length}</summary>
+            <section class="lab-key" aria-label="Lab color key">
+              <ul class="lab-color-list">
+                ${labLegendEntries(this.models.map((m) => m.provider))
+                  .map(
+                    ({ provider, color }) =>
+                      `<li data-lab="${escapeHtml(provider)}">
+                        <span class="lab-swatch" style="background:${escapeHtml(color)}" aria-hidden="true"></span>
+                        <span>${escapeHtml(provider)}</span>
+                      </li>`,
+                  )
+                  .join("")}
+              </ul>
+              <p class="stage-guide-note">Same lab = same color family. Different models in that lab = lighter/darker shades. Trails stay in that family shade.</p>
+            </section>
+          </details>
 
           <details class="provider-disclosure"${open.provider ? " open" : ""}>
             <summary class="stage-guide-heading">PROVIDER SHAPES · ${groups.reduce((n, g) => n + g.providers.length, 0)} PROVIDERS</summary>
