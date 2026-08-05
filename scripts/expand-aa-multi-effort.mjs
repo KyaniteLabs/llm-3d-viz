@@ -2,11 +2,22 @@
 /**
  * Multi-source catalog build (public pages only — no invented metrics).
  *
+ * Run with: node --experimental-strip-types scripts/expand-aa-multi-effort.mjs
+ * (imports pure TypeScript normalizers under src/lib/)
+ *
+ * Two-layer join (ralplan):
+ *  1. Enrich partials: AA map → merge → Arena Elo → OpenRouter prices + provenance
+ *  2. Admit: scorable filter only at product JSON write
+ *
  * Sources:
- *  1. AA leaderboard HTML (primary scored rows)
- *  2. AA /models catalog HTML (second pass — sometimes carries extra rows)
- *  3. OpenRouter /api/v1/models (discovery + pricing cross-check; never invents IQ/speed)
- *  4. data/expected-effort-ladders.json → data/effort-gaps.generated.json (coverage report)
+ *  1. AA leaderboard / catalog / model cards HTML
+ *  2. Arena text style-control board (Elo overlay; soft-fail)
+ *  3. OpenRouter /api/v1/models (list price overlay; never invents IQ/speed)
+ *  4. data/expected-effort-ladders.json → effort-gaps.generated.json
+ *
+ * Env:
+ *  ARENA_FIXTURE=1 — read scripts/fixtures/arena-text-style-control.snippet.html
+ *  SKIP_ARENA=1 — skip Arena entirely
  *
  * Usage: node scripts/expand-aa-multi-effort.mjs
  */
@@ -21,6 +32,13 @@ import {
   isScorable,
   deriveFamilyId,
 } from "./lib/aa-extract.mjs";
+import {
+  mergeBySpine,
+  applyOpenRouterPricing,
+  applyArenaElo,
+  extractArenaEntriesFromHtml,
+  stampAaMeasured,
+} from "./lib/catalog-join.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -28,11 +46,14 @@ const dataPath = path.join(root, "data/models.v0.draft.json");
 const gapsPath = path.join(root, "data/effort-gaps.generated.json");
 const openrouterPath = path.join(root, "data/openrouter-snapshot.json");
 const laddersPath = path.join(root, "data/expected-effort-ladders.json");
+const arenaFixturePath = path.join(
+  root,
+  "scripts/fixtures/arena-text-style-control.snippet.html",
+);
 
 const AA_URLS = [
   { url: "https://artificialanalysis.ai/leaderboards/models", label: "Artificial Analysis leaderboard scrape" },
   { url: "https://artificialanalysis.ai/models", label: "Artificial Analysis models catalog scrape" },
-  // High-signal model cards: full metrics payload + related effort slugs live here.
   { url: "https://artificialanalysis.ai/models/claude-fable-5", label: "AA model card: claude-fable-5" },
   { url: "https://artificialanalysis.ai/models/claude-opus-5", label: "AA model card: claude-opus-5" },
   { url: "https://artificialanalysis.ai/models/claude-sonnet-5", label: "AA model card: claude-sonnet-5" },
@@ -51,7 +72,7 @@ async function fetchHtml(url) {
   return res.text();
 }
 
-/** Deep-scrape individual effort-variant model cards discovered by slug. */
+/** Deep-scrape effort-variant cards — keep partials (no early isScorable). */
 async function deepScrapeSlugs(slugs, today, limit = 40) {
   const out = [];
   const unique = [...new Set(slugs)].slice(0, limit);
@@ -60,47 +81,17 @@ async function deepScrapeSlugs(slugs, today, limit = 40) {
     try {
       const html = await fetchHtml(url);
       const raw = extractAllModelsBySlug(html);
-      // Prefer the page's own slug record if present
       const self = raw.find((m) => m.slug === slug);
       const pool = self ? [self, ...raw] : raw;
       for (const m of pool) {
         if (m.deprecated) continue;
-        const row = mapAaRow(m, today, `AA model card deep: ${slug}`);
-        if (isScorable(row)) out.push(row);
+        out.push(mapAaRow(m, today, `AA model card deep: ${slug}`));
       }
     } catch {
       /* 404 or parse fail — skip */
     }
   }
   return out;
-}
-
-function rowKey(row) {
-  // Prefer slug path + effort; fall back to model name.
-  const slug = (row.source_url || "").split("/").pop() || "";
-  return `${slug}::${row.effort_tier}::${row.model}`.toLowerCase();
-}
-
-function mergeAaRows(into, rows) {
-  const byKey = new Map(into.map((r) => [rowKey(r), r]));
-  for (const r of rows) {
-    const k = rowKey(r);
-    const prev = byKey.get(k);
-    if (!prev) {
-      byKey.set(k, r);
-      continue;
-    }
-    // Prefer non-null metrics; keep earliest source label chain.
-    const merged = { ...prev };
-    for (const [key, val] of Object.entries(r)) {
-      if (val != null && (merged[key] == null || merged[key] === "")) merged[key] = val;
-    }
-    if (prev.source !== r.source) {
-      merged.source = `${prev.source}; ${r.source}`;
-    }
-    byKey.set(k, merged);
-  }
-  return [...byKey.values()];
 }
 
 async function scrapeOpenRouter() {
@@ -117,54 +108,23 @@ async function scrapeOpenRouter() {
   }
 }
 
-/** Overlay OpenRouter pricing onto AA rows when AA price is missing; never invent IQ/tps. */
-function applyOpenRouterPricing(aaRows, orModels) {
-  if (!orModels.length) return { rows: aaRows, overlays: 0 };
-  // index by simplified name fragment
-  const byId = new Map();
-  for (const m of orModels) {
-    byId.set(String(m.id || "").toLowerCase(), m);
-    byId.set(String(m.name || "").toLowerCase(), m);
+/** Arena Elo scrape — soft-fail, never throws out of expand. */
+async function scrapeArenaEntries() {
+  if (process.env.SKIP_ARENA === "1") {
+    return { ok: true, skipped: true, entries: [], error: null };
   }
-  let overlays = 0;
-  const rows = aaRows.map((row) => {
-    if (row.price_in_per_M != null && row.price_out_per_M != null) return row;
-    // Match openrouter anthropic/claude-fable-5 style
-    const slug = (row.source_url || "").split("/").pop() || "";
-    const candidates = [
-      slug,
-      `anthropic/${slug}`,
-      row.model.toLowerCase(),
-      `anthropic: ${row.model}`.toLowerCase(),
-    ];
-    let hit = null;
-    for (const c of candidates) {
-      if (byId.has(c)) {
-        hit = byId.get(c);
-        break;
-      }
+  try {
+    let html;
+    if (process.env.ARENA_FIXTURE === "1") {
+      html = fs.readFileSync(arenaFixturePath, "utf8");
+    } else {
+      html = await fetchHtml("https://arena.ai/leaderboard/text");
     }
-    if (!hit?.pricing) return row;
-    const pin = Number(hit.pricing.prompt);
-    const pout = Number(hit.pricing.completion);
-    // OpenRouter stores $ per token; convert to $ per 1M
-    if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
-    overlays += 1;
-    const price_in_per_M = row.price_in_per_M ?? pin * 1e6;
-    const price_out_per_M = row.price_out_per_M ?? pout * 1e6;
-    const blended =
-      row.blended_price_per_M ??
-      // 7:2:1 blend matching AA convention when missing
-      (price_in_per_M * 7 + price_out_per_M * 2) / 10;
-    return {
-      ...row,
-      price_in_per_M,
-      price_out_per_M,
-      blended_price_per_M: blended,
-      source: `${row.source}; OpenRouter pricing overlay`,
-    };
-  });
-  return { rows, overlays };
+    const entries = extractArenaEntriesFromHtml(html);
+    return { ok: true, skipped: false, entries, error: null };
+  } catch (err) {
+    return { ok: false, skipped: false, entries: [], error: String(err) };
+  }
 }
 
 function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
@@ -188,14 +148,13 @@ function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
         expected_tiers: expected,
         published_tiers: [...have].sort(),
         missing_tiers: missing,
-        partial_tiers: partial, // card exists: speed/price but Intelligence Index null
+        partial_tiers: partial,
         published_rows: (byFamily.get(family) ?? []).length,
         complete: missing.length === 0 && have.size >= 2,
         notes: meta.notes || "",
       });
     }
   }
-  // Also flag singleton families that look adaptive/reasoning without a ladder entry
   for (const [family, tiers] of byFamily) {
     if (tiers.length >= 2) continue;
     if (ladders[family]) continue;
@@ -220,13 +179,12 @@ function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
 const today = new Date().toISOString().slice(0, 10);
 let merged = [];
 const sourceStats = [];
-/** All AA raw models seen (including incomplete IQ) — for gap / deep scrape discovery. */
 const allRawBySlug = new Map();
 
+// --- 1–2. AA list/catalog/cards: map all non-deprecated (including partials) ---
 for (const { url, label } of AA_URLS) {
   try {
     const html = await fetchHtml(url);
-    // Prefer richest single array, but also merge every slug-bearing object on the page.
     let raw = [];
     try {
       raw = extractRichModels(html);
@@ -240,15 +198,15 @@ for (const { url, label } of AA_URLS) {
     const pool = allOnPage.length ? allOnPage : raw;
     const mapped = pool
       .filter((m) => !m.deprecated)
-      .map((m) => mapAaRow(m, today, label))
-      .filter(isScorable);
+      .map((m) => stampAaMeasured(mapAaRow(m, today, label)));
     const before = merged.length;
-    merged = mergeAaRows(merged, mapped);
+    merged = mergeBySpine(merged, mapped);
     sourceStats.push({
       source: label,
       url,
       raw: pool.length,
-      scorable: mapped.length,
+      mapped: mapped.length,
+      scorable: mapped.filter(isScorable).length,
       added: merged.length - before,
     });
   } catch (err) {
@@ -256,19 +214,16 @@ for (const { url, label } of AA_URLS) {
   }
 }
 
-// Deep-scrape effort-variant cards that appear as slugs but may lack IQ in list payloads.
-// e.g. claude-sonnet-5-low has a model card page (speed/price) — re-fetch for metrics.
+// --- Deep scrape: keep partials ---
 const incompleteSlugs = [...allRawBySlug.entries()]
   .filter(([, m]) => {
     if (m.deprecated) return false;
     const tps = m.medianOutputTokensPerSecond ?? m.timescaleData?.medianOutputSpeed;
     const blend = m.price1mBlended7To2To1;
-    // Missing IQ but present as a product effort card — worth a dedicated page pull
     return m.intelligenceIndex == null && tps != null && blend != null;
   })
   .map(([slug]) => slug);
 
-// Also deep-scrape every expected-ladder family base slug + common effort suffixes
 let laddersDocEarly = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
   laddersDocEarly = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
@@ -276,33 +231,31 @@ if (fs.existsSync(laddersPath)) {
 const suffixGuess = ["", "-low", "-medium", "-high", "-xhigh", "-max", "-non-reasoning", "-minimal"];
 const ladderSlugs = [];
 for (const [family, meta] of Object.entries(laddersDocEarly.ladders || {})) {
-  // rough slug from family name
   const base = family
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
   for (const s of suffixGuess) ladderSlugs.push(`${base}${s}`);
-  // Anthropic claude- prefix variants
   if (meta.provider === "Anthropic") {
     for (const s of suffixGuess) ladderSlugs.push(`claude-${base.replace(/^claude-/, "")}${s}`);
   }
 }
-// Known Fable only has claude-fable-5 today — still try effort suffixes
 for (const s of suffixGuess) ladderSlugs.push(`claude-fable-5${s}`);
 
 const deepTargets = [...new Set([...incompleteSlugs, ...ladderSlugs])];
-const deepRows = await deepScrapeSlugs(deepTargets, today, 60);
+const deepRows = (await deepScrapeSlugs(deepTargets, today, 60)).map(stampAaMeasured);
 const beforeDeep = merged.length;
-merged = mergeAaRows(merged, deepRows);
+merged = mergeBySpine(merged, deepRows);
 sourceStats.push({
   source: "AA model card deep scrape",
   targets: deepTargets.length,
   incomplete_list_slugs: incompleteSlugs.length,
-  scorable: deepRows.length,
+  mapped: deepRows.length,
+  scorable: deepRows.filter(isScorable).length,
   added: merged.length - beforeDeep,
 });
 
-// Track partial cards: product effort slug exists with speed/price but no IQ (not plottable).
+// Partial cards for gap reporting
 const partialByFamily = new Map();
 for (const [slug, m] of allRawBySlug) {
   if (m.deprecated) continue;
@@ -316,6 +269,27 @@ for (const [slug, m] of allRawBySlug) {
   partialByFamily.set(fam, list);
 }
 
+// --- 3. Arena Elo overlay (soft-fail) ---
+const arena = await scrapeArenaEntries();
+let arenaAttaches = 0;
+let arenaLogs = [];
+if (arena.entries.length) {
+  const applied = applyArenaElo(merged, arena.entries);
+  merged = applied.rows;
+  arenaAttaches = applied.attaches;
+  arenaLogs = applied.logs;
+}
+sourceStats.push({
+  source: "Arena text style-control",
+  ok: arena.ok,
+  skipped: arena.skipped ?? false,
+  error: arena.error,
+  entries: arena.entries.length,
+  attaches: arenaAttaches,
+  log_sample: arenaLogs.slice(0, 8),
+});
+
+// --- 4. OpenRouter price overlay ---
 const or = await scrapeOpenRouter();
 if (or.ok) {
   fs.writeFileSync(
@@ -324,19 +298,22 @@ if (or.ok) {
   );
 }
 const priced = applyOpenRouterPricing(merged, or.models || []);
-merged = priced.rows.filter(isScorable);
+merged = priced.rows;
 
-merged.sort(
+// --- 5. Emit scorable-only product catalog ---
+const scorable = merged.filter(isScorable);
+scorable.sort(
   (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
 );
 
-fs.writeFileSync(dataPath, `${JSON.stringify(merged, null, 2)}\n`);
+fs.writeFileSync(dataPath, `${JSON.stringify(scorable, null, 2)}\n`);
 
 let laddersDoc = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
   laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
 }
-const gaps = buildEffortGaps(merged, laddersDoc, partialByFamily);
+// Gaps from scorable published tiers (product view) + partial cards
+const gaps = buildEffortGaps(scorable, laddersDoc, partialByFamily);
 fs.writeFileSync(
   gapsPath,
   `${JSON.stringify(
@@ -344,6 +321,12 @@ fs.writeFileSync(
       data_date: today,
       source_stats: sourceStats,
       openrouter: { ok: or.ok, models: or.models?.length ?? 0, price_overlays: priced.overlays },
+      arena: {
+        ok: arena.ok,
+        entries: arena.entries.length,
+        attaches: arenaAttaches,
+        error: arena.error,
+      },
       gaps,
       fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
     },
@@ -353,7 +336,7 @@ fs.writeFileSync(
 );
 
 const byFamily = new Map();
-for (const row of merged) {
+for (const row of scorable) {
   const list = byFamily.get(row.family_id) ?? [];
   list.push(row.effort_tier);
   byFamily.set(row.family_id, list);
@@ -363,11 +346,13 @@ const multi = [...byFamily.entries()].filter(([, tiers]) => tiers.length > 1);
 console.log(
   JSON.stringify(
     {
-      rows: merged.length,
+      rows: scorable.length,
+      partials_in_memory: merged.length - scorable.length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
       source_stats: sourceStats,
       openrouter_overlays: priced.overlays,
+      arena_attaches: arenaAttaches,
       effort_gaps: gaps.length,
       fable_gap: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
       examples: multi

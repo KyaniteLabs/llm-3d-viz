@@ -46,7 +46,7 @@ prev_hash=""
 [[ -f "$HASH_FILE" ]] && prev_hash="$(cat "$HASH_FILE")"
 
 # 1) Scrape Artificial Analysis public leaderboard
-if ! node "$REPO_ROOT/scripts/expand-aa-multi-effort.mjs" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+if ! node --experimental-strip-types "$REPO_ROOT/scripts/expand-aa-multi-effort.mjs" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
   log "ERROR: AA scrape failed"
   printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"scrape\"}" >"$STATUS_FILE"
   exit 2

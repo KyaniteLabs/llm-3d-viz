@@ -12,22 +12,41 @@ Intelligence Index + speed + blended price) lands on the next successful run.
 
 ## Sources (multi-source, honest)
 
+Two-layer join (see `docs/adr/0001-multi-source-catalog-join.md`):
+
+1. **Enrich** partial AA rows + overlays in memory  
+2. **Admit** only scorable triples to `data/models.v0.draft.json`
+
 | Priority | Source | Contributes |
 |----------|--------|-------------|
-| 1 | AA public leaderboard HTML | Scored IQ + TPS + blended $/M |
-| 2 | AA `/models` catalog HTML | Extra scored rows when extractable |
-| 3 | OpenRouter public models API | Pricing overlay only if AA price missing — never invents IQ/speed |
+| 1 | AA public leaderboard / cards HTML | IQ + TPS + blended $/M (and partials for gap discovery) |
+| 2 | Arena text style-control board | `arena_elo` only (effort-safe match; soft-fail) |
+| 3 | OpenRouter public models API | List price overlay if AA price missing — never invents IQ/speed; derived blend labeled `derived_list_blend` |
 | 4 | `data/expected-effort-ladders.json` | Expected ladders → `data/effort-gaps.generated.json` |
+
+### Column priority (v1)
+
+| Axis | Priority | Forbidden writers |
+|------|----------|-------------------|
+| `aa_intelligence_index` | AA only | Arena, OpenRouter |
+| `tps` / `ttft` | AA only | Arena, OpenRouter |
+| prices | AA blended → OpenRouter list/derived (labeled) | — |
+| `arena_elo` | Arena only | AA invent, OpenRouter |
+
+### Arena env flags
+
+- `ARENA_FIXTURE=1` — use `scripts/fixtures/arena-text-style-control.snippet.html`
+- `SKIP_ARENA=1` — skip Arena scrape
 
 **Claude Fable 5:** product supports low/medium/high/xhigh/max. AA public data only scores **max** (with Opus 4.8 fallback). Missing tiers are tracked as an effort gap and shown when you solo Fable — we do **not** invent scores. When AA publishes them, the thrice-daily job ingests them automatically.
 
-Optional paid AA API (`AA_API_KEY`) can be wired later; not configured.
+Optional paid AA API (`AA_API_KEY`) can be wired later; not configured. Join contract stays the same.
 
 ## How it works
 
 ```
 cron (3×/day) → scripts/catalog-auto-update.sh
-  1. node scripts/expand-aa-multi-effort.mjs   # honest public scrape
+  1. node --experimental-strip-types scripts/expand-aa-multi-effort.mjs   # honest public scrape
   2. if data/models.v0.draft.json hash changed:
        npm run build
        rsync dist/ → vps:~/sites/llm-3d-viz/dist/

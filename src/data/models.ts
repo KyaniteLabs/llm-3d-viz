@@ -58,6 +58,22 @@ export interface Model {
   data_date: string;
   source: string;
   null_reason?: string;
+  /**
+   * Per-axis provenance from multi-source catalog join (optional).
+   * Non-AA writes (Arena Elo, OpenRouter list/derived prices) should set this.
+   */
+  sources?: Partial<
+    Record<
+      | "aa_intelligence_index"
+      | "tps"
+      | "ttft"
+      | "blended_price_per_M"
+      | "price_in_per_M"
+      | "price_out_per_M"
+      | "arena_elo",
+      { origin: "aa" | "arena" | "openrouter"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
+    >
+  >;
 }
 
 export const DATA_ERROR = "data_error" as const;
@@ -165,6 +181,27 @@ export function validateModels(candidateModels: readonly Model[]): void {
       row.aa_intelligence_index === null;
     if (excluded && isMissingString(row.null_reason)) {
       throw new Error(`${label} (${row.model}): excluded rows require a null_reason`);
+    }
+    if (row.sources !== undefined) {
+      if (typeof row.sources !== "object" || row.sources === null || Array.isArray(row.sources)) {
+        throw new Error(`${label} (${row.model}): sources must be an object when present`);
+      }
+      for (const [field, meta] of Object.entries(row.sources)) {
+        if (!meta || typeof meta !== "object") {
+          throw new Error(`${label} (${row.model}): sources.${field} must be an object`);
+        }
+        const origin = (meta as { origin?: string }).origin;
+        const kind = (meta as { kind?: string }).kind;
+        if (origin && !["aa", "arena", "openrouter"].includes(origin)) {
+          throw new Error(`${label} (${row.model}): sources.${field}.origin invalid`);
+        }
+        if (
+          kind &&
+          !["measured", "list", "derived", "derived_list_blend"].includes(kind)
+        ) {
+          throw new Error(`${label} (${row.model}): sources.${field}.kind invalid`);
+        }
+      }
     }
   });
 }

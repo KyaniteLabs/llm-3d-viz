@@ -13,6 +13,8 @@ export interface EffortGap {
   published_rows: number;
   complete: boolean;
   notes: string;
+  /** Present when AA has speed/price cards without Intelligence Index. */
+  partial_tiers?: Array<{ tier?: string; slug?: string }>;
 }
 
 interface EffortGapsFile {
@@ -37,9 +39,8 @@ export function formatEffortGapNote(gap: EffortGap): string {
   const published = gap.published_tiers.length ? gap.published_tiers.join(", ") : "none";
   const missing = gap.missing_tiers.length ? gap.missing_tiers.join(", ") : "—";
   const partial =
-    Array.isArray((gap as { partial_tiers?: unknown }).partial_tiers) &&
-    (gap as { partial_tiers: Array<{ tier?: string }> }).partial_tiers.length
-      ? ` Cards exist without Intelligence Index: ${(gap as { partial_tiers: Array<{ tier?: string }> }).partial_tiers.map((p) => p.tier).join(", ")}.`
+    Array.isArray(gap.partial_tiers) && gap.partial_tiers.length
+      ? ` Cards exist without Intelligence Index: ${gap.partial_tiers.map((p) => p.tier).join(", ")}.`
       : "";
   return `Published efforts: ${published}. Missing scored tiers: ${missing}.${partial} ${gap.notes}`.trim();
 }
