@@ -1,194 +1,267 @@
 #!/usr/bin/env node
 /**
- * Expand models.v0.draft.json from Artificial Analysis leaderboard public HTML.
+ * Multi-source catalog build (public pages only — no invented metrics).
  *
- * Pulls EVERY non-deprecated row that has Intelligence Index + output speed +
- * blended price so multi-effort families plot as real points + family trails.
- * Honest scrape only — no synthesized metrics.
+ * Sources:
+ *  1. AA leaderboard HTML (primary scored rows)
+ *  2. AA /models catalog HTML (second pass — sometimes carries extra rows)
+ *  3. OpenRouter /api/v1/models (discovery + pricing cross-check; never invents IQ/speed)
+ *  4. data/expected-effort-ladders.json → data/effort-gaps.generated.json (coverage report)
  *
  * Usage: node scripts/expand-aa-multi-effort.mjs
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  UA,
+  extractRichModels,
+  mapAaRow,
+  isScorable,
+} from "./lib/aa-extract.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const dataPath = path.join(root, "data/models.v0.draft.json");
-const UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
-const LB_URL = "https://artificialanalysis.ai/leaderboards/models";
+const gapsPath = path.join(root, "data/effort-gaps.generated.json");
+const openrouterPath = path.join(root, "data/openrouter-snapshot.json");
+const laddersPath = path.join(root, "data/expected-effort-ladders.json");
 
-function extractRichModels(html) {
-  const probe = html.indexOf('\\"modelCreatorLogo\\":');
-  if (probe < 0) throw new Error("rich model block not found");
-  let searchFrom = probe;
-  let arrStart = -1;
-  for (let k = 0; k < 30; k++) {
-    const i = html.lastIndexOf('\\"models\\":[', searchFrom);
-    if (i < 0) break;
-    if (html.slice(i, i + 8000).includes("modelCreatorLogo")) {
-      arrStart = i;
-      break;
-    }
-    searchFrom = i - 1;
-  }
-  if (arrStart < 0) throw new Error("rich models array marker not found");
-  const marker = '\\"models\\":[';
-  const i = arrStart + marker.length - 1;
-  let depth = 0;
-  let inStr = false;
-  let j = i;
-  while (j < html.length) {
-    if (html.slice(j, j + 2) === '\\"') {
-      inStr = !inStr;
-      j += 2;
+const AA_URLS = [
+  { url: "https://artificialanalysis.ai/leaderboards/models", label: "Artificial Analysis leaderboard scrape" },
+  { url: "https://artificialanalysis.ai/models", label: "Artificial Analysis models catalog scrape" },
+];
+
+async function fetchHtml(url) {
+  const res = await fetch(url, {
+    headers: { "User-Agent": UA, Accept: "text/html" },
+  });
+  if (!res.ok) throw new Error(`${url} → ${res.status}`);
+  return res.text();
+}
+
+function rowKey(row) {
+  // Prefer slug path + effort; fall back to model name.
+  const slug = (row.source_url || "").split("/").pop() || "";
+  return `${slug}::${row.effort_tier}::${row.model}`.toLowerCase();
+}
+
+function mergeAaRows(into, rows) {
+  const byKey = new Map(into.map((r) => [rowKey(r), r]));
+  for (const r of rows) {
+    const k = rowKey(r);
+    const prev = byKey.get(k);
+    if (!prev) {
+      byKey.set(k, r);
       continue;
     }
-    if (!inStr) {
-      if (html[j] === "[" || html[j] === "{") depth += 1;
-      else if (html[j] === "]" || html[j] === "}") {
-        depth -= 1;
-        if (depth === 0) {
-          j += 1;
-          break;
-        }
+    // Prefer non-null metrics; keep earliest source label chain.
+    const merged = { ...prev };
+    for (const [key, val] of Object.entries(r)) {
+      if (val != null && (merged[key] == null || merged[key] === "")) merged[key] = val;
+    }
+    if (prev.source !== r.source) {
+      merged.source = `${prev.source}; ${r.source}`;
+    }
+    byKey.set(k, merged);
+  }
+  return [...byKey.values()];
+}
+
+async function scrapeOpenRouter() {
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/models", {
+      headers: { "User-Agent": UA, Accept: "application/json" },
+    });
+    if (!res.ok) return { ok: false, status: res.status, models: [] };
+    const body = await res.json();
+    const models = Array.isArray(body.data) ? body.data : [];
+    return { ok: true, models };
+  } catch (err) {
+    return { ok: false, error: String(err), models: [] };
+  }
+}
+
+/** Overlay OpenRouter pricing onto AA rows when AA price is missing; never invent IQ/tps. */
+function applyOpenRouterPricing(aaRows, orModels) {
+  if (!orModels.length) return { rows: aaRows, overlays: 0 };
+  // index by simplified name fragment
+  const byId = new Map();
+  for (const m of orModels) {
+    byId.set(String(m.id || "").toLowerCase(), m);
+    byId.set(String(m.name || "").toLowerCase(), m);
+  }
+  let overlays = 0;
+  const rows = aaRows.map((row) => {
+    if (row.price_in_per_M != null && row.price_out_per_M != null) return row;
+    // Match openrouter anthropic/claude-fable-5 style
+    const slug = (row.source_url || "").split("/").pop() || "";
+    const candidates = [
+      slug,
+      `anthropic/${slug}`,
+      row.model.toLowerCase(),
+      `anthropic: ${row.model}`.toLowerCase(),
+    ];
+    let hit = null;
+    for (const c of candidates) {
+      if (byId.has(c)) {
+        hit = byId.get(c);
+        break;
       }
     }
-    j += 1;
+    if (!hit?.pricing) return row;
+    const pin = Number(hit.pricing.prompt);
+    const pout = Number(hit.pricing.completion);
+    // OpenRouter stores $ per token; convert to $ per 1M
+    if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
+    overlays += 1;
+    const price_in_per_M = row.price_in_per_M ?? pin * 1e6;
+    const price_out_per_M = row.price_out_per_M ?? pout * 1e6;
+    const blended =
+      row.blended_price_per_M ??
+      // 7:2:1 blend matching AA convention when missing
+      (price_in_per_M * 7 + price_out_per_M * 2) / 10;
+    return {
+      ...row,
+      price_in_per_M,
+      price_out_per_M,
+      blended_price_per_M: blended,
+      source: `${row.source}; OpenRouter pricing overlay`,
+    };
+  });
+  return { rows, overlays };
+}
+
+function buildEffortGaps(aaRows, laddersDoc) {
+  const byFamily = new Map();
+  for (const row of aaRows) {
+    const list = byFamily.get(row.family_id) ?? [];
+    list.push(row.effort_tier);
+    byFamily.set(row.family_id, list);
   }
-  const raw = html.slice(i, j).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-  return JSON.parse(raw);
-}
-
-function deriveFamilyId(modelName) {
-  let name = modelName.trim();
-  name = name.replace(
-    /\s*\((?:xhigh|max|high|medium|low|default|non-reasoning|reasoning|thinking|adaptive reasoning)[^)]*\)\s*$/i,
-    "",
-  );
-  name = name.replace(/\s*[-–]?\s*(xhigh|max effort|max|high|medium|low)\s*$/i, "");
-  name = name.replace(/\s+/g, " ").trim();
-  return name.length > 0 ? name : modelName.trim();
-}
-
-function deriveEffortTier(name, isReasoning) {
-  const lower = name.toLowerCase();
-  if (/\(xhigh\)|xhigh effort|\bxhigh\b/.test(lower)) return "xhigh";
-  if (/\(max\)|max effort|\bmax\b/.test(lower)) return "max";
-  if (/\(high\)|high effort|\bhigh\b/.test(lower)) return "high";
-  if (/\(medium\)|medium effort|\bmedium\b|\bmid\b/.test(lower)) return "medium";
-  if (/\(low\)|low effort|\blow\b/.test(lower)) return "low";
-  if (/non-reasoning/.test(lower)) return "none";
-  if (isReasoning) return "default";
-  return "none";
-}
-
-function costPerTask(m) {
-  const block = m.intelligenceIndexCostPerTask;
-  if (typeof block === "number") return block;
-  if (block && typeof block === "object") {
-    if (typeof block.total === "number") return block.total;
-    if (block.cost && typeof block.cost.total === "number") return block.cost.total;
+  const ladders = laddersDoc?.ladders ?? {};
+  const gaps = [];
+  for (const [family, meta] of Object.entries(ladders)) {
+    const have = new Set(byFamily.get(family) ?? []);
+    const expected = meta.expected_tiers || [];
+    const missing = expected.filter((t) => !have.has(t));
+    if (missing.length || have.size < 2) {
+      gaps.push({
+        family,
+        provider: meta.provider,
+        expected_tiers: expected,
+        published_tiers: [...have].sort(),
+        missing_tiers: missing,
+        published_rows: (byFamily.get(family) ?? []).length,
+        complete: missing.length === 0 && have.size >= 2,
+        notes: meta.notes || "",
+      });
+    }
   }
-  if (typeof m.intelligenceIndexCostTotal === "number") return m.intelligenceIndexCostTotal;
-  return null;
+  // Also flag singleton families that look adaptive/reasoning without a ladder entry
+  for (const [family, tiers] of byFamily) {
+    if (tiers.length >= 2) continue;
+    if (ladders[family]) continue;
+    const sample = aaRows.find((r) => r.family_id === family);
+    if (!sample) continue;
+    if (!/adaptive|reasoning|effort|thinking/i.test(sample.model)) continue;
+    gaps.push({
+      family,
+      provider: sample.provider,
+      expected_tiers: ["(unknown product ladder)"],
+      published_tiers: [...new Set(tiers)],
+      missing_tiers: ["(additional efforts may exist at product level)"],
+      published_rows: tiers.length,
+      complete: false,
+      notes: "Heuristic: single published row for a reasoning/adaptive model name.",
+    });
+  }
+  gaps.sort((a, b) => a.family.localeCompare(b.family));
+  return gaps;
 }
 
-function mapRow(m, today) {
-  const tps = m.medianOutputTokensPerSecond ?? null;
-  const priceIn = m.price1mInputTokens ?? null;
-  const priceOut = m.price1mOutputTokens ?? null;
-  const blended = m.price1mBlended7To2To1 ?? null;
-  const intel = m.intelligenceIndex ?? null;
-  // TTFT: AA stores seconds; our dataset stores milliseconds.
-  const ttftS =
-    m.medianTimeToFirstTokenSeconds ?? m.medianTimeToFirstAnswerTokenSeconds ?? null;
-  const ttftMs = typeof ttftS === "number" ? ttftS * 1000 : null;
-  const openness = m.isOpenWeights ? "open" : "closed";
-  const family_id = deriveFamilyId(m.name);
-  const effort_tier = deriveEffortTier(m.name, Boolean(m.isReasoning));
-  /** Dataset modality is a string array (e.g. ["text"] or ["text","vision"]). */
-  const modality = ["text"];
-  if (m.inputModalityImage) modality.push("vision");
-  if (m.inputModalitySpeech) modality.push("audio");
-  return {
-    model: m.name,
-    provider: m.modelCreatorName || "Unknown",
-    openness,
-    modality,
-    context_length: typeof m.contextWindowTokens === "number" ? m.contextWindowTokens : 0,
-    release_date: m.releaseDate || today,
-    data_date: today,
-    source: "Artificial Analysis leaderboard scrape",
-    source_url: `https://artificialanalysis.ai/models/${m.slug}`,
-    tps,
-    ttft: ttftMs,
-    price_in_per_M: priceIn,
-    price_out_per_M: priceOut,
-    blended_price_per_M: blended,
-    aa_intelligence_index: intel,
-    arena_elo: null,
-    swe_bench: null,
-    aider_pct: null,
-    gpqa: typeof m.gpqa === "number" ? m.gpqa * 100 : null,
-    reasoning: Boolean(m.isReasoning),
-    family_id,
-    effort_tier,
-    cost_per_index_task_usd: costPerTask(m),
-    time_per_index_task_s:
-      typeof m.intelligenceIndexTimePerTask === "number"
-        ? m.intelligenceIndexTimePerTask
-        : null,
-  };
-}
-
-function isScorable(row) {
-  return (
-    row.aa_intelligence_index != null &&
-    row.tps != null &&
-    row.blended_price_per_M != null &&
-    Number.isFinite(row.aa_intelligence_index) &&
-    Number.isFinite(row.tps) &&
-    Number.isFinite(row.blended_price_per_M)
-  );
-}
-
-const res = await fetch(LB_URL, {
-  headers: { "User-Agent": UA, Accept: "text/html" },
-});
-if (!res.ok) throw new Error(`leaderboard fetch ${res.status}`);
-const html = await res.text();
-const raw = extractRichModels(html);
 const today = new Date().toISOString().slice(0, 10);
+let merged = [];
+const sourceStats = [];
 
-const mapped = raw
-  .filter((m) => !m.deprecated)
-  .map((m) => mapRow(m, today))
-  .filter(isScorable)
-  .sort((a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model));
+for (const { url, label } of AA_URLS) {
+  try {
+    const html = await fetchHtml(url);
+    const raw = extractRichModels(html);
+    const mapped = raw
+      .filter((m) => !m.deprecated)
+      .map((m) => mapAaRow(m, today, label))
+      .filter(isScorable);
+    const before = merged.length;
+    merged = mergeAaRows(merged, mapped);
+    sourceStats.push({
+      source: label,
+      url,
+      raw: raw.length,
+      scorable: mapped.length,
+      added: merged.length - before,
+    });
+  } catch (err) {
+    sourceStats.push({ source: label, url, error: String(err) });
+  }
+}
 
-// Family multi-effort stats
+const or = await scrapeOpenRouter();
+if (or.ok) {
+  fs.writeFileSync(
+    openrouterPath,
+    `${JSON.stringify({ data_date: today, count: or.models.length, models: or.models }, null, 2)}\n`,
+  );
+}
+const priced = applyOpenRouterPricing(merged, or.models || []);
+merged = priced.rows.filter(isScorable);
+
+merged.sort(
+  (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
+);
+
+fs.writeFileSync(dataPath, `${JSON.stringify(merged, null, 2)}\n`);
+
+let laddersDoc = { ladders: {} };
+if (fs.existsSync(laddersPath)) {
+  laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
+}
+const gaps = buildEffortGaps(merged, laddersDoc);
+fs.writeFileSync(
+  gapsPath,
+  `${JSON.stringify(
+    {
+      data_date: today,
+      source_stats: sourceStats,
+      openrouter: { ok: or.ok, models: or.models?.length ?? 0, price_overlays: priced.overlays },
+      gaps,
+      fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
+    },
+    null,
+    2,
+  )}\n`,
+);
+
 const byFamily = new Map();
-for (const row of mapped) {
+for (const row of merged) {
   const list = byFamily.get(row.family_id) ?? [];
   list.push(row.effort_tier);
   byFamily.set(row.family_id, list);
 }
-const multi = [...byFamily.entries()].filter(([, tiers]) => new Set(tiers).size > 1 || tiers.length > 1);
+const multi = [...byFamily.entries()].filter(([, tiers]) => tiers.length > 1);
 
-fs.writeFileSync(dataPath, `${JSON.stringify(mapped, null, 2)}\n`);
 console.log(
   JSON.stringify(
     {
-      rows: mapped.length,
+      rows: merged.length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
-      multiEffortRows: multi.reduce((n, [, tiers]) => n + tiers.length, 0),
-      withCostPerTask: mapped.filter((r) => r.cost_per_index_task_usd != null).length,
-      withTimePerTask: mapped.filter((r) => r.time_per_index_task_s != null).length,
+      source_stats: sourceStats,
+      openrouter_overlays: priced.overlays,
+      effort_gaps: gaps.length,
+      fable_gap: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
       examples: multi
-        .slice(0, 12)
+        .slice(0, 10)
         .map(([fam, tiers]) => ({ family: fam, tiers: [...new Set(tiers)], n: tiers.length })),
     },
     null,

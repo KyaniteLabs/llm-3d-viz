@@ -1,0 +1,313 @@
+{
+  "data_date": "2026-08-05",
+  "source_stats": [
+    {
+      "source": "Artificial Analysis leaderboard scrape",
+      "url": "https://artificialanalysis.ai/leaderboards/models",
+      "raw": 591,
+      "scorable": 158,
+      "added": 158
+    },
+    {
+      "source": "Artificial Analysis models catalog scrape",
+      "url": "https://artificialanalysis.ai/models",
+      "error": "Error: rich model block not found"
+    }
+  ],
+  "openrouter": {
+    "ok": true,
+    "models": 338,
+    "price_overlays": 0
+  },
+  "gaps": [
+    {
+      "family": "Claude Fable 5",
+      "provider": "Anthropic",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+    },
+    {
+      "family": "Claude Sonnet 4.6",
+      "provider": "Anthropic",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "low"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Claude Sonnet 5",
+      "provider": "Anthropic",
+      "expected_tiers": [
+        "none",
+        "high",
+        "max"
+      ],
+      "published_tiers": [
+        "high",
+        "max"
+      ],
+      "missing_tiers": [
+        "none"
+      ],
+      "published_rows": 2,
+      "complete": false,
+      "notes": "Partial AA coverage common."
+    },
+    {
+      "family": "DeepSeek V4 Flash",
+      "provider": "DeepSeek",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "none"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "DeepSeek V4 Flash 0731",
+      "provider": "DeepSeek",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Gemma 4 26B A4B",
+      "provider": "Google",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "none"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Kimi K2.6",
+      "provider": "Kimi",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "none"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Llama 3.1 Nemotron Ultra 253B v1",
+      "provider": "NVIDIA",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Nemotron 3 Nano Omni 30B A3B Reasoning",
+      "provider": "NVIDIA",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Nemotron 3 Ultra 550B A55B",
+      "provider": "NVIDIA",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "NVIDIA Nemotron 3 Super 120B A12B",
+      "provider": "NVIDIA",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3 Next 80B A3B",
+      "provider": "Alibaba",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3 Omni 30B A3B",
+      "provider": "Alibaba",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3.5 35B A3B",
+      "provider": "Alibaba",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "none"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3.5 9B",
+      "provider": "Alibaba",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Trinity Large Thinking",
+      "provider": "Arcee AI",
+      "expected_tiers": [
+        "(unknown product ladder)"
+      ],
+      "published_tiers": [
+        "default"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    }
+  ],
+  "fable": {
+    "family": "Claude Fable 5",
+    "provider": "Anthropic",
+    "expected_tiers": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "published_tiers": [
+      "max"
+    ],
+    "missing_tiers": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "published_rows": 1,
+    "complete": false,
+    "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+  }
+}

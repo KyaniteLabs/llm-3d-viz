@@ -199,6 +199,16 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 .family-chip:hover { border-color: rgba(232, 241, 228, 0.35); color: var(--color-text); }
 .family-chip.is-active, .family-chip.is-action:active { border-color: var(--filament); color: var(--filament); background: rgba(232, 241, 228, 0.08); }
 .family-chip.is-singleton { opacity: 0.92; border-style: dashed; }
+.effort-gap-note {
+  margin: 0.35rem 0 0.15rem;
+  padding: 0.4rem 0.45rem;
+  border: 1px dashed var(--copper, #c47a3a);
+  border-radius: var(--radius-control);
+  color: var(--filament-dim);
+  background: rgba(196, 122, 58, 0.08);
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
 .tree-family.is-singleton em { color: var(--copper, #c47a3a); }
 .empty-visible-banner {
   position: absolute;
