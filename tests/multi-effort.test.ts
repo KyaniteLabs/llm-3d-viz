@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { models, allModels, isScorable } from "../src/data/models";
+import { RELEASE_FLOOR_ISO, meetsReleaseFloor } from "../src/data/catalog-scope";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../src/lib/family";
 
 describe("multi-effort catalog (AA expansion)", () => {
@@ -41,5 +42,16 @@ describe("catalog scope", () => {
   it("default cloud catalog is a subset of the full draft", () => {
     expect(allModels.length).toBeGreaterThan(models.length);
     expect(models.every((m) => ["OpenAI","Anthropic","DeepSeek","Google","NVIDIA","Kimi","Z AI","Alibaba","MiniMax"].includes(m.provider))).toBe(true);
+  });
+});
+
+describe("release floor", () => {
+  it("product catalog has no pre-2026 release_date", () => {
+    expect(models.every((m) => meetsReleaseFloor(m.release_date))).toBe(true);
+    expect(models.every((m) => m.release_date.slice(0, 10) >= RELEASE_FLOOR_ISO)).toBe(true);
+  });
+
+  it("allModels still retains older archive rows", () => {
+    expect(allModels.some((m) => !meetsReleaseFloor(m.release_date))).toBe(true);
   });
 });

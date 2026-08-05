@@ -3,7 +3,7 @@ import { formatTps, formatPricePerM, formatIntelligence } from "../lib/format";
 import { deriveEffortTier, deriveFamilyId } from "../lib/family";
 import {
   catalogScopeFromSearch,
-  isCloudLab,
+  filterProductCatalog,
   type CatalogScope,
 } from "./catalog-scope";
 
@@ -99,15 +99,14 @@ export const allModels: Model[] = (rawModels as Model[]).map((row) => ({
 
 /**
  * Active product catalog.
- * Default = cloud API labs (OpenAI, Anthropic, DeepSeek, Google, NVIDIA, Kimi,
- * Z AI / GLM, Alibaba / Qwen, MiniMax). Full set via `?catalog=all` or `allModels`.
+ * Default = cloud API labs + **release_date ≥ 2026-01-01**.
+ * `?catalog=all` = every lab, still post–Jan 2026. Raw scrape = `allModels` (no floor).
  */
 export const catalogScope: CatalogScope = catalogScopeFromSearch(
   typeof window !== "undefined" ? window.location.search : "",
 );
 
-export const models: Model[] =
-  catalogScope === "all" ? allModels : allModels.filter((m) => isCloudLab(m.provider));
+export const models: Model[] = filterProductCatalog(allModels, catalogScope);
 
 /** Complete rows eligible for three-axis frontier and value-score math. */
 export function isScorable(model: Model): boolean {
