@@ -360,10 +360,42 @@ async function boot() {
   };
 
   document.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "c" || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (isTextEntryTarget(event.target as HTMLElement | null)) return;
-    event.preventDefault();
-    cinema.toggle();
+    // Don't steal arrows when stage canvas owns focus (orbit).
+    const stageFocused = document.activeElement === (stage.el?.querySelector?.("canvas") ?? null)
+      || document.activeElement === stage.gd;
+    const key = event.key;
+    if (key === "c" || key === "C") {
+      event.preventDefault();
+      cinema.toggle();
+      return;
+    }
+    if (key === "Escape") {
+      event.preventDefault();
+      consoleUi.showAllFamilies();
+      return;
+    }
+    if (key === "[" || key === "PageUp") {
+      event.preventDefault();
+      consoleUi.stepFamily(-1);
+      return;
+    }
+    if (key === "]" || key === "PageDown") {
+      event.preventDefault();
+      consoleUi.stepFamily(1);
+      return;
+    }
+    if (!stageFocused && (key === "," || key === "<")) {
+      event.preventDefault();
+      consoleUi.stepEffort(-1);
+      return;
+    }
+    if (!stageFocused && (key === "." || key === ">")) {
+      event.preventDefault();
+      consoleUi.stepEffort(1);
+      return;
+    }
   });
 
   const pointerRoot = stage.el ?? stage.gd;

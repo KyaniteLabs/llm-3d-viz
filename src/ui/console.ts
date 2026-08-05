@@ -89,6 +89,19 @@ export class DecisionConsole {
       onCinemaToggle();
     });
     this.root.addEventListener("click", (event) => this.onConsoleClick(event));
+    this.root.addEventListener("input", (event) => {
+      const target = event.target as HTMLElement;
+      if (target instanceof HTMLInputElement && target.matches("[data-nav-family-search]")) {
+        this.familySearch = target.value;
+        const start = target.selectionStart;
+        this.renderFamilyNav();
+        const again = this.root.querySelector<HTMLInputElement>("[data-nav-family-search]");
+        if (again) {
+          again.focus();
+          if (start != null) again.setSelectionRange(start, start);
+        }
+      }
+    });
     this.renderIncompleteData();
     this.tooltip = document.createElement("aside");
     this.tooltip.className = "stage-tooltip";
@@ -108,26 +121,134 @@ export class DecisionConsole {
   }
 
 
+  /** Multi-effort families in nav order (largest curves first, then name). */
+  private multiEffortNavList(): Array<{ family: string; count: number }> {
+    // Stable chip order from full catalog multi-effort set (largest curves first).
+    return this.multiEffortCatalog();
+  }
+
+  private currentSoloFamily(): string | null {
+    const f = this.store.getState().filters.families;
+    return f.length === 1 ? f[0] : null;
+  }
+
+  /** Step multi-effort family cursor by delta (−1 / +1). Solos that family. */
+  stepFamily(delta: number) {
+    const multi = this.multiEffortNavList();
+    if (multi.length === 0) return;
+    const solo = this.currentSoloFamily();
+    let idx = solo ? multi.findIndex((m) => m.family === solo) : -1;
+    if (idx < 0) idx = delta > 0 ? -1 : 0;
+    idx = (idx + delta + multi.length) % multi.length;
+    this.soloFamily(multi[idx].family);
+    this.renderFilterControls();
+    this.renderFamilyNav();
+  }
+
+  /** Step effort tier within the active multi-effort family (solo or hover pin). */
+  stepEffort(delta: number) {
+    const state = this.store.getState();
+    let family = this.currentSoloFamily();
+    const activeId = state.pinnedModelId ?? state.hoveredModelId;
+    if (!family && activeId) {
+      const m = this.catalog.find((row) => row.model === activeId);
+      if (m) family = familyIdOf(m);
+    }
+    if (!family) {
+      // No family context — start at first multi-effort family then first tier.
+      this.stepFamily(1);
+      family = this.currentSoloFamily();
+    }
+    if (!family) return;
+    const members = groupByFamily(this.catalog).get(family) ?? [];
+    if (members.length < 2) return;
+    // Ensure solo so the ladder is the job.
+    if (this.currentSoloFamily() !== family) this.soloFamily(family);
+    let idx = activeId ? members.findIndex((m) => m.model === activeId) : -1;
+    if (idx < 0) idx = delta > 0 ? -1 : 0;
+    idx = (idx + delta + members.length) % members.length;
+    const next = members[idx];
+    this.store.update({
+      pinnedModelId: next.model,
+      hoveredModelId: next.model,
+    });
+    this.renderFamilyNav();
+  }
+
+  /** Exit family solo; keep age + multi-effort defaults. */
+  showAllFamilies() {
+    this.store.update({
+      filters: { ...this.store.getState().filters, families: [] },
+      pinnedModelId: null,
+      hoveredModelId: null,
+    });
+    this.renderFilterControls();
+    this.renderFamilyNav();
+  }
+
   private renderFamilyNav() {
     const section = this.root.querySelector(".family-nav");
     if (!section) return;
-    const multi = this.multiEffortCatalog();
+    const multi = this.multiEffortNavList();
     const state = this.store.getState();
+    const solo = this.currentSoloFamily();
     const selectedFamilies = new Set(state.filters.families);
-    const chipLimit = 14;
+    const chipLimit = 16;
     const chips = multi.slice(0, chipLimit);
+    const soloIdx = solo ? multi.findIndex((m) => m.family === solo) : -1;
+    const soloMeta = soloIdx >= 0 ? multi[soloIdx] : null;
+
+    // Effort steps for current solo family
+    const members = solo ? groupByFamily(this.catalog).get(solo) ?? [] : [];
+    const activeId = state.pinnedModelId ?? state.hoveredModelId;
+    const effortIdx = activeId ? members.findIndex((m) => m.model === activeId) : -1;
+    const effortLabel =
+      effortIdx >= 0
+        ? `${deriveEffortTier(members[effortIdx])} · ${effortIdx + 1}/${members.length}`
+        : members.length >= 2
+          ? `${members.length} steps`
+          : "—";
+
     section.innerHTML = `
-      <p class="weight-heading">FAMILY CURVES <span class="filter-count">${multi.length} multi-effort</span></p>
-      <p class="axis-hint">Solo a family chip for its intensity ladder. Default shows multi-effort curves only.</p>
+      <p class="weight-heading">NAVIGATE <span class="filter-count">${multi.length} curves</span></p>
+      <div class="nav-stepper" role="group" aria-label="Family stepper">
+        <button type="button" class="nav-step" data-nav-family="-1" title="Previous family [">◀</button>
+        <div class="nav-step-status">
+          <span class="nav-step-label">Family</span>
+          <strong data-nav-family-name>${solo ? solo.replace(/</g, "") : "all curves"}</strong>
+          <span class="nav-step-meta">${soloMeta ? `${soloMeta.count} steps · ${soloIdx + 1}/${multi.length}` : "chip or ] to solo"}</span>
+        </div>
+        <button type="button" class="nav-step" data-nav-family="1" title="Next family ]">▶</button>
+      </div>
+      <div class="nav-stepper" role="group" aria-label="Effort stepper">
+        <button type="button" class="nav-step" data-nav-effort="-1" title="Previous effort ," ${members.length < 2 ? "disabled" : ""}>◀</button>
+        <div class="nav-step-status">
+          <span class="nav-step-label">Effort</span>
+          <strong data-nav-effort-name>${effortLabel.replace(/</g, "")}</strong>
+          <span class="nav-step-meta">${solo ? "step intensity ladder" : "solo a family first"}</span>
+        </div>
+        <button type="button" class="nav-step" data-nav-effort="1" title="Next effort ." ${members.length < 2 ? "disabled" : ""}>▶</button>
+      </div>
+      <div class="nav-actions">
+        <button type="button" class="family-chip is-action nav-show-all" data-nav-show-all ${solo ? "" : "disabled"}>Show all curves · Esc</button>
+      </div>
+      <label class="axis-control nav-search" for="nav-family-search">
+        <span>Find</span>
+        <input id="nav-family-search" type="search" data-nav-family-search value="${this.familySearch.replace(/"/g, "&quot;")}" placeholder="Sol, Opus, Gemini…" autocomplete="off" />
+      </label>
       <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
         ${chips
+          .filter(({ family }) => {
+            const q = this.familySearch.trim().toLowerCase();
+            return !q || family.toLowerCase().includes(q);
+          })
           .map(
             ({ family, count }) =>
-              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps">${family} <em>${count}</em></button>`,
+              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps — click again to show all">${family} <em>${count}</em></button>`,
           )
           .join("")}
-        ${multi.length > chipLimit ? `<span class="axis-hint">+${multi.length - chipLimit} more via advanced filters</span>` : ""}
-      </div>`;
+      </div>
+      <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all · <kbd>C</kbd> cinema</p>`;
   }
 
   private filteredFamilyOptions(): string[] {
@@ -247,6 +368,12 @@ export class DecisionConsole {
   }
 
   private soloFamily(family: string) {
+    const cur = this.currentSoloFamily();
+    // Clicking the active chip exits solo (toggle).
+    if (cur === family) {
+      this.showAllFamilies();
+      return;
+    }
     this.store.update({
       filters: {
         ...this.store.getState().filters,
@@ -271,6 +398,23 @@ export class DecisionConsole {
   private onConsoleClick(event: Event) {
     const target = event.target as HTMLElement | null;
     if (!target) return;
+    const famStep = target.closest<HTMLElement>("[data-nav-family]");
+    if (famStep?.dataset.navFamily != null) {
+      event.preventDefault();
+      this.stepFamily(Number(famStep.dataset.navFamily) || 1);
+      return;
+    }
+    const effStep = target.closest<HTMLElement>("[data-nav-effort]");
+    if (effStep?.dataset.navEffort != null) {
+      event.preventDefault();
+      this.stepEffort(Number(effStep.dataset.navEffort) || 1);
+      return;
+    }
+    if (target.closest("[data-nav-show-all]")) {
+      event.preventDefault();
+      this.showAllFamilies();
+      return;
+    }
     const solo = target.closest<HTMLElement>("[data-solo-family]");
     if (solo?.dataset.soloFamily) {
       event.preventDefault();
@@ -398,7 +542,7 @@ export class DecisionConsole {
       <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>
       ${
         curveSteps >= 2
-          ? `<button type="button" class="family-chip is-action" data-solo-family="${family}">${soloActive ? "Showing family curve" : "Solo family curve"}</button>`
+          ? `<button type="button" class="family-chip is-action" data-solo-family="${family}">${soloActive ? "Exit solo · show all curves" : "Solo family curve"}</button>`
           : ""
       }`;
   }
@@ -417,7 +561,7 @@ export class DecisionConsole {
     const multiN = [...groupByFamily(this.models).values()].filter((rows) => rows.length >= 2).length;
     const solo =
       state.filters.families.length === 1
-        ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-filter-clear>show all</button></p>`
+        ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-nav-show-all>show all curves</button></p>`
         : multiN > 0
           ? `<p class="axis-hint">${multiN} multi-effort curves in view — chip a family to solo.</p>`
           : "";

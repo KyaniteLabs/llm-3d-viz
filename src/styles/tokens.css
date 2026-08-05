@@ -337,3 +337,78 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .empty-visible-banner p { margin: 0; color: var(--color-text-muted); font-size: 0.78rem; line-height: 1.45; }
 .empty-visible-banner .eyebrow { color: var(--filament); }
 .empty-visible-banner strong { color: var(--color-text); font-weight: 500; }
+
+/* Family / effort navigation steppers */
+.nav-stepper {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr) 2.1rem;
+  gap: 0.35rem;
+  align-items: stretch;
+  margin: 0.35rem 0;
+}
+.nav-step {
+  appearance: none;
+  background: rgba(201, 212, 196, 0.06);
+  border: 1px solid var(--color-border);
+  color: var(--filament-dim);
+  font: 500 0.85rem/1 var(--font-mono);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  padding: 0;
+}
+.nav-step:hover:not(:disabled) { border-color: var(--filament); color: var(--filament); }
+.nav-step:disabled { opacity: 0.35; cursor: not-allowed; }
+.nav-step:focus-visible { outline: 1px solid var(--copper); outline-offset: 2px; }
+.nav-step-status {
+  min-width: 0;
+  padding: 0.28rem 0.45rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgba(16, 22, 29, 0.6);
+}
+.nav-step-label {
+  display: block;
+  color: var(--color-text-muted);
+  font: 400 0.55rem/1.2 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.nav-step-status strong {
+  display: block;
+  color: var(--color-text);
+  font: 500 0.72rem/1.3 var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-step-meta {
+  display: block;
+  color: var(--color-text-muted);
+  font: 400 0.58rem/1.3 var(--font-mono);
+}
+.nav-actions { margin: 0.35rem 0 0.45rem; }
+.nav-actions .nav-show-all { width: 100%; margin-top: 0; }
+.nav-search { margin-top: 0.25rem; }
+.nav-keys { margin: 0.45rem 0 0; }
+.nav-keys kbd {
+  display: inline-block;
+  min-width: 1rem;
+  padding: 0.05rem 0.28rem;
+  margin: 0 0.08rem;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--filament-dim);
+  font: 400 0.58rem/1.2 var(--font-mono);
+  background: rgba(201, 212, 196, 0.05);
+}
+.text-link {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--filament-dim);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.text-link:hover { color: var(--filament); }
