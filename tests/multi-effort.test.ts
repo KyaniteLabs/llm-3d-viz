@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { models, isScorable } from "../src/data/models";
+import { models, allModels, isScorable } from "../src/data/models";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../src/lib/family";
 
 describe("multi-effort catalog (AA expansion)", () => {
   it("has many scorable rows and multi-effort families for curves", () => {
     const scorable = models.filter(isScorable);
-    expect(scorable.length).toBeGreaterThan(100);
+    expect(scorable.length).toBeGreaterThan(50);
     const byFamily = groupByFamily(scorable);
     const multi = [...byFamily.entries()].filter(([, rows]) => rows.length >= 2);
-    expect(multi.length).toBeGreaterThanOrEqual(20);
+    expect(multi.length).toBeGreaterThanOrEqual(12);
   });
 
   it("includes full GPT-5.6 Sol and Claude Opus 5 intensity ladders", () => {
@@ -34,5 +34,12 @@ describe("multi-effort catalog (AA expansion)", () => {
     for (let i = 1; i < ranks.length; i++) {
       expect(ranks[i]).toBeGreaterThanOrEqual(ranks[i - 1]);
     }
+  });
+});
+
+describe("catalog scope", () => {
+  it("default cloud catalog is a subset of the full draft", () => {
+    expect(allModels.length).toBeGreaterThan(models.length);
+    expect(models.every((m) => ["OpenAI","Anthropic","DeepSeek","Google","NVIDIA","Kimi","Z AI","Alibaba","MiniMax"].includes(m.provider))).toBe(true);
   });
 });

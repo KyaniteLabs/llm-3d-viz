@@ -1,6 +1,11 @@
 import rawModels from "../../data/models.v0.draft.json";
 import { formatTps, formatPricePerM, formatIntelligence } from "../lib/format";
 import { deriveEffortTier, deriveFamilyId } from "../lib/family";
+import {
+  catalogScopeFromSearch,
+  isCloudLab,
+  type CatalogScope,
+} from "./catalog-scope";
 
 export type Openness = "open" | "closed";
 export type Modality = "text" | "vision" | "audio" | "video";
@@ -83,14 +88,26 @@ export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {
   "Z AI": "circle-open",
 };
 
-/** Enrich curated rows with family/effort keys and null-safe task metrics. */
-export const models: Model[] = (rawModels as Model[]).map((row) => ({
+/** Full draft enrichment (every lab in the scrape). Prefer `models` for product UI. */
+export const allModels: Model[] = (rawModels as Model[]).map((row) => ({
   ...row,
   family_id: row.family_id?.trim() || deriveFamilyId(row.model),
   effort_tier: row.effort_tier?.trim() || deriveEffortTier(row),
   cost_per_index_task_usd: row.cost_per_index_task_usd ?? null,
   time_per_index_task_s: row.time_per_index_task_s ?? null,
 }));
+
+/**
+ * Active product catalog.
+ * Default = cloud API labs (OpenAI, Anthropic, DeepSeek, Google, NVIDIA, Kimi,
+ * Z AI / GLM, Alibaba / Qwen, MiniMax). Full set via `?catalog=all` or `allModels`.
+ */
+export const catalogScope: CatalogScope = catalogScopeFromSearch(
+  typeof window !== "undefined" ? window.location.search : "",
+);
+
+export const models: Model[] =
+  catalogScope === "all" ? allModels : allModels.filter((m) => isCloudLab(m.provider));
 
 /** Complete rows eligible for three-axis frontier and value-score math. */
 export function isScorable(model: Model): boolean {

@@ -289,7 +289,7 @@ test.describe("3D Stage Render Specs", () => {
     });
 
     // Full multi-effort catalog (AA leaderboard scrape) — count moves with data.
-    expect(vizData.scorableCount).toBeGreaterThan(100);
+    expect(vizData.scorableCount).toBeGreaterThan(50);
     expect(vizData.traceCount).toBe(2);
     expect(vizData.pointsCount).toBe(vizData.scorableCount);
     expect(vizData.ridgeType).toBe("scatter3d");
@@ -1473,7 +1473,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     data.perGd.forEach((gd: any) => {
       expect(gd.traceType).toBe("scatter");
       expect(gd.mode).toBe("markers");
-      expect(gd.points).toBeGreaterThan(100);
+      expect(gd.points).toBeGreaterThan(30);
       // hoverinfo 'none' (NOT 'skip'): events fire, no native hover card.
       expect(gd.hoverinfo).toBe("none");
       expect(gd.modebarNodes).toBe(0);
@@ -1672,7 +1672,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       return { before, after, datarevision, modelsCount: allModels.length };
     });
 
-    expect(ranges.modelsCount).toBeGreaterThan(100);
+    expect(ranges.modelsCount).toBeGreaterThan(50);
     // The zoomed range is preserved across the re-render.
     expect(ranges.after).toEqual(ranges.before);
     // And it is the zoomed range, not the original auto-range.

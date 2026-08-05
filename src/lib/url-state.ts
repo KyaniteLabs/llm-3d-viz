@@ -11,6 +11,7 @@
  * - w=s,c,i          raw weight triple speed,cost,intelligence
  * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
  * - enc=openness     legacy openness-primary fill (product default is curve-focus)
+ * - catalog=all      full draft labs (default = cloud focus)
  * - me=0             show single-effort models (product default multi-effort only)
  */
 
@@ -108,7 +109,7 @@ export function serializeShareableState(
   const params = existing ? new URLSearchParams(existing) : new URLSearchParams();
 
   // Preserve renderer flags managed outside this module.
-  const keep = ["stage", "heat", "debug", "enc"];
+  const keep = ["stage", "heat", "debug", "enc", "catalog"];
   const preserved: Record<string, string> = {};
   for (const key of keep) {
     const v = params.get(key);
