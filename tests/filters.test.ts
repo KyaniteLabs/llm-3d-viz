@@ -66,6 +66,15 @@ describe("filters", () => {
     expect(visible.map((m) => m.model).sort()).toEqual(["Fam (low)", "Fam (max)"]);
   });
 
+  it("providers __none__ yields empty visible set", () => {
+    const visible = applyFilters(
+      models,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, providers: ["__none__"] },
+      ref,
+    );
+    expect(visible).toHaveLength(0);
+  });
+
   it("sameFilters is deep-equal on arrays", () => {
     const a = { ...DEFAULT_FILTERS, providers: ["b", "a"] };
     const b = { ...DEFAULT_FILTERS, providers: ["a", "b"] };

@@ -7,6 +7,9 @@ import { Stage3DThree } from "./viz/stage3d-three";
 import type { Stage3DSurface } from "./viz/stage-api";
 import { createStore, type AppState } from "./state";
 import { DecisionConsole } from "./ui/console";
+import { FilterShelf, formatScopeSummary } from "./ui/filter-shelf";
+import { renderMembershipTable } from "./ui/membership-table";
+import { RELEASE_FLOOR_ISO } from "./data/catalog-scope";
 import { CinemaMode } from "./viz/cinema";
 import { StageGuide } from "./ui/stage-guide";
 import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
@@ -137,7 +140,13 @@ async function boot() {
   plotContainer.style.position = "relative";
   stageVisual?.appendChild(plotContainer);
 
-  const consoleRoot = document.querySelector(".console") as HTMLElement;
+  const consoleRoot = document.querySelector(".inspector") as HTMLElement;
+  const shell = document.getElementById("app-shell") as HTMLElement;
+  const filterShelfHost = document.querySelector("[data-filter-shelf]") as HTMLElement;
+  const scopeText = document.querySelector("[data-scope-text]") as HTMLElement;
+  const statusText = document.querySelector("[data-status-text]") as HTMLElement;
+  const canvasHost = document.querySelector(".canvas-host") as HTMLElement;
+  const tableHost = document.querySelector("[data-membership-table]") as HTMLElement;
   // Shareable URL: filters, axes, weights. Session-only: hover/pin/cinema.
   // `?age=0` remains the regression-suite escape hatch for the full catalog.
   const fromUrl = parseShareableState(searchParams);
@@ -146,6 +155,60 @@ async function boot() {
     axisMapping: fromUrl.axisMapping,
     weights: fromUrl.weights,
   });
+
+  const filterShelf = new FilterShelf(filterShelfHost, store, models, sessionReferenceDate);
+  filterShelf.render();
+
+  const setScopeOpen = (open: boolean) => {
+    shell.classList.toggle("is-scope-open", open);
+    const shelf = document.getElementById("filter-shelf");
+    if (shelf) shelf.hidden = !open;
+    document.querySelectorAll("[data-scope-edit]").forEach((btn) => {
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    if (open) filterShelf.resetDraftFromStore();
+  };
+
+  document.querySelectorAll("[data-scope-edit]").forEach((btn) => {
+    btn.addEventListener("click", () => setScopeOpen(!shell.classList.contains("is-scope-open")));
+  });
+  document.querySelector("[data-scope-close]")?.addEventListener("click", () => setScopeOpen(false));
+  document.querySelector("[data-scope-apply]")?.addEventListener("click", () => {
+    filterShelf.apply();
+    setScopeOpen(false);
+  });
+  document.querySelector("[data-scope-reset]")?.addEventListener("click", () => filterShelf.resetDraftFromStore());
+
+  const setCanvasMode = (mode: "3d" | "2d" | "table") => {
+    canvasHost.dataset.canvasMode = mode;
+    canvasHost.querySelectorAll(".mode-tab").forEach((tab) => {
+      const m = (tab as HTMLElement).dataset.mode;
+      const on = m === mode;
+      tab.classList.toggle("is-active", on);
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    const stageEl = canvasHost.querySelector<HTMLElement>('[data-pane="3d"]');
+    const projEl = canvasHost.querySelector<HTMLElement>('[data-pane="2d"]');
+    const tableEl = canvasHost.querySelector<HTMLElement>('[data-pane="table"]');
+    const effortEl = canvasHost.querySelector<HTMLElement>("[data-effort-strip]");
+    if (stageEl) stageEl.hidden = mode !== "3d";
+    if (projEl) projEl.hidden = mode !== "2d";
+    if (tableEl) tableEl.hidden = mode !== "table";
+    // effort only in 3d when solo
+    if (effortEl && mode !== "3d") effortEl.hidden = true;
+  };
+  canvasHost.querySelectorAll(".mode-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const mode = (tab as HTMLElement).dataset.mode as "3d" | "2d" | "table";
+      if (mode) setCanvasMode(mode);
+      // refresh table when entering table mode
+      if (mode === "table") {
+        const vis = applyFilters(models, store.getState().filters, sessionReferenceDate());
+        if (tableHost) renderMembershipTable(tableHost, vis, store);
+      }
+    });
+  });
+  setCanvasMode("3d");
 
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
@@ -174,6 +237,23 @@ async function boot() {
 
   const cinema = new CinemaMode(stage, store);
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
+  document.querySelector("[data-cinema-toggle]")?.addEventListener("click", () => cinema.toggle());
+  document.querySelector("[data-global-search]")?.addEventListener("keydown", (event) => {
+    if ((event as KeyboardEvent).key !== "Enter") return;
+    const q = ((event.target as HTMLInputElement).value || "").trim().toLowerCase();
+    if (!q) return;
+    const vis = applyFilters(models, store.getState().filters, sessionReferenceDate());
+    const hit = vis.find(
+      (m) =>
+        m.model.toLowerCase().includes(q) ||
+        familyIdOf(m).toLowerCase().includes(q) ||
+        m.provider.toLowerCase().includes(q),
+    );
+    if (hit) {
+      store.update({ pinnedModelId: hit.model, hoveredModelId: hit.model });
+      setCanvasMode("3d");
+    }
+  });
 
   let renderedWeights: AppState["weights"] | null = null;
   let renderedAxes: AxisMapping | null = null;

@@ -39,7 +39,7 @@ export class CinemaMode {
   }
 
   private render(state: Readonly<AppState>) {
-    document.querySelector(".observatory")?.classList.toggle("is-cinema", state.cinemaMode && !this.reduced);
+    document.querySelector(".app-shell")?.classList.toggle("is-cinema", state.cinemaMode && !this.reduced);
     if (state.cinemaMode && !this.reduced) this.start();
     else this.stop();
   }
