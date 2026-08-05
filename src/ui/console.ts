@@ -63,7 +63,7 @@ export class DecisionConsole {
     this.catalog = models;
     this.models = models;
     this.root.innerHTML = `
-      <p class="eyebrow">INSTRUMENT CONSOLE</p>
+      <p class="eyebrow">INSTRUMENT CONSOLE · CLOUD LABS</p>
       <h2 id="console-title">Value readout</h2>
       <section class="model-readout" aria-live="polite"></section>
       <section class="family-nav" aria-label="Multi-effort family navigation"></section>
