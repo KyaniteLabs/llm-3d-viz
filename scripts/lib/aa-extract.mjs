@@ -2,23 +2,10 @@
  * Shared Artificial Analysis HTML extractors (public pages only).
  */
 
-export function extractRichModels(html) {
-  const probe = html.indexOf('\\"modelCreatorLogo\\":');
-  if (probe < 0) throw new Error("rich model block not found");
-  let searchFrom = probe;
-  let arrStart = -1;
-  for (let k = 0; k < 30; k++) {
-    const i = html.lastIndexOf('\\"models\\":[', searchFrom);
-    if (i < 0) break;
-    if (html.slice(i, i + 8000).includes("modelCreatorLogo")) {
-      arrStart = i;
-      break;
-    }
-    searchFrom = i - 1;
-  }
-  if (arrStart < 0) throw new Error("rich models array marker not found");
+/** Parse one `\\"models\\":[ ... ]` array starting at the marker index. */
+export function extractModelsArrayAt(html, arrStartMarkerIndex) {
   const marker = '\\"models\\":[';
-  const i = arrStart + marker.length - 1;
+  const i = arrStartMarkerIndex + marker.length - 1; // at '['
   let depth = 0;
   let inStr = false;
   let j = i;
@@ -42,6 +29,76 @@ export function extractRichModels(html) {
   }
   const raw = html.slice(i, j).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
   return JSON.parse(raw);
+}
+
+/**
+ * Extract every models array embedded in AA HTML (leaderboard, model cards, etc.).
+ * Prefer arrays that carry intelligenceIndex / timescale metrics.
+ */
+export function extractAllModelArrays(html) {
+  const arrays = [];
+  let idx = 0;
+  while (true) {
+    const i = html.indexOf('\\"models\\":[', idx);
+    if (i < 0) break;
+    try {
+      const arr = extractModelsArrayAt(html, i);
+      if (Array.isArray(arr) && arr.length && typeof arr[0] === "object") {
+        arrays.push(arr);
+      }
+    } catch {
+      /* skip malformed */
+    }
+    idx = i + 12;
+  }
+  return arrays;
+}
+
+/** Legacy single-array extract (leaderboard / rich block). */
+export function extractRichModels(html) {
+  const arrays = extractAllModelArrays(html);
+  if (!arrays.length) throw new Error("rich model block not found");
+  // Pick the array with the most metric-bearing rows.
+  let best = arrays[0];
+  let bestScore = -1;
+  for (const arr of arrays) {
+    let score = 0;
+    for (const m of arr.slice(0, 40)) {
+      if (m && (m.intelligenceIndex != null || m.timescaleData || m.medianOutputTokensPerSecond)) {
+        score += 1;
+      }
+      if (m && m.modelCreatorLogo) score += 2;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      best = arr;
+    }
+  }
+  return best;
+}
+
+/** Flatten all arrays; keep the richest record per slug. */
+export function extractAllModelsBySlug(html) {
+  const bySlug = new Map();
+  for (const arr of extractAllModelArrays(html)) {
+    for (const m of arr) {
+      if (!m?.slug) continue;
+      const prev = bySlug.get(m.slug);
+      if (!prev) {
+        bySlug.set(m.slug, m);
+        continue;
+      }
+      // Prefer object with intelligenceIndex / timescale
+      const prevRich =
+        (prev.intelligenceIndex != null ? 2 : 0) +
+        (prev.timescaleData || prev.medianOutputTokensPerSecond ? 1 : 0);
+      const nextRich =
+        (m.intelligenceIndex != null ? 2 : 0) +
+        (m.timescaleData || m.medianOutputTokensPerSecond ? 1 : 0);
+      if (nextRich >= prevRich) bySlug.set(m.slug, { ...prev, ...m });
+    }
+  }
+  return [...bySlug.values()];
 }
 
 export function deriveFamilyId(modelName) {
@@ -82,13 +139,20 @@ export function costPerTask(m) {
 }
 
 export function mapAaRow(m, today, sourceLabel) {
-  const tps = m.medianOutputTokensPerSecond ?? null;
+  // Leaderboard uses flat medianOutputTokensPerSecond; model cards use timescaleData.*
+  const tps =
+    m.medianOutputTokensPerSecond ??
+    m.timescaleData?.medianOutputSpeed ??
+    null;
   const priceIn = m.price1mInputTokens ?? null;
   const priceOut = m.price1mOutputTokens ?? null;
   const blended = m.price1mBlended7To2To1 ?? null;
   const intel = m.intelligenceIndex ?? null;
   const ttftS =
-    m.medianTimeToFirstTokenSeconds ?? m.medianTimeToFirstAnswerTokenSeconds ?? null;
+    m.medianTimeToFirstTokenSeconds ??
+    m.medianTimeToFirstAnswerTokenSeconds ??
+    m.timescaleData?.medianTimeToFirstChunk ??
+    null;
   const ttftMs = typeof ttftS === "number" ? ttftS * 1000 : null;
   const openness = m.isOpenWeights ? "open" : "closed";
   const family_id = deriveFamilyId(m.name);
@@ -96,9 +160,11 @@ export function mapAaRow(m, today, sourceLabel) {
   const modality = ["text"];
   if (m.inputModalityImage) modality.push("vision");
   if (m.inputModalitySpeech) modality.push("audio");
+  const provider =
+    m.modelCreatorName || m.creator?.name || m.creator?.slug || "Unknown";
   return {
     model: m.name,
-    provider: m.modelCreatorName || "Unknown",
+    provider,
     openness,
     modality,
     context_length: typeof m.contextWindowTokens === "number" ? m.contextWindowTokens : 0,
@@ -115,7 +181,7 @@ export function mapAaRow(m, today, sourceLabel) {
     arena_elo: null,
     swe_bench: null,
     aider_pct: null,
-    gpqa: typeof m.gpqa === "number" ? m.gpqa * 100 : null,
+    gpqa: typeof m.gpqa === "number" ? (m.gpqa <= 1 ? m.gpqa * 100 : m.gpqa) : null,
     reasoning: Boolean(m.isReasoning),
     family_id,
     effort_tier,

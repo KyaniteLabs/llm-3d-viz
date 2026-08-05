@@ -16,8 +16,10 @@ import { fileURLToPath } from "node:url";
 import {
   UA,
   extractRichModels,
+  extractAllModelsBySlug,
   mapAaRow,
   isScorable,
+  deriveFamilyId,
 } from "./lib/aa-extract.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +32,15 @@ const laddersPath = path.join(root, "data/expected-effort-ladders.json");
 const AA_URLS = [
   { url: "https://artificialanalysis.ai/leaderboards/models", label: "Artificial Analysis leaderboard scrape" },
   { url: "https://artificialanalysis.ai/models", label: "Artificial Analysis models catalog scrape" },
+  // High-signal model cards: full metrics payload + related effort slugs live here.
+  { url: "https://artificialanalysis.ai/models/claude-fable-5", label: "AA model card: claude-fable-5" },
+  { url: "https://artificialanalysis.ai/models/claude-opus-5", label: "AA model card: claude-opus-5" },
+  { url: "https://artificialanalysis.ai/models/claude-sonnet-5", label: "AA model card: claude-sonnet-5" },
+  { url: "https://artificialanalysis.ai/models/gpt-5-6-sol", label: "AA model card: gpt-5-6-sol" },
+  { url: "https://artificialanalysis.ai/models/gpt-5-6-luna", label: "AA model card: gpt-5-6-luna" },
+  { url: "https://artificialanalysis.ai/models/gpt-5-6-terra", label: "AA model card: gpt-5-6-terra" },
+  { url: "https://artificialanalysis.ai/models/gemini-3-5-flash", label: "AA model card: gemini-3-5-flash" },
+  { url: "https://artificialanalysis.ai/providers/anthropic", label: "AA provider: anthropic" },
 ];
 
 async function fetchHtml(url) {
@@ -38,6 +49,30 @@ async function fetchHtml(url) {
   });
   if (!res.ok) throw new Error(`${url} → ${res.status}`);
   return res.text();
+}
+
+/** Deep-scrape individual effort-variant model cards discovered by slug. */
+async function deepScrapeSlugs(slugs, today, limit = 40) {
+  const out = [];
+  const unique = [...new Set(slugs)].slice(0, limit);
+  for (const slug of unique) {
+    const url = `https://artificialanalysis.ai/models/${slug}`;
+    try {
+      const html = await fetchHtml(url);
+      const raw = extractAllModelsBySlug(html);
+      // Prefer the page's own slug record if present
+      const self = raw.find((m) => m.slug === slug);
+      const pool = self ? [self, ...raw] : raw;
+      for (const m of pool) {
+        if (m.deprecated) continue;
+        const row = mapAaRow(m, today, `AA model card deep: ${slug}`);
+        if (isScorable(row)) out.push(row);
+      }
+    } catch {
+      /* 404 or parse fail — skip */
+    }
+  }
+  return out;
 }
 
 function rowKey(row) {
@@ -132,7 +167,7 @@ function applyOpenRouterPricing(aaRows, orModels) {
   return { rows, overlays };
 }
 
-function buildEffortGaps(aaRows, laddersDoc) {
+function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
   const byFamily = new Map();
   for (const row of aaRows) {
     const list = byFamily.get(row.family_id) ?? [];
@@ -145,6 +180,7 @@ function buildEffortGaps(aaRows, laddersDoc) {
     const have = new Set(byFamily.get(family) ?? []);
     const expected = meta.expected_tiers || [];
     const missing = expected.filter((t) => !have.has(t));
+    const partial = partialByFamily.get(family) || [];
     if (missing.length || have.size < 2) {
       gaps.push({
         family,
@@ -152,6 +188,7 @@ function buildEffortGaps(aaRows, laddersDoc) {
         expected_tiers: expected,
         published_tiers: [...have].sort(),
         missing_tiers: missing,
+        partial_tiers: partial, // card exists: speed/price but Intelligence Index null
         published_rows: (byFamily.get(family) ?? []).length,
         complete: missing.length === 0 && have.size >= 2,
         notes: meta.notes || "",
@@ -183,12 +220,25 @@ function buildEffortGaps(aaRows, laddersDoc) {
 const today = new Date().toISOString().slice(0, 10);
 let merged = [];
 const sourceStats = [];
+/** All AA raw models seen (including incomplete IQ) — for gap / deep scrape discovery. */
+const allRawBySlug = new Map();
 
 for (const { url, label } of AA_URLS) {
   try {
     const html = await fetchHtml(url);
-    const raw = extractRichModels(html);
-    const mapped = raw
+    // Prefer richest single array, but also merge every slug-bearing object on the page.
+    let raw = [];
+    try {
+      raw = extractRichModels(html);
+    } catch {
+      raw = [];
+    }
+    const allOnPage = extractAllModelsBySlug(html);
+    for (const m of allOnPage) {
+      if (m?.slug) allRawBySlug.set(m.slug, m);
+    }
+    const pool = allOnPage.length ? allOnPage : raw;
+    const mapped = pool
       .filter((m) => !m.deprecated)
       .map((m) => mapAaRow(m, today, label))
       .filter(isScorable);
@@ -197,13 +247,73 @@ for (const { url, label } of AA_URLS) {
     sourceStats.push({
       source: label,
       url,
-      raw: raw.length,
+      raw: pool.length,
       scorable: mapped.length,
       added: merged.length - before,
     });
   } catch (err) {
     sourceStats.push({ source: label, url, error: String(err) });
   }
+}
+
+// Deep-scrape effort-variant cards that appear as slugs but may lack IQ in list payloads.
+// e.g. claude-sonnet-5-low has a model card page (speed/price) — re-fetch for metrics.
+const incompleteSlugs = [...allRawBySlug.entries()]
+  .filter(([, m]) => {
+    if (m.deprecated) return false;
+    const tps = m.medianOutputTokensPerSecond ?? m.timescaleData?.medianOutputSpeed;
+    const blend = m.price1mBlended7To2To1;
+    // Missing IQ but present as a product effort card — worth a dedicated page pull
+    return m.intelligenceIndex == null && tps != null && blend != null;
+  })
+  .map(([slug]) => slug);
+
+// Also deep-scrape every expected-ladder family base slug + common effort suffixes
+let laddersDocEarly = { ladders: {} };
+if (fs.existsSync(laddersPath)) {
+  laddersDocEarly = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
+}
+const suffixGuess = ["", "-low", "-medium", "-high", "-xhigh", "-max", "-non-reasoning", "-minimal"];
+const ladderSlugs = [];
+for (const [family, meta] of Object.entries(laddersDocEarly.ladders || {})) {
+  // rough slug from family name
+  const base = family
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  for (const s of suffixGuess) ladderSlugs.push(`${base}${s}`);
+  // Anthropic claude- prefix variants
+  if (meta.provider === "Anthropic") {
+    for (const s of suffixGuess) ladderSlugs.push(`claude-${base.replace(/^claude-/, "")}${s}`);
+  }
+}
+// Known Fable only has claude-fable-5 today — still try effort suffixes
+for (const s of suffixGuess) ladderSlugs.push(`claude-fable-5${s}`);
+
+const deepTargets = [...new Set([...incompleteSlugs, ...ladderSlugs])];
+const deepRows = await deepScrapeSlugs(deepTargets, today, 60);
+const beforeDeep = merged.length;
+merged = mergeAaRows(merged, deepRows);
+sourceStats.push({
+  source: "AA model card deep scrape",
+  targets: deepTargets.length,
+  incomplete_list_slugs: incompleteSlugs.length,
+  scorable: deepRows.length,
+  added: merged.length - beforeDeep,
+});
+
+// Track partial cards: product effort slug exists with speed/price but no IQ (not plottable).
+const partialByFamily = new Map();
+for (const [slug, m] of allRawBySlug) {
+  if (m.deprecated) continue;
+  const tps = m.medianOutputTokensPerSecond ?? m.timescaleData?.medianOutputSpeed;
+  const blend = m.price1mBlended7To2To1;
+  if (m.intelligenceIndex != null || tps == null || blend == null) continue;
+  const fam = deriveFamilyId(m.name || slug);
+  const tier = (m.name && mapAaRow(m, today, "partial").effort_tier) || "unknown";
+  const list = partialByFamily.get(fam) ?? [];
+  list.push({ tier, slug, tps, blend });
+  partialByFamily.set(fam, list);
 }
 
 const or = await scrapeOpenRouter();
@@ -226,7 +336,7 @@ let laddersDoc = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
   laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
 }
-const gaps = buildEffortGaps(merged, laddersDoc);
+const gaps = buildEffortGaps(merged, laddersDoc, partialByFamily);
 fs.writeFileSync(
   gapsPath,
   `${JSON.stringify(

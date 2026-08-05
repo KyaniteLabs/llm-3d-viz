@@ -11,12 +11,77 @@
     {
       "source": "Artificial Analysis models catalog scrape",
       "url": "https://artificialanalysis.ai/models",
-      "error": "Error: rich model block not found"
+      "raw": 591,
+      "scorable": 0,
+      "added": 0
+    },
+    {
+      "source": "AA model card: claude-fable-5",
+      "url": "https://artificialanalysis.ai/models/claude-fable-5",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: claude-opus-5",
+      "url": "https://artificialanalysis.ai/models/claude-opus-5",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: claude-sonnet-5",
+      "url": "https://artificialanalysis.ai/models/claude-sonnet-5",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: gpt-5-6-sol",
+      "url": "https://artificialanalysis.ai/models/gpt-5-6-sol",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: gpt-5-6-luna",
+      "url": "https://artificialanalysis.ai/models/gpt-5-6-luna",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: gpt-5-6-terra",
+      "url": "https://artificialanalysis.ai/models/gpt-5-6-terra",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA model card: gemini-3-5-flash",
+      "url": "https://artificialanalysis.ai/models/gemini-3-5-flash",
+      "raw": 591,
+      "scorable": 157,
+      "added": 0
+    },
+    {
+      "source": "AA provider: anthropic",
+      "url": "https://artificialanalysis.ai/providers/anthropic",
+      "raw": 591,
+      "scorable": 0,
+      "added": 0
+    },
+    {
+      "source": "AA model card deep scrape",
+      "targets": 72,
+      "incomplete_list_slugs": 0,
+      "scorable": 5499,
+      "added": 0
     }
   ],
   "openrouter": {
     "ok": true,
-    "models": 338,
+    "models": 339,
     "price_overlays": 0
   },
   "gaps": [
@@ -39,9 +104,10 @@
         "high",
         "xhigh"
       ],
+      "partial_tiers": [],
       "published_rows": 1,
       "complete": false,
-      "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+      "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
     },
     {
       "family": "Claude Sonnet 4.6",
@@ -63,20 +129,27 @@
       "family": "Claude Sonnet 5",
       "provider": "Anthropic",
       "expected_tiers": [
-        "none",
+        "low",
+        "medium",
         "high",
-        "max"
+        "xhigh",
+        "max",
+        "none"
       ],
       "published_tiers": [
         "high",
         "max"
       ],
       "missing_tiers": [
+        "low",
+        "medium",
+        "xhigh",
         "none"
       ],
+      "partial_tiers": [],
       "published_rows": 2,
       "complete": false,
-      "notes": "Partial AA coverage common."
+      "notes": "Cards exist for low/medium/high/xhigh with speed+price but Intelligence Index is null on those cards (verified). Only max + non-reasoning high are scorable."
     },
     {
       "family": "DeepSeek V4 Flash",
@@ -306,8 +379,9 @@
       "high",
       "xhigh"
     ],
+    "partial_tiers": [],
     "published_rows": 1,
     "complete": false,
-    "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+    "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
   }
 }

@@ -5,7 +5,7 @@
     "Claude Fable 5": {
       "provider": "Anthropic",
       "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
-      "notes": "API adaptive reasoning supports multiple efforts; AA public leaderboard only scores max (with Opus 4.8 fallback) as of 2026-08."
+      "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
     },
     "Claude Opus 5": {
       "provider": "Anthropic",
@@ -14,8 +14,8 @@
     },
     "Claude Sonnet 5": {
       "provider": "Anthropic",
-      "expected_tiers": ["none", "high", "max"],
-      "notes": "Partial AA coverage common."
+      "expected_tiers": ["low", "medium", "high", "xhigh", "max", "none"],
+      "notes": "Cards exist for low/medium/high/xhigh with speed+price but Intelligence Index is null on those cards (verified). Only max + non-reasoning high are scorable."
     },
     "GPT-5.6 Sol": {
       "provider": "OpenAI",
