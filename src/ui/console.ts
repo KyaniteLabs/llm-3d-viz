@@ -56,7 +56,6 @@ export class DecisionConsole {
   private cursor = { x: 0, y: 0 };
   private filtersBound = false;
   private familySearch = "";
-  private multiEffortOnly = false;
 
   constructor(root: HTMLElement, store: AppStore, models: readonly Model[], onCinemaToggle: () => void) {
     this.root = root;
@@ -119,7 +118,7 @@ export class DecisionConsole {
     const chips = multi.slice(0, chipLimit);
     section.innerHTML = `
       <p class="weight-heading">FAMILY CURVES <span class="filter-count">${multi.length} multi-effort</span></p>
-      <p class="axis-hint">Solo a family chip to read its intensity ladder. Empty filter = all families in age window.</p>
+      <p class="axis-hint">Solo a family chip for its intensity ladder. Default shows multi-effort curves only.</p>
       <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
         ${chips
           .map(
@@ -134,7 +133,7 @@ export class DecisionConsole {
   private filteredFamilyOptions(): string[] {
     const multi = new Set(this.multiEffortCatalog().map((m) => m.family));
     let families = listFamilies(this.catalog);
-    if (this.multiEffortOnly) families = families.filter((f) => multi.has(f));
+    if (this.store.getState().filters.multiEffortOnly) families = families.filter((f) => multi.has(f));
     const q = this.familySearch.trim().toLowerCase();
     if (q) families = families.filter((f) => f.toLowerCase().includes(q));
     // Multi-effort first for navigability.
@@ -164,8 +163,8 @@ export class DecisionConsole {
           <span>Age ≤ 6 months</span>
         </label>
         <label class="filter-toggle">
-          <input type="checkbox" data-filter-multi-only ${this.multiEffortOnly ? "checked" : ""} />
-          <span>Family list: multi-effort only</span>
+          <input type="checkbox" data-filter-multi-only ${state.filters.multiEffortOnly ? "checked" : ""} />
+          <span>Multi-effort curves only</span>
         </label>
         <button type="button" class="filter-clear" data-filter-clear>Clear filters</button>
       </div>
@@ -202,7 +201,9 @@ export class DecisionConsole {
     section.addEventListener("change", (event) => {
       const target = event.target as HTMLElement;
       if (target instanceof HTMLInputElement && target.matches("[data-filter-multi-only]")) {
-        this.multiEffortOnly = target.checked;
+        this.store.update({
+          filters: { ...this.store.getState().filters, multiEffortOnly: target.checked },
+        });
         this.renderFilterControls();
         this.renderFamilyNav();
         return;
@@ -233,10 +234,12 @@ export class DecisionConsole {
     const age = section.querySelector<HTMLInputElement>("[data-filter-age]")!;
     const prov = section.querySelector<HTMLSelectElement>("[data-filter-providers]")!;
     const fam = section.querySelector<HTMLSelectElement>("[data-filter-families]")!;
+    const multiOnly = section.querySelector<HTMLInputElement>("[data-filter-multi-only]");
     this.store.update({
       filters: {
         ageEnabled: age.checked,
         ageMonths: 6,
+        multiEffortOnly: multiOnly?.checked ?? this.store.getState().filters.multiEffortOnly,
         providers: Array.from(prov.selectedOptions).map((o) => o.value),
         families: Array.from(fam.selectedOptions).map((o) => o.value),
       },
@@ -256,9 +259,8 @@ export class DecisionConsole {
 
   private clearFilters() {
     this.familySearch = "";
-    this.multiEffortOnly = false;
     this.store.update({
-      filters: { ageEnabled: true, ageMonths: 6, providers: [], families: [] },
+      filters: { ageEnabled: true, ageMonths: 6, multiEffortOnly: true, providers: [], families: [] },
       pinnedModelId: null,
       hoveredModelId: null,
     });

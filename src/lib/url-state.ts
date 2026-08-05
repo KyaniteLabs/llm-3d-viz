@@ -11,6 +11,7 @@
  * - w=s,c,i          raw weight triple speed,cost,intelligence
  * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
  * - enc=openness     legacy openness-primary fill (product default is curve-focus)
+ * - me=0             show single-effort models (product default multi-effort only)
  */
 
 import {
@@ -69,6 +70,10 @@ export function parseShareableState(
   if (params.has("families")) {
     filters.families = splitList(params.get("families"));
   }
+  if (params.has("me")) {
+    const me = params.get("me");
+    filters.multiEffortOnly = me !== "0" && me !== "false";
+  }
 
   let axisMapping = normalizeAxisMapping(base.axisMapping ?? DEFAULT_AXIS_MAPPING);
   const ax = params.get("ax");
@@ -111,7 +116,7 @@ export function serializeShareableState(
   }
 
   // Clear shareable keys then re-apply non-defaults.
-  for (const key of ["age", "providers", "families", "ax", "w"]) {
+  for (const key of ["age", "providers", "families", "ax", "w", "me"]) {
     params.delete(key);
   }
   for (const [key, value] of Object.entries(preserved)) {
@@ -120,6 +125,10 @@ export function serializeShareableState(
 
   if (!state.filters.ageEnabled) {
     params.set("age", "0");
+  }
+  // Product default multiEffortOnly=true; only serialize opt-out.
+  if (!state.filters.multiEffortOnly) {
+    params.set("me", "0");
   }
   if (state.filters.providers.length) {
     params.set("providers", joinList(state.filters.providers));

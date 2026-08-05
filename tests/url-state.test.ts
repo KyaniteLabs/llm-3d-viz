@@ -37,6 +37,7 @@ describe("url-state", () => {
       filters: {
         ageEnabled: false,
         ageMonths: 6,
+        multiEffortOnly: true,
         providers: ["OpenAI"],
         families: ["Claude Opus 5"],
       },
@@ -74,5 +75,20 @@ describe("enc presentation flag", () => {
     );
     expect(params.get("enc")).toBe("openness");
     expect(params.get("heat")).toBe("1");
+  });
+});
+
+describe("multi-effort only URL", () => {
+  it("serializes me=0 when multiEffortOnly is off", () => {
+    const params = serializeShareableState({
+      filters: { ...DEFAULT_FILTERS, multiEffortOnly: false },
+      axisMapping: { ...DEFAULT_AXIS_MAPPING },
+      weights: { ...presets.chat },
+    });
+    expect(params.get("me")).toBe("0");
+  });
+  it("parses me=0", () => {
+    const state = parseShareableState("?me=0");
+    expect(state.filters.multiEffortOnly).toBe(false);
   });
 });

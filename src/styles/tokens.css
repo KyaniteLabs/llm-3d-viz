@@ -109,8 +109,8 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-  grid-template-rows: minmax(0, 1fr) minmax(12rem, 16rem);
-  grid-template-areas: "stage console" "projections projections";
+  grid-template-rows: minmax(0, 1fr) auto minmax(9rem, 12rem);
+  grid-template-areas: "stage console" "effort effort" "projections projections";
   gap: 0.75rem;
   padding: 0.75rem;
   overflow: hidden;
@@ -190,7 +190,9 @@ html, body { height: 100%; }
 /* Multi-minute (reasoning-model) TTFT caveat — a muted footnote under the value,
    wherever TTFT is shown (readout + tooltip). */
 .ttft-caveat { display: block; color: var(--text-muted); font-size: var(--step--1); margin-top: 0.1rem; }
-.projection-row { grid-area: projections; min-height: 0; min-width: 0; display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr) minmax(0, 0.92fr); gap: 0.75rem; }
+.projection-row { grid-area: projections; min-height: 0; min-width: 0; max-height: 12rem; display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr) minmax(0, 0.92fr); gap: 0.55rem; }
+.projection-row .projection { min-height: 0; overflow: hidden; }
+.projection-row .projection .js-plotly-plot, .projection-row .projection .plot-container { max-height: 11rem !important; }
 .projection { min-height: 0; padding: 0.65rem 0.8rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); overflow: hidden; }
 .eyebrow { margin: 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.14em; }
 h1, h2 { margin: 0.35rem 0 0; font-family: var(--font-display); font-weight: 500; letter-spacing: -0.04em; }
@@ -265,7 +267,11 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .heat-encoding-note { margin: 0.65rem 0 0; color: var(--color-text-muted); font-size: 0.62rem; line-height: 1.35; }
 
 @media (max-width: 760px) {
-  .observatory { height: auto; min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "stage" "console" "projections"; overflow: visible; }
+  .observatory { height: auto; min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "stage" "effort" "console" "projections"; overflow: visible; }
+  .stage { max-height: 55dvh; }
+  .projection-row { max-height: none; }
+  .console .task-charts, .console .score-table-host, .console .incomplete-data { display: none; }
+  .console .filter-disclosure { display: none; }
   .stage { min-height: 0; display: flex; flex-direction: column; overflow: visible; }
   h1 { max-width: none; overflow-wrap: normal; }
   .stage-visual { min-height: 18rem; }
@@ -297,7 +303,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .filter-disclosure > summary { cursor: pointer; list-style: none; color: var(--color-text-muted); letter-spacing: 0.1em; }
 .filter-disclosure > summary::-webkit-details-marker { display: none; }
 .filter-disclosure .filter-controls { border-top: 0; margin-top: 0.35rem; }
-.effort-strip { grid-area: projections; margin-bottom: 0.5rem; padding: 0.55rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: rgba(16, 22, 29, 0.92); }
+.effort-strip { grid-area: effort; margin: 0; padding: 0.45rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: rgba(16, 22, 29, 0.92); }
 .effort-strip[hidden] { display: none !important; }
 .effort-ladder { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0; padding: 0; list-style: none; }
 .effort-step { display: flex; flex-direction: column; gap: 0.15rem; min-width: 5.5rem; padding: 0.35rem 0.45rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); cursor: default; font-family: var(--font-mono); }

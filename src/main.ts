@@ -171,6 +171,7 @@ async function boot() {
     renderedAxes = { ...axisMapping };
     renderedFilters = {
       ...filters,
+      multiEffortOnly: filters.multiEffortOnly,
       providers: [...filters.providers],
       families: [...filters.families],
     };
