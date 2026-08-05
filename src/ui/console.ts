@@ -63,34 +63,31 @@ export class DecisionConsole {
     this.catalog = models;
     this.models = models;
     this.root.innerHTML = `
-      <p class="eyebrow">INSTRUMENT CONSOLE · CLOUD LABS</p>
-      <h2 id="console-title">Value readout</h2>
+      <p class="eyebrow">INSPECTOR</p>
+      <h2>Selection</h2>
       <section class="model-readout" aria-live="polite"></section>
-      <section class="family-nav" aria-label="Multi-effort family navigation"></section>
+      <section class="family-nav" aria-label="Family and effort navigation"></section>
       <section class="weight-controls" aria-label="Value-score weight shares"></section>
       <section class="preset-controls" aria-label="Workload presets"></section>
-      <section class="axis-controls" aria-label="Stage axis metrics"></section>
       <details class="filter-disclosure">
-        <summary class="weight-heading">ADVANCED FILTERS</summary>
-        <section class="filter-controls" aria-label="Visible-set filters">
-          <p class="weight-heading">VISIBLE SET / FILTERS</p>
-        </section>
+        <summary class="weight-heading">AXES</summary>
+        <section class="axis-controls" aria-label="Stage axis metrics"></section>
       </details>
-      <button class="cinema-toggle" type="button" data-cinema-toggle aria-pressed="false">ENTER CINEMA [C]</button>
       <details class="console-secondary">
         <summary class="weight-heading">MORE · TASKS / TABLE</summary>
         <section class="task-charts" aria-label="Cost and time per Index task"></section>
         <section class="score-table-host" aria-label="Model score table"></section>
         <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
-      </details>`;
+      </details>
+      <!-- legacy filter host kept for renderFilterControls (hidden) -->
+      <section class="filter-controls" hidden aria-hidden="true"></section>`;
 
     this.renderControls();
     this.renderAxisControls();
     this.renderFilterControls();
     this.renderFamilyNav();
-    this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]")!.addEventListener("click", () => {
-      onCinemaToggle();
-    });
+    // Cinema control lives on the scope bar; callback retained for API compatibility.
+    void onCinemaToggle;
     this.root.addEventListener("click", (event) => this.onConsoleClick(event));
     this.root.addEventListener("input", (event) => {
       const target = event.target as HTMLElement;

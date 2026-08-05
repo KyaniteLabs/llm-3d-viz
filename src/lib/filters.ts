@@ -82,6 +82,9 @@ export function applyFilters(
     );
   }
 
+  // Sentinel: explicit empty membership from filter shelf "None"
+  if (filters.providers.includes("__none__")) return [];
+
   return models.filter((model) => {
     if (providerSet && !providerSet.has(model.provider)) return false;
     const fid = familyIdOf(model);

@@ -8,30 +8,74 @@
     <title>Model Observatory</title>
   </head>
   <body>
-    <main class="observatory" aria-label="LLM benchmark observatory">
-      <section class="stage panel" aria-labelledby="stage-title">
-        <div class="region-heading">
-          <p class="eyebrow">MODEL UNIVERSE / V0</p>
+    <div class="app-shell observatory" id="app-shell">
+      <header class="scope-bar" aria-label="Visible set summary">
+        <div class="scope-bar-brand">
+          <p class="eyebrow">MODEL OBSERVATORY</p>
           <h1 id="stage-title">Speed × cost × intelligence</h1>
         </div>
-        <div class="stage-visual">
-          <div class="stage-placeholder" aria-label="3D benchmark stage placeholder">
-            <span>3D STAGE / AWAITING INSTRUMENT DATA</span>
-          </div>
+        <button type="button" class="scope-summary" data-scope-edit aria-expanded="false" aria-controls="filter-shelf">
+          <span class="scope-summary-text" data-scope-text>Loading scope…</span>
+          <span class="scope-edit-label">Edit scope</span>
+        </button>
+        <div class="scope-bar-actions">
+          <label class="scope-search">
+            <span class="visually-hidden">Search models</span>
+            <input type="search" data-global-search placeholder="Search models…" autocomplete="off" />
+          </label>
+          <button type="button" class="cinema-toggle" data-cinema-toggle aria-pressed="false">Cinema [C]</button>
         </div>
-        <aside class="stage-guide" aria-label="Stage legend and frontier model labels"></aside>
-      </section>
+      </header>
 
-      <aside class="console panel" aria-labelledby="console-title">
+      <aside class="filter-shelf" id="filter-shelf" aria-label="Filter shelf — edit visible set" hidden>
+        <div class="filter-shelf-head">
+          <p class="weight-heading">VISIBLE SET</p>
+          <button type="button" class="text-link" data-scope-close>Close</button>
+        </div>
+        <div class="filter-shelf-body" data-filter-shelf></div>
+        <div class="filter-shelf-foot">
+          <button type="button" class="filter-clear" data-scope-reset>Reset draft</button>
+          <button type="button" class="scope-apply" data-scope-apply>Apply scope</button>
+        </div>
       </aside>
 
-      <section class="effort-strip panel" data-effort-strip hidden aria-label="Solo family effort ladder"></section>
-      <section class="projection-row" aria-label="Linked two-dimensional projections">
-        <article class="projection panel"><p class="eyebrow">SPEED / INTELLIGENCE</p></article>
-        <article class="projection panel"><p class="eyebrow">SPEED / COST</p></article>
-        <article class="projection panel"><p class="eyebrow">COST / INTELLIGENCE</p></article>
-      </section>
-    </main>
+      <main class="canvas-host" data-canvas-mode="3d" aria-label="Analysis canvas">
+        <div class="mode-tabs" role="tablist" aria-label="Canvas mode">
+          <button type="button" role="tab" class="mode-tab is-active" data-mode="3d" aria-selected="true">3D</button>
+          <button type="button" role="tab" class="mode-tab" data-mode="2d" aria-selected="false">2D</button>
+          <button type="button" role="tab" class="mode-tab" data-mode="table" aria-selected="false">Table</button>
+        </div>
+
+        <section class="stage panel" data-pane="3d" aria-labelledby="stage-title">
+          <div class="stage-visual">
+            <div class="stage-placeholder" aria-label="3D benchmark stage placeholder">
+              <span>3D STAGE / AWAITING INSTRUMENT DATA</span>
+            </div>
+          </div>
+          <aside class="stage-guide" aria-label="Stage legend and frontier model labels"></aside>
+        </section>
+
+        <section class="effort-strip panel" data-effort-strip hidden aria-label="Solo family effort ladder"></section>
+
+        <section class="projection-row" data-pane="2d" hidden aria-label="Linked two-dimensional projections">
+          <article class="projection panel"><p class="eyebrow">SPEED / INTELLIGENCE</p></article>
+          <article class="projection panel"><p class="eyebrow">SPEED / COST</p></article>
+          <article class="projection panel"><p class="eyebrow">COST / INTELLIGENCE</p></article>
+        </section>
+
+        <section class="table-pane panel" data-pane="table" hidden aria-label="Model membership table">
+          <div data-membership-table></div>
+        </section>
+      </main>
+
+      <aside class="inspector console panel" id="console-title" aria-label="Selection inspector">
+        <!-- DecisionConsole mounts here -->
+      </aside>
+
+      <footer class="status-bar" aria-live="polite">
+        <span data-status-text>Ready</span>
+      </footer>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
