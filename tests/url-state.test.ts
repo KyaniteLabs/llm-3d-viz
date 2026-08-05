@@ -12,6 +12,12 @@ describe("url-state", () => {
     expect(state.filters.families).toEqual(["GPT-5.6"]);
   });
 
+  it("accepts fam= as an alias for families=", () => {
+    const state = parseShareableState("?fam=Claude%20Fable%205&me=1");
+    expect(state.filters.families).toEqual(["Claude Fable 5"]);
+    expect(state.filters.multiEffortOnly).toBe(true);
+  });
+
   it("parses axis mapping and weights", () => {
     const state = parseShareableState("?ax=tps,intelligence,blended_price&w=0.25,0.15,0.6");
     expect(state.axisMapping).toEqual({

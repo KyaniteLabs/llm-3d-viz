@@ -109,8 +109,12 @@ export class FilterShelf {
             const checked =
               (!providerSet || providerSet.has(lab)) &&
               (!familySet || familySet.has(fam));
-            const curve = multi.has(fam) ? ` · ${count} steps` : "";
-            return `<label class="tree-family">
+            const curve = multi.has(fam)
+              ? ` · ${count} steps`
+              : count === 1
+                ? " · single"
+                : ` · ${count}`;
+            return `<label class="tree-family${multi.has(fam) ? "" : " is-singleton"}">
               <input type="checkbox" data-tree-family="${esc(fam)}" data-tree-lab="${esc(lab)}" ${checked ? "checked" : ""} />
               <span>${esc(fam)}<em>${curve}</em></span>
             </label>`;

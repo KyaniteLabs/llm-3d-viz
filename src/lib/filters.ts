@@ -70,8 +70,11 @@ export function applyFilters(
     filters.ageEnabled ? monthsBefore(referenceDate, filters.ageMonths) : null;
 
   // Precompute multi-effort family membership when the filter is on.
+  // Explicit family picks win: if the analyst selected families (e.g. Claude Fable 5,
+  // a singleton on AA), multi-effort-only must NOT zero the stage. The gate only
+  // applies in browse mode (families empty ≡ all).
   let multiEffortFamilies: Set<string> | null = null;
-  if (filters.multiEffortOnly) {
+  if (filters.multiEffortOnly && !familySet) {
     const counts = new Map<string, number>();
     for (const model of models) {
       const id = familyIdOf(model);

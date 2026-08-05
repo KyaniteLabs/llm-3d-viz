@@ -198,6 +198,26 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 .family-chip em { color: var(--filament-dim); font-style: normal; margin-left: 0.2rem; }
 .family-chip:hover { border-color: rgba(232, 241, 228, 0.35); color: var(--color-text); }
 .family-chip.is-active, .family-chip.is-action:active { border-color: var(--filament); color: var(--filament); background: rgba(232, 241, 228, 0.08); }
+.family-chip.is-singleton { opacity: 0.92; border-style: dashed; }
+.tree-family.is-singleton em { color: var(--copper, #c47a3a); }
+.empty-visible-banner {
+  position: absolute;
+  inset: 12% 10% auto;
+  z-index: 8;
+  max-width: 28rem;
+  margin: 0 auto;
+  left: 0; right: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: rgba(11, 17, 16, 0.94);
+  color: var(--color-text-muted);
+  font: 400 0.75rem/1.45 var(--font-mono);
+  pointer-events: none;
+}
+.empty-visible-banner .eyebrow { color: var(--filament-dim); margin: 0 0 0.35rem; }
+.empty-visible-banner p { margin: 0.35rem 0 0; }
+.empty-visible-banner code { color: var(--filament); }
 .family-chip.is-action { margin-top: 0.55rem; width: 100%; text-align: center; letter-spacing: 0.06em; text-transform: uppercase; }
 #filter-family-search { width: 100%; background: var(--ink-panel-2); border: 1px solid var(--color-border); color: var(--color-text); font: 400 0.75rem var(--font-mono); padding: 0.35rem 0.45rem; border-radius: var(--radius-control); }
 .filter-controls select[multiple] { min-height: 5.5rem; }

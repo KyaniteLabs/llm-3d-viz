@@ -190,13 +190,24 @@ export class DecisionConsole {
     const section = this.root.querySelector(".family-nav");
     if (!section) return;
     const multi = this.multiEffortNavList();
+    const multiSet = new Set(multi.map((m) => m.family));
     const state = this.store.getState();
     const solo = this.currentSoloFamily();
     const selectedFamilies = new Set(state.filters.families);
-    const chipLimit = 16;
-    const chips = multi.slice(0, chipLimit);
+    // Chip list: multi-effort first, then singletons (so Fable etc. are reachable).
+    const counts = new Map<string, number>();
+    for (const m of this.catalog) {
+      const id = familyIdOf(m);
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    const singles = [...counts.entries()]
+      .filter(([family, n]) => n === 1 && !multiSet.has(family))
+      .map(([family, count]) => ({ family, count }))
+      .sort((a, b) => a.family.localeCompare(b.family));
+    const chipLimit = 24;
+    const chips = [...multi, ...singles].slice(0, chipLimit);
     const soloIdx = solo ? multi.findIndex((m) => m.family === solo) : -1;
-    const soloMeta = soloIdx >= 0 ? multi[soloIdx] : null;
+    const soloMeta = soloIdx >= 0 ? multi[soloIdx] : solo ? { family: solo, count: counts.get(solo) ?? 1 } : null;
 
     // Effort steps for current solo family
     const members = solo ? groupByFamily(this.catalog).get(solo) ?? [] : [];
@@ -207,16 +218,18 @@ export class DecisionConsole {
         ? `${deriveEffortTier(members[effortIdx])} · ${effortIdx + 1}/${members.length}`
         : members.length >= 2
           ? `${members.length} steps`
-          : "—";
+          : members.length === 1
+            ? "single published effort"
+            : "—";
 
     section.innerHTML = `
-      <p class="weight-heading">NAVIGATE <span class="filter-count">${multi.length} curves</span></p>
+      <p class="weight-heading">NAVIGATE <span class="filter-count">${multi.length} curves · ${singles.length} singles</span></p>
       <div class="nav-stepper" role="group" aria-label="Family stepper">
         <button type="button" class="nav-step" data-nav-family="-1" title="Previous family [">◀</button>
         <div class="nav-step-status">
           <span class="nav-step-label">Family</span>
           <strong data-nav-family-name>${solo ? solo.replace(/</g, "") : "all curves"}</strong>
-          <span class="nav-step-meta">${soloMeta ? `${soloMeta.count} steps · ${soloIdx + 1}/${multi.length}` : "chip or ] to solo"}</span>
+          <span class="nav-step-meta">${soloMeta ? `${soloMeta.count} step${soloMeta.count === 1 ? "" : "s"}${soloIdx >= 0 ? ` · ${soloIdx + 1}/${multi.length}` : " · singleton"}` : "chip or ] to solo"}</span>
         </div>
         <button type="button" class="nav-step" data-nav-family="1" title="Next family ]">▶</button>
       </div>
@@ -225,7 +238,7 @@ export class DecisionConsole {
         <div class="nav-step-status">
           <span class="nav-step-label">Effort</span>
           <strong data-nav-effort-name>${effortLabel.replace(/</g, "")}</strong>
-          <span class="nav-step-meta">${solo ? "step intensity ladder" : "solo a family first"}</span>
+          <span class="nav-step-meta">${solo ? (members.length < 2 ? "only one AA effort row" : "step intensity ladder") : "solo a family first"}</span>
         </div>
         <button type="button" class="nav-step" data-nav-effort="1" title="Next effort ." ${members.length < 2 ? "disabled" : ""}>▶</button>
       </div>
@@ -234,18 +247,21 @@ export class DecisionConsole {
       </div>
       <label class="axis-control nav-search" for="nav-family-search">
         <span>Find</span>
-        <input id="nav-family-search" type="search" data-nav-family-search value="${this.familySearch.replace(/"/g, "&quot;")}" placeholder="Sol, Opus, Gemini…" autocomplete="off" />
+        <input id="nav-family-search" type="search" data-nav-family-search value="${this.familySearch.replace(/"/g, "&quot;")}" placeholder="Fable, Sol, Opus…" autocomplete="off" />
       </label>
-      <div class="family-chip-row" role="list" aria-label="Multi-effort family shortcuts">
+      <div class="family-chip-row" role="list" aria-label="Family shortcuts">
         ${chips
           .filter(({ family }) => {
             const q = this.familySearch.trim().toLowerCase();
             return !q || family.toLowerCase().includes(q);
           })
-          .map(
-            ({ family, count }) =>
-              `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}" data-solo-family="${family}" role="listitem" title="${count} effort steps — click again to show all">${family} <em>${count}</em></button>`,
-          )
+          .map(({ family, count }) => {
+            const single = count < 2;
+            const title = single
+              ? "Single published effort on AA — click to solo (turns off multi-effort-only if needed)"
+              : `${count} effort steps — click again to show all`;
+            return `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}${single ? " is-singleton" : ""}" data-solo-family="${family}" role="listitem" title="${title}">${family} <em>${count}</em></button>`;
+          })
           .join("")}
       </div>
       <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all · <kbd>C</kbd> cinema</p>`;
@@ -253,11 +269,12 @@ export class DecisionConsole {
 
   private filteredFamilyOptions(): string[] {
     const multi = new Set(this.multiEffortCatalog().map((m) => m.family));
+    // Always list singleton families too (e.g. Claude Fable 5) — multi-effort
+    // default only gates browse mode, not discoverability of selected families.
     let families = listFamilies(this.catalog);
-    if (this.store.getState().filters.multiEffortOnly) families = families.filter((f) => multi.has(f));
     const q = this.familySearch.trim().toLowerCase();
     if (q) families = families.filter((f) => f.toLowerCase().includes(q));
-    // Multi-effort first for navigability.
+    // Multi-effort first for navigability; singles last.
     return families.sort((a, b) => {
       const am = multi.has(a) ? 0 : 1;
       const bm = multi.has(b) ? 0 : 1;
@@ -374,10 +391,16 @@ export class DecisionConsole {
       this.showAllFamilies();
       return;
     }
+    const multi = new Set(this.multiEffortCatalog().map((m) => m.family));
+    const isMulti = multi.has(family);
+    const prev = this.store.getState().filters;
     this.store.update({
       filters: {
-        ...this.store.getState().filters,
+        ...prev,
         families: [family],
+        // Singleton families (1 AA effort row) cannot satisfy multi-effort-only
+        // browse gate — turn it off so the point actually appears.
+        multiEffortOnly: isMulti ? prev.multiEffortOnly : false,
       },
       pinnedModelId: null,
       hoveredModelId: null,
