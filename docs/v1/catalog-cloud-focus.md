@@ -20,6 +20,11 @@ Simon: reduce noise; focus on **cloud** models for now. Local / edge labs held f
 
 Amazon, Meta, Mistral, Cohere, SpaceXAI (Grok), Nous, Xiaomi, Microsoft, IBM, and long-tail labs — see `src/data/catalog-scope.ts` `HELD_LABS_FOR_LATER`.
 
+## Release floor
+
+**Nothing older than 2026-01-01** enters the product instrument (`RELEASE_FLOOR_ISO` in `catalog-scope.ts`).
+Pre-2026 rows remain only on `allModels` / the raw JSON for archive work.
+
 ## Escape hatch
 
 - Product default: cloud only
