@@ -117,7 +117,7 @@ export class StageGuide {
               this.heatEncoding
                 ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
                 : this.presentationMode === "curve"
-                  ? '<p class="heat-encoding-note" data-heat-encoding="false">LAB-FOCUS · lab hue + family shade · trails connect effort steps · openness glyph only. ?enc=openness for legacy fill.</p>'
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">LAB-FOCUS · official brand hue + family shade · trails connect effort steps · openness glyph only. ?enc=openness for legacy fill.</p>'
                   : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Default is lab-focus.</p>'
             }
           </section>
@@ -131,12 +131,12 @@ export class StageGuide {
                     ({ provider, color }) =>
                       `<li data-lab="${escapeHtml(provider)}">
                         <span class="lab-swatch" style="background:${escapeHtml(color)}" aria-hidden="true"></span>
-                        <span>${escapeHtml(provider)}</span>
+                        <span>${escapeHtml(provider)} <small class="lab-hex">${escapeHtml(color)}</small></span>
                       </li>`,
                   )
                   .join("")}
               </ul>
-              <p class="stage-guide-note">Same lab = same color family. Different models in that lab = lighter/darker shades. Trails stay in that family shade.</p>
+              <p class="stage-guide-note">Colors match each lab’s public brand primary. Different models in that lab = lighter/darker shades of the same brand hue. Trails stay in that family shade.</p>
             </section>
           </details>
 

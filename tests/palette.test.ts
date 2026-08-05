@@ -226,6 +226,17 @@ describe("curve-focus family continuity", () => {
     expect(b).not.toBe(c);
   });
 
+  it("uses official brand primaries for labs", () => {
+    expect(labColor("OpenAI").toLowerCase()).toBe("#10a37f");
+    expect(labColor("Anthropic").toLowerCase()).toBe("#d97757");
+    expect(labColor("Google").toLowerCase()).toBe("#4285f4");
+    expect(labColor("DeepSeek").toLowerCase()).toBe("#4d6bfe");
+    expect(labColor("Alibaba").toLowerCase()).toBe("#fa6400");
+    expect(labColor("Mistral").toLowerCase()).toBe("#fa500f");
+    expect(labColor("NVIDIA").toLowerCase()).toBe("#76b900");
+    expect(labColor("Kimi").toLowerCase()).toBe("#1a88ff");
+  });
+
   it("keeps OpenAI families in green lab hue and Anthropic in warm lab hue", () => {
     const openai = familySeriesColor("GPT-5.6 Sol", "OpenAI");
     const anthropic = familySeriesColor("Claude Opus 5", "Anthropic");
@@ -233,12 +244,12 @@ describe("curve-focus family continuity", () => {
     const aLab = parseChannels(labColor("Anthropic"))!;
     const o = parseChannels(openai)!;
     const a = parseChannels(anthropic)!;
-    // OpenAI brand is green-dominant (G high); Anthropic warm (R high relative).
+    // OpenAI brand is green-dominant (G high); Anthropic clay (R high relative).
     expect(oLab[1]).toBeGreaterThan(oLab[0]);
     expect(aLab[0]).toBeGreaterThan(aLab[2] * 0.9);
     // Family shades stay near lab (not swapped).
-    expect(Math.abs(o[1] - oLab[1])).toBeLessThan(120);
-    expect(Math.abs(a[0] - aLab[0])).toBeLessThan(120);
+    expect(Math.abs(o[1] - oLab[1])).toBeLessThan(90);
+    expect(Math.abs(a[0] - aLab[0])).toBeLessThan(90);
     expect(openai).not.toBe(anthropic);
   });
 

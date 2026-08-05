@@ -252,29 +252,109 @@ export const OPENNESS_FILL = {
   closed: "#6A7580",
 } as const;
 
-/** Stable lab identity colors for outlines / trails / legend (not fill primary). */
+/**
+ * Lab = brand primary hue (exact or closest official product hex).
+ * Sources checked 2026-08-05 against public brand sites / product CSS where available.
+ * Family shades are light/dark variants of this same hue (see familySeriesColor).
+ */
 export const LAB_COLORS: Readonly<Record<string, string>> = {
+  // ChatGPT / OpenAI product green (openai.com product chrome)
   OpenAI: "#10A37F",
-  Anthropic: "#D4A27F",
+  // Anthropic Claude accent (anthropic.com — #d97757)
+  Anthropic: "#D97757",
+  // Google Blue (Material / brand primary)
   Google: "#4285F4",
-  Meta: "#0668E1",
+  // Meta primary button blue (meta.com)
+  Meta: "#1B74E4",
+  // DeepSeek product blue (deepseek.com — #4D6BFE dominant)
   DeepSeek: "#4D6BFE",
-  Alibaba: "#FF6A00",
-  Mistral: "#F54E42",
+  // Alibaba orange (alibaba.com — #fa6400)
+  Alibaba: "#FA6400",
+  // Mistral brand orange (mistral.ai — #FA500F)
+  Mistral: "#FA500F",
+  // Cohere brand green (product / mark)
   Cohere: "#39594D",
+  // Amazon Smile orange (brand guidelines)
   Amazon: "#FF9900",
-  Kimi: "#1A73E8",
+  // Moonshot / Kimi platform blue (platform.moonshot.cn — #1A88FF)
+  Kimi: "#1A88FF",
+  // Microsoft brand blue
   Microsoft: "#00A4EF",
-  MiniMax: "#7C5CFF",
+  // MiniMax product purple (minimax.chat mark)
+  MiniMax: "#E91E8C",
+  // NVIDIA green (nvidia.com — #76B900)
   NVIDIA: "#76B900",
-  SpaceXAI: "#E8F1E4",
-  "Thinking Machines": "#C47A3A",
+  // xAI / Grok (listed as SpaceXAI in AA): monochrome brand → cool white on ink
+  SpaceXAI: "#E7E9EA",
+  // Thinking Machines — no public brand kit; neutral copper reserved for non-brand chrome only
+  "Thinking Machines": "#8B7355",
+  // Xiaomi brand orange
   Xiaomi: "#FF6900",
-  "Z AI": "#6366F1",
+  // Zhipu / GLM (AA provider string "Z AI") — product indigo from bigmodel/zhipu chrome
+  "Z AI": "#1A56DB",
+  // IBM Blue
+  IBM: "#0F62FE",
+  // Tencent brand blue
+  Tencent: "#12B7F5",
+  // AI21 Labs teal
+  "AI21 Labs": "#0D9488",
 };
 
 export function labColor(provider: string, fallback = "#89939E"): string {
   return LAB_COLORS[provider] ?? fallback;
+}
+
+/** sRGB 0–255 → HSL (h 0–360, s/l 0–1). */
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
+  else if (max === gn) h = ((bn - rn) / d + 2) / 6;
+  else h = ((rn - gn) / d + 4) / 6;
+  return [h * 360, s, l];
+}
+
+function hslToRgb(h: number, s: number, l: number): RGBChannels {
+  const hh = ((h % 360) + 360) % 360;
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return [v, v, v];
+  }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hk = hh / 360;
+  const t = (n: number) => {
+    let x = n;
+    if (x < 0) x += 1;
+    if (x > 1) x -= 1;
+    if (x < 1 / 6) return p + (q - p) * 6 * x;
+    if (x < 1 / 2) return q;
+    if (x < 2 / 3) return p + (q - p) * (2 / 3 - x) * 6;
+    return p;
+  };
+  return [t(hk + 1 / 3), t(hk), t(hk - 1 / 3)].map((c) => Math.round(c * 255)) as RGBChannels;
+}
+
+/**
+ * Shade a brand hex while locking hue (+ saturation). Used so families in a lab
+ * stay unmistakably that brand, just lighter/darker.
+ */
+export function brandShade(hex: string, lightnessDelta: number): string {
+  const ch = parseChannels(hex);
+  if (!ch) return hex;
+  const [h, s, l] = rgbToHsl(ch[0], ch[1], ch[2]);
+  // Keep saturation high so brand reads true; clamp lightness for ink contrast.
+  const sat = Math.min(1, Math.max(0.45, s * 1.05));
+  const lit = Math.min(0.78, Math.max(0.28, l + lightnessDelta));
+  return toHex(hslToRgb(h, sat, lit));
 }
 
 /**
@@ -315,17 +395,16 @@ export const SINGLETON_FILL = "#5A6E78"; // raised for ≥~3:1 on ink (tastechec
  * never a random hue that could be mistaken for another lab.
  */
 export function familySeriesColor(familyId: string, provider?: string): string {
-  const lab = labColor(provider ?? "", "");
-  const knownLab = Boolean(provider && LAB_COLORS[provider]);
-  if (knownLab && lab) {
-    // Shade span: darkened lab ↔ lightened lab. Spread families across the band.
+  const knownLab = Boolean(provider && LAB_COLORS[provider!]);
+  if (knownLab && provider) {
+    const lab = LAB_COLORS[provider]!;
+    // Spread families across a narrow lightness band around the true brand hue.
     const t = stableUnitHash(`${provider}::${familyId}`);
-    // Bias away from pure black/white so marks stay readable on ink.
-    const lo = darken(lab, 0.38);
-    const hi = lighten(lab, 0.42);
-    return mixColors(lo, hi, 0.12 + t * 0.76);
+    // -0.18 … +0.18 around brand L — enough to tell models apart, not wash the brand.
+    const delta = -0.18 + t * 0.36;
+    return brandShade(lab, delta);
   }
-  // Unknown lab: still stable per family, mid-range so it does not steal focus.
+  // Unknown lab: stable mid-range hash (not claimed as a brand color).
   const t = stableUnitHash(familyId);
   const r = 70 + Math.floor(t * 140);
   const g = 80 + Math.floor(stableUnitHash(familyId + ":g") * 120);
@@ -461,7 +540,7 @@ export function legendEntries(
     ? "HEAT ON · copper→filament by value score (diagnostic)"
     : "lab hue · family shade · trail = effort path";
   return [
-    { id: "lab-color", title: "Lab color", detail: "OpenAI green · Anthropic warm · Google blue · …" },
+    { id: "lab-color", title: "Lab color", detail: "official brand primary · family = shade of that hue" },
     { id: "family-trail", title: "Family trail", detail: "same lab hue · shade of this family · low→xhigh effort" },
     { id: "effort-path", title: "Effort path", detail: "real measured points only · ordered intensity" },
     { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },
