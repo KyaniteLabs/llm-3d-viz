@@ -30,6 +30,20 @@ rsync -az --delete dist/ vps:~/sites/llm-3d-viz/dist/
 ssh vps 'docker restart llm-3d-viz'
 ```
 
+## Catalog self-update (≥3×/day)
+
+New AA models/benchmarks are pulled automatically — not one-off fetches.
+
+```bash
+# install once (cron 06:07 / 14:07 / 22:07 local)
+bash scripts/install-catalog-cron.sh
+
+# or full pipeline now
+bash scripts/catalog-auto-update.sh
+```
+
+See `docs/research/catalog-refresh.md`. Logs: `logs/catalog-auto-update.log`.
+
 ## First-time (already done 2026-08-04)
 
 ```bash

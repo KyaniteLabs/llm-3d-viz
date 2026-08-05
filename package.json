@@ -10,7 +10,10 @@
     "test": "vitest run",
     "test:render": "playwright test",
     "deploy:pages": "node -e \"console.error('REFUSED: live publish is approval-gated. Read docs/deploy/cloudflare-pages.md and get Simon\\'s explicit go-ahead in this session.'); process.exit(2)\"",
-    "preview:vite": "vite preview --host 127.0.0.1 --port 5173"
+    "preview:vite": "vite preview --host 127.0.0.1 --port 5173",
+    "catalog:refresh": "node scripts/refresh-catalog.mjs",
+    "catalog:auto-update": "bash scripts/catalog-auto-update.sh",
+    "catalog:install-cron": "bash scripts/install-catalog-cron.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

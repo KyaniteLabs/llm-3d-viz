@@ -2,12 +2,12 @@
 /**
  * Refresh models.v0.draft.json from Artificial Analysis public leaderboard.
  *
- * Run manually:  node scripts/refresh-catalog.mjs
- * Cron example (hourly on a host with network):
- *   7 * * * * cd /path/to/llm-3d-viz && node scripts/refresh-catalog.mjs && npm run build && rsync -az --delete dist/ vps:~/sites/llm-3d-viz/dist/ && ssh vps 'docker restart llm-3d-viz'
+ * Scrape-only. For the self-updating loop (scrape → build-if-changed → private
+ * deploy, ≥3×/day), use:
+ *   bash scripts/install-catalog-cron.sh   # once
+ *   bash scripts/catalog-auto-update.sh    # manual full run
  *
- * Honest scrape only — rows appear when AA publishes them. If a release is not
- * on artificialanalysis.ai yet, it will not appear here.
+ * Honest scrape only — rows appear when AA publishes them.
  */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
