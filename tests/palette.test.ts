@@ -12,8 +12,10 @@ import {
   pointEncoding,
   isSingleton,
   familySeriesColor,
+  labColor,
   SINGLETON_OPACITY,
   SINGLETON_SIZE_SCALE,
+  SINGLETON_FILL,
   legendEntries,
 } from "../src/viz/palette";
 import { models } from "../src/data/models";
@@ -161,9 +163,12 @@ describe("curve-focus pointEncoding (product default)", () => {
       presentationMode: "curve",
       familyId: "B",
       singleton: true,
+      provider: "OpenAI",
     });
     expect(enc.opacity).toBe(SINGLETON_OPACITY);
     expect(enc.sizeScale).toBe(SINGLETON_SIZE_SCALE);
+    // Lab-tinted singleton fill (not pure slate) so lab is still glanceable.
+    expect(enc.fill.toLowerCase()).not.toBe(SINGLETON_FILL.toLowerCase());
   });
 
   it("isSingleton uses post-filter visible set family counts", () => {
@@ -197,7 +202,7 @@ describe("curve-focus pointEncoding (product default)", () => {
 
 describe("curve-focus family continuity", () => {
   it("uses family series fill for multi-effort frontier (not filament override)", () => {
-    const series = familySeriesColor("GPT-5.6 Sol");
+    const series = familySeriesColor("GPT-5.6 Sol", "OpenAI");
     const enc = pointEncoding({
       openness: "closed",
       semanticClass: "frontier",
@@ -219,6 +224,22 @@ describe("curve-focus family continuity", () => {
     expect(a).not.toBe(b);
     expect(a).not.toBe(c);
     expect(b).not.toBe(c);
+  });
+
+  it("keeps OpenAI families in green lab hue and Anthropic in warm lab hue", () => {
+    const openai = familySeriesColor("GPT-5.6 Sol", "OpenAI");
+    const anthropic = familySeriesColor("Claude Opus 5", "Anthropic");
+    const oLab = parseChannels(labColor("OpenAI"))!;
+    const aLab = parseChannels(labColor("Anthropic"))!;
+    const o = parseChannels(openai)!;
+    const a = parseChannels(anthropic)!;
+    // OpenAI brand is green-dominant (G high); Anthropic warm (R high relative).
+    expect(oLab[1]).toBeGreaterThan(oLab[0]);
+    expect(aLab[0]).toBeGreaterThan(aLab[2] * 0.9);
+    // Family shades stay near lab (not swapped).
+    expect(Math.abs(o[1] - oLab[1])).toBeLessThan(120);
+    expect(Math.abs(a[0] - aLab[0])).toBeLessThan(120);
+    expect(openai).not.toBe(anthropic);
   });
 
   it("dims singleton frontier marks without dropping optimum gold", () => {

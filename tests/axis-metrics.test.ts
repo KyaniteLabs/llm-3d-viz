@@ -48,13 +48,37 @@ describe("axis-metrics", () => {
     expect(bad.x).toBe("blended_price");
   });
 
-  it("maps intelligence linearly on a fixed 0–100 domain", () => {
+  it("maps intelligence on full 0–100 when the catalog spans the instrument", () => {
     const domain = buildAxisDomain("intelligence", models);
     expect(domain.min).toBe(0);
     expect(domain.max).toBe(100);
     expect(valueToUnit(0, domain)).toBe(0);
     expect(valueToUnit(100, domain)).toBe(1);
     expect(valueToUnit(50, domain)).toBeCloseTo(0.5);
+    // Denser ticks for glanceable values.
+    expect(domain.ticks.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("tightens intelligence domain when the visible set is a narrow cluster", () => {
+    const cluster = models
+      .filter((m) => m.aa_intelligence_index != null)
+      .filter((m) => m.aa_intelligence_index! >= 55 && m.aa_intelligence_index! <= 62);
+    if (cluster.length < 2) return;
+    const domain = buildAxisDomain("intelligence", cluster);
+    expect(domain.min).toBeGreaterThan(0);
+    expect(domain.max).toBeLessThan(100);
+    expect(domain.max - domain.min).toBeLessThan(45);
+    expect(domain.ticks.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("fits log cost ticks to the visible price band (not forced $0–$100)", () => {
+    const cheap = models.filter(
+      (m) => m.blended_price_per_M != null && m.blended_price_per_M > 0 && m.blended_price_per_M < 1,
+    );
+    expect(cheap.length).toBeGreaterThan(2);
+    const domain = buildAxisDomain("blended_price", cheap);
+    expect(domain.max).toBeLessThan(50);
+    expect(domain.ticks.some((t) => t.value < 1)).toBe(true);
   });
 
   it("places default-axis models inside the unit cube", () => {

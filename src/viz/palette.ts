@@ -79,6 +79,14 @@ export function lighten(color: string, ratio: number): string {
   return toHex(channels.map((c) => c + (255 - c) * ratio) as RGBChannels);
 }
 
+/** Mix a colour toward black by `ratio` (0 = unchanged, 1 = black). */
+export function darken(color: string, ratio: number): string {
+  const channels = parseChannels(color);
+  if (!channels) return color;
+  const amount = Math.max(0, Math.min(1, ratio));
+  return toHex(channels.map((c) => c * (1 - amount)) as RGBChannels);
+}
+
 /** Mix two palette colours without introducing a categorical provider hue. */
 export function mixColors(from: string, to: string, ratio: number): string {
   const fromChannels = parseChannels(from);
@@ -86,6 +94,16 @@ export function mixColors(from: string, to: string, ratio: number): string {
   if (!fromChannels || !toChannels) return to;
   const amount = Math.max(0, Math.min(1, ratio));
   return toHex(fromChannels.map((channel, index) => channel + (toChannels[index] - channel) * amount) as RGBChannels);
+}
+
+/** Stable 0..1 hash for a string (FNV-1a fraction). */
+export function stableUnitHash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (Math.abs(h) % 10_000) / 10_000;
 }
 
 /**
@@ -290,53 +308,33 @@ export const SINGLETON_SIZE_SCALE = 0.55;
 /** Slate fill for post-filter single-effort points under curve-focus. */
 export const SINGLETON_FILL = "#5A6E78"; // raised for ≥~3:1 on ink (tastecheck CL-03)
 
-/** Curated multi-effort family series colors (known AA families). */
-export const FAMILY_SERIES_COLORS: Readonly<Record<string, string>> = {
-  "GPT-5.6 Sol": "#10A37F",
-  "GPT-5.6": "#0D8F6E",
-  "GPT-5.4": "#0B7A5E",
-  "GPT-5.3": "#09664F",
-  "GPT-5.2": "#12B886",
-  "o3": "#20C997",
-  "o4-mini": "#38D9A9",
-  "Claude Opus 5": "#D4A27F",
-  "Claude Opus 4.6": "#C4926F",
-  "Claude Opus 4.5": "#B8926A",
-  "Claude Sonnet 4.6": "#E0B48F",
-  "Claude Sonnet 4.5": "#C9A07A",
-  "Claude Haiku 4.5": "#A8825A",
-  "Gemini 3.1 Pro": "#4285F4",
-  "Gemini 3 Pro": "#5A9BF5",
-  "Gemini 2.5 Pro": "#6BA3F7",
-  "Gemini 2.5 Flash": "#8AB4F8",
-  "Grok 4": "#1DA1F2",
-  "Grok 3": "#4DB5F5",
-  "DeepSeek-R1": "#4D6BFE",
-  "DeepSeek-V3": "#6B84FE",
-  "Qwen3": "#FF6A00",
-  "Qwen2.5": "#FF8533",
-  "Llama 4": "#0668E1",
-  "Mistral Large": "#F54E42",
-  "Kimi K2": "#1A73E8",
-  "MiniMax M2": "#7C5CFF",
-};
-
-/** FNV-1a style hash → stable hex family color (always #rrggbb for Plotly/Three). */
-export function familySeriesColor(familyId: string, _fallbackLab?: string): string {
-  const curated = FAMILY_SERIES_COLORS[familyId];
-  if (curated) return curated;
-  // Hash first so distinct multi-effort families never collapse to one lab color.
-  let h = 2166136261;
-  for (let i = 0; i < familyId.length; i++) {
-    h ^= familyId.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+/**
+ * Product rule (glanceability): **lab = hue**, **family within lab = shade**.
+ * OpenAI greens stay green; Anthropic stays warm; Google blue; Alibaba orange.
+ * Different families in the same lab are light/dark variants of that lab color —
+ * never a random hue that could be mistaken for another lab.
+ */
+export function familySeriesColor(familyId: string, provider?: string): string {
+  const lab = labColor(provider ?? "", "");
+  const knownLab = Boolean(provider && LAB_COLORS[provider]);
+  if (knownLab && lab) {
+    // Shade span: darkened lab ↔ lightened lab. Spread families across the band.
+    const t = stableUnitHash(`${provider}::${familyId}`);
+    // Bias away from pure black/white so marks stay readable on ink.
+    const lo = darken(lab, 0.38);
+    const hi = lighten(lab, 0.42);
+    return mixColors(lo, hi, 0.12 + t * 0.76);
   }
-  // Spread hue-ish channels across mid-range RGB (always #rrggbb).
-  const r = 55 + (Math.abs(h) % 160);
-  const g = 60 + (Math.abs(h >> 7) % 150);
-  const b = 70 + (Math.abs(h >> 15) % 140);
+  // Unknown lab: still stable per family, mid-range so it does not steal focus.
+  const t = stableUnitHash(familyId);
+  const r = 70 + Math.floor(t * 140);
+  const g = 80 + Math.floor(stableUnitHash(familyId + ":g") * 120);
+  const b = 90 + Math.floor(stableUnitHash(familyId + ":b") * 110);
   return toHex([r, g, b]);
 }
+
+/** @deprecated kept for tests/docs that import the old curated map name */
+export const FAMILY_SERIES_COLORS: Readonly<Record<string, string>> = {};
 
 export function isSingleton(
   model: { family_id?: string; model: string },
@@ -381,7 +379,9 @@ export interface PointEncoding {
  */
 export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const palette = input.palette ?? DEFAULT_SEMANTIC_PALETTE;
+  // Lab hue + family shade — primary glance channel for curve-focus.
   const series = familySeriesColor(input.familyId, input.provider);
+  const lab = labColor(input.provider ?? "", series);
   const trailColor = series;
 
   if (input.presentationMode === "openness") {
@@ -395,13 +395,12 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
       ),
       opacity: 1,
       sizeScale: 1,
-      trailColor: labColor(input.provider ?? "", series),
+      trailColor: lab,
       seriesColor: series,
     };
   }
 
-  // Curve-focus: family series is the primary fill channel for multi-effort marks.
-  // Optimum keeps gold; frontier keeps size hierarchy (not filament fill override).
+  // Diagnostic heat (?heat=1): score heat on fill, but trail keeps lab/family identity.
   if (input.heatEncoding) {
     return {
       fill: semanticPointFill(input.semanticClass, input.score, true, palette),
@@ -422,10 +421,10 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     };
   }
 
-  // Singleton (any non-optimum): dim slate; still in score/frontier sets.
+  // Singleton: keep a lab-tinted fill so lab identity is still readable at a glance.
   if (input.singleton) {
     return {
-      fill: SINGLETON_FILL,
+      fill: mixColors(SINGLETON_FILL, series, 0.45),
       opacity: SINGLETON_OPACITY,
       sizeScale: SINGLETON_SIZE_SCALE,
       trailColor,
@@ -433,7 +432,7 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     };
   }
 
-  // Multi-effort dominated + frontier: family series fill (size/★ handle hierarchy).
+  // Multi-effort dominated + frontier: lab/family series fill (size handles hierarchy).
   return {
     fill: series,
     opacity: 1,
@@ -459,17 +458,32 @@ export function legendEntries(
     ];
   }
   const heatNote = heatEncoding
-    ? "HEAT ON · copper→filament by value score"
-    : "family series color on multi-effort paths";
+    ? "HEAT ON · copper→filament by value score (diagnostic)"
+    : "lab hue · family shade · trail = effort path";
   return [
-    { id: "family-trail", title: "Family trail", detail: "series color · effort path low→xhigh" },
-    { id: "effort-path", title: "Effort path", detail: "real points only · ordered intensity" },
-    { id: "singleton-dim", title: "Singleton", detail: "dim slate · single-effort in visible set" },
-    { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge / efficient boundary" },
-    { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest" },
+    { id: "lab-color", title: "Lab color", detail: "OpenAI green · Anthropic warm · Google blue · …" },
+    { id: "family-trail", title: "Family trail", detail: "same lab hue · shade of this family · low→xhigh effort" },
+    { id: "effort-path", title: "Effort path", detail: "real measured points only · ordered intensity" },
+    { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },
+    { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge · nothing beats these on all axes" },
+    { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest · best for your weights" },
     { id: "open-closed-glyph", title: "Open / closed", detail: "glyph only · not primary fill" },
     { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
-    { id: "frontier-point", title: "Frontier point", detail: "larger size · series fill on multi-effort" },
-    { id: "heat-note", title: heatEncoding ? "Heat" : "Curve-focus", detail: heatNote },
+    { id: "frontier-point", title: "Frontier point", detail: "larger size · keeps lab/family fill" },
+    { id: "heat-note", title: heatEncoding ? "Heat" : "Lab-focus", detail: heatNote },
   ];
+}
+
+/** Ordered lab swatches for STAGE KEY (product cloud labs first). */
+export function labLegendEntries(
+  providers: readonly string[],
+): Array<{ provider: string; color: string }> {
+  const seen = new Set<string>();
+  const out: Array<{ provider: string; color: string }> = [];
+  for (const p of providers) {
+    if (seen.has(p)) continue;
+    seen.add(p);
+    out.push({ provider: p, color: labColor(p) });
+  }
+  return out.sort((a, b) => a.provider.localeCompare(b.provider));
 }

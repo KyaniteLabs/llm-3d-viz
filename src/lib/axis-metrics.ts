@@ -227,30 +227,68 @@ function minPositive(values: readonly number[]): number {
   return positive.length > 0 ? Math.min(...positive) : 1;
 }
 
+/**
+ * Log ticks that adapt to the *visible* span:
+ * - multi-decade: 1–2–5 mid-decade marks when the view is tight
+ * - wide span: decade anchors
+ * - always denser than the old decade-only grid so solo-family views stay readable
+ */
 function niceLogTicks(min: number, max: number, narrow: boolean): number[] {
   const lo = Math.log10(Math.max(min, Number.MIN_VALUE));
-  const hi = Math.log10(Math.max(max, min * 10));
-  const decades: number[] = [];
-  for (let e = Math.floor(lo); e <= Math.ceil(hi); e++) {
-    const v = 10 ** e;
-    if (v >= min * 0.99 && v <= max * 1.01) decades.push(v);
+  const hi = Math.log10(Math.max(max, min * 1.01));
+  const spanDecades = hi - lo;
+  const mags = [1, 2, 5];
+  const out: number[] = [];
+  const e0 = Math.floor(lo);
+  const e1 = Math.ceil(hi);
+  for (let e = e0; e <= e1; e++) {
+    for (const m of mags) {
+      const v = m * 10 ** e;
+      if (v >= min * 0.98 && v <= max * 1.02) out.push(v);
+    }
   }
-  if (decades.length === 0) return [min, max];
-  if (narrow && decades.length > 2) return [decades[0], decades[decades.length - 1]];
-  return decades;
+  if (out.length === 0) return [min, max];
+  // Cap density: narrow UI → fewer labels; tight data span → keep mid-decade marks.
+  const maxTicks = narrow ? 3 : spanDecades <= 1.2 ? 7 : spanDecades <= 2.5 ? 6 : 5;
+  if (out.length <= maxTicks) return out;
+  // Prefer endpoints + evenly spaced selection.
+  const picked = [out[0]];
+  const step = (out.length - 1) / (maxTicks - 1);
+  for (let i = 1; i < maxTicks - 1; i++) {
+    picked.push(out[Math.round(i * step)]);
+  }
+  picked.push(out[out.length - 1]);
+  return [...new Set(picked)].sort((a, b) => a - b);
 }
 
+/** Linear ticks: denser when the visible span is small (solo family / filtered set). */
 function linearTicks(min: number, max: number, narrow: boolean): number[] {
-  if (min === 0 && max === 100) {
-    return narrow ? [50, 100] : [0, 20, 40, 60, 80, 100];
-  }
   const span = max - min;
   if (span <= 0) return [min];
-  const step = narrow ? span / 2 : span / 4;
-  const out: number[] = [];
-  for (let i = 0; i <= (narrow ? 2 : 4); i++) {
-    out.push(min + step * i);
+  // Full AA index 0–100 stays familiar; denser when zoomed into a band.
+  if (min <= 0.01 && max >= 99.5) {
+    return narrow ? [0, 50, 100] : [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   }
+  // Nice step from span
+  const target = narrow ? 3 : span <= 15 ? 6 : span <= 40 ? 5 : 4;
+  const rawStep = span / target;
+  const pow = 10 ** Math.floor(Math.log10(rawStep));
+  const niceCandidates = [1, 2, 2.5, 5, 10].map((m) => m * pow);
+  let step = niceCandidates[0];
+  for (const c of niceCandidates) {
+    if (c >= rawStep * 0.85) {
+      step = c;
+      break;
+    }
+    step = c;
+  }
+  const start = Math.ceil(min / step) * step;
+  const out: number[] = [];
+  if (start > min + step * 0.05) out.push(min);
+  for (let v = start; v <= max + step * 1e-9; v += step) {
+    out.push(Number(v.toPrecision(8)));
+  }
+  if (out[out.length - 1] < max - step * 0.05) out.push(max);
   return out;
 }
 
@@ -265,6 +303,31 @@ export function buildAxisDomain(
   const raw = models
     .map((m) => def.getValue(m))
     .filter((v): v is number => v !== null && !Number.isNaN(v));
+
+  // Intelligence: full 0–100 when the visible set still spans the instrument;
+  // tighten to data band when filters solo a cluster (more granular ticks).
+  if (def.fixedDomain && metricId === "intelligence" && raw.length > 0) {
+    const dataMin = Math.min(...raw);
+    const dataMax = Math.max(...raw);
+    const dataSpan = dataMax - dataMin;
+    const useFull = dataSpan >= 45 || (dataMin <= 15 && dataMax >= 75);
+    const pad = Math.max(2, dataSpan * 0.08);
+    const min = useFull ? def.fixedDomain[0] : Math.max(0, dataMin - pad);
+    const max = useFull ? def.fixedDomain[1] : Math.min(100, dataMax + pad);
+    const ticks = linearTicks(min, max, narrow).map((value) => ({
+      value,
+      label: def.formatTick(value),
+    }));
+    return {
+      metricId,
+      scale: def.scale,
+      min,
+      max,
+      floor: min,
+      ticks,
+      title: def.title,
+    };
+  }
 
   if (def.fixedDomain) {
     const [min, max] = def.fixedDomain;
@@ -291,18 +354,14 @@ export function buildAxisDomain(
     let max = effective.length > 0 ? Math.max(...effective) : floor * 100;
     // Keep a usable log span when data collapses.
     if (max <= min) max = min * 10;
-    // Price metrics historically span up to ~$100/M for tick context.
+    // Pad ~half-decade so marks are not glued to the cube edge — but do NOT
+    // force a global $0–$100 / 10–1000 span. Granularity follows the visible set.
+    const logPad = 10 ** ((Math.log10(max) - Math.log10(min)) * 0.06);
+    min = Math.max(floor * 0.9, min / Math.max(logPad, 1.05));
+    max = max * Math.max(logPad, 1.05);
     if (metricId === "blended_price" || metricId === "price_in" || metricId === "price_out") {
-      max = Math.max(max, 100);
+      // Keep a small floor marker context without inflating to $100 when looking at cheap models.
       min = Math.min(min, floor);
-    }
-    if (metricId === "tps") {
-      min = Math.min(min, 10);
-      max = Math.max(max, 1000);
-    }
-    if (metricId === "ttft") {
-      min = Math.min(min, 100); // 0.1s
-      max = Math.max(max, 60_000);
     }
     const tickValues = niceLogTicks(min, max, narrow);
     // Always surface floor marker for price-like axes when not narrow.
@@ -324,10 +383,13 @@ export function buildAxisDomain(
     };
   }
 
-  // Linear, data-driven
+  // Linear, data-driven (+ modest padding)
   let min = raw.length > 0 ? Math.min(...raw) : 0;
   let max = raw.length > 0 ? Math.max(...raw) : 1;
   if (max <= min) max = min + 1;
+  const pad = (max - min) * 0.06;
+  min -= pad;
+  max += pad;
   const ticks = linearTicks(min, max, narrow).map((value) => ({
     value,
     label: def.formatTick(value),
