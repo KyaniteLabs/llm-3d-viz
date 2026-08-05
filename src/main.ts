@@ -134,7 +134,7 @@ async function boot() {
   const plotContainer = document.createElement("div");
   plotContainer.id = "stage-3d-plot-container";
   plotContainer.style.flex = "1";
-  plotContainer.style.minHeight = "300px";
+  plotContainer.style.minHeight = "0";
   plotContainer.style.width = "100%";
   plotContainer.style.height = "100%";
   plotContainer.style.position = "relative";
@@ -196,6 +196,28 @@ async function boot() {
     if (tableEl) tableEl.hidden = mode !== "table";
     // effort only in 3d when solo
     if (effortEl && mode !== "3d") effortEl.hidden = true;
+    // Plotly plots are born in a 6.75rem strip — resize once the 2D pane is full-height.
+    if (mode === "2d") {
+      requestAnimationFrame(() => {
+        void import("./viz/plotly-loader").then(({ loadPlotly }) =>
+          loadPlotly().then((Plotly) => {
+            projections?.gds?.forEach((gd) => {
+              try {
+                Plotly.Plots.resize(gd);
+              } catch {
+                /* plot not ready */
+              }
+            });
+          }),
+        ).catch(() => {
+          /* plotly not loaded yet */
+        });
+      });
+    }
+    if (mode === "3d") {
+      // Force Three resize after leaving a hidden/zeroed layout slot.
+      window.dispatchEvent(new Event("resize"));
+    }
   };
   canvasHost.querySelectorAll(".mode-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -294,6 +316,12 @@ async function boot() {
     };
 
     const visibleSet = applyFilters(models, filters, sessionReferenceDate());
+    if (scopeText) {
+      scopeText.textContent = formatScopeSummary(filters, visibleSet.length, models.length);
+    }
+    if (statusText) {
+      statusText.textContent = `${visibleSet.length} models · ${filters.multiEffortOnly ? "multi-effort" : "all variants"} · stage ${activeBackend}`;
+    }
     // Drop pin/hover if filtered out.
     const state = store.getState();
     const stillVisible = (id: string | null) =>

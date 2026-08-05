@@ -157,11 +157,11 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
 /* STAGE KEY overlays the 3D, does not shrink it */
 .stage-guide {
   position: absolute !important;
-  top: 2.4rem;
+  top: 0.55rem;
   right: 0.45rem;
   z-index: 6;
   width: min(14rem, 32%);
-  max-height: calc(100% - 3rem);
+  max-height: calc(100% - 1.2rem);
   overflow: auto;
   grid-column: unset !important;
   grid-row: unset !important;
@@ -170,6 +170,7 @@ body { margin: 0; min-width: 0; max-width: 100%; overflow-x: auto; }
   backdrop-filter: blur(6px);
   pointer-events: auto;
 }
+.app-shell .stage-guide { top: 0.55rem; }
 .console {
   grid-area: console;
   min-height: 0;
@@ -550,11 +551,19 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .console-secondary > summary { cursor: pointer; list-style: none; }
 .console-secondary > summary::-webkit-details-marker { display: none; }
 
-/* ========== App shell (structural redesign A) ========== */
-.app-shell {
+/* ========== App shell (structural redesign A) ==========
+   CRITICAL: #app-shell owns both .app-shell and .observatory.
+   Legacy .observatory { display: grid } must NOT win over this shell grid,
+   and display:contents must NEVER be applied to the shell (it collapses layout).
+*/
+.app-shell,
+.app-shell.observatory {
   height: 100dvh;
+  max-height: 100dvh;
   width: 100%;
-  display: grid;
+  max-width: 100%;
+  min-width: 0;
+  display: grid !important;
   grid-template-columns: minmax(0, 1fr) minmax(15rem, 17rem);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
@@ -562,28 +571,43 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
     "canvas inspector"
     "status status";
   gap: 0;
+  padding: 0;
   background: var(--ink-field);
   overflow: hidden;
+  box-sizing: border-box;
 }
-.app-shell.is-scope-open {
+.app-shell.is-scope-open,
+.app-shell.observatory.is-scope-open {
   grid-template-columns: minmax(16rem, 18rem) minmax(0, 1fr) minmax(15rem, 17rem);
   grid-template-areas:
     "top top top"
     "shelf canvas inspector"
     "status status status";
 }
-.app-shell.is-scope-open .filter-shelf { display: flex; }
+.app-shell.is-scope-open .filter-shelf:not([hidden]) { display: flex; }
+
+/* Author `display` rules beat UA [hidden]{display:none} — force hide. */
+.projection-row[hidden],
+.table-pane[hidden],
+.stage[hidden],
+.filter-shelf[hidden],
+.effort-strip[hidden],
+.canvas-host [hidden] {
+  display: none !important;
+}
 
 .scope-bar {
   grid-area: top;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
   padding: 0.4rem 0.65rem;
   border-bottom: 1px solid var(--color-border);
   background: var(--ink-panel-1);
   z-index: 20;
+  min-height: 0;
+  min-width: 0;
 }
 .scope-bar-brand { min-width: 0; flex: 0 1 auto; }
 .scope-bar-brand h1 { margin: 0.05rem 0 0; font-size: 0.95rem; font-weight: 500; letter-spacing: -0.03em; }
@@ -616,7 +640,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.scope-bar-actions { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+.scope-bar-actions { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; flex-shrink: 0; }
 .scope-search input {
   width: min(12rem, 28vw);
   background: var(--ink-panel-2);
@@ -633,9 +657,11 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   display: none;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   border-right: 1px solid var(--color-border);
   background: var(--ink-panel-1);
   z-index: 15;
+  overflow: hidden;
 }
 .filter-shelf-head, .filter-shelf-foot {
   display: flex;
@@ -644,6 +670,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   gap: 0.5rem;
   padding: 0.45rem 0.55rem;
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 .filter-shelf-foot { border-bottom: 0; border-top: 1px solid var(--color-border); }
 .filter-shelf-body {
@@ -697,22 +724,31 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-auto-rows: minmax(0, auto);
   gap: 0.25rem;
   padding: 0.3rem;
   overflow: hidden;
   position: relative;
+  align-content: stretch;
 }
-.canvas-host[data-canvas-mode="2d"] {
-  grid-template-rows: auto minmax(0, 1fr);
-}
+.canvas-host[data-canvas-mode="2d"],
 .canvas-host[data-canvas-mode="table"] {
   grid-template-rows: auto minmax(0, 1fr);
 }
 .mode-tabs {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  align-self: start;
   gap: 0.25rem;
   padding: 0 0.15rem;
+  height: auto;
+  min-height: 0;
+  width: auto;
+  max-width: 100%;
 }
 .mode-tab {
   appearance: none;
@@ -725,44 +761,91 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   padding: 0.28rem 0.55rem;
   border-radius: var(--radius-pill);
   cursor: pointer;
+  height: auto;
+  align-self: center;
+  flex: 0 0 auto;
 }
 .mode-tab.is-active, .mode-tab:hover {
   color: var(--filament);
   border-color: var(--filament-dim);
 }
+/* Neutralize legacy observatory grid-areas inside the shell canvas. */
+.canvas-host .stage,
+.canvas-host .effort-strip,
+.canvas-host .projection-row,
+.canvas-host .table-pane {
+  grid-area: unset !important;
+  grid-column: 1;
+  grid-row: auto;
+}
 .canvas-host .stage {
-  grid-area: unset;
   min-height: 0;
+  min-width: 0;
   height: 100%;
+  width: 100%;
   border-radius: var(--radius-card);
+  /* Stage is the hero: absolute fill so Three never gets a 0-height chain */
+  display: block;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
 }
-.canvas-host[data-canvas-mode="2d"] .stage,
-.canvas-host[data-canvas-mode="2d"] .effort-strip,
-.canvas-host[data-canvas-mode="table"] .stage,
-.canvas-host[data-canvas-mode="table"] .effort-strip,
-.canvas-host[data-canvas-mode="table"] .projection-row,
-.canvas-host[data-canvas-mode="3d"] .projection-row,
-.canvas-host[data-canvas-mode="3d"] .table-pane,
-.canvas-host[data-canvas-mode="2d"] .table-pane {
-  /* toggled via [hidden] in JS; reinforce */
-}
-.canvas-host[data-canvas-mode="2d"] .projection-row {
-  height: auto;
-  max-height: none;
+.canvas-host .stage-visual,
+.canvas-host #stage-3d-plot-container,
+.canvas-host .stage-3d-three,
+.canvas-host .stage-3d-canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
   min-height: 0;
-  height: 100%;
-  grid-template-rows: 1fr;
+  min-width: 0;
+  margin: 0;
+}
+.canvas-host .stage-3d-three canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+.canvas-host .effort-strip:not([hidden]) {
+  grid-row: auto;
+  max-height: 4.5rem;
+}
+.canvas-host[data-canvas-mode="2d"] .projection-row:not([hidden]) {
+  display: grid !important;
   grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
+  grid-area: unset !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  align-self: stretch;
+  width: 100%;
 }
 .canvas-host[data-canvas-mode="2d"] .projection-row .projection {
   min-height: 0;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
+.canvas-host[data-canvas-mode="2d"] .projection-row .projection-plot,
 .canvas-host[data-canvas-mode="2d"] .projection-row .js-plotly-plot,
 .canvas-host[data-canvas-mode="2d"] .projection-row .plot-container,
 .canvas-host[data-canvas-mode="2d"] .projection-row .svg-container {
+  flex: 1 1 auto;
+  min-height: 0 !important;
   max-height: none !important;
-  height: calc(100% - 1rem) !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+.canvas-host[data-canvas-mode="table"] .table-pane:not([hidden]) {
+  min-height: 0;
+  height: auto;
+  align-self: stretch;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .inspector {
@@ -774,6 +857,8 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   border-radius: 0;
   padding: 0.55rem 0.65rem;
   background: var(--ink-panel-1);
+  /* Beat legacy .console { grid-area: console } */
+  grid-area: inspector !important;
 }
 .status-bar {
   grid-area: status;
@@ -783,6 +868,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   color: var(--color-text-muted);
   font: 400 0.6rem/1.4 var(--font-mono);
   letter-spacing: 0.04em;
+  min-height: 0;
 }
 
 .table-pane {
@@ -810,24 +896,31 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .membership-table tr { cursor: pointer; }
 .membership-table tr:hover, .membership-table tr.is-selected { color: var(--filament); background: rgba(232,241,228,0.05); }
 
-/* Legacy .observatory rules no longer wrap the app; neutralize if present */
-.observatory { display: contents; }
-
 @media (max-width: 960px) {
-  .app-shell, .app-shell.is-scope-open {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 28dvh) auto;
-    grid-template-areas: "top" "canvas" "inspector" "status";
+  .app-shell,
+  .app-shell.observatory,
+  .app-shell.is-scope-open,
+  .app-shell.observatory.is-scope-open {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 28dvh) auto !important;
+    grid-template-areas: "top" "canvas" "inspector" "status" !important;
   }
   .filter-shelf {
     position: fixed;
     inset: 0 auto 0 0;
     width: min(20rem, 88vw);
+    height: 100dvh;
+    max-height: 100dvh;
     z-index: 40;
     box-shadow: 4px 0 24px rgba(0,0,0,0.45);
   }
-  .app-shell.is-scope-open .filter-shelf { display: flex; }
-  .inspector { border-left: 0; border-top: 1px solid var(--color-border); max-height: 28dvh; }
+  .app-shell.is-scope-open .filter-shelf:not([hidden]) { display: flex; }
+  .inspector {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    max-height: 28dvh;
+  }
+  .scope-bar { flex-wrap: wrap; }
 }
 
 .app-shell.is-cinema {
