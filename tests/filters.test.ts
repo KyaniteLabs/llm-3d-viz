@@ -34,14 +34,14 @@ describe("filters", () => {
   ];
 
   it("age ≤6 months excludes old release_date when enabled", () => {
-    const visible = applyFilters(models, { ...DEFAULT_FILTERS, ageEnabled: true }, ref);
+    const visible = applyFilters(models, { ...DEFAULT_FILTERS, ageEnabled: true, multiEffortOnly: false }, ref);
     expect(visible.map((m) => m.model)).toEqual(["New A", "New C"]);
   });
 
   it("empty provider multi-select ≡ all", () => {
     const visible = applyFilters(
       models,
-      { ...DEFAULT_FILTERS, ageEnabled: false, providers: [] },
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, providers: [] },
       ref,
     );
     expect(visible).toHaveLength(3);
@@ -50,10 +50,20 @@ describe("filters", () => {
   it("provider multi-select unions", () => {
     const visible = applyFilters(
       models,
-      { ...DEFAULT_FILTERS, ageEnabled: false, providers: ["Anthropic"] },
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, providers: ["Anthropic"] },
       ref,
     );
     expect(visible.map((m) => m.model).sort()).toEqual(["New C", "Old B"]);
+  });
+
+  it("multiEffortOnly keeps only multi-step families", () => {
+    const rows = [
+      stub({ model: "Fam (low)", provider: "X", release_date: "2026-07-01", effort_tier: "low" }),
+      stub({ model: "Fam (max)", provider: "X", release_date: "2026-07-01", effort_tier: "max" }),
+      stub({ model: "Solo", provider: "Y", release_date: "2026-07-01" }),
+    ];
+    const visible = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
+    expect(visible.map((m) => m.model).sort()).toEqual(["Fam (low)", "Fam (max)"]);
   });
 
   it("sameFilters is deep-equal on arrays", () => {

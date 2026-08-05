@@ -82,10 +82,11 @@ export class StageGuide {
   }
 
   private defaultOpen(isCompact: boolean): { stage: boolean; provider: boolean } {
-    // Compact: start collapsed so the plot is unobstructed; desktop: open both.
+    // Tastecheck 2026-08-04: STAGE KEY collapsed by default (canvas first).
+    // Provider shapes also start closed; user open state is sticky after first toggle.
     return {
-      stage: this.stageKeyOpen ?? !isCompact,
-      provider: this.providerOpen ?? !isCompact,
+      stage: this.stageKeyOpen ?? false,
+      provider: this.providerOpen ?? false,
     };
   }
 

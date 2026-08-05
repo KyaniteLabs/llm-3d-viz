@@ -9,6 +9,11 @@ export interface ModelFilters {
   /** When true, drop models older than ageMonths before referenceDate. */
   ageEnabled: boolean;
   ageMonths: number;
+  /**
+   * When true (product default), only families with 2+ effort steps remain in the
+   * visible set. Simon tastecheck fork 2026-08-04: multi-effort instrument first paint.
+   */
+  multiEffortOnly: boolean;
   /** Empty ≡ all providers. */
   providers: string[];
   /** Empty ≡ all families. */
@@ -18,12 +23,14 @@ export interface ModelFilters {
 export const DEFAULT_FILTERS: ModelFilters = {
   ageEnabled: true,
   ageMonths: 6,
+  multiEffortOnly: true,
   providers: [],
   families: [],
 };
 
 export function sameFilters(a: ModelFilters, b: ModelFilters): boolean {
   if (a.ageEnabled !== b.ageEnabled || a.ageMonths !== b.ageMonths) return false;
+  if (Boolean(a.multiEffortOnly) !== Boolean(b.multiEffortOnly)) return false;
   if (a.providers.length !== b.providers.length || a.families.length !== b.families.length) {
     return false;
   }
@@ -62,9 +69,24 @@ export function applyFilters(
   const cutoff =
     filters.ageEnabled ? monthsBefore(referenceDate, filters.ageMonths) : null;
 
+  // Precompute multi-effort family membership when the filter is on.
+  let multiEffortFamilies: Set<string> | null = null;
+  if (filters.multiEffortOnly) {
+    const counts = new Map<string, number>();
+    for (const model of models) {
+      const id = familyIdOf(model);
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    multiEffortFamilies = new Set(
+      [...counts.entries()].filter(([, n]) => n >= 2).map(([id]) => id),
+    );
+  }
+
   return models.filter((model) => {
     if (providerSet && !providerSet.has(model.provider)) return false;
-    if (familySet && !familySet.has(familyIdOf(model))) return false;
+    const fid = familyIdOf(model);
+    if (familySet && !familySet.has(fid)) return false;
+    if (multiEffortFamilies && !multiEffortFamilies.has(fid)) return false;
     if (cutoff) {
       const released = parseReleaseDate(model.release_date);
       if (!released || released < cutoff) return false;

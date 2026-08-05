@@ -82,8 +82,11 @@ export class Stage3DThree implements Stage3DSurface {
 
   private readonly heatEncoding: boolean;
   private presentationMode: PresentationMode = "curve";
+  private highlightFamilyId: string | null = null;
+  private soloFamily = false;
   private hasUserOrbited = false;
   private lastFitKey = "";
+  private keyboardBound = false;
   private readonly tokens: {
     filament: string;
     filamentDim: string;
@@ -491,6 +494,8 @@ export class Stage3DThree implements Stage3DSurface {
   public render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
     this.axisMapping = normalizeAxisMapping(options?.axisMapping ?? this.axisMapping);
     if (options?.presentationMode) this.presentationMode = options.presentationMode;
+    this.highlightFamilyId = options?.highlightFamilyId ?? null;
+    this.soloFamily = Boolean(options?.soloFamily);
     // Stash fit for end of paint (after points exist).
     (this as any)._pendingFit = options?.fit ?? "none";
 
@@ -593,18 +598,24 @@ export class Stage3DThree implements Stage3DSurface {
           (kind === "octa" ? "sphere" : "octa");
       }
 
+      let opacity = enc.opacity;
+      if (this.highlightFamilyId && fid !== this.highlightFamilyId) {
+        opacity = Math.min(opacity, 0.18);
+        size = Math.max(4, size * 0.72);
+      } else if (this.highlightFamilyId && fid === this.highlightFamilyId) {
+        size = Math.max(size, isOptimum ? 22 : isFrontier ? 17 : 13);
+      }
       const mesh = this.makePointMesh(kind, color, size);
       mesh.position.copy(pos);
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      mat.transparent = enc.opacity < 0.99 || mat.transparent;
-      mat.opacity = Math.min(mat.opacity, enc.opacity);
-      if (enc.opacity < 0.99) mat.opacity = enc.opacity;
+      mat.transparent = opacity < 0.99 || mat.transparent;
+      mat.opacity = opacity;
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
       mesh.userData.reasoning = Boolean(model.reasoning);
       mesh.userData.familyId = fid;
       mesh.userData.singleton = singleton;
-      mesh.userData.encOpacity = enc.opacity;
+      mesh.userData.encOpacity = enc.opacity; // pre-highlight base
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
@@ -638,15 +649,21 @@ export class Stage3DThree implements Stage3DSurface {
         singleton: false,
         provider: members[0].provider,
       });
+      const famId = familyIdOf(members[0]);
+      let trailOpacity = 0.92;
+      if (this.highlightFamilyId && famId !== this.highlightFamilyId) trailOpacity = 0.12;
+      else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 1;
+      else if (this.soloFamily) trailOpacity = 1;
       const mat = new THREE.LineBasicMaterial({
         color: new THREE.Color(trailEnc.trailColor),
         transparent: true,
-        opacity: 0.9,
+        opacity: trailOpacity,
         depthWrite: false,
         linewidth: 2,
       });
       const line = new THREE.Line(geom, mat);
       line.renderOrder = 0;
+      line.userData.familyId = famId;
       this.trailsGroup.add(line);
       trailCount += 1;
     }
@@ -707,7 +724,12 @@ export class Stage3DThree implements Stage3DSurface {
     // Soft-fit multi-effort bounds on first paint / filter catalog change.
     const fitMode = (this as any)._pendingFit as StageFitMode | undefined;
     if (fitMode && fitMode !== "none") {
-      this.fitToVisible(plottable, fitMode);
+      this.fitToVisible(plottable, this.soloFamily ? "all" : fitMode);
+    }
+
+    if (!this.keyboardBound) {
+      this.bindKeyboard();
+      this.keyboardBound = true;
     }
 
     // Accessible name tracks current optimum.
@@ -730,6 +752,35 @@ export class Stage3DThree implements Stage3DSurface {
     (window as any).__viz = viz;
 
     this.paintLabels();
+  }
+
+  public setFamilyHighlight(familyId: string | null) {
+    this.highlightFamilyId = familyId;
+    for (const mesh of this.pointMeshes) {
+      const fid = mesh.userData.familyId as string | undefined;
+      const base = (mesh.userData.encOpacity as number) ?? 1;
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      if (familyId && fid && fid !== familyId) {
+        mat.transparent = true;
+        mat.opacity = Math.min(base, 0.18);
+        mesh.scale.setScalar(0.72);
+      } else {
+        mat.opacity = base;
+        mesh.scale.setScalar(1);
+      }
+    }
+    for (const child of this.trailsGroup.children) {
+      const line = child as THREE.Line;
+      const mat = line.material as THREE.LineBasicMaterial;
+      const fid = line.userData.familyId as string | undefined;
+      if (familyId && fid && fid !== familyId) {
+        mat.opacity = 0.12;
+      } else if (familyId && fid === familyId) {
+        mat.opacity = 1;
+      } else {
+        mat.opacity = 0.92;
+      }
+    }
   }
 
   public setPointAppearance(colors: string[], sizes: number[]) {
@@ -861,9 +912,12 @@ export class Stage3DThree implements Stage3DSurface {
     const box = new THREE.Box3().setFromPoints(pts);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z, 0.4);
-    const padding = 1.15;
-    const dist = Math.max(2.2, maxDim * 2.4 * padding);
+    const maxDim = Math.max(size.x, size.y, size.z, 0.25);
+    const n = pts.length;
+    // Solo ladders (few points) need tighter framing so the curve is readable.
+    const padding = n <= 8 ? 1.35 : 1.15;
+    const minDist = n <= 8 ? 1.65 : 2.2;
+    const dist = Math.max(minDist, maxDim * (n <= 8 ? 2.05 : 2.4) * padding);
     // Keep similar corner viewing angle as product default.
     const dir = new THREE.Vector3(-0.75, 0.5, 0.68).normalize();
     const eye = center.clone().add(dir.multiplyScalar(dist));
@@ -873,6 +927,65 @@ export class Stage3DThree implements Stage3DSurface {
       center: { x: center.x, y: center.y, z: center.z },
       up: { x: 0, y: 1, z: 0 },
     });
+  }
+
+
+  /** Arrow keys orbit; +/- dolly — keyboard path for stage (tastecheck A11Y-02). */
+  private bindKeyboard() {
+    const canvas = this.renderer.domElement;
+    canvas.addEventListener("keydown", (event: KeyboardEvent) => {
+      if (document.activeElement !== canvas) return;
+      const step = event.shiftKey ? 0.12 : 0.06;
+      let handled = true;
+      switch (event.key) {
+        case "ArrowLeft":
+          this.orbitTo(Math.atan2(this.camera.position.x, this.camera.position.z) + step);
+          break;
+        case "ArrowRight":
+          this.orbitTo(Math.atan2(this.camera.position.x, this.camera.position.z) - step);
+          break;
+        case "ArrowUp": {
+          const sph = new THREE.Spherical().setFromVector3(
+            this.camera.position.clone().sub(this.controls.target),
+          );
+          sph.phi = Math.max(0.2, sph.phi - step);
+          const v = new THREE.Vector3().setFromSpherical(sph).add(this.controls.target);
+          this.setCamera({ eye: { x: v.x, y: v.y, z: v.z } });
+          break;
+        }
+        case "ArrowDown": {
+          const sph = new THREE.Spherical().setFromVector3(
+            this.camera.position.clone().sub(this.controls.target),
+          );
+          sph.phi = Math.min(Math.PI / 2 - 0.05, sph.phi + step);
+          const v = new THREE.Vector3().setFromSpherical(sph).add(this.controls.target);
+          this.setCamera({ eye: { x: v.x, y: v.y, z: v.z } });
+          break;
+        }
+        case "=":
+        case "+": {
+          const dir = this.controls.target.clone().sub(this.camera.position).normalize();
+          this.camera.position.add(dir.multiplyScalar(0.15));
+          this.controls.update();
+          break;
+        }
+        case "-":
+        case "_": {
+          const dir = this.camera.position.clone().sub(this.controls.target).normalize();
+          this.camera.position.add(dir.multiplyScalar(0.15));
+          this.controls.update();
+          break;
+        }
+        default:
+          handled = false;
+      }
+      if (handled) {
+        event.preventDefault();
+        this.hasUserOrbited = true;
+        this.paintLabels();
+      }
+    });
+    canvas.setAttribute("aria-keyshortcuts", "ArrowLeft ArrowRight ArrowUp ArrowDown + -");
   }
 
   destroy() {

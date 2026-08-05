@@ -24,6 +24,10 @@ export interface StageRenderOptions {
    * - none: leave camera (user orbit / cinema)
    */
   fit?: StageFitMode;
+  /** Dim non-matching families (hover/pin family emphasis). */
+  highlightFamilyId?: string | null;
+  /** When true, use tighter solo ladder framing. */
+  soloFamily?: boolean;
 }
 
 /**
@@ -42,5 +46,7 @@ export interface Stage3DSurface {
   setPointAppearance?(colors: string[], sizes: number[]): void;
   /** Optional explicit fit after render (Three); Plotly no-ops. */
   fitToVisible?(models: Model[], mode?: StageFitMode): void;
+  /** Dim non-matching family marks/trails without a full rebuild. */
+  setFamilyHighlight?(familyId: string | null): void;
   destroy?(): void;
 }
