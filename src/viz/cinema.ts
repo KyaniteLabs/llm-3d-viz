@@ -3,6 +3,12 @@ import { motionPreference } from "./sweep-timing";
 import type { Stage3DSurface } from "./stage-api";
 
 const ORBIT_SPEED = 0.00012;
+/**
+ * After entering cinema, the scope bar hides and the stage expands under the
+ * cursor — browsers fire pointerenter on that reflow. Ignore detune until this
+ * grace elapses so a click on Cinema [C] does not immediately exit.
+ */
+const DETUNE_ARM_MS = 600;
 
 export class CinemaMode {
   private readonly stage: Stage3DSurface;
@@ -11,6 +17,9 @@ export class CinemaMode {
   private started = 0;
   private reduced = motionPreference()?.matches ?? false;
   private removeMotionListener: (() => void) | null = null;
+  /** performance.now() after which pointerenter may exit cinema. */
+  private detuneArmedAt = 0;
+  private wasCinema = false;
 
   constructor(stage: Stage3DSurface, store: AppStore) {
     this.stage = stage;
@@ -29,7 +38,10 @@ export class CinemaMode {
     // Prefer el (Stage API); gd is the same root for both Plotly and Three.
     const pointerRoot = this.stage.el ?? this.stage.gd;
     pointerRoot.addEventListener("pointerenter", () => {
-      if (this.store.getState().cinemaMode) this.store.update({ cinemaMode: false });
+      if (!this.store.getState().cinemaMode) return;
+      // Accidental enter from cinema layout expansion — ignore until armed.
+      if (performance.now() < this.detuneArmedAt) return;
+      this.store.update({ cinemaMode: false });
     });
   }
 
@@ -39,8 +51,13 @@ export class CinemaMode {
   }
 
   private render(state: Readonly<AppState>) {
-    document.querySelector(".app-shell")?.classList.toggle("is-cinema", state.cinemaMode && !this.reduced);
-    if (state.cinemaMode && !this.reduced) this.start();
+    const active = state.cinemaMode && !this.reduced;
+    if (active && !this.wasCinema) {
+      this.detuneArmedAt = performance.now() + DETUNE_ARM_MS;
+    }
+    this.wasCinema = active;
+    document.querySelector(".app-shell")?.classList.toggle("is-cinema", active);
+    if (active) this.start();
     else this.stop();
   }
 
