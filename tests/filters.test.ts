@@ -56,7 +56,7 @@ describe("filters", () => {
     expect(visible.map((m) => m.model).sort()).toEqual(["New C", "Old B"]);
   });
 
-  it("multiEffortOnly keeps only multi-step families", () => {
+  it("multiEffortOnly keeps only multi-step families in browse mode", () => {
     const rows = [
       stub({ model: "Fam (low)", provider: "X", release_date: "2026-07-01", effort_tier: "low" }),
       stub({ model: "Fam (max)", provider: "X", release_date: "2026-07-01", effort_tier: "max" }),
@@ -64,6 +64,48 @@ describe("filters", () => {
     ];
     const visible = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
     expect(visible.map((m) => m.model).sort()).toEqual(["Fam (low)", "Fam (max)"]);
+  });
+
+  it("explicit family selection shows singletons even when multiEffortOnly is on (Fable)", () => {
+    const rows = [
+      stub({
+        model: "Claude Fable 5 (Adaptive Reasoning, Max Effort, Opus 4.8 Fallback)",
+        provider: "Anthropic",
+        release_date: "2026-06-09",
+        family_id: "Claude Fable 5",
+        effort_tier: "max",
+      }),
+      stub({
+        model: "Claude Opus 5 (max)",
+        provider: "Anthropic",
+        release_date: "2026-07-24",
+        family_id: "Claude Opus 5",
+        effort_tier: "max",
+      }),
+      stub({
+        model: "Claude Opus 5 (high)",
+        provider: "Anthropic",
+        release_date: "2026-07-24",
+        family_id: "Claude Opus 5",
+        effort_tier: "high",
+      }),
+    ];
+    // Browse: Fable hidden
+    const browse = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
+    expect(browse.every((m) => !m.model.includes("Fable"))).toBe(true);
+    // Explicit solo: Fable must appear (user selected it)
+    const solo = applyFilters(
+      rows,
+      {
+        ...DEFAULT_FILTERS,
+        ageEnabled: false,
+        multiEffortOnly: true,
+        families: ["Claude Fable 5"],
+      },
+      ref,
+    );
+    expect(solo).toHaveLength(1);
+    expect(solo[0].model).toContain("Fable");
   });
 
   it("providers __none__ yields empty visible set", () => {

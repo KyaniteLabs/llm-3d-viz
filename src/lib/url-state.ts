@@ -7,6 +7,7 @@
  * - age=0|1          age filter off / on (default on, 6 months)
  * - providers=a,b    multi-select; empty ≡ all
  * - families=a,b     multi-select; empty ≡ all (comma-separated family_ids)
+ * - fam=a,b          alias for families=
  * - ax=x,y,z         AxisMetricId triple for scene X/Y/Z
  * - w=s,c,i          raw weight triple speed,cost,intelligence
  * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
@@ -68,8 +69,9 @@ export function parseShareableState(
   if (params.has("providers")) {
     filters.providers = splitList(params.get("providers"));
   }
-  if (params.has("families")) {
-    filters.families = splitList(params.get("families"));
+  if (params.has("families") || params.has("fam")) {
+    // `fam` is a short alias people type by habit; prefer `families` when both present.
+    filters.families = splitList(params.get("families") ?? params.get("fam"));
   }
   if (params.has("me")) {
     const me = params.get("me");

@@ -100,7 +100,7 @@ function updateEffortStrip(
   });
 }
 
-function updateEmptyState(visibleCount: number) {
+function updateEmptyState(visibleCount: number, filters?: { multiEffortOnly?: boolean; families?: string[] }) {
   const stage = document.querySelector(".stage-visual") as HTMLElement | null;
   if (!stage) return;
   let banner = stage.querySelector("[data-empty-visible]") as HTMLElement | null;
@@ -108,17 +108,21 @@ function updateEmptyState(visibleCount: number) {
     banner?.remove();
     return;
   }
+  const famHint =
+    filters?.families?.length && filters.multiEffortOnly
+      ? `Selected families may be single-effort on AA (e.g. Claude Fable 5). Turn off <strong>Multi-effort only</strong> in Edit scope, or solo via a family chip (auto-widens).`
+      : `Nothing matches the current filters. Clear filters or turn off <strong>Multi-effort only</strong> / age to widen the set.`;
   if (!banner) {
     banner = document.createElement("div");
     banner.dataset.emptyVisible = "1";
     banner.className = "empty-visible-banner";
     banner.setAttribute("role", "status");
-    banner.innerHTML = `
-      <p class="eyebrow">NO MODELS IN VIEW</p>
-      <p>Nothing matches the current filters. Clear filters or turn off <strong>Multi-effort curves only</strong> / age to widen the set.</p>
-      <p class="axis-hint">Tip: ?me=0 shows single-effort models; ?age=0 removes the age window.</p>`;
     stage.appendChild(banner);
   }
+  banner.innerHTML = `
+      <p class="eyebrow">NO MODELS IN VIEW</p>
+      <p>${famHint}</p>
+      <p class="axis-hint">Tip: <code>?me=0</code> shows single-effort models; <code>?families=Claude%20Fable%205&amp;me=0</code> solos Fable.</p>`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -356,7 +360,7 @@ async function boot() {
       soloFamily,
       highlightFamilyId: soloFamily ? filters.families[0] : highlightFamilyId,
     });
-    updateEmptyState(visibleSet.length);
+    updateEmptyState(visibleSet.length, filters);
     projections?.setPresentationMode?.(presentationMode);
     projections?.render(weights, visibleSet);
     sweep?.setPresentationMode?.(presentationMode);
