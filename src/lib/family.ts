@@ -1,8 +1,18 @@
 /**
  * Family identity + effort-tier helpers for multi-effort trails.
+ * Pure derivation lives in family-effort.shared.mjs (shared with expand scripts).
  */
 
 import type { Model } from "../data/models";
+import {
+  deriveFamilyId as deriveFamilyIdShared,
+  deriveEffortTierFromName,
+  normalizeFamily,
+  normalizeProvider,
+  lastSlugSegment,
+} from "./family-effort.shared";
+
+export { normalizeFamily, normalizeProvider, lastSlugSegment };
 
 /** Ordered ranks for effort intensity (low → high). Unknowns sort last. */
 export const EFFORT_RANK: Readonly<Record<string, number>> = {
@@ -12,6 +22,7 @@ export const EFFORT_RANK: Readonly<Record<string, number>> = {
   high: 3,
   max: 4,
   xhigh: 5,
+  minimal: 1,
   default: 3,
 };
 
@@ -20,29 +31,15 @@ export const EFFORT_RANK: Readonly<Record<string, number>> = {
  * effort / reasoning suffixes (parenthetical tiers, "reasoning", etc.).
  */
 export function deriveFamilyId(modelName: string): string {
-  let name = modelName.trim();
-  // Strip trailing parenthetical effort markers: (max), (high), (xhigh), (Reasoning), …
-  name = name.replace(
-    /\s*\((?:xhigh|max|high|medium|low|default|reasoning|non-reasoning|thinking|adaptive reasoning)[^)]*\)\s*$/i,
-    "",
-  );
-  // Strip trailing bare effort words after hyphen/space
-  name = name.replace(/\s*[-–]?\s*(xhigh|max effort|max|high|medium|low)\s*$/i, "");
-  name = name.replace(/\s+/g, " ").trim();
-  return name.length > 0 ? name : modelName.trim();
+  return deriveFamilyIdShared(modelName);
 }
 
 /** Parse effort tier from structured field or name heuristics. */
-export function deriveEffortTier(model: Pick<Model, "model" | "effort_tier" | "reasoning">): string {
+export function deriveEffortTier(
+  model: Pick<Model, "model" | "effort_tier" | "reasoning">,
+): string {
   if (model.effort_tier && model.effort_tier.trim()) return model.effort_tier.trim().toLowerCase();
-  const lower = model.model.toLowerCase();
-  if (/\(xhigh\)|\bxhigh\b/.test(lower)) return "xhigh";
-  if (/\(max\)|\bmax effort\b|\bmax\b/.test(lower)) return "max";
-  if (/\(high\)|\bhigh\b/.test(lower)) return "high";
-  if (/\(medium\)|\bmedium\b|\bmid\b/.test(lower)) return "medium";
-  if (/\(low\)|\blow\b/.test(lower)) return "low";
-  if (model.reasoning) return "default";
-  return "none";
+  return deriveEffortTierFromName(model.model, Boolean(model.reasoning));
 }
 
 export function effortRank(tier: string): number {

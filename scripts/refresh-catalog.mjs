@@ -15,5 +15,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const expand = path.join(root, "scripts/expand-aa-multi-effort.mjs");
-const r = spawnSync(process.execPath, [expand], { cwd: root, stdio: "inherit" });
+const r = spawnSync(process.execPath, ["--experimental-strip-types", expand], {
+  cwd: root,
+  stdio: "inherit",
+});
 process.exit(r.status ?? 1);

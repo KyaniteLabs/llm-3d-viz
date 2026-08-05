@@ -2,6 +2,13 @@
  * Shared Artificial Analysis HTML extractors (public pages only).
  */
 
+import {
+  deriveFamilyId,
+  deriveEffortTierFromName,
+} from "../../src/lib/family-effort.shared.ts";
+
+export { deriveFamilyId, deriveEffortTierFromName };
+
 /** Parse one `\\"models\\":[ ... ]` array starting at the marker index. */
 export function extractModelsArrayAt(html, arrStartMarkerIndex) {
   const marker = '\\"models\\":[';
@@ -101,30 +108,9 @@ export function extractAllModelsBySlug(html) {
   return [...bySlug.values()];
 }
 
-export function deriveFamilyId(modelName) {
-  let name = modelName.trim();
-  name = name.replace(
-    /\s*\((?:xhigh|max|high|medium|low|default|minimal|non-reasoning|reasoning|thinking|adaptive reasoning)[^)]*\)\s*$/i,
-    "",
-  );
-  name = name.replace(/\s*[-–]?\s*(xhigh|max effort|max|high|medium|low|minimal)\s*$/i, "");
-  // Strip trailing fallback parentheticals that are not effort-only
-  name = name.replace(/\s*\(with fallback\)\s*$/i, "");
-  name = name.replace(/\s+/g, " ").trim();
-  return name.length > 0 ? name : modelName.trim();
-}
-
+/** @deprecated use deriveEffortTierFromName — kept for expand call sites */
 export function deriveEffortTier(name, isReasoning) {
-  const lower = name.toLowerCase();
-  if (/\(xhigh\)|xhigh effort|\bxhigh\b/.test(lower)) return "xhigh";
-  if (/\(max\)|max effort|\bmax\b/.test(lower)) return "max";
-  if (/\(high\)|high effort|\bhigh\b/.test(lower)) return "high";
-  if (/\(medium\)|medium effort|\bmedium\b|\bmid\b/.test(lower)) return "medium";
-  if (/\(low\)|low effort|\blow\b/.test(lower)) return "low";
-  if (/\(minimal\)|minimal effort|\bminimal\b/.test(lower)) return "minimal";
-  if (/non-reasoning/.test(lower)) return "none";
-  if (isReasoning) return "default";
-  return "none";
+  return deriveEffortTierFromName(name, isReasoning);
 }
 
 export function costPerTask(m) {
@@ -156,7 +142,7 @@ export function mapAaRow(m, today, sourceLabel) {
   const ttftMs = typeof ttftS === "number" ? ttftS * 1000 : null;
   const openness = m.isOpenWeights ? "open" : "closed";
   const family_id = deriveFamilyId(m.name);
-  const effort_tier = deriveEffortTier(m.name, Boolean(m.isReasoning));
+  const effort_tier = deriveEffortTierFromName(m.name, Boolean(m.isReasoning));
   const modality = ["text"];
   if (m.inputModalityImage) modality.push("vision");
   if (m.inputModalitySpeech) modality.push("audio");
