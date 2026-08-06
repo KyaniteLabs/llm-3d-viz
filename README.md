@@ -39,6 +39,13 @@ See **[docs/forkers/README.md](docs/forkers/README.md)** — branding, lab color
 
 MIT — see [LICENSE](LICENSE).
 
+## Source
+
+| Host | Role |
+|------|------|
+| [GitHub KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) | Public mirror / forks |
+| [Forgejo simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Canonical developer remote |
+
 ## Status
 
 Open-source friendly build. Production deploy configuration is operator-specific and not required to run or fork the app.
