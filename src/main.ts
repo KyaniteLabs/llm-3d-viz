@@ -21,6 +21,7 @@ import { CinemaMode } from "./viz/cinema";
 import { StageGuide } from "./ui/stage-guide";
 import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
 import { displayName } from "./lib/display-name";
+import { normalizedScores, weightedOptimum } from "./lib/score";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -445,8 +446,36 @@ async function boot() {
     viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
     viz.visibleCount = visibleSet.length;
     viz.pointCount = (window as any).__viz?.pointCount ?? visibleSet.length;
+    // Session instrument state for operator E2E (must mirror store, not invent).
+    viz.weights = { ...appState.weights };
+    viz.decideMode = Boolean(appState.decideMode);
+    viz.intelligenceFloor = appState.intelligenceFloor;
+    viz.costSpeedBias = appState.costSpeedBias;
+    viz.cinemaMode = Boolean(appState.cinemaMode);
+    viz.hoveredModelId = appState.hoveredModelId;
+    viz.pinnedModelId = appState.pinnedModelId;
+    viz.optimumModelId = appState.decideMode
+      ? null
+      : (weightedOptimum(normalizedScores(visibleSet, weights, visibleSet))?.model.model ?? null);
     (window as any).__viz = viz;
   };
+
+  // Publish hover/pin/cinema even on lightweight subscribe paths (no full rebuild).
+  store.subscribe((state) => {
+    const viz = (window as any).__viz;
+    if (!viz) return;
+    viz.hoveredModelId = state.hoveredModelId;
+    viz.pinnedModelId = state.pinnedModelId;
+    viz.cinemaMode = Boolean(state.cinemaMode);
+    viz.decideMode = Boolean(state.decideMode);
+    viz.intelligenceFloor = state.intelligenceFloor;
+    viz.weights = { ...state.weights };
+    viz.filters = {
+      ...state.filters,
+      providers: [...state.filters.providers],
+      families: [...state.filters.families],
+    };
+  });
 
   store.subscribe((state) => {
     if (!renderedWeights || !renderedAxes || !renderedFilters) {
@@ -557,6 +586,11 @@ async function boot() {
     }
     if (key === "Escape") {
       event.preventDefault();
+      // Exit cinema first (button is hidden under is-cinema); then clear family solo.
+      if (store.getState().cinemaMode) {
+        store.update({ cinemaMode: false });
+        return;
+      }
       consoleUi.showAllFamilies();
       return;
     }
