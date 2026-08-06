@@ -60,11 +60,11 @@ export class StageGuide {
   }
 
   private defaultOpen(isCompact: boolean): { stage: boolean; glyph: boolean } {
-    // Tastecheck 2026-08-04: STAGE KEY collapsed by default (canvas first).
-    // Glyph key starts closed; user open state is sticky after first toggle.
+    // S+: encoding HUD open by default (glanceable decode; no hover tour).
+    // User open state is sticky after first toggle.
     return {
-      stage: this.stageKeyOpen ?? false,
-      glyph: this.glyphOpen ?? false,
+      stage: this.stageKeyOpen ?? true,
+      glyph: this.glyphOpen ?? true,
     };
   }
 

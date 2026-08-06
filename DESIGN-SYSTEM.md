@@ -25,9 +25,9 @@ Supersedes “never categorical color on canvas” and “copper never on canvas
 | Channel | Meaning | Default (curve-focus) |
 |---------|---------|----------------------|
 | **Position X / Y / Z** | Cost / intelligence / speed (remappable metrics) | **On** |
-| **Fill color** | Lab **brand colors[0]** + family shade; singleton = dim lab tint | **On** — lab identity |
-| **Outer ring** | Lab **brand colors[1]** | **On** |
-| **Inner core** | Lab **brand colors[2]** | **On** — ≥3-color uniqueness |
+| **Fill color** | Lab **brand colors[0]** + family shade; **always full chroma** (no hover) | **On** — glanceable lab identity |
+| **Outer ring** | Lab **brand colors[1]** | **Focus only** (solo/selected/`?brand=full`) |
+| **Inner core** | Lab **brand colors[2]** | **Focus only** |
 | **Trail** | Same family shade; effort-rank ordered; real points only | **On** |
 | **Size** | Value-score for current weights (continuous) | **On** — bigger = better fit |
 | **Size floor / gold** | Frontier size floor; optimum = gold + largest | **On** |
@@ -44,6 +44,10 @@ Glyph 2×2 (authoritative in `src/viz/mark-encoding.ts`):
 | Reasoning | solid octa | wire octa |
 
 - Legend must match stage 1:1 (lab color, trails, size=score, glyph 2×2, frontier, optimum).
+- **Legend HUD open by default** (compact); decoding must not require hover on marks.
+
+### Glanceable lab color (S+ · 2026-08-06)
+Lab brand **fill is always on** for every visible mark. Rank uses filament ridge, point size, and quiet trails — not muted brand fills.
 - Family effort **trails** keep one family color along real points only (no invented vertices).
 - Value-score weights remain independent of display-axis remapping.
 - First paint: soft-fit multi-effort subset bounds; age ≤ 6 months remains density floor.
@@ -93,7 +97,8 @@ Glyph 2×2 (authoritative in `src/viz/mark-encoding.ts`):
 - No rainbow categoricals for providers → point **shape** + direct labels + near-neutral pearl.
 - No default Plotly chrome (modebar, grid, ticks, hover card, camera) → strip all; build axes/legend/tooltip/controls in HTML; **Plotly = render engine only.**
 - No fake volumetrics in Plotly v0 → v0 signature is typographic/informational + frontier animation; true atmosphere = R3F v1+.
-- No emoji icons → minimal 1px line-icon set.
+- No emoji icons (including ⚡ and ★ on marks) → minimal 1px line-icon set / plain mono labels.
+- No desaturating lab fill to encode rank (hierarchy = ridge + size + quiet trails).
 - No particle systems / starfield / grid-floor-to-horizon / fog-bank / neon bloom (Three.js demo vocab is banned).
 - No shaded Pareto **surface** → ridge line/fuse + subtraction.
 - No ambient/idle glow or permanent camera drift → spectacle only on user action.

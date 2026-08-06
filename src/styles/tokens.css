@@ -1185,3 +1185,107 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   grid-template-rows: minmax(0, 1fr);
   padding: 0;
 }
+
+
+/* --- S+ hybrid 3D + linked 2D strip --- */
+.canvas-host[data-canvas-mode="3d"] {
+  grid-template-rows: auto minmax(0, 1fr) minmax(7.5rem, 9.25rem);
+}
+.canvas-host[data-canvas-mode="3d"] .projection-row:not([hidden]) {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 8.5rem;
+  max-height: 9.25rem;
+  min-height: 7.5rem;
+  gap: 0.25rem;
+  align-self: end;
+}
+.canvas-host[data-canvas-mode="3d"] .projection-row .projection {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.canvas-host[data-canvas-mode="3d"] .projection-row .js-plotly-plot,
+.canvas-host[data-canvas-mode="3d"] .projection-row .plot-container,
+.canvas-host[data-canvas-mode="3d"] .projection-row .svg-container {
+  flex: 1 1 auto;
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+.canvas-host[data-canvas-mode="3d"] .stage {
+  grid-row: 2;
+  min-height: 0;
+}
+.canvas-host[data-canvas-mode="3d"] .mode-tabs { grid-row: 1; }
+.canvas-host[data-canvas-mode="3d"] .projection-row { grid-row: 3; }
+.canvas-host[data-canvas-mode="3d"] .effort-strip:not([hidden]) {
+  /* effort overlays stage bottom if shown */
+  position: absolute;
+  bottom: 9.5rem;
+  left: 0.3rem;
+  right: 0.3rem;
+  z-index: 5;
+  max-height: 4rem;
+}
+
+/* STAGE KEY open HUD: cap height so stage stays subject */
+.stage-guide-body {
+  max-height: 4.5rem;
+  overflow: auto;
+}
+.stage-guide-disclosure[open] .stage-guide-body {
+  max-height: min(18rem, 55vh);
+}
+
+/* Instrument inputs — no white native fields */
+input[type="search"],
+input[type="text"],
+input:not([type]),
+select,
+textarea {
+  background: var(--ink-panel-2) !important;
+  color: var(--text-warm) !important;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+input[type="range"] {
+  accent-color: var(--copper);
+}
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 2px;
+}
+
+/* Mobile stage-first */
+@media (max-width: 760px) {
+  .app-shell, .observatory {
+    grid-template-rows: auto minmax(52vh, 1fr) minmax(0, 38vh) !important;
+  }
+  .canvas-host {
+    min-height: 52vh;
+  }
+  .canvas-host[data-canvas-mode="3d"] {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .canvas-host[data-canvas-mode="3d"] .projection-row {
+    display: none !important;
+  }
+  .inspector, .console {
+    max-height: 38vh;
+    overflow: auto;
+  }
+  .stage-guide {
+    width: min(11rem, 42%);
+    font-size: 0.85em;
+  }
+}
+
+.nav-help summary {
+  cursor: pointer;
+  list-style: none;
+}
+.nav-help summary::-webkit-details-marker { display: none; }

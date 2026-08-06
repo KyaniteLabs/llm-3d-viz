@@ -66,7 +66,7 @@ export class DecidePanel {
       <div class="decide-chart-host" data-decide-chart aria-label="Cost versus speed of eligible models"></div>
       <section class="decide-shortlist" data-decide-shortlist aria-label="Shortlist"></section>
       <div class="decide-actions">
-        <button type="button" class="scope-apply" data-decide-export>Copy DecideResponse JSON</button>
+        <button type="button" class="scope-apply" data-decide-export>Copy decision</button>
         <span class="console-note" data-decide-export-status hidden></span>
       </div>
     `;

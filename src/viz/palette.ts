@@ -518,6 +518,19 @@ export interface PointEncodingInput {
   singleton: boolean;
   provider?: string;
   palette?: SemanticPalette;
+  /** Solo family filter active for this family. */
+  solo?: boolean;
+  /** Currently selected / hovered. */
+  selected?: boolean;
+  /** ?brand=full or density-expand. */
+  brandFull?: boolean;
+  /** Member of cinema focus set. */
+  cinemaFocus?: boolean;
+  /**
+   * Effort role within multi-effort family: endpoints keep full size;
+   * mid steps shrink (size only — brand fill stays full chroma).
+   */
+  effortRole?: "endpoint" | "mid" | "single";
 }
 
 export interface PointEncoding {
@@ -532,11 +545,33 @@ export interface PointEncoding {
   sizeScale: number;
   trailColor: string;
   seriesColor: string;
+  /** Outer brand ring mesh — false at full catalog density by default. */
+  showRing: boolean;
+  /** Inner brand core mesh. */
+  showCore: boolean;
+  /** Suggested idle trail opacity (stages may raise on solo). */
+  trailOpacity: number;
 }
+
+/** Brand ring/core layers: full catalog default off; on for focus states. */
+export function brandLayerFlags(input: Pick<
+  PointEncodingInput,
+  "solo" | "selected" | "brandFull" | "cinemaFocus"
+>): { showRing: boolean; showCore: boolean } {
+  const on = Boolean(input.solo || input.selected || input.brandFull || input.cinemaFocus);
+  return { showRing: on, showCore: on };
+}
+
+/** Idle multi-effort trail opacity (S+ glance-first: quiet trails, loud fills). */
+export const TRAIL_IDLE_OPACITY = 0.45;
+export const TRAIL_SOLO_OPACITY = 0.9;
+/** Mid-effort size multiplier within a multi-effort family. */
+export const MID_EFFORT_SIZE_SCALE = 0.7;
 
 /**
  * Single product encoding contract for stage, projections, sweep, and legend.
- * Curve-focus (default): family series fill+trail; openness never primary fill.
+ * Curve-focus (default): full lab brand fill always (glanceable); openness never primary fill.
+ * Hierarchy: ridge + size + quiet trails — not desaturated brand fill.
  * Openness mode: legacy aaPointFill for regression / AA screenshots.
  */
 export function pointEncoding(input: PointEncodingInput): PointEncoding {
@@ -548,10 +583,14 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const brandColors = labColors(input.provider ?? "");
   const lab = labColor(input.provider ?? "", series);
   const trailColor = series;
-  // Size = value-score (continuous) × singleton dim. Stages add frontier/optimum floors.
+  const layers = brandLayerFlags(input);
+  const trailOpacity =
+    input.solo || input.selected ? TRAIL_SOLO_OPACITY : TRAIL_IDLE_OPACITY;
+  // Size = value-score × singleton × mid-effort. Stages add frontier/optimum floors.
   const scoreSize = scoreSizeScale(input.score);
   const singletonMul =
     input.singleton && input.semanticClass !== "optimum" ? SINGLETON_SIZE_SCALE : 1;
+  const midMul = input.effortRole === "mid" ? MID_EFFORT_SIZE_SCALE : 1;
 
   if (input.presentationMode === "openness") {
     return {
@@ -566,9 +605,12 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
       core,
       brandColors,
       opacity: 1,
-      sizeScale: scoreSize,
+      sizeScale: scoreSize * midMul,
       trailColor: lab,
       seriesColor: series,
+      showRing: layers.showRing,
+      showCore: layers.showCore,
+      trailOpacity,
     };
   }
 
@@ -580,51 +622,62 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
       core,
       brandColors,
       opacity: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_OPACITY : 1,
-      sizeScale: scoreSize * singletonMul,
+      sizeScale: scoreSize * singletonMul * midMul,
       trailColor,
       seriesColor: series,
+      showRing: layers.showRing,
+      showCore: layers.showCore,
+      trailOpacity,
     };
   }
 
   if (input.semanticClass === "optimum") {
     return {
       fill: palette.gold ?? palette.filament,
-      // Keep brand rings so lab is still readable on the gold optimum.
       accent: series,
       core,
       brandColors,
       opacity: 1,
-      // Optimum already has a stage floor size; score still modulates slightly.
       sizeScale: Math.max(1.15, scoreSize),
       trailColor,
       seriesColor: series,
+      showRing: true,
+      showCore: layers.showCore,
+      trailOpacity,
     };
   }
 
   // Singleton: keep a lab-tinted fill so lab identity is still readable at a glance.
   if (input.singleton) {
+    // Glanceable: keep lab-tinted fill; only slight size/α dim.
     return {
       fill: mixColors(SINGLETON_FILL, series, 0.45),
       accent,
       core,
       brandColors,
       opacity: SINGLETON_OPACITY,
-      sizeScale: scoreSize * SINGLETON_SIZE_SCALE,
+      sizeScale: scoreSize * SINGLETON_SIZE_SCALE * midMul,
       trailColor,
       seriesColor: series,
+      showRing: layers.showRing,
+      showCore: layers.showCore,
+      trailOpacity,
     };
   }
 
-  // Multi-effort dominated + frontier: lab/family series fill; size = value-score.
+  // Multi-effort dominated + frontier: full lab fill always (glanceable).
   return {
     fill: series,
     accent,
     core,
     brandColors,
     opacity: 1,
-    sizeScale: scoreSize,
+    sizeScale: scoreSize * midMul,
     trailColor,
     seriesColor: series,
+    showRing: layers.showRing,
+    showCore: layers.showCore,
+    trailOpacity,
   };
 }
 
@@ -650,8 +703,8 @@ export function legendEntries(
     ? "HEAT ON · copper→filament by value score (diagnostic)"
     : "lab = color · shape = openness×reasoning · size = value score";
   return [
-    { id: "lab-color", title: "Lab color", detail: "≥3 brand colors · fill + outer ring + core · family shades primary" },
-    { id: "family-trail", title: "Family trail", detail: "effort path · real points only · low→xhigh" },
+    { id: "lab-color", title: "Lab color", detail: "full brand fill always · rings/core on focus · family shades primary" },
+    { id: "family-trail", title: "Family trail", detail: "effort path · quiet until solo · real points only" },
     { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
     { id: "glyph-standard", title: "Sphere", detail: "standard model (not reasoning)" },
     { id: "glyph-reasoning", title: "Octahedron", detail: "reasoning / thinking model" },

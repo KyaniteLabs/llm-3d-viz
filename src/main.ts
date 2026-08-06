@@ -209,13 +209,14 @@ async function boot() {
     const projEl = canvasHost.querySelector<HTMLElement>('[data-pane="2d"]');
     const tableEl = canvasHost.querySelector<HTMLElement>('[data-pane="table"]');
     const effortEl = canvasHost.querySelector<HTMLElement>("[data-effort-strip]");
-    if (stageEl) stageEl.hidden = mode !== "3d";
-    if (projEl) projEl.hidden = mode !== "2d";
+    if (stageEl) stageEl.hidden = mode === "table" || mode === "2d";
+    // SPEC hybrid: linked 2D strip visible under 3D; full 2D mode expands strip.
+    if (projEl) projEl.hidden = mode === "table";
     if (tableEl) tableEl.hidden = mode !== "table";
     // effort only in 3d when solo
     if (effortEl && mode !== "3d") effortEl.hidden = true;
-    // Plotly plots are born in a 6.75rem strip — resize once the 2D pane is full-height.
-    if (mode === "2d") {
+    // Resize Plotly when 2D strip or full 2D is shown.
+    if (mode === "2d" || mode === "3d") {
       requestAnimationFrame(() => {
         void import("./viz/plotly-loader").then(({ loadPlotly }) =>
           loadPlotly().then((Plotly) => {
@@ -366,7 +367,7 @@ async function boot() {
       scopeText.textContent = formatScopeSummary(filters, visibleSet.length, models.length);
     }
     if (statusText) {
-      statusText.textContent = `${visibleSet.length} models · ${filters.multiEffortOnly ? "multi-effort" : "all variants"} · stage ${activeBackend}`;
+      statusText.textContent = `${visibleSet.length} models · ${filters.multiEffortOnly ? "multi-effort" : "all variants"} · multi-effort`;
     }
     // Drop pin/hover if filtered out.
     const state = store.getState();
@@ -423,7 +424,7 @@ async function boot() {
     decidePanel.setModels(visibleSet);
     stageGuide.setModels(visibleSet);
     if (statusText && appState.decideMode && decide) {
-      statusText.textContent = `Decide · floor ${appState.intelligenceFloor} · ${decide.eligible.length} eligible · ${decide.shortlist.length} shortlist · stage ${activeBackend}`;
+      statusText.textContent = `Decide · floor ${appState.intelligenceFloor} · ${decide.eligible.length} eligible · ${decide.shortlist.length} shortlist`;
     }
 
     // Always publish instrument state for Playwright/QA (preview + prod).
