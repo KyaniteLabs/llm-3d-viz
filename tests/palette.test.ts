@@ -144,7 +144,7 @@ describe("curve-focus pointEncoding (product default)", () => {
     { model: "B solo", family_id: "B", openness: "closed" as const },
   ];
 
-  it("colors multi-effort dominated points with family series fill, not openness blue", () => {
+  it("colors multi-effort dominated points with lab hue (not openness blue), not pure slate mud", () => {
     const enc = pointEncoding({
       openness: "open",
       semanticClass: "dominated",
@@ -155,9 +155,12 @@ describe("curve-focus pointEncoding (product default)", () => {
       singleton: false,
       provider: "OpenAI",
     });
+    const series = familySeriesColor("A", "OpenAI");
     expect(enc.fill).not.toBe(OPENNESS_FILL.open);
-    expect(enc.fill).toBe(familySeriesColor("A", "OpenAI"));
-    expect(enc.opacity).toBe(1);
+    // Beauty P0: dominated may desat slightly but still lab-tinted (not openness blue).
+    expect(enc.fill).not.toBe(OPENNESS_FILL.closed);
+    expect(enc.seriesColor).toBe(series);
+    expect(enc.opacity).toBeLessThanOrEqual(1);
     expect(enc.trailColor).toBe(enc.seriesColor);
   });
 
@@ -346,10 +349,14 @@ describe("curve-focus family continuity", () => {
 
 
 describe("S+ brand layers + glanceable trails", () => {
-  it("always shows brand ring + core (≥3 colors on every mark)", () => {
-    expect(brandLayerFlags({}).showRing).toBe(true);
-    expect(brandLayerFlags({}).showCore).toBe(true);
-    expect(brandLayerFlags({ solo: false, selected: false, brandFull: false }).showRing).toBe(true);
+  it("Beauty P0: ring/core focus-gated (not always-on confetti)", () => {
+    expect(brandLayerFlags({}).showRing).toBe(false);
+    expect(brandLayerFlags({}).showCore).toBe(false);
+    expect(brandLayerFlags({ solo: false, selected: false, brandFull: false }).showRing).toBe(false);
+    expect(brandLayerFlags({ solo: true }).showRing).toBe(true);
+    expect(brandLayerFlags({ selected: true }).showCore).toBe(true);
+    expect(brandLayerFlags({ brandFull: true }).showRing).toBe(true);
+    expect(brandLayerFlags({ cinemaFocus: true }).showCore).toBe(true);
   });
 
   it("maps Qwen models under Alibaba provider to Qwen violet — not Alibaba orange", () => {
@@ -369,13 +376,12 @@ describe("S+ brand layers + glanceable trails", () => {
     });
     expect(enc.fill.toLowerCase()).not.toBe("#ff6a00");
     expect(enc.brandColors[0].toLowerCase()).toBe("#615ced");
-    expect(enc.showRing).toBe(true);
-    expect(enc.showCore).toBe(true);
+    expect(enc.showRing).toBe(false); // Beauty P0: idle rings off
     expect(enc.accent.toLowerCase()).toBe("#1a1033");
     expect(enc.core.toLowerCase()).toBe("#c4b5fd");
   });
 
-  it("pointEncoding keeps full family fill, multi-color layers, quiet trail by default", () => {
+  it("pointEncoding: dominated keeps lab hue, quiet trail, no idle rings", () => {
     const enc = pointEncoding({
       openness: "closed",
       semanticClass: "dominated",
@@ -387,10 +393,39 @@ describe("S+ brand layers + glanceable trails", () => {
       provider: "OpenAI",
     });
     expect(enc.fill).toBeTruthy();
-    expect(enc.showRing).toBe(true);
-    expect(enc.showCore).toBe(true);
+    expect(enc.showRing).toBe(false);
+    expect(enc.showCore).toBe(false);
     expect(enc.trailOpacity).toBe(TRAIL_IDLE_OPACITY);
-    expect(enc.opacity).toBe(1);
+    expect(enc.trailOpacity).toBeLessThan(0.25);
+    expect(enc.opacity).toBeLessThanOrEqual(0.9);
+  });
+
+  it("frontier keeps full-chroma series fill; optimum forces ring", () => {
+    const frontier = pointEncoding({
+      openness: "closed",
+      semanticClass: "frontier",
+      score: 0.8,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "gpt-5.6-sol",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    const series = familySeriesColor("gpt-5.6-sol", "OpenAI");
+    expect(frontier.fill).toBe(series);
+    expect(frontier.showRing).toBe(false);
+    const opt = pointEncoding({
+      openness: "closed",
+      semanticClass: "optimum",
+      score: 1,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "gpt-5.6-sol",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(opt.showRing).toBe(true);
+    expect(opt.showCore).toBe(true);
   });
 
   it("mid effort shrinks size only", () => {

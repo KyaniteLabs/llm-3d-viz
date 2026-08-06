@@ -6,6 +6,7 @@ import {
   candidatesForArena,
   spineKey,
   isScorable,
+  canAdmitPlotTriple,
 } from "../scripts/lib/catalog-join.mjs";
 import { parseArenaIdentity } from "../src/lib/family-effort.shared";
 
@@ -146,6 +147,7 @@ describe("catalog-join", () => {
     });
     // not scorable without price
     expect(isScorable(row)).toBe(false);
+    expect(canAdmitPlotTriple(row)).toBe(false);
     const { rows, overlays } = applyOpenRouterPricing([row], [
       {
         id: "anthropic/claude-fable-5",
@@ -160,6 +162,94 @@ describe("catalog-join", () => {
     expect(rows[0].blended_price_per_M).toBeGreaterThan(0);
     expect(rows[0].sources?.blended_price_per_M?.kind).toBe("derived_list_blend");
     expect(isScorable(rows[0])).toBe(true);
+    expect(canAdmitPlotTriple(rows[0])).toBe(true);
+  });
+
+  it("admit: AA-complete triple admits", () => {
+    const row = aaRow({});
+    expect(canAdmitPlotTriple(row)).toBe(true);
+    const out = joinCatalog([row]);
+    expect(out.scorable).toHaveLength(1);
+    expect(out.scorable[0].sources?.aa_intelligence_index?.origin).toBe("aa");
+  });
+
+  it("admit: AA IQ+TPS + OpenRouter price admits with provenance", () => {
+    const partial = aaRow({
+      model: "Grok 4.5 (high)",
+      provider: "SpaceXAI",
+      family_id: "Grok 4.5",
+      effort_tier: "high",
+      source_url: "https://artificialanalysis.ai/models/grok-4-5",
+      price_in_per_M: null,
+      price_out_per_M: null,
+      blended_price_per_M: null,
+      aa_intelligence_index: 55,
+      tps: 80,
+    });
+    expect(canAdmitPlotTriple(partial)).toBe(false);
+    const out = joinCatalog([partial], {
+      orModels: [
+        {
+          id: "x-ai/grok-4.5",
+          name: "SpaceXAI: Grok 4.5",
+          pricing: { prompt: "0.000003", completion: "0.000015" },
+        },
+      ],
+    });
+    expect(out.openrouterOverlays).toBeGreaterThanOrEqual(1);
+    expect(out.scorable).toHaveLength(1);
+    expect(out.scorable[0].blended_price_per_M).toBeGreaterThan(0);
+    expect(out.scorable[0].sources?.blended_price_per_M?.origin).toBe("openrouter");
+    expect(out.scorable[0].aa_intelligence_index).toBe(55);
+    expect(out.scorable[0].tps).toBe(80);
+  });
+
+  it("admit: rejects OpenRouter-only and Arena-only shells", () => {
+    const orOnly = {
+      model: "Ghost OR",
+      provider: "OpenAI",
+      openness: "closed",
+      release_date: "2026-06-01",
+      data_date: "2026-08-06",
+      source: "openrouter-only",
+      tps: null,
+      aa_intelligence_index: null,
+      blended_price_per_M: 1.5,
+      price_in_per_M: 1,
+      price_out_per_M: 2,
+      arena_elo: null,
+    };
+    const arenaOnly = {
+      model: "Ghost Arena",
+      provider: "Anthropic",
+      openness: "closed",
+      release_date: "2026-06-01",
+      data_date: "2026-08-06",
+      source: "arena-only",
+      tps: null,
+      aa_intelligence_index: null,
+      blended_price_per_M: null,
+      arena_elo: 1500,
+    };
+    expect(canAdmitPlotTriple(orOnly)).toBe(false);
+    expect(canAdmitPlotTriple(arenaOnly)).toBe(false);
+    const out = joinCatalog([orOnly as never, arenaOnly as never]);
+    expect(out.scorable).toHaveLength(0);
+  });
+
+  it("admit: rejects missing IQ even when OR fills price", () => {
+    const noIq = aaRow({
+      aa_intelligence_index: null,
+      blended_price_per_M: null,
+      price_in_per_M: null,
+      price_out_per_M: null,
+      source_url: "https://artificialanalysis.ai/models/mystery",
+    });
+    const out = joinCatalog([noIq], {
+      orModels: [{ id: "mystery", pricing: { prompt: "0.00001", completion: "0.00002" } }],
+    });
+    // price may overlay but IQ missing → not admitted
+    expect(out.scorable).toHaveLength(0);
   });
 
   it("candidatesForArena uses normalizeFamily bridge", () => {

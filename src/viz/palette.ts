@@ -588,27 +588,33 @@ export interface PointEncoding {
 }
 
 /**
- * Brand ring/core layers — always on so each mark shows ≥3 brand colors
- * (body colors[0], outer ring colors[1], inner core colors[2]).
- * Focus/solo no longer gate multi-color identity.
+ * Brand ring/core layers — Beauty P0: focus-gated multi-color, not always-on confetti.
+ * Body fill keeps lab brand always; ring (colors[1]) + core (colors[2]) on solo /
+ * selected / cinema / ?brand=full only.
  */
-export function brandLayerFlags(_input?: Pick<
+export function brandLayerFlags(input?: Pick<
   PointEncodingInput,
   "solo" | "selected" | "brandFull" | "cinemaFocus"
 >): { showRing: boolean; showCore: boolean } {
-  return { showRing: true, showCore: true };
+  const on = Boolean(
+    input?.solo || input?.selected || input?.brandFull || input?.cinemaFocus,
+  );
+  return { showRing: on, showCore: on };
 }
 
-/** Idle multi-effort trail opacity (S+ glance-first: quiet trails, loud fills). */
-export const TRAIL_IDLE_OPACITY = 0.45;
-export const TRAIL_SOLO_OPACITY = 0.9;
+/** Idle multi-effort trail opacity — quiet so ridge + fills own hierarchy. */
+export const TRAIL_IDLE_OPACITY = 0.18;
+export const TRAIL_SOLO_OPACITY = 0.88;
 /** Mid-effort size multiplier within a multi-effort family. */
 export const MID_EFFORT_SIZE_SCALE = 0.7;
+/** Dominated marks: slight desat toward ink (keep hue) so frontier wins. */
+export const DOMINATED_CHROMA_PULL = 0.22;
 
 /**
  * Single product encoding contract for stage, projections, sweep, and legend.
- * Curve-focus (default): full lab brand fill always (glanceable); openness never primary fill.
- * Hierarchy: ridge + size + quiet trails — not desaturated brand fill.
+ * Curve-focus (default): lab brand fill always; ring/core focus-gated (Beauty P0).
+ * Hierarchy: filament ridge > frontier size > full-chroma lab fill > quiet trails.
+ * Dominated: keep lab hue, pull chroma slightly toward ink (not slate mud).
  * Openness mode: legacy aaPointFill for regression / AA screenshots.
  */
 export function pointEncoding(input: PointEncodingInput): PointEncoding {
@@ -628,6 +634,8 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const singletonMul =
     input.singleton && input.semanticClass !== "optimum" ? SINGLETON_SIZE_SCALE : 1;
   const midMul = input.effortRole === "mid" ? MID_EFFORT_SIZE_SCALE : 1;
+  /** Idle dominated: keep brand hue, soft desat for hierarchy. */
+  const dominatedFillBrand = mixColors(series, palette.slateCyan, DOMINATED_CHROMA_PULL);
 
   if (input.presentationMode === "openness") {
     return {
@@ -679,14 +687,13 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
       trailColor,
       seriesColor: series,
       showRing: true,
-      showCore: layers.showCore,
+      showCore: true,
       trailOpacity,
     };
   }
 
-  // Singleton: keep a lab-tinted fill so lab identity is still readable at a glance.
+  // Singleton (incl. singleton-frontier): lab-tinted fill + dim before multi-effort paths.
   if (input.singleton) {
-    // Glanceable: keep lab-tinted fill; only slight size/α dim.
     return {
       fill: mixColors(SINGLETON_FILL, series, 0.45),
       accent,
@@ -702,13 +709,30 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     };
   }
 
-  // Multi-effort dominated + frontier: full lab fill always (glanceable).
+  // Multi-effort frontier: full lab chroma; ring only on focus.
+  if (input.semanticClass === "frontier") {
+    return {
+      fill: series,
+      accent,
+      core,
+      brandColors,
+      opacity: 1,
+      sizeScale: scoreSize * midMul,
+      trailColor,
+      seriesColor: series,
+      showRing: layers.showRing,
+      showCore: layers.showCore,
+      trailOpacity,
+    };
+  }
+
+  // Dominated multi-effort: lab hue retained, chroma pulled for hierarchy.
   return {
-    fill: series,
+    fill: dominatedFillBrand,
     accent,
     core,
     brandColors,
-    opacity: 1,
+    opacity: 0.88,
     sizeScale: scoreSize * midMul,
     trailColor,
     seriesColor: series,
@@ -739,12 +763,12 @@ export function legendEntries(
     ? "HEAT ON · copper→filament by value score (diagnostic)"
     : "lab = color · shape = open/closed (all wire) · size = value score";
   return [
-    { id: "lab-color", title: "Lab color", detail: "brand fill + ring + core always (≥3 colors) · family shades primary" },
+    { id: "lab-color", title: "Lab color", detail: "brand fill always · ring/core on focus · family shades primary" },
     { id: "family-trail", title: "Family trail", detail: "effort path · quiet until solo · real points only" },
     { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
     { id: "glyph-closed", title: "Wire sphere", detail: "closed weights" },
     { id: "glyph-open", title: "Wire octa", detail: "open weights · all marks wireframe" },
-    { id: "frontier-ridge", title: "Pareto ridge", detail: "white ridge · efficient boundary" },
+    { id: "frontier-ridge", title: "Pareto ridge", detail: "filament ridge · loudest structural line" },
     { id: "optimum-marker", title: "Optimum", detail: "gold + largest · best for your weights" },
     { id: "frontier-point", title: "Frontier point", detail: "size floor · keeps lab/family fill" },
     { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },

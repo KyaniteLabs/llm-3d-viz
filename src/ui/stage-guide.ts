@@ -98,7 +98,7 @@ export class StageGuide {
               this.heatEncoding
                 ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
                 : this.presentationMode === "curve"
-                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · shape = open/closed (all wire) · size = value score. Reasoning is not a glyph.</p>'
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · ring/core on focus · shape = open/closed wire · size = score. Ridge is loudest line.</p>'
                   : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Glyphs = open/closed wire only.</p>'
             }
           </section>

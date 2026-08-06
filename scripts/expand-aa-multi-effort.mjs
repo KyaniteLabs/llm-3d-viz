@@ -7,7 +7,7 @@
  *
  * Two-layer join (ralplan):
  *  1. Enrich partials: AA map → merge → Arena Elo → OpenRouter prices + provenance
- *  2. Admit: scorable filter only at product JSON write
+ *  2. Admit: assembled speed×cost×intelligence triple (canAdmitPlotTriple)
  *
  * Sources:
  *  1. AA leaderboard / catalog / model cards HTML
@@ -39,6 +39,7 @@ import {
   applyArenaElo,
   extractArenaEntriesFromHtml,
   stampAaMeasured,
+  canAdmitPlotTriple,
 } from "./lib/catalog-join.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -303,7 +304,8 @@ const priced = applyOpenRouterPricing(merged, or.models || []);
 merged = priced.rows;
 
 // --- 5. Emit scorable-only product catalog ---
-const scorable = merged.filter(isScorable);
+// Assembled-triple admit (ADR-0001): IQ+TPS + cost from AA and/or OpenRouter join.
+const scorable = merged.filter(canAdmitPlotTriple);
 scorable.sort(
   (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
 );

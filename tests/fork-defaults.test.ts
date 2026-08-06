@@ -26,15 +26,16 @@ describe("forker config seams", () => {
     expect(APP_BRANDING.documentTitle.trim().length).toBeGreaterThan(0);
   });
 
-  it("brand layers always on (multi-color kit on every mark)", () => {
+  it("brand layers default off; brandFull/focus turns them on", () => {
     const base = {
       solo: false,
       selected: false,
       cinemaFocus: false,
     } as const;
-    const layers = brandLayerFlags({ ...base, brandFull: false });
-    expect(layers.showRing).toBe(true);
-    expect(layers.showCore).toBe(true);
-    expect(FORK_DEFAULTS.brandLayersFullDefault).toBe(true);
+    const idle = brandLayerFlags({ ...base, brandFull: false });
+    expect(idle.showRing).toBe(false);
+    expect(idle.showCore).toBe(false);
+    expect(FORK_DEFAULTS.brandLayersFullDefault).toBe(false);
+    expect(brandLayerFlags({ ...base, brandFull: true }).showRing).toBe(true);
   });
 });
