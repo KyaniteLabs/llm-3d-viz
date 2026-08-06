@@ -840,6 +840,7 @@ export class Stage3DThree implements Stage3DSurface {
         familyId: fid,
         singleton,
         provider: model.provider,
+        modelId: model.model,
         solo: soloThis,
         selected: Boolean(
           this.highlightFamilyId &&
@@ -954,6 +955,7 @@ export class Stage3DThree implements Stage3DSurface {
         familyId: familyIdOf(members[0]),
         singleton: false,
         provider: members[0].provider,
+        modelId: members[0].model,
       });
       const famId = familyIdOf(members[0]);
       let trailOpacity = trailEnc.trailOpacity ?? 0.45;

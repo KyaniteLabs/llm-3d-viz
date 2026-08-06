@@ -16,6 +16,7 @@ import {
   labSecondary,
   labBrand,
   LAB_BRANDS,
+  resolveLabKey,
   scoreSizeScale,
   SINGLETON_OPACITY,
   SINGLETON_SIZE_SCALE,
@@ -342,14 +343,36 @@ describe("curve-focus family continuity", () => {
 
 
 describe("S+ brand layers + glanceable trails", () => {
-  it("hides brand rings by default; shows on solo/selected/brandFull", () => {
-    expect(brandLayerFlags({}).showRing).toBe(false);
-    expect(brandLayerFlags({ solo: true }).showRing).toBe(true);
-    expect(brandLayerFlags({ selected: true }).showCore).toBe(true);
-    expect(brandLayerFlags({ brandFull: true }).showRing).toBe(true);
+  it("always shows brand ring + core (≥3 colors on every mark)", () => {
+    expect(brandLayerFlags({}).showRing).toBe(true);
+    expect(brandLayerFlags({}).showCore).toBe(true);
+    expect(brandLayerFlags({ solo: false, selected: false, brandFull: false }).showRing).toBe(true);
   });
 
-  it("pointEncoding keeps full family fill and quiet trail by default", () => {
+  it("maps Qwen models under Alibaba provider to Qwen violet — not Alibaba orange", () => {
+    expect(resolveLabKey("Alibaba", "Qwen3.5 122B A10B (Reasoning)")).toBe("Qwen");
+    expect(labColor("Alibaba", "#89939E", "Qwen3 Coder Next").toLowerCase()).toBe("#615ced");
+    expect(labColor("Alibaba").toLowerCase()).toBe("#ff6a00"); // bare Alibaba still corporate orange
+    const enc = pointEncoding({
+      openness: "open",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "Qwen3.5",
+      singleton: false,
+      provider: "Alibaba",
+      modelId: "Qwen3.5 122B A10B (Reasoning)",
+    });
+    expect(enc.fill.toLowerCase()).not.toBe("#ff6a00");
+    expect(enc.brandColors[0].toLowerCase()).toBe("#615ced");
+    expect(enc.showRing).toBe(true);
+    expect(enc.showCore).toBe(true);
+    expect(enc.accent.toLowerCase()).toBe("#1a1033");
+    expect(enc.core.toLowerCase()).toBe("#c4b5fd");
+  });
+
+  it("pointEncoding keeps full family fill, multi-color layers, quiet trail by default", () => {
     const enc = pointEncoding({
       openness: "closed",
       semanticClass: "dominated",
@@ -361,7 +384,8 @@ describe("S+ brand layers + glanceable trails", () => {
       provider: "OpenAI",
     });
     expect(enc.fill).toBeTruthy();
-    expect(enc.showRing).toBe(false);
+    expect(enc.showRing).toBe(true);
+    expect(enc.showCore).toBe(true);
     expect(enc.trailOpacity).toBe(TRAIL_IDLE_OPACITY);
     expect(enc.opacity).toBe(1);
   });
