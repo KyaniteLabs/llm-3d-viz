@@ -1218,6 +1218,7 @@ export class Stage3DThree implements Stage3DSurface {
     }
     kept.push(...nonMarks, ...acceptedMarks);
 
+    const edgePad = 8;
     for (const { text, x, y, kind } of kept) {
       const el = document.createElement("span");
       el.textContent = text;
@@ -1225,10 +1226,33 @@ export class Stage3DThree implements Stage3DSurface {
       const color =
         kind === "title" ? this.tokens.textWarm : kind === "mark" ? this.tokens.filament : this.tokens.textMuted;
       const weight = kind === "title" || kind === "mark" ? "500" : "400";
-      el.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-100%);
+      // Edge-aware anchor so long axis titles (e.g. INTELLIGENCE) never clip to "LLIGENCE".
+      let left = x;
+      let top = y;
+      let tx = "-50%";
+      let ty = "-100%";
+      if (x < 56) {
+        left = edgePad;
+        tx = "0%";
+      } else if (x > w - 56) {
+        left = w - edgePad;
+        tx = "-100%";
+      } else {
+        left = Math.min(w - edgePad, Math.max(edgePad, x));
+      }
+      if (y < edgePad + 4) {
+        top = edgePad;
+        ty = "0%";
+      } else if (y > h - 4) {
+        top = h - edgePad;
+        ty = "-100%";
+      }
+      const maxW = kind === "title" ? "none" : "12rem";
+      const overflow = kind === "title" ? "visible" : "hidden";
+      el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
         color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.03em;white-space:nowrap;
         opacity:${kind === "mark" ? 0.92 : kind === "title" ? 0.95 : 0.75};text-shadow:0 0 6px ${this.tokens.inkField};
-        max-width:12rem;overflow:hidden;text-overflow:ellipsis;pointer-events:none;`;
+        max-width:${maxW};overflow:${overflow};text-overflow:ellipsis;pointer-events:none;`;
       this.labelRoot.appendChild(el);
     }
   }

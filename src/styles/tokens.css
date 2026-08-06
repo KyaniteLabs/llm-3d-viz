@@ -781,6 +781,107 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   color: var(--filament);
 }
 
+/* Progressive disclosure — simple intents first; analyst tools under Advanced */
+.intent-heading {
+  margin: 0.1rem 0 0.35rem;
+  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--filament);
+}
+.intent-blurb {
+  margin: 0 0 0.65rem;
+  color: var(--color-text-muted);
+  font: 400 0.72rem/1.45 var(--font-body);
+  max-width: 36rem;
+}
+.intent-blurb strong {
+  color: var(--filament-dim);
+  font-weight: 500;
+}
+.intent-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+.intent-chip {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.5rem 0.55rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: rgba(232, 241, 228, 0.03);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font: 400 0.68rem/1.3 var(--font-mono);
+}
+.intent-chip:hover {
+  border-color: var(--filament-dim);
+  color: var(--color-text);
+}
+.intent-chip.is-active,
+.intent-chip[aria-pressed="true"] {
+  border-color: var(--filament);
+  color: var(--filament);
+  background: rgba(232, 241, 228, 0.08);
+}
+.intent-chip-label {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+.intent-chip-blurb {
+  font-size: 0.6rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.intent-chip.is-active .intent-chip-blurb {
+  color: var(--filament-dim);
+}
+.advanced-panel {
+  margin-top: 0.65rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.35rem;
+}
+.advanced-summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--filament-dim);
+  font: 500 0.65rem/1.4 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+.advanced-summary::-webkit-details-marker { display: none; }
+.advanced-summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 0.15s var(--ease-out);
+}
+.advanced-panel[open] > .advanced-summary::before {
+  transform: rotate(90deg);
+}
+.advanced-hint {
+  margin: 0 0 0.55rem;
+  color: var(--color-text-muted);
+  font: 400 0.65rem/1.4 var(--font-body);
+  opacity: 0.9;
+}
+
 /* Decide mode prototype (#136) */
 .decide-panel {
   margin-bottom: 0.75rem;
@@ -1276,36 +1377,52 @@ select:focus-visible {
     overflow: hidden;
   }
 
+  /* Single-row chrome ≤ ~56px: brand mark · scope chip · search · Decide */
   .scope-bar {
-    flex-wrap: wrap;
-    gap: 0.22rem 0.35rem;
-    padding: 0.28rem 0.4rem;
+    flex-wrap: nowrap;
+    gap: 0.25rem 0.3rem;
+    padding: 0.2rem 0.35rem;
     align-items: center;
+    max-height: 3.5rem; /* residual: ≤64px scope bar */
+  }
+  .scope-bar-brand {
+    flex: 0 0 auto;
+    max-width: 4.5rem;
   }
   .scope-bar-brand h1 {
-    font-size: 0.78rem;
-    margin-top: 0;
+    display: none; /* reclaim vertical; title lives on stage */
   }
   .scope-bar-brand .eyebrow {
-    font-size: 0.48rem;
+    font-size: 0.45rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .scope-summary {
-    flex: 1 1 auto;
+    flex: 0 1 5.5rem;
     min-width: 0;
-    max-width: 100%;
-    padding: 0.28rem 0.4rem;
+    max-width: 6.5rem;
+    padding: 0.25rem 0.35rem;
+    min-height: 2.25rem;
   }
   .scope-summary-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 11rem;
+    max-width: 100%;
+    font-size: 0.58rem;
+  }
+  .scope-edit-label {
+    display: none;
   }
   .scope-bar-actions {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
     margin-left: 0;
-    justify-content: stretch;
-    gap: 0.3rem;
+    justify-content: flex-end;
+    gap: 0.25rem;
   }
   .scope-bar .scope-search {
     flex: 1 1 auto;
@@ -1314,9 +1431,9 @@ select:focus-visible {
   .scope-bar .scope-search input {
     width: 100%;
     min-width: 0;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     min-height: 2.25rem; /* ≥36px touch */
-    padding: 0.4rem 0.45rem;
+    padding: 0.35rem 0.4rem;
   }
   /* Cinema is desktop-oriented; free horizontal chrome */
   .scope-bar .cinema-toggle {
@@ -1324,10 +1441,29 @@ select:focus-visible {
   }
   .scope-bar .decide-toggle {
     flex: 0 0 auto;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     min-height: 2.25rem; /* ≥36px touch */
-    min-width: 3.5rem;
-    padding: 0.4rem 0.65rem;
+    min-width: 3.25rem;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .intent-presets {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+  }
+  .intent-chip {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.45rem;
+  }
+  .intent-chip-blurb {
+    display: none; /* label only in tight inspector; title attr keeps full blurb */
+  }
+  .intent-blurb {
+    font-size: 0.65rem;
+    margin-bottom: 0.45rem;
+  }
+  .advanced-summary {
+    min-height: 2.25rem;
   }
 
   .canvas-host {
