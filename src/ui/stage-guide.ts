@@ -97,8 +97,8 @@ export class StageGuide {
               this.heatEncoding
                 ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
                 : this.presentationMode === "curve"
-                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · shape = openness×reasoning · size = value score. ?enc=openness for legacy fill.</p>'
-                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Glyphs still encode openness×reasoning.</p>'
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · shape = open/closed (all wire) · size = value score. Reasoning is not a glyph.</p>'
+                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Glyphs = open/closed wire only.</p>'
             }
           </section>
 
@@ -134,7 +134,7 @@ export class StageGuide {
           </details>
 
           <details class="glyph-disclosure"${open.glyph ? " open" : ""}>
-            <summary class="stage-guide-heading">GLYPHS · OPENNESS × REASONING</summary>
+            <summary class="stage-guide-heading">GLYPHS · OPEN VS CLOSED (ALL WIRE)</summary>
             <section class="provider-key glyph-key" aria-label="Glyph encoding key">
               <ul class="provider-shape-list">
                 ${MARK_GLYPH_LEGEND.map(
@@ -144,7 +144,7 @@ export class StageGuide {
                 </li>`,
                 ).join("")}
               </ul>
-              <p class="stage-guide-note">Sphere = standard · octa = reasoning. Solid = closed weights · wire = open weights. Lab is never encoded by shape.</p>
+              <p class="stage-guide-note">Wire sphere = closed weights · wire octa = open weights. All marks wireframe. Reasoning is not a shape (inspector only). Lab is never shape.</p>
             </section>
           </details>
 

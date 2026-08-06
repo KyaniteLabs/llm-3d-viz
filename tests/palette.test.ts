@@ -229,13 +229,16 @@ describe("curve-focus pointEncoding (product default)", () => {
     const curve = legendEntries("curve", false).map((e) => e.id);
     expect(curve).toContain("family-trail");
     expect(curve).toContain("size-score");
-    expect(curve).toContain("glyph-standard");
-    expect(curve).toContain("glyph-reasoning");
+    expect(curve).toContain("glyph-closed");
+    expect(curve).toContain("glyph-open");
     expect(curve).toContain("singleton-dim");
+    expect(curve).not.toContain("glyph-standard");
+    expect(curve).not.toContain("glyph-reasoning");
     expect(curve).not.toContain("open-point");
     const open = legendEntries("openness", false).map((e) => e.id);
     expect(open).toContain("open-point");
     expect(open).toContain("closed-point");
+    expect(open).toContain("glyph-closed");
     expect(open).toContain("size-score");
   });
 });

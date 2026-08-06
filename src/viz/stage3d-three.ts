@@ -869,7 +869,7 @@ export class Stage3DThree implements Stage3DSurface {
       // Keep optimum slightly larger so it still wins the visual hierarchy.
       size = Math.max(3.5, size * (isOptimum ? Math.max(markerDensity, 0.85) : markerDensity));
 
-      // Glyph = openness × reasoning only (lab is color; optimum is gold+size).
+      // Glyph = openness only, all wire (lab is color; optimum is gold+size).
       const kind: GlyphKind = markChannels(model).sceneGlyph;
 
       let opacity = enc.opacity;

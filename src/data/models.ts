@@ -79,8 +79,8 @@ export interface Model {
 export const DATA_ERROR = "data_error" as const;
 
 /**
- * @deprecated Lab is color, not shape. Glyphs encode openness × reasoning via
- * `src/viz/mark-encoding.ts` (sphere/octa × solid/wire). Kept only for any
+ * @deprecated Lab is color, not shape. Glyphs encode openness via
+ * `src/viz/mark-encoding.ts` (wire sphere = closed · wire octa = open). Kept only for any
  * residual test fixtures that still import the old provider→symbol map.
  */
 export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {

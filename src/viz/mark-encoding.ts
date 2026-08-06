@@ -1,7 +1,7 @@
 /**
  * Single source of truth for point-mark channels on the stage + projections.
  *
- * Clean channel matrix (curve-focus product default):
+ * Channel matrix (curve-focus product default · 2026-08-06):
  *
  * | Channel              | Meaning                                      |
  * |----------------------|----------------------------------------------|
@@ -9,18 +9,21 @@
  * | Fill color           | Lab brand hue + family shade                 |
  * | Trail                | Multi-effort path within a family            |
  * | Size                 | Value-score for current weights (+ floors)   |
- * | Shape geometry       | Reasoning: sphere = standard, octa = reason  |
- * | Solid vs wireframe   | Openness: solid = closed weights, open = open|
+ * | Shape geometry       | Openness only: wire sphere = closed · wire octa = open |
+ * | Material             | All marks wireframe (no solid/wire split)    |
  * | Gold + max size      | Optimum (best for weights)                   |
  * | Ridge + size floor   | Pareto frontier                              |
  *
- * Lab identity is NEVER carried by shape (color already owns lab). Shape is a
- * strict 2×2 of openness × reasoning so every glyph is unambiguous.
+ * Lab is NEVER shape (color owns lab). Reasoning is NOT a stage glyph —
+ * almost all new models are reasoning; it stays in inspector / filters / table.
  */
 
 import type { Model, Plotly3dSymbol } from "../data/models";
 
-/** Three.js scene glyphs (wireframe variants end with `-open`). */
+/**
+ * Three.js scene glyphs. Product marks always use wire (`*-open`) variants.
+ * Solid kinds remain in the type for geometry helpers (e.g. brand core mesh).
+ */
 export type SceneGlyphKind =
   | "sphere"
   | "sphere-open"
@@ -32,49 +35,50 @@ export type SceneGlyphKind =
 export interface MarkChannels {
   /** Plotly scatter3d symbol (2D + Plotly 3D fallback). */
   plotlySymbol: Plotly3dSymbol;
-  /** Three.js glyph kind. */
+  /** Three.js glyph kind — always a wire (`*-open`) product mark. */
   sceneGlyph: SceneGlyphKind;
   openness: "open" | "closed";
+  /** Pass-through for console/table — not used for glyph choice. */
   reasoning: boolean;
   /** Short legend id. */
-  keyId: "standard-closed" | "standard-open" | "reasoning-closed" | "reasoning-open";
+  keyId: "closed-wire" | "open-wire";
   /** Human label for keys. */
   label: string;
 }
 
 /**
- * Resolve mark shape from model attributes only — no lab, no optimum hijack.
- * Optimum is gold + size; it keeps the same openness×reasoning glyph.
+ * Resolve mark shape from openness only — all wire.
+ * Optimum is gold + size; same openness glyph.
+ * Reasoning does not change geometry.
  */
 export function markChannels(
   model: Pick<Model, "openness" | "reasoning">,
 ): MarkChannels {
   const openness = model.openness === "open" ? "open" : "closed";
   const reasoning = Boolean(model.reasoning);
-  const openMark = openness === "open";
 
-  if (reasoning) {
+  if (openness === "open") {
     return {
-      plotlySymbol: openMark ? "diamond-open" : "diamond",
-      sceneGlyph: openMark ? "octa-open" : "octa",
+      plotlySymbol: "diamond-open",
+      sceneGlyph: "octa-open",
       openness,
-      reasoning: true,
-      keyId: openMark ? "reasoning-open" : "reasoning-closed",
-      label: openMark ? "Reasoning · open weights" : "Reasoning · closed",
+      reasoning,
+      keyId: "open-wire",
+      label: "Open weights · wire octa",
     };
   }
 
   return {
-    plotlySymbol: openMark ? "circle-open" : "circle",
-    sceneGlyph: openMark ? "sphere-open" : "sphere",
+    plotlySymbol: "circle-open",
+    sceneGlyph: "sphere-open",
     openness,
-    reasoning: false,
-    keyId: openMark ? "standard-open" : "standard-closed",
-    label: openMark ? "Standard · open weights" : "Standard · closed",
+    reasoning,
+    keyId: "closed-wire",
+    label: "Closed weights · wire sphere",
   };
 }
 
-/** Legend rows for the glyph 2×2 (stable order). */
+/** Legend rows for glyph encoding (openness only · all wire). */
 export const MARK_GLYPH_LEGEND: ReadonlyArray<{
   id: MarkChannels["keyId"];
   plotlySymbol: Plotly3dSymbol;
@@ -83,31 +87,17 @@ export const MARK_GLYPH_LEGEND: ReadonlyArray<{
   detail: string;
 }> = [
   {
-    id: "standard-closed",
-    plotlySymbol: "circle",
-    sceneGlyph: "sphere",
-    title: "Sphere · solid",
-    detail: "Standard model · closed weights",
-  },
-  {
-    id: "standard-open",
+    id: "closed-wire",
     plotlySymbol: "circle-open",
     sceneGlyph: "sphere-open",
     title: "Sphere · wire",
-    detail: "Standard model · open weights",
+    detail: "Closed weights",
   },
   {
-    id: "reasoning-closed",
-    plotlySymbol: "diamond",
-    sceneGlyph: "octa",
-    title: "Octa · solid",
-    detail: "Reasoning / thinking model · closed",
-  },
-  {
-    id: "reasoning-open",
+    id: "open-wire",
     plotlySymbol: "diamond-open",
     sceneGlyph: "octa-open",
     title: "Octa · wire",
-    detail: "Reasoning / thinking model · open weights",
+    detail: "Open weights",
   },
 ];
