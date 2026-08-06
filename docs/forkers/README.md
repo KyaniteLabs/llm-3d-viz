@@ -18,7 +18,7 @@ npm run build
 | Lab brand colors | `LAB_BRANDS` in `src/viz/palette.ts` |
 | Theme (ink, filament, fonts) | `src/styles/tokens.css` `:root` |
 | Models | `data/` catalog + `npm run catalog:refresh` pipeline |
-| Brand ring + core | Always on (≥3 colors per lab mark); fill is brand primary |
+| Brand ring + core | Focus only (`?brand=full` or solo); fill is brand primary always |
 
 Lab **fill color is always on** at a glance. Do not mute brand fills for “hierarchy” — use ridge + size + trails.
 

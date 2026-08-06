@@ -219,13 +219,28 @@ export class Stage3DThree implements Stage3DSurface {
     this.floorPlaneGroup.visible = false;
     this.scene.add(this.floorPlaneGroup);
 
-    const ridgeMat = new THREE.LineBasicMaterial({
-      color: new THREE.Color("#F4D58A"),
+    // Filament-white ridge (design system) — louder than idle trails/marks.
+    // WebGL ignores LineBasicMaterial.linewidth on most platforms; dual-pass
+    // dim underlay + bright core approximates structural dominance.
+    const ridgeUnder = new THREE.LineBasicMaterial({
+      color: new THREE.Color("#C9D4C4"),
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+    const ridgeCore = new THREE.LineBasicMaterial({
+      color: new THREE.Color("#E8F1E4"),
       transparent: false,
       opacity: 1,
-      linewidth: 2,
+      depthTest: true,
     });
-    this.ridgeLine = new THREE.Line(new THREE.BufferGeometry(), ridgeMat);
+    this.ridgeLine = new THREE.Line(new THREE.BufferGeometry(), ridgeCore);
+    this.ridgeLine.renderOrder = 4;
+    const ridgeHalo = new THREE.Line(new THREE.BufferGeometry(), ridgeUnder);
+    ridgeHalo.renderOrder = 3;
+    ridgeHalo.userData.isRidgeHalo = true;
+    this.ridgeLine.userData.halo = ridgeHalo;
+    this.scene.add(ridgeHalo);
     this.scene.add(this.ridgeLine);
 
     this.applyCameraState();
@@ -958,10 +973,10 @@ export class Stage3DThree implements Stage3DSurface {
         modelId: members[0].model,
       });
       const famId = familyIdOf(members[0]);
-      let trailOpacity = trailEnc.trailOpacity ?? 0.45;
-      if (this.highlightFamilyId && famId !== this.highlightFamilyId) trailOpacity = 0.12;
-      else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 0.9;
-      else if (this.soloFamily) trailOpacity = 0.9;
+      let trailOpacity = trailEnc.trailOpacity ?? 0.18;
+      if (this.highlightFamilyId && famId !== this.highlightFamilyId) trailOpacity = 0.08;
+      else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 0.88;
+      else if (this.soloFamily) trailOpacity = 0.88;
       const mat = new THREE.LineBasicMaterial({
         color: new THREE.Color(trailEnc.trailColor),
         transparent: true,
@@ -984,11 +999,21 @@ export class Stage3DThree implements Stage3DSurface {
     const ridgePts = vertices
       .map((v) => this.modelToScene(v.model))
       .filter((p): p is THREE.Vector3 => p !== null);
-    this.ridgeLine.geometry.dispose();
-    this.ridgeLine.geometry =
+    const ridgeGeom =
       ridgePts.length >= 2
         ? new THREE.BufferGeometry().setFromPoints(ridgePts)
         : new THREE.BufferGeometry();
+    this.ridgeLine.geometry.dispose();
+    this.ridgeLine.geometry = ridgeGeom;
+    const halo = this.ridgeLine.userData.halo as THREE.Line | undefined;
+    if (halo) {
+      halo.geometry.dispose();
+      // Shared points — clone geometry so dispose paths stay independent.
+      halo.geometry =
+        ridgePts.length >= 2
+          ? new THREE.BufferGeometry().setFromPoints(ridgePts)
+          : new THREE.BufferGeometry();
+    }
 
     // Labels: always mark optimum; when a small multi-effort set is focused
     // (≤12 plottable points), label with short tier tags + NMS in paintLabels.

@@ -177,6 +177,11 @@ export function mapAaRow(m, today, sourceLabel) {
   };
 }
 
+/**
+ * Complete plot triple present (speed × cost × intelligence).
+ * Field origins may be AA or OpenRouter-derived blend after join; callers must
+ * not invent missing numbers. Prefer catalog-join.canAdmitPlotTriple for admit.
+ */
 export function isScorable(row) {
   return (
     row.aa_intelligence_index != null &&
@@ -184,7 +189,8 @@ export function isScorable(row) {
     row.blended_price_per_M != null &&
     Number.isFinite(row.aa_intelligence_index) &&
     Number.isFinite(row.tps) &&
-    Number.isFinite(row.blended_price_per_M)
+    Number.isFinite(row.blended_price_per_M) &&
+    row.blended_price_per_M >= 0
   );
 }
 

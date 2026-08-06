@@ -14,8 +14,8 @@ export interface ForkDefaults {
   /** Age window in months when age filter is on. */
   ageMonthsDefault: number;
   /**
-   * Multi-color brand layers (ring + core) on every mark.
-   * Product default true — ≥3 brand colors always visible.
+   * When true, brand ring/core on every mark (`?brand=full` also works).
+   * Default false (Beauty P0): full lab *fill* always; rings/core focus-only.
    */
   brandLayersFullDefault: boolean;
 }
@@ -26,5 +26,5 @@ export const FORK_DEFAULTS: ForkDefaults = {
   multiEffortOnlyDefault: true,
   ageFilterDefault: true,
   ageMonthsDefault: 6,
-  brandLayersFullDefault: true,
+  brandLayersFullDefault: false,
 };

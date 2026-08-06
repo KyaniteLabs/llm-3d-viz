@@ -93,15 +93,23 @@ export function applyAaDerivedBlend(aaRows) {
 }
 
 /**
- * OpenRouter pricing overlay — never writes IQ/TPS.
- * May fill either missing price side; labels list / derived_list_blend.
+ * OpenRouter pricing overlay — never writes IQ/TPS (intelligence/speed stay AA spine).
+ * May fill missing price sides; labels list / derived_list_blend.
+ * Matching is multi-host (x-ai, meta, qwen, …) so joined rows can admit with OR cost.
  */
 export function applyOpenRouterPricing(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, overlays: 0 };
   const byId = new Map();
   for (const m of orModels) {
-    byId.set(String(m.id || "").toLowerCase(), m);
-    byId.set(String(m.name || "").toLowerCase(), m);
+    const id = String(m.id || "").toLowerCase();
+    const name = String(m.name || "").toLowerCase();
+    if (id) {
+      byId.set(id, m);
+      // bare slug after org/
+      const bare = id.includes("/") ? id.split("/").pop() : id;
+      if (bare && !byId.has(bare)) byId.set(bare, m);
+    }
+    if (name) byId.set(name, m);
   }
   let overlays = 0;
   const rows = aaRows.map((row) => {
@@ -111,18 +119,61 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     if (!needIn && !needOut && !needBlend) return row;
 
     const slug = aaSlugFromSourceUrl(row.source_url || "");
+    const modelLc = String(row.model || "").toLowerCase();
+    const providerLc = String(row.provider || "").toLowerCase();
+    const orgHints = [
+      "anthropic",
+      "openai",
+      "google",
+      "x-ai",
+      "meta-llama",
+      "meta",
+      "qwen",
+      "deepseek",
+      "mistralai",
+      "moonshotai",
+      "z-ai",
+      "minimax",
+      "nvidia",
+    ];
+    // AA often uses grok-4-5; OpenRouter uses grok-4.5 (digit-digit → digit.digit).
+    const slugOrStyle = slug
+      ? slug.replace(/(\d+)-(\d+)/g, "$1.$2")
+      : "";
+    const slugDash = slug ? slug.replace(/\./g, "-") : "";
     const candidates = [
       slug,
-      `anthropic/${slug}`,
-      `openai/${slug}`,
-      `google/${slug}`,
-      row.model?.toLowerCase(),
+      slugOrStyle,
+      slugDash,
+      ...orgHints.flatMap((o) =>
+        slug
+          ? [`${o}/${slug}`, `${o}/${slugOrStyle}`, `${o}/${slugDash}`]
+          : [],
+      ),
+      modelLc,
+      modelLc.replace(/\s+/g, "-"),
+      modelLc.replace(/\s+/g, "-").replace(/(\d+)-(\d+)/g, "$1.$2"),
+      modelLc.replace(/\s*\([^)]*\)\s*/g, "").trim(),
+      // Grok / xAI common ids (AA: grok-4-5; OpenRouter: x-ai/grok-4.5)
+      slug?.startsWith("grok") ? `x-ai/${slug}` : null,
+      slug?.startsWith("grok") ? `x-ai/${slugOrStyle}` : null,
+      providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slug}` : null,
+      providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slugOrStyle}` : null,
     ].filter(Boolean);
     let hit = null;
     for (const c of candidates) {
       if (byId.has(c)) {
         hit = byId.get(c);
         break;
+      }
+    }
+    // Fuzzy: id ends with slug
+    if (!hit && slug) {
+      for (const [id, m] of byId) {
+        if (typeof id === "string" && (id === slug || id.endsWith(`/${slug}`) || id.endsWith(slug))) {
+          hit = m;
+          break;
+        }
       }
     }
     if (!hit?.pricing) return row;
@@ -326,6 +377,25 @@ function parseEntriesArray(sub) {
 }
 
 /**
+ * Plot-admission after multi-source join (ADR-0001 amended).
+ * Complete speed×cost×intelligence triple from honest provenance only.
+ * Arena Elo alone never admits; missing IQ/TPS never admits.
+ * @param {object} row
+ * @returns {boolean}
+ */
+export function canAdmitPlotTriple(row) {
+  if (!row || typeof row !== "object") return false;
+  const hasIq =
+    row.aa_intelligence_index != null && Number.isFinite(Number(row.aa_intelligence_index));
+  const hasTps = row.tps != null && Number.isFinite(Number(row.tps));
+  const hasCost =
+    row.blended_price_per_M != null &&
+    Number.isFinite(Number(row.blended_price_per_M)) &&
+    Number(row.blended_price_per_M) >= 0;
+  return hasIq && hasTps && hasCost && isScorable(row);
+}
+
+/**
  * Full join pipeline on in-memory rows (no network).
  * @param {object[]} aaRows — may include partials
  * @param {{ arenaEntries?: object[], orModels?: object[] }} overlays
@@ -337,7 +407,7 @@ export function joinCatalog(aaRows, overlays = {}) {
   rows = arena.rows;
   const priced = applyOpenRouterPricing(rows, overlays.orModels || []);
   rows = priced.rows;
-  const scorable = rows.filter(isScorable);
+  const scorable = rows.filter(canAdmitPlotTriple);
   return {
     all: rows,
     scorable,
