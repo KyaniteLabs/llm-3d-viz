@@ -15,6 +15,7 @@ import { DecisionConsole } from "./ui/console";
 import { DecidePanel } from "./ui/decide-panel";
 import { FilterShelf, formatScopeSummary } from "./ui/filter-shelf";
 import { renderMembershipTable } from "./ui/membership-table";
+import { APP_BRANDING } from "./config/app-branding";
 import { RELEASE_FLOOR_ISO } from "./data/catalog-scope";
 import { CinemaMode } from "./viz/cinema";
 import { StageGuide } from "./ui/stage-guide";
@@ -136,6 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function boot() {
+  document.title = APP_BRANDING.documentTitle;
+  // Canonical hooks: data-app-title / data-app-tagline on index.html scope-bar-brand.
+  const wordmark = document.querySelector("[data-app-title]");
+  if (wordmark) wordmark.textContent = APP_BRANDING.title;
+  const tag = document.querySelector("[data-app-tagline]");
+  if (tag) tag.textContent = APP_BRANDING.tagline;
   const stagePanel = document.querySelector(".stage") as HTMLElement;
   const stageVisual = stagePanel?.querySelector(".stage-visual") as HTMLElement | null;
   const placeholder = stageVisual?.querySelector(".stage-placeholder");

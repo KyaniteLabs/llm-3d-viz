@@ -4,7 +4,11 @@ import {
   sameAxisMapping,
   type AxisMapping,
 } from "./lib/axis-metrics";
-import { DEFAULT_INTELLIGENCE_FLOOR, type FloorSource } from "./lib/decide";
+import {
+  DEFAULT_COST_SPEED_BIAS,
+  DEFAULT_INTELLIGENCE_FLOOR,
+  type FloorSource,
+} from "./lib/decide";
 import { DEFAULT_FILTERS, sameFilters, type ModelFilters } from "./lib/filters";
 import { presets, type ScoreWeights } from "./lib/score";
 
@@ -54,7 +58,7 @@ export function createStore(initial: Partial<AppState> = {}) {
     cinemaMode: false,
     decideMode: false,
     intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
-    costSpeedBias: 0,
+    costSpeedBias: DEFAULT_COST_SPEED_BIAS,
     floorAnchorModelId: null,
     floorSource: "default",
     floorUserSet: false,

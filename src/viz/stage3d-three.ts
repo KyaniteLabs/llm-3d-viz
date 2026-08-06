@@ -31,6 +31,7 @@ import {
 import { markChannels, type SceneGlyphKind } from "./mark-encoding";
 import { familyIdOf, groupByFamily } from "../lib/family";
 import { displayName } from "../lib/display-name";
+import { FORK_DEFAULTS } from "../config/fork-defaults";
 import type { Stage3DSurface, StageCamera, StageRenderOptions, StageFitMode } from "./stage-api";
 
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -807,8 +808,9 @@ export class Stage3DThree implements Stage3DSurface {
       }
     }
     const brandFull =
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).get("brand") === "full";
+      FORK_DEFAULTS.brandLayersFullDefault ||
+      (typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("brand") === "full");
 
     plottable.forEach((model) => {
       const pos = this.modelToScene(model);

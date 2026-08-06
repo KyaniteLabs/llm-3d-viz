@@ -1,35 +1,44 @@
 # llm-3d-viz
 
-Interactive 3D LLM benchmark visualization — **SPEED × COST × INTELLIGENCE**.
+Interactive **3D LLM benchmark visualization** — speed × cost × intelligence.
 
-Observatory-after-dark Plotly stage (de-chromed), 35 curated models, Pareto ridge, linked 2D projections, value-score console, threshold-sweep, cinema mode.
+Observatory-after-dark instrument: Three.js stage, Pareto ridge, multi-effort trails, linked 2D projections, value-score console, Decide mode (intelligence floor → cost×speed shortlist).
 
-## Status
-
-**v0.1 complete** on `main` (2026-08-02). Publish to `viz.kyanitelabs.tech` is **approval-gated** — see [`docs/deploy/cloudflare-pages.md`](docs/deploy/cloudflare-pages.md).
-
-**Axis mapping (locked):** x = COST · y = INTELLIGENCE · z = SPEED.
-
-## Authority
-
-| Doc | Role |
-|-----|------|
-| [`SPEC.md`](SPEC.md) | Product spec, locked decisions D1–D8, phased roadmap |
-| [`DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md) | Visual system: *Observatory-after-dark* |
-| [`HANDOFF.md`](HANDOFF.md) | Session resume / current ops truth |
-| [`docs/research/frontier-math.md`](docs/research/frontier-math.md) | Math contract |
-| [`docs/deploy/cloudflare-pages.md`](docs/deploy/cloudflare-pages.md) | Cloudflare Pages publish runbook |
-
-## Local
+## Quick start
 
 ```bash
 npm install
+npm run dev          # local Vite
+npm test             # vitest
 npm run build
-npx vite preview   # or: npm run dev
-npm test           # 44 vitest
-npm run test:render  # playwright (ports: isolate per worktree)
+npm run test:render  # Playwright (optional)
 ```
 
-## Repo
+## Customize
 
-Private Forgejo: https://git.kyanitelabs.tech/simon/llm-3d-viz
+See **[docs/forkers/README.md](docs/forkers/README.md)** — branding, lab colors, tokens, catalog, defaults.
+
+## Docs
+
+| Doc | Role |
+|-----|------|
+| [SPEC.md](SPEC.md) | Product spec |
+| [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Visual system |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Module seams |
+| [docs/forkers/README.md](docs/forkers/README.md) | Fork guide |
+
+## Encoding (glance-first)
+
+- **Lab** = full brand fill (always readable, no hover)
+- **Shape** = openness × reasoning (sphere/octa × solid/wire)
+- **Size** = value-score
+- **Ridge** = Pareto frontier (filament white)
+- **Trails** = multi-effort paths (quiet until solo)
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Status
+
+Open-source friendly build. Production deploy configuration is operator-specific and not required to run or fork the app.

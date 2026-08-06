@@ -29,6 +29,7 @@ import {
 import {
   clampBias,
   clampFloor,
+  DEFAULT_COST_SPEED_BIAS,
   DEFAULT_INTELLIGENCE_FLOOR,
   type FloorSource,
 } from "./decide";
@@ -54,7 +55,7 @@ export interface ShareableState {
 export const DEFAULT_DECIDE_SHARE: ShareableDecideState = {
   decideMode: false,
   intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
-  costSpeedBias: 0,
+  costSpeedBias: DEFAULT_COST_SPEED_BIAS,
   floorAnchorModelId: null,
   floorSource: "default",
   floorUserSet: false,
@@ -90,7 +91,7 @@ export function parseDecideFromParams(
 ): ShareableDecideState {
   const decideMode = params.get("decide") === "1" || params.get("decide") === "true";
   let intelligenceFloor = DEFAULT_INTELLIGENCE_FLOOR;
-  let costSpeedBias = 0;
+  let costSpeedBias = DEFAULT_COST_SPEED_BIAS;
   let floorAnchorModelId: string | null = null;
   let floorSource: FloorSource = "default";
   let floorUserSet = false;
@@ -285,7 +286,7 @@ export function serializeShareableState(
     if (d.floorAnchorModelId) {
       params.set("anchor", d.floorAnchorModelId);
     }
-    if (d.costSpeedBias !== 0) {
+    if (d.costSpeedBias !== DEFAULT_COST_SPEED_BIAS) {
       params.set("bias", String(clampBias(d.costSpeedBias)));
     }
   }

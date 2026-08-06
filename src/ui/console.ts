@@ -8,7 +8,7 @@ import {
 } from "../lib/axis-metrics";
 import { effortGapForFamily, formatEffortGapNote } from "../data/effort-gaps";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../lib/family";
-import { listFamilies, listMultiEffortFamilies, listProviders } from "../lib/filters";
+import { DEFAULT_FILTERS, listFamilies, listMultiEffortFamilies, listProviders } from "../lib/filters";
 import { normalizedScores, presets, weightedOptimum, type ScoreWeights } from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
@@ -417,7 +417,7 @@ export class DecisionConsole {
   private clearFilters() {
     this.familySearch = "";
     this.store.update({
-      filters: { ageEnabled: true, ageMonths: 6, multiEffortOnly: true, providers: [], families: [] },
+      filters: { ...DEFAULT_FILTERS, providers: [], families: [] },
       pinnedModelId: null,
       hoveredModelId: null,
     });
