@@ -103,10 +103,16 @@ export class StageGuide {
           </section>
 
           <details class="lab-disclosure" open>
-            <summary class="stage-guide-heading">LAB COLORS · ${[...new Set(this.models.map((m) => m.provider))].length}</summary>
+            <summary class="stage-guide-heading">LAB COLORS · ${labLegendEntries(
+              this.models.map((m) => m.provider),
+              this.models.map((m) => ({ provider: m.provider, model: m.model })),
+            ).length}</summary>
             <section class="lab-key" aria-label="Lab color key">
               <ul class="lab-color-list">
-                ${labLegendEntries(this.models.map((m) => m.provider))
+                ${labLegendEntries(
+                  this.models.map((m) => m.provider),
+                  this.models.map((m) => ({ provider: m.provider, model: m.model })),
+                )
                   .map(({ provider, colors }) => {
                     const shown = colors.slice(0, Math.max(3, Math.min(5, colors.length)));
                     const hexLine = shown.map((c) => escapeHtml(c)).join(" · ");
@@ -123,7 +129,7 @@ export class StageGuide {
                   })
                   .join("")}
               </ul>
-              <p class="stage-guide-note">Color = lab only. ≥3 real brand colors per lab: fill · outer ring · core. Family shades only the primary. Oranges stay separated (Amazon / Alibaba / Mistral / Xiaomi).</p>
+              <p class="stage-guide-note">Color = lab only. ≥3 brand colors always: fill · outer ring · core. Qwen is violet (not Alibaba orange). Family shades only the primary.</p>
             </section>
           </details>
 

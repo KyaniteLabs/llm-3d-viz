@@ -26,8 +26,8 @@ Supersedes “never categorical color on canvas” and “copper never on canvas
 |---------|---------|----------------------|
 | **Position X / Y / Z** | Cost / intelligence / speed (remappable metrics) | **On** |
 | **Fill color** | Lab **brand colors[0]** + family shade; **always full chroma** (no hover) | **On** — glanceable lab identity |
-| **Outer ring** | Lab **brand colors[1]** | **Focus only** (solo/selected/`?brand=full`) |
-| **Inner core** | Lab **brand colors[2]** | **Focus only** |
+| **Outer ring** | Lab **brand colors[1]** | **On** always (≥3-color brand kit) |
+| **Inner core** | Lab **brand colors[2]** | **On** always |
 | **Trail** | Same family shade; effort-rank ordered; real points only | **On** |
 | **Size** | Value-score for current weights (continuous) | **On** — bigger = better fit |
 | **Size floor / gold** | Frontier size floor; optimum = gold + largest | **On** |
@@ -47,7 +47,7 @@ Glyph 2×2 (authoritative in `src/viz/mark-encoding.ts`):
 - **Legend HUD open by default** (compact); decoding must not require hover on marks.
 
 ### Glanceable lab color (S+ · 2026-08-06)
-Lab brand **fill is always on** for every visible mark. Rank uses filament ridge, point size, and quiet trails — not muted brand fills.
+Lab brand **fill + ring + core** are always on for every visible mark (≥3 brand colors). Rank uses filament ridge, point size, and quiet trails — not muted brand fills. Catalog org labels must not steal product identity (e.g. **Qwen ≠ Alibaba orange** — resolve by model name).
 - Family effort **trails** keep one family color along real points only (no invented vertices).
 - Value-score weights remain independent of display-axis remapping.
 - First paint: soft-fit multi-effort subset bounds; age ≤ 6 months remains density floor.

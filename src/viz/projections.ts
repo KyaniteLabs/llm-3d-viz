@@ -210,6 +210,7 @@ export class Projections {
       familyId: familyIdOf(model),
       singleton: isSingleton(model, visible, familyIdOf),
       provider: model.provider,
+      modelId: model.model,
       palette: {
         slateCyan: this.tokens.slateCyan,
         filamentDim: this.tokens.filamentDim,

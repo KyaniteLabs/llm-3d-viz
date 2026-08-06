@@ -289,7 +289,12 @@ export const LAB_BRANDS: Readonly<Record<string, LabBrand>> = {
   Meta: brand(["#0866FF", "#0081FB", "#FFFFFF", "#F0F2F5"], "Meta blue · light blue · white · ash"),
   // DeepSeek whale blue system (product mark blue + navy + cyan highlight)
   DeepSeek: brand(["#4D6BFE", "#1E3A8A", "#7DD3FC", "#0A0F2C"], "DeepSeek blue · navy · ice · ink"),
-  // Alibaba safety orange + black + white
+  /**
+   * Qwen product identity (violet) — NOT Alibaba Smile orange.
+   * Catalog often labels Qwen rows as provider "Alibaba"; resolveLabKey remaps by model name.
+   */
+  Qwen: brand(["#615CED", "#1A1033", "#C4B5FD", "#0D0A1A"], "Qwen violet · deep purple · lilac · ink"),
+  // Alibaba corporate (non-Qwen only after resolveLabKey)
   Alibaba: brand(["#FF6A00", "#000000", "#FFFFFF", "#FFB400"], "Alibaba orange · black · white · gold"),
   // Mistral sunset kit (mistral.ai): orange-red · sunshine · cream · ink
   Mistral: brand(["#FA520F", "#FFD900", "#FFF0C2", "#1F1F1F", "#B9DAFF"], "Mistral orange · yellow · cream · ink"),
@@ -337,30 +342,57 @@ export const LAB_BRANDS: Readonly<Record<string, LabBrand>> = {
 
 const FALLBACK_BRAND: LabBrand = brand(["#89939E", "#3D5560", "#E7E2D8"], "unknown lab fallback");
 
+/**
+ * Map catalog provider (+ optional model id) → LAB_BRANDS key.
+ * Product identity wins over coarse org labels (Qwen ≠ Alibaba Smile orange).
+ */
+export function resolveLabKey(provider: string, modelId?: string): string {
+  const mid = (modelId ?? "").trim();
+  // Qwen* models are catalogued under Alibaba / Alibaba Cloud — brand as Qwen.
+  // Match Qwen3.5… etc. (digit after n is not a word boundary).
+  if (mid && /qwen/i.test(mid)) {
+    return "Qwen";
+  }
+  const p = (provider ?? "").trim();
+  if (p in LAB_BRANDS) return p;
+  const aliases: Record<string, string> = {
+    xAI: "SpaceXAI",
+    XAI: "SpaceXAI",
+    Grok: "SpaceXAI",
+    "Alibaba Cloud": "Alibaba",
+    "Zhipu AI": "Z AI",
+    Zhipu: "Z AI",
+  };
+  return aliases[p] ?? p;
+}
+
 /** @deprecated use labBrand(provider).colors[0] */
 export const LAB_COLORS: Readonly<Record<string, string>> = Object.fromEntries(
   Object.entries(LAB_BRANDS).map(([k, v]) => [k, v.colors[0]]),
 ) as Record<string, string>;
 
-export function labBrand(provider: string): LabBrand {
-  return LAB_BRANDS[provider] ?? FALLBACK_BRAND;
+export function labBrand(provider: string, modelId?: string): LabBrand {
+  return LAB_BRANDS[resolveLabKey(provider, modelId)] ?? FALLBACK_BRAND;
 }
 
 /** Brand palette (≥3). Always returns a fresh copy-safe readonly view. */
-export function labColors(provider: string): readonly string[] {
-  return labBrand(provider).colors;
+export function labColors(provider: string, modelId?: string): readonly string[] {
+  return labBrand(provider, modelId).colors;
 }
 
-export function labColor(provider: string, fallback = "#89939E"): string {
-  return LAB_BRANDS[provider]?.colors[0] ?? fallback;
+export function labColor(provider: string, fallback = "#89939E", modelId?: string): string {
+  const key = resolveLabKey(provider, modelId);
+  return LAB_BRANDS[key]?.colors[0] ?? fallback;
 }
 
-export function labSecondary(provider: string, fallback = "#3D5560"): string {
-  return LAB_BRANDS[provider]?.colors[1] ?? fallback;
+export function labSecondary(provider: string, fallback = "#3D5560", modelId?: string): string {
+  const key = resolveLabKey(provider, modelId);
+  return LAB_BRANDS[key]?.colors[1] ?? fallback;
 }
 
-export function labTertiary(provider: string, fallback = "#E7E2D8"): string {
-  return LAB_BRANDS[provider]?.colors[2] ?? fallback;
+export function labTertiary(provider: string, fallback = "#E7E2D8", modelId?: string): string {
+  const key = resolveLabKey(provider, modelId);
+  return LAB_BRANDS[key]?.colors[2] ?? fallback;
 }
 
 /** sRGB 0–255 → HSL (h 0–360, s/l 0–1). */
@@ -460,13 +492,13 @@ export function scoreSizeScale(score: number): number {
 
 /**
  * Product rule: **lab = brand primary**, **family within lab = shade of primary**.
- * Secondary brand color is reserved for the outline ring (see stage meshes) so
- * two-color labs stay unique even when primaries sit near each other (oranges).
+ * Secondary/tertiary brand colors are outer ring + inner core (always on).
  */
-export function familySeriesColor(familyId: string, provider?: string): string {
-  const brand = provider ? LAB_BRANDS[provider] : undefined;
+export function familySeriesColor(familyId: string, provider?: string, modelId?: string): string {
+  const key = provider ? resolveLabKey(provider, modelId) : "";
+  const brand = key ? LAB_BRANDS[key] : undefined;
   if (brand) {
-    const t = stableUnitHash(`${provider}::${familyId}`);
+    const t = stableUnitHash(`${key}::${familyId}`);
     // -0.16 … +0.16 around brand L — enough to tell families apart, not wash brand.
     const delta = -0.16 + t * 0.32;
     return brandShade(brand.colors[0], delta);
@@ -480,13 +512,13 @@ export function familySeriesColor(familyId: string, provider?: string): string {
 }
 
 /** Outer outline = brand colors[1] (fixed, not family-shaded). */
-export function familyAccentColor(provider?: string): string {
-  return provider ? labSecondary(provider) : "#3D5560";
+export function familyAccentColor(provider?: string, modelId?: string): string {
+  return provider ? labSecondary(provider, "#3D5560", modelId) : "#3D5560";
 }
 
 /** Inner core = brand colors[2] (fixed). */
-export function familyCoreColor(provider?: string): string {
-  return provider ? labTertiary(provider) : "#E7E2D8";
+export function familyCoreColor(provider?: string, modelId?: string): string {
+  return provider ? labTertiary(provider, "#E7E2D8", modelId) : "#E7E2D8";
 }
 
 /** @deprecated kept for tests/docs that import the old curated map name */
@@ -517,6 +549,8 @@ export interface PointEncodingInput {
   familyId: string;
   singleton: boolean;
   provider?: string;
+  /** Model id for lab aliasing (e.g. Qwen* under Alibaba). */
+  modelId?: string;
   palette?: SemanticPalette;
   /** Solo family filter active for this family. */
   solo?: boolean;
@@ -553,13 +587,16 @@ export interface PointEncoding {
   trailOpacity: number;
 }
 
-/** Brand ring/core layers: full catalog default off; on for focus states. */
-export function brandLayerFlags(input: Pick<
+/**
+ * Brand ring/core layers — always on so each mark shows ≥3 brand colors
+ * (body colors[0], outer ring colors[1], inner core colors[2]).
+ * Focus/solo no longer gate multi-color identity.
+ */
+export function brandLayerFlags(_input?: Pick<
   PointEncodingInput,
   "solo" | "selected" | "brandFull" | "cinemaFocus"
 >): { showRing: boolean; showCore: boolean } {
-  const on = Boolean(input.solo || input.selected || input.brandFull || input.cinemaFocus);
-  return { showRing: on, showCore: on };
+  return { showRing: true, showCore: true };
 }
 
 /** Idle multi-effort trail opacity (S+ glance-first: quiet trails, loud fills). */
@@ -577,11 +614,11 @@ export const MID_EFFORT_SIZE_SCALE = 0.7;
 export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const palette = input.palette ?? DEFAULT_SEMANTIC_PALETTE;
   // Lab primary (family-shaded) + fixed brand secondary/tertiary rings.
-  const series = familySeriesColor(input.familyId, input.provider);
-  const accent = familyAccentColor(input.provider);
-  const core = familyCoreColor(input.provider);
-  const brandColors = labColors(input.provider ?? "");
-  const lab = labColor(input.provider ?? "", series);
+  const series = familySeriesColor(input.familyId, input.provider, input.modelId);
+  const accent = familyAccentColor(input.provider, input.modelId);
+  const core = familyCoreColor(input.provider, input.modelId);
+  const brandColors = labColors(input.provider ?? "", input.modelId);
+  const lab = labColor(input.provider ?? "", series, input.modelId);
   const trailColor = series;
   const layers = brandLayerFlags(input);
   const trailOpacity =
@@ -703,7 +740,7 @@ export function legendEntries(
     ? "HEAT ON · copper→filament by value score (diagnostic)"
     : "lab = color · shape = openness×reasoning · size = value score";
   return [
-    { id: "lab-color", title: "Lab color", detail: "full brand fill always · rings/core on focus · family shades primary" },
+    { id: "lab-color", title: "Lab color", detail: "brand fill + ring + core always (≥3 colors) · family shades primary" },
     { id: "family-trail", title: "Family trail", detail: "effort path · quiet until solo · real points only" },
     { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
     { id: "glyph-standard", title: "Sphere", detail: "standard model (not reasoning)" },
@@ -717,9 +754,10 @@ export function legendEntries(
   ];
 }
 
-/** Ordered lab swatches for STAGE KEY (≥3 brand colors). */
+/** Ordered lab swatches for STAGE KEY (≥3 brand colors). Accepts models for Qwen/etc aliasing. */
 export function labLegendEntries(
   providers: readonly string[],
+  models?: readonly { provider: string; model: string }[],
 ): Array<{ provider: string; color: string; secondary: string; tertiary: string; colors: readonly string[] }> {
   const seen = new Set<string>();
   const out: Array<{
@@ -729,17 +767,34 @@ export function labLegendEntries(
     tertiary: string;
     colors: readonly string[];
   }> = [];
-  for (const p of providers) {
-    if (seen.has(p)) continue;
-    seen.add(p);
-    const colors = labColors(p);
-    out.push({
-      provider: p,
-      color: colors[0],
-      secondary: colors[1],
-      tertiary: colors[2],
-      colors,
-    });
+  if (models?.length) {
+    for (const m of models) {
+      const key = resolveLabKey(m.provider, m.model);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const colors = labColors(m.provider, m.model);
+      out.push({
+        provider: key,
+        color: colors[0],
+        secondary: colors[1],
+        tertiary: colors[2],
+        colors,
+      });
+    }
+  } else {
+    for (const p of providers) {
+      const key = resolveLabKey(p);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const colors = labColors(p);
+      out.push({
+        provider: key,
+        color: colors[0],
+        secondary: colors[1],
+        tertiary: colors[2],
+        colors,
+      });
+    }
   }
   return out.sort((a, b) => a.provider.localeCompare(b.provider));
 }

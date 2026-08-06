@@ -26,17 +26,15 @@ describe("forker config seams", () => {
     expect(APP_BRANDING.documentTitle.trim().length).toBeGreaterThan(0);
   });
 
-  it("brandFull forces ring/core layers on (forker brandLayersFullDefault path)", () => {
+  it("brand layers always on (multi-color kit on every mark)", () => {
     const base = {
       solo: false,
       selected: false,
       cinemaFocus: false,
     } as const;
-    const off = brandLayerFlags({ ...base, brandFull: false });
-    const on = brandLayerFlags({ ...base, brandFull: true });
-    expect(off.showRing).toBe(false);
-    expect(off.showCore).toBe(false);
-    expect(on.showRing).toBe(true);
-    expect(on.showCore).toBe(true);
+    const layers = brandLayerFlags({ ...base, brandFull: false });
+    expect(layers.showRing).toBe(true);
+    expect(layers.showCore).toBe(true);
+    expect(FORK_DEFAULTS.brandLayersFullDefault).toBe(true);
   });
 });
