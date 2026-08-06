@@ -278,31 +278,44 @@ async function runOperatorMatrix(page: Page, label: string) {
   await pass(page, `${label}:cinema`, async () => {
     await page.goto("/?age=0&me=1");
     await waitForThreeStage(page);
+    // Ensure keyboard is not trapped in a text field (Escape would no-op on entry targets).
+    await page.locator("body").click({ position: { x: 8, y: 8 }, force: true }).catch(() => undefined);
     const cin = page.locator("[data-cinema-toggle]").first();
     const visible = (await cin.count()) > 0 && (await cin.isVisible().catch(() => false));
     if (visible) {
       await cin.click({ force: true });
-      await page.waitForTimeout(400);
-      const cinemaOn = await page.evaluate(
+      await page.waitForFunction(
         () =>
           document.getElementById("app-shell")?.classList.contains("is-cinema") === true ||
           (window as any).__viz?.cinemaMode === true,
+        null,
+        { timeout: 5000 },
       );
-      expect(cinemaOn).toBe(true);
       // Escape exits cinema (product: cinema button is hidden under is-cinema).
       await page.keyboard.press("Escape");
-      await page.waitForTimeout(300);
-      let cinemaOff = await page.evaluate(
-        () => document.getElementById("app-shell")?.classList.contains("is-cinema") === true,
-      );
-      // Fallback: C toggles cinema if Escape path missed focus
-      if (cinemaOff) {
+      try {
+        await page.waitForFunction(
+          () =>
+            document.getElementById("app-shell")?.classList.contains("is-cinema") !== true &&
+            (window as any).__viz?.cinemaMode !== true,
+          null,
+          { timeout: 3000 },
+        );
+      } catch {
+        // Fallback: C toggles cinema if Escape path missed focus
+        await page.locator("body").click({ position: { x: 8, y: 8 }, force: true }).catch(() => undefined);
         await page.keyboard.press("c");
-        await page.waitForTimeout(250);
-        cinemaOff = await page.evaluate(
-          () => document.getElementById("app-shell")?.classList.contains("is-cinema") === true,
+        await page.waitForFunction(
+          () =>
+            document.getElementById("app-shell")?.classList.contains("is-cinema") !== true &&
+            (window as any).__viz?.cinemaMode !== true,
+          null,
+          { timeout: 3000 },
         );
       }
+      const cinemaOff = await page.evaluate(
+        () => document.getElementById("app-shell")?.classList.contains("is-cinema") === true,
+      );
       expect(cinemaOff).toBe(false);
       const mode = await page.evaluate(() => Boolean((window as any).__viz?.cinemaMode));
       expect(mode).toBe(false);
