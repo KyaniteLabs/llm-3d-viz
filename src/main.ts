@@ -1,6 +1,12 @@
 import "./styles/tokens.css";
 import { models } from "./data/models";
-import { sameAxisMapping, type AxisMapping } from "./lib/axis-metrics";
+import {
+  applyEconomyBasis,
+  detectEconomyBasis,
+  sameAxisMapping,
+  type AxisMapping,
+  type EconomyBasis,
+} from "./lib/axis-metrics";
 import { applyFilters, sameFilters, type ModelFilters } from "./lib/filters";
 import { parseShareableState, writeShareableUrl } from "./lib/url-state";
 import { Stage3DThree } from "./viz/stage3d-three";
@@ -259,6 +265,28 @@ async function boot() {
   });
   setCanvasMode("3d");
 
+  // Always-visible economy basis: rate ($/M · tok/s) vs task ($/task · s/task).
+  // Remaps cost (X) and speed (Z); intelligence (Y) stays put.
+  const syncEconomyToggle = (mapping: AxisMapping) => {
+    const basis = detectEconomyBasis(mapping);
+    canvasHost.querySelectorAll<HTMLButtonElement>("[data-economy-basis]").forEach((btn) => {
+      const id = btn.dataset.economyBasis as EconomyBasis | undefined;
+      const on = basis !== "custom" && id === basis;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  };
+  canvasHost.querySelectorAll<HTMLButtonElement>("[data-economy-basis]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const basis = btn.dataset.economyBasis as EconomyBasis | undefined;
+      if (basis !== "rate" && basis !== "task") return;
+      const cur = store.getState().axisMapping;
+      store.update({ axisMapping: applyEconomyBasis(cur, basis) });
+    });
+  });
+  store.subscribe((state) => syncEconomyToggle(state.axisMapping));
+  syncEconomyToggle(store.getState().axisMapping);
+
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
   if (stageBackend === "r3f") {
@@ -443,6 +471,7 @@ async function boot() {
     viz.presentationMode = presentationMode;
     viz.projectionsInstance = projections;
     viz.axisMapping = { ...axisMapping };
+    viz.economyBasis = detectEconomyBasis(axisMapping);
     viz.filters = { ...filters, providers: [...filters.providers], families: [...filters.families] };
     viz.visibleCount = visibleSet.length;
     viz.pointCount = (window as any).__viz?.pointCount ?? visibleSet.length;
