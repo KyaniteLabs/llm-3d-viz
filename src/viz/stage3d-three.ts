@@ -499,12 +499,33 @@ export class Stage3DThree implements Stage3DSurface {
     // Stash fit for end of paint (after points exist).
     (this as any)._pendingFit = options?.fit ?? "none";
 
+    const floor =
+      options?.intelligenceFloor != null && Number.isFinite(options.intelligenceFloor)
+        ? options.intelligenceFloor
+        : null;
+    const decidePareto = new Set(
+      options?.decideParetoIds
+        ? Array.isArray(options.decideParetoIds)
+          ? options.decideParetoIds
+          : [...options.decideParetoIds]
+        : [],
+    );
+    const decideShortlist = new Set(
+      options?.decideShortlistIds
+        ? Array.isArray(options.decideShortlistIds)
+          ? options.decideShortlistIds
+          : [...options.decideShortlistIds]
+        : [],
+    );
+
     // Plot models that have all three mapped metrics. Value-score / frontier still
-    // use the classic speed×cost×intelligence contract among isScorable rows.
+    // use the classic speed×cost×intelligence contract among isScorable rows —
+    // except in Decide mode (intelligenceFloor set): suppress value-score optimum.
+    const decideMode = floor != null;
     const plottable = modelsList.filter((m) => hasMappedAxes(m, this.axisMapping));
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
-    const optimumModel = weightedOptimum(scores)?.model;
+    const optimumModel = decideMode ? undefined : weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((m) => m.model));
 
     const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
@@ -604,6 +625,21 @@ export class Stage3DThree implements Stage3DSurface {
         size = Math.max(4, size * 0.72);
       } else if (this.highlightFamilyId && fid === this.highlightFamilyId) {
         size = Math.max(size, isOptimum ? 22 : isFrontier ? 17 : 13);
+      }
+      // Decide mode: dim below intelligence floor; call out Pareto / shortlist.
+      if (floor != null) {
+        const idx = model.aa_intelligence_index;
+        const below = idx === null || idx < floor;
+        if (below) {
+          opacity = Math.min(opacity, 0.12);
+          size = Math.max(3, size * 0.55);
+        } else if (decideShortlist.has(model.model)) {
+          size = Math.max(size, 18);
+          opacity = Math.max(opacity, 0.95);
+        } else if (decidePareto.has(model.model)) {
+          size = Math.max(size, 14);
+          opacity = Math.max(opacity, 0.9);
+        }
       }
       const mesh = this.makePointMesh(kind, color, size);
       mesh.position.copy(pos);
@@ -732,12 +768,19 @@ export class Stage3DThree implements Stage3DSurface {
       this.keyboardBound = true;
     }
 
-    // Accessible name tracks current optimum.
-    const optName = optimumModel?.model ?? "none";
-    this.renderer.domElement.setAttribute(
-      "aria-label",
-      `3D benchmark stage. ${this.pointMeshes.length} models. Current optimum ${optName}. ${frontierIds.size} on Pareto frontier. Full table in instrument console.`,
-    );
+    // Accessible name: value-score optimum only outside Decide mode (B′).
+    if (decideMode) {
+      this.renderer.domElement.setAttribute(
+        "aria-label",
+        `3D benchmark stage in Decide mode. ${this.pointMeshes.length} models. Floor ${floor}. Cost-speed shortlist and Pareto callouts active. Full table in instrument console.`,
+      );
+    } else {
+      const optName = optimumModel?.model ?? "none";
+      this.renderer.domElement.setAttribute(
+        "aria-label",
+        `3D benchmark stage. ${this.pointMeshes.length} models. Current optimum ${optName}. ${frontierIds.size} on Pareto frontier. Full table in instrument console.`,
+      );
+    }
 
     (this.gd as any).__stageModelIds = this.modelIds.slice();
     (this.gd as any).__stageBackend = "three";
@@ -749,6 +792,10 @@ export class Stage3DThree implements Stage3DSurface {
     viz.stageModelIds = this.modelIds.slice();
     viz.stageBackend = "three";
     viz.pointCount = this.pointMeshes.length;
+    viz.decideMode = decideMode;
+    viz.pointSemanticClasses = this.pointMeshes.map(
+      (m) => (m.userData.semanticClass as string) ?? "dominated",
+    );
     (window as any).__viz = viz;
 
     this.paintLabels();

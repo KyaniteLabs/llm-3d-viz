@@ -28,6 +28,15 @@ export interface StageRenderOptions {
   highlightFamilyId?: string | null;
   /** When true, use tighter solo ladder framing. */
   soloFamily?: boolean;
+  /**
+   * Decide mode: dim points with Index below this floor (or missing Index).
+   * Null/undefined = no floor dimming.
+   */
+  intelligenceFloor?: number | null;
+  /** Decide mode: model ids on cost×speed Pareto (brighten). */
+  decideParetoIds?: ReadonlySet<string> | string[] | null;
+  /** Decide mode: shortlist model ids (call out). */
+  decideShortlistIds?: ReadonlySet<string> | string[] | null;
 }
 
 /**

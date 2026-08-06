@@ -6,7 +6,13 @@ import { parseShareableState, writeShareableUrl } from "./lib/url-state";
 import { Stage3DThree } from "./viz/stage3d-three";
 import type { Stage3DSurface } from "./viz/stage-api";
 import { createStore, type AppState } from "./state";
+import {
+  catalogSnapshotId,
+  DEFAULT_INTELLIGENCE_FLOOR,
+  shortlistFromDecide,
+} from "./lib/decide";
 import { DecisionConsole } from "./ui/console";
+import { DecidePanel } from "./ui/decide-panel";
 import { FilterShelf, formatScopeSummary } from "./ui/filter-shelf";
 import { renderMembershipTable } from "./ui/membership-table";
 import { RELEASE_FLOOR_ISO } from "./data/catalog-scope";
@@ -151,13 +157,21 @@ async function boot() {
   const statusText = document.querySelector("[data-status-text]") as HTMLElement;
   const canvasHost = document.querySelector(".canvas-host") as HTMLElement;
   const tableHost = document.querySelector("[data-membership-table]") as HTMLElement;
-  // Shareable URL: filters, axes, weights. Session-only: hover/pin/cinema.
+  // Shareable URL: filters, axes, weights, decide. Session-only: hover/pin/cinema.
   // `?age=0` remains the regression-suite escape hatch for the full catalog.
-  const fromUrl = parseShareableState(searchParams);
+  // Product catalog = `models` (post catalog-scope, pre shelf filters).
+  const productCatalogSnapshot = catalogSnapshotId(models);
+  const fromUrl = parseShareableState(searchParams, {}, { catalog: models });
   const store = createStore({
     filters: fromUrl.filters,
     axisMapping: fromUrl.axisMapping,
     weights: fromUrl.weights,
+    decideMode: fromUrl.decide.decideMode,
+    intelligenceFloor: fromUrl.decide.intelligenceFloor,
+    costSpeedBias: fromUrl.decide.costSpeedBias,
+    floorAnchorModelId: fromUrl.decide.floorAnchorModelId,
+    floorSource: fromUrl.decide.floorSource,
+    floorUserSet: fromUrl.decide.floorUserSet,
   });
 
   const filterShelf = new FilterShelf(filterShelfHost, store, models, sessionReferenceDate);
@@ -263,7 +277,34 @@ async function boot() {
 
   const cinema = new CinemaMode(stage, store);
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
+  const decideHost = document.createElement("div");
+  consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
+  const decidePanel = new DecidePanel(decideHost, store, models, productCatalogSnapshot);
+  decidePanel.setModels(applyFilters(models, store.getState().filters, sessionReferenceDate()));
   document.querySelector("[data-cinema-toggle]")?.addEventListener("click", () => cinema.toggle());
+  const decideToggle = document.querySelector<HTMLButtonElement>("[data-decide-toggle]");
+  decideToggle?.addEventListener("click", () => {
+    const cur = store.getState();
+    const next = !cur.decideMode;
+    if (next && !cur.floorUserSet) {
+      store.update({
+        decideMode: true,
+        intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
+        floorSource: "default",
+        floorAnchorModelId: null,
+      });
+    } else {
+      store.update({ decideMode: next });
+    }
+    decideToggle.setAttribute("aria-pressed", String(next));
+    decideToggle.classList.toggle("is-active", next);
+  });
+  store.subscribe((state) => {
+    if (!decideToggle) return;
+    decideToggle.setAttribute("aria-pressed", String(state.decideMode));
+    decideToggle.classList.toggle("is-active", state.decideMode);
+    document.documentElement.dataset.decideMode = state.decideMode ? "1" : "0";
+  });
   document.querySelector("[data-global-search]")?.addEventListener("keydown", (event) => {
     if ((event as KeyboardEvent).key !== "Enter") return;
     const q = ((event.target as HTMLInputElement).value || "").trim().toLowerCase();
@@ -284,6 +325,7 @@ async function boot() {
   let renderedWeights: AppState["weights"] | null = null;
   let renderedAxes: AxisMapping | null = null;
   let renderedFilters: ModelFilters | null = null;
+  let renderedDecideKey = "";
   let pending: {
     weights: AppState["weights"];
     axisMapping: AxisMapping;
@@ -350,15 +392,23 @@ async function boot() {
       lastFilterFitKey = filterKey;
     }
     const soloFamily = filters.families.length === 1;
-    const hoverId = store.getState().hoveredModelId ?? store.getState().pinnedModelId;
+    const appState = store.getState();
+    const hoverId = appState.hoveredModelId ?? appState.pinnedModelId;
     const hoverModel = hoverId ? visibleSet.find((m) => m.model === hoverId) : null;
     const highlightFamilyId = hoverModel ? familyIdOf(hoverModel) : null;
+    const decide = appState.decideMode
+      ? shortlistFromDecide(visibleSet, appState.intelligenceFloor, appState.costSpeedBias, 3)
+      : null;
+    renderedDecideKey = `${appState.decideMode}:${appState.intelligenceFloor}:${appState.costSpeedBias}:${appState.floorAnchorModelId ?? ""}`;
     stage.render(weights, visibleSet, {
       axisMapping,
       presentationMode,
       fit: shouldFit ? (soloFamily ? "all" : "multi-effort") : "none",
       soloFamily,
       highlightFamilyId: soloFamily ? filters.families[0] : highlightFamilyId,
+      intelligenceFloor: appState.decideMode ? appState.intelligenceFloor : null,
+      decideParetoIds: decide ? decide.pareto.map((m) => m.model) : null,
+      decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
     });
     updateEmptyState(visibleSet.length, filters);
     projections?.setPresentationMode?.(presentationMode);
@@ -370,7 +420,11 @@ async function boot() {
     // (filter) changes — restarting on every paint raced mid-sweep size=11 frames
     // and made Playwright settle checks flaky.
     consoleUi.setModels(visibleSet);
+    decidePanel.setModels(visibleSet);
     stageGuide.setModels(visibleSet);
+    if (statusText && appState.decideMode && decide) {
+      statusText.textContent = `Decide · floor ${appState.intelligenceFloor} · ${decide.eligible.length} eligible · ${decide.shortlist.length} shortlist · stage ${activeBackend}`;
+    }
 
     // Always publish instrument state for Playwright/QA (preview + prod).
     const viz = (window as any).__viz ?? {};
@@ -394,8 +448,10 @@ async function boot() {
     const weightsSame = sameWeights(renderedWeights, state.weights);
     const axesSame = sameAxisMapping(renderedAxes, state.axisMapping);
     const filtersSame = sameFilters(renderedFilters, state.filters);
+    const decideKey = `${state.decideMode}:${state.intelligenceFloor}:${state.costSpeedBias}:${state.floorAnchorModelId ?? ""}`;
+    const decideSame = decideKey === renderedDecideKey;
     // Hover/pin: lightweight family emphasis (no full rebuild / no sweep race).
-    if (weightsSame && axesSame && filtersSame) {
+    if (weightsSame && axesSame && filtersSame && decideSame) {
       const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
       const soloFamily = state.filters.families.length === 1;
       const hoverId = state.hoveredModelId ?? state.pinnedModelId;
@@ -444,6 +500,14 @@ async function boot() {
       filters: state.filters,
       axisMapping: state.axisMapping,
       weights: state.weights,
+      decide: {
+        decideMode: state.decideMode,
+        intelligenceFloor: state.intelligenceFloor,
+        costSpeedBias: state.costSpeedBias,
+        floorAnchorModelId: state.floorAnchorModelId,
+        floorSource: state.floorSource,
+        floorUserSet: state.floorUserSet,
+      },
     });
   });
 

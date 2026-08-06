@@ -1,5 +1,5 @@
 /**
- * Shareable URL state for filters, axes, and value-score weights.
+ * Shareable URL state for filters, axes, value-score weights, and Decide mode.
  *
  * Session-only (not encoded): hover, pin, cinema mode, transient cursor.
  *
@@ -10,6 +10,10 @@
  * - fam=a,b          alias for families=
  * - ax=x,y,z         AxisMetricId triple for scene X/Y/Z
  * - w=s,c,i          raw weight triple speed,cost,intelligence
+ * - decide=1         Decide mode on
+ * - floor=<0..100>   intelligence floor (written whenever decide=1)
+ * - bias=<-1..1>     cost/speed bias (omit when 0)
+ * - anchor=<modelId> floor anchor (when set, floor number is resolved Index)
  * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
  * - enc=openness     legacy openness-primary fill (product default is curve-focus)
  * - catalog=all      full draft labs (default = cloud focus)
@@ -22,14 +26,39 @@ import {
   normalizeAxisMapping,
   type AxisMapping,
 } from "./axis-metrics";
+import {
+  clampBias,
+  clampFloor,
+  DEFAULT_INTELLIGENCE_FLOOR,
+  type FloorSource,
+} from "./decide";
 import { DEFAULT_FILTERS, type ModelFilters } from "./filters";
 import { presets, type ScoreWeights } from "./score";
+
+export interface ShareableDecideState {
+  decideMode: boolean;
+  intelligenceFloor: number;
+  costSpeedBias: number;
+  floorAnchorModelId: string | null;
+  floorSource: FloorSource;
+  floorUserSet: boolean;
+}
 
 export interface ShareableState {
   filters: ModelFilters;
   axisMapping: AxisMapping;
   weights: ScoreWeights;
+  decide: ShareableDecideState;
 }
+
+export const DEFAULT_DECIDE_SHARE: ShareableDecideState = {
+  decideMode: false,
+  intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
+  costSpeedBias: 0,
+  floorAnchorModelId: null,
+  floorSource: "default",
+  floorUserSet: false,
+};
 
 const listSep = ",";
 
@@ -48,12 +77,85 @@ function joinList(values: readonly string[]): string {
     .join(listSep);
 }
 
+/**
+ * Resolve decide fields from URL using B2 rules when a catalog is provided for anchors.
+ * Without catalog, anchor is kept as id and floor number is taken from query if present.
+ */
+export function parseDecideFromParams(
+  params: URLSearchParams,
+  opts?: {
+    /** Product or visible catalog for anchor resolution. */
+    catalog?: readonly { model: string; aa_intelligence_index: number | null }[];
+  },
+): ShareableDecideState {
+  const decideMode = params.get("decide") === "1" || params.get("decide") === "true";
+  let intelligenceFloor = DEFAULT_INTELLIGENCE_FLOOR;
+  let costSpeedBias = 0;
+  let floorAnchorModelId: string | null = null;
+  let floorSource: FloorSource = "default";
+  let floorUserSet = false;
+
+  if (params.has("bias")) {
+    costSpeedBias = clampBias(Number(params.get("bias")));
+  }
+
+  const anchorRaw = params.get("anchor");
+  const floorRaw = params.has("floor") ? Number(params.get("floor")) : null;
+  const catalog = opts?.catalog;
+
+  if (anchorRaw && anchorRaw.trim()) {
+    const id = decodeURIComponent(anchorRaw.trim());
+    const row = catalog?.find((m) => m.model === id);
+    if (row && row.aa_intelligence_index != null) {
+      floorAnchorModelId = id;
+      intelligenceFloor = clampFloor(row.aa_intelligence_index);
+      floorSource = "anchor";
+      floorUserSet = true;
+    } else if (!catalog) {
+      // Catalog not available at parse time — keep id; floor from query if any.
+      floorAnchorModelId = id;
+      if (floorRaw != null && Number.isFinite(floorRaw)) {
+        intelligenceFloor = clampFloor(floorRaw);
+      }
+      floorSource = "anchor";
+      floorUserSet = true;
+    } else if (floorRaw != null && Number.isFinite(floorRaw)) {
+      // Unknown anchor → ignore anchor, use floor as user.
+      floorAnchorModelId = null;
+      intelligenceFloor = clampFloor(floorRaw);
+      floorSource = "user";
+      floorUserSet = true;
+    }
+  } else if (floorRaw != null && Number.isFinite(floorRaw)) {
+    intelligenceFloor = clampFloor(floorRaw);
+    floorSource = "user";
+    floorUserSet = true;
+  } else if (decideMode) {
+    intelligenceFloor = DEFAULT_INTELLIGENCE_FLOOR;
+    floorSource = "default";
+    floorUserSet = false;
+  }
+
+  return {
+    decideMode,
+    intelligenceFloor,
+    costSpeedBias,
+    floorAnchorModelId,
+    floorSource,
+    floorUserSet,
+  };
+}
+
 /** Parse shareable fields from a URLSearchParams / location.search. */
 export function parseShareableState(
   search: string | URLSearchParams,
   base: Partial<ShareableState> = {},
+  opts?: { catalog?: readonly { model: string; aa_intelligence_index: number | null }[] },
 ): ShareableState {
-  const params = typeof search === "string" ? new URLSearchParams(search.startsWith("?") ? search : `?${search}`) : search;
+  const params =
+    typeof search === "string"
+      ? new URLSearchParams(search.startsWith("?") ? search : `?${search}`)
+      : search;
 
   const filters: ModelFilters = {
     ...DEFAULT_FILTERS,
@@ -70,7 +172,6 @@ export function parseShareableState(
     filters.providers = splitList(params.get("providers"));
   }
   if (params.has("families") || params.has("fam")) {
-    // `fam` is a short alias people type by habit; prefer `families` when both present.
     filters.families = splitList(params.get("families") ?? params.get("fam"));
   }
   if (params.has("me")) {
@@ -100,7 +201,9 @@ export function parseShareableState(
     }
   }
 
-  return { filters, axisMapping, weights };
+  const decide = parseDecideFromParams(params, { catalog: opts?.catalog });
+
+  return { filters, axisMapping, weights, decide };
 }
 
 /** Serialize shareable state into query params (omit product defaults). */
@@ -110,7 +213,6 @@ export function serializeShareableState(
 ): URLSearchParams {
   const params = existing ? new URLSearchParams(existing) : new URLSearchParams();
 
-  // Preserve renderer flags managed outside this module.
   const keep = ["stage", "heat", "debug", "enc", "catalog"];
   const preserved: Record<string, string> = {};
   for (const key of keep) {
@@ -118,8 +220,18 @@ export function serializeShareableState(
     if (v !== null) preserved[key] = v;
   }
 
-  // Clear shareable keys then re-apply non-defaults.
-  for (const key of ["age", "providers", "families", "ax", "w", "me"]) {
+  for (const key of [
+    "age",
+    "providers",
+    "families",
+    "ax",
+    "w",
+    "me",
+    "decide",
+    "floor",
+    "bias",
+    "anchor",
+  ]) {
     params.delete(key);
   }
   for (const [key, value] of Object.entries(preserved)) {
@@ -129,7 +241,6 @@ export function serializeShareableState(
   if (!state.filters.ageEnabled) {
     params.set("age", "0");
   }
-  // Product default multiEffortOnly=true; only serialize opt-out.
   if (!state.filters.multiEffortOnly) {
     params.set("me", "0");
   }
@@ -164,6 +275,19 @@ export function serializeShareableState(
         .map((n) => String(n))
         .join(listSep),
     );
+  }
+
+  const d = state.decide ?? DEFAULT_DECIDE_SHARE;
+  if (d.decideMode) {
+    params.set("decide", "1");
+    // Always write floor when decide is on.
+    params.set("floor", String(clampFloor(d.intelligenceFloor)));
+    if (d.floorAnchorModelId) {
+      params.set("anchor", encodeURIComponent(d.floorAnchorModelId));
+    }
+    if (d.costSpeedBias !== 0) {
+      params.set("bias", String(clampBias(d.costSpeedBias)));
+    }
   }
 
   return params;

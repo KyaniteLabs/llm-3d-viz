@@ -1,0 +1,11 @@
+{
+  "slug": "decide-mode-v1",
+  "status": "consensus_approved_pending_execution",
+  "date": "2026-08-06",
+  "chosen": "B_prime",
+  "plan": ".omx/plans/prd-decide-mode-v1.md",
+  "map": 128,
+  "architect": "ITERATE then B_prime accepted",
+  "critic": "APPROVE revise-3",
+  "execution": "blocked_until_simon"
+}

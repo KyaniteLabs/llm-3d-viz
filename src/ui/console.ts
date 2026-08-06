@@ -577,6 +577,9 @@ export class DecisionConsole {
   }
 
   private leaderboard(state: Readonly<AppState>, activePreset: string | undefined) {
+    if (state.decideMode) {
+      return `<p class="console-note" data-decide-leaderboard-suppressed>Value-score optimum is off in Decide mode — use the shortlist and cost×speed chart above.</p>`;
+    }
     if (this.models.length === 0) {
       return `<p class="console-note">No models in the visible set. Relax age, provider, or family filters — or Clear filters.</p>`;
     }
@@ -656,9 +659,21 @@ export class DecisionConsole {
   }
 
   render(state: Readonly<AppState>) {
+    // Decide mode (B′): hide classic value-score weights / presets entirely.
+    const weightHost = this.root.querySelector<HTMLElement>(".weight-controls");
+    const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
+    if (weightHost) weightHost.hidden = state.decideMode;
+    if (presetHost) presetHost.hidden = state.decideMode;
+    this.root.classList.toggle("is-decide-mode", state.decideMode);
+    // Leaderboard section is rebuilt in readout; also hide any stale host.
+    this.root.querySelectorAll(".value-leaderboard").forEach((el) => {
+      (el as HTMLElement).hidden = state.decideMode;
+    });
+
     weightKeys.forEach((key) => {
-      const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`)!;
-      const output = this.root.querySelector<HTMLOutputElement>(`[data-weight-output="${key}"]`)!;
+      const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`);
+      const output = this.root.querySelector<HTMLOutputElement>(`[data-weight-output="${key}"]`);
+      if (!input || !output) return;
       input.value = String(state.weights[key]);
       const share = weightShares(state.weights)[key];
       output.value = `${share}%`;

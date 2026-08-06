@@ -23,6 +23,7 @@
             <span class="visually-hidden">Search models</span>
             <input type="search" data-global-search placeholder="Search models…" autocomplete="off" />
           </label>
+          <button type="button" class="decide-toggle" data-decide-toggle aria-pressed="false" title="Intelligence floor + cost×speed shortlist">Decide</button>
           <button type="button" class="cinema-toggle" data-cinema-toggle aria-pressed="false">Cinema [C]</button>
         </div>
       </header>
@@ -69,7 +70,7 @@
       </main>
 
       <aside class="inspector console panel" id="console-title" aria-label="Selection inspector">
-        <!-- DecisionConsole mounts here -->
+        <!-- DecisionConsole + DecidePanel mount here -->
       </aside>
 
       <footer class="status-bar" aria-live="polite">
