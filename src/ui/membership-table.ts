@@ -34,7 +34,7 @@ export function renderMembershipTable(
         <td>${esc(fam)}</td>
         <td>${esc(deriveEffortTier(m))}</td>
         <td>${esc(displayName(m.model))}</td>
-        <td class="num">${m.aa_intelligence_index ?? "—"}</td>
+        <td class="num">${m.aa_intelligence_index != null ? Number(m.aa_intelligence_index).toFixed(1) : "—"}</td>
         <td class="num">${m.tps != null ? Math.round(m.tps) : "—"}</td>
         <td class="num">${m.blended_price_per_M != null ? m.blended_price_per_M.toFixed(2) : "—"}</td>
       </tr>`;

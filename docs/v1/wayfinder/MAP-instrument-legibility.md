@@ -14,3 +14,9 @@
 - **Frontier:** #87
 - **Charted:** 2026-08-04
 - **Source:** antagonistic design audit + multi-effort product ask
+
+## S+ quality map (2026-08-06)
+- [MAP-s-plus-observatory-quality.md](./MAP-s-plus-observatory-quality.md) — critical path W0–W5 · bar ≥90 all gates · stretch ≥96
+- [RALPLAN-s-plus-observatory-quality.md](./RALPLAN-s-plus-observatory-quality.md)
+- [decision-filament-hierarchy.md](./decision-filament-hierarchy.md)
+- Evidence: `.omx/artifacts/visual-ralph/adversarial-2026-08-06/`

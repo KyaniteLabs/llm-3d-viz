@@ -270,7 +270,8 @@ export class DecisionConsole {
           })
           .join("")}
       </div>
-      <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all · <kbd>C</kbd> cinema</p>`;
+      <details class="nav-help"><summary class="axis-hint">Keyboard</summary>
+      <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all · <kbd>C</kbd> cinema</p></details>`;
   }
 
   private filteredFamilyOptions(): string[] {
@@ -664,6 +665,8 @@ export class DecisionConsole {
     const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
     if (weightHost) weightHost.hidden = state.decideMode;
     if (presetHost) presetHost.hidden = state.decideMode;
+    const familyNav = this.root.querySelector<HTMLElement>(".family-nav");
+    if (familyNav) familyNav.hidden = state.decideMode;
     this.root.classList.toggle("is-decide-mode", state.decideMode);
     // Leaderboard section is rebuilt in readout; also hide any stale host.
     this.root.querySelectorAll(".value-leaderboard").forEach((el) => {

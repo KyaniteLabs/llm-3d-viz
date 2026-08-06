@@ -21,6 +21,8 @@ import {
   SINGLETON_SIZE_SCALE,
   SINGLETON_FILL,
   legendEntries,
+  brandLayerFlags,
+  TRAIL_IDLE_OPACITY,
 } from "../src/viz/palette";
 import { models } from "../src/data/models";
 import { frontier } from "../src/lib/pareto";
@@ -335,5 +337,59 @@ describe("curve-focus family continuity", () => {
     });
     expect(opt.fill.toLowerCase()).toMatch(/#f4d58a|#e8f1e4/);
     expect(opt.opacity).toBe(1);
+  });
+});
+
+
+describe("S+ brand layers + glanceable trails", () => {
+  it("hides brand rings by default; shows on solo/selected/brandFull", () => {
+    expect(brandLayerFlags({}).showRing).toBe(false);
+    expect(brandLayerFlags({ solo: true }).showRing).toBe(true);
+    expect(brandLayerFlags({ selected: true }).showCore).toBe(true);
+    expect(brandLayerFlags({ brandFull: true }).showRing).toBe(true);
+  });
+
+  it("pointEncoding keeps full family fill and quiet trail by default", () => {
+    const enc = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "gpt-5.6-luna",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(enc.fill).toBeTruthy();
+    expect(enc.showRing).toBe(false);
+    expect(enc.trailOpacity).toBe(TRAIL_IDLE_OPACITY);
+    expect(enc.opacity).toBe(1);
+  });
+
+  it("mid effort shrinks size only", () => {
+    const base = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "f",
+      singleton: false,
+      provider: "OpenAI",
+      effortRole: "endpoint",
+    });
+    const mid = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "f",
+      singleton: false,
+      provider: "OpenAI",
+      effortRole: "mid",
+    });
+    expect(mid.sizeScale).toBeCloseTo(base.sizeScale * 0.7);
+    expect(mid.fill).toBe(base.fill);
   });
 });

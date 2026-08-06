@@ -777,6 +777,39 @@ export class Stage3DThree implements Stage3DSurface {
     this.pointMeshes = [];
     this.modelIds = [];
 
+    // Multi-effort endpoint vs mid: size hierarchy only (fills stay full brand chroma).
+    const effortRoleByModel = new Map<string, "endpoint" | "mid" | "single">();
+    {
+      const byFam = new Map<string, typeof plottable>();
+      for (const m of plottable) {
+        const fid = familyIdOf(m);
+        const arr = byFam.get(fid) ?? [];
+        arr.push(m);
+        byFam.set(fid, arr);
+      }
+      for (const members of byFam.values()) {
+        if (members.length < 2) {
+          for (const m of members) effortRoleByModel.set(m.model, "single");
+          continue;
+        }
+        // members already effort-ordered via groupByFamily when used for trails;
+        // sort by effort rank for endpoints.
+        const ordered = members.slice().sort((a, b) => {
+          const ta = (a.effort_tier || "").toString();
+          const tb = (b.effort_tier || "").toString();
+          return ta.localeCompare(tb) || a.model.localeCompare(b.model);
+        });
+        ordered.forEach((m, i) => {
+          const role =
+            i === 0 || i === ordered.length - 1 ? "endpoint" : "mid";
+          effortRoleByModel.set(m.model, role);
+        });
+      }
+    }
+    const brandFull =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("brand") === "full";
+
     plottable.forEach((model) => {
       const pos = this.modelToScene(model);
       if (!pos) return;
@@ -793,6 +826,9 @@ export class Stage3DThree implements Stage3DSurface {
       const score = scores.find((c) => c.model.model === model.model)?.score ?? 0;
       const fid = familyIdOf(model);
       const singleton = isSingleton(model, plottable, familyIdOf);
+      const soloThis =
+        Boolean(this.soloFamily) ||
+        (Boolean(this.highlightFamilyId) && this.highlightFamilyId === fid);
       const enc = pointEncoding({
         openness: model.openness,
         semanticClass,
@@ -802,6 +838,14 @@ export class Stage3DThree implements Stage3DSurface {
         familyId: fid,
         singleton,
         provider: model.provider,
+        solo: soloThis,
+        selected: Boolean(
+          this.highlightFamilyId &&
+            this.highlightFamilyId === fid &&
+            !this.soloFamily
+        ) || isOptimum,
+        brandFull,
+        effortRole: effortRoleByModel.get(model.model) ?? "single",
         palette: {
           slateCyan: this.tokens.slateCyan,
           filamentDim: this.tokens.filamentDim,
@@ -853,11 +897,11 @@ export class Stage3DThree implements Stage3DSurface {
           opacity = Math.min(opacity, 0.55);
         }
       }
-      // Brand rings: outer=colors[1], core=colors[2]. Skip on floor-dimmed marks.
+      // Brand rings only when encoding says so (full catalog default off; focus on).
       const belowFloor =
         decideMode && floor != null && (model.aa_intelligence_index == null || model.aa_intelligence_index < floor);
-      const accent = belowFloor ? undefined : enc.accent;
-      const core = belowFloor ? undefined : enc.core;
+      const accent = !belowFloor && enc.showRing ? enc.accent : undefined;
+      const core = !belowFloor && enc.showCore ? enc.core : undefined;
       const mesh = this.makePointMesh(kind, color, size, accent, core);
       mesh.position.copy(pos);
       const mat = mesh.material as THREE.MeshBasicMaterial;
@@ -910,10 +954,10 @@ export class Stage3DThree implements Stage3DSurface {
         provider: members[0].provider,
       });
       const famId = familyIdOf(members[0]);
-      let trailOpacity = 0.92;
+      let trailOpacity = trailEnc.trailOpacity ?? 0.45;
       if (this.highlightFamilyId && famId !== this.highlightFamilyId) trailOpacity = 0.12;
-      else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 1;
-      else if (this.soloFamily) trailOpacity = 1;
+      else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 0.9;
+      else if (this.soloFamily) trailOpacity = 0.9;
       const mat = new THREE.LineBasicMaterial({
         color: new THREE.Color(trailEnc.trailColor),
         transparent: true,
@@ -961,7 +1005,7 @@ export class Stage3DThree implements Stage3DSurface {
       if (isOptimum) {
         const shortBase = displayName(id);
         const short = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
-        text = `${mesh.userData.reasoning ? "⚡ " : "★ "}${short}`;
+        text = short;
       } else if (focusLabels) {
         // Solo/focus: effort tier primary (optional short stem).
         const stem = displayName(id).split(/[\s(]/)[0]?.slice(0, 8) ?? "";
