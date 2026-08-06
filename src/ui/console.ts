@@ -74,13 +74,15 @@ export class DecisionConsole {
     const advancedOpen =
       typeof sessionStorage !== "undefined" && sessionStorage.getItem(ADVANCED_STORAGE_KEY) === "1";
     this.root.innerHTML = `
-      <p class="eyebrow">GOAL</p>
-      <h2 class="intent-heading">What are you optimizing for?</h2>
-      <p class="intent-blurb">
-        Each mark is a model on <strong>speed × cost × intelligence</strong>.
-        Pick a goal — the cube reweights and names a pick. Drag to orbit; click a mark for detail.
-      </p>
-      <section class="intent-presets" aria-label="Optimization goals"></section>
+      <div class="intent-primary" data-intent-primary>
+        <p class="eyebrow">GOAL</p>
+        <h2 class="intent-heading">What are you optimizing for?</h2>
+        <p class="intent-blurb">
+          Each mark is a model on <strong>speed × cost × intelligence</strong>.
+          Pick a goal — the cube reweights and names a pick. Drag to orbit; click a mark for detail.
+        </p>
+        <section class="intent-presets" aria-label="Optimization goals"></section>
+      </div>
       <section class="model-readout" aria-live="polite"></section>
       <details class="advanced-panel" data-advanced-panel${advancedOpen ? " open" : ""}>
         <summary class="advanced-summary">Advanced controls</summary>
@@ -714,15 +716,11 @@ export class DecisionConsole {
     // Decide mode (B′): hide classic value-score weights / presets entirely.
     const weightHost = this.root.querySelector<HTMLElement>(".weight-controls");
     const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
-    const intentHost = this.root.querySelector<HTMLElement>(".intent-presets");
-    const intentBlurb = this.root.querySelector<HTMLElement>(".intent-blurb");
-    const intentHeading = this.root.querySelector<HTMLElement>(".intent-heading");
+    const intentPrimary = this.root.querySelector<HTMLElement>("[data-intent-primary]");
     const advanced = this.root.querySelector<HTMLElement>("[data-advanced-panel]");
     if (weightHost) weightHost.hidden = state.decideMode;
     if (presetHost) presetHost.hidden = state.decideMode;
-    if (intentHost) intentHost.hidden = state.decideMode;
-    if (intentBlurb) intentBlurb.hidden = state.decideMode;
-    if (intentHeading) intentHeading.hidden = state.decideMode;
+    if (intentPrimary) intentPrimary.hidden = state.decideMode;
     if (advanced) advanced.hidden = state.decideMode;
     const familyNav = this.root.querySelector<HTMLElement>(".family-nav");
     if (familyNav) familyNav.hidden = state.decideMode;

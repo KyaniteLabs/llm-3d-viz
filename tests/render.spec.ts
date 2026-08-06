@@ -19,6 +19,14 @@ function asNumberList(value: unknown): number[] {
   return [];
 }
 
+/** Open Advanced so weight sliders / technical presets are actionable (product default is closed). */
+async function openAdvancedControls(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const d = document.querySelector<HTMLDetailsElement>("[data-advanced-panel]");
+    if (d) d.open = true;
+  });
+}
+
 /** Plotly stage is ready when __viz carries scorable models and intentional marker mirrors. */
 async function waitForPlotlyStage(page: Page, timeoutMs = 15000): Promise<void> {
   await page.waitForFunction(
@@ -44,6 +52,8 @@ async function waitForPlotlyStage(page: Page, timeoutMs = 15000): Promise<void> 
     null,
     { timeout: timeoutMs },
   );
+  // Analyst render suite exercises weight/preset controls under Advanced.
+  await openAdvancedControls(page);
 }
 
 async function waitForSweepSettled(page: Page, timeoutMs = 10000): Promise<void> {
@@ -998,7 +1008,7 @@ test.describe("3D Stage Render Specs", () => {
     await expect(page.locator(".stage-tooltip")).toContainText(modelLabelNeedle(hitB.model));
     await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
     await expect(page.locator(".stage-tooltip")).toBeHidden();
-    await expect(page.locator(".model-readout")).toContainText("CURRENT OPTIMUM");
+    await expect(page.locator(".model-readout")).toContainText("TOP PICK");
 
     // Preserve repeated pin/unpin stress coverage without re-scanning the canvas.
     for (let repetition = 0; repetition < 10; repetition += 1) {
@@ -1017,7 +1027,7 @@ test.describe("3D Stage Render Specs", () => {
       await page.mouse.move(blank.x, blank.y);
       await page.locator(".stage-3d-canvas").click({ position: { x: 8, y: 8 } });
       await expect(page.locator(".stage-tooltip")).toBeHidden();
-      await expect(page.locator(".model-readout")).toContainText("CURRENT OPTIMUM");
+      await expect(page.locator(".model-readout")).toContainText("TOP PICK");
     }
   });
 
@@ -1206,9 +1216,11 @@ test.describe("3D Stage Render Specs", () => {
     await waitForPlotlyStage(page);
     const box = await stageCanvasBox(page);
     await page.mouse.move(box.x + 8, box.y + 8);
-    await expect(page.locator(".value-leaderboard")).toContainText("CURRENT OPTIMUM");
+    await expect(page.locator(".value-leaderboard")).toContainText("TOP PICK");
     await expect(page.locator("[data-optimum-model-id]")).toContainText(/.+/);
-    await expect(page.locator("[data-preset-outcome]")).toContainText(/chat/i);
+    // Human intent label for default chat weights; attribute keeps technical id
+    await expect(page.locator("[data-preset-outcome]")).toHaveAttribute("data-preset-outcome", "chat");
+    await expect(page.locator("[data-preset-outcome]")).toContainText(/Best balance/i);
   });
 
   test("FIX-B: stage, console, and all projections fit the 1366×768 first viewport", async ({ page }) => {
@@ -1255,7 +1267,8 @@ test.describe("3D Stage Render Specs", () => {
     expect(await readShares()).toEqual([35, 30, 35]);
     expect((await readShares()).reduce((sum, share) => sum + share, 0)).toBe(100);
 
-    await page.locator('[data-preset="coding"]').click();
+    // Technical chip inside Advanced (intent chips also carry data-preset)
+    await page.locator('.preset-controls [data-preset="coding"]').click();
     const coding = await page.evaluate(() => ({
       raw: ["speed", "cost", "intelligence"].map((key) => (document.querySelector(`#weight-${key}`) as HTMLInputElement).value),
       shares: [...document.querySelectorAll("[data-weight-output]")].map((node) => node.textContent),
@@ -1329,7 +1342,7 @@ test.describe("3D Stage Render Specs", () => {
 
     const results = [];
     for (const preset of ["coding", "RAG", "long-context"]) {
-      await page.locator(`[data-preset="${preset}"]`).click();
+      await page.locator(`.preset-controls [data-preset="${preset}"]`).click();
       await waitForSweepSettled(page);
       results.push(await readOrdering());
     }
