@@ -380,7 +380,7 @@ test.describe("3D Stage Render Specs", () => {
     expect(layout.zaxisRange[0]).toBeLessThan(layout.zaxisRange[1]);
   });
 
-  test("Item 20 & 21: Provider shapes and optimum marker size/symbol distinctness", async ({ page }) => {
+  test("Item 20 & 21: Glyphs encode openness×reasoning; optimum is size not shape-hijack", async ({ page }) => {
     await page.goto("/?stage=plotly&age=0");
     await waitForPlotlyStage(page);
 
@@ -400,33 +400,32 @@ test.describe("3D Stage Render Specs", () => {
       for (let i = 1; i < models.length; i++) {
         if ((scores[models[i]] ?? -1) > (scores[models[optimumIndex]] ?? -1)) optimumIndex = i;
       }
+      const expected = (m: any) => {
+        const open = m.openness === "open";
+        const reasoning = Boolean(m.reasoning);
+        if (reasoning) return open ? "diamond-open" : "diamond";
+        return open ? "circle-open" : "circle";
+      };
       return {
         symbols,
         models,
-        providers: viz.scorableModels.map((m: any) => m.provider),
-        providerShapes: viz.providerShapes,
+        expectedSymbols: viz.scorableModels.map(expected),
         frontierModelIds: viz.frontierModelIds as string[],
         optimumIndex,
       };
     });
 
-    // Check we have >= 4 distinct symbols
+    // Openness×reasoning 2×2 yields up to 4 glyphs (catalog usually has all).
     const uniqueSymbols = new Set(data.symbols);
-    expect(uniqueSymbols.size).toBeGreaterThanOrEqual(4);
+    expect(uniqueSymbols.size).toBeGreaterThanOrEqual(2);
     expect(data.optimumIndex).toBeGreaterThanOrEqual(0);
 
-    const optimumSymbol = data.symbols[data.optimumIndex];
-    data.providers.forEach((provider: string, index: number) => {
-      if (index !== data.optimumIndex) {
-        // Unknown labs fall back to circle (long-tail providers after multi-effort expand).
-        expect(data.symbols[index]).toBe(data.providerShapes[provider] || "circle");
-      }
+    // Glyph follows attributes for every point including optimum (no lab shape map).
+    data.expectedSymbols.forEach((expected: string, index: number) => {
+      expect(data.symbols[index]).toBe(expected);
     });
-
-    const frontierIndices = data.frontierModelIds
-      .map((modelId: string) => data.models.indexOf(modelId))
-      .filter((index: number) => index !== data.optimumIndex);
-    frontierIndices.forEach((index: number) => expect(optimumSymbol).not.toBe(data.symbols[index]));
+    // Optimum may share a glyph with peers; size/gold carry hierarchy, not shape hijack.
+    expect(data.frontierModelIds.length).toBeGreaterThan(0);
   });
 
   test("Items 14 & 21: slider re-ranks immediately and keeps the optimum non-colour distinct", async ({ page }) => {
@@ -1159,29 +1158,31 @@ test.describe("3D Stage Render Specs", () => {
     await expect(prompt.locator("button#webgl-reload-btn")).toBeVisible();
   });
 
-  test("FIX-B: legend, provider shape groups, and frontier model names are visible without hover", async ({ page }) => {
+  test("FIX-B: legend, glyph key, and frontier model names are visible without hover", async ({ page }) => {
     await page.goto("/?stage=plotly&age=0");
     await waitForPlotlyStage(page);
     await page.locator(".stage-guide-disclosure").evaluate((el: HTMLDetailsElement) => {
       el.open = true;
     });
 
-    // Default product legend is curve-focus (openness glyph, not open/closed fill).
+    // Default product legend is curve-focus: lab color, size=score, glyph 2×2.
     for (const entry of [
+      "lab-color",
       "family-trail",
-      "effort-path",
-      "singleton-dim",
+      "size-score",
+      "glyph-standard",
+      "glyph-reasoning",
+      "glyph-open",
       "frontier-ridge",
       "optimum-marker",
-      "open-closed-glyph",
-      "reasoning-mark",
       "frontier-point",
+      "singleton-dim",
     ]) {
       await expect(page.locator(`[data-legend-entry="${entry}"]`)).toHaveCount(1);
     }
 
-    // Open provider key so names are in the DOM text.
-    await page.locator(".provider-disclosure").evaluate((el: HTMLDetailsElement) => {
+    // Open glyph key — 4-row openness×reasoning matrix.
+    await page.locator(".glyph-disclosure").evaluate((el: HTMLDetailsElement) => {
       el.open = true;
     });
     const labels = await page.locator("[data-frontier-model]").evaluateAll((nodes) =>
@@ -1193,16 +1194,11 @@ test.describe("3D Stage Render Specs", () => {
     expect(new Set(labels).size).toBe(new Set(expected).size);
     expected.forEach((id) => expect(labels).toContain(id));
 
-    const providerNames = await page.evaluate(() => Object.keys((window as any).__viz.providerShapes));
-    const providerKeyText = await page.locator(".provider-shape-list").innerText();
-    // Only providers present in the current scorable set must appear.
-    const present = await page.evaluate(() =>
-      [...new Set((window as any).__viz.scorableModels.map((m: any) => m.provider as string))],
-    );
-    present.forEach((provider: string) => expect(providerKeyText).toContain(provider));
-    expect(await page.locator("[data-provider-shape]").count()).toBeGreaterThanOrEqual(4);
+    const glyphKeyText = await page.locator(".provider-shape-list").innerText();
+    expect(glyphKeyText.toLowerCase()).toContain("sphere");
+    expect(glyphKeyText.toLowerCase()).toContain("reasoning");
+    expect(await page.locator("[data-glyph-key]").count()).toBe(4);
     await expect(page.locator("#frontier-label-note")).toContainText("no 3D-to-pixel label API");
-    void providerNames;
   });
 
   test("comprehension pass: landing shows the weighted optimum after a real pointer event without hovering a point", async ({ page }) => {

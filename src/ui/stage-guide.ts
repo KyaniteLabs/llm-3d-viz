@@ -1,20 +1,10 @@
-import { PROVIDER_SHAPES, type Model } from "../data/models";
+import type { Model } from "../data/models";
 import { frontier } from "../lib/pareto";
 import { normalizedScores, weightedOptimum } from "../lib/score";
 import { displayName } from "../lib/display-name";
 import type { AppState, AppStore } from "../state";
 import { legendEntries, labLegendEntries, type PresentationMode } from "../viz/palette";
-
-const SHAPE_LABELS: Record<string, string> = {
-  circle: "circle",
-  "circle-open": "open circle",
-  cross: "cross",
-  diamond: "diamond",
-  "diamond-open": "open diamond",
-  square: "square",
-  "square-open": "open square",
-  x: "x",
-};
+import { MARK_GLYPH_LEGEND } from "../viz/mark-encoding";
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (character) => ({
@@ -24,18 +14,6 @@ function escapeHtml(value: string): string {
     "'": "&#39;",
     '"': "&quot;",
   })[character] ?? character);
-}
-
-function providerGroups(models: readonly Model[]): Array<{ shape: string; providers: string[] }> {
-  const present = [...new Set(models.map((model) => model.provider))].sort();
-  const groups = new Map<string, string[]>();
-  for (const provider of present) {
-    const shape = PROVIDER_SHAPES[provider] || "circle";
-    const names = groups.get(shape) ?? [];
-    names.push(provider);
-    groups.set(shape, names);
-  }
-  return [...groups.entries()].map(([shape, providers]) => ({ shape, providers }));
 }
 
 /**
@@ -51,7 +29,7 @@ export class StageGuide {
   private readonly presentationMode: PresentationMode;
   /** User-controlled open state; null until first paint (then defaults apply). */
   private stageKeyOpen: boolean | null = null;
-  private providerOpen: boolean | null = null;
+  private glyphOpen: boolean | null = null;
 
   constructor(
     root: HTMLElement,
@@ -76,17 +54,17 @@ export class StageGuide {
 
   private captureDisclosureState() {
     const stage = this.root.querySelector<HTMLDetailsElement>(".stage-guide-disclosure");
-    const provider = this.root.querySelector<HTMLDetailsElement>(".provider-disclosure");
+    const glyph = this.root.querySelector<HTMLDetailsElement>(".glyph-disclosure");
     if (stage) this.stageKeyOpen = stage.open;
-    if (provider) this.providerOpen = provider.open;
+    if (glyph) this.glyphOpen = glyph.open;
   }
 
-  private defaultOpen(isCompact: boolean): { stage: boolean; provider: boolean } {
+  private defaultOpen(isCompact: boolean): { stage: boolean; glyph: boolean } {
     // Tastecheck 2026-08-04: STAGE KEY collapsed by default (canvas first).
-    // Provider shapes also start closed; user open state is sticky after first toggle.
+    // Glyph key starts closed; user open state is sticky after first toggle.
     return {
       stage: this.stageKeyOpen ?? false,
-      provider: this.providerOpen ?? false,
+      glyph: this.glyphOpen ?? false,
     };
   }
 
@@ -97,7 +75,6 @@ export class StageGuide {
     const optimum = state.decideMode
       ? undefined
       : weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
-    const groups = providerGroups(this.models);
     const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches;
     const open = this.defaultOpen(isCompact);
 
@@ -120,8 +97,8 @@ export class StageGuide {
               this.heatEncoding
                 ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
                 : this.presentationMode === "curve"
-                  ? '<p class="heat-encoding-note" data-heat-encoding="false">LAB-FOCUS · official brand hue + family shade · trails connect effort steps · openness glyph only. ?enc=openness for legacy fill.</p>'
-                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Default is lab-focus.</p>'
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · shape = openness×reasoning · size = value score. ?enc=openness for legacy fill.</p>'
+                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Glyphs still encode openness×reasoning.</p>'
             }
           </section>
 
@@ -130,28 +107,38 @@ export class StageGuide {
             <section class="lab-key" aria-label="Lab color key">
               <ul class="lab-color-list">
                 ${labLegendEntries(this.models.map((m) => m.provider))
-                  .map(
-                    ({ provider, color }) =>
-                      `<li data-lab="${escapeHtml(provider)}">
-                        <span class="lab-swatch" style="background:${escapeHtml(color)}" aria-hidden="true"></span>
-                        <span>${escapeHtml(provider)} <small class="lab-hex">${escapeHtml(color)}</small></span>
-                      </li>`,
-                  )
+                  .map(({ provider, colors }) => {
+                    const shown = colors.slice(0, Math.max(3, Math.min(5, colors.length)));
+                    const hexLine = shown.map((c) => escapeHtml(c)).join(" · ");
+                    const chips = shown
+                      .map(
+                        (c, i) =>
+                          `<span class="lab-swatch lab-swatch--n${i}" style="background:${escapeHtml(c)}; box-shadow: inset 0 0 0 1px rgba(231,226,216,0.2)"></span>`,
+                      )
+                      .join("");
+                    return `<li data-lab="${escapeHtml(provider)}">
+                        <span class="lab-swatch-strip" aria-hidden="true">${chips}</span>
+                        <span>${escapeHtml(provider)} <small class="lab-hex">${hexLine}</small></span>
+                      </li>`;
+                  })
                   .join("")}
               </ul>
-              <p class="stage-guide-note">Colors match each lab’s public brand primary. Different models in that lab = lighter/darker shades of the same brand hue. Trails stay in that family shade.</p>
+              <p class="stage-guide-note">Color = lab only. ≥3 real brand colors per lab: fill · outer ring · core. Family shades only the primary. Oranges stay separated (Amazon / Alibaba / Mistral / Xiaomi).</p>
             </section>
           </details>
 
-          <details class="provider-disclosure"${open.provider ? " open" : ""}>
-            <summary class="stage-guide-heading">PROVIDER SHAPES · ${groups.reduce((n, g) => n + g.providers.length, 0)} PROVIDERS</summary>
-            <section class="provider-key" aria-label="Provider shape key">
+          <details class="glyph-disclosure"${open.glyph ? " open" : ""}>
+            <summary class="stage-guide-heading">GLYPHS · OPENNESS × REASONING</summary>
+            <section class="provider-key glyph-key" aria-label="Glyph encoding key">
               <ul class="provider-shape-list">
-                ${groups.map(({ shape, providers }) => `<li data-provider-shape="${escapeHtml(shape)}">
-                  <span class="provider-glyph provider-glyph--${escapeHtml(shape)}" aria-label="${escapeHtml(SHAPE_LABELS[shape] ?? shape)}" role="img"></span>
-                  <span>${providers.map(escapeHtml).join(", ")}</span>
-                </li>`).join("")}
+                ${MARK_GLYPH_LEGEND.map(
+                  (row) => `<li data-glyph-key="${escapeHtml(row.id)}" data-provider-shape="${escapeHtml(row.plotlySymbol)}">
+                  <span class="provider-glyph provider-glyph--${escapeHtml(row.plotlySymbol)}" aria-label="${escapeHtml(row.title)}" role="img"></span>
+                  <span><strong>${escapeHtml(row.title)}</strong><small> · ${escapeHtml(row.detail)}</small></span>
+                </li>`,
+                ).join("")}
               </ul>
+              <p class="stage-guide-note">Sphere = standard · octa = reasoning. Solid = closed weights · wire = open weights. Lab is never encoded by shape.</p>
             </section>
           </details>
 
@@ -177,8 +164,8 @@ export class StageGuide {
     this.root.querySelector(".stage-guide-disclosure")?.addEventListener("toggle", (event) => {
       this.stageKeyOpen = (event.currentTarget as HTMLDetailsElement).open;
     });
-    this.root.querySelector(".provider-disclosure")?.addEventListener("toggle", (event) => {
-      this.providerOpen = (event.currentTarget as HTMLDetailsElement).open;
+    this.root.querySelector(".glyph-disclosure")?.addEventListener("toggle", (event) => {
+      this.glyphOpen = (event.currentTarget as HTMLDetailsElement).open;
     });
   }
 }

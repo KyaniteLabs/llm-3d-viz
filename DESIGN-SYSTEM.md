@@ -14,23 +14,36 @@
 - **Signature:** the **threshold-sweep** — on every re-weight, a staged filament ignition propagates from the frontier outward, synced to the 2D projections snapping into registration. Both the motion signature and the video hero shot.
 - **Imagery and iconography:** no decorative imagery; one minimal 1px line-icon set for controls. No emoji. Provider differentiation = **point shape** (circle/triangle/square/diamond…) **plus** AA-style semantic channels below (shape remains useful when many labs share a color class).
 
-## Canvas encoding channel matrix (curve-focus default · 2026-08-04)
+## Canvas encoding channel matrix (curve-focus default · 2026-08-06)
 
 Supersedes “never categorical color on canvas” and “copper never on canvas” for **data marks only**. Chrome copper (sliders/focus) is unchanged.
 
 **Product default = curve-focus** (RALPLAN A2 / PRD #86). Openness-primary fill is regression-only (`?enc=openness`).
 
+**One meaning per channel — no double-encoding.** Lab is color only; shape is never lab.
+
 | Channel | Meaning | Default (curve-focus) |
 |---------|---------|----------------------|
-| **Fill** | Multi-effort **family series color**; singleton = dim slate | **On** — primary story |
-| **Trail** | Same family series color; effort-rank ordered; real points only | **On** |
-| **Glyph / icon** | Openness (open/closed) + reasoning / thinking-effort | **On** — secondary |
-| **Size / ridge / ★** | Frontier / optimum | **On** |
-| **Lab / provider color** | Outline / identity when multi-lab | Secondary |
-| **Singleton dim** | Post-filter family count &lt; 2: opacity 0.30, size ×0.55 | Visual only (still in score/frontier) |
-| **Score heat (copper→filament)** | Diagnostic value-score ramp | **Off**; opt-in `?heat=1` only |
+| **Position X / Y / Z** | Cost / intelligence / speed (remappable metrics) | **On** |
+| **Fill color** | Lab **brand colors[0]** + family shade; singleton = dim lab tint | **On** — lab identity |
+| **Outer ring** | Lab **brand colors[1]** | **On** |
+| **Inner core** | Lab **brand colors[2]** | **On** — ≥3-color uniqueness |
+| **Trail** | Same family shade; effort-rank ordered; real points only | **On** |
+| **Size** | Value-score for current weights (continuous) | **On** — bigger = better fit |
+| **Size floor / gold** | Frontier size floor; optimum = gold + largest | **On** |
+| **Shape geometry** | **Sphere** = standard · **Octahedron** = reasoning/thinking | **On** |
+| **Solid vs wireframe** | **Solid** = closed weights · **Wire** = open weights | **On** |
+| **Ridge polyline** | Pareto frontier | **On** |
+| **Score heat (copper→filament)** | Diagnostic value-score on fill | **Off**; `?heat=1` only |
 
-- Legend must match stage 1:1 (family trail, effort path, singleton, frontier, optimum, open/closed glyph, reasoning).
+Glyph 2×2 (authoritative in `src/viz/mark-encoding.ts`):
+
+| | Closed weights | Open weights |
+|--|----------------|--------------|
+| Standard | solid sphere | wire sphere |
+| Reasoning | solid octa | wire octa |
+
+- Legend must match stage 1:1 (lab color, trails, size=score, glyph 2×2, frontier, optimum).
 - Family effort **trails** keep one family color along real points only (no invented vertices).
 - Value-score weights remain independent of display-axis remapping.
 - First paint: soft-fit multi-effort subset bounds; age ≤ 6 months remains density floor.

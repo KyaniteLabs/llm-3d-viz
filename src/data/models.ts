@@ -79,10 +79,9 @@ export interface Model {
 export const DATA_ERROR = "data_error" as const;
 
 /**
- * Plotly Scatter3d has eight useful glyphs. The first eight providers retain a
- * dedicated glyph; the remaining long tail intentionally shares an open or
- * closed "other" variant. This makes those collisions semantic, not accidental,
- * while preserving openness as a non-colour cue.
+ * @deprecated Lab is color, not shape. Glyphs encode openness × reasoning via
+ * `src/viz/mark-encoding.ts` (sphere/octa × solid/wire). Kept only for any
+ * residual test fixtures that still import the old provider→symbol map.
  */
 export const PROVIDER_SHAPES: Readonly<Record<string, Plotly3dSymbol>> = {
   OpenAI: "circle",

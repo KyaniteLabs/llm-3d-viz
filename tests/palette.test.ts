@@ -13,6 +13,9 @@ import {
   isSingleton,
   familySeriesColor,
   labColor,
+  labSecondary,
+  labBrand,
+  LAB_BRANDS,
   scoreSizeScale,
   SINGLETON_OPACITY,
   SINGLETON_SIZE_SCALE,
@@ -222,11 +225,15 @@ describe("curve-focus pointEncoding (product default)", () => {
   it("legend entries 1:1 for curve vs openness", () => {
     const curve = legendEntries("curve", false).map((e) => e.id);
     expect(curve).toContain("family-trail");
+    expect(curve).toContain("size-score");
+    expect(curve).toContain("glyph-standard");
+    expect(curve).toContain("glyph-reasoning");
     expect(curve).toContain("singleton-dim");
     expect(curve).not.toContain("open-point");
     const open = legendEntries("openness", false).map((e) => e.id);
     expect(open).toContain("open-point");
     expect(open).toContain("closed-point");
+    expect(open).toContain("size-score");
   });
 });
 
@@ -256,15 +263,38 @@ describe("curve-focus family continuity", () => {
     expect(b).not.toBe(c);
   });
 
-  it("uses official brand primaries for labs", () => {
+  it("uses ≥3 researched brand colors per lab", () => {
     expect(labColor("OpenAI").toLowerCase()).toBe("#10a37f");
+    expect(labSecondary("OpenAI").toLowerCase()).toBe("#202123");
+    expect(labBrand("OpenAI").colors[2].toLowerCase()).toBe("#fafafa");
     expect(labColor("Anthropic").toLowerCase()).toBe("#d97757");
+    expect(labSecondary("Anthropic").toLowerCase()).toBe("#6a9bcc");
+    expect(labBrand("Anthropic").colors[2].toLowerCase()).toBe("#788c5d");
     expect(labColor("Google").toLowerCase()).toBe("#4285f4");
+    expect(labSecondary("Google").toLowerCase()).toBe("#ea4335");
+    expect(labBrand("Google").colors[2].toLowerCase()).toBe("#fbbc05");
+    expect(labBrand("Google").colors[3].toLowerCase()).toBe("#34a853");
     expect(labColor("DeepSeek").toLowerCase()).toBe("#4d6bfe");
-    expect(labColor("Alibaba").toLowerCase()).toBe("#fa6400");
-    expect(labColor("Mistral").toLowerCase()).toBe("#fa500f");
+    // Orange family deliberately separated (Amazon / Alibaba / Mistral / Xiaomi).
+    expect(labColor("Alibaba").toLowerCase()).toBe("#ff6a00");
+    expect(labColor("Mistral").toLowerCase()).toBe("#fa520f");
+    expect(labSecondary("Mistral").toLowerCase()).toBe("#ffd900");
+    expect(labColor("Amazon").toLowerCase()).toBe("#ff9900");
+    expect(labColor("Xiaomi").toLowerCase()).toBe("#ff6900");
     expect(labColor("NVIDIA").toLowerCase()).toBe("#76b900");
-    expect(labColor("Kimi").toLowerCase()).toBe("#1a88ff");
+    expect(labColor("Microsoft").toLowerCase()).toBe("#00a4ef");
+    expect(labBrand("Microsoft").colors).toHaveLength(4);
+    expect(labColor("Kimi").toLowerCase()).toBe("#1783ff");
+    // Every kit has ≥3 distinct hexes.
+    for (const [name, brand] of Object.entries(LAB_BRANDS)) {
+      expect(brand.colors.length).toBeGreaterThanOrEqual(3);
+      const lower = brand.colors.map((c) => c.toLowerCase());
+      expect(new Set(lower).size).toBe(lower.length);
+      for (const c of brand.colors) {
+        expect(c).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      }
+      expect(labBrand(name).colors[0]).toBe(brand.colors[0]);
+    }
   });
 
   it("keeps OpenAI families in green lab hue and Anthropic in warm lab hue", () => {

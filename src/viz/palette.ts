@@ -253,55 +253,114 @@ export const OPENNESS_FILL = {
 } as const;
 
 /**
- * Lab = brand primary hue (exact or closest official product hex).
- * Sources checked 2026-08-05 against public brand sites / product CSS where available.
- * Family shades are light/dark variants of this same hue (see familySeriesColor).
+ * Official brand kit: ≥3 real brand colors per lab.
+ *
+ * colors[0] = primary fill · colors[1] = outer outline · colors[2] = core/inner ring
+ * Extra colors (3+) reserved for legend / future pattern fills.
+ *
+ * Sources revalidated 2026-08-06 against lab brand pages, product CSS, and
+ * published brand kits (Anthropic skill kit, Google Material G, Microsoft logo,
+ * NVIDIA trademark PDF, IBM Carbon, Mistral brand, Amazon Smile, etc.).
+ * When a brand is monochrome, include black / white / charcoal from their system —
+ * do not invent fake rainbows.
  */
-export const LAB_COLORS: Readonly<Record<string, string>> = {
-  // ChatGPT / OpenAI product green (openai.com product chrome)
-  OpenAI: "#10A37F",
-  // Anthropic Claude accent (anthropic.com — #d97757)
-  Anthropic: "#D97757",
-  // Google Blue (Material / brand primary)
-  Google: "#4285F4",
-  // Meta primary button blue (meta.com)
-  Meta: "#1B74E4",
-  // DeepSeek product blue (deepseek.com — #4D6BFE dominant)
-  DeepSeek: "#4D6BFE",
-  // Alibaba orange (alibaba.com — #fa6400)
-  Alibaba: "#FA6400",
-  // Mistral brand orange (mistral.ai — #FA500F)
-  Mistral: "#FA500F",
-  // Cohere brand green (product / mark)
-  Cohere: "#39594D",
-  // Amazon Smile orange (brand guidelines)
-  Amazon: "#FF9900",
-  // Moonshot / Kimi platform blue (platform.moonshot.cn — #1A88FF)
-  Kimi: "#1A88FF",
-  // Microsoft brand blue
-  Microsoft: "#00A4EF",
-  // MiniMax product purple (minimax.chat mark)
-  MiniMax: "#E91E8C",
-  // NVIDIA green (nvidia.com — #76B900)
-  NVIDIA: "#76B900",
-  // xAI / Grok (listed as SpaceXAI in AA): monochrome brand → cool white on ink
-  SpaceXAI: "#E7E9EA",
-  // Thinking Machines — no public brand kit; neutral copper reserved for non-brand chrome only
-  "Thinking Machines": "#8B7355",
-  // Xiaomi brand orange
-  Xiaomi: "#FF6900",
-  // Zhipu / GLM (AA provider string "Z AI") — product indigo from bigmodel/zhipu chrome
-  "Z AI": "#1A56DB",
-  // IBM Blue
-  IBM: "#0F62FE",
-  // Tencent brand blue
-  Tencent: "#12B7F5",
-  // AI21 Labs teal
-  "AI21 Labs": "#0D9488",
+export interface LabBrand {
+  /** Ordered brand palette — length ≥ 3. */
+  colors: readonly string[];
+  /** Provenance for maintainers (not shown in UI). */
+  note?: string;
+}
+
+function brand(colors: readonly string[], note?: string): LabBrand {
+  if (colors.length < 3) {
+    throw new Error(`LabBrand requires ≥3 colors, got ${colors.length}: ${note ?? "?"}`);
+  }
+  return { colors, note };
+}
+
+export const LAB_BRANDS: Readonly<Record<string, LabBrand>> = {
+  // ChatGPT green + OpenAI charcoal + off-white (product / brand archive)
+  OpenAI: brand(["#10A37F", "#202123", "#FAFAFA"], "ChatGPT green · charcoal · off-white"),
+  // Anthropic official accent kit (orange · blue · green) + dark ground
+  Anthropic: brand(["#D97757", "#6A9BCC", "#788C5D", "#141413", "#FAF9F5"], "Anthropic accents + dark/light"),
+  // Google logo / Material medium set
+  Google: brand(["#4285F4", "#EA4335", "#FBBC05", "#34A853"], "Google Blue Red Yellow Green"),
+  // Meta / Facebook product blues + white
+  Meta: brand(["#0866FF", "#0081FB", "#FFFFFF", "#F0F2F5"], "Meta blue · light blue · white · ash"),
+  // DeepSeek whale blue system (product mark blue + navy + cyan highlight)
+  DeepSeek: brand(["#4D6BFE", "#1E3A8A", "#7DD3FC", "#0A0F2C"], "DeepSeek blue · navy · ice · ink"),
+  // Alibaba safety orange + black + white
+  Alibaba: brand(["#FF6A00", "#000000", "#FFFFFF", "#FFB400"], "Alibaba orange · black · white · gold"),
+  // Mistral sunset kit (mistral.ai): orange-red · sunshine · cream · ink
+  Mistral: brand(["#FA520F", "#FFD900", "#FFF0C2", "#1F1F1F", "#B9DAFF"], "Mistral orange · yellow · cream · ink"),
+  // Cohere: coniferous green · synthetic quartz · volcanic black (Pentagram rebrand)
+  Cohere: brand(["#39594D", "#D18EE2", "#212121", "#FF7759", "#FAFAFA"], "Cohere green · quartz · black · coral"),
+  // Amazon Smile: orange · navy · white (+ classic denim blue)
+  Amazon: brand(["#FF9900", "#232F3E", "#FFFFFF", "#146EB4"], "Amazon orange · navy · white · denim"),
+  // Moonshot / Kimi platform (product blue system)
+  Kimi: brand(["#1783FF", "#0B1B33", "#93C5FD", "#FFFFFF"], "Kimi blue · navy · sky · white"),
+  // Microsoft logo square colors
+  Microsoft: brand(["#00A4EF", "#7FBA00", "#F25022", "#FFB900"], "Microsoft Blue Green Red Yellow"),
+  // MiniMax product magenta system
+  MiniMax: brand(["#E91E8C", "#6B21A8", "#FBCFE8", "#1A0B1F"], "MiniMax magenta · violet · blush · ink"),
+  // NVIDIA trademark: green · dark gray · white (PDF guidelines)
+  NVIDIA: brand(["#76B900", "#1E1E1E", "#FFFFFF", "#000000"], "NVIDIA green · dark · white · black"),
+  // xAI / Grok (AA: SpaceXAI): black · white · cool gray (brand guidelines monochrome)
+  SpaceXAI: brand(["#E7E9EA", "#000000", "#71767B", "#FFFFFF"], "xAI light · black · gray · white"),
+  // Thinking Machines Lab — no public kit; bronze triad marked unofficial
+  "Thinking Machines": brand(["#C4A574", "#3D3428", "#F5E6C8", "#1A1612"], "unofficial bronze triad"),
+  // Xiaomi orange · black · white · light orange
+  Xiaomi: brand(["#FF6900", "#000000", "#FFFFFF", "#FF9850"], "Xiaomi orange · black · white"),
+  // Zhipu / GLM (AA: "Z AI") product indigo system
+  "Z AI": brand(["#1A56DB", "#7C3AED", "#93C5FD", "#0F172A"], "Zhipu indigo · violet · sky · ink"),
+  // IBM Carbon blue 60 + black + white + blue 40
+  IBM: brand(["#0F62FE", "#000000", "#FFFFFF", "#78A9FF"], "IBM Blue 60 · black · white · Blue 40"),
+  // Tencent brand blue system
+  Tencent: brand(["#12B7F5", "#0052D9", "#FFFFFF", "#001F4D"], "Tencent cyan · deep blue · white"),
+  // AI21 product teal system
+  "AI21 Labs": brand(["#0D9488", "#134E4A", "#5EEAD4", "#042F2E"], "AI21 teal triad"),
+  // Long-tail labs (product chrome where public; else distinct high-contrast triad)
+  "Nous Research": brand(["#A78BFA", "#1E1B4B", "#EDE9FE", "#4C1D95"], "Nous violet triad"),
+  "Liquid AI": brand(["#22D3EE", "#0E7490", "#CFFAFE", "#083344"], "Liquid cyan triad"),
+  InclusionAI: brand(["#F43F5E", "#881337", "#FECDD3", "#4C0519"], "Inclusion rose triad"),
+  Inception: brand(["#FBBF24", "#78350F", "#FEF3C7", "#451A03"], "Inception amber triad"),
+  "Arcee AI": brand(["#38BDF8", "#0C4A6E", "#E0F2FE", "#082F49"], "Arcee sky triad"),
+  Upstage: brand(["#6366F1", "#312E81", "#E0E7FF", "#1E1B4B"], "Upstage indigo triad"),
+  StepFun: brand(["#34D399", "#064E3B", "#D1FAE5", "#022C22"], "StepFun emerald triad"),
+  LongCat: brand(["#F472B6", "#831843", "#FCE7F3", "#500724"], "LongCat pink triad"),
+  KwaiKAT: brand(["#FF4906", "#1A1A1A", "#FFFFFF", "#FFB4A0"], "Kwai orange triad"),
+  Celeris: brand(["#94A3B8", "#334155", "#F1F5F9", "#0F172A"], "Celeris slate triad"),
+  "Multiverse Computing": brand(["#818CF8", "#312E81", "#E0E7FF", "#1E1B4B"], "Multiverse indigo triad"),
+  "Nex AGI": brand(["#2DD4BF", "#115E59", "#CCFBF1", "#042F2E"], "Nex teal triad"),
+  "Sapiens AI": brand(["#F59E0B", "#78350F", "#FEF3C7", "#451A03"], "Sapiens amber triad"),
 };
 
+const FALLBACK_BRAND: LabBrand = brand(["#89939E", "#3D5560", "#E7E2D8"], "unknown lab fallback");
+
+/** @deprecated use labBrand(provider).colors[0] */
+export const LAB_COLORS: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(LAB_BRANDS).map(([k, v]) => [k, v.colors[0]]),
+) as Record<string, string>;
+
+export function labBrand(provider: string): LabBrand {
+  return LAB_BRANDS[provider] ?? FALLBACK_BRAND;
+}
+
+/** Brand palette (≥3). Always returns a fresh copy-safe readonly view. */
+export function labColors(provider: string): readonly string[] {
+  return labBrand(provider).colors;
+}
+
 export function labColor(provider: string, fallback = "#89939E"): string {
-  return LAB_COLORS[provider] ?? fallback;
+  return LAB_BRANDS[provider]?.colors[0] ?? fallback;
+}
+
+export function labSecondary(provider: string, fallback = "#3D5560"): string {
+  return LAB_BRANDS[provider]?.colors[1] ?? fallback;
+}
+
+export function labTertiary(provider: string, fallback = "#E7E2D8"): string {
+  return LAB_BRANDS[provider]?.colors[2] ?? fallback;
 }
 
 /** sRGB 0–255 → HSL (h 0–360, s/l 0–1). */
@@ -400,20 +459,17 @@ export function scoreSizeScale(score: number): number {
 }
 
 /**
- * Product rule (glanceability): **lab = hue**, **family within lab = shade**.
- * OpenAI greens stay green; Anthropic stays warm; Google blue; Alibaba orange.
- * Different families in the same lab are light/dark variants of that lab color —
- * never a random hue that could be mistaken for another lab.
+ * Product rule: **lab = brand primary**, **family within lab = shade of primary**.
+ * Secondary brand color is reserved for the outline ring (see stage meshes) so
+ * two-color labs stay unique even when primaries sit near each other (oranges).
  */
 export function familySeriesColor(familyId: string, provider?: string): string {
-  const knownLab = Boolean(provider && LAB_COLORS[provider!]);
-  if (knownLab && provider) {
-    const lab = LAB_COLORS[provider]!;
-    // Spread families across a narrow lightness band around the true brand hue.
+  const brand = provider ? LAB_BRANDS[provider] : undefined;
+  if (brand) {
     const t = stableUnitHash(`${provider}::${familyId}`);
-    // -0.18 … +0.18 around brand L — enough to tell models apart, not wash the brand.
-    const delta = -0.18 + t * 0.36;
-    return brandShade(lab, delta);
+    // -0.16 … +0.16 around brand L — enough to tell families apart, not wash brand.
+    const delta = -0.16 + t * 0.32;
+    return brandShade(brand.colors[0], delta);
   }
   // Unknown lab: stable mid-range hash (not claimed as a brand color).
   const t = stableUnitHash(familyId);
@@ -421,6 +477,16 @@ export function familySeriesColor(familyId: string, provider?: string): string {
   const g = 80 + Math.floor(stableUnitHash(familyId + ":g") * 120);
   const b = 90 + Math.floor(stableUnitHash(familyId + ":b") * 110);
   return toHex([r, g, b]);
+}
+
+/** Outer outline = brand colors[1] (fixed, not family-shaded). */
+export function familyAccentColor(provider?: string): string {
+  return provider ? labSecondary(provider) : "#3D5560";
+}
+
+/** Inner core = brand colors[2] (fixed). */
+export function familyCoreColor(provider?: string): string {
+  return provider ? labTertiary(provider) : "#E7E2D8";
 }
 
 /** @deprecated kept for tests/docs that import the old curated map name */
@@ -456,6 +522,12 @@ export interface PointEncodingInput {
 
 export interface PointEncoding {
   fill: string;
+  /** Brand colors[1] — outer outline ring. */
+  accent: string;
+  /** Brand colors[2] — inner core. */
+  core: string;
+  /** Full brand palette (≥3) for legend / advanced marks. */
+  brandColors: readonly string[];
   opacity: number;
   sizeScale: number;
   trailColor: string;
@@ -469,8 +541,11 @@ export interface PointEncoding {
  */
 export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const palette = input.palette ?? DEFAULT_SEMANTIC_PALETTE;
-  // Lab hue + family shade — primary glance channel for curve-focus.
+  // Lab primary (family-shaded) + fixed brand secondary/tertiary rings.
   const series = familySeriesColor(input.familyId, input.provider);
+  const accent = familyAccentColor(input.provider);
+  const core = familyCoreColor(input.provider);
+  const brandColors = labColors(input.provider ?? "");
   const lab = labColor(input.provider ?? "", series);
   const trailColor = series;
   // Size = value-score (continuous) × singleton dim. Stages add frontier/optimum floors.
@@ -487,6 +562,9 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
         input.heatEncoding,
         palette,
       ),
+      accent,
+      core,
+      brandColors,
       opacity: 1,
       sizeScale: scoreSize,
       trailColor: lab,
@@ -498,6 +576,9 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   if (input.heatEncoding) {
     return {
       fill: semanticPointFill(input.semanticClass, input.score, true, palette),
+      accent,
+      core,
+      brandColors,
       opacity: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_OPACITY : 1,
       sizeScale: scoreSize * singletonMul,
       trailColor,
@@ -508,6 +589,10 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   if (input.semanticClass === "optimum") {
     return {
       fill: palette.gold ?? palette.filament,
+      // Keep brand rings so lab is still readable on the gold optimum.
+      accent: series,
+      core,
+      brandColors,
       opacity: 1,
       // Optimum already has a stage floor size; score still modulates slightly.
       sizeScale: Math.max(1.15, scoreSize),
@@ -520,6 +605,9 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   if (input.singleton) {
     return {
       fill: mixColors(SINGLETON_FILL, series, 0.45),
+      accent,
+      core,
+      brandColors,
       opacity: SINGLETON_OPACITY,
       sizeScale: scoreSize * SINGLETON_SIZE_SCALE,
       trailColor,
@@ -530,6 +618,9 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   // Multi-effort dominated + frontier: lab/family series fill; size = value-score.
   return {
     fill: series,
+    accent,
+    core,
+    brandColors,
     opacity: 1,
     sizeScale: scoreSize,
     trailColor,
@@ -548,38 +639,54 @@ export function legendEntries(
       { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest" },
       { id: "open-point", title: "Open weights", detail: "blue fill (dominated)" },
       { id: "closed-point", title: "Closed / proprietary", detail: "slate fill (dominated)" },
-      { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
-      { id: "frontier-point", title: "Frontier point", detail: "filament-dim size" },
+      { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
+      { id: "glyph-standard", title: "Sphere glyph", detail: "standard (non-reasoning) model" },
+      { id: "glyph-reasoning", title: "Octa glyph", detail: "reasoning / thinking model" },
+      { id: "glyph-open", title: "Wireframe", detail: "open weights · solid = closed" },
+      { id: "frontier-point", title: "Frontier point", detail: "size floor" },
     ];
   }
   const heatNote = heatEncoding
     ? "HEAT ON · copper→filament by value score (diagnostic)"
-    : "lab hue · family shade · trail = effort path";
+    : "lab = color · shape = openness×reasoning · size = value score";
   return [
-    { id: "lab-color", title: "Lab color", detail: "official brand primary · family = shade of that hue" },
-    { id: "family-trail", title: "Family trail", detail: "same lab hue · shade of this family · low→xhigh effort" },
-    { id: "effort-path", title: "Effort path", detail: "real measured points only · ordered intensity" },
-    { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },
-    { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge · nothing beats these on all axes" },
-    { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest · best for your weights" },
+    { id: "lab-color", title: "Lab color", detail: "≥3 brand colors · fill + outer ring + core · family shades primary" },
+    { id: "family-trail", title: "Family trail", detail: "effort path · real points only · low→xhigh" },
     { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
-    { id: "open-closed-glyph", title: "Open / closed", detail: "glyph only · not primary fill" },
-    { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
+    { id: "glyph-standard", title: "Sphere", detail: "standard model (not reasoning)" },
+    { id: "glyph-reasoning", title: "Octahedron", detail: "reasoning / thinking model" },
+    { id: "glyph-open", title: "Solid vs wire", detail: "solid = closed weights · wire = open weights" },
+    { id: "frontier-ridge", title: "Pareto ridge", detail: "white ridge · efficient boundary" },
+    { id: "optimum-marker", title: "Optimum", detail: "gold + largest · best for your weights" },
     { id: "frontier-point", title: "Frontier point", detail: "size floor · keeps lab/family fill" },
-    { id: "heat-note", title: heatEncoding ? "Heat" : "Lab-focus", detail: heatNote },
+    { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },
+    { id: "heat-note", title: heatEncoding ? "Heat" : "Encoding", detail: heatNote },
   ];
 }
 
-/** Ordered lab swatches for STAGE KEY (product cloud labs first). */
+/** Ordered lab swatches for STAGE KEY (≥3 brand colors). */
 export function labLegendEntries(
   providers: readonly string[],
-): Array<{ provider: string; color: string }> {
+): Array<{ provider: string; color: string; secondary: string; tertiary: string; colors: readonly string[] }> {
   const seen = new Set<string>();
-  const out: Array<{ provider: string; color: string }> = [];
+  const out: Array<{
+    provider: string;
+    color: string;
+    secondary: string;
+    tertiary: string;
+    colors: readonly string[];
+  }> = [];
   for (const p of providers) {
     if (seen.has(p)) continue;
     seen.add(p);
-    out.push({ provider: p, color: labColor(p) });
+    const colors = labColors(p);
+    out.push({
+      provider: p,
+      color: colors[0],
+      secondary: colors[1],
+      tertiary: colors[2],
+      colors,
+    });
   }
   return out.sort((a, b) => a.provider.localeCompare(b.provider));
 }

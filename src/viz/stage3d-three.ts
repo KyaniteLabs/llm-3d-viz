@@ -9,7 +9,7 @@
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Model, PROVIDER_SHAPES } from "../data/models";
+import { Model } from "../data/models";
 import {
   DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
@@ -28,6 +28,7 @@ import {
   type PresentationMode,
   type SemanticPointClass,
 } from "./palette";
+import { markChannels, type SceneGlyphKind } from "./mark-encoding";
 import { familyIdOf, groupByFamily } from "../lib/family";
 import { displayName } from "../lib/display-name";
 import type { Stage3DSurface, StageCamera, StageRenderOptions, StageFitMode } from "./stage-api";
@@ -46,18 +47,7 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 const S = 1;
 const EYE_Y_FLOOR = 0.15;
 
-type GlyphKind = "sphere" | "sphere-open" | "box" | "box-open" | "octa" | "octa-open" | "cross" | "x";
-
-const SHAPE_TO_GLYPH: Record<string, GlyphKind> = {
-  circle: "sphere",
-  "circle-open": "sphere-open",
-  diamond: "octa",
-  "diamond-open": "octa-open",
-  square: "box",
-  "square-open": "box-open",
-  cross: "cross",
-  x: "x",
-};
+type GlyphKind = SceneGlyphKind | "box" | "box-open";
 
 type LabelSpec = {
   text: string;
@@ -653,7 +643,19 @@ export class Stage3DThree implements Stage3DSurface {
     return 0.045 + (sizePx / 16) * 0.055;
   }
 
-  private makePointMesh(kind: GlyphKind, color: string, sizePx: number): THREE.Mesh {
+  /**
+   * Lab mark with ≥3 brand colors:
+   *   body  = colors[0] (family-shaded fill)
+   *   outer = colors[1] wire ring (brand secondary)
+   *   core  = colors[2] small solid core (brand tertiary)
+   */
+  private makePointMesh(
+    kind: GlyphKind,
+    color: string,
+    sizePx: number,
+    accent?: string,
+    core?: string,
+  ): THREE.Mesh {
     const radius = this.radiusForSize(sizePx);
     const geom = this.glyphGeometry(kind, radius);
     const open = kind.endsWith("-open") || kind === "cross" || kind === "x";
@@ -667,6 +669,46 @@ export class Stage3DThree implements Stage3DSurface {
     });
     const mesh = new THREE.Mesh(geom, mat);
     if (kind === "x") mesh.rotation.z = Math.PI / 4;
+
+    // Outer brand ring (colors[1]).
+    if (accent && accent.toLowerCase() !== color.toLowerCase()) {
+      const shellRadius = radius * (open ? 1.14 : 1.2);
+      const shellGeom = this.glyphGeometry(kind, shellRadius);
+      const shellMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(accent),
+        wireframe: true,
+        transparent: true,
+        opacity: open ? 0.58 : 0.9,
+        depthTest: true,
+        depthWrite: false,
+      });
+      const shell = new THREE.Mesh(shellGeom, shellMat);
+      if (kind === "x") shell.rotation.z = Math.PI / 4;
+      shell.renderOrder = -1;
+      mesh.add(shell);
+      mesh.userData.accentShell = shell;
+    }
+
+    // Inner brand core (colors[2]) — solid kernel even when body is wireframe.
+    if (core) {
+      const coreRadius = radius * (open ? 0.42 : 0.38);
+      const solidKind = (kind.replace(/-open$/, "") || "sphere") as GlyphKind;
+      const coreGeom = this.glyphGeometry(solidKind, coreRadius);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(core),
+        wireframe: false,
+        transparent: true,
+        opacity: 0.95,
+        depthTest: true,
+        depthWrite: true,
+      });
+      const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+      if (kind === "x") coreMesh.rotation.z = Math.PI / 4;
+      coreMesh.renderOrder = 1;
+      mesh.add(coreMesh);
+      mesh.userData.coreShell = coreMesh;
+    }
+
     // Store base radius for sweep scale updates.
     mesh.userData.baseRadius = radius;
     mesh.userData.baseSizePx = sizePx;
@@ -724,17 +766,16 @@ export class Stage3DThree implements Stage3DSurface {
     while (this.pointsGroup.children.length) {
       const child = this.pointsGroup.children[0] as THREE.Mesh;
       this.pointsGroup.remove(child);
-      child.geometry.dispose();
-      (child.material as THREE.Material).dispose();
+      child.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const mat = mesh.material;
+        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+        else if (mat) (mat as THREE.Material).dispose();
+      });
     }
     this.pointMeshes = [];
     this.modelIds = [];
-
-    const otherFrontierKinds = new Set(
-      plottable
-        .filter((m) => frontierIds.has(m.model) && m.model !== optimumModel?.model)
-        .map((m) => SHAPE_TO_GLYPH[PROVIDER_SHAPES[m.provider] || "circle"] || "sphere"),
-    );
 
     plottable.forEach((model) => {
       const pos = this.modelToScene(model);
@@ -781,37 +822,8 @@ export class Stage3DThree implements Stage3DSurface {
       // Keep optimum slightly larger so it still wins the visual hierarchy.
       size = Math.max(3.5, size * (isOptimum ? Math.max(markerDensity, 0.85) : markerDensity));
 
-      let kind: GlyphKind =
-        SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";
-      // Reasoning models use open wireframe mark when not already open-shaped.
-      if (model.reasoning && !kind.endsWith("-open") && kind !== "cross" && kind !== "x") {
-        kind = (kind + "-open") as GlyphKind;
-      }
-      // Openness glyph: prefer open-style mark for open weights in curve-focus
-      // when not already distinguished by reasoning wireframe.
-      if (
-        this.presentationMode === "curve" &&
-        model.openness === "open" &&
-        !kind.endsWith("-open") &&
-        kind !== "cross" &&
-        kind !== "x" &&
-        !model.reasoning
-      ) {
-        kind = (kind + "-open") as GlyphKind;
-      }
-      if (isOptimum) {
-        const candidates: GlyphKind[] = [
-          "sphere",
-          "octa",
-          "box",
-          "cross",
-          "sphere-open",
-          "octa-open",
-        ];
-        kind =
-          candidates.find((c) => c !== kind && !otherFrontierKinds.has(c)) ??
-          (kind === "octa" ? "sphere" : "octa");
-      }
+      // Glyph = openness × reasoning only (lab is color; optimum is gold+size).
+      const kind: GlyphKind = markChannels(model).sceneGlyph;
 
       let opacity = enc.opacity;
       if (this.highlightFamilyId && fid !== this.highlightFamilyId) {
@@ -841,11 +853,23 @@ export class Stage3DThree implements Stage3DSurface {
           opacity = Math.min(opacity, 0.55);
         }
       }
-      const mesh = this.makePointMesh(kind, color, size);
+      // Brand rings: outer=colors[1], core=colors[2]. Skip on floor-dimmed marks.
+      const belowFloor =
+        decideMode && floor != null && (model.aa_intelligence_index == null || model.aa_intelligence_index < floor);
+      const accent = belowFloor ? undefined : enc.accent;
+      const core = belowFloor ? undefined : enc.core;
+      const mesh = this.makePointMesh(kind, color, size, accent, core);
       mesh.position.copy(pos);
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.transparent = opacity < 0.99 || mat.transparent;
       mat.opacity = opacity;
+      for (const key of ["accentShell", "coreShell"] as const) {
+        const shell = mesh.userData[key] as THREE.Mesh | undefined;
+        if (shell) {
+          const sm = shell.material as THREE.MeshBasicMaterial;
+          sm.opacity = Math.min(sm.opacity, opacity);
+        }
+      }
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
       mesh.userData.reasoning = Boolean(model.reasoning);

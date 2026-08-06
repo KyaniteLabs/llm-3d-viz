@@ -1,8 +1,9 @@
 import { loadPlotly } from "./plotly-loader";
-import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
+import { Model, isScorable, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
+import { markChannels } from "./mark-encoding";
 import { familyIdOf } from "../lib/family";
 import {
   DEFAULT_AXIS_MAPPING,
@@ -220,25 +221,11 @@ export class Stage3D {
     const y: number[] = [];
     const z: number[] = [];
     const colors: string[] = [];
+    const accents: string[] = [];
     const sizes: number[] = [];
     const symbols: Plotly3dSymbol[] = [];
     const textLabels: string[] = [];
     const frontierIds = new Set(frontierModels.map((model) => model.model));
-    const otherFrontierSymbols = new Set(
-      scorable
-        .filter((model) => frontierIds.has(model.model) && model.model !== optimumModel?.model)
-        .map((model) => PROVIDER_SHAPES[model.provider] || "circle"),
-    );
-    const symbolCandidates: Plotly3dSymbol[] = [
-      "circle",
-      "circle-open",
-      "cross",
-      "diamond",
-      "diamond-open",
-      "square",
-      "square-open",
-      "x",
-    ];
 
     scorable.forEach((model) => {
       const isOptimum = Boolean(optimumModel && model.model === optimumModel.model);
@@ -256,16 +243,8 @@ export class Stage3D {
       y.push(model.aa_intelligence_index!);
       z.push(model.tps!);
 
-      const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
-      let symbol: Plotly3dSymbol = baseSymbol;
-      if (isOptimum) {
-        // The optimum needs a non-colour channel that is distinct from every
-        // other frontier point, not just from its own provider's base glyph.
-        symbol =
-          symbolCandidates.find((candidate) => candidate !== baseSymbol && !otherFrontierSymbols.has(candidate)) ??
-          (baseSymbol === "diamond" ? "circle" : "diamond");
-      }
-      symbols.push(symbol);
+      // Glyph = openness × reasoning only (lab is color; optimum is gold+size).
+      symbols.push(markChannels(model).plotlySymbol);
 
       const score = scores.find((candidate) => candidate.model.model === model.model)?.score ?? 0;
       const enc = pointEncoding({
@@ -286,6 +265,7 @@ export class Stage3D {
         },
       });
       colors.push(enc.fill);
+      accents.push(enc.accent);
 
       // Size = value-score (enc.sizeScale) + hierarchy floors for frontier/optimum.
       let size = Math.max(4, Math.round(8 * enc.sizeScale));
@@ -312,7 +292,8 @@ export class Stage3D {
         color: colors.slice(),
         size: sizes.slice(),
         symbol: symbols.slice(),
-        line: { color: this.tokens.inkField, width: 1 },
+        // Brand secondary as outline so two-color labs stay unique.
+        line: { color: accents.slice(), width: 1.5 },
       },
       hoverinfo: "none",
     };
@@ -481,7 +462,7 @@ export class Stage3D {
         pointNumberToModelId,
         modelIdToPointNumber,
         scorableModels: scorable,
-        providerShapes: PROVIDER_SHAPES,
+        markGlyphLegend: ["circle", "circle-open", "diamond", "diamond-open"],
         frontierModelIds: frontierModels.map((model) => model.model),
         scoreByModel: Object.fromEntries(scores.map((entry) => [entry.model.model, entry.score])),
         heatEncoding: this.heatEncoding,

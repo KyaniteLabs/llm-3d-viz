@@ -1,8 +1,9 @@
 import { loadPlotly } from "./plotly-loader";
-import { Model, isScorable, PROVIDER_SHAPES, Plotly3dSymbol } from "../data/models";
+import { Model, isScorable, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
+import { markChannels } from "./mark-encoding";
 import { familyIdOf } from "../lib/family";
 import {
   buildAxisDomain,
@@ -182,37 +183,18 @@ export class Projections {
   }
 
   /**
-   * Per-point marker encoding mirrored from `stage3d.ts`: provider glyph base,
-   * filament optimum (size + distinct symbol), filament-dim frontier, slate-cyan
-   * subtraction for dominated points. Kept in sync so the projections read as
-   * the same instrument as the stage.
+   * Per-point marker encoding mirrored from the 3D stage:
+   * color = lab/family, glyph = openness×reasoning, size = value-score.
    */
   private pointStyle(
     model: Model,
     isOptimum: boolean,
     isFrontier: boolean,
-    otherFrontierSymbols: Set<Plotly3dSymbol>,
+    _otherFrontierSymbols: Set<Plotly3dSymbol>,
     score: number,
     visible: readonly Model[],
-  ): { color: string; size: number; symbol: Plotly3dSymbol } {
-    const baseSymbol = PROVIDER_SHAPES[model.provider] || "circle";
-    const symbolCandidates: Plotly3dSymbol[] = [
-      "circle",
-      "circle-open",
-      "cross",
-      "diamond",
-      "diamond-open",
-      "square",
-      "square-open",
-      "x",
-    ];
-    let symbol = baseSymbol;
-    if (isOptimum) {
-      symbol =
-        symbolCandidates.find(
-          (candidate) => candidate !== baseSymbol && !otherFrontierSymbols.has(candidate),
-        ) ?? (baseSymbol === "diamond" ? "circle" : "diamond");
-    }
+  ): { color: string; accent: string; core: string; size: number; symbol: Plotly3dSymbol } {
+    const symbol = markChannels(model).plotlySymbol;
 
     const semanticClass: SemanticPointClass = isOptimum
       ? "optimum"
@@ -244,7 +226,7 @@ export class Projections {
     const density = densityMarkerScale(visible.length);
     size = Math.max(3, Math.round(size * (isOptimum ? Math.max(density, 0.85) : density)));
 
-    return { color: enc.fill, size, symbol };
+    return { color: enc.fill, accent: enc.accent, core: enc.core, size, symbol };
   }
 
   setPresentationMode(mode: PresentationMode) {
@@ -322,17 +304,13 @@ export class Projections {
       intelligence: buildAxisDomain("intelligence", scorable),
     };
     this.priceFloor = this.domains.cost.floor;
-    const otherFrontierSymbols = new Set<Plotly3dSymbol>(
-      scorable
-        .filter((model) => frontierIds.has(model.model) && model.model !== optimumModel?.model)
-        .map((model) => PROVIDER_SHAPES[model.provider] || "circle"),
-    );
 
     const traces = this.specs.map((spec) => {
       const x: number[] = [];
       const y: number[] = [];
       const text: string[] = [];
       const colors: string[] = [];
+      const accents: string[] = [];
       const sizes: number[] = [];
       const symbols: Plotly3dSymbol[] = [];
       scorable.forEach((model) => {
@@ -343,11 +321,12 @@ export class Projections {
           model,
           Boolean(optimumModel && model.model === optimumModel.model),
           frontierIds.has(model.model),
-          otherFrontierSymbols,
+          new Set(),
           scoreById.get(model.model) ?? 0,
           scorable,
         );
         colors.push(style.color);
+        accents.push(style.accent);
         sizes.push(style.size);
         symbols.push(style.symbol);
       });
@@ -361,7 +340,7 @@ export class Projections {
         marker: {
           ...(this.initialized ? {} : { color: colors, size: sizes }),
           symbol: symbols,
-          line: { color: this.tokens.inkField, width: 1 },
+          line: { color: accents, width: 1.5 },
         },
       };
     });

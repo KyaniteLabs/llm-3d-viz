@@ -460,6 +460,26 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .effort-step.is-active { border-color: var(--filament); background: rgba(232, 241, 228, 0.08); }
 .effort-tier { color: var(--filament-dim); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .effort-step strong { color: var(--color-text); font-size: 0.68rem; font-weight: 500; }
+.lab-swatch-pair,
+.lab-swatch-strip {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  width: 1.55rem;
+  height: 0.75rem;
+  margin-top: 0.12rem;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(231, 226, 216, 0.18);
+}
+.lab-swatch-pair .lab-swatch,
+.lab-swatch-strip .lab-swatch {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
 .key-mark--lab-color {
   width: 0.75rem;
   height: 0.75rem;
@@ -505,6 +525,24 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 .key-mark--effort-path { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: #10a37f; box-shadow: 0.35rem 0 0 -0.15rem #0d8f6e, 0.7rem 0 0 -0.25rem #09664f; }
 .key-mark--singleton-dim { border-radius: 50%; background: #3d5560; opacity: 0.35; }
 .key-mark--open-closed-glyph { border-radius: 50%; border: 1.5px solid var(--filament-dim); background: transparent; }
+.key-mark--glyph-standard { border-radius: 50%; background: var(--filament-dim); }
+.key-mark--glyph-reasoning {
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.12rem;
+  background: var(--filament-dim);
+  transform: rotate(45deg) scale(0.85);
+}
+.key-mark--glyph-open {
+  border-radius: 50%;
+  border: 1.5px solid var(--filament-dim);
+  background: transparent;
+}
+.key-mark--size-score {
+  border-radius: 50%;
+  background: var(--filament-dim);
+  box-shadow: 0.45rem 0.1rem 0 -0.12rem rgba(201, 212, 196, 0.55);
+}
 .key-mark--open, .key-mark--open-point { border-radius: 50%; background: #5b9bd5; }
 .key-mark--closed, .key-mark--closed-point { border-radius: 50%; background: #6a7580; }
 .key-mark--reasoning-mark { border-radius: 50%; border: 1.5px dashed var(--filament-dim); background: transparent; }
