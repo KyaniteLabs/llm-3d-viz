@@ -20,3 +20,6 @@ tmp-*.png
 tmp-*/
 stage-only.png
 
+
+# Mobile UX workscratch (screenshots/metrics)
+.scratch-mobile-ux/
