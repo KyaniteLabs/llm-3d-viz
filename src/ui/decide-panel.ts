@@ -40,8 +40,9 @@ export class DecidePanel {
       <p class="eyebrow">DECIDE</p>
       <h2 class="decide-title">Intelligence floor → cost × speed</h2>
       <p class="console-note decide-blurb">
-        Minimum AA Index (default 50). Eligible models need Index ≥ floor and measured cost + speed.
-        Chart is cost × speed; ridge = Pareto; shortlist of 3 follows the cheap↔fast bias.
+        The glowing plane on the 3D stage is your intelligence floor (AA Index; default 50).
+        Models below it dim; only models on or above with measured cost + speed enter the pick set.
+        Cost × speed chart + Pareto ridge + shortlist of 3 follow the cheap↔fast bias.
       </p>
       <div class="decide-floor">
         <label class="decide-label">

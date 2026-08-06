@@ -107,6 +107,8 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly ridgeLine: THREE.Line;
   private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
+  /** Decide mode: visible intelligence-floor plane(s) in the data cube. */
+  private readonly floorPlaneGroup = new THREE.Group();
   private readonly labelRoot: HTMLDivElement;
   private labelSpecs: LabelSpec[] = [];
 
@@ -222,6 +224,8 @@ export class Stage3DThree implements Stage3DSurface {
     this.scene.add(this.pointsGroup);
     this.scene.add(this.trailsGroup);
     this.scene.add(this.axisGroup);
+    this.floorPlaneGroup.visible = false;
+    this.scene.add(this.floorPlaneGroup);
 
     const ridgeMat = new THREE.LineBasicMaterial({
       color: new THREE.Color("#F4D58A"),
@@ -369,6 +373,183 @@ export class Stage3DThree implements Stage3DSurface {
       depthWrite: false,
     });
     this.axisGroup.add(new THREE.Line(geom, mat));
+  }
+
+  private clearFloorPlaneGroup() {
+    while (this.floorPlaneGroup.children.length) {
+      const child = this.floorPlaneGroup.children[0];
+      this.floorPlaneGroup.remove(child);
+      if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+        child.geometry.dispose();
+        const mat = child.material;
+        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+        else (mat as THREE.Material).dispose();
+      }
+    }
+  }
+
+  /**
+   * Decide mode: draw the intelligence floor as a real plane cutting the cube.
+   * Everything on the high-intelligence side is eligible; below is dimmed.
+   * Axis is whichever scene axis currently maps to `intelligence` (default Y).
+   */
+  private updateFloorPlane(floor: number | null) {
+    this.clearFloorPlaneGroup();
+    // Drop prior floor labels from the label list.
+    this.labelSpecs = this.labelSpecs.filter((s) => s.kind !== "mark" || !s.text.startsWith("FLOOR"));
+
+    if (floor == null || !this.domains) {
+      this.floorPlaneGroup.visible = false;
+      return;
+    }
+
+    const metricAxis =
+      this.axisMapping.x === "intelligence"
+        ? "x"
+        : this.axisMapping.y === "intelligence"
+          ? "y"
+          : this.axisMapping.z === "intelligence"
+            ? "z"
+            : null;
+    if (!metricAxis) {
+      this.floorPlaneGroup.visible = false;
+      return;
+    }
+
+    const t = this.tickToSceneAxis(metricAxis, floor);
+    // Keep plane inside cube with a hair of padding so edges read.
+    const lo = -S + 0.01;
+    const hi = S - 0.01;
+    const filament = new THREE.Color(this.tokens.filament);
+    const dim = new THREE.Color(this.tokens.filamentDim);
+
+    // Filled plane (double-sided, translucent).
+    const planeSize = 2 * S - 0.02;
+    const geom = new THREE.PlaneGeometry(planeSize, planeSize);
+    const mat = new THREE.MeshBasicMaterial({
+      color: filament,
+      transparent: true,
+      opacity: 0.14,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geom, mat);
+
+    // Below-floor half-box tint (slab from cube low → floor) so the cut is obvious.
+    const belowSpan = t - lo;
+    let belowMesh: THREE.Mesh | null = null;
+    if (belowSpan > 0.02) {
+      const belowGeom = new THREE.BoxGeometry(
+        metricAxis === "x" ? belowSpan : planeSize,
+        metricAxis === "y" ? belowSpan : planeSize,
+        metricAxis === "z" ? belowSpan : planeSize,
+      );
+      const belowMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(this.tokens.slateCyan),
+        transparent: true,
+        opacity: 0.08,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      belowMesh = new THREE.Mesh(belowGeom, belowMat);
+      // Center of slab midway between lo and floor.
+      const mid = (lo + t) / 2;
+      if (metricAxis === "x") belowMesh.position.set(mid, 0, 0);
+      else if (metricAxis === "y") belowMesh.position.set(0, mid, 0);
+      else belowMesh.position.set(0, 0, mid);
+      this.floorPlaneGroup.add(belowMesh);
+    }
+
+    // Orient plane: default PlaneGeometry is XY facing +Z.
+    if (metricAxis === "x") {
+      mesh.rotation.y = Math.PI / 2;
+      mesh.position.set(t, 0, 0);
+    } else if (metricAxis === "y") {
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(0, t, 0);
+    } else {
+      mesh.position.set(0, 0, t);
+    }
+    mesh.renderOrder = 1;
+    this.floorPlaneGroup.add(mesh);
+
+    // Bright outline of the plane (four edges).
+    const corners: THREE.Vector3[] = [];
+    if (metricAxis === "x") {
+      corners.push(
+        new THREE.Vector3(t, lo, lo),
+        new THREE.Vector3(t, hi, lo),
+        new THREE.Vector3(t, hi, hi),
+        new THREE.Vector3(t, lo, hi),
+      );
+    } else if (metricAxis === "y") {
+      corners.push(
+        new THREE.Vector3(lo, t, lo),
+        new THREE.Vector3(hi, t, lo),
+        new THREE.Vector3(hi, t, hi),
+        new THREE.Vector3(lo, t, hi),
+      );
+    } else {
+      corners.push(
+        new THREE.Vector3(lo, lo, t),
+        new THREE.Vector3(hi, lo, t),
+        new THREE.Vector3(hi, hi, t),
+        new THREE.Vector3(lo, hi, t),
+      );
+    }
+    const edgePts = [...corners, corners[0]];
+    const edgeGeom = new THREE.BufferGeometry().setFromPoints(edgePts);
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: filament,
+      transparent: true,
+      opacity: 0.95,
+      depthWrite: false,
+    });
+    const edgeLine = new THREE.Line(edgeGeom, edgeMat);
+    edgeLine.renderOrder = 2;
+    this.floorPlaneGroup.add(edgeLine);
+
+    // Cross-hatch on the plane so it reads as a surface, not a glow.
+    const hatchMat = new THREE.LineBasicMaterial({
+      color: dim,
+      transparent: true,
+      opacity: 0.35,
+      depthWrite: false,
+    });
+    const hatchN = 5;
+    for (let i = 1; i < hatchN; i++) {
+      const u = lo + ((hi - lo) * i) / hatchN;
+      let a: THREE.Vector3;
+      let b: THREE.Vector3;
+      if (metricAxis === "y") {
+        a = new THREE.Vector3(u, t, lo);
+        b = new THREE.Vector3(u, t, hi);
+      } else if (metricAxis === "x") {
+        a = new THREE.Vector3(t, u, lo);
+        b = new THREE.Vector3(t, u, hi);
+      } else {
+        a = new THREE.Vector3(u, lo, t);
+        b = new THREE.Vector3(u, hi, t);
+      }
+      const g = new THREE.BufferGeometry().setFromPoints([a, b]);
+      this.floorPlaneGroup.add(new THREE.Line(g, hatchMat));
+    }
+
+    // HTML label on the plane
+    const labelWorld =
+      metricAxis === "y"
+        ? new THREE.Vector3(hi - 0.05, t + 0.06, lo + 0.05)
+        : metricAxis === "x"
+          ? new THREE.Vector3(t + 0.06, hi - 0.05, lo + 0.05)
+          : new THREE.Vector3(hi - 0.05, hi - 0.05, t + 0.06);
+    this.labelSpecs.push({
+      text: `FLOOR · ${Math.round(floor)}`,
+      world: labelWorld,
+      kind: "mark",
+      priority: 5,
+    });
+
+    this.floorPlaneGroup.visible = true;
   }
 
   private buildAxes() {
@@ -535,6 +716,8 @@ export class Stage3DThree implements Stage3DSurface {
       z: buildAxisDomain(this.axisMapping.z, plottable, { narrow }),
     };
     this.buildAxes();
+    // Decide: intelligence floor as a visible cutting plane through the cube.
+    this.updateFloorPlane(decideMode ? floor : null);
 
     while (this.pointsGroup.children.length) {
       const child = this.pointsGroup.children[0] as THREE.Mesh;
@@ -733,7 +916,10 @@ export class Stage3DThree implements Stage3DSurface {
 
     // Labels: always mark optimum; when a small multi-effort set is focused
     // (≤12 plottable points), label with short tier tags + NMS in paintLabels.
-    this.labelSpecs = this.labelSpecs.filter((s) => s.kind !== "mark");
+    // Keep Decide FLOOR plane labels.
+    this.labelSpecs = this.labelSpecs.filter(
+      (s) => s.kind !== "mark" || s.text.startsWith("FLOOR"),
+    );
     const focusLabels = plottable.length > 0 && plottable.length <= 12;
     for (const mesh of this.pointMeshes) {
       const id = mesh.userData.modelId as string;
