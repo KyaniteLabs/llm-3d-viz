@@ -4,6 +4,11 @@ import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
 import { familyIdOf } from "../lib/family";
+import {
+  buildAxisDomain,
+  densityMarkerScale,
+  type AxisDomain,
+} from "../lib/axis-metrics";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -90,6 +95,12 @@ export class Projections {
   private presentationMode: PresentationMode = "curve";
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
+  /** Shared domain builder snapshots for the current visible set (stage parity). */
+  private domains: {
+    tps: AxisDomain;
+    cost: AxisDomain;
+    intelligence: AxisDomain;
+  } | null = null;
   /** Incremented every render so Plotly.react never silently skips a data diff. */
   private datarevision = 0;
   /** True while either direction of a coupling fan-out is driving Fx.hover. */
@@ -156,12 +167,6 @@ export class Projections {
       return `rgba(${channels.join(", ")}, ${alpha})`;
     }
     return resolvedColor;
-  }
-
-  /** ε floor = half the smallest positive blended price, identical to the stage. */
-  private computePriceFloor(scorable: Model[]): number {
-    const positive = scorable.map((m) => m.blended_price_per_M!).filter((p) => p > 0);
-    return positive.length > 0 ? Math.min(...positive) / 2 : 0.08125;
   }
 
   /** Coordinates for one projection, ε-clamping cost exactly as the stage does. */
@@ -232,10 +237,12 @@ export class Projections {
       },
     });
 
-    let size = 8;
-    if (isOptimum) size = 16;
-    else if (isFrontier) size = 11;
-    else size = Math.max(4, Math.round(size * enc.sizeScale));
+    // Size = value-score (enc.sizeScale) + hierarchy floors.
+    let size = Math.max(4, Math.round(8 * enc.sizeScale));
+    if (isOptimum) size = Math.max(size, 16);
+    else if (isFrontier) size = Math.max(size, 11);
+    const density = densityMarkerScale(visible.length);
+    size = Math.max(3, Math.round(size * (isOptimum ? Math.max(density, 0.85) : density)));
 
     return { color: enc.fill, size, symbol };
   }
@@ -245,36 +252,28 @@ export class Projections {
   }
 
   private axisLayout(kind: AxisKind): Record<string, unknown> {
-    let titleText: string;
-    let tickvals: number[];
-    let ticktext: string[];
-    // Intelligence is LINEAR on its native 0–100 index (frontier-math §3.3 —
-    // "logging it would distort"); speed + cost stay log, matching the stage.
-    let scale: "log" | "linear" = "log";
-    let range: [number, number] | undefined;
-    switch (kind) {
-      case "tps":
-        titleText = "SPEED (TPS)";
-        tickvals = [10, 100, 1000];
-        ticktext = ["10", "100", "1000"];
-        break;
-      case "intelligence":
-        titleText = "INTELLIGENCE (INDEX)";
-        tickvals = [0, 20, 40, 60, 80, 100];
-        ticktext = ["0", "20", "40", "60", "80", "100"];
-        scale = "linear";
-        range = [0, 100];
-        break;
-      case "cost":
-        titleText = "COST ($/M)";
-        // The single ε "≤ floor" tick mirrors the stage's cost axis.
-        tickvals = [this.priceFloor, 0.1, 1, 10, 100];
-        ticktext = ["≤ floor", "0.1", "1", "10", "100"];
-        break;
+    // Intelligence is LINEAR data min–max (frontier-math §3.3 — logging would
+    // distort); speed + cost stay log. Domains match the 3D stage.
+    const domain = this.domains?.[kind];
+    if (!domain) {
+      // Pre-first-render fallback (should not paint).
+      return { type: kind === "intelligence" ? "linear" : "log", automargin: true };
     }
+    const scale = domain.scale;
+    const range: [number, number] =
+      scale === "log"
+        ? [Math.log10(domain.min), Math.log10(domain.max)]
+        : [domain.min, domain.max];
+    const titleText =
+      kind === "tps"
+        ? "SPEED (TPS)"
+        : kind === "intelligence"
+          ? "INTELLIGENCE (INDEX)"
+          : "COST ($/M)";
     return {
       type: scale,
-      ...(range ? { range, autorange: false } : {}),
+      range,
+      autorange: false,
       showgrid: true,
       gridcolor: this.colorWithAlpha(this.tokens.textWarm, 0.06),
       zeroline: false,
@@ -285,8 +284,8 @@ export class Projections {
       tickwidth: 1,
       tickcolor: this.colorWithAlpha(this.tokens.textWarm, 0.15),
       tickmode: "array",
-      tickvals,
-      ticktext,
+      tickvals: domain.ticks.map((t) => t.value),
+      ticktext: domain.ticks.map((t) => t.label),
       tickfont: {
         family: this.tokens.fontMono,
         size: 9,
@@ -317,7 +316,12 @@ export class Projections {
     const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimumModel = weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((model) => model.model));
-    this.priceFloor = this.computePriceFloor(scorable);
+    this.domains = {
+      tps: buildAxisDomain("tps", scorable),
+      cost: buildAxisDomain("blended_price", scorable),
+      intelligence: buildAxisDomain("intelligence", scorable),
+    };
+    this.priceFloor = this.domains.cost.floor;
     const otherFrontierSymbols = new Set<Plotly3dSymbol>(
       scorable
         .filter((model) => frontierIds.has(model.model) && model.model !== optimumModel?.model)

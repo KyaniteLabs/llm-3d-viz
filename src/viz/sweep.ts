@@ -13,7 +13,7 @@ import {
   isSingleton,
   pointEncoding,
   semanticFloorFill,
-  SINGLETON_SIZE_SCALE,
+
   type PresentationMode,
   type SemanticPointClass,
 } from "./palette";
@@ -209,13 +209,24 @@ export class SweepScheduler {
         }).fill;
       });
       const sizes = ids.map((id) => {
-        if (target && id === optimum) return 16;
-        if (target && frontierIds.has(id)) return 11;
-        let size = 8;
         const model = modelById.get(id);
-        if (model && this.presentationMode === "curve" && isSingleton(model, this.models, familyIdOf)) {
-          size = Math.max(4, Math.round(size * SINGLETON_SIZE_SCALE));
-        }
+        const semanticClass = semanticClassFor(id);
+        const enc = pointEncoding({
+          openness: model?.openness ?? "closed",
+          semanticClass,
+          score: scoreById.get(id) ?? 0,
+          heatEncoding: this.heatEncoding,
+          presentationMode: this.presentationMode,
+          familyId: model ? familyIdOf(model) : id,
+          singleton: model
+            ? isSingleton(model, this.models, familyIdOf)
+            : true,
+          provider: model?.provider,
+        });
+        let size = Math.max(4, Math.round(8 * enc.sizeScale));
+        if (target && id === optimum) size = Math.max(size, 16);
+        else if (target && frontierIds.has(id)) size = Math.max(size, 11);
+        if (!target) size = Math.max(4, Math.round(size * 0.85));
         return size;
       });
       return { ids, colors, sizes };

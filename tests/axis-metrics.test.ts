@@ -4,6 +4,7 @@ import {
   DEFAULT_AXIS_MAPPING,
   availableAxisMetrics,
   buildAxisDomain,
+  densityMarkerScale,
   hasMappedAxes,
   mappingHeading,
   modelToSceneCoords,
@@ -48,18 +49,34 @@ describe("axis-metrics", () => {
     expect(bad.x).toBe("blended_price");
   });
 
-  it("maps intelligence on full 0–100 when the catalog spans the instrument", () => {
+  it("fits intelligence to the visible catalog with pad (not forced 0–100)", () => {
     const domain = buildAxisDomain("intelligence", models);
-    expect(domain.min).toBe(0);
-    expect(domain.max).toBe(100);
-    expect(valueToUnit(0, domain)).toBe(0);
-    expect(valueToUnit(100, domain)).toBe(1);
-    expect(valueToUnit(50, domain)).toBeCloseTo(0.5);
-    // Denser ticks for glanceable values.
-    expect(domain.ticks.length).toBeGreaterThanOrEqual(6);
+    const indices = models
+      .map((m) => m.aa_intelligence_index)
+      .filter((v): v is number => v != null)
+      .sort((a, b) => a - b);
+    const dataMin = indices[0];
+    const dataMax = indices[indices.length - 1];
+    // Domain hugs the bulk of the data — empty headroom above top models is gone.
+    // Soft-trim may leave extreme tails slightly outside the domain (clamped to faces).
+    expect(domain.max).toBeLessThan(95);
+    expect(domain.max - domain.min).toBeLessThan((dataMax - dataMin) * 1.35);
+    expect(domain.max - domain.min).toBeGreaterThan((dataMax - dataMin) * 0.7);
+    // Still inside the AA instrument clamp.
+    expect(domain.min).toBeGreaterThanOrEqual(0);
+    expect(domain.max).toBeLessThanOrEqual(100);
+    // Mid-catalog values stay interior (not glued to a face).
+    const mid = indices[Math.floor(indices.length / 2)];
+    const u = valueToUnit(mid, domain);
+    expect(u).toBeGreaterThan(0.15);
+    expect(u).toBeLessThan(0.85);
+    // Absolute extrema remain mappable (may clamp to faces if soft-trimmed).
+    expect(valueToUnit(dataMin, domain)).toBeLessThanOrEqual(0.15);
+    expect(valueToUnit(dataMax, domain)).toBeGreaterThanOrEqual(0.85);
+    expect(domain.ticks.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("tightens intelligence domain when the visible set is a narrow cluster", () => {
+  it("tightens intelligence domain further when the visible set is a narrow cluster", () => {
     const cluster = models
       .filter((m) => m.aa_intelligence_index != null)
       .filter((m) => m.aa_intelligence_index! >= 55 && m.aa_intelligence_index! <= 62);
@@ -69,6 +86,13 @@ describe("axis-metrics", () => {
     expect(domain.max).toBeLessThan(100);
     expect(domain.max - domain.min).toBeLessThan(45);
     expect(domain.ticks.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("shrinks markers when the point cloud is dense", () => {
+    expect(densityMarkerScale(10)).toBe(1);
+    expect(densityMarkerScale(50)).toBe(0.9);
+    expect(densityMarkerScale(100)).toBe(0.8);
+    expect(densityMarkerScale(160)).toBe(0.7);
   });
 
   it("fits log cost ticks to the visible price band (not forced $0–$100)", () => {

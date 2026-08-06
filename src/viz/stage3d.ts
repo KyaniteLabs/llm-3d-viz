@@ -4,6 +4,12 @@ import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointClass } from "./palette";
 import { familyIdOf } from "../lib/family";
+import {
+  DEFAULT_AXIS_MAPPING,
+  buildAxisDomain,
+  densityMarkerScale,
+  hasMappedAxes,
+} from "../lib/axis-metrics";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -194,17 +200,20 @@ export class Stage3D {
   private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]) {
     const Plotly = await loadPlotly();
     const gen = ++this.renderGen;
-    const scorable = modelsList.filter(isScorable);
+    const mapping = DEFAULT_AXIS_MAPPING;
+    const scorable = modelsList.filter((m) => isScorable(m) && hasMappedAxes(m, mapping));
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
     const optimumScore = weightedOptimum(scores);
     const optimumModel = optimumScore?.model;
 
-    // Dynamically calculate priceFloor
-    const positivePrices = scorable
-      .map((m) => m.blended_price_per_M!)
-      .filter((p) => p > 0);
-    this.priceFloor = positivePrices.length > 0 ? Math.min(...positivePrices) / 2 : 0.08125;
+    const containerWidth = this.container.clientWidth;
+    const narrow = containerWidth > 0 && containerWidth < Stage3D.NARROW_PX;
+    const costDomain = buildAxisDomain("blended_price", scorable, { narrow });
+    const intelDomain = buildAxisDomain("intelligence", scorable, { narrow });
+    const speedDomain = buildAxisDomain("tps", scorable, { narrow });
+    this.priceFloor = costDomain.floor;
+    const markerDensity = densityMarkerScale(scorable.length);
 
     // Build lists for Scatter3D points
     const x: number[] = [];
@@ -278,16 +287,11 @@ export class Stage3D {
       });
       colors.push(enc.fill);
 
-      // Keep sizes aligned with SweepScheduler (optimum 16, frontier 11, rest 8)
-      // so restyle/settled contracts stay consistent across stage + sweep.
-      let size = 8;
-      if (isOptimum) {
-        size = 16;
-      } else if (isFrontier) {
-        size = 11;
-      } else {
-        size = Math.max(4, Math.round(size * enc.sizeScale));
-      }
+      // Size = value-score (enc.sizeScale) + hierarchy floors for frontier/optimum.
+      let size = Math.max(4, Math.round(8 * enc.sizeScale));
+      if (isOptimum) size = Math.max(size, 16);
+      else if (isFrontier) size = Math.max(size, 11);
+      size = Math.max(3, Math.round(size * (isOptimum ? Math.max(markerDensity, 0.85) : markerDensity)));
       sizes.push(size);
 
       textLabels.push(model.model);
@@ -334,42 +338,31 @@ export class Stage3D {
       hoverinfo: "none",
     };
 
-    // De-chromed axis config. Speed and cost stay LOG (heavy-tailed: price
-    // spans >10³×, tps ~10²×). Intelligence is LINEAR on its native 0–100 index
-    // scale — frontier-math §3.3 pins linear min-max for intelligence because
-    // "the intelligence index is already a bounded, roughly uniform 0–100-style
-    // index; logging it would distort", and the score layer already normalizes
-    // intelligence linearly (src/lib/score.ts). The old log [1,10,100] axis
-    // crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
-    // FIX-D (#29): narrow-stage axis legibility (see NARROW_PX). The `> 0` guard
-    // avoids treating an un-laid-out container (clientWidth 0) as narrow. gl3d
-    // renders axis titles as textures fixed at the axis ends; on a narrow stage
-    // the long titles ("INTELLIGENCE (INDEX)") overflow the canvas and clip, and
-    // no paper margin reclaims them (verified by independent vision review). So
-    // at narrow widths we SHORTEN the titles to the metric name AND thin the tick
-    // density (the three axes converge near the origin in the 3D projection, so a
-    // full tick set jumbles there on a small canvas). Units still live in the
-    // tooltip/console readout and the 2D projections below.
-    const containerWidth = this.container.clientWidth;
-    const narrow = containerWidth > 0 && containerWidth < Stage3D.NARROW_PX;
+    // De-chromed axis config. Speed and cost stay LOG (heavy-tailed). Intelligence
+    // is LINEAR data min–max (frontier-math §3.3) — logging AA Index would distort.
+    // Domains come from buildAxisDomain over the visible set (same as Three stage).
+    // FIX-D (#29): narrow-stage axis legibility (see NARROW_PX).
     const axisTitleSize = narrow ? 9 : 11;
     const axisTickSize = narrow ? 9 : 10;
-    const axisCfg = narrow
-      ? {
-          // FIX-D (#29): on a narrow 3D stage the three axes converge at one
-          // origin corner, so their lowest ticks ("0"/"10"/"≤ floor") stack into
-          // an illegible cluster. Drop each axis's origin tick on mobile — the
-          // full tick set (incl. the ε "≤ floor" marker) stays on the 2D
-          // projections rendered below the stage.
-          speed: { title: "SPEED", ticks: [100, 1000], labels: ["100", "1000"] },
-          intelligence: { title: "INTEL", ticks: [50, 100], labels: ["50", "100"] },
-          cost: { title: "COST", ticks: [1, 100], labels: ["1", "100"] },
-        }
-      : {
-          speed: { title: "SPEED (TPS)", ticks: [10, 100, 1000], labels: ["10", "100", "1000"] },
-          intelligence: { title: "INTELLIGENCE (INDEX)", ticks: [0, 20, 40, 60, 80, 100], labels: ["0", "20", "40", "60", "80", "100"] },
-          cost: { title: "COST ($/M)", ticks: [this.priceFloor, 0.1, 1, 10, 100], labels: ["≤ floor", "0.1", "1", "10", "100"] },
-        };
+    const pickTicks = (domain: { ticks: Array<{ value: number; label: string }>; title: string }, shortTitle: string) => {
+      let ticks = domain.ticks;
+      // On a narrow stage the three axes converge at one corner — keep fewer labels.
+      if (narrow && ticks.length > 3) {
+        ticks = [ticks[0], ticks[Math.floor(ticks.length / 2)], ticks[ticks.length - 1]];
+      } else if (narrow && ticks.length > 2) {
+        ticks = [ticks[Math.floor(ticks.length / 2)], ticks[ticks.length - 1]];
+      }
+      return {
+        title: narrow ? shortTitle : domain.title,
+        ticks: ticks.map((t) => t.value),
+        labels: ticks.map((t) => t.label),
+      };
+    };
+    const axisCfg = {
+      cost: pickTicks(costDomain, "COST"),
+      intelligence: pickTicks(intelDomain, "INTEL"),
+      speed: pickTicks(speedDomain, "SPEED"),
+    };
 
     const axisLayout = (
       titleText: string,
@@ -423,29 +416,28 @@ export class Stage3D {
         uirevision: "constant_camera",
         aspectmode: "manual",
         aspectratio: { x: 1.15, y: 1, z: 1 },
-        // Explicit ascending ranges on every axis so Plotly never autoranges a
-        // log axis into a visually reversed tick run. Cost/speed ranges cover the
-        // scorable set with padding; intelligence stays the locked 0–100 index.
+        // Explicit ascending ranges from the shared domain builder so Plotly and
+        // Three stages stay aligned (data-fit cost/speed log + intelligence linear).
         xaxis: axisLayout(
           axisCfg.cost.title,
           axisCfg.cost.ticks,
           axisCfg.cost.labels,
           "log",
-          [Math.log10(this.priceFloor), Math.log10(100)],
+          [Math.log10(costDomain.min), Math.log10(costDomain.max)],
         ),
         yaxis: axisLayout(
           axisCfg.intelligence.title,
           axisCfg.intelligence.ticks,
           axisCfg.intelligence.labels,
           "linear",
-          [0, 100],
+          [intelDomain.min, intelDomain.max],
         ),
         zaxis: axisLayout(
           axisCfg.speed.title,
           axisCfg.speed.ticks,
           axisCfg.speed.labels,
           "log",
-          [Math.log10(10), Math.log10(1000)],
+          [Math.log10(speedDomain.min), Math.log10(speedDomain.max)],
         ),
         camera: this.camera,
         // 'closest' (not false) so the stage emits plotly_hover on hover and the

@@ -326,7 +326,7 @@ test.describe("3D Stage Render Specs", () => {
     }
   });
 
-  test("Item 13: speed/cost LOG, intelligence LINEAR (0–100), ε floor on cost", async ({ page }) => {
+  test("Item 13: speed/cost LOG, intelligence LINEAR data-fit, ε floor on cost", async ({ page }) => {
     await page.goto("/?stage=plotly&age=0");
     await waitForPlotlyStage(page);
 
@@ -336,43 +336,48 @@ test.describe("3D Stage Render Specs", () => {
       const positivePrices = viz.scorableModels
         .map((model: any) => model.blended_price_per_M)
         .filter((price: number) => price > 0);
+      const indices = viz.scorableModels
+        .map((model: any) => model.aa_intelligence_index)
+        .filter((v: number | null) => v != null) as number[];
       const expectedFloor = Math.min(...positivePrices) / 2;
       return {
         xaxisType: scene.xaxis.type,
         yaxisType: scene.yaxis.type,
         zaxisType: scene.zaxis.type,
-        xaxisTickvals: scene.xaxis.tickvals,
-        xaxisTicktext: scene.xaxis.ticktext,
-        yaxisTickvals: scene.yaxis.tickvals,
-        yaxisTicktext: scene.yaxis.ticktext,
-        zaxisTickvals: scene.zaxis.tickvals,
-        zaxisTicktext: scene.zaxis.ticktext,
+        xaxisRange: scene.xaxis.range as [number, number],
+        yaxisRange: scene.yaxis.range as [number, number],
+        zaxisRange: scene.zaxis.range as [number, number],
+        xaxisTickvals: scene.xaxis.tickvals as number[],
+        yaxisTickvals: scene.yaxis.tickvals as number[],
+        zaxisTickvals: scene.zaxis.tickvals as number[],
         expectedFloor,
         vizPriceFloor: viz.priceFloor,
+        dataIntelMin: Math.min(...indices),
+        dataIntelMax: Math.max(...indices),
       };
     });
 
     // Axis mapping (locked 2026-08-02): x = COST, y = INTELLIGENCE, z = SPEED.
-    // Speed + cost stay log (heavy-tailed). Intelligence is LINEAR on its native
-    // 0–100 index (frontier-math §3.3 — logging it "would distort"; the score
-    // layer already normalizes intelligence linearly). The old log [1,10,100]
-    // axis crushed the top ~8 models (IQ 50–61) into ~4% of the axis.
+    // Speed + cost stay log (heavy-tailed). Intelligence is LINEAR data min–max
+    // (frontier-math §3.3 — logging it would distort). Domains follow the visible set.
     expect(layout.xaxisType).toBe("log");
     expect(layout.yaxisType).toBe("linear");
     expect(layout.zaxisType).toBe("log");
 
-    // Cost axis (x): includes the floor value and "≤ floor" label.
-    expect(layout.vizPriceFloor).toBe(layout.expectedFloor);
-    expect(layout.xaxisTickvals).toEqual([layout.expectedFloor, 0.1, 1, 10, 100]);
-    expect(layout.xaxisTicktext).toEqual(["≤ floor", "0.1", "1", "10", "100"]);
+    // Cost axis (x): ε floor is available for $0 prices; domain is data-fit (log).
+    expect(layout.vizPriceFloor).toBeCloseTo(layout.expectedFloor, 8);
+    expect(layout.xaxisTickvals.length).toBeGreaterThanOrEqual(2);
+    expect(layout.xaxisRange[0]).toBeLessThan(layout.xaxisRange[1]);
 
-    // Intelligence ticks (y): linear 0–100 every 20.
-    expect(layout.yaxisTickvals).toEqual([0, 20, 40, 60, 80, 100]);
-    expect(layout.yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
+    // Intelligence (y): linear data-fit — not forced 0–100 empty headroom.
+    expect(layout.yaxisRange[0]).toBeLessThanOrEqual(layout.dataIntelMin);
+    expect(layout.yaxisRange[1]).toBeGreaterThanOrEqual(layout.dataIntelMax);
+    expect(layout.yaxisRange[1]).toBeLessThan(100);
+    expect(layout.yaxisTickvals.length).toBeGreaterThanOrEqual(3);
 
-    // Speed ticks (z): powers of 10.
-    expect(layout.zaxisTickvals).toEqual([10, 100, 1000]);
-    expect(layout.zaxisTicktext).toEqual(["10", "100", "1000"]);
+    // Speed (z): log domain covers the visible TPS band.
+    expect(layout.zaxisTickvals.length).toBeGreaterThanOrEqual(2);
+    expect(layout.zaxisRange[0]).toBeLessThan(layout.zaxisRange[1]);
   });
 
   test("Item 20 & 21: Provider shapes and optimum marker size/symbol distinctness", async ({ page }) => {
@@ -1482,7 +1487,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     });
 
     // Axis scale per projection: speed (tps) + cost stay LOG; intelligence is
-    // LINEAR on its native 0–100 index (frontier-math §3.3), matching the stage.
+    // LINEAR data min–max (frontier-math §3.3), matching the stage.
     //   gds[0] tps-intelligence : x=tps(log)     y=intelligence(linear)
     //   gds[1] tps-cost         : x=tps(log)     y=cost(log)
     //   gds[2] cost-intelligence: x=cost(log)    y=intelligence(linear)
@@ -1492,9 +1497,10 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     expect(data.perGd[1].yaxisType).toBe("log");
     expect(data.perGd[2].xaxisType).toBe("log");
     expect(data.perGd[2].yaxisType).toBe("linear");
-    // Intelligence axes carry linear 0–100 ticks (every 20).
-    expect(data.perGd[0].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
-    expect(data.perGd[2].yaxisTicktext).toEqual(["0", "20", "40", "60", "80", "100"]);
+    // Intelligence axes use data-fit ticks (not forced 0–100 empty headroom).
+    expect(data.perGd[0].yaxisTicktext.length).toBeGreaterThanOrEqual(3);
+    expect(data.perGd[2].yaxisTicktext.length).toBeGreaterThanOrEqual(3);
+    expect(data.perGd[0].yaxisTicktext).not.toEqual(["0", "20", "40", "60", "80", "100"]);
 
     // Cost axes carry the single ε "≤ floor" tick (tps-cost y, cost-intelligence x).
     expect(data.perGd[1].yaxisTicktext).toContain("≤ floor");

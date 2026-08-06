@@ -389,6 +389,17 @@ export const SINGLETON_SIZE_SCALE = 0.55;
 export const SINGLETON_FILL = "#5A6E78"; // raised for ≥~3:1 on ink (tastecheck CL-03)
 
 /**
+ * Continuous size channel for value-score (the 4th mark variable).
+ * Axes already carry cost × intelligence × speed; size answers
+ * "how good for my current weights?" without needing ?heat=1 color.
+ * Sqrt map keeps mid scores readable; range ~0.48–1.42.
+ */
+export function scoreSizeScale(score: number): number {
+  const s = Math.min(1, Math.max(0, Number.isFinite(score) ? score : 0));
+  return 0.48 + Math.sqrt(s) * 0.94;
+}
+
+/**
  * Product rule (glanceability): **lab = hue**, **family within lab = shade**.
  * OpenAI greens stay green; Anthropic stays warm; Google blue; Alibaba orange.
  * Different families in the same lab are light/dark variants of that lab color —
@@ -462,6 +473,10 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
   const series = familySeriesColor(input.familyId, input.provider);
   const lab = labColor(input.provider ?? "", series);
   const trailColor = series;
+  // Size = value-score (continuous) × singleton dim. Stages add frontier/optimum floors.
+  const scoreSize = scoreSizeScale(input.score);
+  const singletonMul =
+    input.singleton && input.semanticClass !== "optimum" ? SINGLETON_SIZE_SCALE : 1;
 
   if (input.presentationMode === "openness") {
     return {
@@ -473,7 +488,7 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
         palette,
       ),
       opacity: 1,
-      sizeScale: 1,
+      sizeScale: scoreSize,
       trailColor: lab,
       seriesColor: series,
     };
@@ -484,7 +499,7 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     return {
       fill: semanticPointFill(input.semanticClass, input.score, true, palette),
       opacity: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_OPACITY : 1,
-      sizeScale: input.singleton && input.semanticClass !== "optimum" ? SINGLETON_SIZE_SCALE : 1,
+      sizeScale: scoreSize * singletonMul,
       trailColor,
       seriesColor: series,
     };
@@ -494,7 +509,8 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     return {
       fill: palette.gold ?? palette.filament,
       opacity: 1,
-      sizeScale: 1,
+      // Optimum already has a stage floor size; score still modulates slightly.
+      sizeScale: Math.max(1.15, scoreSize),
       trailColor,
       seriesColor: series,
     };
@@ -505,17 +521,17 @@ export function pointEncoding(input: PointEncodingInput): PointEncoding {
     return {
       fill: mixColors(SINGLETON_FILL, series, 0.45),
       opacity: SINGLETON_OPACITY,
-      sizeScale: SINGLETON_SIZE_SCALE,
+      sizeScale: scoreSize * SINGLETON_SIZE_SCALE,
       trailColor,
       seriesColor: series,
     };
   }
 
-  // Multi-effort dominated + frontier: lab/family series fill (size handles hierarchy).
+  // Multi-effort dominated + frontier: lab/family series fill; size = value-score.
   return {
     fill: series,
     opacity: 1,
-    sizeScale: 1,
+    sizeScale: scoreSize,
     trailColor,
     seriesColor: series,
   };
@@ -546,9 +562,10 @@ export function legendEntries(
     { id: "singleton-dim", title: "Singleton", detail: "dim lab tint · single-effort in visible set" },
     { id: "frontier-ridge", title: "Pareto frontier", detail: "white ridge · nothing beats these on all axes" },
     { id: "optimum-marker", title: "Optimum marker", detail: "bright gold / largest · best for your weights" },
+    { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
     { id: "open-closed-glyph", title: "Open / closed", detail: "glyph only · not primary fill" },
     { id: "reasoning-mark", title: "Reasoning", detail: "open / wireframe glyph" },
-    { id: "frontier-point", title: "Frontier point", detail: "larger size · keeps lab/family fill" },
+    { id: "frontier-point", title: "Frontier point", detail: "size floor · keeps lab/family fill" },
     { id: "heat-note", title: heatEncoding ? "Heat" : "Lab-focus", detail: heatNote },
   ];
 }

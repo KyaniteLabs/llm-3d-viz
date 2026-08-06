@@ -59,7 +59,8 @@ export const DEFAULT_AXIS_MAPPING: AxisMapping = {
 };
 
 function formatPriceTick(value: number): string {
-  if (value < 0.05) return "≤fl";
+  // ε price floor marker (half the cheapest positive blended price).
+  if (value < 0.05) return "≤ floor";
   if (value < 1) return value.toFixed(1).replace(/\.0$/, "");
   if (value >= 100) return String(Math.round(value));
   return String(Number(value.toPrecision(2)));
@@ -136,7 +137,8 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     available: true,
     getValue: (m) => m.aa_intelligence_index,
     formatTick: formatIntelTick,
-    fixedDomain: [0, 100],
+    // Domain is data-driven over the visible set (frontier-math §3.3 min-max).
+    // Hard instrument bounds stay [0, 100] as clamp only — not a forced axis span.
   },
   {
     id: "cost_per_index",
@@ -227,6 +229,51 @@ function minPositive(values: readonly number[]): number {
   return positive.length > 0 ? Math.min(...positive) : 1;
 }
 
+/** Linear interpolation percentile on a pre-sorted ascending array. */
+function percentileSorted(sorted: readonly number[], p: number): number {
+  if (sorted.length === 0) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const t = Math.min(1, Math.max(0, p)) * (sorted.length - 1);
+  const lo = Math.floor(t);
+  const hi = Math.ceil(t);
+  if (lo === hi) return sorted[lo];
+  const f = t - lo;
+  return sorted[lo] * (1 - f) + sorted[hi] * f;
+}
+
+/**
+ * Soft-trim extreme tails so the bulk of points owns more of the cube.
+ * True outliers still map (clamped to faces via valueToUnit → unitToScene).
+ * Only applies when n is large enough that p02/p98 are meaningful.
+ */
+function robustDataExtent(
+  values: readonly number[],
+  options: { log?: boolean } = {},
+): { min: number; max: number } {
+  const sorted = [...values].sort((a, b) => a - b);
+  const dataMin = sorted[0];
+  const dataMax = sorted[sorted.length - 1];
+  if (sorted.length < 12 || dataMax <= dataMin) {
+    return { min: dataMin, max: dataMax };
+  }
+  const p02 = percentileSorted(sorted, 0.02);
+  const p98 = percentileSorted(sorted, 0.98);
+  let min = dataMin;
+  let max = dataMax;
+  if (options.log) {
+    // Heavy upper tails (e.g. one 2000 tok/s model vs bulk ~100) crush neighbors.
+    if (p98 > 0 && dataMax / p98 > 2.5) max = p98;
+    if (p02 > 0 && p02 / dataMin > 2.5 && p02 < max) min = p02;
+  } else {
+    const span = dataMax - dataMin;
+    // Only trim when the tail is a real chunk of the span (≥3%).
+    if (dataMax - p98 >= span * 0.03) max = p98;
+    if (p02 - dataMin >= span * 0.03) min = p02;
+  }
+  if (max <= min) return { min: dataMin, max: dataMax };
+  return { min, max };
+}
+
 /**
  * Log ticks that adapt to the *visible* span:
  * - multi-decade: 1–2–5 mid-decade marks when the view is tight
@@ -265,7 +312,7 @@ function niceLogTicks(min: number, max: number, narrow: boolean): number[] {
 function linearTicks(min: number, max: number, narrow: boolean): number[] {
   const span = max - min;
   if (span <= 0) return [min];
-  // Full AA index 0–100 stays familiar; denser when zoomed into a band.
+  // Familiar full-instrument grid only when the domain actually covers it.
   if (min <= 0.01 && max >= 99.5) {
     return narrow ? [0, 50, 100] : [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   }
@@ -304,31 +351,6 @@ export function buildAxisDomain(
     .map((m) => def.getValue(m))
     .filter((v): v is number => v !== null && !Number.isNaN(v));
 
-  // Intelligence: full 0–100 when the visible set still spans the instrument;
-  // tighten to data band when filters solo a cluster (more granular ticks).
-  if (def.fixedDomain && metricId === "intelligence" && raw.length > 0) {
-    const dataMin = Math.min(...raw);
-    const dataMax = Math.max(...raw);
-    const dataSpan = dataMax - dataMin;
-    const useFull = dataSpan >= 45 || (dataMin <= 15 && dataMax >= 75);
-    const pad = Math.max(2, dataSpan * 0.08);
-    const min = useFull ? def.fixedDomain[0] : Math.max(0, dataMin - pad);
-    const max = useFull ? def.fixedDomain[1] : Math.min(100, dataMax + pad);
-    const ticks = linearTicks(min, max, narrow).map((value) => ({
-      value,
-      label: def.formatTick(value),
-    }));
-    return {
-      metricId,
-      scale: def.scale,
-      min,
-      max,
-      floor: min,
-      ticks,
-      title: def.title,
-    };
-  }
-
   if (def.fixedDomain) {
     const [min, max] = def.fixedDomain;
     const ticks = linearTicks(min, max, narrow).map((value) => ({
@@ -352,13 +374,20 @@ export function buildAxisDomain(
     const effective = raw.map((v) => (v <= 0 ? floor : Math.max(v, floor)));
     let min = effective.length > 0 ? Math.min(...effective) : floor;
     let max = effective.length > 0 ? Math.max(...effective) : floor * 100;
+    // Soft-trim extreme log tails so one ultra-fast / ultra-cheap outlier does
+    // not compress the rest of the field into a thin slab of the cube.
+    if (positives.length >= 12) {
+      const robust = robustDataExtent(positives, { log: true });
+      min = Math.max(min, robust.min);
+      max = Math.min(max, robust.max);
+    }
     // Keep a usable log span when data collapses.
     if (max <= min) max = min * 10;
-    // Pad ~half-decade so marks are not glued to the cube edge — but do NOT
-    // force a global $0–$100 / 10–1000 span. Granularity follows the visible set.
-    const logPad = 10 ** ((Math.log10(max) - Math.log10(min)) * 0.06);
-    min = Math.max(floor * 0.9, min / Math.max(logPad, 1.05));
-    max = max * Math.max(logPad, 1.05);
+    // Modest edge breath — enough that marks are not glued to the wall, small
+    // enough that the data band still owns most of the axis (inter-point space).
+    const logPad = 10 ** ((Math.log10(max) - Math.log10(min)) * 0.07);
+    min = Math.max(floor * 0.9, min / Math.max(logPad, 1.06));
+    max = max * Math.max(logPad, 1.06);
     if (metricId === "blended_price" || metricId === "price_in" || metricId === "price_out") {
       // Keep a small floor marker context without inflating to $100 when looking at cheap models.
       min = Math.min(min, floor);
@@ -383,13 +412,26 @@ export function buildAxisDomain(
     };
   }
 
-  // Linear, data-driven (+ modest padding)
+  // Linear, data-driven (intelligence and any future linear metrics).
+  // frontier-math §3.3: min-max over the visible set — NOT a forced 0–100 span.
+  // Soft-trim extreme tails when n is large so the bulk spreads across the cube.
   let min = raw.length > 0 ? Math.min(...raw) : 0;
   let max = raw.length > 0 ? Math.max(...raw) : 1;
+  if (raw.length >= 12) {
+    const robust = robustDataExtent(raw);
+    min = robust.min;
+    max = robust.max;
+  }
   if (max <= min) max = min + 1;
-  const pad = (max - min) * 0.06;
+  // Modest edge breath so marks aren't glued to the wall — keep pad small so
+  // the data band owns most of the cube (inter-point separation).
+  const pad = Math.max(metricId === "intelligence" ? 1.5 : 0, (max - min) * 0.06);
   min -= pad;
   max += pad;
+  if (metricId === "intelligence") {
+    min = Math.max(0, min);
+    max = Math.min(100, max);
+  }
   const ticks = linearTicks(min, max, narrow).map((value) => ({
     value,
     label: def.formatTick(value),
@@ -403,6 +445,17 @@ export function buildAxisDomain(
     ticks,
     title: def.title,
   };
+}
+
+/**
+ * Shrink point markers when many models share the cube so neighbors separate
+ * visually. Pure display scale — does not change coordinates.
+ */
+export function densityMarkerScale(pointCount: number): number {
+  if (pointCount >= 120) return 0.7;
+  if (pointCount >= 70) return 0.8;
+  if (pointCount >= 40) return 0.9;
+  return 1;
 }
 
 /** Map a raw metric value into unit interval [0, 1] given a domain. */

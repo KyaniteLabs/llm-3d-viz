@@ -2,7 +2,7 @@
  * Three.js 3D hero stage (docs/v1/r3f-stage-contract.md).
  * Vanilla TS — no React/R3F.
  *
- * Default product axes: x=cost (log), y=intelligence (linear 0–100), z=speed (log).
+ * Default product axes: x=cost (log), y=intelligence (linear, data min–max), z=speed (log).
  * Scene is Three Y-up with that assignment. Metrics on X/Y/Z are remappable via
  * AxisMapping so cost definition (and other metrics) need not be permanently chosen.
  * Visual target: Plotly-parity cube + grid + ticks; monochrome heat (design system).
@@ -13,6 +13,7 @@ import { Model, PROVIDER_SHAPES } from "../data/models";
 import {
   DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
+  densityMarkerScale,
   hasMappedAxes,
   modelToSceneCoords,
   normalizeAxisMapping,
@@ -708,6 +709,7 @@ export class Stage3DThree implements Stage3DSurface {
     const scores = normalizedScores(modelsList, weights, modelsList);
     const optimumModel = decideMode ? undefined : weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((m) => m.model));
+    const markerDensity = densityMarkerScale(plottable.length);
 
     const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
     this.domains = {
@@ -768,14 +770,16 @@ export class Stage3DThree implements Stage3DSurface {
         },
       });
       let color = enc.fill;
-      let size = 11;
+      // Size = value-score (via enc.sizeScale) as continuous 4th channel.
+      // Frontier / optimum keep a size floor so hierarchy still wins at a glance.
+      let size = Math.max(4, 11 * enc.sizeScale);
       if (!decideMode) {
-        if (isOptimum) size = 22;
-        else if (isFrontier) size = 15;
-        else size = Math.max(4, 11 * enc.sizeScale);
-      } else {
-        size = Math.max(4, 10 * enc.sizeScale);
+        if (isOptimum) size = Math.max(size, 22);
+        else if (isFrontier) size = Math.max(size, 14);
       }
+      // Dense catalogs: shrink markers so neighbors read as separate marks.
+      // Keep optimum slightly larger so it still wins the visual hierarchy.
+      size = Math.max(3.5, size * (isOptimum ? Math.max(markerDensity, 0.85) : markerDensity));
 
       let kind: GlyphKind =
         SHAPE_TO_GLYPH[PROVIDER_SHAPES[model.provider] || "circle"] || "sphere";

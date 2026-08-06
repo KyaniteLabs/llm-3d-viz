@@ -13,6 +13,7 @@ import {
   isSingleton,
   familySeriesColor,
   labColor,
+  scoreSizeScale,
   SINGLETON_OPACITY,
   SINGLETON_SIZE_SCALE,
   SINGLETON_FILL,
@@ -166,9 +167,38 @@ describe("curve-focus pointEncoding (product default)", () => {
       provider: "OpenAI",
     });
     expect(enc.opacity).toBe(SINGLETON_OPACITY);
-    expect(enc.sizeScale).toBe(SINGLETON_SIZE_SCALE);
+    // Singleton size = value-score scale × singleton dim factor.
+    expect(enc.sizeScale).toBeCloseTo(scoreSizeScale(0.2) * SINGLETON_SIZE_SCALE, 5);
     // Lab-tinted singleton fill (not pure slate) so lab is still glanceable.
     expect(enc.fill.toLowerCase()).not.toBe(SINGLETON_FILL.toLowerCase());
+  });
+
+  it("maps value-score into continuous size (bigger = better for weights)", () => {
+    expect(scoreSizeScale(0)).toBeCloseTo(0.48, 2);
+    expect(scoreSizeScale(1)).toBeCloseTo(1.42, 2);
+    expect(scoreSizeScale(0.25)).toBeLessThan(scoreSizeScale(0.81));
+    const low = pointEncoding({
+      openness: "open",
+      semanticClass: "dominated",
+      score: 0.1,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "A",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    const high = pointEncoding({
+      openness: "open",
+      semanticClass: "dominated",
+      score: 0.9,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "A",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(high.sizeScale).toBeGreaterThan(low.sizeScale);
+    expect(legendEntries("curve", false).map((e) => e.id)).toContain("size-score");
   });
 
   it("isSingleton uses post-filter visible set family counts", () => {
