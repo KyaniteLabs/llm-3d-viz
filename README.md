@@ -30,7 +30,7 @@ See **[docs/forkers/README.md](docs/forkers/README.md)** — branding, lab color
 ## Encoding (glance-first)
 
 - **Lab** = full brand fill (always readable, no hover)
-- **Shape** = openness × reasoning (sphere/octa × solid/wire)
+- **Shape** = open vs closed weights (all wire: sphere / octa)
 - **Size** = value-score
 - **Ridge** = Pareto frontier (filament white)
 - **Trails** = multi-effort paths (quiet until solo)

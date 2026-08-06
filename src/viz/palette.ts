@@ -730,22 +730,20 @@ export function legendEntries(
       { id: "open-point", title: "Open weights", detail: "blue fill (dominated)" },
       { id: "closed-point", title: "Closed / proprietary", detail: "slate fill (dominated)" },
       { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
-      { id: "glyph-standard", title: "Sphere glyph", detail: "standard (non-reasoning) model" },
-      { id: "glyph-reasoning", title: "Octa glyph", detail: "reasoning / thinking model" },
-      { id: "glyph-open", title: "Wireframe", detail: "open weights · solid = closed" },
+      { id: "glyph-closed", title: "Wire sphere", detail: "closed weights" },
+      { id: "glyph-open", title: "Wire octa", detail: "open weights" },
       { id: "frontier-point", title: "Frontier point", detail: "size floor" },
     ];
   }
   const heatNote = heatEncoding
     ? "HEAT ON · copper→filament by value score (diagnostic)"
-    : "lab = color · shape = openness×reasoning · size = value score";
+    : "lab = color · shape = open/closed (all wire) · size = value score";
   return [
     { id: "lab-color", title: "Lab color", detail: "brand fill + ring + core always (≥3 colors) · family shades primary" },
     { id: "family-trail", title: "Family trail", detail: "effort path · quiet until solo · real points only" },
     { id: "size-score", title: "Point size", detail: "value-score for your weights · bigger = better fit" },
-    { id: "glyph-standard", title: "Sphere", detail: "standard model (not reasoning)" },
-    { id: "glyph-reasoning", title: "Octahedron", detail: "reasoning / thinking model" },
-    { id: "glyph-open", title: "Solid vs wire", detail: "solid = closed weights · wire = open weights" },
+    { id: "glyph-closed", title: "Wire sphere", detail: "closed weights" },
+    { id: "glyph-open", title: "Wire octa", detail: "open weights · all marks wireframe" },
     { id: "frontier-ridge", title: "Pareto ridge", detail: "white ridge · efficient boundary" },
     { id: "optimum-marker", title: "Optimum", detail: "gold + largest · best for your weights" },
     { id: "frontier-point", title: "Frontier point", detail: "size floor · keeps lab/family fill" },

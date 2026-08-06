@@ -31,17 +31,19 @@ Supersedes “never categorical color on canvas” and “copper never on canvas
 | **Trail** | Same family shade; effort-rank ordered; real points only | **On** |
 | **Size** | Value-score for current weights (continuous) | **On** — bigger = better fit |
 | **Size floor / gold** | Frontier size floor; optimum = gold + largest | **On** |
-| **Shape geometry** | **Sphere** = standard · **Octahedron** = reasoning/thinking | **On** |
-| **Solid vs wireframe** | **Solid** = closed weights · **Wire** = open weights | **On** |
+| **Shape geometry** | **Wire sphere** = closed weights · **Wire octa** = open weights | **On** |
+| **Material** | **All wireframe** (no solid marks) | **On** |
 | **Ridge polyline** | Pareto frontier | **On** |
 | **Score heat (copper→filament)** | Diagnostic value-score on fill | **Off**; `?heat=1` only |
 
-Glyph 2×2 (authoritative in `src/viz/mark-encoding.ts`):
+Glyph law (authoritative in `src/viz/mark-encoding.ts`):
 
-| | Closed weights | Open weights |
-|--|----------------|--------------|
-| Standard | solid sphere | wire sphere |
-| Reasoning | solid octa | wire octa |
+| Openness | Glyph | Material |
+|----------|-------|----------|
+| Closed weights | sphere | wire |
+| Open weights | octahedron | wire |
+
+Reasoning / thinking is **not** a stage shape — nearly all new models reason; it stays in inspector, filters, and table only.
 
 - Legend must match stage 1:1 (lab color, trails, size=score, glyph 2×2, frontier, optimum).
 - **Legend HUD open by default** (compact); decoding must not require hover on marks.
