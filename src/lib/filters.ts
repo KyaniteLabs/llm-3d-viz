@@ -3,6 +3,7 @@
  */
 
 import type { Model } from "../data/models";
+import { FORK_DEFAULTS } from "../config/fork-defaults";
 import { familyIdOf } from "./family";
 
 export interface ModelFilters {
@@ -20,10 +21,11 @@ export interface ModelFilters {
   families: string[];
 }
 
+/** Product defaults — forker overrides live in `src/config/fork-defaults.ts`. */
 export const DEFAULT_FILTERS: ModelFilters = {
-  ageEnabled: true,
+  ageEnabled: FORK_DEFAULTS.ageFilterDefault,
   ageMonths: 6,
-  multiEffortOnly: true,
+  multiEffortOnly: FORK_DEFAULTS.multiEffortOnlyDefault,
   providers: [],
   families: [],
 };

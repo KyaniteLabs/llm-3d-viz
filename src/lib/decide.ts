@@ -3,8 +3,12 @@
  * Floor = AA Index; pick pool needs cost+speed; cost×speed Pareto + bias shortlist.
  */
 import { isScorable, type Model } from "../data/models";
+import { FORK_DEFAULTS } from "../config/fork-defaults";
 
-export const DEFAULT_INTELLIGENCE_FLOOR = 50;
+/** Forker override: `src/config/fork-defaults.ts` → decideFloor. */
+export const DEFAULT_INTELLIGENCE_FLOOR = FORK_DEFAULTS.decideFloor;
+/** Forker override: `src/config/fork-defaults.ts` → decideBias. */
+export const DEFAULT_COST_SPEED_BIAS = FORK_DEFAULTS.decideBias;
 export const DEFAULT_SHORTLIST_N = 3;
 
 /** −1 = prefer cheaper, +1 = prefer faster, 0 = balanced on Pareto. */
