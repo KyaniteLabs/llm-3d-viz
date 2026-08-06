@@ -20,7 +20,7 @@ Implemented on `fix/tastecheck-hold-blockers` after Simon locked forks:
 # TasteCheck Pass — llm-3d-viz (private VPS artifact)
 
 **Date:** 2026-08-04  
-**Artifact:** http://100.92.68.103:4242/ (Tailscale-only; main @ curve-focus)  
+**Artifact:** private origin (operator-local; main @ curve-focus)  
 **Spec:** `DESIGN-SYSTEM.md` (Observatory-after-dark + curve-focus matrix)  
 **Evidence dir:** this folder (`01`–`05` PNGs)
 
@@ -108,7 +108,7 @@ Until forks 1–2 resolve, visual-quality veto stays HOLD even if code is correc
 | humanize-copy | HC-01 chrome voice | pass | Instrument voice (MODEL UNIVERSE, STAGE KEY) | — | 01 | render |
 | humanize-copy | HC-02 density copy | fail | “Empty filter = all families in age window” is correct but dense jargon for first run | Shorter first-run hint | 01 family curves | render |
 | tastecheck-pass | TC-visual-veto | fail | Implementer cannot clear; Simon not yet visual-go on private VPS | Simon inspects 01–04; go/kill | this ledger | process |
-| tastecheck-pass | TC-gate-self-real-artifact | pass | VPS + screenshots | — | 100.92.68.103:4242 | runtime |
+| tastecheck-pass | TC-gate-self-real-artifact | pass | private origin + screenshots | — | private origin | runtime |
 | tastecheck-pass | TC-gate-self-checks-ran | pass | Contrast numeric + screenshots + DOM probe | — | this ledger | session |
 | tastecheck-pass | TC-gate-self-visual-independent | fail | No independent vision reviewer this session | Dispatch vision review or Simon go | — | process |
 | tastecheck-pass | TC-gate-self-blockers-owned | pass | Blockers listed with owners | — | below | session |

@@ -8,6 +8,7 @@
 #   REPO_ROOT     default: parent of this scripts/ dir
 #   DEPLOY_HOST   default: vps  (ssh host with dist + docker)
 #   DEPLOY_DIST   default: ~/sites/llm-3d-viz/dist
+#   HEALTH_URL    optional private origin health check (e.g. http://127.0.0.1:4242/)
 #   SKIP_DEPLOY=1 skip rsync/restart (scrape+build only)
 #   SKIP_BUILD=1  scrape only
 #   FORCE=1       rebuild+deploy even if data hash unchanged
@@ -18,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 DEPLOY_HOST="${DEPLOY_HOST:-vps}"
 DEPLOY_DIST="${DEPLOY_DIST:-~/sites/llm-3d-viz/dist}"
+HEALTH_URL="${HEALTH_URL:-}"
 LOG_DIR="${LOG_DIR:-$REPO_ROOT/logs}"
 DATA_FILE="$REPO_ROOT/data/models.v0.draft.json"
 STATE_DIR="$REPO_ROOT/.cache/catalog-sync"
@@ -93,12 +95,16 @@ if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
     printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"restart\",\"rows\":$row_count}" >"$STATUS_FILE"
     exit 5
   fi
-  # Health check
-  code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 'http://100.92.68.103:4242/' || echo 000)"
-  log "health http://100.92.68.103:4242/ → $code"
-  if [[ "$code" != "200" ]]; then
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"health\",\"code\":\"$code\",\"rows\":$row_count}" >"$STATUS_FILE"
-    exit 6
+  # Optional health check (set HEALTH_URL in operator env — never hardcode private IPs here)
+  if [[ -n "$HEALTH_URL" ]]; then
+    code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$HEALTH_URL" || echo 000)"
+    log "health $HEALTH_URL → $code"
+    if [[ "$code" != "200" ]]; then
+      printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"health\",\"code\":\"$code\",\"rows\":$row_count}" >"$STATUS_FILE"
+      exit 6
+    fi
+  else
+    log "health skipped (set HEALTH_URL to enable)"
   fi
 fi
 

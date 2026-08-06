@@ -10,12 +10,10 @@
 |-------|--------|
 | App | v0.1 complete on `main`; axis lock x=cost, y=intelligence, z=speed |
 | Suites | `npm run build` + `tsc --noEmit` + 44 vitest green (re-run before ship) |
-| Auth | `npx wrangler whoami` → KyaniteLabs `2936a63a800a637b48be6ba1623064f2` (simon@puenteworks.com) |
-| Pages scope | OAuth has `pages (write)` |
-| Existing Pages projects | only `puenteworks-enhanced` — **no** `llm-3d-viz` yet |
-| DNS | `viz.kyanitelabs.tech` has **no** A/CNAME yet (zone `kyanitelabs.tech` is on CF) |
-| Policy | Allowed: product Pages + kyanitelabs product subdomains (`FORBIDDEN-ZONES.md`) |
-| Cost | Pages free tier for static assets; **do not** enable paid add-ons |
+| Auth | Cloudflare account with Pages write (`npx wrangler whoami`) |
+| Pages scope | OAuth / API token with `pages (write)` |
+| DNS | Optional custom domain on your zone (example product host: `viz.kyanitelabs.tech`) |
+| Cost | Pages free tier for static assets; **do not** enable paid add-ons unless intended |
 
 ## What ships
 
