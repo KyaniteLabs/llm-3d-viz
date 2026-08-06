@@ -138,10 +138,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function boot() {
   document.title = APP_BRANDING.documentTitle;
-  const wordmark = document.querySelector(".wordmark, [data-app-title]");
+  // Canonical hooks: data-app-title / data-app-tagline on index.html scope-bar-brand.
+  const wordmark = document.querySelector("[data-app-title]");
   if (wordmark) wordmark.textContent = APP_BRANDING.title;
-  const tag = document.querySelector("[data-app-tagline], .app-tagline, h1");
-  if (tag && tag.matches("h1")) tag.textContent = APP_BRANDING.tagline;
+  const tag = document.querySelector("[data-app-tagline]");
+  if (tag) tag.textContent = APP_BRANDING.tagline;
   const stagePanel = document.querySelector(".stage") as HTMLElement;
   const stageVisual = stagePanel?.querySelector(".stage-visual") as HTMLElement | null;
   const placeholder = stageVisual?.querySelector(".stage-placeholder");

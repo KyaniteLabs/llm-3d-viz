@@ -3,10 +3,10 @@
  * without hunting through UI chrome.
  */
 export const APP_BRANDING = {
-  /** Browser tab + shell wordmark. */
+  /** Shell wordmark (`[data-app-title]` in index.html). */
   title: "Model Observatory",
-  /** Short product line under the title. */
+  /** Product line under the title (`[data-app-tagline]` / h1). */
   tagline: "Speed × cost × intelligence",
-  /** HTML document title. */
+  /** Browser tab title (`document.title`). */
   documentTitle: "Model Observatory",
 } as const;

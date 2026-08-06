@@ -18,7 +18,7 @@ npm run build
 | Lab brand colors | `LAB_BRANDS` in `src/viz/palette.ts` |
 | Theme (ink, filament, fonts) | `src/styles/tokens.css` `:root` |
 | Models | `data/` catalog + `npm run catalog:refresh` pipeline |
-| Full brand rings always | `?brand=full` or `brandLayersFullDefault` |
+| Full brand rings always | `?brand=full` or `brandLayersFullDefault: true` (no `?brand=off` escape) |
 
 Lab **fill color is always on** at a glance. Do not mute brand fills for “hierarchy” — use ridge + size + trails.
 

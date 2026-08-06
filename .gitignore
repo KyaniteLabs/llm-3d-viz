@@ -8,3 +8,15 @@ logs/
 .cache/
 
 data/openrouter-snapshot.json
+
+# Local agent / tool workspaces (never ship)
+.gjc/
+.omc/
+.omx/
+.elder-gods/
+
+# Ad-hoc local screenshots / capture dumps
+tmp-*.png
+tmp-*/
+stage-only.png
+

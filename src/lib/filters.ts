@@ -24,7 +24,7 @@ export interface ModelFilters {
 /** Product defaults — forker overrides live in `src/config/fork-defaults.ts`. */
 export const DEFAULT_FILTERS: ModelFilters = {
   ageEnabled: FORK_DEFAULTS.ageFilterDefault,
-  ageMonths: 6,
+  ageMonths: FORK_DEFAULTS.ageMonthsDefault,
   multiEffortOnly: FORK_DEFAULTS.multiEffortOnlyDefault,
   providers: [],
   families: [],

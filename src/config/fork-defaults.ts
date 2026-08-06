@@ -9,11 +9,14 @@ export interface ForkDefaults {
   decideBias: number;
   /** Prefer multi-effort families in the default visible set. */
   multiEffortOnlyDefault: boolean;
-  /** Age filter on by default (≤6 months). */
+  /** Age filter on by default. */
   ageFilterDefault: boolean;
+  /** Age window in months when age filter is on. */
+  ageMonthsDefault: number;
   /**
    * When true, brand ring/core layers render for all marks (`?brand=full` also works).
    * Default false: full lab *fill* is always on; rings are focus-only.
+   * There is no `?brand=off` escape when this is true — set false to keep focus-only rings.
    */
   brandLayersFullDefault: boolean;
 }
@@ -23,5 +26,6 @@ export const FORK_DEFAULTS: ForkDefaults = {
   decideBias: 0,
   multiEffortOnlyDefault: true,
   ageFilterDefault: true,
+  ageMonthsDefault: 6,
   brandLayersFullDefault: false,
 };
