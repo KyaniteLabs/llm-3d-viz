@@ -5,8 +5,8 @@ Last updated: 2026-08-03 (v7 — **Simon: not doing Plotly for 3D hero**; Three 
 ## What this is
 Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
 
-- **Repo (Forgejo, private):** https://git.kyanitelabs.tech/simon/llm-3d-viz
-- **Local clone:** `~/workspaces/llm-3d-viz` · **Namespace:** `simon`
+- **Repo (Forgejo SoT):** https://git.kyanitelabs.tech/simon/llm-3d-viz
+- **Local clone:** workspace `llm-3d-viz` · **Namespace:** `simon`
 - **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
 - **Three stage:** default hero on this branch; `?stage=plotly` is debug-only / kill-path, not product
 
@@ -63,8 +63,8 @@ npm run preview   # http://127.0.0.1:4200/  (Safari-safe; Three default)
 - Chrome-only emergency: `npx vite preview --host 127.0.0.1 --port 5173`
 
 ## Ops
-- **Workers:** codex luna/terra (implement), claude-glm (review ≠ implementer), vision models only for screenshots/taste.
-- **Forgejo:** write token = `git.kyanitelabs.tech` line in `~/.git-credentials` + browser UA.
+- **Workers:** implementer + independent GLM review on PRs; vision models only for screenshots/taste.
+- **Forgejo:** REST API with browser UA; credentials stay in the local credential helper (never commit tokens).
 - **Tracker:** merge before delete branch.
 
 ## Key pointers

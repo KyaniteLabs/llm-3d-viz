@@ -4,8 +4,8 @@
 
 The instrument **self-updates** whenever Artificial Analysis publishes new models or
 benchmark rows. It must **check at least three times per day**, scrape the public
-leaderboard, and if the catalog changed: rebuild and redeploy the private Tailscale
-instance (`http://100.92.68.103:4242/`).
+leaderboard, and if the catalog changed: rebuild and optionally redeploy a private
+origin (operator-configured `DEPLOY_HOST` / `HEALTH_URL` — no private IPs in-repo).
 
 This is **not** a one-off “add Qwen 3.8” fetch. Every release AA publishes (with
 Intelligence Index + speed + blended price) lands on the next successful run.

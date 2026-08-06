@@ -1,67 +1,48 @@
-# Private deploy — Tailscale-only (VPS `srv1542844`)
+# Private origin deploy (optional, operator-local)
 
-**Status:** live for Simon-only use (not public internet).
+**Status:** pattern only — no hostnames or private IPs in this public tree.
 
-**URL (Tailscale):** http://100.92.68.103:4242/  
-**Host:** `vps` / `srv1542844` · bind `100.92.68.103:4242` only (not `0.0.0.0`)
+For day-to-day instrumenting before or beside a public Pages deploy, operators may host
+`dist/` on a private network (VPN / Tailscale / LAN) with nginx or any static server.
 
 ## Privacy model
 
-- Docker publishes nginx **only** on the Tailscale IP.
-- Public NIC / `:80` / `:443` do **not** expose this app.
-- Reachable from devices on Simon’s tailnet (Mac, phone with Tailscale, etc.).
-- Not Cloudflare Pages; no public DNS for this instance.
+- Bind the static server only to a private interface (not public `0.0.0.0` on the open internet).
+- Do not commit private IPs, SSH aliases that encode infrastructure, or credentials into this repo.
+- Prefer env vars in local shells / cron (`DEPLOY_HOST`, `HEALTH_URL`) for automation.
 
-## Layout on VPS
+## Typical layout (example names only)
 
 ```
 ~/sites/llm-3d-viz/dist/     # static build
-~/sites/llm-3d-viz/nginx.conf
-docker: llm-3d-viz  (nginx:alpine, restart unless-stopped)
+docker/nginx serving that volume on a private bind
 ```
 
-## Redeploy from laptop
+## Redeploy from a laptop (generic)
 
 ```bash
-cd ~/workspaces/llm-3d-viz
+cd /path/to/llm-3d-viz
 git checkout main && git pull --ff-only
 npm run build
-rsync -az --delete dist/ vps:~/sites/llm-3d-viz/dist/
-ssh vps 'docker restart llm-3d-viz'
+# rsync/scp dist/ to your private host; restart your static container/service
 ```
 
 ## Catalog self-update (≥3×/day)
 
-New AA models/benchmarks are pulled automatically — not one-off fetches.
-
 ```bash
-# install once (cron 06:07 / 14:07 / 22:07 local)
+# optional local install
 bash scripts/install-catalog-cron.sh
 
-# or full pipeline now
+# full pipeline (scrape → build → optional deploy)
+SKIP_DEPLOY=1 bash scripts/catalog-auto-update.sh   # scrape+build only
+# or set DEPLOY_HOST / HEALTH_URL in the environment for private redeploy
 bash scripts/catalog-auto-update.sh
 ```
 
-See `docs/research/catalog-refresh.md`. Logs: `logs/catalog-auto-update.log`.
-
-## First-time (already done 2026-08-04)
-
-```bash
-# bind only Tailscale IP
-docker run -d --name llm-3d-viz --restart unless-stopped \
-  -p 100.92.68.103:4242:80 \
-  -v "$HOME/sites/llm-3d-viz/dist:/usr/share/nginx/html:ro" \
-  -v "$HOME/sites/llm-3d-viz/nginx.conf:/etc/nginx/conf.d/default.conf:ro" \
-  nginx:alpine
-```
-
-## Stop / remove
-
-```bash
-ssh vps 'docker rm -f llm-3d-viz'
-```
+See `docs/research/catalog-refresh.md`. Logs default to `logs/catalog-auto-update.log` (gitignored).
 
 ## Relation to public publish
 
-Public `viz.kyanitelabs.tech` remains **approval-gated** (`docs/deploy/cloudflare-pages.md`).  
-This private instance is for instrumenting tastecheck and daily use while the product is unfinished.
+Public product hosting (e.g. Cloudflare Pages + optional custom domain) is documented in
+`docs/deploy/cloudflare-pages.md`. Private origins are operator-specific and not required to
+fork or run the app.
