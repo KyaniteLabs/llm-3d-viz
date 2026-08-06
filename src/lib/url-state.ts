@@ -283,7 +283,7 @@ export function serializeShareableState(
     // Always write floor when decide is on.
     params.set("floor", String(clampFloor(d.intelligenceFloor)));
     if (d.floorAnchorModelId) {
-      params.set("anchor", encodeURIComponent(d.floorAnchorModelId));
+      params.set("anchor", d.floorAnchorModelId);
     }
     if (d.costSpeedBias !== 0) {
       params.set("bias", String(clampBias(d.costSpeedBias)));

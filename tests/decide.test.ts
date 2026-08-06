@@ -73,16 +73,17 @@ describe("bias shortlist", () => {
     expect(rankParetoByBias(pareto, 1)[0].model).toBe("fast");
   });
 
-  it("builds DecideResponse with required snapshot and floorSource", () => {
+  it("builds DecideResponse with required snapshot and floorSource", async () => {
     const rows = [
       model("a", 10, 0.5, 55),
       model("b", 50, 2, 60),
       model("c", 100, 5, 70),
       model("d", 150, 8, 80),
     ];
-    const snap = catalogSnapshotId(rows);
+    const snap = await catalogSnapshotId(rows);
     expect(snap.startsWith("cat_")).toBe(true);
     expect(snap).not.toBe("local");
+    expect(snap.length).toBe("cat_".length + 16);
     const { shortlist } = shortlistFromDecide(rows, 50, 0, 3);
     expect(shortlist.length).toBeLessThanOrEqual(3);
     const resp = buildDecideResponse(rows, {
@@ -107,16 +108,18 @@ describe("bias shortlist", () => {
     ).toThrow(/catalogSnapshotId/);
   });
 
-  it("is stable for fixed product catalog fixture", () => {
+  it("is stable for fixed product catalog fixture", async () => {
     const catalog = [model("z", 1, 1, 10), model("a", 2, 2, 20)];
-    expect(catalogSnapshotId(catalog)).toBe(catalogSnapshotId(catalog));
-    // Order of input must not matter
-    expect(catalogSnapshotId([...catalog].reverse())).toBe(catalogSnapshotId(catalog));
+    const a = await catalogSnapshotId(catalog);
+    const b = await catalogSnapshotId(catalog);
+    const c = await catalogSnapshotId([...catalog].reverse());
+    expect(a).toBe(b);
+    expect(a).toBe(c);
   });
 
-  it("preserves each floorSource on export", () => {
+  it("preserves each floorSource on export", async () => {
     const rows = [model("a", 50, 2, 60)];
-    const snap = catalogSnapshotId(rows);
+    const snap = await catalogSnapshotId(rows);
     for (const source of ["user", "anchor", "default"] as const) {
       const resp = buildDecideResponse(rows, {
         floor: 55,

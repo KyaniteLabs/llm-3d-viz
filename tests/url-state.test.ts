@@ -129,8 +129,18 @@ describe("url-state", () => {
         floorUserSet: true,
       },
     });
-    expect(params.get("anchor")).toBe(encodeURIComponent("Model-A"));
+    expect(params.get("anchor")).toBe("Model-A");
     expect(params.get("floor")).toBe("72");
+  });
+
+  it("serializes me=0 opt-out of multi-effort default", () => {
+    const params = serializeShareableState({
+      ...baseShare(),
+      filters: { ...DEFAULT_FILTERS, multiEffortOnly: false },
+    });
+    expect(params.get("me")).toBe("0");
+    const again = parseShareableState(params);
+    expect(again.filters.multiEffortOnly).toBe(false);
   });
 });
 

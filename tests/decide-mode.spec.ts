@@ -34,6 +34,12 @@ test.describe("Decide mode v1", () => {
       expect(aria.toLowerCase()).toContain("decide");
     }
 
+    const classes = await page.evaluate(() => (window as any).__viz?.pointSemanticClasses as string[] | undefined);
+    if (classes?.length) {
+      expect(classes).not.toContain("optimum");
+      expect(classes).not.toContain("frontier");
+    }
+
     // Export builds without throw (click)
     await page.click("[data-decide-export]");
 

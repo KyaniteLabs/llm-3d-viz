@@ -160,7 +160,7 @@ async function boot() {
   // Shareable URL: filters, axes, weights, decide. Session-only: hover/pin/cinema.
   // `?age=0` remains the regression-suite escape hatch for the full catalog.
   // Product catalog = `models` (post catalog-scope, pre shelf filters).
-  const productCatalogSnapshot = catalogSnapshotId(models);
+  const productCatalogSnapshot = await catalogSnapshotId(models);
   const fromUrl = parseShareableState(searchParams, {}, { catalog: models });
   const store = createStore({
     filters: fromUrl.filters,
