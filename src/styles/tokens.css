@@ -1260,27 +1260,162 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
-/* Mobile stage-first */
+/* Mobile stage-first — phone is stage + short inspector, not desktop shell scaled down */
 @media (max-width: 760px) {
-  .app-shell, .observatory {
-    grid-template-rows: auto minmax(52vh, 1fr) minmax(0, 38vh) !important;
+  .app-shell,
+  .app-shell.observatory,
+  .app-shell.is-scope-open,
+  .app-shell.observatory.is-scope-open {
+    /* top · canvas (hero) · inspector (sheet) · status */
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 26dvh) auto !important;
+    grid-template-areas: "top" "canvas" "inspector" "status" !important;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
+
+  .scope-bar {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.45rem;
+    padding: 0.4rem 0.5rem;
+    align-items: center;
+  }
+  .scope-bar-brand h1 {
+    font-size: 0.82rem;
+  }
+  .scope-bar-brand .eyebrow {
+    font-size: 0.5rem;
+  }
+  .scope-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .scope-summary-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 11rem;
+  }
+  .scope-bar-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+  .scope-bar .scope-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .scope-bar .scope-search input {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.72rem;
+  }
+  /* Cinema is desktop-oriented; free horizontal chrome */
+  .scope-bar .cinema-toggle {
+    display: none;
+  }
+  .scope-bar .decide-toggle {
+    flex: 0 0 auto;
+    font-size: 0.58rem;
+    padding: 0.32rem 0.55rem;
+  }
+
   .canvas-host {
-    min-height: 52vh;
+    min-height: 0;
+    padding: 0.2rem 0.25rem 0.15rem;
+    gap: 0.15rem;
   }
+  .mode-tabs {
+    padding: 0 0.1rem;
+  }
+  .mode-tab {
+    padding: 0.22rem 0.48rem;
+    font-size: 0.58rem;
+  }
+
+  /* Beat hybrid strip's `display: grid !important` (higher specificity + later). */
   .canvas-host[data-canvas-mode="3d"] {
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) !important;
   }
-  .canvas-host[data-canvas-mode="3d"] .projection-row {
+  .canvas-host[data-canvas-mode="3d"] .projection-row,
+  .canvas-host[data-canvas-mode="3d"] .projection-row:not([hidden]) {
     display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
   }
-  .inspector, .console {
-    max-height: 38vh;
+  .canvas-host[data-canvas-mode="3d"] .stage {
+    grid-row: 2 !important;
+    min-height: 0;
+  }
+  .canvas-host[data-canvas-mode="3d"] .effort-strip:not([hidden]) {
+    bottom: 0.35rem;
+  }
+
+  /* STAGE KEY: chip only — never a panel covering the cube */
+  .stage-guide {
+    top: 0.35rem !important;
+    right: 0.25rem !important;
+    width: auto !important;
+    max-width: min(10.5rem, 46%) !important;
+    max-height: none !important;
+    font-size: 0.78em;
+  }
+  .stage-guide-disclosure {
+    padding: 0.28rem 0.4rem !important;
+  }
+  .stage-guide-disclosure > summary {
+    font-size: 0.58rem !important;
+    gap: 0.35rem;
+  }
+  .stage-guide-count {
+    font-size: 0.52rem !important;
+  }
+  /* Open body: bottom sheet style max so it doesn't cover the whole stage */
+  .stage-guide-disclosure[open] {
+    max-width: min(16rem, 72vw) !important;
+  }
+  .stage-guide-disclosure[open] .stage-guide-body {
+    max-height: min(28dvh, 11rem) !important;
     overflow: auto;
   }
-  .stage-guide {
-    width: min(11rem, 42%);
-    font-size: 0.85em;
+  /* Hide lab color essay on phone — chips + stage carry identity */
+  .stage-guide .lab-disclosure {
+    display: none;
+  }
+
+  .inspector,
+  .console {
+    max-height: 26dvh !important;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .inspector .nav-help,
+  .console .nav-help,
+  .inspector .axis-controls,
+  .console .axis-controls {
+    display: none;
+  }
+
+  .status-bar {
+    font-size: 0.58rem;
+    padding: 0.2rem 0.45rem;
+  }
+}
+
+/* Very narrow phones */
+@media (max-width: 400px) {
+  .scope-bar-brand h1 {
+    font-size: 0.75rem;
+  }
+  .scope-edit-label {
+    display: none;
   }
 }
 

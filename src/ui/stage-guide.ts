@@ -60,11 +60,12 @@ export class StageGuide {
   }
 
   private defaultOpen(isCompact: boolean): { stage: boolean; glyph: boolean } {
-    // S+: encoding HUD open by default (glanceable decode; no hover tour).
+    // Desktop: STAGE KEY open so encoding is glanceable.
+    // Mobile: closed by default — open HUD eats the stage (see mobile shot).
     // User open state is sticky after first toggle.
     return {
-      stage: this.stageKeyOpen ?? true,
-      glyph: this.glyphOpen ?? true,
+      stage: this.stageKeyOpen ?? !isCompact,
+      glyph: this.glyphOpen ?? !isCompact,
     };
   }
 
