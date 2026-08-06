@@ -722,6 +722,142 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   border-radius: var(--radius-control);
 }
 .scope-bar .cinema-toggle { margin-top: 0; font-size: 0.6rem; }
+.scope-bar .decide-toggle {
+  margin-top: 0;
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+.scope-bar .decide-toggle:hover,
+.scope-bar .decide-toggle.is-active,
+.scope-bar .decide-toggle[aria-pressed="true"] {
+  border-color: var(--filament-dim);
+  color: var(--filament);
+}
+
+/* Decide mode prototype (#136) */
+.decide-panel {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.decide-panel[hidden] { display: none !important; }
+.decide-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0.15rem 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+.decide-blurb { margin: 0 0 0.5rem; font-size: 0.65rem; }
+.decide-floor, .decide-bias { display: grid; gap: 0.4rem; margin-bottom: 0.5rem; }
+.decide-label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+.decide-label input[type="range"] { width: 100%; accent-color: var(--filament); }
+.decide-label select {
+  width: 100%;
+  background: var(--ink-panel-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font: 400 0.65rem var(--font-mono);
+  padding: 0.25rem;
+  border-radius: var(--radius-control);
+}
+.decide-label output {
+  font-family: var(--font-mono);
+  color: var(--filament);
+  font-size: 0.8rem;
+}
+.decide-chart-host { margin: 0.4rem 0; }
+.decide-svg {
+  display: block;
+  background: var(--ink-field, #070c0b);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+.decide-ridge {
+  stroke: var(--filament);
+  stroke-width: 1.25;
+  opacity: 0.85;
+}
+.decide-dot.is-eligible { fill: var(--color-text-muted); opacity: 0.55; }
+.decide-dot.is-pareto { fill: var(--filament-dim); }
+.decide-dot.is-shortlist { fill: var(--filament); stroke: var(--filament); stroke-width: 0.5; }
+.decide-axis-label {
+  fill: var(--color-text-muted);
+  font-size: 8px;
+  font-family: var(--font-mono);
+}
+.decide-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.55rem;
+}
+.decide-leg::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  margin-right: 0.2rem;
+  vertical-align: middle;
+}
+.decide-leg.is-eligible::before { background: var(--color-text-muted); }
+.decide-leg.is-pareto::before { background: var(--filament-dim); }
+.decide-leg.is-shortlist::before { background: var(--filament); }
+.decide-shortlist-ol {
+  list-style: none;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.decide-shortlist-item {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.35rem;
+  width: 100%;
+  text-align: left;
+  background: var(--ink-panel-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.35rem 0.4rem;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  font: 400 0.7rem var(--font-sans, inherit);
+}
+.decide-shortlist-item:hover {
+  border-color: var(--filament-dim);
+}
+.decide-rank {
+  grid-row: 1 / span 2;
+  font-family: var(--font-mono);
+  color: var(--filament);
+  align-self: center;
+}
+.decide-name { font-weight: 500; }
+.decide-meta {
+  grid-column: 2;
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+.decide-actions { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.console.is-decide-mode .value-leaderboard { display: none !important; }
+.app-shell.is-cinema .decide-toggle { display: none; }
 
 .filter-shelf {
   grid-area: shelf;

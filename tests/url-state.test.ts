@@ -2,7 +2,18 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_AXIS_MAPPING } from "../src/lib/axis-metrics";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 import { presets } from "../src/lib/score";
-import { parseShareableState, serializeShareableState } from "../src/lib/url-state";
+import {
+  DEFAULT_DECIDE_SHARE,
+  parseShareableState,
+  serializeShareableState,
+} from "../src/lib/url-state";
+
+const baseShare = () => ({
+  filters: { ...DEFAULT_FILTERS },
+  axisMapping: { ...DEFAULT_AXIS_MAPPING },
+  weights: { ...presets.chat },
+  decide: { ...DEFAULT_DECIDE_SHARE },
+});
 
 describe("url-state", () => {
   it("parses age=0 and provider/family lists", () => {
@@ -29,11 +40,7 @@ describe("url-state", () => {
   });
 
   it("omits product defaults on serialize", () => {
-    const params = serializeShareableState({
-      filters: { ...DEFAULT_FILTERS },
-      axisMapping: { ...DEFAULT_AXIS_MAPPING },
-      weights: { ...presets.chat },
-    });
+    const params = serializeShareableState(baseShare());
     expect(params.toString()).toBe("");
   });
 
@@ -53,6 +60,7 @@ describe("url-state", () => {
         z: "blended_price" as const,
       },
       weights: { speed: 0.25, cost: 0.15, intelligence: 0.6 },
+      decide: { ...DEFAULT_DECIDE_SHARE },
     };
     const serialized = serializeShareableState(state, existing);
     expect(serialized.get("stage")).toBe("plotly");
@@ -66,35 +74,81 @@ describe("url-state", () => {
     expect(again.axisMapping).toEqual(state.axisMapping);
     expect(again.weights).toEqual(state.weights);
   });
+
+  it("round-trips decide floor bias and always writes floor when decide on", () => {
+    const state = {
+      ...baseShare(),
+      decide: {
+        decideMode: true,
+        intelligenceFloor: 62,
+        costSpeedBias: -0.5,
+        floorAnchorModelId: null as string | null,
+        floorSource: "user" as const,
+        floorUserSet: true,
+      },
+    };
+    const params = serializeShareableState(state);
+    expect(params.get("decide")).toBe("1");
+    expect(params.get("floor")).toBe("62");
+    expect(params.get("bias")).toBe("-0.5");
+    const again = parseShareableState(params);
+    expect(again.decide.decideMode).toBe(true);
+    expect(again.decide.intelligenceFloor).toBe(62);
+    expect(again.decide.costSpeedBias).toBe(-0.5);
+    expect(again.decide.floorSource).toBe("user");
+  });
+
+  it("anchor wins floor number when catalog resolves Index", () => {
+    const catalog = [
+      { model: "Model-A", aa_intelligence_index: 72 },
+      { model: "Model-B", aa_intelligence_index: 40 },
+    ];
+    const state = parseShareableState("?decide=1&floor=60&anchor=Model-A", {}, { catalog });
+    expect(state.decide.floorAnchorModelId).toBe("Model-A");
+    expect(state.decide.intelligenceFloor).toBe(72);
+    expect(state.decide.floorSource).toBe("anchor");
+  });
+
+  it("unknown anchor falls back to floor as user", () => {
+    const catalog = [{ model: "Model-A", aa_intelligence_index: 72 }];
+    const state = parseShareableState("?decide=1&floor=55&anchor=Missing", {}, { catalog });
+    expect(state.decide.floorAnchorModelId).toBeNull();
+    expect(state.decide.intelligenceFloor).toBe(55);
+    expect(state.decide.floorSource).toBe("user");
+  });
+
+  it("serializes both anchor and resolved floor", () => {
+    const params = serializeShareableState({
+      ...baseShare(),
+      decide: {
+        decideMode: true,
+        intelligenceFloor: 72,
+        costSpeedBias: 0,
+        floorAnchorModelId: "Model-A",
+        floorSource: "anchor",
+        floorUserSet: true,
+      },
+    });
+    expect(params.get("anchor")).toBe("Model-A");
+    expect(params.get("floor")).toBe("72");
+  });
+
+  it("serializes me=0 opt-out of multi-effort default", () => {
+    const params = serializeShareableState({
+      ...baseShare(),
+      filters: { ...DEFAULT_FILTERS, multiEffortOnly: false },
+    });
+    expect(params.get("me")).toBe("0");
+    const again = parseShareableState(params);
+    expect(again.filters.multiEffortOnly).toBe(false);
+  });
 });
 
 describe("enc presentation flag", () => {
   it("preserves enc=openness when serializing shareable state", () => {
     const existing = new URLSearchParams("enc=openness&heat=1");
-    const params = serializeShareableState(
-      {
-        filters: { ...DEFAULT_FILTERS },
-        axisMapping: { ...DEFAULT_AXIS_MAPPING },
-        weights: { ...presets.chat },
-      },
-      existing,
-    );
+    const params = serializeShareableState(baseShare(), existing);
     expect(params.get("enc")).toBe("openness");
     expect(params.get("heat")).toBe("1");
-  });
-});
-
-describe("multi-effort only URL", () => {
-  it("serializes me=0 when multiEffortOnly is off", () => {
-    const params = serializeShareableState({
-      filters: { ...DEFAULT_FILTERS, multiEffortOnly: false },
-      axisMapping: { ...DEFAULT_AXIS_MAPPING },
-      weights: { ...presets.chat },
-    });
-    expect(params.get("me")).toBe("0");
-  });
-  it("parses me=0", () => {
-    const state = parseShareableState("?me=0");
-    expect(state.filters.multiEffortOnly).toBe(false);
   });
 });

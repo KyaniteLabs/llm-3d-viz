@@ -4,6 +4,7 @@ import {
   sameAxisMapping,
   type AxisMapping,
 } from "./lib/axis-metrics";
+import { DEFAULT_INTELLIGENCE_FLOOR, type FloorSource } from "./lib/decide";
 import { DEFAULT_FILTERS, sameFilters, type ModelFilters } from "./lib/filters";
 import { presets, type ScoreWeights } from "./lib/score";
 
@@ -15,6 +16,24 @@ export interface AppState {
   hoveredModelId: string | null;
   pinnedModelId: string | null;
   cinemaMode: boolean;
+  /**
+   * Decide mode (#128 / SPEC #137): intelligence floor + cost×speed shortlist.
+   * When true, classic value-score weight UI and optimum are suppressed.
+   */
+  decideMode: boolean;
+  /** AA Intelligence Index floor (default 50). */
+  intelligenceFloor: number;
+  /** −1 prefer cheaper … +1 prefer faster. */
+  costSpeedBias: number;
+  /** Optional known-good model id used as floor anchor. */
+  floorAnchorModelId: string | null;
+  /** How the current floor was set (export provenance). */
+  floorSource: FloorSource;
+  /**
+   * True after user/anchor/url has set floor this session — re-enter Decide keeps floor.
+   * False → first enter Decide applies default 50 + source default.
+   */
+  floorUserSet: boolean;
   datarevision: number;
 }
 
@@ -33,6 +52,12 @@ export function createStore(initial: Partial<AppState> = {}) {
     hoveredModelId: null,
     pinnedModelId: null,
     cinemaMode: false,
+    decideMode: false,
+    intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
+    costSpeedBias: 0,
+    floorAnchorModelId: null,
+    floorSource: "default",
+    floorUserSet: false,
     datarevision: 0,
     ...restInitial,
   };

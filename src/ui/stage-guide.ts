@@ -93,7 +93,10 @@ export class StageGuide {
   private render(state: Readonly<AppState>) {
     this.captureDisclosureState();
     const frontierModels = frontier(this.models).sort((a, b) => a.model.localeCompare(b.model));
-    const optimum = weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
+    // Decide mode: no value-score optimum (B′ single ranking authority).
+    const optimum = state.decideMode
+      ? undefined
+      : weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
     const groups = providerGroups(this.models);
     const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches;
     const open = this.defaultOpen(isCompact);

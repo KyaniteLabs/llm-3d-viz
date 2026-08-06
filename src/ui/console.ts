@@ -577,6 +577,9 @@ export class DecisionConsole {
   }
 
   private leaderboard(state: Readonly<AppState>, activePreset: string | undefined) {
+    if (state.decideMode) {
+      return `<p class="console-note" data-decide-leaderboard-suppressed>Value-score optimum is off in Decide mode — use the shortlist and cost×speed chart above.</p>`;
+    }
     if (this.models.length === 0) {
       return `<p class="console-note">No models in the visible set. Relax age, provider, or family filters — or Clear filters.</p>`;
     }
@@ -656,9 +659,21 @@ export class DecisionConsole {
   }
 
   render(state: Readonly<AppState>) {
+    // Decide mode (B′): hide classic value-score weights / presets entirely.
+    const weightHost = this.root.querySelector<HTMLElement>(".weight-controls");
+    const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
+    if (weightHost) weightHost.hidden = state.decideMode;
+    if (presetHost) presetHost.hidden = state.decideMode;
+    this.root.classList.toggle("is-decide-mode", state.decideMode);
+    // Leaderboard section is rebuilt in readout; also hide any stale host.
+    this.root.querySelectorAll(".value-leaderboard").forEach((el) => {
+      (el as HTMLElement).hidden = state.decideMode;
+    });
+
     weightKeys.forEach((key) => {
-      const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`)!;
-      const output = this.root.querySelector<HTMLOutputElement>(`[data-weight-output="${key}"]`)!;
+      const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`);
+      const output = this.root.querySelector<HTMLOutputElement>(`[data-weight-output="${key}"]`);
+      if (!input || !output) return;
       input.value = String(state.weights[key]);
       const share = weightShares(state.weights)[key];
       output.value = `${share}%`;
@@ -715,7 +730,7 @@ export class DecisionConsole {
     const model = this.activeModel(state);
     readout.innerHTML = model ? this.details(model, state) : this.leaderboard(state, activePreset);
     this.renderTaskCharts();
-    this.renderScoreTable(state.weights);
+    this.renderScoreTable(state.weights, state);
     if (model) {
       this.tooltip.innerHTML = this.details(model, state);
       this.tooltip.hidden = false;
@@ -725,18 +740,24 @@ export class DecisionConsole {
     }
   }
 
-  renderScoreTable(weights: ScoreWeights) {
+  renderScoreTable(weights: ScoreWeights, state?: Readonly<AppState>) {
     const host = this.root.querySelector(".score-table-host");
     if (!host) return;
+    const decideMode = Boolean(state?.decideMode);
     const scores = normalizedScores(this.models, weights, this.models)
       .slice()
       .sort((a, b) => b.score - a.score || a.model.model.localeCompare(b.model.model));
     const frontierIds = new Set(frontier(this.models).map((m) => m.model));
-    const optimum = weightedOptimum(scores)?.model.model;
+    const optimum = decideMode ? undefined : weightedOptimum(scores)?.model.model;
     const rows = scores
       .map(({ model, score }) => {
-        const role =
-          model.model === optimum ? "optimum" : frontierIds.has(model.model) ? "frontier" : "dominated";
+        const role = decideMode
+          ? "row"
+          : model.model === optimum
+            ? "optimum"
+            : frontierIds.has(model.model)
+              ? "frontier"
+              : "dominated";
         return `<tr data-model-id="${model.model}" data-role="${role}" tabindex="0">
           <th scope="row">${displayName(model.model)}</th>
           <td>${model.provider}</td>
@@ -744,16 +765,16 @@ export class DecisionConsole {
           <td>${formatTps(model.tps)}</td>
           <td>${formatPricePerM(model.blended_price_per_M)}</td>
           <td>${formatIntelligence(model.aa_intelligence_index)}</td>
-          <td>${score.toFixed(3)}</td>
+          <td>${decideMode ? "—" : score.toFixed(3)}</td>
           <td>${role}</td>
         </tr>`;
       })
       .join("");
     host.innerHTML = `<details class="score-table-disclosure" open>
       <summary>MODEL TABLE · ${scores.length} SCORABLE IN VIEW</summary>
-      <div class="score-table-wrap" role="region" aria-label="Scorable models by value score">
+      <div class="score-table-wrap" role="region" aria-label="${decideMode ? "Scorable models in Decide mode" : "Scorable models by value score"}">
         <table class="score-table">
-          <caption class="visually-hidden">Visible scorable models with speed, cost, intelligence, and value score.</caption>
+          <caption class="visually-hidden">Visible scorable models with speed, cost, intelligence${decideMode ? "" : ", and value score"}.</caption>
           <thead><tr>
             <th scope="col">Model</th><th scope="col">Provider</th><th scope="col">Open</th><th scope="col">TPS</th>
             <th scope="col">Cost $/M</th><th scope="col">Intel</th><th scope="col">Score</th><th scope="col">Class</th>
