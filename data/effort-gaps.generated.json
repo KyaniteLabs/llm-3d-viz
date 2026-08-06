@@ -1,73 +1,83 @@
 {
-  "data_date": "2026-08-05",
+  "data_date": "2026-08-06",
   "source_stats": [
     {
       "source": "Artificial Analysis leaderboard scrape",
       "url": "https://artificialanalysis.ai/leaderboards/models",
-      "raw": 591,
-      "scorable": 158,
-      "added": 158
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 160,
+      "added": 265
     },
     {
       "source": "Artificial Analysis models catalog scrape",
       "url": "https://artificialanalysis.ai/models",
-      "raw": 591,
+      "raw": 595,
+      "mapped": 265,
       "scorable": 0,
       "added": 0
     },
     {
       "source": "AA model card: claude-fable-5",
       "url": "https://artificialanalysis.ai/models/claude-fable-5",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: claude-opus-5",
       "url": "https://artificialanalysis.ai/models/claude-opus-5",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: claude-sonnet-5",
       "url": "https://artificialanalysis.ai/models/claude-sonnet-5",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: gpt-5-6-sol",
       "url": "https://artificialanalysis.ai/models/gpt-5-6-sol",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: gpt-5-6-luna",
       "url": "https://artificialanalysis.ai/models/gpt-5-6-luna",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: gpt-5-6-terra",
       "url": "https://artificialanalysis.ai/models/gpt-5-6-terra",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA model card: gemini-3-5-flash",
       "url": "https://artificialanalysis.ai/models/gemini-3-5-flash",
-      "raw": 591,
-      "scorable": 157,
+      "raw": 595,
+      "mapped": 265,
+      "scorable": 159,
       "added": 0
     },
     {
       "source": "AA provider: anthropic",
       "url": "https://artificialanalysis.ai/providers/anthropic",
-      "raw": 591,
+      "raw": 595,
+      "mapped": 265,
       "scorable": 0,
       "added": 0
     },
@@ -75,14 +85,71 @@
       "source": "AA model card deep scrape",
       "targets": 72,
       "incomplete_list_slugs": 0,
-      "scorable": 5499,
+      "mapped": 9310,
+      "scorable": 5569,
       "added": 0
+    },
+    {
+      "source": "Arena text style-control",
+      "ok": true,
+      "skipped": false,
+      "error": null,
+      "entries": 384,
+      "attaches": 45,
+      "log_sample": [
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-6-thinking",
+          "slug": "claude-opus-4-6-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-7-thinking",
+          "slug": "claude-opus-4-7-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-6",
+          "slug": "claude-opus-4-6"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-7",
+          "slug": "claude-opus-4-7"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "gemini-3-pro",
+          "slug": "gemini-3-pro"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-8-thinking-text",
+          "slug": "claude-opus-4-8-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "gpt-5.5-high-text",
+          "slug": "gpt-5.5-high"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "gpt-5.5-text",
+          "slug": "gpt-5.5"
+        }
+      ]
     }
   ],
   "openrouter": {
     "ok": true,
-    "models": 339,
+    "models": 400,
     "price_overlays": 0
+  },
+  "arena": {
+    "ok": true,
+    "entries": 384,
+    "attaches": 45,
+    "error": null
   },
   "gaps": [
     {

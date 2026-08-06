@@ -75,15 +75,26 @@ export function applyFilters(
   // Explicit family picks win: if the analyst selected families (e.g. Claude Fable 5,
   // a singleton on AA), multi-effort-only must NOT zero the stage. The gate only
   // applies in browse mode (families empty ≡ all).
+  //
+  // Also keep *frontier singletons* (high Intelligence Index) so Fable / Grok 4.5 /
+  // Muse Spark are not silently dropped just because AA only publishes one effort.
+  const FRONTIER_SINGLETON_IQ = 48;
   let multiEffortFamilies: Set<string> | null = null;
   if (filters.multiEffortOnly && !familySet) {
     const counts = new Map<string, number>();
+    const maxIq = new Map<string, number>();
     for (const model of models) {
       const id = familyIdOf(model);
       counts.set(id, (counts.get(id) ?? 0) + 1);
+      const iq = model.aa_intelligence_index;
+      if (typeof iq === "number" && Number.isFinite(iq)) {
+        maxIq.set(id, Math.max(maxIq.get(id) ?? -Infinity, iq));
+      }
     }
     multiEffortFamilies = new Set(
-      [...counts.entries()].filter(([, n]) => n >= 2).map(([id]) => id),
+      [...counts.entries()]
+        .filter(([id, n]) => n >= 2 || (maxIq.get(id) ?? -Infinity) >= FRONTIER_SINGLETON_IQ)
+        .map(([id]) => id),
     );
   }
 

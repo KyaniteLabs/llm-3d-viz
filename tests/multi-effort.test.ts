@@ -41,7 +41,23 @@ describe("multi-effort catalog (AA expansion)", () => {
 describe("catalog scope", () => {
   it("default cloud catalog is a subset of the full draft", () => {
     expect(allModels.length).toBeGreaterThan(models.length);
-    expect(models.every((m) => ["OpenAI","Anthropic","DeepSeek","Google","NVIDIA","Kimi","Z AI","Alibaba","MiniMax"].includes(m.provider))).toBe(true);
+    expect(
+      models.every((m) =>
+        [
+          "OpenAI",
+          "Anthropic",
+          "DeepSeek",
+          "Google",
+          "NVIDIA",
+          "Kimi",
+          "Z AI",
+          "Alibaba",
+          "MiniMax",
+          "SpaceXAI",
+          "Meta",
+        ].includes(m.provider),
+      ),
+    ).toBe(true);
   });
 });
 
