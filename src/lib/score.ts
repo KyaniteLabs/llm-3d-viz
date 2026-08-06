@@ -27,7 +27,41 @@ export const presets = {
   vision: { speed: 0.15, cost: 0.25, intelligence: 0.6 },
   RAG: { speed: 0.2, cost: 0.55, intelligence: 0.25 },
   "long-context": { speed: 0.25, cost: 0.45, intelligence: 0.3 },
+  /** Latency-first workload (intent: Fastest). */
+  speed: { speed: 0.55, cost: 0.2, intelligence: 0.25 },
 } as const satisfies Record<string, ScoreWeights>;
+
+export type PresetId = keyof typeof presets;
+
+/**
+ * Primary UX intents — human goals, not analyst jargon.
+ * Weights still map to `presets`; advanced panel exposes raw sliders + technical chips.
+ * LLM-assisted “tell me what you need” can layer on top later without replacing these four.
+ */
+export const intentPresets = [
+  {
+    id: "chat" as const,
+    label: "Best balance",
+    blurb: "Everyday use — speed, price, and smarts weighted evenly.",
+  },
+  {
+    id: "coding" as const,
+    label: "Smartest",
+    blurb: "Prioritize intelligence for hard reasoning and code.",
+  },
+  {
+    id: "RAG" as const,
+    label: "Budget",
+    blurb: "Favor lower price while staying usable.",
+  },
+  {
+    id: "speed" as const,
+    label: "Fastest",
+    blurb: "Prioritize tokens/sec when latency matters most.",
+  },
+] as const satisfies ReadonlyArray<{ id: PresetId; label: string; blurb: string }>;
+
+export type IntentId = (typeof intentPresets)[number]["id"];
 
 function minPositive(values: readonly number[]): number {
   const positive = values.filter((value) => value > 0);

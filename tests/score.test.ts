@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Model } from "../src/data/models";
 import {
+  intentPresets,
   normalizedScores,
   presets,
   weightedOptimum,
@@ -128,14 +129,28 @@ describe("value-score normalization", () => {
     expect(normalizedScores([low, high], weights(0, 0, 0), [low, high])[0].score).toBeCloseTo(1 / 3);
   });
 
-  it("exports the exact five preset triples", () => {
+  it("exports workload preset triples including speed/latency", () => {
     expect(presets).toEqual({
       coding: { speed: 0.25, cost: 0.15, intelligence: 0.6 },
       chat: { speed: 0.35, cost: 0.3, intelligence: 0.35 },
       vision: { speed: 0.15, cost: 0.25, intelligence: 0.6 },
       RAG: { speed: 0.2, cost: 0.55, intelligence: 0.25 },
       "long-context": { speed: 0.25, cost: 0.45, intelligence: 0.3 },
+      speed: { speed: 0.55, cost: 0.2, intelligence: 0.25 },
     });
+  });
+
+  it("exports four human intent presets mapped to real weights", () => {
+    expect(intentPresets).toHaveLength(4);
+    expect(intentPresets.map((i) => i.label)).toEqual([
+      "Best balance",
+      "Smartest",
+      "Budget",
+      "Fastest",
+    ]);
+    for (const intent of intentPresets) {
+      expect(presets[intent.id]).toBeTruthy();
+    }
   });
 
   it("recomputes the optimum without changing the frontier input", () => {

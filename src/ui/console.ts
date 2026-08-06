@@ -9,11 +9,19 @@ import {
 import { effortGapForFamily, formatEffortGapNote } from "../data/effort-gaps";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../lib/family";
 import { DEFAULT_FILTERS, listFamilies, listMultiEffortFamilies, listProviders } from "../lib/filters";
-import { normalizedScores, presets, weightedOptimum, type ScoreWeights } from "../lib/score";
+import {
+  intentPresets,
+  normalizedScores,
+  presets,
+  weightedOptimum,
+  type ScoreWeights,
+} from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
 import { displayName } from "../lib/display-name";
 import type { AppStore, AppState } from "../state";
+
+const ADVANCED_STORAGE_KEY = "llm3d-advanced-open";
 
 const weightKeys = ["speed", "cost", "intelligence"] as const;
 type WeightKey = (typeof weightKeys)[number];
@@ -63,32 +71,54 @@ export class DecisionConsole {
     this.store = store;
     this.catalog = models;
     this.models = models;
+    const advancedOpen =
+      typeof sessionStorage !== "undefined" && sessionStorage.getItem(ADVANCED_STORAGE_KEY) === "1";
     this.root.innerHTML = `
-      <p class="eyebrow">INSPECTOR</p>
-      <h2>Selection</h2>
+      <div class="intent-primary" data-intent-primary>
+        <p class="eyebrow">GOAL</p>
+        <h2 class="intent-heading">What are you optimizing for?</h2>
+        <p class="intent-blurb">
+          Each mark is a model on <strong>speed × cost × intelligence</strong>.
+          Pick a goal — the cube reweights and names a pick. Drag to orbit; click a mark for detail.
+        </p>
+        <section class="intent-presets" aria-label="Optimization goals"></section>
+      </div>
       <section class="model-readout" aria-live="polite"></section>
-      <section class="family-nav" aria-label="Family and effort navigation"></section>
-      <section class="weight-controls" aria-label="Value-score weight shares"></section>
-      <section class="preset-controls" aria-label="Workload presets"></section>
-      <details class="filter-disclosure">
-        <summary class="weight-heading">AXES</summary>
-        <section class="axis-controls" aria-label="Stage axis metrics"></section>
-      </details>
-      <details class="console-secondary">
-        <summary class="weight-heading">MORE · TASKS / TABLE</summary>
-        <section class="task-charts" aria-label="Cost and time per Index task"></section>
-        <section class="score-table-host" aria-label="Model score table"></section>
-        <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
+      <details class="advanced-panel" data-advanced-panel${advancedOpen ? " open" : ""}>
+        <summary class="advanced-summary">Advanced controls</summary>
+        <p class="advanced-hint">Analyst tools: raw weight shares, technical workloads, family/effort nav, axes, tables.</p>
+        <section class="weight-controls" aria-label="Value-score weight shares"></section>
+        <section class="preset-controls" aria-label="Workload presets (technical)"></section>
+        <section class="family-nav" aria-label="Family and effort navigation"></section>
+        <details class="filter-disclosure">
+          <summary class="weight-heading">AXES</summary>
+          <section class="axis-controls" aria-label="Stage axis metrics"></section>
+        </details>
+        <details class="console-secondary">
+          <summary class="weight-heading">MORE · TASKS / TABLE</summary>
+          <section class="task-charts" aria-label="Cost and time per Index task"></section>
+          <section class="score-table-host" aria-label="Model score table"></section>
+          <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
+        </details>
       </details>
       <!-- legacy filter host kept for renderFilterControls (hidden) -->
       <section class="filter-controls" hidden aria-hidden="true"></section>`;
 
+    this.renderIntentPresets();
     this.renderControls();
     this.renderAxisControls();
     this.renderFilterControls();
     this.renderFamilyNav();
     // Cinema control lives on the scope bar; callback retained for API compatibility.
     void onCinemaToggle;
+    this.root.querySelector<HTMLDetailsElement>("[data-advanced-panel]")?.addEventListener("toggle", (ev) => {
+      const d = ev.currentTarget as HTMLDetailsElement;
+      try {
+        sessionStorage.setItem(ADVANCED_STORAGE_KEY, d.open ? "1" : "0");
+      } catch {
+        /* private mode */
+      }
+    });
     this.root.addEventListener("click", (event) => this.onConsoleClick(event));
     this.root.addEventListener("input", (event) => {
       const target = event.target as HTMLElement;
@@ -500,6 +530,28 @@ export class DecisionConsole {
     });
   }
 
+  private renderIntentPresets() {
+    const host = this.root.querySelector(".intent-presets");
+    if (!host) return;
+    host.innerHTML = intentPresets
+      .map(
+        (intent) => `
+      <button type="button" class="intent-chip" data-intent="${intent.id}" data-preset="${intent.id}"
+        title="${intent.blurb}" aria-pressed="false">
+        <span class="intent-chip-label">${intent.label}</span>
+        <span class="intent-chip-blurb">${intent.blurb}</span>
+      </button>`,
+      )
+      .join("");
+    host.querySelectorAll<HTMLButtonElement>("[data-intent]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.intent as keyof typeof presets;
+        const preset = presets[id];
+        if (preset) this.store.update({ weights: { ...preset }, decideMode: false });
+      });
+    });
+  }
+
   private renderControls() {
     const controls = this.root.querySelector(".weight-controls")!;
     controls.innerHTML = `<p class="weight-heading">VALUE SCORE / WEIGHT SHARE</p>${weightKeys
@@ -520,9 +572,9 @@ export class DecisionConsole {
     });
 
     const chips = this.root.querySelector(".preset-controls")!;
-    chips.innerHTML = Object.keys(presets)
+    chips.innerHTML = `<p class="weight-heading">TECHNICAL WORKLOADS</p>${Object.keys(presets)
       .map((name) => `<button class="preset-chip" type="button" data-preset="${name}">${name}</button>`)
-      .join("");
+      .join("")}`;
     chips.querySelectorAll<HTMLButtonElement>("button[data-preset]").forEach((button) => {
       button.addEventListener("click", () => {
         const preset = presets[button.dataset.preset as keyof typeof presets];
@@ -590,17 +642,18 @@ export class DecisionConsole {
     const optimum = weightedOptimum(scores) ?? scores[0];
     if (!optimum) return `<p class="console-note">No complete benchmark rows are available in the visible set.</p>`;
     const shares = weightShares(state.weights);
-    const presetLabel = activePreset ?? "custom weights";
+    const intent = intentPresets.find((i) => i.id === activePreset);
+    const presetLabel = intent?.label ?? activePreset ?? "Custom weights";
     const multiN = [...groupByFamily(this.models).values()].filter((rows) => rows.length >= 2).length;
     const solo =
       state.filters.families.length === 1
         ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-nav-show-all>show all curves</button></p>`
         : multiN > 0
-          ? `<p class="axis-hint">${multiN} multi-effort curves in view — chip a family to solo.</p>`
+          ? `<p class="axis-hint">${multiN} multi-effort curves in view — open Advanced to solo a family.</p>`
           : "";
     return `<section class="value-leaderboard" aria-label="Current value-score leaderboard">
-      <p class="eyebrow">CURRENT OPTIMUM · ${this.models.length} VISIBLE</p>
-      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}" data-focus-family="${familyIdOf(optimum.model)}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} VALUE SCORE · ${deriveEffortTier(optimum.model)}</span></p>
+      <p class="eyebrow">TOP PICK · ${this.models.length} VISIBLE</p>
+      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}" data-focus-family="${familyIdOf(optimum.model)}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} score · ${deriveEffortTier(optimum.model)}</span></p>
       <ol>${scores
         .slice(0, 5)
         .map(
@@ -663,8 +716,12 @@ export class DecisionConsole {
     // Decide mode (B′): hide classic value-score weights / presets entirely.
     const weightHost = this.root.querySelector<HTMLElement>(".weight-controls");
     const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
+    const intentPrimary = this.root.querySelector<HTMLElement>("[data-intent-primary]");
+    const advanced = this.root.querySelector<HTMLElement>("[data-advanced-panel]");
     if (weightHost) weightHost.hidden = state.decideMode;
     if (presetHost) presetHost.hidden = state.decideMode;
+    if (intentPrimary) intentPrimary.hidden = state.decideMode;
+    if (advanced) advanced.hidden = state.decideMode;
     const familyNav = this.root.querySelector<HTMLElement>(".family-nav");
     if (familyNav) familyNav.hidden = state.decideMode;
     this.root.classList.toggle("is-decide-mode", state.decideMode);
@@ -723,6 +780,11 @@ export class DecisionConsole {
     this.root.querySelectorAll<HTMLButtonElement>("[data-preset]").forEach((button) => {
       button.classList.toggle("is-active", button.dataset.preset === activePreset);
       button.setAttribute("aria-pressed", String(button.dataset.preset === activePreset));
+    });
+    this.root.querySelectorAll<HTMLButtonElement>("[data-intent]").forEach((button) => {
+      const on = button.dataset.intent === activePreset;
+      button.classList.toggle("is-active", on);
+      button.setAttribute("aria-pressed", String(on));
     });
     const cinemaButton = this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]");
     if (cinemaButton) {
