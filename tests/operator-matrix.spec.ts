@@ -227,6 +227,49 @@ async function runOperatorMatrix(page: Page, label: string) {
     expect(mapping.x || mapping.X || true).toBeTruthy();
   });
 
+  await pass(page, `${label}:economy-basis-toggle`, async () => {
+    await page.goto("/?age=0&me=1");
+    await waitForThreeStage(page);
+    const rateBtn = page.locator('[data-economy-basis="rate"]');
+    const taskBtn = page.locator('[data-economy-basis="task"]');
+    await expect(rateBtn).toBeVisible();
+    await expect(taskBtn).toBeVisible();
+    const before = await page.evaluate(() => ({
+      ax: { ...((window as any).__viz?.axisMapping ?? {}) },
+      n: Number((window as any).__viz?.pointCount ?? 0),
+      basis: (window as any).__viz?.economyBasis,
+    }));
+    expect(before.n).toBeGreaterThan(0);
+    // Default is rate: $/M × tok/s (x=blended_price, z=tps)
+    expect(before.ax.x).toBe("blended_price");
+    expect(before.ax.z).toBe("tps");
+
+    await taskBtn.click();
+    await page.waitForTimeout(400);
+    const task = await page.evaluate(() => ({
+      ax: { ...((window as any).__viz?.axisMapping ?? {}) },
+      n: Number((window as any).__viz?.pointCount ?? 0),
+      basis: (window as any).__viz?.economyBasis,
+      pressed: document.querySelector('[data-economy-basis="task"]')?.getAttribute("aria-pressed"),
+    }));
+    expect(task.ax.x).toBe("cost_per_index");
+    expect(task.ax.z).toBe("time_per_index");
+    expect(task.ax.y).toBe(before.ax.y); // intelligence (or prior Y) preserved
+    expect(task.basis).toBe("task");
+    expect(task.pressed).toBe("true");
+    expect(task.n).toBeGreaterThan(0);
+
+    await rateBtn.click();
+    await page.waitForTimeout(400);
+    const rate = await page.evaluate(() => ({
+      ax: { ...((window as any).__viz?.axisMapping ?? {}) },
+      basis: (window as any).__viz?.economyBasis,
+    }));
+    expect(rate.ax.x).toBe("blended_price");
+    expect(rate.ax.z).toBe("tps");
+    expect(rate.basis).toBe("rate");
+  });
+
   await pass(page, `${label}:filters-age-me`, async () => {
     await page.goto("/?me=0&age=0");
     await waitForThreeStage(page);

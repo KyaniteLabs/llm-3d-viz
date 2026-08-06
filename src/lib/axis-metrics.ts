@@ -58,6 +58,49 @@ export const DEFAULT_AXIS_MAPPING: AxisMapping = {
   z: "tps",
 };
 
+/**
+ * Always-visible economy basis for the cost×speed plane (scene X and Z).
+ * Intelligence (Y) is unchanged.
+ *
+ * - rate: cost = blended $/M tokens, speed = tokens/s
+ * - task: cost = $ per Index task, speed = seconds per Index task
+ */
+export type EconomyBasis = "rate" | "task";
+
+export const ECONOMY_BASIS_LABELS: Record<EconomyBasis, { short: string; detail: string }> = {
+  rate: {
+    short: "$/M · tok/s",
+    detail: "Cost per million tokens and tokens per second",
+  },
+  task: {
+    short: "$/task · s/task",
+    detail: "Cost and wall time per Artificial Analysis Index task",
+  },
+};
+
+/** Apply rate vs task metrics to the cost (X) and speed (Z) axes; preserve Y. */
+export function applyEconomyBasis(mapping: AxisMapping, basis: EconomyBasis): AxisMapping {
+  if (basis === "task") {
+    return {
+      x: "cost_per_index",
+      y: mapping.y,
+      z: "time_per_index",
+    };
+  }
+  return {
+    x: "blended_price",
+    y: mapping.y,
+    z: "tps",
+  };
+}
+
+/** Detect rate/task basis from mapping, or custom when Advanced remapped X/Z. */
+export function detectEconomyBasis(mapping: AxisMapping): EconomyBasis | "custom" {
+  if (mapping.x === "blended_price" && mapping.z === "tps") return "rate";
+  if (mapping.x === "cost_per_index" && mapping.z === "time_per_index") return "task";
+  return "custom";
+}
+
 function formatPriceTick(value: number): string {
   // ε price floor marker (half the cheapest positive blended price).
   if (value < 0.05) return "≤ floor";

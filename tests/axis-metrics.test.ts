@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { models } from "../src/data/models";
 import {
   DEFAULT_AXIS_MAPPING,
+  applyEconomyBasis,
   availableAxisMetrics,
   buildAxisDomain,
   densityMarkerScale,
+  detectEconomyBasis,
   hasMappedAxes,
   mappingHeading,
   modelToSceneCoords,
@@ -20,6 +22,26 @@ describe("axis-metrics", () => {
       z: "tps",
     });
     expect(mappingHeading(DEFAULT_AXIS_MAPPING)).toBe("Speed × cost × intelligence");
+  });
+
+  it("toggles economy basis between rate ($/M · tok/s) and task ($/task · s/task)", () => {
+    expect(detectEconomyBasis(DEFAULT_AXIS_MAPPING)).toBe("rate");
+    const task = applyEconomyBasis(DEFAULT_AXIS_MAPPING, "task");
+    expect(task).toEqual({
+      x: "cost_per_index",
+      y: "intelligence",
+      z: "time_per_index",
+    });
+    expect(detectEconomyBasis(task)).toBe("task");
+    const back = applyEconomyBasis(task, "rate");
+    expect(back).toEqual(DEFAULT_AXIS_MAPPING);
+    // Preserves a custom intelligence remaps on Y
+    const customY = applyEconomyBasis(
+      { x: "blended_price", y: "ttft", z: "tps" },
+      "task",
+    );
+    expect(customY.y).toBe("ttft");
+    expect(detectEconomyBasis({ x: "price_in", y: "intelligence", z: "tps" })).toBe("custom");
   });
 
   it("exposes available metrics including task axes when data exists", () => {

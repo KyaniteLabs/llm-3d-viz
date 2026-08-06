@@ -41,10 +41,32 @@
       </aside>
 
       <main class="canvas-host" data-canvas-mode="3d" aria-label="Analysis canvas">
-        <div class="mode-tabs" role="tablist" aria-label="Canvas mode">
-          <button type="button" role="tab" class="mode-tab is-active" data-mode="3d" aria-selected="true">3D</button>
-          <button type="button" role="tab" class="mode-tab" data-mode="2d" aria-selected="false">2D</button>
-          <button type="button" role="tab" class="mode-tab" data-mode="table" aria-selected="false">Table</button>
+        <div class="canvas-chrome" data-canvas-chrome>
+          <div class="mode-tabs" role="tablist" aria-label="Canvas mode">
+            <button type="button" role="tab" class="mode-tab is-active" data-mode="3d" aria-selected="true">3D</button>
+            <button type="button" role="tab" class="mode-tab" data-mode="2d" aria-selected="false">2D</button>
+            <button type="button" role="tab" class="mode-tab" data-mode="table" aria-selected="false">Table</button>
+          </div>
+          <div class="economy-toggle" role="group" aria-label="Cost and speed units">
+            <button
+              type="button"
+              class="economy-chip is-active"
+              data-economy-basis="rate"
+              aria-pressed="true"
+              title="Cost per million tokens · tokens per second"
+            >
+              $/M · tok/s
+            </button>
+            <button
+              type="button"
+              class="economy-chip"
+              data-economy-basis="task"
+              aria-pressed="false"
+              title="Cost and time per Artificial Analysis Index task"
+            >
+              $/task · s/task
+            </button>
+          </div>
         </div>
 
         <section class="stage panel" data-pane="3d" aria-labelledby="stage-title">
