@@ -18,6 +18,8 @@ export const CLOUD_LABS = [
   "Z AI", // GLM
   "Alibaba", // Qwen
   "MiniMax",
+  "SpaceXAI", // xAI Grok (AA provider string)
+  "Meta", // Muse Spark
 ] as const;
 
 export type CloudLab = (typeof CLOUD_LABS)[number];
@@ -60,14 +62,12 @@ export const HELD_LABS_FOR_LATER = [
   "KwaiKAT",
   "Liquid AI",
   "LongCat",
-  "Meta",
   "Microsoft",
   "Mistral",
   "Multiverse Computing",
   "Nex AGI",
   "Nous Research",
   "Sapiens AI",
-  "SpaceXAI",
   "StepFun",
   "Tencent",
   "Thinking Machines",

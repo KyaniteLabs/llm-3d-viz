@@ -56,14 +56,54 @@ describe("filters", () => {
     expect(visible.map((m) => m.model).sort()).toEqual(["New C", "Old B"]);
   });
 
-  it("multiEffortOnly keeps only multi-step families in browse mode", () => {
+  it("multiEffortOnly keeps multi-step families; low-IQ singletons drop", () => {
     const rows = [
       stub({ model: "Fam (low)", provider: "X", release_date: "2026-07-01", effort_tier: "low" }),
       stub({ model: "Fam (max)", provider: "X", release_date: "2026-07-01", effort_tier: "max" }),
-      stub({ model: "Solo", provider: "Y", release_date: "2026-07-01" }),
+      // Mid-tier singleton — not multi-effort, not frontier IQ
+      stub({
+        model: "Solo Mid",
+        provider: "Y",
+        release_date: "2026-07-01",
+        aa_intelligence_index: 30,
+      }),
     ];
     const visible = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
     expect(visible.map((m) => m.model).sort()).toEqual(["Fam (low)", "Fam (max)"]);
+  });
+
+  it("multiEffortOnly keeps high-IQ frontier singletons (Grok / Fable)", () => {
+    const rows = [
+      stub({
+        model: "Grok 4.5 (high)",
+        provider: "SpaceXAI",
+        release_date: "2026-07-08",
+        family_id: "Grok 4.5",
+        aa_intelligence_index: 53.8,
+      }),
+      stub({
+        model: "Claude Opus 5 (max)",
+        provider: "Anthropic",
+        release_date: "2026-07-24",
+        family_id: "Claude Opus 5",
+        effort_tier: "max",
+        aa_intelligence_index: 60,
+      }),
+      stub({
+        model: "Claude Opus 5 (high)",
+        provider: "Anthropic",
+        release_date: "2026-07-24",
+        family_id: "Claude Opus 5",
+        effort_tier: "high",
+        aa_intelligence_index: 58,
+      }),
+    ];
+    const browse = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
+    expect(browse.map((m) => m.model).sort()).toEqual([
+      "Claude Opus 5 (high)",
+      "Claude Opus 5 (max)",
+      "Grok 4.5 (high)",
+    ]);
   });
 
   it("explicit family selection shows singletons even when multiEffortOnly is on (Fable)", () => {
@@ -74,6 +114,7 @@ describe("filters", () => {
         release_date: "2026-06-09",
         family_id: "Claude Fable 5",
         effort_tier: "max",
+        aa_intelligence_index: 40, // below frontier singleton floor when not selected
       }),
       stub({
         model: "Claude Opus 5 (max)",
@@ -90,7 +131,7 @@ describe("filters", () => {
         effort_tier: "high",
       }),
     ];
-    // Browse: Fable hidden
+    // Browse: low-IQ Fable singleton still hidden by multi-effort
     const browse = applyFilters(rows, { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: true }, ref);
     expect(browse.every((m) => !m.model.includes("Fable"))).toBe(true);
     // Explicit solo: Fable must appear (user selected it)
