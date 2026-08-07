@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | **executing** · Ultragoal · W0–W4 complete · W5 BLOCKED on independent D10 CVD only |
+| **Status** | **executing** · Ultragoal · W0–W4 complete · **W5 D10 REDEFINED + cleared (identity-without-color via focus-set direct labels; palette floor = no degenerate merges)** · W5 instrument scorecard + W6 remain (role/deploy gated) |
 | **Plan** | `.omx/plans/prd-s-plus-maximal-dataviz-beauty.md` |
 | **Supersedes** | MAP-s-plus-observatory-quality · RALPLAN-s-plus-observatory-quality |
 | **Baseline tip** | `d7bcec1` |
@@ -113,13 +113,13 @@ docs  verify  HUD/host  chrome  hybrid  instrument  DiB+SHIP
 **Blocked by:** W4  
 **Evidence:** `s-plus-w5/`  
 
-- [ ] Cinema density: focus-set or top-K **K≤12** + frontier/optimum/selected; not full-catalog confetti  
-- [ ] DOF + filament ridge in cinema  
-- [ ] Threshold-sweep visible on weight change  
-- [ ] CVD: deuteranopia sim + `cvd-note.md` for top-10 labs  
-- [ ] Multi-viewport recapture parity  
-- [ ] Independent scores **D1–D12 only** ≥90; role means ≥92  
-- [ ] **Not** product deploy SHIP  
+- [x] Cinema density: focus-set or top-K **K≤12** + frontier/optimum/selected; not full-catalog confetti
+- [x] DOF + filament ridge in cinema
+- [x] Threshold-sweep visible on weight change
+- [x] **D10 REDEFINED (owner-approved 2026-08-07):** identity reachable WITHOUT color via always-on focus-set direct labels (`labelFocusIds`, default view, K≤12, NMS); palette floor = no identical primaries + no degenerate (<5 dE) deutan merge among high-signal labs. Old "≥35 all-pairs" bar retired — provably impossible for 33 labs in sRGB; conflicts with ridge+size+trail hierarchy law. See `s-plus-w5/d10-redefined.md`.
+- [x] Multi-viewport recapture parity
+- [ ] Independent scores **D1–D12** ≥90; role means ≥92 *(role-gated — implementer cannot self-score)*
+- [ ] **Not** product deploy SHIP
 
 **GATE:** instrument scorecard pass.
 

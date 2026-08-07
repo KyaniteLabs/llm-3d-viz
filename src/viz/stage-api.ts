@@ -42,6 +42,14 @@ export interface StageRenderOptions {
    * so cinema export is not full-catalog confetti (K≤12 typical).
    */
   cinemaFocusIds?: ReadonlySet<string> | string[] | null;
+  /**
+   * Always-on direct-label focus-set (D10 redefined 2026-08-07). Marks in this set get
+   * a short-name label in the DEFAULT view (not only sparse/cinema contexts) so lab
+   * identity is reachable WITHOUT color — color becomes a secondary cue. Independent
+   * of cinemaFocusIds (which dims); this only adds labels. Typically frontier ∪
+   * optimum ∪ selected ∪ shortlist ∪ top-K≤12 (computeCinemaFocusIds).
+   */
+  labelFocusIds?: ReadonlySet<string> | string[] | null;
 }
 
 /**

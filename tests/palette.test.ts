@@ -551,3 +551,107 @@ describe("S+ W1 freeze goldens (no algorithm thrash)", () => {
     }
   });
 });
+
+// --- D10 (redefined 2026-08-07): identity must be reachable WITHOUT color ---
+// Direct labeling carries identity (focus-set labels in stage3d-three.ts); color is
+// a secondary cue. The palette bar is "no identical primaries + no catastrophic
+// deuteranopia merge among high-signal labs" — NOT ≥35 dE for all 33×32/2 pairs,
+// which is provably impossible in sRGB (deutan-saturated; candidates bottom out
+// ~8–10 dE worst-pair).
+const DEUTAN_M = [
+  [0.367322, 0.860646, -0.227968],
+  [0.280085, 0.672501, 0.047413],
+  [-0.01182, 0.04294, 0.968881],
+];
+const s2l = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const l2s = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+function deutanLab(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  // sRGB 0–255 → linear 0–1; deutan matrix applies in LINEAR light.
+  const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => s2l(c / 255));
+  const o = [0, 1, 2].map((i) =>
+    clamp01(DEUTAN_M[i][0] * lin[0] + DEUTAN_M[i][1] * lin[1] + DEUTAN_M[i][2] * lin[2]),
+  );
+  // XYZ(D65) expects LINEAR values — do NOT gamma-encode before this matrix.
+  const [R, G, B] = o;
+  const X = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047;
+  const Y = R * 0.2126 + G * 0.7152 + B * 0.0722;
+  const Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
+}
+const dE76 = (a: [number, number, number], b: [number, number, number]) =>
+  Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+describe("D10 CVD — identity-without-color palette floor", () => {
+  const primaries = Object.entries(LAB_BRANDS).map(([k, v]) => ({
+    k,
+    hex: v.colors[0].toLowerCase(),
+    dLab: deutanLab(v.colors[0]),
+  }));
+
+  it("has no two identical lab primaries", () => {
+    const seen = new Map<string, string>();
+    const dups: string[] = [];
+    for (const p of primaries) {
+      if (seen.has(p.hex)) dups.push(`${p.k} ≡ ${seen.get(p.hex)} (${p.hex})`);
+      else seen.set(p.hex, p.k);
+    }
+    expect(dups, dups.join("; ")).toEqual([]);
+  });
+
+  it("high-signal lab deutan separation is label-mitigated (diagnostic)", () => {
+    // Per redefined D10 (owner-approved 2026-08-07): identity is reachable WITHOUT
+    // color via focus-set direct labels, so major brand colors are PRESERVED even
+    // where deutan separation is weak (Anthropic↔Mistral, Google↔Microsoft,
+    // NVIDIA↔Alibaba all merge ~8–10 dE). This logs the worst major pairs but only
+    // hard-gates a true near-identical degenerate merge (<5 dE), which would mean
+    // two brands are indistinguishable even with effort.
+    const majors = [
+      "OpenAI", "Anthropic", "Google", "Meta", "DeepSeek", "Qwen",
+      "Microsoft", "NVIDIA", "Kimi", "SpaceXAI", "Mistral", "Alibaba", "Amazon",
+    ];
+    const HARD = 5;
+    const pairs: Array<{ d: number; label: string }> = [];
+    for (let i = 0; i < majors.length; i++) {
+      for (let j = i + 1; j < majors.length; j++) {
+        const a = primaries.find((p) => p.k === majors[i]);
+        const b = primaries.find((p) => p.k === majors[j]);
+        if (!a || !b) continue;
+        pairs.push({ d: dE76(a.dLab, b.dLab), label: `${majors[i]} ⟷ ${majors[j]}` });
+      }
+    }
+    pairs.sort((x, y) => x.d - y.d);
+    // biome-ignore lint/suspicious/noConsole: D10 label-mitigated collision record
+    console.log(
+      `[D10] worst major deutan pairs (label-mitigated; brand colors preserved):\n${pairs
+        .slice(0, 5)
+        .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
+        .join("\n")}`,
+    );
+    const degenerate = pairs.filter((p) => p.d < HARD);
+    expect(
+      degenerate,
+      `near-identical deutan merge (<${HARD} dE) — would need a remap:\n${degenerate
+        .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
+        .join("\n")}`,
+    ).toEqual([]);
+  });
+
+  it("documents the deutan separability report (diagnostic, not a gate)", () => {
+    const report: string[] = [];
+    for (let i = 0; i < primaries.length; i++) {
+      for (let j = i + 1; j < primaries.length; j++) {
+        const d = dE76(primaries[i].dLab, primaries[j].dLab);
+        if (d < 35) report.push(`${d.toFixed(1)}  ${primaries[i].k} ⟷ ${primaries[j].k}`);
+      }
+    }
+    report.sort((a, b) => parseFloat(a) - parseFloat(b));
+    // biome-ignore lint/suspicious/noConsole: D10 saturated-palette record for CI
+    console.log(
+      `[D10] ${report.length} deutan pairs < 35 dE (sRGB-saturated; identity via labels, not color):\n${report.slice(0, 20).join("\n")}`,
+    );
+    expect(report.length).toBeGreaterThan(0);
+  });
+});

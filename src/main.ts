@@ -576,12 +576,16 @@ async function boot() {
       : null;
     renderedDecideKey = `${appState.decideMode}:${appState.intelligenceFloor}:${appState.costSpeedBias}:${appState.floorAnchorModelId ?? ""}`;
     renderedCinemaMode = Boolean(appState.cinemaMode);
+    // D10 (redefined 2026-08-07): compute the focus-set ALWAYS so the default view
+    // gets always-on direct labels (identity reachable w/o color). Cinema dimming
+    // reuses the same set but stays cinema-only.
+    const labelFocusIds = computeCinemaFocusIds(visibleSet, weights, {
+      selectedId: appState.pinnedModelId ?? appState.hoveredModelId,
+      decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
+    });
     let cinemaFocusIds: Set<string> | null = null;
     if (appState.cinemaMode) {
-      cinemaFocusIds = computeCinemaFocusIds(visibleSet, weights, {
-        selectedId: appState.pinnedModelId ?? appState.hoveredModelId,
-        decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
-      });
+      cinemaFocusIds = labelFocusIds;
       if (soloFamily) {
         addFamilyMembers(cinemaFocusIds, visibleSet, filters.families[0], familyIdOf);
       }
@@ -596,6 +600,7 @@ async function boot() {
       decideParetoIds: decide ? decide.pareto.map((m) => m.model) : null,
       decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
       cinemaFocusIds,
+      labelFocusIds,
     });
     updateEmptyState(visibleSet.length, filters);
     projections?.setPresentationMode?.(presentationMode);
@@ -643,6 +648,7 @@ async function boot() {
     viz.optimumModelId = appState.decideMode
       ? null
       : (weightedOptimum(normalizedScores(visibleSet, weights, visibleSet))?.model.model ?? null);
+    viz.labelFocusIds = labelFocusIds ? [...labelFocusIds] : [];
     (window as any).__viz = viz;
   };
 

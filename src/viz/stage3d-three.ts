@@ -850,6 +850,15 @@ export class Stage3DThree implements Stage3DSurface {
     // Empty focus set would blank the whole stage — fail open.
     const cinemaFocus =
       cinemaFocusRaw && cinemaFocusRaw.size > 0 ? cinemaFocusRaw : null;
+    // D10: always-on direct-label focus-set (independent of cinema dim).
+    const labelFocusRaw = options?.labelFocusIds
+      ? new Set(
+          Array.isArray(options.labelFocusIds)
+            ? options.labelFocusIds
+            : [...options.labelFocusIds],
+        )
+      : null;
+    const labelFocus = labelFocusRaw && labelFocusRaw.size > 0 ? labelFocusRaw : null;
 
     // Plot models that have all three mapped metrics.
     // Decide mode (intelligenceFloor set): suppress value-score optimum AND classic
@@ -1119,8 +1128,10 @@ export class Stage3DThree implements Stage3DSurface {
           : new THREE.BufferGeometry();
     }
 
-    // Labels: always mark optimum; when a small multi-effort set is focused
-    // (≤12 plottable points), label with short tier tags + NMS in paintLabels.
+    // Labels: always mark optimum; label the D10 focus-set (frontier ∪ optimum ∪
+    // selected ∪ shortlist ∪ top-K) by short name so identity is reachable WITHOUT
+    // color in the DEFAULT view; when a small multi-effort set is focused (≤12
+    // plottable) label all with short tier tags. NMS collision pass in paintLabels.
     // Keep Decide FLOOR plane labels.
     this.labelSpecs = this.labelSpecs.filter(
       (s) => s.kind !== "mark" || s.text.startsWith("FLOOR"),
@@ -1132,13 +1143,13 @@ export class Stage3DThree implements Stage3DSurface {
       if (!model) continue;
       const isOptimum = mesh.userData.semanticClass === "optimum";
       const isFrontier = mesh.userData.semanticClass === "frontier";
-      if (!isOptimum && !focusLabels) continue;
+      const inLabelFocus = !!labelFocus?.has(id);
+      if (!isOptimum && !focusLabels && !inLabelFocus) continue;
       const tier = (model.effort_tier || "").toString().toLowerCase();
       let text: string;
       if (isOptimum) {
         const shortBase = displayName(id);
-        const short = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
-        text = short;
+        text = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
       } else if (focusLabels) {
         // Solo/focus: effort tier primary (optional short stem).
         const stem = displayName(id).split(/[\s(]/)[0]?.slice(0, 8) ?? "";
@@ -1150,7 +1161,9 @@ export class Stage3DThree implements Stage3DSurface {
               : stem || "?";
         text = tier && tier !== "default" ? tierLabel : `${stem} ${tierLabel}`.trim();
       } else {
-        continue;
+        // D10 focus-set direct label (default view): short name = identity w/o color.
+        const shortBase = displayName(id);
+        text = shortBase.length > 16 ? shortBase.slice(0, 14) + "…" : shortBase;
       }
       const priority = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.labelSpecs.push({
