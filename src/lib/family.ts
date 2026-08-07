@@ -47,6 +47,26 @@ export function effortRank(tier: string): number {
   return EFFORT_RANK[key] ?? 50;
 }
 
+/**
+ * True for Non-reasoning / no-thinking effort rungs Simon does not use.
+ * Keeps:
+ *  - explicit low / medium / high / max / xhigh
+ *  - bare "(Reasoning)" rows (catalog often tags effort_tier none wrongly)
+ *  - unspecified single-shot models with no effort ladder in the name
+ * Drops:
+ *  - any name with Non-reasoning (including "Non-reasoning, High Effort")
+ *  - effort_tier minimal (below Low)
+ */
+export function isNonReasoningEffortRow(
+  model: Pick<Model, "model" | "effort_tier" | "reasoning">,
+): boolean {
+  const name = model.model ?? "";
+  if (/\bnon[\s-]?reasoning\b/i.test(name)) return true;
+  const tier = deriveEffortTier(model);
+  if (tier === "minimal") return true;
+  return false;
+}
+
 export function familyIdOf(model: Model): string {
   return (model.family_id && model.family_id.trim()) || deriveFamilyId(model.model);
 }

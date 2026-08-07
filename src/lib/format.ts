@@ -10,11 +10,11 @@
 
 import type { Model } from "../data/models";
 
-/** Output tokens/sec, one decimal — "172.1 tok/s". */
+/** Output tokens/sec, integer — "172 tok/s" (S+ numeral craft). */
 export function formatTps(value: number | null): string {
   return value === null
     ? "—"
-    : `${value.toLocaleString("en-US", { maximumFractionDigits: 1 })} tok/s`;
+    : `${value.toLocaleString("en-US", { maximumFractionDigits: 0 })} tok/s`;
 }
 
 /** USD per 1M tokens, always two decimals — "$7.70 /M tokens". */

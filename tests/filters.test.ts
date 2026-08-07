@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyFilters, DEFAULT_FILTERS, sameFilters } from "../src/lib/filters";
-import { deriveFamilyId, deriveEffortTier, groupByFamily } from "../src/lib/family";
+import { deriveFamilyId, deriveEffortTier, groupByFamily, isNonReasoningEffortRow } from "../src/lib/family";
 import type { Model } from "../src/data/models";
 
 function stub(partial: Partial<Model> & Pick<Model, "model" | "provider" | "release_date">): Model {
@@ -163,6 +163,79 @@ describe("filters", () => {
     const b = { ...DEFAULT_FILTERS, providers: ["a", "b"] };
     expect(sameFilters(a, b)).toBe(true);
     expect(sameFilters(a, { ...b, ageEnabled: false })).toBe(false);
+  });
+
+  it("vramMaxGb keeps open models that fit Q4-class size only", () => {
+    const rows = [
+      stub({ model: "Qwen3-8B", provider: "Alibaba", release_date: "2026-07-01", openness: "open" }),
+      stub({ model: "Qwen2.5-14B", provider: "Alibaba", release_date: "2026-07-01", openness: "open" }),
+      stub({ model: "Llama-3.1-70B", provider: "Meta", release_date: "2026-07-01", openness: "open" }),
+      stub({ model: "GPT-5.6", provider: "OpenAI", release_date: "2026-07-01", openness: "closed" }),
+    ];
+    const local8 = applyFilters(
+      rows,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, openness: "open", vramMaxGb: 8 },
+      ref,
+    );
+    expect(local8.map((m) => m.model)).toEqual(["Qwen3-8B"]);
+
+    const local12 = applyFilters(
+      rows,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, openness: "open", vramMaxGb: 12 },
+      ref,
+    );
+    expect(local12.map((m) => m.model).sort()).toEqual(["Qwen2.5-14B", "Qwen3-8B"]);
+
+    const local24 = applyFilters(
+      rows,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, openness: "open", vramMaxGb: 24 },
+      ref,
+    );
+    expect(local24.map((m) => m.model).sort()).toEqual(["Qwen2.5-14B", "Qwen3-8B"]);
+    // 70B still too big for 24GB Q4
+    expect(local24.every((m) => m.model !== "Llama-3.1-70B")).toBe(true);
+  });
+
+  it("sameFilters distinguishes vramMaxGb", () => {
+    const a = { ...DEFAULT_FILTERS, openness: "open" as const, vramMaxGb: 8 as const };
+    const b = { ...DEFAULT_FILTERS, openness: "open" as const, vramMaxGb: 12 as const };
+    expect(sameFilters(a, b)).toBe(false);
+    expect(sameFilters(a, { ...a })).toBe(true);
+  });
+
+  it("excludeNonReasoning drops Non-reasoning rungs, keeps Low+ and bare Reasoning", () => {
+    const rows = [
+      stub({ model: "Qwen3.5 27B (Non-reasoning)", provider: "Alibaba", release_date: "2026-07-01", effort_tier: "none", reasoning: false }),
+      stub({ model: "Qwen3.5 27B (Reasoning)", provider: "Alibaba", release_date: "2026-07-01", effort_tier: "none", reasoning: false }),
+      stub({ model: "Claude Opus 5 (low)", provider: "Anthropic", release_date: "2026-07-01", effort_tier: "low", reasoning: true }),
+      stub({ model: "Claude Opus 5 (max)", provider: "Anthropic", release_date: "2026-07-01", effort_tier: "max", reasoning: true }),
+      stub({ model: "Claude Opus 4.6 (Non-reasoning, High Effort)", provider: "Anthropic", release_date: "2026-07-01", effort_tier: "high", reasoning: false }),
+      stub({ model: "Gemini 3.1 Pro Preview", provider: "Google", release_date: "2026-07-01", effort_tier: "none", reasoning: false }),
+    ];
+    const visible = applyFilters(
+      rows,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, excludeNonReasoning: true },
+      ref,
+    );
+    expect(visible.map((m) => m.model).sort()).toEqual([
+      "Claude Opus 5 (low)",
+      "Claude Opus 5 (max)",
+      "Gemini 3.1 Pro Preview",
+      "Qwen3.5 27B (Reasoning)",
+    ]);
+  });
+
+  it("excludeNonReasoning=false keeps Non-reasoning rows", () => {
+    const rows = [
+      stub({ model: "Qwen3.5 27B (Non-reasoning)", provider: "Alibaba", release_date: "2026-07-01", effort_tier: "none" }),
+      stub({ model: "Qwen3.5 27B (Reasoning)", provider: "Alibaba", release_date: "2026-07-01", effort_tier: "none" }),
+    ];
+    const all = applyFilters(
+      rows,
+      { ...DEFAULT_FILTERS, ageEnabled: false, multiEffortOnly: false, excludeNonReasoning: false },
+      ref,
+    );
+    expect(all).toHaveLength(2);
   });
 });
 

@@ -4,7 +4,8 @@
 
 import type { Model } from "../data/models";
 import { FORK_DEFAULTS } from "../config/fork-defaults";
-import { familyIdOf } from "./family";
+import { familyIdOf, isNonReasoningEffortRow } from "./family";
+import { fitsLocalVram, type LocalVramGb } from "./local-vram";
 
 export interface ModelFilters {
   /** When true, drop models older than ageMonths before referenceDate. */
@@ -19,6 +20,21 @@ export interface ModelFilters {
   providers: string[];
   /** Empty ≡ all families. */
   families: string[];
+  /**
+   * Open-weight gate for Local · N GB intents and filter shelf.
+   * all = no openness filter; open/closed = keep only that class.
+   */
+  openness: "all" | "open" | "closed";
+  /**
+   * Local VRAM ceiling (GB): 8 | 12 | 24 (top-3 consumer tiers). null = no VRAM gate.
+   * When set, keeps open-weight models whose name-parsed size fits Q4-class in this VRAM.
+   */
+  vramMaxGb: LocalVramGb | null;
+  /**
+   * When true (Simon product default), drop Non-reasoning / minimal effort rungs.
+   * Low+ and bare Reasoning / unspecified models stay.
+   */
+  excludeNonReasoning: boolean;
 }
 
 /** Product defaults — forker overrides live in `src/config/fork-defaults.ts`. */
@@ -28,11 +44,17 @@ export const DEFAULT_FILTERS: ModelFilters = {
   multiEffortOnly: FORK_DEFAULTS.multiEffortOnlyDefault,
   providers: [],
   families: [],
+  openness: "all",
+  vramMaxGb: null,
+  excludeNonReasoning: FORK_DEFAULTS.excludeNonReasoningDefault,
 };
 
 export function sameFilters(a: ModelFilters, b: ModelFilters): boolean {
   if (a.ageEnabled !== b.ageEnabled || a.ageMonths !== b.ageMonths) return false;
   if (Boolean(a.multiEffortOnly) !== Boolean(b.multiEffortOnly)) return false;
+  if ((a.openness ?? "all") !== (b.openness ?? "all")) return false;
+  if ((a.vramMaxGb ?? null) !== (b.vramMaxGb ?? null)) return false;
+  if (Boolean(a.excludeNonReasoning) !== Boolean(b.excludeNonReasoning)) return false;
   if (a.providers.length !== b.providers.length || a.families.length !== b.families.length) {
     return false;
   }
@@ -101,11 +123,20 @@ export function applyFilters(
   // Sentinel: explicit empty membership from filter shelf "None"
   if (filters.providers.includes("__none__")) return [];
 
+  const openness = filters.openness ?? "all";
+
   return models.filter((model) => {
     if (providerSet && !providerSet.has(model.provider)) return false;
     const fid = familyIdOf(model);
     if (familySet && !familySet.has(fid)) return false;
     if (multiEffortFamilies && !multiEffortFamilies.has(fid)) return false;
+    if (openness === "open" && model.openness !== "open") return false;
+    if (openness === "closed" && model.openness !== "closed") return false;
+    if (filters.vramMaxGb != null) {
+      if (model.openness !== "open") return false;
+      if (!fitsLocalVram(model.model, filters.vramMaxGb)) return false;
+    }
+    if (filters.excludeNonReasoning && isNonReasoningEffortRow(model)) return false;
     if (cutoff) {
       const released = parseReleaseDate(model.release_date);
       if (!released || released < cutoff) return false;

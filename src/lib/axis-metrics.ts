@@ -73,8 +73,9 @@ export const ECONOMY_BASIS_LABELS: Record<EconomyBasis, { short: string; detail:
     detail: "Cost per million tokens and tokens per second",
   },
   task: {
-    short: "$/task · s/task",
-    detail: "Cost and wall time per Artificial Analysis Index task",
+    short: "$/task · s/task≈",
+    detail:
+      "Cost per AA Index task when measured. Time is measured wall-time when available; otherwise estimated as TTFT + 1000/TPS (not AA free-API wall time).",
   },
 };
 
@@ -99,6 +100,26 @@ export function detectEconomyBasis(mapping: AxisMapping): EconomyBasis | "custom
   if (mapping.x === "blended_price" && mapping.z === "tps") return "rate";
   if (mapping.x === "cost_per_index" && mapping.z === "time_per_index") return "task";
   return "custom";
+}
+
+
+/**
+ * AA free Data API omits Index-task wall time (see scripts/lib/aa-api.mjs).
+ * When measured `time_per_index_task_s` is missing, estimate:
+ *   TTFT(s) + (INDEX_TASK_OUTPUT_TOKENS / tps)
+ * Transparent proxy so task-economy axes never blank the stage.
+ */
+export const INDEX_TASK_OUTPUT_TOKENS_EST = 1000;
+
+export function estimateTimePerIndexTaskS(
+  m: Pick<Model, "time_per_index_task_s" | "tps" | "ttft">,
+): number | null {
+  if (m.time_per_index_task_s != null && m.time_per_index_task_s > 0) {
+    return m.time_per_index_task_s;
+  }
+  if (m.tps == null || !(m.tps > 0)) return null;
+  const ttftS = m.ttft != null && m.ttft > 0 ? m.ttft / 1000 : 0;
+  return ttftS + INDEX_TASK_OUTPUT_TOKENS_EST / m.tps;
 }
 
 function formatPriceTick(value: number): string {
@@ -197,15 +218,17 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
   },
   {
     id: "time_per_index",
-    label: "Time / Index task",
-    title: "TIME / TASK",
+    /** AA free API omits measured wall time — values are often estimated. */
+    label: "Time / Index task (est.)",
+    title: "TIME / TASK (est.)",
     scale: "log",
     available: true,
-    getValue: (m) =>
-      m.time_per_index_task_s != null && m.time_per_index_task_s > 0
-        ? m.time_per_index_task_s
-        : null,
-    formatTick: (v) => (v >= 100 ? `${Math.round(v)}s` : `${Number(v.toPrecision(3))}s`),
+    getValue: (m) => estimateTimePerIndexTaskS(m),
+    formatTick: (v) => {
+      const body = v >= 100 ? `${Math.round(v)}s` : `${Number(v.toPrecision(3))}s`;
+      // Tick labels stay short; "est." is in the axis title.
+      return body;
+    },
   },
 ] as const;
 
@@ -444,13 +467,24 @@ export function buildAxisDomain(
     ) {
       tickValues.unshift(floor);
     }
+    const rawTicks = tickValues.map((value) => ({ value, label: def.formatTick(value) }));
+    // L1: "≤ floor" is a point label, not a range — keep the first occurrence
+    // and drop duplicate floor-labeled ticks; two of them overdraw at the axis
+    // origin and smear into one unreadable glyph cluster.
+    let floorLabelSeen = false;
+    const ticks = rawTicks.filter((tick) => {
+      if (tick.label !== "≤ floor") return true;
+      if (floorLabelSeen) return false;
+      floorLabelSeen = true;
+      return true;
+    });
     return {
       metricId,
       scale: "log",
       min,
       max,
       floor,
-      ticks: tickValues.map((value) => ({ value, label: def.formatTick(value) })),
+      ticks,
       title: def.title,
     };
   }

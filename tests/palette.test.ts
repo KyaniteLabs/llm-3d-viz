@@ -24,6 +24,9 @@ import {
   legendEntries,
   brandLayerFlags,
   TRAIL_IDLE_OPACITY,
+  TRAIL_SOLO_OPACITY,
+  MID_EFFORT_SIZE_SCALE,
+  DOMINATED_CHROMA_PULL,
 } from "../src/viz/palette";
 import { models } from "../src/data/models";
 import { frontier } from "../src/lib/pareto";
@@ -283,17 +286,17 @@ describe("curve-focus family continuity", () => {
     expect(labSecondary("Google").toLowerCase()).toBe("#ea4335");
     expect(labBrand("Google").colors[2].toLowerCase()).toBe("#fbbc05");
     expect(labBrand("Google").colors[3].toLowerCase()).toBe("#34a853");
-    expect(labColor("DeepSeek").toLowerCase()).toBe("#4d6bfe");
+    expect(labColor("DeepSeek").toLowerCase()).toBe("#6b4dff");
     // Orange family deliberately separated (Amazon / Alibaba / Mistral / Xiaomi).
     expect(labColor("Alibaba").toLowerCase()).toBe("#ff6a00");
-    expect(labColor("Mistral").toLowerCase()).toBe("#fa520f");
-    expect(labSecondary("Mistral").toLowerCase()).toBe("#ffd900");
-    expect(labColor("Amazon").toLowerCase()).toBe("#ff9900");
+    expect(labColor("Mistral").toLowerCase()).toBe("#e11d48");
+    expect(labSecondary("Mistral").toLowerCase()).toBe("#9f1239");
+    expect(labColor("Amazon").toLowerCase()).toBe("#b45309");
     expect(labColor("Xiaomi").toLowerCase()).toBe("#ff6900");
-    expect(labColor("NVIDIA").toLowerCase()).toBe("#76b900");
-    expect(labColor("Microsoft").toLowerCase()).toBe("#00a4ef");
+    expect(labColor("NVIDIA").toLowerCase()).toBe("#84cc16");
+    expect(labColor("Microsoft").toLowerCase()).toBe("#6366f1");
     expect(labBrand("Microsoft").colors).toHaveLength(4);
-    expect(labColor("Kimi").toLowerCase()).toBe("#1783ff");
+    expect(labColor("Kimi").toLowerCase()).toBe("#00c2e0");
     // Every kit has ≥3 distinct hexes.
     for (const [name, brand] of Object.entries(LAB_BRANDS)) {
       expect(brand.colors.length).toBeGreaterThanOrEqual(3);
@@ -359,9 +362,9 @@ describe("S+ brand layers + glanceable trails", () => {
     expect(brandLayerFlags({ cinemaFocus: true }).showCore).toBe(true);
   });
 
-  it("maps Qwen models under Alibaba provider to Qwen violet — not Alibaba orange", () => {
+  it("maps Qwen models under Alibaba provider to Qwen sky — not Alibaba orange", () => {
     expect(resolveLabKey("Alibaba", "Qwen3.5 122B A10B (Reasoning)")).toBe("Qwen");
-    expect(labColor("Alibaba", "#89939E", "Qwen3 Coder Next").toLowerCase()).toBe("#615ced");
+    expect(labColor("Alibaba", "#89939E", "Qwen3 Coder Next").toLowerCase()).toBe("#38bdf8");
     expect(labColor("Alibaba").toLowerCase()).toBe("#ff6a00"); // bare Alibaba still corporate orange
     const enc = pointEncoding({
       openness: "open",
@@ -375,10 +378,10 @@ describe("S+ brand layers + glanceable trails", () => {
       modelId: "Qwen3.5 122B A10B (Reasoning)",
     });
     expect(enc.fill.toLowerCase()).not.toBe("#ff6a00");
-    expect(enc.brandColors[0].toLowerCase()).toBe("#615ced");
+    expect(enc.brandColors[0].toLowerCase()).toBe("#38bdf8");
     expect(enc.showRing).toBe(false); // Beauty P0: idle rings off
-    expect(enc.accent.toLowerCase()).toBe("#1a1033");
-    expect(enc.core.toLowerCase()).toBe("#c4b5fd");
+    expect(enc.accent.toLowerCase()).toBe("#0c4a6e");
+    expect(enc.core.toLowerCase()).toBe("#e0f2fe");
   });
 
   it("pointEncoding: dominated keeps lab hue, quiet trail, no idle rings", () => {
@@ -453,5 +456,98 @@ describe("S+ brand layers + glanceable trails", () => {
     });
     expect(mid.sizeScale).toBeCloseTo(base.sizeScale * 0.7);
     expect(mid.fill).toBe(base.fill);
+  });
+});
+
+describe("S+ W1 freeze goldens (no algorithm thrash)", () => {
+  it("locks trail / mid / chroma constants to paint authority", () => {
+    expect(TRAIL_IDLE_OPACITY).toBe(0.18);
+    expect(TRAIL_SOLO_OPACITY).toBe(0.88);
+    expect(MID_EFFORT_SIZE_SCALE).toBe(0.7);
+    expect(DOMINATED_CHROMA_PULL).toBe(0.22);
+    expect(TRAIL_IDLE_OPACITY).toBeLessThan(0.45);
+  });
+
+  it("brandLayerFlags matrix: off default; on for solo|selected|brandFull|cinemaFocus", () => {
+    const off = brandLayerFlags({});
+    expect(off).toEqual({ showRing: false, showCore: false });
+    expect(brandLayerFlags({ solo: true })).toEqual({ showRing: true, showCore: true });
+    expect(brandLayerFlags({ selected: true })).toEqual({ showRing: true, showCore: true });
+    expect(brandLayerFlags({ brandFull: true })).toEqual({ showRing: true, showCore: true });
+    expect(brandLayerFlags({ cinemaFocus: true })).toEqual({ showRing: true, showCore: true });
+    expect(brandLayerFlags({ solo: false, selected: false, brandFull: false, cinemaFocus: false })).toEqual({
+      showRing: false,
+      showCore: false,
+    });
+  });
+
+  it("mid-effort size multiplier is exactly MID_EFFORT_SIZE_SCALE", () => {
+    const base = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "f",
+      singleton: false,
+      provider: "OpenAI",
+      effortRole: "endpoint",
+    });
+    const mid = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "f",
+      singleton: false,
+      provider: "OpenAI",
+      effortRole: "mid",
+    });
+    expect(mid.sizeScale).toBeCloseTo(base.sizeScale * MID_EFFORT_SIZE_SCALE, 5);
+    expect(mid.fill).toBe(base.fill);
+  });
+
+  it("singleton policy A: size/opacity hierarchy keeps non-slate identity (lab-ish fill)", () => {
+    // Policy A (W1 locked): keep SINGLETON_OPACITY/SIZE; fill must not collapse to pure SINGLETON_FILL slate.
+    // If glance fails later, fail-set unlocks Policy B (opacity 1 + size-only, no slate mix).
+    const series = familySeriesColor("gpt-5.6-luna", "OpenAI");
+    const enc = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "LonelyFamily",
+      singleton: true,
+      provider: "OpenAI",
+    });
+    expect(SINGLETON_OPACITY).toBe(0.42);
+    expect(SINGLETON_SIZE_SCALE).toBe(0.55);
+    expect(enc.opacity).toBe(SINGLETON_OPACITY);
+    expect(enc.fill.toLowerCase()).not.toBe(SINGLETON_FILL.toLowerCase());
+    // Mixed toward series — must differ from pure slate mud
+    expect(enc.fill.toLowerCase()).not.toBe("#3d5560");
+    // Size reduced vs non-singleton same score
+    const multi = pointEncoding({
+      openness: "closed",
+      semanticClass: "dominated",
+      score: 0.5,
+      heatEncoding: false,
+      presentationMode: "curve",
+      familyId: "gpt-5.6-luna",
+      singleton: false,
+      provider: "OpenAI",
+    });
+    expect(enc.sizeScale).toBeLessThan(multi.sizeScale);
+    expect(series).toBeTruthy();
+  });
+
+  it("no emoji pictographs in legend channel titles", () => {
+    const entries = legendEntries("curve", false);
+    for (const e of entries) {
+      expect(e.title).not.toMatch(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF\u2B50\u26A1]/u);
+      expect(e.detail ?? "").not.toMatch(/[⚡★☆✦]/u);
+    }
   });
 });

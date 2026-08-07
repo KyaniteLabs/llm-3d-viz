@@ -63,6 +63,13 @@ fi
 
 log "scrape ok rows=$row_count hash=${after_hash:0:12}… changed=$changed"
 
+# Coverage report every successful scrape (null honesty; no invented fields).
+if ! node "$REPO_ROOT/scripts/catalog-coverage-report.mjs" --out "$LOG_DIR/catalog-coverage.txt" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+  log "WARN: catalog coverage report failed (non-fatal)"
+else
+  log "coverage → $LOG_DIR/catalog-coverage.txt"
+fi
+
 if [[ "$changed" -eq 0 ]]; then
   log "no catalog change — skip build/deploy"
   printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\"}" >"$STATUS_FILE"

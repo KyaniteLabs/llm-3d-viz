@@ -55,3 +55,41 @@ test.describe("Decide mode v1", () => {
     await page.waitForTimeout(300);
   });
 });
+
+  test("AC-I5 Decide hide matrix: Explore hosts hidden, export kept", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector("[data-decide-toggle]", { timeout: 30000 });
+    await page.waitForTimeout(800);
+    await page.click("[data-decide-toggle]");
+    await expect(page.locator("html")).toHaveAttribute("data-decide-mode", "1");
+
+    const mustHide = [
+      ".weight-controls",
+      ".preset-controls",
+      "[data-intent-primary]",
+      "[data-advanced-panel]",
+      ".family-nav",
+      "#nav-family-search",
+      "[data-nav-family-search]",
+      ".family-chip-row",
+      ".nav-keys",
+      '[data-section="score"]',
+      '[data-section="navigate"]',
+    ];
+    for (const sel of mustHide) {
+      const loc = page.locator(sel).first();
+      const count = await page.locator(sel).count();
+      if (count === 0) continue; // absent is OK
+      await expect(loc, sel).toBeHidden();
+    }
+    // value-leaderboard should be absent or hidden
+    const lb = page.locator(".value-leaderboard");
+    if ((await lb.count()) > 0) {
+      await expect(lb.first()).toBeHidden();
+    }
+
+    await expect(page.locator("[data-decide-export]")).toBeVisible();
+    await expect(page.locator(".decide-panel:not([hidden])")).toBeVisible();
+    // Selection section may remain for context
+    await expect(page.locator('[data-section="selection"]')).toBeVisible();
+  });

@@ -29,6 +29,12 @@ export const presets = {
   "long-context": { speed: 0.25, cost: 0.45, intelligence: 0.3 },
   /** Latency-first workload (intent: Fastest). */
   speed: { speed: 0.55, cost: 0.2, intelligence: 0.25 },
+  /** Local 8 GB — slightly speed-biased (smaller models). */
+  local8: { speed: 0.45, cost: 0.2, intelligence: 0.35 },
+  /** Local 12 GB — smart + fast balance. */
+  local12: { speed: 0.4, cost: 0.2, intelligence: 0.4 },
+  /** Local 24 GB — room for larger open models; intelligence up. */
+  local24: { speed: 0.35, cost: 0.15, intelligence: 0.5 },
 } as const satisfies Record<string, ScoreWeights>;
 
 export type PresetId = keyof typeof presets;
@@ -36,7 +42,7 @@ export type PresetId = keyof typeof presets;
 /**
  * Primary UX intents — human goals, not analyst jargon.
  * Weights still map to `presets`; advanced panel exposes raw sliders + technical chips.
- * LLM-assisted “tell me what you need” can layer on top later without replacing these four.
+ * LLM-assisted “tell me what you need” can layer on top later without replacing these intents.
  */
 export const intentPresets = [
   {
@@ -58,6 +64,21 @@ export const intentPresets = [
     id: "speed" as const,
     label: "Fastest",
     blurb: "Prioritize tokens/sec when latency matters most.",
+  },
+  {
+    id: "local8" as const,
+    label: "Local · 8 GB",
+    blurb: "Open weights that fit ~8 GB VRAM (≤~9B Q4) — laptops / entry GPUs.",
+  },
+  {
+    id: "local12" as const,
+    label: "Local · 12 GB",
+    blurb: "Open weights that fit ~12 GB VRAM (≤~14B Q4) — mid desktops.",
+  },
+  {
+    id: "local24" as const,
+    label: "Local · 24 GB",
+    blurb: "Open weights that fit ~24 GB VRAM (≤~34B Q4) — 4090-class.",
   },
 ] as const satisfies ReadonlyArray<{ id: PresetId; label: string; blurb: string }>;
 

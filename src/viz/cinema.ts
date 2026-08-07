@@ -2,6 +2,13 @@ import type { AppStore, AppState } from "../state";
 import { motionPreference } from "./sweep-timing";
 import type { Stage3DSurface } from "./stage-api";
 
+/**
+ * W2 host lock / W6 fill: under `.app-shell.is-cinema`, status-bar (and method-strip) are CSS-hidden.
+ * Cinema/export method line must render via stage overlay or capture compositor — not by re-showing chrome.
+ * Implemented as stage-hosted .cinema-method-line under is-cinema (status-bar hidden).
+ */
+export const CINEMA_METHOD_LINE_HOST = "export-overlay" as const;
+
 const ORBIT_SPEED = 0.00012;
 /**
  * After entering cinema, the scope bar hides and the stage expands under the
@@ -35,14 +42,28 @@ export class CinemaMode {
       this.removeMotionListener = () => media.removeEventListener?.("change", onChange);
     }
     this.store.subscribe((state) => this.render(state));
-    // Prefer el (Stage API); gd is the same root for both Plotly and Three.
-    const pointerRoot = this.stage.el ?? this.stage.gd;
-    pointerRoot.addEventListener("pointerenter", () => {
-      if (!this.store.getState().cinemaMode) return;
-      // Accidental enter from cinema layout expansion — ignore until armed.
-      if (performance.now() < this.detuneArmedAt) return;
-      this.store.update({ cinemaMode: false });
-    });
+    // Exit controls: floating FAB, keyboard C, Atlas "cinema off".
+    // Do NOT exit on pointerenter — reflow after enter was firing false exits
+    // and cinema hid all chrome so users could not recover without keyboard.
+    this.ensureExitFab();
+  }
+
+  private ensureExitFab() {
+    let fab = document.querySelector<HTMLButtonElement>("[data-cinema-exit]");
+    if (!fab) {
+      fab = document.createElement("button");
+      fab.type = "button";
+      fab.className = "cinema-exit-fab";
+      fab.setAttribute("data-cinema-exit", "1");
+      fab.setAttribute("aria-label", "Exit cinema mode");
+      fab.textContent = "Exit cinema [C]";
+      fab.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.store.getState().cinemaMode) this.store.update({ cinemaMode: false });
+      });
+      document.body.appendChild(fab);
+    }
   }
 
   destroy() {
@@ -57,6 +78,10 @@ export class CinemaMode {
     }
     this.wasCinema = active;
     document.querySelector(".app-shell")?.classList.toggle("is-cinema", active);
+    // FAB is mounted on body; mirror class on <html> for :has-free selectors.
+    document.documentElement.classList.toggle("is-cinema", active);
+    this.syncMethodOverlay(active);
+    this.stage.setCinemaAtmosphere?.(active);
     if (active) this.start();
     else this.stop();
   }
@@ -81,5 +106,29 @@ export class CinemaMode {
   toggle() {
     if (this.reduced) return;
     this.store.update({ cinemaMode: !this.store.getState().cinemaMode });
+  }
+
+  /** Method line on cinema export frame (status-bar is CSS-hidden under is-cinema). */
+  private syncMethodOverlay(active: boolean) {
+    const host = this.stage.el ?? this.stage.gd;
+    let el = host.querySelector<HTMLElement>("[data-cinema-method]");
+    if (!active) {
+      el?.remove();
+      return;
+    }
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "cinema-method-line";
+      el.setAttribute("data-cinema-method", "1");
+      el.setAttribute("aria-hidden", "true");
+      const style = host.style as CSSStyleDeclaration;
+      if (!style.position || style.position === "static") style.position = "relative";
+      host.appendChild(el);
+    }
+    const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
+    const asOf = new Date().toISOString().slice(0, 10);
+    el.textContent =
+      `Model Observatory · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
+      (n != null ? ` · N=${n}` : "");
   }
 }

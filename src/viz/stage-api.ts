@@ -37,6 +37,11 @@ export interface StageRenderOptions {
   decideParetoIds?: ReadonlySet<string> | string[] | null;
   /** Decide mode: shortlist model ids (call out). */
   decideShortlistIds?: ReadonlySet<string> | string[] | null;
+  /**
+   * Cinema density focus-set (W5). When set, marks outside the set are heavily dimmed
+   * so cinema export is not full-catalog confetti (K≤12 typical).
+   */
+  cinemaFocusIds?: ReadonlySet<string> | string[] | null;
 }
 
 /**
@@ -55,6 +60,8 @@ export interface Stage3DSurface {
   setPointAppearance?(colors: string[], sizes: number[]): void;
   /** Optional explicit fit after render (Three); Plotly no-ops. */
   fitToVisible?(models: Model[], mode?: StageFitMode): void;
+  /** Optional cinema fog / atmosphere (Three). */
+  setCinemaAtmosphere?(on: boolean): void;
   /** Dim non-matching family marks/trails without a full rebuild. */
   setFamilyHighlight?(familyId: string | null): void;
   destroy?(): void;

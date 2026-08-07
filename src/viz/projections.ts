@@ -271,7 +271,7 @@ export class Projections {
       ticktext: domain.ticks.map((t) => t.label),
       tickfont: {
         family: this.tokens.fontMono,
-        size: 9,
+        size: 10,
         color: this.tokens.textMuted,
       },
       title: {

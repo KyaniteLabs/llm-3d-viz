@@ -18,6 +18,8 @@ describe("forker config seams", () => {
     expect(DEFAULT_FILTERS.ageEnabled).toBe(FORK_DEFAULTS.ageFilterDefault);
     expect(DEFAULT_FILTERS.ageMonths).toBe(FORK_DEFAULTS.ageMonthsDefault);
     expect(DEFAULT_FILTERS.multiEffortOnly).toBe(FORK_DEFAULTS.multiEffortOnlyDefault);
+    expect(DEFAULT_FILTERS.excludeNonReasoning).toBe(FORK_DEFAULTS.excludeNonReasoningDefault);
+    expect(FORK_DEFAULTS.excludeNonReasoningDefault).toBe(true);
   });
 
   it("APP_BRANDING exposes non-empty title, tagline, documentTitle", () => {

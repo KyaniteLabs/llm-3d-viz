@@ -20,6 +20,9 @@ function cloneFilters(f: ModelFilters): ModelFilters {
     multiEffortOnly: f.multiEffortOnly,
     providers: [...f.providers],
     families: [...f.families],
+    openness: f.openness ?? "all",
+    vramMaxGb: f.vramMaxGb ?? null,
+    excludeNonReasoning: f.excludeNonReasoning ?? true,
   };
 }
 
@@ -315,10 +318,14 @@ export function formatScopeSummary(
   visibleCount: number,
   catalogCount: number,
 ): string {
-  const bits: string[] = ["Cloud"];
+  const bits: string[] = [filters.vramMaxGb != null ? "Local" : "Cloud"];
   if (filters.ageEnabled) bits.push(`≤${filters.ageMonths}mo`);
   else bits.push("any age");
   if (filters.multiEffortOnly) bits.push("multi-effort");
+  if (filters.vramMaxGb != null) bits.push(`≤${filters.vramMaxGb}GB VRAM`);
+  else if (filters.openness === "open") bits.push("open weights");
+  else if (filters.openness === "closed") bits.push("closed");
+  if (filters.excludeNonReasoning) bits.push("reasoning only");
   if (filters.providers.length && !filters.providers.includes("__none__")) {
     bits.push(`${filters.providers.length} lab${filters.providers.length === 1 ? "" : "s"}`);
   }

@@ -323,8 +323,8 @@ export class Stage3D {
     // is LINEAR data min–max (frontier-math §3.3) — logging AA Index would distort.
     // Domains come from buildAxisDomain over the visible set (same as Three stage).
     // FIX-D (#29): narrow-stage axis legibility (see NARROW_PX).
-    const axisTitleSize = narrow ? 9 : 11;
-    const axisTickSize = narrow ? 9 : 10;
+    const axisTitleSize = narrow ? 10 : 11;
+    const axisTickSize = 10;
     const pickTicks = (domain: { ticks: Array<{ value: number; label: string }>; title: string }, shortTitle: string) => {
       let ticks = domain.ticks;
       // On a narrow stage the three axes converge at one corner — keep fewer labels.

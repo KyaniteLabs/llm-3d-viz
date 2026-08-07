@@ -159,34 +159,40 @@ export function catalogSnapshotPayload(productCatalog: readonly Model[]): string
     .join("\n");
 }
 
-/**
- * Stable content id for the **product catalog** (post catalog-scope, pre shelf filters).
- * SHA-256, first 16 hex chars, `cat_` prefix. Never returns bare "local".
- * Async (Web Crypto / Node crypto.subtle).
- */
-export async function catalogSnapshotId(productCatalog: readonly Model[]): Promise<string> {
-  const payload = catalogSnapshotPayload(productCatalog);
-  const data = new TextEncoder().encode(payload);
-  const subtle = globalThis.crypto?.subtle;
-  if (!subtle) {
-    throw new Error("catalogSnapshotId requires crypto.subtle");
-  }
-  const buf = await subtle.digest("SHA-256", data);
-  const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return `cat_${hex.slice(0, 16)}`;
-}
-
-/** Sync fallback only for pure tests that inject a precomputed id — prefer catalogSnapshotId. */
-export function catalogSnapshotIdSyncForTests(productCatalog: readonly Model[]): string {
-  // Deterministic non-crypto stand-in when subtle unavailable in odd runners.
-  // Production always uses catalogSnapshotId (SHA-256).
-  const payload = catalogSnapshotPayload(productCatalog);
+/** FNV-1a 32-bit stand-in when Web Crypto is unavailable (HTTP / non-secure contexts). */
+function catalogSnapshotIdFnv(payload: string): string {
   let h = 2166136261;
   for (let i = 0; i < payload.length; i++) {
     h ^= payload.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return `cat_${(h >>> 0).toString(16).padStart(8, "0")}${(payload.length >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+/**
+ * Stable content id for the **product catalog** (post catalog-scope, pre shelf filters).
+ * SHA-256, first 16 hex chars, `cat_` prefix when `crypto.subtle` exists.
+ * Falls back to deterministic FNV on HTTP / non-secure contexts (no throw — boot must not die).
+ */
+export async function catalogSnapshotId(productCatalog: readonly Model[]): Promise<string> {
+  const payload = catalogSnapshotPayload(productCatalog);
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) {
+    return catalogSnapshotIdFnv(payload);
+  }
+  try {
+    const data = new TextEncoder().encode(payload);
+    const buf = await subtle.digest("SHA-256", data);
+    const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    return `cat_${hex.slice(0, 16)}`;
+  } catch {
+    return catalogSnapshotIdFnv(payload);
+  }
+}
+
+/** Sync fallback only for pure tests that inject a precomputed id — prefer catalogSnapshotId. */
+export function catalogSnapshotIdSyncForTests(productCatalog: readonly Model[]): string {
+  return catalogSnapshotIdFnv(catalogSnapshotPayload(productCatalog));
 }
 
 export function buildDecideResponse(

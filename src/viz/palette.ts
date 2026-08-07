@@ -286,30 +286,30 @@ export const LAB_BRANDS: Readonly<Record<string, LabBrand>> = {
   // Google logo / Material medium set
   Google: brand(["#4285F4", "#EA4335", "#FBBC05", "#34A853"], "Google Blue Red Yellow Green"),
   // Meta / Facebook product blues + white
-  Meta: brand(["#0866FF", "#0081FB", "#FFFFFF", "#F0F2F5"], "Meta blue · light blue · white · ash"),
+  Meta: brand(["#D946EF", "#86198F", "#FAE8FF", "#1A0A1F"], "Meta fuchsia · plum · lilac · ink"),
   // DeepSeek whale blue system (product mark blue + navy + cyan highlight)
-  DeepSeek: brand(["#4D6BFE", "#1E3A8A", "#7DD3FC", "#0A0F2C"], "DeepSeek blue · navy · ice · ink"),
+  DeepSeek: brand(["#6B4DFF", "#1E1B4B", "#A5B4FC", "#0A0F2C"], "DeepSeek violet · deep navy · ice · ink"),
   /**
    * Qwen product identity (violet) — NOT Alibaba Smile orange.
    * Catalog often labels Qwen rows as provider "Alibaba"; resolveLabKey remaps by model name.
    */
-  Qwen: brand(["#615CED", "#1A1033", "#C4B5FD", "#0D0A1A"], "Qwen violet · deep purple · lilac · ink"),
+  Qwen: brand(["#38BDF8", "#0C4A6E", "#E0F2FE", "#082F49"], "Qwen sky · deep cyan · ice · ink"),
   // Alibaba corporate (non-Qwen only after resolveLabKey)
   Alibaba: brand(["#FF6A00", "#000000", "#FFFFFF", "#FFB400"], "Alibaba orange · black · white · gold"),
   // Mistral sunset kit (mistral.ai): orange-red · sunshine · cream · ink
-  Mistral: brand(["#FA520F", "#FFD900", "#FFF0C2", "#1F1F1F", "#B9DAFF"], "Mistral orange · yellow · cream · ink"),
+  Mistral: brand(["#E11D48", "#9F1239", "#FFD900", "#1F1F1F"], "Mistral rose · wine · gold · ink"),
   // Cohere: coniferous green · synthetic quartz · volcanic black (Pentagram rebrand)
   Cohere: brand(["#39594D", "#D18EE2", "#212121", "#FF7759", "#FAFAFA"], "Cohere green · quartz · black · coral"),
   // Amazon Smile: orange · navy · white (+ classic denim blue)
-  Amazon: brand(["#FF9900", "#232F3E", "#FFFFFF", "#146EB4"], "Amazon orange · navy · white · denim"),
+  Amazon: brand(["#B45309", "#232F3E", "#FCD34D", "#146EB4"], "Amazon amber · navy · gold · blue"),
   // Moonshot / Kimi platform (product blue system)
-  Kimi: brand(["#1783FF", "#0B1B33", "#93C5FD", "#FFFFFF"], "Kimi blue · navy · sky · white"),
+  Kimi: brand(["#00C2E0", "#042F2E", "#67E8F9", "#FFFFFF"], "Kimi cyan · deep teal · sky · white"),
   // Microsoft logo square colors
-  Microsoft: brand(["#00A4EF", "#7FBA00", "#F25022", "#FFB900"], "Microsoft Blue Green Red Yellow"),
+  Microsoft: brand(["#6366F1", "#312E81", "#C7D2FE", "#0F0E1A"], "Microsoft indigo · deep · lilac · ink"),
   // MiniMax product magenta system
   MiniMax: brand(["#E91E8C", "#6B21A8", "#FBCFE8", "#1A0B1F"], "MiniMax magenta · violet · blush · ink"),
   // NVIDIA trademark: green · dark gray · white (PDF guidelines)
-  NVIDIA: brand(["#76B900", "#1E1E1E", "#FFFFFF", "#000000"], "NVIDIA green · dark · white · black"),
+  NVIDIA: brand(["#84CC16", "#14532D", "#FFFFFF", "#052E16"], "NVIDIA lime · forest · white · ink"),
   // xAI / Grok (AA: SpaceXAI): black · white · cool gray (brand guidelines monochrome)
   SpaceXAI: brand(["#E7E9EA", "#000000", "#71767B", "#FFFFFF"], "xAI light · black · gray · white"),
   // Thinking Machines Lab — no public kit; bronze triad marked unofficial

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | charted · RALPLAN **APPROVE** · **pending user execute approval** |
+| **Status** | **superseded** by MAP-s-plus-maximal-dataviz-beauty (2026-08-07) |
 | **Forgejo map** | #147 |
 | **PRD** | #146 |
 | **Tickets** | #148→#149→#150→#151→#152→#153 |
@@ -41,7 +41,7 @@ docs   paint  HUD    chrome hybrid  scorecard
 **Evidence:** docs only  
 
 - [ ] `decision-filament-hierarchy.md` status locked (algorithms + principle rank)  
-- [ ] `DESIGN-SYSTEM.md` channel matrix: non-frontier desat; rings/core default off at full density; continuous filament ridge; equal-chroma carnival in refusals; emoji still banned including ★  
+- [x] ~~non-frontier desat~~ **SUPERSEDED** → glanceable fill + chroma pull (see MAP-s-plus-maximal-dataviz-beauty) · rings/core focus-gated · filament ridge · no carnival · no emoji  
 - [ ] A2 supersession pointer (idle trail α; rings) in wayfinder docs  
 - [ ] `decision-semantic-color-aa.md` pointer to S+ hierarchy overlay  
 - [ ] RALPLAN W5 scorecard + mid-train binary rule published  
@@ -146,3 +146,8 @@ Light mode · WebGPU · n≥20 study · more brand hex unless CVD fail · new De
 ## Next train (after this map)
 - [MAP-oss-custom-quality.md](./MAP-oss-custom-quality.md) — architecture + ultraqa → customizable → FJ+GH open source
 
+
+
+## Superseded by (2026-08-07)
+- [MAP-s-plus-maximal-dataviz-beauty.md](./MAP-s-plus-maximal-dataviz-beauty.md)
+- Plan: `.omx/plans/prd-s-plus-maximal-dataviz-beauty.md` (Critic APPROVE · pending user execute)
