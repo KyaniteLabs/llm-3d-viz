@@ -12,9 +12,10 @@
       "ok": true,
       "raw": 595,
       "mapped": 595,
-      "scorable": 0,
+      "scorable_pre_blend": 0,
       "tier": "free",
-      "pages": 3
+      "pages": 3,
+      "scorable_after_blend": 302
     },
     {
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
@@ -105,11 +106,12 @@
       ],
       "published_rows": 1,
       "complete": false,
-      "partial_cards": []
+      "notes": "",
+      "partial_tiers": []
     },
     {
       "family": "Claude Opus 4.8",
-      "provider": null,
+      "provider": "Anthropic",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -144,11 +146,12 @@
       ],
       "published_rows": 2,
       "complete": false,
-      "partial_cards": []
+      "notes": "",
+      "partial_tiers": []
     },
     {
       "family": "DeepSeek V4 Flash 0731",
-      "provider": null,
+      "provider": "DeepSeek",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -162,7 +165,7 @@
     },
     {
       "family": "Qwen3",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -176,7 +179,7 @@
     },
     {
       "family": "Qwen3 Max (Preview)",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -190,7 +193,7 @@
     },
     {
       "family": "Qwen3 Max Thinking (Preview)",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -204,7 +207,7 @@
     },
     {
       "family": "Qwen3.6 Max Preview",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -218,7 +221,7 @@
     },
     {
       "family": "Qwen3.7",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -232,7 +235,7 @@
     },
     {
       "family": "Qwen3.8",
-      "provider": null,
+      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"
@@ -266,6 +269,7 @@
     ],
     "published_rows": 1,
     "complete": false,
-    "partial_cards": []
+    "notes": "",
+    "partial_tiers": []
   }
 }

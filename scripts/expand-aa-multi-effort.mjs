@@ -49,10 +49,14 @@ const aaSnapshotPath = path.join(root, "data/aa-api-snapshot.json");
 
 function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
   const byFamily = new Map();
+  const providerByFamily = new Map();
   for (const row of aaRows) {
     const list = byFamily.get(row.family_id) ?? [];
     list.push(row.effort_tier);
     byFamily.set(row.family_id, list);
+    if (row.provider && !providerByFamily.has(row.family_id)) {
+      providerByFamily.set(row.family_id, row.provider);
+    }
   }
   const ladders = laddersDoc?.ladders ?? {};
   const gaps = [];
@@ -64,13 +68,14 @@ function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
     if (missing.length || have.size < 2) {
       gaps.push({
         family,
-        provider: meta.provider,
+        provider: meta.provider || providerByFamily.get(family) || "Unknown",
         expected_tiers: expected,
         published_tiers: [...have],
         missing_tiers: missing,
         published_rows: have.size,
         complete: missing.length === 0 && have.size >= 2,
-        partial_cards: partial,
+        notes: "",
+        partial_tiers: partial,
       });
     }
   }
@@ -79,7 +84,7 @@ function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
     if (tiers.length < 2 && tiers.some((t) => t === "default" || t === "max")) {
       gaps.push({
         family,
-        provider: null,
+        provider: providerByFamily.get(family) || "Unknown",
         expected_tiers: [],
         published_tiers: [...new Set(tiers)],
         missing_tiers: ["(additional efforts may exist at product level)"],
@@ -149,13 +154,14 @@ if (!aa.ok) {
 const aaMapped = aa.models.map((m) =>
   stampAaMeasured(mapAaApiModel(m, today, "AA Data API free")),
 );
+// Free API often omits blended $/M until applyAaDerivedBlend — count scorable after blend later.
 let merged = mergeBySpine([], aaMapped);
 sourceStats.push({
   source: aa.source,
   ok: true,
   raw: aa.models.length,
   mapped: aaMapped.length,
-  scorable: aaMapped.filter(isScorable).length,
+  scorable_pre_blend: aaMapped.filter(isScorable).length,
   tier: aa.tier,
   pages: aa.pages,
 });
@@ -182,6 +188,7 @@ sourceStats.push({
 
 // --- 3. AA-derived blend, then OpenRouter list prices ---
 merged = applyAaDerivedBlend(merged);
+sourceStats[0].scorable_after_blend = merged.filter(isScorable).length;
 const or = await fetchOpenRouterModels();
 if (or.ok) {
   fs.writeFileSync(
