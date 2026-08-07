@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-**Last updated:** 2026-08-07 (land close — source landed Forgejo `e38f57a`)
+**Last updated:** 2026-08-07 (S+ campaign — W5 D10 + W6 + W7 audit-fix verified; gates remain)
 
 ## What this is
 
@@ -10,6 +10,21 @@ Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). 
 - **Live:** https://viz.kyanitelabs.tech/  
 - **Run:** `npm install && npm run dev`  
 - **Tests:** `npm test` (207 unit tests as of closeout)
+
+## S+ campaign state (2026-08-07) — resume here
+
+**Committed (local `main`, not pushed — push is approval-gated):**
+- `5a4b2f0` W5 D10 redefined — identity-without-color via focus-set direct labels (+ dup-primary fix: Arcee cyan, Upstage olive). Playwright `labels-d10.spec` proves labels render.
+- `6a132d9` W6 log-scale axis labels (2D + Three); W6 method strip/copy/story/provenance/cinema-overlay already shipped by Grok prep.
+- `591d37e` W7 verification — 2026-08-07 design audit (B−) was a **stale deploy**; all top findings verified FIXED in current code (focus→copper F-005, color-scheme F-012, Plotly mono fonts F-003, no dup token F-011, mobile chips not severed F-001/2 — `w7-mobile.spec`). + L8 type craft (tabular nums, pretty prose).
+
+**Genuinely blocked (human-gated — not auto-completable):**
+- Fresh audit re-grade (B−→A−): needs designer/critic role (implementer cannot self-grade).
+- Independent instrument scorecard D1–D14 ≥90: role-gated (critic/designer/dataviz).
+- Deploy: Simon's explicit go (`npm run deploy:pages` refuses otherwise).
+- W7 stretch motion features (L2 sweep choreography, L5 OKLCH, L6 lock-on, L3 living stage, L9 export, L4 cinema optics): code-able but need visual QA (no vision available headlessly) to certify S+.
+
+**Maps:** `MAP-s-plus-maximal-dataviz-beauty.md` (W5 done, W6 done, gated scorecard/deploy) · `MAP-w7-life-layer.md` (audit findings resolved; motion tickets pending). D10 rationale: `.omx/artifacts/visual-ralph/s-plus-w5/d10-redefined.md`.
 
 ## Resume here (2026-08-07)
 

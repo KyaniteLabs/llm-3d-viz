@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | **prepared** — execution starts the moment Grok's W0–W6 tree lands clean |
+| **Status** | **audit findings verified-resolved (2026-08-07)** · G0 clean tree met · audit-fix tickets (L1/L7/L8/L10a) confirmed fixed in current code (audit was a stale deploy) · new motion tickets (L2/L5/L6/L3/L9/L4) + fresh re-grade + deploy remain (visual-QA / role / Simon gated) |
 | **Charted** | 2026-08-07 (design-review audit + 10-way life-layer brief, user-approved "wait, then execute") |
 | **Base** | Grok W0–W6 train (`.omx/plans/prd-s-plus-maximal-dataviz-beauty.md`) — do not start on dirty tree |
 | **Baseline** | design audit 2026-08-07: Design **B−** · Slop **A** · `~/.gstack/projects/simon-llm-3d-viz/designs/design-audit-20260807/design-baseline.json` |
