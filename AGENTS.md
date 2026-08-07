@@ -4,6 +4,12 @@ Interactive 3D LLM benchmark visualization (speed × cost × intelligence). Prod
 
 ## Agent skills
 
+### Dual-repo (product vs OSS)
+
+- **Product SoT:** Forgejo `simon/llm-3d-viz` only (`origin`). Do not auto-push product main to GitHub.
+- **Open source:** separate GitHub `KyaniteLabs/llm-3d-viz` — intentional `oss` remote publish only.
+- Policy: `docs/agents/dual-repo.md`.
+
 ### Issue tracker
 
 Issues live in Forgejo Issues on `git.kyanitelabs.tech/simon/llm-3d-viz`, managed via the Forgejo REST API. See `docs/agents/issue-tracker.md`.
