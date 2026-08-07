@@ -35,3 +35,11 @@ Or cut a release branch / tag and push that only.
 
 - Not two forever-diverged products with zero shared code (you can still publish product→OSS when you want).
 - Not “Forgejo public + GitHub public same live mirror.”
+
+## Liani / simple decision UX
+
+Lives **only** on the OSS GitHub tree (`oss/public` → `oss` remote `main`).
+
+- Product Forgejo `main`: `edition = "product"` — no simple-decision panel, no cute labels.
+- OSS: `edition = "oss"` mounts `src/ui/simple-decision.ts`.
+- **Never merge `oss/public` into product `main`.** Rebase OSS onto product when publishing instead.
