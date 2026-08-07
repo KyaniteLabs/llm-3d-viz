@@ -31,6 +31,12 @@ import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
 import { displayName } from "./lib/display-name";
 import { normalizedScores, weightedOptimum } from "./lib/score";
 import { buildInsightMethodCopy, defaultStoryLine } from "./lib/share-copy";
+import {
+  diffCatalog,
+  loadCatalogSnapshot,
+  saveCatalogSnapshot,
+  type CatalogSnapshot,
+} from "./lib/catalog-diff";
 import { formatCoverageBadge } from "./lib/provenance";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
@@ -184,6 +190,20 @@ async function boot() {
   const storyLineEl = document.querySelector("[data-story-line]") as HTMLElement | null;
   const methodStripEl = document.querySelector("[data-method-strip]") as HTMLElement | null;
   const copyInsightBtn = document.querySelector("[data-copy-insight]") as HTMLButtonElement | null;
+  const newSinceEl = document.querySelector("[data-new-since]") as HTMLElement | null;
+  // L3 — Living stage: one-time catalog-arrival diff. New models since the last
+  // visit surface as a status line (data-freshness); first visit = no pulse.
+  // Spectacle only on data change, never ambient (spec law). Reduced-motion: no
+  // stage emphasis class; the status line still informs.
+  const allCatalogIds = models.map((m) => m.model);
+  const lastCatalog = loadCatalogSnapshot();
+  const catalogDiff = diffCatalog(allCatalogIds, lastCatalog);
+  const newModelIds = !catalogDiff.isFirstVisit ? catalogDiff.newIds : [];
+  if (newSinceEl && newModelIds.length > 0) {
+    newSinceEl.hidden = false;
+    newSinceEl.textContent = `${newModelIds.length} new since ${lastCatalog?.date ?? ""}`;
+  }
+  saveCatalogSnapshot(allCatalogIds);
   const canvasHost = document.querySelector(".canvas-host") as HTMLElement;
   const tableHost = document.querySelector("[data-membership-table]") as HTMLElement;
   // Shareable URL: filters, axes, weights, decide. Session-only: hover/pin/cinema.
@@ -649,6 +669,7 @@ async function boot() {
       ? null
       : (weightedOptimum(normalizedScores(visibleSet, weights, visibleSet))?.model.model ?? null);
     viz.labelFocusIds = labelFocusIds ? [...labelFocusIds] : [];
+    viz.newModelIds = newModelIds;
     (window as any).__viz = viz;
   };
 

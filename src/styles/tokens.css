@@ -1571,6 +1571,15 @@ html.is-cinema .cinema-exit-fab {
 .method-strip[hidden] { display: none !important; }
 /* Cinema: method line is export-overlay only — do not force status-bar visible */
 .app-shell.is-cinema .method-strip { display: none !important; }
+/* L3: data-arrival status line — copper accent so freshness reads at a glance. */
+.new-since {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  color: var(--copper);
+}
+.new-since[hidden] { display: none !important; }
+.app-shell.is-cinema .new-since { display: none !important; }
 
 .data-sources {
   flex: 0 1 auto;
