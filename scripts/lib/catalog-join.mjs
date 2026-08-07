@@ -297,17 +297,19 @@ export function applyArenaElo(aaRows, arenaEntries) {
  */
 export function stampAaMeasured(row) {
   let next = { ...row, sources: { ...(row.sources || {}) } };
-  const stamp = (field) => {
+  const stamp = (field, origin = "aa") => {
     if (next[field] != null && !next.sources[field]) {
-      next.sources[field] = { origin: "aa", kind: "measured" };
+      next.sources[field] = { origin, kind: "measured" };
     }
   };
+  // Prefer existing provenance (e.g. aa-api); only fill gaps.
   stamp("aa_intelligence_index");
   stamp("tps");
   stamp("ttft");
   stamp("blended_price_per_M");
   stamp("price_in_per_M");
   stamp("price_out_per_M");
+  stamp("cost_per_index_task_usd");
   return next;
 }
 

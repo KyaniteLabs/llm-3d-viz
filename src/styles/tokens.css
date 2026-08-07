@@ -1258,6 +1258,11 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 }
 .status-bar {
   grid-area: status;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
   padding: 0.25rem 0.65rem;
   border-top: 1px solid var(--color-border);
   background: var(--ink-panel-1);
@@ -1265,6 +1270,22 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   font: 400 0.6rem/1.4 var(--font-mono);
   letter-spacing: 0.04em;
   min-height: 0;
+}
+.data-sources {
+  flex: 0 1 auto;
+  text-align: right;
+  opacity: 0.92;
+  letter-spacing: 0.02em;
+  font-size: 0.55rem;
+}
+.data-sources a {
+  color: var(--filament-dim);
+  text-decoration: none;
+}
+.data-sources a:hover {
+  color: var(--filament);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .table-pane {

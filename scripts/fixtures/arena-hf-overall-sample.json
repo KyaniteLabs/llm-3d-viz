@@ -1,0 +1,17 @@
+[
+  {
+    "model_name": "claude-fable-5",
+    "organization": "anthropic",
+    "license": "Proprietary",
+    "rating": 1508.57,
+    "category": "overall",
+    "leaderboard_publish_date": "2026-08-03"
+  },
+  {
+    "model_name": "some-other-model",
+    "organization": "openai",
+    "rating": 1400,
+    "category": "coding",
+    "leaderboard_publish_date": "2026-08-03"
+  }
+]
