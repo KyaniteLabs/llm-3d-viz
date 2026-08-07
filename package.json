@@ -14,17 +14,23 @@
     "catalog:refresh": "node --experimental-strip-types scripts/refresh-catalog.mjs",
     "catalog:expand": "node --experimental-strip-types scripts/expand-aa-multi-effort.mjs",
     "catalog:auto-update": "bash scripts/catalog-auto-update.sh",
-    "catalog:install-cron": "bash scripts/install-catalog-cron.sh"
+    "catalog:install-cron": "bash scripts/install-catalog-cron.sh",
+    "catalog:snapshot": "node scripts/export-catalog-snapshot.mjs",
+    "catalog:coverage": "node scripts/catalog-coverage-report.mjs",
+    "atlas:cli": "tsx bin/atlas-cli.ts",
+    "atlas:mcp": "tsx bin/atlas-mcp-server.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "plotly.js-dist-min": "^3.1.0",
+    "tsx": "^4.23.10",
     "typescript": "^5.9.2",
     "vite": "^7.1.3",
     "vitest": "^3.2.4"
   },
   "dependencies": {
     "@types/three": "^0.185.3",
+    "kokoro-js": "^1.2.1",
     "three": "^0.185.1"
   }
 }

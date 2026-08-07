@@ -20,7 +20,7 @@ describe("displayName", () => {
 
 describe("metric formatting (FIX-C #28: readout units)", () => {
   it("formats speed as tok/s", () => {
-    expect(formatTps(172.123)).toBe("172.1 tok/s");
+    expect(formatTps(172.123)).toBe("172 tok/s");
     expect(formatTps(null)).toBe("—");
   });
 

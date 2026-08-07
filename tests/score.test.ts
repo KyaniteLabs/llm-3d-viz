@@ -129,7 +129,7 @@ describe("value-score normalization", () => {
     expect(normalizedScores([low, high], weights(0, 0, 0), [low, high])[0].score).toBeCloseTo(1 / 3);
   });
 
-  it("exports workload preset triples including speed/latency", () => {
+  it("exports workload preset triples including speed/latency and local VRAM", () => {
     expect(presets).toEqual({
       coding: { speed: 0.25, cost: 0.15, intelligence: 0.6 },
       chat: { speed: 0.35, cost: 0.3, intelligence: 0.35 },
@@ -137,16 +137,22 @@ describe("value-score normalization", () => {
       RAG: { speed: 0.2, cost: 0.55, intelligence: 0.25 },
       "long-context": { speed: 0.25, cost: 0.45, intelligence: 0.3 },
       speed: { speed: 0.55, cost: 0.2, intelligence: 0.25 },
+      local8: { speed: 0.45, cost: 0.2, intelligence: 0.35 },
+      local12: { speed: 0.4, cost: 0.2, intelligence: 0.4 },
+      local24: { speed: 0.35, cost: 0.15, intelligence: 0.5 },
     });
   });
 
-  it("exports four human intent presets mapped to real weights", () => {
-    expect(intentPresets).toHaveLength(4);
+  it("exports human intents including top-3 local VRAM tiers", () => {
+    expect(intentPresets).toHaveLength(7);
     expect(intentPresets.map((i) => i.label)).toEqual([
       "Best balance",
       "Smartest",
       "Budget",
       "Fastest",
+      "Local · 8 GB",
+      "Local · 12 GB",
+      "Local · 24 GB",
     ]);
     for (const intent of intentPresets) {
       expect(presets[intent.id]).toBeTruthy();

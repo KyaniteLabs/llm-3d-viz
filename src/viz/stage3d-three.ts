@@ -32,6 +32,10 @@ import { markChannels, type SceneGlyphKind } from "./mark-encoding";
 import { familyIdOf, groupByFamily } from "../lib/family";
 import { displayName } from "../lib/display-name";
 import { FORK_DEFAULTS } from "../config/fork-defaults";
+import {
+  formatTaskAnchorStageLabel,
+  taskAnchorsInDomain,
+} from "../lib/intelligence-task-anchors";
 import type { Stage3DSurface, StageCamera, StageRenderOptions, StageFitMode } from "./stage-api";
 
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -53,7 +57,9 @@ type GlyphKind = SceneGlyphKind | "box" | "box-open";
 type LabelSpec = {
   text: string;
   world: THREE.Vector3;
-  kind: "title" | "tick" | "mark";
+  kind: "title" | "tick" | "mark" | "task";
+  /** Longer title attribute for task frames of reference. */
+  title?: string;
   priority?: number;
 };
 
@@ -97,6 +103,7 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly pointer = new THREE.Vector2();
   private readonly pointsGroup = new THREE.Group();
   private readonly ridgeLine: THREE.Line;
+  private cinemaFog: THREE.FogExp2 | null = null;
   private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
   /** Decide mode: visible intelligence-floor plane(s) in the data cube. */
@@ -188,8 +195,9 @@ export class Stage3DThree implements Stage3DSurface {
 
     this.labelRoot = document.createElement("div");
     this.labelRoot.className = "stage-3d-axis-labels";
+    // overflow:visible so task callouts can extend into empty margin outside the cube
     this.labelRoot.style.cssText =
-      "position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:var(--font-mono);z-index:2;";
+      "position:absolute;inset:0;pointer-events:none;overflow:visible;font-family:var(--font-mono);z-index:2;";
     this.el.appendChild(this.labelRoot);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -223,9 +231,9 @@ export class Stage3DThree implements Stage3DSurface {
     // WebGL ignores LineBasicMaterial.linewidth on most platforms; dual-pass
     // dim underlay + bright core approximates structural dominance.
     const ridgeUnder = new THREE.LineBasicMaterial({
-      color: new THREE.Color("#C9D4C4"),
+      color: new THREE.Color("#E8F1E4"),
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.88,
       depthWrite: false,
     });
     const ridgeCore = new THREE.LineBasicMaterial({
@@ -261,6 +269,13 @@ export class Stage3DThree implements Stage3DSurface {
     (this.gd as any).__stageBackend = "three";
     (this.gd as any).__setPointAppearance = (colors: string[], sizes: number[]) =>
       this.setPointAppearance(colors, sizes);
+    // Hide HTML placeholder once WebGL stage is alive (was covering canvas = "blank site")
+    this.el.closest(".stage-visual")?.classList.add("is-ready");
+    document.querySelectorAll("[data-stage-placeholder], .stage-placeholder").forEach((el) => {
+      el.classList.add("is-dismissed");
+      (el as HTMLElement).style.display = "none";
+      (el as HTMLElement).setAttribute("hidden", "");
+    });
   }
 
   private showReloadPrompt() {
@@ -279,17 +294,36 @@ export class Stage3DThree implements Stage3DSurface {
 
   private bindResize(container: HTMLElement) {
     const resize = () => {
-      const w = Math.max(1, this.el.clientWidth || container.clientWidth || 300);
-      const h = Math.max(1, this.el.clientHeight || container.clientHeight || 300);
+      // Prefer real box; never stay at 0×0 (Safari flex/grid race can report 0 on first paint).
+      let w = this.el.clientWidth || container.clientWidth || 0;
+      let h = this.el.clientHeight || container.clientHeight || 0;
+      if (w < 32 || h < 32) {
+        const parent = this.el.parentElement;
+        w = Math.max(w, parent?.clientWidth || 0, 640);
+        h = Math.max(h, parent?.clientHeight || 0, 420);
+      }
+      w = Math.max(32, Math.floor(w));
+      h = Math.max(32, Math.floor(h));
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(w, h, false);
+      // updateStyle true so canvas CSS matches buffer (Safari/WebKit)
+      this.renderer.setSize(w, h, true);
+      this.renderer.domElement.style.width = "100%";
+      this.renderer.domElement.style.height = "100%";
+      this.renderer.domElement.style.display = "block";
       this.paintLabels();
     };
     resize();
+    // Second pass after layout settles (common Safari blank-canvas fix)
+    requestAnimationFrame(() => {
+      resize();
+      requestAnimationFrame(resize);
+    });
+    window.addEventListener("resize", resize, { passive: true });
     this.resizeObs = new ResizeObserver(resize);
     this.resizeObs.observe(this.el);
     this.resizeObs.observe(container);
+    if (this.el.parentElement) this.resizeObs.observe(this.el.parentElement);
   }
 
   private startLoop() {
@@ -622,6 +656,7 @@ export class Stage3DThree implements Stage3DSurface {
     }
     for (const t of domains.y.ticks) {
       const sy = this.tickToSceneAxis("y", t.value);
+      // Clean numeric ticks only — task callouts are separate (outside the cube).
       this.labelSpecs.push({
         text: t.label,
         world: new THREE.Vector3(-S - 0.08, sy, -S - 0.02),
@@ -634,6 +669,54 @@ export class Stage3DThree implements Stage3DSurface {
         text: t.label,
         world: new THREE.Vector3(-S - 0.02, -S - 0.08, sz),
         kind: "tick",
+      });
+    }
+
+    // Sparse task frames: same heights as Index, text extends into empty margin
+    // OUTSIDE the cube (left of the intelligence face), not over the data.
+    this.pushIntelligenceTaskCallouts(domains);
+    this.el.querySelector("[data-intel-axis-rail]")?.remove();
+  }
+
+  /**
+   * Place plain-English task callouts outside the cube, flush with the
+   * intelligence axis. Anchor sits just outside the left face; paintLabels
+   * grows text further outward (into empty space).
+   */
+  private pushIntelligenceTaskCallouts(domains: {
+    x: AxisDomain;
+    y: AxisDomain;
+    z: AxisDomain;
+  }) {
+    const metricAxis: "x" | "y" | "z" | null =
+      this.axisMapping.x === "intelligence"
+        ? "x"
+        : this.axisMapping.y === "intelligence"
+          ? "y"
+          : this.axisMapping.z === "intelligence"
+            ? "z"
+            : null;
+    if (!metricAxis) return;
+    const domain = domains[metricAxis];
+    const anchors = taskAnchorsInDomain(domain.min, domain.max);
+    for (const a of anchors) {
+      const t = this.tickToSceneAxis(metricAxis, a.index);
+      // Just outside the cube wall that carries the intelligence ticks (left face for Y).
+      let world: THREE.Vector3;
+      if (metricAxis === "y") {
+        // Left of cube, mid-depth so the callout sits in the left margin, not over points.
+        world = new THREE.Vector3(-S - 0.12, t, 0);
+      } else if (metricAxis === "x") {
+        world = new THREE.Vector3(t, -S - 0.12, -S - 0.02);
+      } else {
+        world = new THREE.Vector3(-S - 0.12, -S - 0.02, t);
+      }
+      this.labelSpecs.push({
+        text: formatTaskAnchorStageLabel(a),
+        world,
+        kind: "task",
+        title: `Index ~${Math.round(a.index)} · ${a.band}: ${a.example}`,
+        priority: 3,
       });
     }
   }
@@ -757,6 +840,25 @@ export class Stage3DThree implements Stage3DSurface {
           : [...options.decideShortlistIds]
         : [],
     );
+    const cinemaFocusRaw = options?.cinemaFocusIds
+      ? new Set(
+          Array.isArray(options.cinemaFocusIds)
+            ? options.cinemaFocusIds
+            : [...options.cinemaFocusIds],
+        )
+      : null;
+    // Empty focus set would blank the whole stage — fail open.
+    const cinemaFocus =
+      cinemaFocusRaw && cinemaFocusRaw.size > 0 ? cinemaFocusRaw : null;
+    // D10: always-on direct-label focus-set (independent of cinema dim).
+    const labelFocusRaw = options?.labelFocusIds
+      ? new Set(
+          Array.isArray(options.labelFocusIds)
+            ? options.labelFocusIds
+            : [...options.labelFocusIds],
+        )
+      : null;
+    const labelFocus = labelFocusRaw && labelFocusRaw.size > 0 ? labelFocusRaw : null;
 
     // Plot models that have all three mapped metrics.
     // Decide mode (intelligenceFloor set): suppress value-score optimum AND classic
@@ -863,6 +965,7 @@ export class Stage3DThree implements Stage3DSurface {
             !this.soloFamily
         ) || isOptimum,
         brandFull,
+        cinemaFocus: Boolean(cinemaFocus && cinemaFocus.has(model.model)),
         effortRole: effortRoleByModel.get(model.model) ?? "single",
         palette: {
           slateCyan: this.tokens.slateCyan,
@@ -913,6 +1016,16 @@ export class Stage3DThree implements Stage3DSurface {
         } else {
           size = 9;
           opacity = Math.min(opacity, 0.55);
+        }
+      }
+      // Cinema density (W5): non-focus fully suppressed — export is focus-set only.
+      if (cinemaFocus && cinemaFocus.size > 0) {
+        if (!cinemaFocus.has(model.model)) {
+          opacity = 0;
+          size = 0.01;
+        } else {
+          opacity = Math.max(opacity, 0.96);
+          size = Math.max(size, isOptimum ? 22 : isFrontier ? 16 : 13);
         }
       }
       // Brand rings only when encoding says so (full catalog default off; focus on).
@@ -1015,8 +1128,10 @@ export class Stage3DThree implements Stage3DSurface {
           : new THREE.BufferGeometry();
     }
 
-    // Labels: always mark optimum; when a small multi-effort set is focused
-    // (≤12 plottable points), label with short tier tags + NMS in paintLabels.
+    // Labels: always mark optimum; label the D10 focus-set (frontier ∪ optimum ∪
+    // selected ∪ shortlist ∪ top-K) by short name so identity is reachable WITHOUT
+    // color in the DEFAULT view; when a small multi-effort set is focused (≤12
+    // plottable) label all with short tier tags. NMS collision pass in paintLabels.
     // Keep Decide FLOOR plane labels.
     this.labelSpecs = this.labelSpecs.filter(
       (s) => s.kind !== "mark" || s.text.startsWith("FLOOR"),
@@ -1028,13 +1143,13 @@ export class Stage3DThree implements Stage3DSurface {
       if (!model) continue;
       const isOptimum = mesh.userData.semanticClass === "optimum";
       const isFrontier = mesh.userData.semanticClass === "frontier";
-      if (!isOptimum && !focusLabels) continue;
+      const inLabelFocus = !!labelFocus?.has(id);
+      if (!isOptimum && !focusLabels && !inLabelFocus) continue;
       const tier = (model.effort_tier || "").toString().toLowerCase();
       let text: string;
       if (isOptimum) {
         const shortBase = displayName(id);
-        const short = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
-        text = short;
+        text = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
       } else if (focusLabels) {
         // Solo/focus: effort tier primary (optional short stem).
         const stem = displayName(id).split(/[\s(]/)[0]?.slice(0, 8) ?? "";
@@ -1046,8 +1161,14 @@ export class Stage3DThree implements Stage3DSurface {
               : stem || "?";
         text = tier && tier !== "default" ? tierLabel : `${stem} ${tierLabel}`.trim();
       } else {
-        continue;
+        // D10 focus-set direct label (default view): short name = identity w/o color.
+        const shortBase = displayName(id);
+        text = shortBase.length > 16 ? shortBase.slice(0, 14) + "…" : shortBase;
       }
+      // NMS priority: optimum (3) and frontier (2) reliably win the collision pass, so
+      // they are the always-visible identity anchors; selected/shortlist/top-K (1) are
+      // suppressed when they overlap a higher-priority mark in dense views. Intentional
+      // readability tradeoff — ridge marks are the legible backbone, not the long tail.
       const priority = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.labelSpecs.push({
         text,
@@ -1184,54 +1305,93 @@ export class Stage3DThree implements Stage3DSurface {
     const h = this.el.clientHeight;
     if (w < 2 || h < 2) return;
 
-    type Placed = { text: string; x: number; y: number; kind: LabelSpec["kind"]; priority: number };
+    type Placed = {
+      text: string;
+      x: number;
+      y: number;
+      kind: LabelSpec["kind"];
+      priority: number;
+      title?: string;
+    };
     const candidates: Placed[] = [];
-    for (const { text, world, kind, priority } of this.labelSpecs) {
+    for (const { text, world, kind, priority, title } of this.labelSpecs) {
       const projected = world.clone().project(this.camera);
       if (projected.z > 1 || projected.z < -1) continue;
       if (projected.x < -1.2 || projected.x > 1.2 || projected.y < -1.2 || projected.y > 1.2) continue;
       const x = (projected.x * 0.5 + 0.5) * w;
       const y = (-projected.y * 0.5 + 0.5) * h;
-      candidates.push({ text, x, y, kind, priority: priority ?? (kind === "title" ? 4 : kind === "mark" ? 1 : 0) });
+      candidates.push({
+        text,
+        x,
+        y,
+        kind,
+        title,
+        priority:
+          priority ??
+          (kind === "title" ? 4 : kind === "task" ? 2 : kind === "mark" ? 1 : 0),
+      });
     }
 
-    // NMS for mark labels: higher priority wins; axis titles/ticks always keep.
+    // NMS for mark + task labels: higher priority wins; axis titles/ticks always keep.
     const kept: Placed[] = [];
-    const markBox = (p: Placed) => ({
-      l: p.x - 36,
-      r: p.x + 36,
-      t: p.y - 14,
-      b: p.y + 2,
-    });
-    const overlap = (a: ReturnType<typeof markBox>, b: ReturnType<typeof markBox>) =>
+    const labelBox = (p: Placed) => {
+      const halfW = p.kind === "task" ? 72 : 36;
+      const halfH = p.kind === "task" ? 12 : 8;
+      return {
+        l: p.x - halfW,
+        r: p.x + halfW,
+        t: p.y - halfH,
+        b: p.y + halfH,
+      };
+    };
+    const overlap = (a: ReturnType<typeof labelBox>, b: ReturnType<typeof labelBox>) =>
       !(a.r < b.l || a.l > b.r || a.b < b.t || a.t > b.b);
 
-    const nonMarks = candidates.filter((c) => c.kind !== "mark");
-    const marks = candidates
+    // Task frames always keep (orientation rails); only model marks NMS.
+    const always = candidates.filter(
+      (c) => c.kind === "title" || c.kind === "tick" || c.kind === "task",
+    );
+    const soft = candidates
       .filter((c) => c.kind === "mark")
       .sort((a, b) => b.priority - a.priority);
-    const acceptedMarks: Placed[] = [];
-    for (const m of marks) {
-      const box = markBox(m);
-      if (acceptedMarks.some((k) => overlap(box, markBox(k)))) continue;
-      acceptedMarks.push(m);
+    const acceptedSoft: Placed[] = [];
+    for (const m of soft) {
+      const box = labelBox(m);
+      if (acceptedSoft.some((k) => overlap(box, labelBox(k)))) continue;
+      acceptedSoft.push(m);
     }
-    kept.push(...nonMarks, ...acceptedMarks);
+    kept.push(...always, ...acceptedSoft);
 
-    const edgePad = 8;
-    for (const { text, x, y, kind } of kept) {
+    const edgePad = 6;
+    for (const { text, x, y, kind, title } of kept) {
       const el = document.createElement("span");
       el.textContent = text;
-      const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : "9px";
+      if (title) el.title = title;
+      if (kind === "task") el.className = "stage-task-anchor";
+      const isTask = kind === "task";
+      const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : isTask ? "10px" : "10px";
       const color =
-        kind === "title" ? this.tokens.textWarm : kind === "mark" ? this.tokens.filament : this.tokens.textMuted;
-      const weight = kind === "title" || kind === "mark" ? "500" : "400";
-      // Edge-aware anchor so long axis titles (e.g. INTELLIGENCE) never clip to "LLIGENCE".
+        kind === "title"
+          ? this.tokens.textWarm
+          : kind === "mark"
+            ? this.tokens.filament
+            : isTask
+              ? this.tokens.filamentDim
+              : this.tokens.textMuted;
+      const weight = kind === "title" || kind === "mark" || isTask ? "500" : "400";
+
+      // Task callouts: anchor at cube wall, text extends LEFT into empty margin (outside cube).
+      // Numeric ticks / titles: normal edge-aware centering.
       let left = x;
       let top = y;
       let tx = "-50%";
-      let ty = "-100%";
-      if (x < 56) {
+      let ty = "-50%";
+      if (isTask) {
+        // Keep the right edge of the label near the cube face; body grows outward.
+        left = Math.max(edgePad + 4, Math.min(x, w * 0.38));
+        tx = "-100%";
+        ty = "-50%";
+      } else if (x < 56) {
         left = edgePad;
         tx = "0%";
       } else if (x > w - 56) {
@@ -1247,12 +1407,19 @@ export class Stage3DThree implements Stage3DSurface {
         top = h - edgePad;
         ty = "-100%";
       }
-      const maxW = kind === "title" ? "none" : "12rem";
-      const overflow = kind === "title" ? "visible" : "hidden";
+
+      const maxW = kind === "title" ? "none" : isTask ? "min(15rem, 32vw)" : "12rem";
+      const opacity = kind === "mark" ? 0.92 : kind === "title" ? 0.95 : isTask ? 0.9 : 0.78;
       el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
-        color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.03em;white-space:nowrap;
-        opacity:${kind === "mark" ? 0.92 : kind === "title" ? 0.95 : 0.75};text-shadow:0 0 6px ${this.tokens.inkField};
-        max-width:${maxW};overflow:${overflow};text-overflow:ellipsis;pointer-events:none;`;
+        color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.02em;
+        white-space:${isTask ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : "left"};
+        opacity:${opacity};text-shadow:0 0 8px ${this.tokens.inkField},0 0 2px ${this.tokens.inkField};
+        max-width:${maxW};overflow:${kind === "title" ? "visible" : "hidden"};
+        pointer-events:${title ? "auto" : "none"};cursor:${title ? "help" : "default"};
+        background:${isTask ? "rgba(7,12,11,0.72)" : "transparent"};
+        border:${isTask ? "1px solid rgba(201,212,196,0.18)" : "0"};
+        padding:${isTask ? "3px 7px" : "0"};border-radius:${isTask ? "4px" : "0"};
+        box-shadow:${isTask ? "0 0 12px rgba(7,12,11,0.5)" : "none"};`;
       this.labelRoot.appendChild(el);
     }
   }
@@ -1261,6 +1428,19 @@ export class Stage3DThree implements Stage3DSurface {
    * Soft-fit camera to multi-effort (or all) point bounds. Skips if user has
    * already orbited unless fit key (model set) changed and fit forced via options.
    */
+
+  /** Cinema DOF surrogate: exponential fog + denser atmosphere (MeshBasic-safe). */
+  public setCinemaAtmosphere(on: boolean) {
+    if (on) {
+      if (!this.cinemaFog) {
+        this.cinemaFog = new THREE.FogExp2(0x070c0b, 0.045);
+      }
+      this.scene.fog = this.cinemaFog;
+    } else {
+      this.scene.fog = null;
+    }
+  }
+
   public fitToVisible(models: Model[], mode: StageFitMode = "multi-effort"): void {
     if (mode === "none") return;
     const plottable = models.filter((m) => hasMappedAxes(m, this.axisMapping));

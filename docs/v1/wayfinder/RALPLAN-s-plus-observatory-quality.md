@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-08-07** by `.omx/plans/prd-s-plus-maximal-dataviz-beauty.md` + `MAP-s-plus-maximal-dataviz-beauty.md`. The `target_L = 0.55 × L` desat algorithm below is **void** — glanceable full brand fill + chroma pull 0.22 is law.
+
 # RALPLAN — S+ Observatory quality (≥90 all gates)
 
 **Status:** `pending approval` (Critic **APPROVE** · PRD #146 · map #147 · tickets #148–#153)  
@@ -81,8 +83,9 @@ Roles mark N/A only where column shows “—”. N/A does not count toward comp
 Use WCAG sRGB relative luminance `L` on fill hex:
 `L = 0.2126 R + 0.7152 G + 0.0722 B` with standard sRGB linearization.
 
-### Non-frontier hierarchy
+### Non-frontier hierarchy (**VOID — do not implement**)
 ```
+// SUPERSEDED: do not use 0.55×L desat
 frontier_ref_fill =
   same-lab frontier mark fill if any frontier in visible set for that lab
   else --filament-dim (#C9D4C4)

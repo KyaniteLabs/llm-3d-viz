@@ -2,6 +2,7 @@ import type { Model } from "../data/models";
 import { frontier } from "../lib/pareto";
 import { normalizedScores, weightedOptimum } from "../lib/score";
 import { displayName } from "../lib/display-name";
+import { INTELLIGENCE_TASK_ANCHORS } from "../lib/intelligence-task-anchors";
 import type { AppState, AppStore } from "../state";
 import { legendEntries, labLegendEntries, type PresentationMode } from "../viz/palette";
 import { MARK_GLYPH_LEGEND } from "../viz/mark-encoding";
@@ -130,7 +131,7 @@ export class StageGuide {
                   })
                   .join("")}
               </ul>
-              <p class="stage-guide-note">Color = lab only. ≥3 brand colors always: fill · outer ring · core. Qwen is violet (not Alibaba orange). Family shades only the primary.</p>
+              <p class="stage-guide-note">Color = lab brand fill always (glanceable). Outer ring + core only on focus (solo / selected / full-brand / cinema focus) — not always-on. Qwen is violet (not Alibaba orange). Family shades the primary.</p>
             </section>
           </details>
 
@@ -148,6 +149,26 @@ export class StageGuide {
               <p class="stage-guide-note">Wire sphere = closed weights · wire octa = open weights. All marks wireframe. Reasoning is not a shape (inspector only). Lab is never shape.</p>
             </section>
           </details>
+
+          <section class="intel-task-anchors" aria-label="Intelligence Index task frames of reference">
+            <p class="stage-guide-heading">INTELLIGENCE · WHAT WORK LOOKS LIKE</p>
+            <ol class="intel-task-list">
+              ${INTELLIGENCE_TASK_ANCHORS.map(
+                (a) =>
+                  `<li data-intel-anchor="${a.index}" title="${escapeHtml(a.sources)}">
+                    <span class="intel-task-index">~${Math.round(a.index)}</span>
+                    <span>
+                      <strong>${escapeHtml(a.short)}</strong>
+                      <small>${escapeHtml(a.example)}</small>
+                    </span>
+                  </li>`,
+              ).join("")}
+            </ol>
+            <p class="stage-guide-note">
+              Callouts sit outside the cube on the intelligence axis — orientation only, not hard floors.
+              Decide floor stays yours.
+            </p>
+          </section>
 
           <section class="frontier-labels" aria-label="Frontier model labels">
             <p class="stage-guide-heading">FRONTIER MODELS</p>

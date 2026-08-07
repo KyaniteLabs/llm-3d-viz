@@ -7,6 +7,7 @@ import {
   buildAxisDomain,
   densityMarkerScale,
   detectEconomyBasis,
+  estimateTimePerIndexTaskS,
   hasMappedAxes,
   mappingHeading,
   modelToSceneCoords,
@@ -158,5 +159,24 @@ describe("axis-metrics", () => {
     expect(mappingHeading(mapping).toLowerCase()).toContain("input");
     const plottable = models.filter((m) => hasMappedAxes(m, mapping));
     expect(plottable.length).toBeGreaterThan(5);
+  });
+});
+
+
+describe("task economy axes never blank the stage", () => {
+  it("estimates time when measured Index time is null", () => {
+    const est = estimateTimePerIndexTaskS({ time_per_index_task_s: null, tps: 100, ttft: 1000 });
+    // 1s TTFT + 1000/100 = 11s
+    expect(est).toBeCloseTo(11, 5);
+  });
+
+  it("prefers measured time when present", () => {
+    expect(estimateTimePerIndexTaskS({ time_per_index_task_s: 3.5, tps: 100, ttft: 1000 })).toBe(3.5);
+  });
+
+  it("task mapping has plottable models with cost+estimated time", () => {
+    const taskMap = applyEconomyBasis(DEFAULT_AXIS_MAPPING, "task");
+    const n = models.filter((m) => hasMappedAxes(m, taskMap)).length;
+    expect(n).toBeGreaterThan(10);
   });
 });

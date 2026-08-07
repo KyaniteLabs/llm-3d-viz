@@ -1,76 +1,100 @@
 # HANDOFF — llm-3d-viz
 
-Last updated: 2026-08-03 (v7 — **Simon: not doing Plotly for 3D hero**; Three is the path)
+**Last updated:** 2026-08-07 (S+ campaign — W5 D10 + W6 + W7 audit-fix verified; gates remain)
 
 ## What this is
-Interactive 3D web app plotting LLM benchmarks across **SPEED × COST × INTELLIGENCE** — rotatable 3D scatter, Pareto ridge, linked 2D projections, tunable value-score, threshold-sweep, cinema mode. Goal: a publishable product **and** source material for visually beautiful videos.
 
-- **Repo (Forgejo SoT):** https://git.kyanitelabs.tech/simon/llm-3d-viz
-- **Local clone:** workspace `llm-3d-viz` · **Namespace:** `simon`
-- **Run it:** `npm install && npm run build && npx vite preview` (or `npm run dev`)
-- **Three stage:** default hero on this branch; `?stage=plotly` is debug-only / kill-path, not product
+Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). Three.js stage, Pareto ridge, multi-effort trails, Decide mode, Atlas decision agent, shareable URL state.
 
-## Status: Three is the 3D hero — Plotly stage is out (Simon 2026-08-03)
+- **Repo (Forgejo SoT):** https://git.kyanitelabs.tech/simon/llm-3d-viz  
+- **Live:** https://viz.kyanitelabs.tech/  
+- **Run:** `npm install && npm run dev`  
+- **Tests:** `npm test` (207 unit tests as of closeout)
 
-**Decision (Simon, explicit):** we are **not** shipping/polishing Plotly as the 3D hero. Path is **Three.js stage** (`Stage3DThree`) → visual go → production default.
+## S+ campaign state (2026-08-07) — resume here
 
-- Plotly may remain **only** for linked **2D projections** until those are replaced (spike contract: do not port 2D in the same train).
-- No more “freeze Plotly v0 and film that instead.”
-- **Do not publish** until Simon visual go on the **Three** hero. Suites green ≠ product ready.
+**Committed (local `main`, 8 commits past e38f57a, not pushed — push is approval-gated):**
+- `5a4b2f0` W5 D10 — identity-without-color: focus-set direct labels + dup-primary fix (Arcee cyan, Upstage olive). `labels-d10.spec`.
+- `6a132d9` W6 — log-scale axis labels (2D + Three); method strip/copy/story/provenance/cinema-overlay already shipped by Grok prep.
+- `591d37e` W7 — 2026-08-07 design audit (B−) was a **stale deploy**; all top findings verified FIXED (focus→copper, color-scheme:dark, Plotly mono fonts, no dup token, mobile chips not severed — `w7-mobile.spec`). + L8 type craft.
+- `7c6de96` W7 L3 — living stage: catalog-arrival diff + "N new since" status. `catalog-diff.test` + `l3-living-stage.spec`.
+- `3d50c6e` W7 L9 — cinema export: 2× composited PNG (stage + wordmark + method). `l9-cinema-export.spec`.
+- `ea73174` perf — `computeCinemaFocusIds` scores once (was 2×/render in the label path).
+- `d8032f3` **architect review fixes** — independent review verdict: **ship-ready, no Critical/High** (deutan math + label pipeline + palette verified correct). Folded F1–F7 (test fidelity + DRY 2D title).
 
-### Landed
-- PR #38 comprehension pass, #40 residual closeout, #42 cream plane kill + axis camera orientation.
-- **Spike (this branch):** `Stage3DSurface` API, `Stage3DThree` (vanilla Three — Y-up scene, MeshBasic points, floor/grid, STAGE·THREE badge), cinema/sweep/hover by model id, Plotly default + WebGL fail-soft fallback.
+**State:** 217/217 unit, build green, 5 new Playwright specs green. Code path to the S+ audit bar is COMPLETE + independently reviewed (ship-ready). Captures staged in `.omx/.../w7-capture/` (1440/390/decide) for a one-pass re-grade.
 
-### Critical path
-1. ~~Merge #42~~ done
-2. ~~Freeze Plotly stage polish~~ active
-3. **R3F / Three stage spike** — implement + wire (`spike/r3f-stage`); **Simon go/kill after visual look**
-4. If go → production stage swap PR train (default r3f, optional `?stage=plotly` one release)
-5. Then v1 product features + high-quality video; publish only with Simon go
+**Genuinely blocked (human/vision-gated — not auto-completable):**
+- Fresh design audit re-grade (B−→A−): needs a **vision**-capable evaluator (I have none headlessly). Findings are fixed → a re-audit should clear A−.
+- Deploy: Simon's explicit go (`npm run deploy:pages` refuses otherwise).
+- W7 stretch motion (L2 sweep, L6 lock-on, L4 cinema-DOF): code-able but need visual QA to certify. L5 (OKLCH) would re-touch the brand palette you approved keeping — skipped.
 
-**Do not:** keep polishing Plotly; rewrite console/math/2D in the same train; add Three demo slop (particles, bloom soup, starfields).
+**Maps:** `MAP-s-plus-maximal-dataviz-beauty.md` (W5/W6 done) · `MAP-w7-life-layer.md` (audit findings resolved; L3/L9 done; motion pending). D10 rationale: `.omx/artifacts/visual-ralph/s-plus-w5/d10-redefined.md`.
 
-### Spike analysis (2026-08-03)
-- Full best-practice + TasteCheck ledger: `docs/v1/three-stage-deep-analysis-and-tastecheck-2026-08.md`
-- Verdict: **HOLD** (visual veto + a11y table + Plotly code-split + occlusion)
-- Evidence PNGs: `docs/v1/tastecheck-evidence/`
+## Resume here (2026-08-07)
 
-### Spike verify
+**Source landed:** commit `e38f57a` on Forgejo `origin/main` (`simon/llm-3d-viz`) — `feat: Atlas agentic Decide surface, SEO/GEO, catalog CLI/MCP`. Production deploy was already live and HTTP-smoke green 2026-08-07.
+
+**Full campaign closeout + file map (includes Land receipt):**  
+→ [`docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-07-atlas-agentic.md`](docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-07-atlas-agentic.md)
+
+**Learnings (ops + product doctrine):**  
+→ [`docs/v1/wayfinder/LEARNINGS-2026-08-07-atlas-agentic.md`](docs/v1/wayfinder/LEARNINGS-2026-08-07-atlas-agentic.md)
+
+**Deploy receipt:**  
+→ [`docs/deploy/STATUS-2026-08-07.md`](docs/deploy/STATUS-2026-08-07.md)
+
+### Landed this train (summary)
+
+- Atlas: offline tools + optional OpenAI/Anthropic-protocol LLM (BYOK) + NUCBox Unsloth via Vite proxy  
+- Atlas: decision-surface control (floor, filters, pin, cinema, economy) with host apply gating + undo  
+- Voice: free Kokoro TTS (browser) + gesture STT  
+- SEO/GEO: llms.txt, about.md, sitemap, meta/JSON-LD, OG PNG — **deployed to production**  
+- CLI + MCP stdio (`npm run atlas:cli` / `atlas:mcp`)  
+- Catalog coverage report + inspector provenance / Arena / est. task time  
+- Cinema: recoverable exit (FAB + Atlas stays visible); no pointerenter trap  
+
+### Production Ultra QA (2026-08-07)
+
+11/11 Playwright checks on `viz.kyanitelabs.tech` (coverage badge, Atlas cinema, floor Apply, provenance, static content-types). Evidence: `docs/v1/wayfinder/ultraqa-prod.png`.
+
+### Still open (parked — do not pretend done)
+
+| Item | Notes |
+|------|--------|
+| CF Managed robots AI blocks | Zone-level; `llms.txt` still live |
+| Public HTTP MCP | Local stdio only; needs auth + rate limit |
+| Secondary data fills | GPQA / SWE-bench / Aider / measured Index task time still empty (do not invent) |
+| VPS origin | Pages is public path; VPS rsync was flaky |
+| GitHub OSS mirror | Intentional separate tip; **not** an auto-mirror of Forgejo |
+
+### Quick commands
+
 ```bash
-npm test          # 45 vitest
-npx tsc --noEmit
+npm run dev
+npm test
+npm run catalog:coverage
+npm run atlas:cli -- meta
 npm run build
-npm run preview   # http://127.0.0.1:4200/  (Safari-safe; Three default)
+# deploy (operator): npx wrangler pages deploy dist --project-name=llm-3d-viz --branch=main --commit-dirty=true
 ```
 
-**Look at:** first paint axes (high up/away, no cream plane), ridge + heat, cinema (`C` / button), console hover by model id, threshold sweep markers.
+### NUCBox Atlas LLM (local only)
 
-### Honest residuals
-- Spike still ships Plotly for 2D projections + default 3D path (bundle still Plotly-heavy).
-- Three axis labels are HTML overlays (not perfect data→pixel labels yet).
-- Playwright render suite still Plotly-centric; not updated for non-Plotly pick in this spike.
-- Product encoding gaps (effort levels, class contrast, filters) remain **after** stage go/kill — separate from renderer critical path.
+```bash
+node scripts/wire-atlas-nucbox.mjs   # writes .env.local (gitignored)
+npm run dev                          # proxy /api/atlas/llm → :8890
+# UI: Atlas → NUCBox Unsloth
+```
 
-### Next — Simon
-- **Visual go/kill on Three only** (http://127.0.0.1:4200/).
-- If go → production: default Three, delete or bury Plotly stage path; keep 2D Plotly only until replaced.
-- Videos = Three cinema path, not Plotly gl3d.
+## Older context (still true)
 
-### Local preview (Safari)
-- **Do not use `vite preview` on :4190** — Vite hangs WebKit; port 4190 is blocked for Safari on this Mac.
-- **Use:** `npm run build && npm run preview` → **http://127.0.0.1:4200/** (Python static server; Safari + Chrome).
-- Chrome-only emergency: `npx vite preview --host 127.0.0.1 --port 5173`
+- **Three.js** is the 3D hero; Plotly is projections/debug only.  
+- Catalog is curated honesty-first (nulls not invented). Primary stack: AA Index × blended $/M × TPS.  
+- Dual-repo: Forgejo product SoT; GitHub public MIT is not a live mirror.
 
-## Ops
-- **Workers:** implementer + independent GLM review on PRs; vision models only for screenshots/taste.
-- **Forgejo:** REST API with browser UA; credentials stay in the local credential helper (never commit tokens).
-- **Tracker:** merge before delete branch.
+## Agent docs
 
-## Key pointers
-- `SPEC.md` / `DESIGN-SYSTEM.md` — locked product + visual authority
-- `docs/v1/r3f-stage-contract.md` — **stage rewrite contract + spike plan**
-- `src/viz/stage-api.ts` · `src/viz/stage3d-three.ts` · `src/viz/stage3d.ts`
-- `docs/research/` — frontier-math, plotly-dechrome, dataset
-- `docs/deploy/cloudflare-pages.md` — publish runbook (gated)
-- `HANDOFF.md` (this file)
+- Issues: `docs/agents/issue-tracker.md`  
+- Domain: `docs/agents/domain.md`  
+- MCP requirements: `docs/agents/mcp-cli-api-requirements.md`  

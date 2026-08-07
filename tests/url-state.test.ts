@@ -142,6 +142,38 @@ describe("url-state", () => {
     const again = parseShareableState(params);
     expect(again.filters.multiEffortOnly).toBe(false);
   });
+
+  it("parses and round-trips local VRAM + open-weight share params", () => {
+    const state = parseShareableState("?vram=12&open=1");
+    expect(state.filters.vramMaxGb).toBe(12);
+    expect(state.filters.openness).toBe("open");
+
+    const params = serializeShareableState({
+      ...baseShare(),
+      filters: { ...DEFAULT_FILTERS, openness: "open", vramMaxGb: 24 },
+    });
+    expect(params.get("vram")).toBe("24");
+    expect(params.get("open")).toBe("1");
+    const again = parseShareableState(params);
+    expect(again.filters.vramMaxGb).toBe(24);
+    expect(again.filters.openness).toBe("open");
+  });
+
+  it("vram alone forces openness open; invalid vram ignored", () => {
+    const state = parseShareableState("?vram=24");
+    expect(state.filters.vramMaxGb).toBe(24);
+    expect(state.filters.openness).toBe("open");
+    const bad = parseShareableState("?vram=16");
+    expect(bad.filters.vramMaxGb).toBeNull();
+  });
+
+  it("clears stale open/vram when serializing defaults", () => {
+    const existing = new URLSearchParams("vram=8&open=1&heat=1");
+    const params = serializeShareableState(baseShare(), existing);
+    expect(params.get("vram")).toBeNull();
+    expect(params.get("open")).toBeNull();
+    expect(params.get("heat")).toBe("1");
+  });
 });
 
 describe("enc presentation flag", () => {

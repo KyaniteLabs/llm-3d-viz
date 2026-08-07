@@ -1,9 +1,9 @@
 # Decision: glanceable lab color + filament rank (no hover required)
 
-**Map:** MAP-s-plus-observatory-quality (#147)  
-**PRD:** #146 · tickets #148–#153  
-**Date:** 2026-08-06  
-**Status:** **amended by product owner** (supersedes “desat non-frontier until hover”)  
+**Map:** MAP-s-plus-maximal-dataviz-beauty (supersedes #147)  
+**Plan:** `.omx/plans/prd-s-plus-maximal-dataviz-beauty.md`  
+**Date:** 2026-08-06 · **W0 locked:** 2026-08-07  
+**Status:** **locked for execute** (owner glanceable fill; trail idle **0.18**; supersedes desat-until-hover + 0.55×L)  
 **Authority:** Simon 2026-08-06 — *“see and understand at a glance; don’t want to hover; that was the point of color differentiation.”*
 
 ## Problem
@@ -33,10 +33,10 @@ Audit confetti was real (equal-loud marks + high-α trails + closed legend + no 
 | **Optimum** | Max size + gold/filament treatment · **no emoji** · same glyph; lab fill still present or gold overlay that remains identifiable |
 | **Size** | Value-score continuous; frontier floor + optimum max; **readable without hover** |
 | **Shape** | Sphere/octa × solid/wire (openness × reasoning) always visible |
-| **Trails idle** | Family hue **α ≤ 0.45** (quiet spaghetti, not muted fills) |
+| **Trails idle** | Family hue **α = 0.18** (code freeze; stricter than historical ≤0.45) |
 | **Trails solo** | α ≥ 0.85 |
 | **Endpoint emphasis** | Mid-effort **size** ×0.70 (not fill desat); endpoints full size |
-| **Singleton** | Slightly smaller / optional slight α on **mark** only if still lab-hue-recognizable (never grey-out brand) |
+| **Singleton** | Size/α hierarchy **only if lab hue still nameable** (W1 locks A keep 0.42+glanceable hue **or** B opacity 1 + size-only; no slate-mud fill) |
 | **Rings/core ≥3** | Default **off** at full density (noise); **on** for solo / selected / `?brand=full` / density-expand / cinema focus-set — **not** required for lab glance (fill alone is enough) |
 | **Legend HUD** | **Always open**; lab color chips for every lab in view; glyph matrix; size ramp; frontier/optimum |
 | **Hover** | Detail only (name, metrics) — **never** the first reveal of lab color or channel meaning |
@@ -85,3 +85,11 @@ Hover may add name/metrics only.
 - RALPLAN scorecard D1: “filament + size rank” not “desat non-frontier”  
 - MAP/W1 accept bullets: replace luminance≤55% fill rule with glance-first paint rules  
 - Comment on Forgejo #146 / #147 / #149 when execute train starts  
+
+
+## W0 lock (2026-08-07)
+
+Single-source paint authority published in DESIGN-SYSTEM + maximal-beauty plan.  
+**Forbidden:** `target_L = 0.55 × L` desat; slate-cyan as default dominated **mark fill**; hover-gated lab color.  
+**Allowed:** chroma pull 0.22 keep hue; trail idle 0.18; mid size 0.7.  
+Ultragoal: G001–G007 under `.omc/ultragoal/`.

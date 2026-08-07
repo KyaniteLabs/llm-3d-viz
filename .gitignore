@@ -23,3 +23,10 @@ tmp-*/
 
 .env
 .env.local
+.gstack/
+
+.playwright-mcp/
+.wrangler/
+**/.wrangler/
+
+.scratch/

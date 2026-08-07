@@ -1,5 +1,5 @@
 import "./styles/tokens.css";
-import { models } from "./data/models";
+import { allModels, models, type Model } from "./data/models";
 import {
   applyEconomyBasis,
   detectEconomyBasis,
@@ -19,16 +19,26 @@ import {
 } from "./lib/decide";
 import { DecisionConsole } from "./ui/console";
 import { DecidePanel } from "./ui/decide-panel";
+import { AtlasAgentPanel } from "./ui/atlas-agent-panel";
 import { FilterShelf, formatScopeSummary } from "./ui/filter-shelf";
 import { renderMembershipTable } from "./ui/membership-table";
 import { APP_BRANDING } from "./config/app-branding";
 import { RELEASE_FLOOR_ISO } from "./data/catalog-scope";
 import { CinemaMode } from "./viz/cinema";
+import { computeCinemaFocusIds, addFamilyMembers } from "./lib/cinema-focus";
 import { StageGuide } from "./ui/stage-guide";
 import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
 import { displayName } from "./lib/display-name";
 import { normalizedScores, weightedOptimum } from "./lib/score";
 import { isOssEdition } from "./config/edition";
+import { buildInsightMethodCopy, defaultStoryLine } from "./lib/share-copy";
+import {
+  diffCatalog,
+  loadCatalogSnapshot,
+  saveCatalogSnapshot,
+  type CatalogSnapshot,
+} from "./lib/catalog-diff";
+import { formatCoverageBadge } from "./lib/provenance";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -56,6 +66,14 @@ function sessionReferenceDate(): Date {
     return new Date(override);
   }
   return new Date();
+}
+
+/**
+ * Local VRAM intents need open-weight rows held out of the cloud product set
+ * (Meta / Mistral / gpt-oss, pre-2026 releases). Other modes stay on `models`.
+ */
+function catalogForFilters(filters: Pick<ModelFilters, "vramMaxGb">): readonly Model[] {
+  return filters.vramMaxGb != null ? allModels : models;
 }
 
 
@@ -170,6 +188,23 @@ async function boot() {
   const filterShelfHost = document.querySelector("[data-filter-shelf]") as HTMLElement;
   const scopeText = document.querySelector("[data-scope-text]") as HTMLElement;
   const statusText = document.querySelector("[data-status-text]") as HTMLElement;
+  const storyLineEl = document.querySelector("[data-story-line]") as HTMLElement | null;
+  const methodStripEl = document.querySelector("[data-method-strip]") as HTMLElement | null;
+  const copyInsightBtn = document.querySelector("[data-copy-insight]") as HTMLButtonElement | null;
+  const newSinceEl = document.querySelector("[data-new-since]") as HTMLElement | null;
+  // L3 — Living stage: one-time catalog-arrival diff. New models since the last
+  // visit surface as a status line (data-freshness); first visit = no pulse.
+  // Spectacle only on data change, never ambient (spec law). Reduced-motion: no
+  // stage emphasis class; the status line still informs.
+  const allCatalogIds = models.map((m) => m.model);
+  const lastCatalog = loadCatalogSnapshot();
+  const catalogDiff = diffCatalog(allCatalogIds, lastCatalog);
+  const newModelIds = !catalogDiff.isFirstVisit ? catalogDiff.newIds : [];
+  if (newSinceEl && newModelIds.length > 0) {
+    newSinceEl.hidden = false;
+    newSinceEl.textContent = `${newModelIds.length} new since ${lastCatalog?.date ?? ""}`;
+  }
+  saveCatalogSnapshot(allCatalogIds);
   const canvasHost = document.querySelector(".canvas-host") as HTMLElement;
   const tableHost = document.querySelector("[data-membership-table]") as HTMLElement;
   // Shareable URL: filters, axes, weights, decide. Session-only: hover/pin/cinema.
@@ -259,12 +294,30 @@ async function boot() {
       if (mode) setCanvasMode(mode);
       // refresh table when entering table mode
       if (mode === "table") {
-        const vis = applyFilters(models, store.getState().filters, sessionReferenceDate());
+        const vis = applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate());
         if (tableHost) renderMembershipTable(tableHost, vis, store);
       }
     });
   });
   setCanvasMode("3d");
+
+  // boot-blank-guard: if WebGL never produced marks, show hard error (not silent black)
+  window.setTimeout(() => {
+    const n = (window as any).__viz?.visibleCount ?? 0;
+    const canvas = document.querySelector(".stage-visual canvas") as HTMLCanvasElement | null;
+    const h = canvas?.clientHeight ?? 0;
+    if (n > 0 && h > 40) return;
+    if (document.querySelector("[data-boot-fail]")) return;
+    const banner = document.createElement("div");
+    banner.setAttribute("data-boot-fail", "1");
+    banner.style.cssText =
+      "position:fixed;inset:auto 1rem 1rem 1rem;z-index:9999;padding:0.75rem 1rem;background:#3a1510;color:#f4d58a;font:500 0.8rem/1.4 var(--font-mono);border:1px solid #c47a3a;border-radius:6px;";
+    banner.innerHTML =
+      "Stage failed to paint (WebGL/layout). <button type=\"button\" style=\"margin-left:0.75rem;background:#f4d58a;color:#070c0b;border:0;padding:0.3rem 0.6rem;cursor:pointer;font:inherit\">Reload</button>";
+    banner.querySelector("button")?.addEventListener("click", () => location.reload());
+    document.body.appendChild(banner);
+  }, 4000);
+
 
   // Always-visible economy basis: rate ($/M · tok/s) vs task ($/task · s/task).
   // Remaps cost (X) and speed (Z); intelligence (Y) stays put.
@@ -293,6 +346,16 @@ async function boot() {
   if (stageBackend === "r3f") {
     try {
       stage = new Stage3DThree(plotContainer, heatEncoding, { debugBadge: debugStage });
+      // Kick layout + hide placeholder (Safari first-paint height race)
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+        document.querySelector(".stage-visual")?.classList.add("is-ready");
+        document.querySelectorAll(".stage-placeholder").forEach((el) => {
+          el.classList.add("is-dismissed");
+          (el as HTMLElement).hidden = true;
+          (el as HTMLElement).style.display = "none";
+        });
+      });
     } catch (err) {
       console.error("[stage] Three init failed; falling back to Plotly", err);
       plotContainer.replaceChildren();
@@ -314,6 +377,13 @@ async function boot() {
   );
 
   const cinema = new CinemaMode(stage, store);
+  // L9: cinema frame export — 'S' while in cinema composites + downloads a 2× PNG.
+  window.addEventListener("keydown", (e) => {
+    if (store.getState().cinemaMode && (e.key === "s" || e.key === "S")) {
+      e.preventDefault();
+      cinema.downloadFrame();
+    }
+  });
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
   // Liani / average-user simple picker — OSS edition only (never product Forgejo default).
   let simpleDecision: { setModels: (m: readonly import("./data/models").Model[]) => void } | null =
@@ -331,7 +401,20 @@ async function boot() {
   const decideHost = document.createElement("div");
   consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
   const decidePanel = new DecidePanel(decideHost, store, models, productCatalogSnapshot);
-  decidePanel.setModels(applyFilters(models, store.getState().filters, sessionReferenceDate()));
+  decidePanel.setModels(applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate()));
+  const atlasHost =
+    document.querySelector<HTMLElement>("[data-atlas-agent]") ??
+    (() => {
+      const d = document.createElement("div");
+      d.setAttribute("data-atlas-agent", "1");
+      consoleRoot.appendChild(d);
+      return d;
+    })();
+  const atlasPanel = new AtlasAgentPanel(atlasHost, store);
+  atlasPanel.setCatalog(models, productCatalogSnapshot);
+  atlasPanel.setVisible(
+    applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate()),
+  );
   document.querySelector("[data-cinema-toggle]")?.addEventListener("click", () => cinema.toggle());
   const decideToggle = document.querySelector<HTMLButtonElement>("[data-decide-toggle]");
   decideToggle?.addEventListener("click", () => {
@@ -360,7 +443,7 @@ async function boot() {
     if ((event as KeyboardEvent).key !== "Enter") return;
     const q = ((event.target as HTMLInputElement).value || "").trim().toLowerCase();
     if (!q) return;
-    const vis = applyFilters(models, store.getState().filters, sessionReferenceDate());
+    const vis = applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate());
     const hit = vis.find(
       (m) =>
         m.model.toLowerCase().includes(q) ||
@@ -370,6 +453,24 @@ async function boot() {
     if (hit) {
       store.update({ pinnedModelId: hit.model, hoveredModelId: hit.model });
       setCanvasMode("3d");
+
+  // boot-blank-guard: if WebGL never produced marks, show hard error (not silent black)
+  window.setTimeout(() => {
+    const n = (window as any).__viz?.visibleCount ?? 0;
+    const canvas = document.querySelector(".stage-visual canvas") as HTMLCanvasElement | null;
+    const h = canvas?.clientHeight ?? 0;
+    if (n > 0 && h > 40) return;
+    if (document.querySelector("[data-boot-fail]")) return;
+    const banner = document.createElement("div");
+    banner.setAttribute("data-boot-fail", "1");
+    banner.style.cssText =
+      "position:fixed;inset:auto 1rem 1rem 1rem;z-index:9999;padding:0.75rem 1rem;background:#3a1510;color:#f4d58a;font:500 0.8rem/1.4 var(--font-mono);border:1px solid #c47a3a;border-radius:6px;";
+    banner.innerHTML =
+      "Stage failed to paint (WebGL/layout). <button type=\"button\" style=\"margin-left:0.75rem;background:#f4d58a;color:#070c0b;border:0;padding:0.3rem 0.6rem;cursor:pointer;font:inherit\">Reload</button>";
+    banner.querySelector("button")?.addEventListener("click", () => location.reload());
+    document.body.appendChild(banner);
+  }, 4000);
+
     }
   });
 
@@ -377,6 +478,7 @@ async function boot() {
   let renderedAxes: AxisMapping | null = null;
   let renderedFilters: ModelFilters | null = null;
   let renderedDecideKey = "";
+  let renderedCinemaMode = false;
   let pending: {
     weights: AppState["weights"];
     axisMapping: AxisMapping;
@@ -398,6 +500,69 @@ async function boot() {
   const sameWeights = (left: AppState["weights"], right: AppState["weights"]) =>
     left.speed === right.speed && left.cost === right.cost && left.intelligence === right.intelligence;
 
+
+  function updateTrustChrome(
+    visibleSet: typeof models,
+    weights: AppState["weights"],
+    axisMapping: AxisMapping,
+    appState: AppState,
+  ) {
+    const scores = normalizedScores(visibleSet, weights, visibleSet);
+    const top = weightedOptimum(scores)?.model;
+    const story = defaultStoryLine({
+      decideMode: appState.decideMode,
+      floor: appState.intelligenceFloor,
+      topModel: top ? displayName(top.model) : null,
+      nPlottable: visibleSet.length,
+      intentLabel: null,
+    });
+    if (storyLineEl) storyLineEl.textContent = story;
+    const axes = `${axisMapping.x} × ${axisMapping.y} × ${axisMapping.z}`;
+    const asOf = new Date().toISOString().slice(0, 10);
+    const sources = "Artificial Analysis · OpenRouter · Arena (CC BY 4.0)";
+    const costTaskN = visibleSet.filter(
+      (m) => m.cost_per_index_task_usd != null && m.cost_per_index_task_usd > 0,
+    ).length;
+    const arenaN = visibleSet.filter((m) => m.arena_elo != null).length;
+    const timeMeasN = visibleSet.filter(
+      (m) => m.time_per_index_task_s != null && m.time_per_index_task_s > 0,
+    ).length;
+    const coverageBadge = formatCoverageBadge({
+      modelCount: visibleSet.length,
+      costTaskPresent: costTaskN,
+      arenaPresent: arenaN,
+      timeTaskMeasured: timeMeasN,
+    });
+    if (methodStripEl) {
+      methodStripEl.hidden = false;
+      methodStripEl.textContent = `as of ${asOf} · N=${visibleSet.length} · ${axes} · ${sources} · ${coverageBadge}`;
+      methodStripEl.title = coverageBadge;
+    }
+    if (copyInsightBtn && !(copyInsightBtn as any).__bound) {
+      (copyInsightBtn as any).__bound = true;
+      copyInsightBtn.addEventListener("click", async () => {
+        const text = buildInsightMethodCopy({
+          title: "Model Observatory",
+          story,
+          axes,
+          sources,
+          asOf,
+          nPlottable: visibleSet.length,
+          url: window.location.href,
+        });
+        try {
+          await navigator.clipboard.writeText(text);
+          copyInsightBtn.textContent = "Copied";
+          setTimeout(() => {
+            copyInsightBtn.textContent = "Copy insight";
+          }, 1400);
+        } catch {
+          copyInsightBtn.textContent = "Copy failed";
+        }
+      });
+    }
+  }
+
   const renderVisuals = (
     weights: AppState["weights"],
     axisMapping: AxisMapping,
@@ -412,12 +577,12 @@ async function boot() {
       families: [...filters.families],
     };
 
-    const visibleSet = applyFilters(models, filters, sessionReferenceDate());
+    const visibleSet = applyFilters(catalogForFilters(filters), filters, sessionReferenceDate());
     if (scopeText) {
-      scopeText.textContent = formatScopeSummary(filters, visibleSet.length, models.length);
+      scopeText.textContent = formatScopeSummary(filters, visibleSet.length, catalogForFilters(filters).length);
     }
     if (statusText) {
-      statusText.textContent = `${visibleSet.length} models · ${filters.multiEffortOnly ? "multi-effort" : "all variants"} · multi-effort`;
+      statusText.textContent = `${visibleSet.length} models · ${filters.multiEffortOnly ? "multi-effort" : "all variants"}`;
     }
     // Drop pin/hover if filtered out.
     const state = store.getState();
@@ -451,6 +616,21 @@ async function boot() {
       ? shortlistFromDecide(visibleSet, appState.intelligenceFloor, appState.costSpeedBias, 3)
       : null;
     renderedDecideKey = `${appState.decideMode}:${appState.intelligenceFloor}:${appState.costSpeedBias}:${appState.floorAnchorModelId ?? ""}`;
+    renderedCinemaMode = Boolean(appState.cinemaMode);
+    // D10 (redefined 2026-08-07): compute the focus-set ALWAYS so the default view
+    // gets always-on direct labels (identity reachable w/o color). Cinema dimming
+    // reuses the same set but stays cinema-only.
+    const labelFocusIds = computeCinemaFocusIds(visibleSet, weights, {
+      selectedId: appState.pinnedModelId ?? appState.hoveredModelId,
+      decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
+    });
+    let cinemaFocusIds: Set<string> | null = null;
+    if (appState.cinemaMode) {
+      cinemaFocusIds = labelFocusIds;
+      if (soloFamily) {
+        addFamilyMembers(cinemaFocusIds, visibleSet, filters.families[0], familyIdOf);
+      }
+    }
     stage.render(weights, visibleSet, {
       axisMapping,
       presentationMode,
@@ -460,6 +640,8 @@ async function boot() {
       intelligenceFloor: appState.decideMode ? appState.intelligenceFloor : null,
       decideParetoIds: decide ? decide.pareto.map((m) => m.model) : null,
       decideShortlistIds: decide ? decide.shortlist.map((m) => m.model) : null,
+      cinemaFocusIds,
+      labelFocusIds,
     });
     updateEmptyState(visibleSet.length, filters);
     projections?.setPresentationMode?.(presentationMode);
@@ -473,7 +655,14 @@ async function boot() {
     consoleUi.setModels(visibleSet);
     decidePanel.setModels(visibleSet);
     simpleDecision?.setModels(visibleSet);
+    atlasPanel.setVisible(visibleSet);
     stageGuide.setModels(visibleSet);
+    updateTrustChrome(visibleSet, weights, axisMapping, appState);
+    document.querySelector(".stage-visual")?.classList.add("is-ready");
+    document.querySelectorAll(".stage-placeholder").forEach((el) => {
+      el.classList.add("is-dismissed");
+      (el as HTMLElement).hidden = true;
+    });
     if (statusText && appState.decideMode && decide) {
       statusText.textContent = `Decide · floor ${appState.intelligenceFloor} · ${decide.eligible.length} eligible · ${decide.shortlist.length} shortlist`;
     }
@@ -501,6 +690,9 @@ async function boot() {
     viz.optimumModelId = appState.decideMode
       ? null
       : (weightedOptimum(normalizedScores(visibleSet, weights, visibleSet))?.model.model ?? null);
+    viz.labelFocusIds = labelFocusIds ? [...labelFocusIds] : [];
+    viz.newModelIds = newModelIds;
+    viz.captureCinemaFrame = () => cinema.captureFrame();
     (window as any).__viz = viz;
   };
 
@@ -531,9 +723,10 @@ async function boot() {
     const filtersSame = sameFilters(renderedFilters, state.filters);
     const decideKey = `${state.decideMode}:${state.intelligenceFloor}:${state.costSpeedBias}:${state.floorAnchorModelId ?? ""}`;
     const decideSame = decideKey === renderedDecideKey;
+    const cinemaSame = Boolean(state.cinemaMode) === renderedCinemaMode;
     // Hover/pin: lightweight family emphasis (no full rebuild / no sweep race).
-    if (weightsSame && axesSame && filtersSame && decideSame) {
-      const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
+    if (weightsSame && axesSame && filtersSame && decideSame && cinemaSame) {
+      const visibleNow = applyFilters(catalogForFilters(state.filters), state.filters, sessionReferenceDate());
       const soloFamily = state.filters.families.length === 1;
       const hoverId = state.hoveredModelId ?? state.pinnedModelId;
       const hoverModel = hoverId ? visibleNow.find((m) => m.model === hoverId) : null;
@@ -550,10 +743,11 @@ async function boot() {
     // the new set immediately. Weight/axis-only changes leave membership alone;
     // SweepScheduler starts its own ignition from its store subscription.
     if (!filtersSame) {
-      const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
+      const visibleNow = applyFilters(catalogForFilters(state.filters), state.filters, sessionReferenceDate());
       consoleUi.setModels(visibleNow);
       decidePanel.setModels(visibleNow);
       simpleDecision?.setModels(visibleNow);
+      atlasPanel.setVisible(visibleNow);
       stageGuide.setModels(visibleNow);
       sweep?.setModels(visibleNow);
     }
@@ -601,7 +795,7 @@ async function boot() {
     if (state.hoveredModelId === lastStripHover && state.pinnedModelId === lastStripPin) return;
     lastStripHover = state.hoveredModelId;
     lastStripPin = state.pinnedModelId;
-    const visibleSet = applyFilters(models, state.filters, sessionReferenceDate());
+    const visibleSet = applyFilters(catalogForFilters(state.filters), state.filters, sessionReferenceDate());
     updateEffortStrip(visibleSet, state, store);
   });
 
@@ -687,7 +881,7 @@ async function boot() {
     projectionContainers.length > 0
       ? new Projections(projectionContainers, stage.gd, heatEncoding)
       : null;
-  const initialVisible = applyFilters(models, store.getState().filters, sessionReferenceDate());
+  const initialVisible = applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate());
   const sweepScheduler = new SweepScheduler(
     stage.gd,
     projections?.gds ?? [],

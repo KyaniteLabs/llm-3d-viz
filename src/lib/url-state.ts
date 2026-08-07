@@ -179,6 +179,20 @@ export function parseShareableState(
     const me = params.get("me");
     filters.multiEffortOnly = me !== "0" && me !== "false";
   }
+  if (params.has("open") || params.has("openness")) {
+    const o = (params.get("open") ?? params.get("openness") ?? "all").toLowerCase();
+    filters.openness = o === "open" || o === "1" || o === "true" ? "open" : o === "closed" ? "closed" : "all";
+  }
+  if (params.has("vram")) {
+    const v = Number(params.get("vram"));
+    filters.vramMaxGb = v === 8 || v === 12 || v === 24 ? v : null;
+    if (filters.vramMaxGb != null) filters.openness = "open";
+  }
+  // nr=1 → include Non-reasoning rungs; default product excludes them.
+  if (params.has("nr")) {
+    const nr = (params.get("nr") ?? "").toLowerCase();
+    filters.excludeNonReasoning = nr === "0" || nr === "false" || nr === "off";
+  }
 
   let axisMapping = normalizeAxisMapping(base.axisMapping ?? DEFAULT_AXIS_MAPPING);
   const ax = params.get("ax");
@@ -232,6 +246,10 @@ export function serializeShareableState(
     "floor",
     "bias",
     "anchor",
+    "open",
+    "openness",
+    "vram",
+    "nr",
   ]) {
     params.delete(key);
   }
@@ -250,6 +268,17 @@ export function serializeShareableState(
   }
   if (state.filters.families.length) {
     params.set("families", joinList(state.filters.families));
+  }
+  if (state.filters.openness === "open") {
+    params.set("open", "1");
+  } else if (state.filters.openness === "closed") {
+    params.set("open", "closed");
+  }
+  if (state.filters.vramMaxGb === 8 || state.filters.vramMaxGb === 12 || state.filters.vramMaxGb === 24) {
+    params.set("vram", String(state.filters.vramMaxGb));
+  }
+  if (state.filters.excludeNonReasoning === false) {
+    params.set("nr", "1");
   }
 
   const defAxes = DEFAULT_AXIS_MAPPING;

@@ -18,6 +18,11 @@ import {
 } from "../lib/score";
 import { frontier } from "../lib/pareto";
 import { formatTps, formatPricePerM, formatIntelligence, formatTtftSeconds, ttftCaveat } from "../lib/format";
+import {
+  formatProvenanceLine,
+  optionalMetricDlRows,
+  selectionExtras,
+} from "../lib/provenance";
 import { displayName } from "../lib/display-name";
 import type { AppStore, AppState } from "../state";
 
@@ -32,7 +37,15 @@ const axisRoleLabel: Record<SceneAxis, string> = {
   z: "Z axis",
 };
 const AXIS_STUB_NOTE =
-  "Cost/time per Index task use AA Intelligence Index task metrics when present for a model.";
+  "Cost/task uses measured AA Index-task cost when present. Time/task is measured wall-time when present; otherwise estimated (TTFT + 1000/TPS).";
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 function weightShares(weights: AppState["weights"]): Record<WeightKey, number> {
   const total = weightKeys.reduce((sum, weightKey) => sum + Math.max(0, weights[weightKey]), 0);
@@ -73,34 +86,46 @@ export class DecisionConsole {
     this.models = models;
     const advancedOpen =
       typeof sessionStorage !== "undefined" && sessionStorage.getItem(ADVANCED_STORAGE_KEY) === "1";
+    // S+ W3 Interpretation A: Selection | Score | Navigate (progressive disclosure preserved).
     this.root.innerHTML = `
-      <div class="intent-primary" data-intent-primary>
-        <p class="eyebrow">GOAL</p>
-        <h2 class="intent-heading">What are you optimizing for?</h2>
-        <p class="intent-blurb">
-          Each mark is a model on <strong>speed × cost × intelligence</strong>.
-          Pick a goal — the cube reweights and names a pick. Drag to orbit; click a mark for detail.
-        </p>
-        <section class="intent-presets" aria-label="Optimization goals"></section>
-      </div>
-      <section class="model-readout" aria-live="polite"></section>
-      <details class="advanced-panel" data-advanced-panel${advancedOpen ? " open" : ""}>
-        <summary class="advanced-summary">Advanced controls</summary>
-        <p class="advanced-hint">Analyst tools: raw weight shares, technical workloads, family/effort nav, axes, tables.</p>
+      <section class="console-section" data-section="selection" aria-label="Selection">
+        <p class="eyebrow console-section-label">SELECTION</p>
+        <section class="model-readout" aria-live="polite"></section>
+      </section>
+      <section class="console-section" data-section="score" aria-label="Score">
+        <p class="eyebrow console-section-label">SCORE</p>
+        <div class="intent-primary" data-intent-primary>
+          <p class="eyebrow">GOAL</p>
+          <h2 class="intent-heading">What are you optimizing for?</h2>
+          <p class="intent-blurb">
+            Each mark is a model on <strong>speed × cost × intelligence</strong>.
+            Pick a goal — the cube reweights and names a pick. Drag to orbit; click a mark for detail.
+          </p>
+          <section class="intent-presets" aria-label="Optimization goals"></section>
+        </div>
+        <!-- L10a (F-007): the value-score sliders are the signature instrument —
+             always visible under the goal cards, not buried in a twisty. -->
         <section class="weight-controls" aria-label="Value-score weight shares"></section>
-        <section class="preset-controls" aria-label="Workload presets (technical)"></section>
+        <details class="advanced-panel" data-advanced-panel${advancedOpen ? " open" : ""}>
+          <summary class="advanced-summary">Advanced controls</summary>
+          <p class="advanced-hint">Analyst tools: technical workloads, axes, tables.</p>
+          <section class="preset-controls" aria-label="Workload presets (technical)"></section>
+          <details class="filter-disclosure">
+            <summary class="weight-heading">AXES</summary>
+            <section class="axis-controls" aria-label="Stage axis metrics"></section>
+          </details>
+          <details class="console-secondary">
+            <summary class="weight-heading">MORE · TASKS / TABLE</summary>
+            <section class="task-charts" aria-label="Cost and time per Index task"></section>
+            <section class="score-table-host" aria-label="Model score table"></section>
+            <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
+          </details>
+        </details>
+      </section>
+      <section class="console-section" data-section="navigate" aria-label="Navigate">
+        <p class="eyebrow console-section-label">NAVIGATE</p>
         <section class="family-nav" aria-label="Family and effort navigation"></section>
-        <details class="filter-disclosure">
-          <summary class="weight-heading">AXES</summary>
-          <section class="axis-controls" aria-label="Stage axis metrics"></section>
-        </details>
-        <details class="console-secondary">
-          <summary class="weight-heading">MORE · TASKS / TABLE</summary>
-          <section class="task-charts" aria-label="Cost and time per Index task"></section>
-          <section class="score-table-host" aria-label="Model score table"></section>
-          <section class="incomplete-data" aria-label="Incomplete benchmark data"></section>
-        </details>
-      </details>
+      </section>
       <!-- legacy filter host kept for renderFilterControls (hidden) -->
       <section class="filter-controls" hidden aria-hidden="true"></section>`;
 
@@ -410,11 +435,13 @@ export class DecisionConsole {
     const prov = section.querySelector<HTMLSelectElement>("[data-filter-providers]")!;
     const fam = section.querySelector<HTMLSelectElement>("[data-filter-families]")!;
     const multiOnly = section.querySelector<HTMLInputElement>("[data-filter-multi-only]");
+    const prev = this.store.getState().filters;
     this.store.update({
       filters: {
+        ...prev,
         ageEnabled: age.checked,
         ageMonths: 6,
-        multiEffortOnly: multiOnly?.checked ?? this.store.getState().filters.multiEffortOnly,
+        multiEffortOnly: multiOnly?.checked ?? prev.multiEffortOnly,
         providers: Array.from(prov.selectedOptions).map((o) => o.value),
         families: Array.from(fam.selectedOptions).map((o) => o.value),
       },
@@ -547,7 +574,28 @@ export class DecisionConsole {
       button.addEventListener("click", () => {
         const id = button.dataset.intent as keyof typeof presets;
         const preset = presets[id];
-        if (preset) this.store.update({ weights: { ...preset }, decideMode: false });
+        if (!preset) return;
+        const filters = this.store.getState().filters;
+        const vramMaxGb =
+          id === "local8" ? 8 : id === "local12" ? 12 : id === "local24" ? 24 : null;
+        const isLocal = vramMaxGb != null;
+        // Local VRAM intents: open-weight + size gate on the full catalog (not
+        // cloud-only 2026 API set). Drop multi-effort / age so small open models
+        // actually appear. Non-local intents clear both gates.
+        this.store.update({
+          weights: { ...preset },
+          decideMode: false,
+          filters: {
+            ...filters,
+            providers: [...filters.providers],
+            families: [...filters.families],
+            openness: isLocal ? "open" : "all",
+            vramMaxGb,
+            ...(isLocal
+              ? { multiEffortOnly: false, ageEnabled: false }
+              : {}),
+          },
+        });
       });
     });
   }
@@ -613,15 +661,17 @@ export class DecisionConsole {
     const tier = deriveEffortTier(model);
     const curveSteps = groupByFamily(this.catalog).get(family)?.length ?? 1;
     const soloActive = state.filters.families.length === 1 && state.filters.families[0] === family;
-    return `<strong data-model-id="${model.model}">${model.model}</strong><span>${model.provider} · ${model.openness}${model.reasoning ? " · reasoning" : ""} · effort <em>${tier}</em>${curveSteps >= 2 ? ` · ${curveSteps}-step curve` : ""}</span>
+    return `<strong class="selection-name" data-model-id="${model.model}">${displayName(model.model)}</strong><span>${model.provider} · ${model.openness}${model.reasoning ? " · reasoning" : ""} · effort <em>${tier}</em>${curveSteps >= 2 ? ` · ${curveSteps}-step curve` : ""}${selectionExtras(model)}</span>
       <dl><div><dt>TPS</dt><dd>${formatTps(model.tps)}</dd></div>
       <div><dt>TTFT</dt><dd>${ttftCell}</dd></div>
       <div><dt>Blended price</dt><dd>${formatPricePerM(model.blended_price_per_M)}</dd></div>
       <div><dt>AA index</dt><dd>${formatIntelligence(model.aa_intelligence_index)}</dd></div>
+      ${optionalMetricDlRows(model)}
       <div><dt>Family</dt><dd>${family}</dd></div>
       <div><dt>Effort tier</dt><dd>${tier}</dd></div>
       <div><dt>Curve steps</dt><dd>${curveSteps}${curveSteps >= 2 ? " (multi-effort)" : ""}</dd></div>
-      <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div></dl>
+      <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div>
+      <div class="provenance-row"><dt>Provenance</dt><dd class="provenance-line">${escapeHtml(formatProvenanceLine(model))}</dd></div></dl>
       ${
         curveSteps >= 2
           ? `<button type="button" class="family-chip is-action" data-solo-family="${family}">${soloActive ? "Exit solo · show all curves" : "Solo family curve"}</button>`
@@ -649,18 +699,32 @@ export class DecisionConsole {
       state.filters.families.length === 1
         ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-nav-show-all>show all curves</button></p>`
         : multiN > 0
-          ? `<p class="axis-hint">${multiN} multi-effort curves in view — open Advanced to solo a family.</p>`
+          ? `<p class="axis-hint">${multiN} multi-effort curves in view — open Navigate to solo a family.</p>`
           : "";
     return `<section class="value-leaderboard" aria-label="Current value-score leaderboard">
       <p class="eyebrow">TOP PICK · ${this.models.length} VISIBLE</p>
       <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}" data-focus-family="${familyIdOf(optimum.model)}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} score · ${deriveEffortTier(optimum.model)}</span></p>
-      <ol>${scores
+      <ol data-leaderboard-list>${scores
         .slice(0, 5)
         .map(
           ({ model, score }) =>
             `<li data-model-id="${model.model}" data-focus-family="${familyIdOf(model)}"><span>${displayName(model.model)} <small>${deriveEffortTier(model)}</small></span><strong>${score.toFixed(3)}</strong></li>`,
         )
         .join("")}</ol>
+      ${
+        scores.length > 5
+          ? `<details class="leaderboard-expand" data-leaderboard-expand>
+              <summary class="text-link">Show all ${scores.length} ranked</summary>
+              <ol>${scores
+                .slice(5)
+                .map(
+                  ({ model, score }) =>
+                    `<li data-model-id="${model.model}" data-focus-family="${familyIdOf(model)}"><span>${displayName(model.model)} <small>${deriveEffortTier(model)}</small></span><strong>${score.toFixed(3)}</strong></li>`,
+                )
+                .join("")}</ol>
+            </details>`
+          : ""
+      }
       <p class="preset-outcome" data-preset-outcome="${activePreset ?? "custom"}">${presetLabel} · ${shares.speed}% speed / ${shares.cost}% cost / ${shares.intelligence}% intelligence → ${displayName(optimum.model.model)}</p>
       ${solo}
     </section>`;
@@ -713,22 +777,28 @@ export class DecisionConsole {
   }
 
   render(state: Readonly<AppState>) {
-    // Decide mode (B′): hide classic value-score weights / presets entirely.
-    const weightHost = this.root.querySelector<HTMLElement>(".weight-controls");
-    const presetHost = this.root.querySelector<HTMLElement>(".preset-controls");
-    const intentPrimary = this.root.querySelector<HTMLElement>("[data-intent-primary]");
-    const advanced = this.root.querySelector<HTMLElement>("[data-advanced-panel]");
-    if (weightHost) weightHost.hidden = state.decideMode;
-    if (presetHost) presetHost.hidden = state.decideMode;
-    if (intentPrimary) intentPrimary.hidden = state.decideMode;
-    if (advanced) advanced.hidden = state.decideMode;
-    const familyNav = this.root.querySelector<HTMLElement>(".family-nav");
-    if (familyNav) familyNav.hidden = state.decideMode;
-    this.root.classList.toggle("is-decide-mode", state.decideMode);
-    // Leaderboard section is rebuilt in readout; also hide any stale host.
-    this.root.querySelectorAll(".value-leaderboard").forEach((el) => {
-      (el as HTMLElement).hidden = state.decideMode;
-    });
+    // Decide mode (AC-I5): hide Explore score/nav chrome; keep Selection for shortlist context only when useful.
+    const decide = state.decideMode;
+    const hideSelectors = [
+      ".weight-controls",
+      ".preset-controls",
+      "[data-intent-primary]",
+      "[data-advanced-panel]",
+      ".family-nav",
+      "#nav-family-search",
+      "[data-nav-family-search]",
+      ".family-chip-row",
+      ".value-leaderboard",
+      ".nav-keys",
+      '[data-section="score"]',
+      '[data-section="navigate"]',
+    ];
+    for (const sel of hideSelectors) {
+      this.root.querySelectorAll(sel).forEach((el) => {
+        (el as HTMLElement).hidden = decide;
+      });
+    }
+    this.root.classList.toggle("is-decide-mode", decide);
 
     weightKeys.forEach((key) => {
       const input = this.root.querySelector<HTMLInputElement>(`[data-weight="${key}"]`);

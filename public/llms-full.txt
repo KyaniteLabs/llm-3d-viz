@@ -1,0 +1,71 @@
+# Model Observatory — full agent brief (llms-full.txt)
+
+Canonical: https://viz.kyanitelabs.tech/
+Updated: 2026-08-07
+
+## One-sentence pitch
+
+Model Observatory is a free, MIT-licensed **3D LLM benchmark instrument** that maps models on **intelligence (AA Index) × cost (blended $/M) × speed (tok/s)** and supports **Decide mode**: intelligence floor → cost/speed shortlist with shareable URLs.
+
+## Product surface (human UI)
+
+1. **3D stage** — WebGL points; open = wire shape; lab brand colors; Pareto ridge; multi-effort trails.
+2. **2D projections** — linked speed/intel, speed/cost, cost/intel views.
+3. **Table** — membership list of the visible set.
+4. **Filter shelf** — age, multi-effort, providers, families, openness, VRAM tiers, non-reasoning exclusion.
+5. **Decide panel** — floor slider, cost/speed bias, eligible shortlist.
+6. **Atlas dock** — natural language / voice over **catalog tools** (offline grammar by default; optional OpenAI- or Anthropic-compatible endpoint, including NUCBox Unsloth BYOK via local Vite proxy).
+7. **Cinema mode** — stage-first presentation chrome.
+
+## URL state (shareable)
+
+Query params (subset): `decide=1`, `floor=`, `bias=`, `anchor=`, `providers=`, `families=`, `age=`, `me=`, `ax=`, `w=`, `catalog=`. Session-only: hover, pin, cinema.
+
+## Data policy
+
+- Catalog is **curated static/refresh pipeline**, not live free-form scraping in the browser.
+- **Nulls are honest** — unmeasured Index/cost/speed never fabricated.
+- Sources disclosed in UI footer: Artificial Analysis, OpenRouter, Arena (CC BY 4.0).
+
+## Atlas agent tools (in-app, not public HTTP API yet)
+
+Host-side pure tools (ground truth from catalog):
+
+- get_catalog_meta
+- search_models / get_model
+- list_eligible / rank_eligible
+- propose_floor
+- compare_models
+- finish_turn → structured UI proposal (floor, filters, shortlist, pin)
+
+High-impact UI writes use confirm/apply. Optional LLM only drives tool calls; metrics still come from tools.
+
+## MCP / CLI (status)
+
+**Local (in-repo) live:**
+- CLI: `npm run atlas:cli -- meta|search|eligible|rank|get|compare|floor`
+- MCP stdio: `npm run atlas:mcp` (JSON-RPC tools/list + tools/call over catalog)
+- Snapshot: `npm run catalog:snapshot` → `data/atlas-catalog-snapshot.json`
+- Full-app Atlas in browser: cinema/pin/filters/decide/axes + Apply/Undo
+
+**Public origin:** MCP HTTP endpoint **not** deployed yet. Requirements: `docs/agents/mcp-cli-api-requirements.md`.
+Do not invent a public MCP URL until M5 ships.
+
+## What not to claim
+
+- Not an LLM API marketplace checkout.
+- Not a substitute for Artificial Analysis official rankings without attribution.
+- Not offline-capable for full WebGL without a modern browser.
+- Public site does not host private NUCBox / Unsloth endpoints.
+
+## Repos
+
+| Role | URL |
+|------|-----|
+| Product SoT | https://git.kyanitelabs.tech/simon/llm-3d-viz |
+| Public MIT | https://github.com/KyaniteLabs/llm-3d-viz |
+| Live | https://viz.kyanitelabs.tech/ |
+
+## License
+
+MIT — see repository LICENSE.

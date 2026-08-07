@@ -4,8 +4,122 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#070C0B" />
+    <meta name="color-scheme" content="dark" />
+    <title>Model Observatory — LLM speed × cost × intelligence (3D)</title>
+    <meta
+      name="description"
+      content="Interactive 3D observatory of LLM benchmarks: Artificial Analysis intelligence Index, blended cost, and tokens/s. Set an intelligence floor, rank eligible models by cost or speed, compare open vs closed weights, and share Decide shortlists. Free, browser-based, MIT."
+    />
+    <meta
+      name="keywords"
+      content="LLM benchmark, AI model comparison, intelligence index, tokens per second, cost per million tokens, Artificial Analysis, open weights, Decide mode, 3D data visualization"
+    />
+    <meta name="author" content="Kyanite Labs / Simon Gonzalez De Cruz" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://viz.kyanitelabs.tech/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Model Observatory" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://viz.kyanitelabs.tech/" />
+    <meta property="og:title" content="Model Observatory — LLM speed × cost × intelligence" />
+    <meta
+      property="og:description"
+      content="3D benchmark stage for LLMs: intelligence floor, cost×speed shortlist, multi-effort trails, open vs closed. Shareable Decide links."
+    />
+    <meta property="og:image" content="https://viz.kyanitelabs.tech/og-image.png" />
+    <meta property="og:image:alt" content="Model Observatory 3D stage — speed, cost, intelligence axes" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Model Observatory — LLM speed × cost × intelligence" />
+    <meta
+      name="twitter:description"
+      content="Interactive 3D LLM benchmarks. Floor intelligence, rank by cost or speed, compare models honestly."
+    />
+    <meta name="twitter:image" content="https://viz.kyanitelabs.tech/og-image.png" />
+
+    <!-- Agent / AI discovery -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
+    <link rel="alternate" type="text/markdown" href="/about.md" title="About (Markdown)" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Model Observatory</title>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://viz.kyanitelabs.tech/#app",
+            "name": "Model Observatory",
+            "alternateName": ["llm-3d-viz", "LLM 3D Viz"],
+            "url": "https://viz.kyanitelabs.tech/",
+            "description": "Interactive 3D visualization of LLM benchmarks across speed (tokens/s), cost (blended $/M), and intelligence (Artificial Analysis Index). Decide mode: set an intelligence floor and shortlist by cost or speed.",
+            "applicationCategory": "DataVisualizationApplication",
+            "operatingSystem": "Web browser",
+            "browserRequirements": "Requires JavaScript and WebGL",
+            "isAccessibleForFree": true,
+            "license": "https://opensource.org/licenses/MIT",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "Kyanite Labs",
+              "url": "https://kyanitelabs.tech"
+            },
+            "featureList": [
+              "3D stage: cost × intelligence × speed",
+              "Decide mode with intelligence floor and cost/speed bias",
+              "Multi-effort trails and Pareto ridge",
+              "Open vs closed weight encoding",
+              "Local VRAM tier filters (8/12/24 GB)",
+              "Shareable URL state",
+              "Atlas agent dock (offline tools + optional BYOK LLM)"
+            ]
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://viz.kyanitelabs.tech/#catalog",
+            "name": "Model Observatory curated LLM catalog",
+            "description": "Curated per-model metrics for visualization: AA Intelligence Index, tokens/s, blended price, openness. Nulls preserved; metrics are never invented client-side.",
+            "license": "https://opensource.org/licenses/MIT",
+            "creator": { "@type": "Organization", "name": "Kyanite Labs" },
+            "variableMeasured": [
+              "aa_intelligence_index",
+              "tps",
+              "blended_price_per_M",
+              "openness"
+            ],
+            "isBasedOn": [
+              { "@type": "CreativeWork", "name": "Artificial Analysis", "url": "https://artificialanalysis.ai" },
+              { "@type": "CreativeWork", "name": "OpenRouter list prices", "url": "https://openrouter.ai" },
+              {
+                "@type": "Dataset",
+                "name": "LMSYS Chatbot Arena leaderboard dataset",
+                "url": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
+                "license": "https://creativecommons.org/licenses/by/4.0/"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://viz.kyanitelabs.tech/#website",
+            "url": "https://viz.kyanitelabs.tech/",
+            "name": "Model Observatory",
+            "publisher": { "@type": "Organization", "name": "Kyanite Labs" },
+            "inLanguage": "en"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="app-shell observatory" id="app-shell">
@@ -62,16 +176,17 @@
               class="economy-chip"
               data-economy-basis="task"
               aria-pressed="false"
-              title="Cost and time per Artificial Analysis Index task"
+              title="Cost per AA Index task (when measured). Time is measured wall-time when available; otherwise estimated as TTFT + 1000/TPS."
             >
-              $/task · s/task
+              $/task · s/task≈
             </button>
           </div>
         </div>
 
         <section class="stage panel" data-pane="3d" aria-labelledby="stage-title">
           <div class="stage-visual">
-            <div class="stage-placeholder" aria-label="3D benchmark stage placeholder">
+            <p class="story-line" data-story-line aria-live="polite"></p>
+            <div class="stage-placeholder" aria-label="3D benchmark stage placeholder" data-stage-placeholder>
               <span>3D STAGE / AWAITING INSTRUMENT DATA</span>
             </div>
           </div>
@@ -93,10 +208,16 @@
 
       <aside class="inspector console panel" id="console-title" aria-label="Selection inspector">
         <!-- DecisionConsole + DecidePanel mount here -->
+        <div class="atlas-mount" data-atlas-agent></div>
       </aside>
 
       <footer class="status-bar" aria-live="polite">
         <span data-status-text>Ready</span>
+        <span class="new-since" data-new-since hidden aria-live="polite"></span>
+        <!-- W2 host lock: method strip in footer band (≤1 mono line). Content = W6.
+             Cinema: method line via export overlay — status-bar hides under is-cinema. -->
+        <span class="method-strip" data-method-strip aria-label="Data method summary"></span>
+        <button type="button" class="text-link copy-insight" data-copy-insight>Copy insight</button>
         <span class="data-sources" data-data-sources>
           Data:
           <a href="https://artificialanalysis.ai" target="_blank" rel="noopener noreferrer">Artificial Analysis</a>
@@ -108,6 +229,29 @@
         </span>
       </footer>
     </div>
+    <noscript>
+      <article class="seo-fallback" style="max-width:42rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif;line-height:1.5;color:#e8efe9;background:#070c0b">
+        <h1>Model Observatory</h1>
+        <p>
+          Interactive <strong>3D LLM benchmark visualization</strong> of
+          <strong>speed × cost × intelligence</strong>. Compare models on Artificial Analysis
+          Intelligence Index, blended $/M, and tokens per second. Use Decide mode to set an
+          intelligence floor and shortlist by cost or speed.
+        </p>
+        <p>
+          JavaScript and WebGL are required for the live stage.
+          Read the agent-facing brief at <a href="/llms.txt">/llms.txt</a>
+          and product notes at <a href="/about.md">/about.md</a>.
+        </p>
+        <p>
+          Data sources:
+          <a href="https://artificialanalysis.ai">Artificial Analysis</a>,
+          <a href="https://openrouter.ai">OpenRouter</a>,
+          <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">Arena (CC BY 4.0)</a>.
+          MIT licensed open source.
+        </p>
+      </article>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

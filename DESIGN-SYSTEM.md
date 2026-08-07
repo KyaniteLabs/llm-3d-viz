@@ -54,6 +54,21 @@ Lab brand **fill is always on**. Ring + core are **focus-gated** (solo/selected/
 - Value-score weights remain independent of display-axis remapping.
 - First paint: soft-fit multi-effort subset bounds; age ≤ 6 months remains density floor.
 
+### S+ paint authority (W0 · 2026-08-07 · maximal beauty train)
+Canonical numbers live in `src/viz/palette.ts` and `.omx/plans/prd-s-plus-maximal-dataviz-beauty.md`:
+
+| Rule | Value |
+|------|-------|
+| Lab fill | Full brand `colors[0]` always (glanceable) |
+| Dominated | Chroma pull **0.22** keep hue — never 0.55×L desat |
+| Trail idle α | **0.18** |
+| Mid-effort size | **0.7** × hierarchy; brand fill kept |
+| Rings/core | Focus-gated only (`brandLayerFlags`) |
+| Seam | `pointEncoding` only |
+
+MAP: `docs/v1/wayfinder/MAP-s-plus-maximal-dataviz-beauty.md`
+
+
 ## Typography specimen (→ web-typography)
 - **Display / labels:** refined grotesque — **Söhne / Neue Haas Grotesk** if licensed, else **Inter Tight** (NOT default Inter) / Geist. Tight tracking.
 - **Numerals:** **tabular mono** — IBM Plex Mono or Geist Mono. Tabular figures mandatory so speed/cost/IQ align.
@@ -63,7 +78,7 @@ Lab brand **fill is always on**. Ring + core are **focus-gated** (solo/selected/
 ## Color palette (→ color-system)
 - **Dominant hue:** cool-**green** ink, field `#070C0B` (near-black, chlorophyll undertone) — chosen to kill the "Linear blue-ink" cliché. Panels step lighter: `#0B1110`, `#10161D`.
 - **Accent:** **white-hot filament** `#E8F1E4` (warm-white) ~100% for the ridge; frontier points slightly lower luminance `#C9D4C4`. *(Documented warm alternative: Sol's mineral gold `#D6A84B` / hot core `#F4D58A` — swap only if a render shows white reads too clinical.)*
-- **Dominated / off-frontier:** desaturated slate-cyan `#3D5560` at 40–60% opacity (**subtraction**, never added glow).
+- **Dominated / off-frontier marks:** keep **lab brand hue** with slight chroma pull toward ink (`DOMINATED_CHROMA_PULL = 0.22` in `pointEncoding`); hierarchy via **ridge + size + quiet trails** — **not** slate mud as default fill, **not** 0.55×L desat. Token `--slate-cyan` remains for chrome/subtraction accents only.
 - **Chrome functional accent:** restrained copper `#C47A3A` — **only** active slider thumb + focus rings; never in the canvas.
 - **Neutrals:** text `#E7E2D8` (warm off-white), muted `#89939E`. Warm-biased to balance the cool-green field.
 - **Mode:** **dark-first.** Light mode is a later consideration; the concept is dark.
@@ -147,7 +162,7 @@ Lab brand **fill is always on**. Ring + core are **focus-gated** (solo/selected/
   /* VIZ-SPECIFIC (data-viz) */
   --viz-frontier: var(--filament);
   --viz-frontier-point: var(--filament-dim);
-  --viz-dominated: var(--slate-cyan);   /* used at 40–60% opacity */
+  --viz-dominated: var(--slate-cyan);   /* chrome/subtraction accent — marks use brand fill + chroma pull, not this as default fill */
   /* provider differentiation = SHAPE, not a --series-* hue ramp */
 
   /* MOTION */
