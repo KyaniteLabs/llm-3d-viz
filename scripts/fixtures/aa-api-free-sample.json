@@ -1,0 +1,62 @@
+{
+  "tier": "free",
+  "intelligence_index_version": 4.1,
+  "data": [
+    {
+      "id": "sample-1",
+      "name": "gpt-oss-20B (high)",
+      "slug": "gpt-oss-20b",
+      "release_date": "2025-08-05",
+      "model_creator": { "id": "oai", "name": "OpenAI" },
+      "evaluations": {
+        "artificial_analysis_intelligence_index": 24.5,
+        "artificial_analysis_coding_index": 18.5,
+        "artificial_analysis_agentic_index": 27.6
+      },
+      "artificial_analysis_intelligence_index_cost": {
+        "total_cost": 20.69,
+        "cost_per_task": { "total_cost": 0.1678 }
+      },
+      "pricing": {
+        "price_1m_input_tokens": 0.06,
+        "price_1m_output_tokens": 0.2,
+        "price_1m_cache_hit_tokens": 0.015,
+        "price_1m_cache_write_tokens": 0.075
+      },
+      "performance": {
+        "median_output_tokens_per_second": 296.47,
+        "median_time_to_first_token_seconds": 0.65,
+        "median_time_to_first_answer_token_seconds": 7.4,
+        "median_end_to_end_response_time_seconds": 9.09
+      }
+    },
+    {
+      "id": "sample-2",
+      "name": "Claude Fable 5 (high)",
+      "slug": "claude-fable-5",
+      "release_date": "2026-06-01",
+      "model_creator": { "id": "ant", "name": "Anthropic" },
+      "evaluations": {
+        "artificial_analysis_intelligence_index": 55,
+        "artificial_analysis_coding_index": 50,
+        "artificial_analysis_agentic_index": 48
+      },
+      "artificial_analysis_intelligence_index_cost": {
+        "total_cost": 100,
+        "cost_per_task": { "total_cost": 0.5 }
+      },
+      "pricing": {
+        "price_1m_input_tokens": 5,
+        "price_1m_output_tokens": 25,
+        "price_1m_cache_hit_tokens": null,
+        "price_1m_cache_write_tokens": null
+      },
+      "performance": {
+        "median_output_tokens_per_second": 80,
+        "median_time_to_first_token_seconds": 1.2,
+        "median_time_to_first_answer_token_seconds": 2.0,
+        "median_end_to_end_response_time_seconds": 12
+      }
+    }
+  ]
+}

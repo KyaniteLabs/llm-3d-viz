@@ -1,52 +1,56 @@
-# Catalog auto-update (Artificial Analysis)
+# Catalog auto-update (official APIs / licensed datasets)
 
 ## Requirement
 
-The instrument **self-updates** whenever Artificial Analysis publishes new models or
-benchmark rows. It must **check at least three times per day**, scrape the public
-leaderboard, and if the catalog changed: rebuild and optionally redeploy a private
-origin (operator-configured `DEPLOY_HOST` / `HEALTH_URL` — no private IPs in-repo).
+The instrument **self-updates** whenever Artificial Analysis (and overlays) publish
+new models or benchmark rows. It must **check at least three times per day**, refresh
+via **official APIs** (not HTML scrape), and if the catalog changed: rebuild and
+optionally redeploy a private origin (operator-configured `DEPLOY_HOST` / `HEALTH_URL`).
 
-This is **not** a one-off “add Qwen 3.8” fetch. Every release AA publishes (with
-Intelligence Index + speed + blended price) lands on the next successful run.
+Policy research: `docs/research/data-source-policy-review-2026-08-06.md`.
 
 ## Sources (multi-source, honest)
 
 Two-layer join (see `docs/adr/0001-multi-source-catalog-join.md`):
 
-1. **Enrich** partial AA rows + overlays in memory  
+1. **Enrich** AA API rows + overlays in memory  
 2. **Admit** only scorable triples to `data/models.v0.draft.json`
 
 | Priority | Source | Contributes |
 |----------|--------|-------------|
-| 1 | AA public leaderboard / cards HTML | IQ + TPS + blended $/M (and partials for gap discovery) |
-| 2 | Arena text style-control board | `arena_elo` only (effort-safe match; soft-fail) |
-| 3 | OpenRouter public models API | List price overlay if AA price missing — never invents IQ/speed; derived blend labeled `derived_list_blend` |
+| 1 | **AA Data API free** `GET /api/v2/language/models/free` + `x-api-key` | IQ + TPS + in/out $/M (+ cost/task when present) |
+| 2 | **Arena HF dataset** `lmarena-ai/leaderboard-dataset` `text_style_control` latest (CC BY 4.0) | `arena_elo` only (effort-safe match; soft-fail) |
+| 3 | **OpenRouter** `GET /api/v1/models` (optional Bearer key) | List price overlay if AA price missing |
 | 4 | `data/expected-effort-ladders.json` | Expected ladders → `data/effort-gaps.generated.json` |
+
+### Env
+
+| Variable | Role |
+|----------|------|
+| `AA_API_KEY` or `ARTIFICIAL_ANALYSIS_API_KEY` | **Required** for live AA refresh (free key at https://artificialanalysis.ai/data-api ) |
+| `OPENROUTER_API_KEY` | Optional |
+| `SKIP_ARENA=1` | Skip Arena Elo overlay |
+| `AA_FIXTURE_JSON` | Offline AA Free-shape JSON (tests) |
+| `ARENA_HF_FIXTURE` | Offline HF-row JSON (tests) |
+
+**Do not** scrape `artificialanalysis.ai` or `arena.ai` HTML in the expand pipeline.
 
 ### Column priority (v1)
 
 | Axis | Priority | Forbidden writers |
 |------|----------|-------------------|
-| `aa_intelligence_index` | AA only | Arena, OpenRouter |
-| `tps` / `ttft` | AA only | Arena, OpenRouter |
-| prices | AA blended → OpenRouter list/derived (labeled) | — |
-| `arena_elo` | Arena only | AA invent, OpenRouter |
+| `aa_intelligence_index` | AA API only | Arena, OpenRouter |
+| `tps` / `ttft` | AA API only | Arena, OpenRouter |
+| prices | AA in/out → derived blend → OpenRouter list/derived (labeled) | — |
+| `arena_elo` | Arena HF only | AA invent, OpenRouter |
 
-### Arena env flags
-
-- `ARENA_FIXTURE=1` — use `scripts/fixtures/arena-text-style-control.snippet.html`
-- `SKIP_ARENA=1` — skip Arena scrape
-
-**Claude Fable 5:** product supports low/medium/high/xhigh/max. AA public data only scores **max** (with Opus 4.8 fallback). Missing tiers are tracked as an effort gap and shown when you solo Fable — we do **not** invent scores. When AA publishes them, the thrice-daily job ingests them automatically.
-
-Optional paid AA API (`AA_API_KEY`) can be wired later; not configured. Join contract stays the same.
+**Claude Fable 5:** product supports low/medium/high/xhigh/max. Free API may only publish a subset of effort rows. Missing tiers are effort gaps — we do **not** invent scores.
 
 ## How it works
 
 ```
 cron (3×/day) → scripts/catalog-auto-update.sh
-  1. node --experimental-strip-types scripts/expand-aa-multi-effort.mjs   # honest public scrape
+  1. AA_API_KEY=… node --experimental-strip-types scripts/expand-aa-multi-effort.mjs
   2. if data/models.v0.draft.json hash changed:
        npm run build
        rsync dist/ → vps:~/sites/llm-3d-viz/dist/

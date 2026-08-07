@@ -1,25 +1,22 @@
-node_modules/
-dist/
-playwright-report/
-test-results/
 
-# Catalog auto-update runtime
-logs/
 .cache/
-
-data/openrouter-snapshot.json
-
-# Local agent / tool workspaces (never ship)
+.elder-gods/
 .gjc/
 .omc/
 .omx/
-.elder-gods/
-
+.scratch-mobile-ux/
 # Ad-hoc local screenshots / capture dumps
+# Catalog auto-update runtime
+# Local agent / tool workspaces (never ship)
+# Mobile UX workscratch (screenshots/metrics)
+data/aa-api-snapshot.json
+data/arena-text-style-control-latest.parquet
+data/openrouter-snapshot.json
+dist/
+logs/
+node_modules/
+playwright-report/
+stage-only.png
+test-results/
 tmp-*.png
 tmp-*/
-stage-only.png
-
-
-# Mobile UX workscratch (screenshots/metrics)
-.scratch-mobile-ux/
