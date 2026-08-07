@@ -28,6 +28,7 @@ import { StageGuide } from "./ui/stage-guide";
 import { groupByFamily, deriveEffortTier, familyIdOf } from "./lib/family";
 import { displayName } from "./lib/display-name";
 import { normalizedScores, weightedOptimum } from "./lib/score";
+import { isOssEdition } from "./config/edition";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -314,6 +315,19 @@ async function boot() {
 
   const cinema = new CinemaMode(stage, store);
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
+  // Liani / average-user simple picker — OSS edition only (never product Forgejo default).
+  let simpleDecision: { setModels: (m: readonly import("./data/models").Model[]) => void } | null =
+    null;
+  if (isOssEdition) {
+    document.documentElement.dataset.edition = "oss";
+    const { SimpleDecision } = await import("./ui/simple-decision");
+    simpleDecision = new SimpleDecision(consoleRoot, store);
+    simpleDecision.setModels(
+      applyFilters(models, store.getState().filters, sessionReferenceDate()),
+    );
+  } else {
+    document.documentElement.dataset.edition = "product";
+  }
   const decideHost = document.createElement("div");
   consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
   const decidePanel = new DecidePanel(decideHost, store, models, productCatalogSnapshot);
@@ -458,6 +472,7 @@ async function boot() {
     // and made Playwright settle checks flaky.
     consoleUi.setModels(visibleSet);
     decidePanel.setModels(visibleSet);
+    simpleDecision?.setModels(visibleSet);
     stageGuide.setModels(visibleSet);
     if (statusText && appState.decideMode && decide) {
       statusText.textContent = `Decide · floor ${appState.intelligenceFloor} · ${decide.eligible.length} eligible · ${decide.shortlist.length} shortlist`;
@@ -537,6 +552,8 @@ async function boot() {
     if (!filtersSame) {
       const visibleNow = applyFilters(models, state.filters, sessionReferenceDate());
       consoleUi.setModels(visibleNow);
+      decidePanel.setModels(visibleNow);
+      simpleDecision?.setModels(visibleNow);
       stageGuide.setModels(visibleNow);
       sweep?.setModels(visibleNow);
     }

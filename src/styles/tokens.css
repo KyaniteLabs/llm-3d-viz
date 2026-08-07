@@ -781,6 +781,167 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   color: var(--filament);
 }
 
+/* OSS-only simple decision (Liani path) — mounted only when edition=oss */
+.simple-decision {
+  margin: 0 0 0.85rem;
+}
+.simple-decision-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 0.65rem 0.7rem 0.75rem;
+  background: rgba(232, 241, 228, 0.04);
+}
+.simple-decision-title {
+  margin: 0.15rem 0 0.35rem;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  font-weight: 500;
+  color: var(--filament);
+}
+.simple-decision-blurb {
+  margin: 0 0 0.65rem;
+  color: var(--color-text-muted);
+  font: 400 0.72rem/1.45 var(--font-body);
+}
+.simple-need-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+.simple-need {
+  appearance: none;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 0.45rem 0.5rem;
+  cursor: pointer;
+  min-height: 2.75rem;
+  font: 400 0.65rem/1.3 var(--font-mono);
+}
+.simple-need strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+.simple-need span {
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.62rem;
+}
+.simple-need:hover,
+.simple-need.is-active {
+  border-color: var(--filament);
+  color: var(--filament-dim);
+  background: rgba(232, 241, 228, 0.08);
+}
+.simple-sliders {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.simple-slider {
+  display: grid;
+  gap: 0.15rem;
+  color: var(--color-text-muted);
+  font: 400 0.65rem var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.simple-slider em {
+  color: var(--filament);
+  font-style: normal;
+  float: right;
+}
+.simple-slider input[type="range"] {
+  width: 100%;
+  min-height: 1.35rem;
+  accent-color: var(--copper);
+}
+.simple-cute {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0.55rem;
+  color: var(--color-text-muted);
+  font: 400 0.68rem/1.3 var(--font-body);
+  cursor: pointer;
+}
+.simple-cute input {
+  accent-color: var(--filament);
+}
+.simple-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+  margin-bottom: 0.55rem;
+}
+.simple-spin {
+  appearance: none;
+  border: 1px solid var(--filament-dim);
+  background: rgba(232, 241, 228, 0.1);
+  color: var(--filament);
+  font: 500 0.72rem var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  min-height: 2.25rem;
+}
+.simple-spin:hover {
+  border-color: var(--filament);
+  background: rgba(232, 241, 228, 0.16);
+}
+.simple-decision.is-spinning .simple-pick strong {
+  animation: simple-spin-flash 0.55s var(--ease-out);
+}
+@keyframes simple-spin-flash {
+  0% { opacity: 0.3; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.simple-pick {
+  margin: 0.2rem 0 0.4rem;
+}
+.simple-pick strong {
+  display: block;
+  color: var(--filament);
+  font-size: 0.95rem;
+}
+.simple-pick span {
+  color: var(--color-text-muted);
+  font: 400 0.68rem var(--font-mono);
+}
+.simple-rank {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--color-text-muted);
+  font: 400 0.68rem/1.45 var(--font-mono);
+}
+.simple-rank li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  cursor: pointer;
+}
+.simple-rank li.is-pick,
+.simple-rank li:hover {
+  color: var(--filament);
+}
+@media (max-width: 760px) {
+  .simple-need-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* Progressive disclosure — simple intents first; analyst tools under Advanced */
 .intent-heading {
   margin: 0.1rem 0 0.35rem;
@@ -1763,3 +1924,8 @@ select:focus-visible {
   list-style: none;
 }
 .nav-help summary::-webkit-details-marker { display: none; }
+
+/* OSS: simple picker owns first-run UX; collapse analyst intent strip */
+html[data-edition="oss"] .intent-primary {
+  display: none;
+}

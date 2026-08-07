@@ -1,8 +1,11 @@
-# llm-3d-viz
+# llm-3d-viz (open source)
 
 Interactive **3D LLM benchmark visualization** — speed × cost × intelligence.
 
-Observatory-after-dark instrument: Three.js stage, Pareto ridge, multi-effort trails, linked 2D projections, value-score console, Decide mode (intelligence floor → cost×speed shortlist).
+**This is the public OSS edition** for forks and customizers (MIT).  
+Simon’s product instrument is developed on a **separate Forgejo repo** and is not a live mirror of this tree.
+
+Observatory-after-dark: Three.js stage, Pareto ridge, multi-effort trails, linked 2D projections, value-score console, Decide mode — plus an optional **simple “what do you need?” picker** (goals + sliders + spin shortlist) for non-analyst visitors.
 
 ## Quick start
 
