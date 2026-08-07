@@ -1,101 +1,27 @@
 {
-  "data_date": "2026-08-06",
+  "data_date": "2026-08-07",
+  "ingestion": "official-api-only",
+  "attribution": {
+    "artificial_analysis": "https://artificialanalysis.ai (Data API)",
+    "openrouter": "https://openrouter.ai (models list prices)",
+    "arena": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset (CC BY 4.0)"
+  },
   "source_stats": [
     {
-      "source": "Artificial Analysis leaderboard scrape",
-      "url": "https://artificialanalysis.ai/leaderboards/models",
+      "source": "AA Data API /language/models/free",
+      "ok": true,
       "raw": 595,
-      "mapped": 265,
-      "scorable": 160,
-      "added": 265
-    },
-    {
-      "source": "Artificial Analysis models catalog scrape",
-      "url": "https://artificialanalysis.ai/models",
-      "raw": 595,
-      "mapped": 265,
+      "mapped": 595,
       "scorable": 0,
-      "added": 0
+      "tier": "free",
+      "pages": 3
     },
     {
-      "source": "AA model card: claude-fable-5",
-      "url": "https://artificialanalysis.ai/models/claude-fable-5",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: claude-opus-5",
-      "url": "https://artificialanalysis.ai/models/claude-opus-5",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: claude-sonnet-5",
-      "url": "https://artificialanalysis.ai/models/claude-sonnet-5",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: gpt-5-6-sol",
-      "url": "https://artificialanalysis.ai/models/gpt-5-6-sol",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: gpt-5-6-luna",
-      "url": "https://artificialanalysis.ai/models/gpt-5-6-luna",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: gpt-5-6-terra",
-      "url": "https://artificialanalysis.ai/models/gpt-5-6-terra",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA model card: gemini-3-5-flash",
-      "url": "https://artificialanalysis.ai/models/gemini-3-5-flash",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 159,
-      "added": 0
-    },
-    {
-      "source": "AA provider: anthropic",
-      "url": "https://artificialanalysis.ai/providers/anthropic",
-      "raw": 595,
-      "mapped": 265,
-      "scorable": 0,
-      "added": 0
-    },
-    {
-      "source": "AA model card deep scrape",
-      "targets": 72,
-      "incomplete_list_slugs": 0,
-      "mapped": 9310,
-      "scorable": 5569,
-      "added": 0
-    },
-    {
-      "source": "Arena text style-control",
+      "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
       "skipped": false,
-      "error": null,
-      "entries": 384,
-      "attaches": 45,
+      "entries": 383,
+      "attaches": 88,
       "log_sample": [
         {
           "code": "arena_no_family",
@@ -109,47 +35,53 @@
         },
         {
           "code": "arena_no_family",
-          "key": "claude-opus-4-6",
-          "slug": "claude-opus-4-6"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-7",
-          "slug": "claude-opus-4-7"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "gemini-3-pro",
-          "slug": "gemini-3-pro"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-8-thinking-text",
+          "key": "claude-opus-4-8-thinking",
           "slug": "claude-opus-4-8-thinking"
         },
         {
-          "code": "arena_no_family",
-          "key": "gpt-5.5-high-text",
-          "slug": "gpt-5.5-high"
+          "code": "arena_no_tier_match",
+          "key": "gpt-5.4-high",
+          "tier": "high"
+        },
+        {
+          "code": "arena_ambiguous_family",
+          "key": "gpt-5.5"
         },
         {
           "code": "arena_no_family",
-          "key": "gpt-5.5-text",
-          "slug": "gpt-5.5"
+          "key": "gpt-5.2-chat-latest-20260210",
+          "slug": "gpt-5.2-chat-latest-20260210"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "qwen3.7-max-preview",
+          "slug": "qwen3.7-max-preview"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "grok-4.20-beta1",
+          "slug": "grok-4.20-beta1"
         }
       ]
+    },
+    {
+      "source": "OpenRouter /api/v1/models",
+      "ok": true,
+      "models": 400,
+      "price_overlays": 16,
+      "authenticated": false
     }
   ],
   "openrouter": {
     "ok": true,
     "models": 400,
-    "price_overlays": 0
+    "price_overlays": 16
   },
   "arena": {
     "ok": true,
-    "entries": 384,
-    "attaches": 45,
-    "error": null
+    "entries": 383,
+    "attaches": 88,
+    "license": "CC BY 4.0"
   },
   "gaps": [
     {
@@ -171,19 +103,16 @@
         "high",
         "xhigh"
       ],
-      "partial_tiers": [],
       "published_rows": 1,
       "complete": false,
-      "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
+      "partial_cards": []
     },
     {
-      "family": "Claude Sonnet 4.6",
-      "provider": "Anthropic",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Claude Opus 4.8",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "low"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -204,8 +133,8 @@
         "none"
       ],
       "published_tiers": [
-        "high",
-        "max"
+        "max",
+        "high"
       ],
       "missing_tiers": [
         "low",
@@ -213,33 +142,14 @@
         "xhigh",
         "none"
       ],
-      "partial_tiers": [],
       "published_rows": 2,
       "complete": false,
-      "notes": "Cards exist for low/medium/high/xhigh with speed+price but Intelligence Index is null on those cards (verified). Only max + non-reasoning high are scorable."
-    },
-    {
-      "family": "DeepSeek V4 Flash",
-      "provider": "DeepSeek",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "none"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+      "partial_cards": []
     },
     {
       "family": "DeepSeek V4 Flash 0731",
-      "provider": "DeepSeek",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
         "max"
       ],
@@ -251,13 +161,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "Gemma 4 26B A4B",
-      "provider": "Google",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "none"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -267,13 +175,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "Kimi K2.6",
-      "provider": "Kimi",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3 Max (Preview)",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "none"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -283,13 +189,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "Llama 3.1 Nemotron Ultra 253B v1",
-      "provider": "NVIDIA",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3 Max Thinking (Preview)",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "default"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -299,13 +203,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "Nemotron 3 Nano Omni 30B A3B Reasoning",
-      "provider": "NVIDIA",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3.6 Max Preview",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "default"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -315,13 +217,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "Nemotron 3 Ultra 550B A55B",
-      "provider": "NVIDIA",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3.7",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "default"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -331,93 +231,11 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
-      "family": "NVIDIA Nemotron 3 Super 120B A12B",
-      "provider": "NVIDIA",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
+      "family": "Qwen3.8",
+      "provider": null,
+      "expected_tiers": [],
       "published_tiers": [
-        "default"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3 Next 80B A3B",
-      "provider": "Alibaba",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "default"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3 Omni 30B A3B",
-      "provider": "Alibaba",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "default"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3.5 35B A3B",
-      "provider": "Alibaba",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "none"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3.5 9B",
-      "provider": "Alibaba",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "default"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Trinity Large Thinking",
-      "provider": "Arcee AI",
-      "expected_tiers": [
-        "(unknown product ladder)"
-      ],
-      "published_tiers": [
-        "default"
+        "max"
       ],
       "missing_tiers": [
         "(additional efforts may exist at product level)"
@@ -446,9 +264,8 @@
       "high",
       "xhigh"
     ],
-    "partial_tiers": [],
     "published_rows": 1,
     "complete": false,
-    "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
+    "partial_cards": []
   }
 }

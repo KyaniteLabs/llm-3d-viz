@@ -20,3 +20,6 @@ stage-only.png
 test-results/
 tmp-*.png
 tmp-*/
+
+.env
+.env.local
