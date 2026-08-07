@@ -1,5 +1,8 @@
 # Make your own observatory
 
+**Open-source entry:** public GitHub [KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) (MIT).  
+Simon’s product checkout and deploy live on Forgejo and are **not** the same as a continuous public mirror — see `docs/agents/dual-repo.md`.
+
 ## 1. Run
 
 ```bash
