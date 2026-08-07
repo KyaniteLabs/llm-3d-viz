@@ -191,7 +191,7 @@ export function validateModels(candidateModels: readonly Model[]): void {
         }
         const origin = (meta as { origin?: string }).origin;
         const kind = (meta as { kind?: string }).kind;
-        if (origin && !["aa", "arena", "openrouter"].includes(origin)) {
+        if (origin && !["aa", "aa-api", "arena", "openrouter"].includes(origin)) {
           throw new Error(`${label} (${row.model}): sources.${field}.origin invalid`);
         }
         if (
