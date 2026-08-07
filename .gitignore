@@ -28,3 +28,5 @@ tmp-*/
 .playwright-mcp/
 .wrangler/
 **/.wrangler/
+
+.scratch/

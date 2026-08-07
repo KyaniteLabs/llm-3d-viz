@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-**Last updated:** 2026-08-07 (Atlas agentic + SEO/GEO + MCP/CLI + data honesty + prod Ultra QA)
+**Last updated:** 2026-08-07 (land close — source landed Forgejo `e38f57a`)
 
 ## What this is
 
@@ -13,7 +13,9 @@ Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). 
 
 ## Resume here (2026-08-07)
 
-**Full campaign closeout + file map:**  
+**Source landed:** commit `e38f57a` on Forgejo `origin/main` (`simon/llm-3d-viz`) — `feat: Atlas agentic Decide surface, SEO/GEO, catalog CLI/MCP`. Production deploy was already live and HTTP-smoke green 2026-08-07.
+
+**Full campaign closeout + file map (includes Land receipt):**  
 → [`docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-07-atlas-agentic.md`](docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-07-atlas-agentic.md)
 
 **Learnings (ops + product doctrine):**  
@@ -36,15 +38,15 @@ Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). 
 
 11/11 Playwright checks on `viz.kyanitelabs.tech` (coverage badge, Atlas cinema, floor Apply, provenance, static content-types). Evidence: `docs/v1/wayfinder/ultraqa-prod.png`.
 
-### Still open (do not pretend done)
+### Still open (parked — do not pretend done)
 
 | Item | Notes |
 |------|--------|
-| Uncommitted dirty tree | Large WIP on `main` — commit/push when Simon wants |
-| CF Managed robots AI blocks | Zone-level; llms.txt still live |
-| Public HTTP MCP | Local stdio only |
-| Secondary data fills | GPQA/SWE/Aider/measured task time still empty |
+| CF Managed robots AI blocks | Zone-level; `llms.txt` still live |
+| Public HTTP MCP | Local stdio only; needs auth + rate limit |
+| Secondary data fills | GPQA / SWE-bench / Aider / measured Index task time still empty (do not invent) |
 | VPS origin | Pages is public path; VPS rsync was flaky |
+| GitHub OSS mirror | Intentional separate tip; **not** an auto-mirror of Forgejo |
 
 ### Quick commands
 

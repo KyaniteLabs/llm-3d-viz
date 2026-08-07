@@ -3,7 +3,7 @@
 **Date:** 2026-08-07  
 **Repo:** `llm-3d-viz` (Forgejo SoT)  
 **Live:** https://viz.kyanitelabs.tech/  
-**Status:** Source + production Pages deploy landed; unit tests **207 pass**; production Ultra QA **11/11** (Playwright)
+**Status:** Source **landed** on Forgejo `origin/main` at commit `e38f57a` (2026-08-07). Production Pages deploy was already live from earlier in the campaign and HTTP-smoke green 2026-08-07; not re-deployed in this land pass. Unit tests **207 pass**. Production Ultra QA was **11/11** earlier in the campaign (not re-run in this pass).
 
 ---
 
@@ -136,7 +136,8 @@ Receipt: `docs/deploy/STATUS-2026-08-07.md`
 | Measured Index-task wall time | Free AA API has no field; estimate remains disclosed |
 | Open-weight density + VRAM metadata | Separate enrichment pipeline |
 | Full SPA control (3D/2D/table tabs, global search chrome) | Decision surface only; wording updated |
-| Git commit of dirty tree | Not committed in this closeout unless Simon asks |
+| GitHub OSS mirror | Intentional separate tip; **not** an auto-mirror of Forgejo `origin/main` |
+| VPS origin | Pages is public path; VPS rsync was flaky |
 
 ---
 
@@ -169,6 +170,15 @@ npm run build
 
 ---
 
-## 6. Dirty tree note
+## 6. Land receipt
 
-Large uncommitted set on `main` (Atlas, SEO public files, bin/, tests, vite proxy, cinema fixes, etc.). Next human step if desired: atomic commits or single ship commit + push Forgejo — **not done in closeout**.
+| Field | Value |
+|-------|-------|
+| Commit | `e38f57a` |
+| Subject | `feat: Atlas agentic Decide surface, SEO/GEO, catalog CLI/MCP` |
+| Date | 2026-08-07 |
+| Remote | Forgejo `origin/main` — https://git.kyanitelabs.tech/simon/llm-3d-viz |
+| Tree state after land | Clean except untracked artifacts (`w7-l1-l8-desktop.png`, `w7-l1-l8-final.png`) left as-is |
+| Production | Already deployed earlier in campaign; HTTP smoke green 2026-08-07 (no re-deploy in this land pass) |
+
+The previous "large uncommitted dirty tree" is **landed**, not outstanding.
