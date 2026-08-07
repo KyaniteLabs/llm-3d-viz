@@ -102,7 +102,8 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly raycaster = new THREE.Raycaster();
   private readonly pointer = new THREE.Vector2();
   private readonly pointsGroup = new THREE.Group();
-  private readonly ridgeLine: THREE.Line;
+  private readonly ridgeMesh: THREE.Mesh;
+  private readonly ridgeGlow: THREE.Mesh;
   private cinemaFog: THREE.FogExp2 | null = null;
   private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
@@ -227,29 +228,34 @@ export class Stage3DThree implements Stage3DSurface {
     this.floorPlaneGroup.visible = false;
     this.scene.add(this.floorPlaneGroup);
 
-    // Filament-white ridge (design system) — louder than idle trails/marks.
-    // WebGL ignores LineBasicMaterial.linewidth on most platforms; dual-pass
-    // dim underlay + bright core approximates structural dominance.
-    const ridgeUnder = new THREE.LineBasicMaterial({
-      color: new THREE.Color("#E8F1E4"),
-      transparent: true,
-      opacity: 0.88,
-      depthWrite: false,
-    });
-    const ridgeCore = new THREE.LineBasicMaterial({
-      color: new THREE.Color("#E8F1E4"),
-      transparent: false,
-      opacity: 1,
-      depthTest: true,
-    });
-    this.ridgeLine = new THREE.Line(new THREE.BufferGeometry(), ridgeCore);
-    this.ridgeLine.renderOrder = 4;
-    const ridgeHalo = new THREE.Line(new THREE.BufferGeometry(), ridgeUnder);
-    ridgeHalo.renderOrder = 3;
-    ridgeHalo.userData.isRidgeHalo = true;
-    this.ridgeLine.userData.halo = ridgeHalo;
-    this.scene.add(ridgeHalo);
-    this.scene.add(this.ridgeLine);
+    // Filament ridge: a glowing 3D tube through the Pareto frontier vertices.
+    // Replaces the old 1px THREE.Line — WebGL ignores LineBasicMaterial.linewidth,
+    // so the "ridge" was an invisible hairline. A centripetal Catmull-Rom tube
+    // passes through every frontier model and reads as a structural filament
+    // backbone, matching the design-system "filament" metaphor literally.
+    const ridgeColor = new THREE.Color(this.tokens.filament);
+    // depthTest:false — the ridge renders ON TOP of the frontier marks so it
+    // reads as one continuous backbone, not segments broken by each opaque
+    // node (marks are 2–5× wider than the tube and would swallow it).
+    this.ridgeMesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({ color: ridgeColor, depthTest: false, depthWrite: false }),
+    );
+    this.ridgeMesh.renderOrder = 6;
+    this.ridgeGlow = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        color: ridgeColor,
+        transparent: true,
+        opacity: 0.13,
+        blending: THREE.AdditiveBlending,
+        depthTest: false,
+        depthWrite: false,
+      }),
+    );
+    this.ridgeGlow.renderOrder = 5;
+    this.scene.add(this.ridgeGlow);
+    this.scene.add(this.ridgeMesh);
 
     this.applyCameraState();
     this.buildAxes();
@@ -1112,21 +1118,24 @@ export class Stage3DThree implements Stage3DSurface {
     const ridgePts = vertices
       .map((v) => this.modelToScene(v.model))
       .filter((p): p is THREE.Vector3 => p !== null);
-    const ridgeGeom =
-      ridgePts.length >= 2
-        ? new THREE.BufferGeometry().setFromPoints(ridgePts)
-        : new THREE.BufferGeometry();
-    this.ridgeLine.geometry.dispose();
-    this.ridgeLine.geometry = ridgeGeom;
-    const halo = this.ridgeLine.userData.halo as THREE.Line | undefined;
-    if (halo) {
-      halo.geometry.dispose();
-      // Shared points — clone geometry so dispose paths stay independent.
-      halo.geometry =
-        ridgePts.length >= 2
-          ? new THREE.BufferGeometry().setFromPoints(ridgePts)
-          : new THREE.BufferGeometry();
+    let coreGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
+    let glowGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
+    if (ridgePts.length >= 2) {
+      // Centripetal Catmull-Rom passes through every frontier vertex (no
+      // invented points) with minimal overshoot — honest yet smooth. Tube
+      // radii calibrated to the [-S, S] cube: core (0.02 ≈ 21px at default
+      // zoom) thinner than marks (0.045–0.10) so nodes still pop; glow (0.035)
+      // is a tight bloom UNDER the thinner marks so it halo'd the wire without
+      // washing frontier nodes (the prior 0.055 ≈ 58px was mark-sized → blowout).
+      const curve = new THREE.CatmullRomCurve3(ridgePts, false, "centripetal");
+      const tubularSegments = Math.max(64, ridgePts.length * 32);
+      coreGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.02, 8, false);
+      glowGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.035, 8, false);
     }
+    this.ridgeMesh.geometry.dispose();
+    this.ridgeMesh.geometry = coreGeom;
+    this.ridgeGlow.geometry.dispose();
+    this.ridgeGlow.geometry = glowGeom;
 
     // Labels: always mark optimum; label the D10 focus-set (frontier ∪ optimum ∪
     // selected ∪ shortlist ∪ top-K) by short name so identity is reachable WITHOUT
