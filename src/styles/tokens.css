@@ -123,6 +123,12 @@ button, input, select, textarea { font-family: inherit; }
 /* L10a (F-005): copper focus ring everywhere — the UA blue default is off-brand
    and near-invisible on the ink field. Per-component rules below may refine offset. */
 :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* L8 (2026-08-07): tabular numerals so score/value columns align; pretty prose wrap. */
+body { text-wrap: pretty; }
+.model-readout, .score-table, .method-strip, [data-weight-output], .stage-3d-axis-labels {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
 
 .observatory {
   min-height: 100dvh;
