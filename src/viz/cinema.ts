@@ -131,4 +131,58 @@ export class CinemaMode {
       `Model Observatory · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
       (n != null ? ` · N=${n}` : "");
   }
+  /**
+   * L9 — cinema export artifact: composite the live stage canvas with an ink-field
+   * ground, wordmark (top-left), and method line (bottom) at 2× gallery resolution,
+   * return a PNG dataURL. WebGL canvas is capturable because the renderer was
+   * created with preserveDrawingBuffer:true. Reduced-motion users still get a PNG.
+   */
+  captureFrame(): string | null {
+    const canvas = (this.stage.el ?? this.stage.gd).querySelector("canvas");
+    if (!canvas) return null;
+    const SCALE = 2;
+    const out = document.createElement("canvas");
+    out.width = Math.max(1440, canvas.clientWidth) * SCALE;
+    out.height = Math.max(900, canvas.clientHeight) * SCALE;
+    const ctx = out.getContext("2d");
+    if (!ctx) return null;
+    // Ink-field ground.
+    ctx.fillStyle = "#070C0B";
+    ctx.fillRect(0, 0, out.width, out.height);
+    // Stage capture (preserveDrawingBuffer keeps the buffer readable here).
+    ctx.drawImage(canvas, 0, 0, out.width, out.height);
+    const mono = `${11 * SCALE}px "IBM Plex Mono", ui-monospace, monospace`;
+    // Wordmark top-left.
+    ctx.fillStyle = "#E8F1E4";
+    ctx.font = mono;
+    ctx.textBaseline = "top";
+    ctx.fillText("MODEL OBSERVATORY", 24 * SCALE, 20 * SCALE);
+    // Method line bottom.
+    const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
+    const asOf = new Date().toISOString().slice(0, 10);
+    const method = `speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}${
+      n != null ? ` · N=${n}` : ""
+    }`;
+    ctx.fillStyle = "#89939E";
+    ctx.font = mono;
+    ctx.textBaseline = "bottom";
+    ctx.fillText(method, 24 * SCALE, out.height - 20 * SCALE);
+    // Hairline frame.
+    ctx.strokeStyle = "rgba(201,212,196,0.18)";
+    ctx.lineWidth = SCALE;
+    ctx.strokeRect(SCALE, SCALE, out.width - 2 * SCALE, out.height - 2 * SCALE);
+    return out.toDataURL("image/png");
+  }
+
+  /** Trigger a PNG download of the composited cinema frame. */
+  downloadFrame(): void {
+    const url = this.captureFrame();
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `model-observatory-${new Date().toISOString().slice(0, 10)}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 }

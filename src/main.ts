@@ -376,6 +376,13 @@ async function boot() {
   );
 
   const cinema = new CinemaMode(stage, store);
+  // L9: cinema frame export — 'S' while in cinema composites + downloads a 2× PNG.
+  window.addEventListener("keydown", (e) => {
+    if (store.getState().cinemaMode && (e.key === "s" || e.key === "S")) {
+      e.preventDefault();
+      cinema.downloadFrame();
+    }
+  });
   const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
   const decideHost = document.createElement("div");
   consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
@@ -670,6 +677,7 @@ async function boot() {
       : (weightedOptimum(normalizedScores(visibleSet, weights, visibleSet))?.model.model ?? null);
     viz.labelFocusIds = labelFocusIds ? [...labelFocusIds] : [];
     viz.newModelIds = newModelIds;
+    viz.captureCinemaFrame = () => cinema.captureFrame();
     (window as any).__viz = viz;
   };
 
