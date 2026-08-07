@@ -413,6 +413,9 @@ export function buildAxisDomain(
 ): AxisDomain {
   const def = getAxisMetric(metricId);
   const narrow = options.narrow === true;
+  // W6: surface log scale on the axis title so heavy-tailed axes (cost/speed/ttft)
+  // are not misread as linear. Single source of truth — flows to Three + Plotly titles.
+  const axisTitle = def.scale === "log" ? `${def.title} · log` : def.title;
   const raw = models
     .map((m) => def.getValue(m))
     .filter((v): v is number => v !== null && !Number.isNaN(v));
@@ -430,7 +433,7 @@ export function buildAxisDomain(
       max,
       floor: min,
       ticks,
-      title: def.title,
+      title: axisTitle,
     };
   }
 
@@ -485,7 +488,7 @@ export function buildAxisDomain(
       max,
       floor,
       ticks,
-      title: def.title,
+      title: axisTitle,
     };
   }
 
@@ -520,7 +523,7 @@ export function buildAxisDomain(
     max,
     floor: min,
     ticks,
-    title: def.title,
+    title: axisTitle,
   };
 }
 

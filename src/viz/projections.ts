@@ -247,12 +247,13 @@ export class Projections {
       scale === "log"
         ? [Math.log10(domain.min), Math.log10(domain.max)]
         : [domain.min, domain.max];
-    const titleText =
+    const titleText = `${
       kind === "tps"
         ? "SPEED (TPS)"
         : kind === "intelligence"
           ? "INTELLIGENCE (INDEX)"
-          : "COST ($/M)";
+          : "COST ($/M)"
+    }${scale === "log" ? " · log" : ""}`;
     return {
       type: scale,
       range,

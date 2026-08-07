@@ -130,13 +130,13 @@ docs  verify  HUD/host  chrome  hybrid  instrument  DiB+SHIP
 **Blocked by:** W5 instrument pass + W2 host lock  
 **Evidence:** `s-plus-w6/`  
 
-- [ ] Method strip: as-of, sources, axes (economy basis), N  
-- [ ] Copy insight+method (`src/lib/share-copy.ts` new + button)  
-- [ ] Story line; sparse = N_plottable<3 or missing as-of → fail-closed copy  
-- [ ] Provenance chips in Selection when `sources` present  
-- [ ] Log labels on 2D + Three where log  
-- [ ] How-to-read once/session  
-- [ ] Cinema export overlay method line (works while is-cinema hides chrome)  
+- [x] Method strip: as-of, sources, axes (economy basis), N — `data-method-strip` populated (main.ts updateTrustChrome)
+- [x] Copy insight+method (`src/lib/share-copy.ts` + `data-copy-insight` button) — buildInsightMethodCopy wired
+- [x] Story line; sparse = N_plottable<3 → fail-closed copy — defaultStoryLine handles n<3
+- [x] Provenance in Selection when sources present — formatProvenanceLine (console.ts)
+- [x] Log labels on 2D + Three where log — `axisTitle` in buildAxisDomain + projections.ts titleText (2026-08-07)
+- [x] How-to-read — covered by always-open STAGE KEY (W2); no separate chrome (avoids redundant UI)
+- [x] Cinema export overlay method line — CinemaMode.syncMethodOverlay (data-cinema-method under is-cinema)
 - [ ] Independent **D1–D14** ≥90; tastecheck SHIP; Simon go  
 - [x] checklist.md + captures  
 
