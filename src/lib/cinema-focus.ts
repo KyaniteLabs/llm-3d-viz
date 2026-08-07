@@ -22,7 +22,9 @@ export function computeCinemaFocusIds(
   const k = opts?.k ?? CINEMA_FOCUS_K;
   const ids = new Set<string>();
   for (const m of frontier(models)) ids.add(m.model);
-  const opt = weightedOptimum(normalizedScores(models, weights, models))?.model;
+  // Compute scores once — this runs every render for the D10 label focus-set.
+  const scores = normalizedScores(models, weights, models);
+  const opt = weightedOptimum(scores)?.model;
   if (opt) ids.add(opt.model);
   if (opts?.selectedId) ids.add(opts.selectedId);
   if (opts?.decideShortlistIds) {
@@ -30,7 +32,7 @@ export function computeCinemaFocusIds(
   }
   const target = Math.max(k, ids.size);
   if (ids.size >= target) return ids;
-  const ranked = normalizedScores(models, weights, models)
+  const ranked = scores
     .slice()
     .sort((a, b) => b.score - a.score || a.model.model.localeCompare(b.model.model));
   for (const row of ranked) {
