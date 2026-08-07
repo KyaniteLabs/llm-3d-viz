@@ -39,13 +39,15 @@ See **[docs/forkers/README.md](docs/forkers/README.md)** — branding, lab color
 
 MIT — see [LICENSE](LICENSE).
 
-## Source
+## Source (two repos, not one mirror)
 
-| Host | Role |
+| Repo | Role |
 |------|------|
-| [GitHub KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) | Public mirror / forks |
-| [Forgejo simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Canonical developer remote |
+| **This product (Forgejo)** [simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Simon’s version — SoT for development, catalog ops, deploy |
+| **Open source (GitHub)** [KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) | Separate public MIT repo for forks & customization |
+
+Product work stays on **Forgejo only**. GitHub is **not** a live mirror; it is refreshed only when deliberately published. Policy: `docs/agents/dual-repo.md`.
 
 ## Status
 
-Open-source friendly build. Production deploy configuration is operator-specific and not required to run or fork the app.
+Fork-friendly MIT build. Production deploy config is operator-specific and not required to run or fork.
