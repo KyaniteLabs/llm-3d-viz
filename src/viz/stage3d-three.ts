@@ -136,13 +136,29 @@ export class Stage3DThree implements Stage3DSurface {
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
       styles.getPropertyValue(name).trim() || fallback;
+    // Color tokens may serialize as color(display-p3 …) in wide-gamut browsers,
+    // which THREE.Color cannot parse (silently defaults to white → whiteout).
+    // Route through a 2D canvas: fillStyle accepts any CSS color and getImageData
+    // on the default sRGB canvas returns the browser-converted sRGB bytes.
+    const resolveColorToken = (name: string, fallback: string): string => {
+      const raw = styles.getPropertyValue(name).trim();
+      if (!raw) return fallback;
+      const c = document.createElement("canvas");
+      c.width = 1; c.height = 1;
+      const ctx = c.getContext("2d");
+      if (!ctx) return fallback;
+      ctx.fillStyle = raw;
+      ctx.fillRect(0, 0, 1, 1);
+      const d = ctx.getImageData(0, 0, 1, 1).data;
+      return `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
+    };
     this.tokens = {
-      filament: resolveToken("--filament", DESIGN_SYSTEM_TOKEN_FALLBACKS.filament),
-      filamentDim: resolveToken("--filament-dim", DESIGN_SYSTEM_TOKEN_FALLBACKS.filamentDim),
-      slateCyan: resolveToken("--slate-cyan", DESIGN_SYSTEM_TOKEN_FALLBACKS.slateCyan),
-      textWarm: resolveToken("--text-warm", DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm),
-      textMuted: resolveToken("--text-muted", DESIGN_SYSTEM_TOKEN_FALLBACKS.textMuted),
-      inkField: resolveToken("--ink-field", DESIGN_SYSTEM_TOKEN_FALLBACKS.inkField),
+      filament: resolveColorToken("--filament", DESIGN_SYSTEM_TOKEN_FALLBACKS.filament),
+      filamentDim: resolveColorToken("--filament-dim", DESIGN_SYSTEM_TOKEN_FALLBACKS.filamentDim),
+      slateCyan: resolveColorToken("--slate-cyan", DESIGN_SYSTEM_TOKEN_FALLBACKS.slateCyan),
+      textWarm: resolveColorToken("--text-warm", DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm),
+      textMuted: resolveColorToken("--text-muted", DESIGN_SYSTEM_TOKEN_FALLBACKS.textMuted),
+      inkField: resolveColorToken("--ink-field", DESIGN_SYSTEM_TOKEN_FALLBACKS.inkField),
       fontMono: resolveToken("--font-mono", DESIGN_SYSTEM_TOKEN_FALLBACKS.fontMono),
     };
 
@@ -234,14 +250,15 @@ export class Stage3DThree implements Stage3DSurface {
     // passes through every frontier model and reads as a structural filament
     // backbone, matching the design-system "filament" metaphor literally.
     const ridgeColor = new THREE.Color(this.tokens.filament);
-    // depthTest:false — the ridge renders ON TOP of the frontier marks so it
-    // reads as one continuous backbone, not segments broken by each opaque
-    // node (marks are 2–5× wider than the tube and would swallow it).
+    // depthTest stays ON — depthTest:false whiteout'd the canvas (50% white).
+    // The tube occludes behind frontier marks (geometrically correct — the
+    // ridge threads through nodes), which reads as slight segmentation but is
+    // honest and does not break rendering.
     this.ridgeMesh = new THREE.Mesh(
       new THREE.BufferGeometry(),
-      new THREE.MeshBasicMaterial({ color: ridgeColor, depthTest: false, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ color: ridgeColor }),
     );
-    this.ridgeMesh.renderOrder = 6;
+    this.ridgeMesh.renderOrder = 4;
     this.ridgeGlow = new THREE.Mesh(
       new THREE.BufferGeometry(),
       new THREE.MeshBasicMaterial({
@@ -249,11 +266,10 @@ export class Stage3DThree implements Stage3DSurface {
         transparent: true,
         opacity: 0.13,
         blending: THREE.AdditiveBlending,
-        depthTest: false,
         depthWrite: false,
       }),
     );
-    this.ridgeGlow.renderOrder = 5;
+    this.ridgeGlow.renderOrder = 3;
     this.scene.add(this.ridgeGlow);
     this.scene.add(this.ridgeMesh);
 
