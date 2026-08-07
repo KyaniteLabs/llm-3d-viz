@@ -247,13 +247,9 @@ export class Projections {
       scale === "log"
         ? [Math.log10(domain.min), Math.log10(domain.max)]
         : [domain.min, domain.max];
-    const titleText = `${
-      kind === "tps"
-        ? "SPEED (TPS)"
-        : kind === "intelligence"
-          ? "INTELLIGENCE (INDEX)"
-          : "COST ($/M)"
-    }${scale === "log" ? " · log" : ""}`;
+    // F3: title is the single source of truth from buildAxisDomain (already decorated
+    // with ' · log' for log axes) — no duplicate kind→label ternary here.
+    const titleText = domain.title;
     return {
       type: scale,
       range,

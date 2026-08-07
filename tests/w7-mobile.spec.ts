@@ -20,16 +20,14 @@ test("mobile 390: no severed chips + stage holds ≥52vh", async ({ page }) => {
     const chips = [...document.querySelectorAll<HTMLElement>(
       ".family-chip, .family-chip-row, .nav-stepper, .value-leaderboard",
     )];
+    const vw = window.innerWidth;
     const severed = chips
       .map((el) => {
         const r = el.getBoundingClientRect();
-        const parent = el.offsetParent?.getBoundingClientRect() ?? {
-          left: 0,
-          right: window.innerWidth,
-        };
-        // Severed = partially off-screen left/right (sliver) while still rendered.
-        const offLeft = r.right < 8 || r.left < -4;
-        const offRight = r.left > window.innerWidth - 8;
+        // Severed = partially off the viewport edge (sliver) while still rendered.
+        // Viewport frame only (F7) — offsetParent is the offset ancestor, not the clip.
+        const offLeft = r.left < -4 || r.right < 8;
+        const offRight = r.left > vw - 8;
         const clippedWidth = r.width > 0 && r.width < 24 && r.height > 8;
         return {
           cls: el.className.slice(0, 40),
@@ -44,6 +42,6 @@ test("mobile 390: no severed chips + stage holds ≥52vh", async ({ page }) => {
     return { vh, stageVh: stageH / vh, stageH, severed };
   });
 
-  expect(report.stageVh, `stage only ${report.stageVh.toFixed(2)}vh (<0.52)`).toBeGreaterThanOrEqual(0.5);
+  expect(report.stageVh, `stage only ${report.stageVh.toFixed(2)}vh (<0.52)`).toBeGreaterThanOrEqual(0.52);
   expect(report.severed, `severed/clipped chips: ${JSON.stringify(report.severed)}`).toEqual([]);
 });

@@ -607,33 +607,53 @@ describe("D10 CVD — identity-without-color palette floor", () => {
     // where deutan separation is weak (Anthropic↔Mistral, Google↔Microsoft,
     // NVIDIA↔Alibaba all merge ~8–10 dE). This logs the worst major pairs but only
     // hard-gates a true near-identical degenerate merge (<5 dE), which would mean
-    // two brands are indistinguishable even with effort.
+    // two brands are indistinguishable even with effort. Includes Arcee + Upstage
+    // (the primaries this campaign recolored) so a recolor can't sneak in a merge.
     const majors = [
       "OpenAI", "Anthropic", "Google", "Meta", "DeepSeek", "Qwen",
       "Microsoft", "NVIDIA", "Kimi", "SpaceXAI", "Mistral", "Alibaba", "Amazon",
+      "Arcee AI", "Upstage",
     ];
     const HARD = 5;
+    const pairD = (a: string, b: string) => {
+      const pa = primaries.find((p) => p.k === a);
+      const pb = primaries.find((p) => p.k === b);
+      return pa && pb ? dE76(pa.dLab, pb.dLab) : Infinity;
+    };
     const pairs: Array<{ d: number; label: string }> = [];
     for (let i = 0; i < majors.length; i++) {
       for (let j = i + 1; j < majors.length; j++) {
-        const a = primaries.find((p) => p.k === majors[i]);
-        const b = primaries.find((p) => p.k === majors[j]);
-        if (!a || !b) continue;
-        pairs.push({ d: dE76(a.dLab, b.dLab), label: `${majors[i]} ⟷ ${majors[j]}` });
+        pairs.push({ d: pairD(majors[i], majors[j]), label: `${majors[i]} ⟷ ${majors[j]}` });
       }
     }
     pairs.sort((x, y) => x.d - y.d);
+    // Full-list diagnostic: surface EVERY <5 dE pair (incl. brand-preserved ones like
+    // Alibaba↔Xiaomi orange) so degenerate merges are visible in CI even where the
+    // owner declined a remap. Not a gate — label-mitigated per the redefined D10.
+    const allDegenerate: Array<{ d: number; label: string }> = [];
+    for (let i = 0; i < primaries.length; i++) {
+      for (let j = i + 1; j < primaries.length; j++) {
+        const d = dE76(primaries[i].dLab, primaries[j].dLab);
+        if (d < HARD) allDegenerate.push({ d, label: `${primaries[i].k} ⟷ ${primaries[j].k}` });
+      }
+    }
+    allDegenerate.sort((x, y) => x.d - y.d);
     // biome-ignore lint/suspicious/noConsole: D10 label-mitigated collision record
     console.log(
       `[D10] worst major deutan pairs (label-mitigated; brand colors preserved):\n${pairs
         .slice(0, 5)
         .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
-        .join("\n")}`,
+        .join("\n")}` +
+        (allDegenerate.length
+          ? `\n[D10] full-list <${HARD} dE pairs (known/brand-preserved, not gated):\n${allDegenerate
+              .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
+              .join("\n")}`
+          : ""),
     );
     const degenerate = pairs.filter((p) => p.d < HARD);
     expect(
       degenerate,
-      `near-identical deutan merge (<${HARD} dE) — would need a remap:\n${degenerate
+      `near-identical deutan merge (<${HARD} dE) among majors/recolored — would need a remap:\n${degenerate
         .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
         .join("\n")}`,
     ).toEqual([]);

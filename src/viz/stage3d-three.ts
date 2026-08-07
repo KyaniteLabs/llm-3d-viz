@@ -1165,6 +1165,10 @@ export class Stage3DThree implements Stage3DSurface {
         const shortBase = displayName(id);
         text = shortBase.length > 16 ? shortBase.slice(0, 14) + "…" : shortBase;
       }
+      // NMS priority: optimum (3) and frontier (2) reliably win the collision pass, so
+      // they are the always-visible identity anchors; selected/shortlist/top-K (1) are
+      // suppressed when they overlap a higher-priority mark in dense views. Intentional
+      // readability tradeoff — ridge marks are the legible backbone, not the long tail.
       const priority = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.labelSpecs.push({
         text,
