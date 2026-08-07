@@ -27,7 +27,7 @@ Two-layer join (see `docs/adr/0001-multi-source-catalog-join.md`):
 
 | Variable | Role |
 |----------|------|
-| `AA_API_KEY` or `ARTIFICIAL_ANALYSIS_API_KEY` | **Required** for live AA refresh (free key at https://artificialanalysis.ai/data-api ) |
+| `AA_API_KEY` or `ARTIFICIAL_ANALYSIS_API_KEY` | **Required** for live AA refresh (free key at https://artificialanalysis.ai/data-api ). **No key on agent hosts = no live expand** — keep committed catalog until operator sets key. |
 | `OPENROUTER_API_KEY` | Optional |
 | `SKIP_ARENA=1` | Skip Arena Elo overlay |
 | `AA_FIXTURE_JSON` | Offline AA Free-shape JSON (tests) |
