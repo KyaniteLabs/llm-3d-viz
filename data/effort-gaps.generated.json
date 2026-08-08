@@ -20,30 +20,72 @@
     {
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
-      "skipped": true,
-      "error": null,
-      "entries": 0,
-      "attaches": 0,
-      "log_sample": []
+      "skipped": false,
+      "entries": 385,
+      "attaches": 84,
+      "log_sample": [
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-6-thinking",
+          "slug": "claude-opus-4-6-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-7-thinking",
+          "slug": "claude-opus-4-7-thinking"
+        },
+        {
+          "code": "arena_no_tier_match",
+          "key": "qwen3.8-max",
+          "tier": "max"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-8-thinking",
+          "slug": "claude-opus-4-8-thinking"
+        },
+        {
+          "code": "arena_no_tier_match",
+          "key": "gpt-5.4-high",
+          "tier": "high"
+        },
+        {
+          "code": "arena_ambiguous_family",
+          "key": "gpt-5.5"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "gpt-5.2-chat-latest-20260210",
+          "slug": "gpt-5.2-chat-latest-20260210"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "qwen3.7-max-preview",
+          "slug": "qwen3.7-max-preview"
+        }
+      ]
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
       "models": 400,
-      "price_overlays": 16,
+      "price_overlays": 11,
+      "modality_overlays": 87,
+      "context_overlays": 143,
       "authenticated": false
     }
   ],
   "openrouter": {
     "ok": true,
     "models": 400,
-    "price_overlays": 16
+    "price_overlays": 11,
+    "modality_overlays": 87,
+    "context_overlays": 143
   },
   "arena": {
     "ok": true,
-    "entries": 0,
-    "attaches": 0,
-    "error": null,
+    "entries": 385,
+    "attaches": 84,
     "license": "CC BY 4.0"
   },
   "gaps": [
@@ -109,95 +151,28 @@
       "published_rows": 2,
       "complete": false,
       "notes": "",
-      "partial_tiers": []
+      "partial_tiers": [
+        {
+          "tier": "low",
+          "slug": "claude-sonnet-5-low"
+        },
+        {
+          "tier": "xhigh",
+          "slug": "claude-sonnet-5-xhigh"
+        },
+        {
+          "tier": "high",
+          "slug": "claude-sonnet-5-high"
+        },
+        {
+          "tier": "medium",
+          "slug": "claude-sonnet-5-medium"
+        }
+      ]
     },
     {
       "family": "DeepSeek V4 Flash 0731",
       "provider": "DeepSeek",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3 Max (Preview)",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3 Max Thinking (Preview)",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3.6 Max Preview",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3.7",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "max"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
-    },
-    {
-      "family": "Qwen3.8",
-      "provider": "Alibaba",
       "expected_tiers": [],
       "published_tiers": [
         "max"

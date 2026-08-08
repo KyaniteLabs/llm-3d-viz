@@ -6,7 +6,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-03-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -61,7 +61,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-03-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -116,7 +116,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -171,7 +171,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-11-18",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -226,7 +226,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -242,7 +242,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3 14B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -281,7 +281,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -336,7 +336,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -352,7 +352,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3 235B A22B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -391,7 +391,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -446,7 +446,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-25",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -505,7 +505,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -517,7 +517,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.9099999999999998,
     "aa_intelligence_index": 18.4,
-    "arena_elo": null,
+    "arena_elo": 1422.8597038681792,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -547,6 +547,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -560,7 +564,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -576,7 +580,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3 30B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -615,7 +619,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -670,7 +674,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -729,7 +733,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -784,7 +788,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -800,7 +804,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3 32B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -839,7 +843,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -894,7 +898,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -910,7 +914,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3 8B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -949,7 +953,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1004,7 +1008,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-07-31",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1049,6 +1053,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1059,7 +1067,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1071,7 +1079,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 2.1,
     "aa_intelligence_index": 18.2,
-    "arena_elo": null,
+    "arena_elo": 1387.6790036010593,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -1101,6 +1109,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -1114,7 +1126,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-02-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1163,6 +1175,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1173,7 +1189,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-09-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1191,7 +1207,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Qwen3",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -1218,6 +1234,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1228,7 +1248,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1246,7 +1266,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Qwen3 Max (Preview)",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -1283,7 +1303,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1301,7 +1321,7 @@
     "gpqa": null,
     "reasoning": true,
     "family_id": "Qwen3 Max Thinking (Preview)",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -1338,7 +1358,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1397,7 +1417,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-09-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1409,7 +1429,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.65,
     "aa_intelligence_index": 13.8,
-    "arena_elo": null,
+    "arena_elo": 1401.1091619535414,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -1439,9 +1459,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1452,7 +1480,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1507,7 +1535,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1562,7 +1590,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1615,9 +1643,10 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-09-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1629,7 +1658,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.9099999999999998,
     "aa_intelligence_index": 14.4,
-    "arena_elo": null,
+    "arena_elo": 1415.215021805383,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -1659,9 +1688,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1672,7 +1713,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1725,9 +1766,10 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-10-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1772,6 +1814,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1782,7 +1832,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1835,9 +1885,10 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-10-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1882,6 +1933,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1892,7 +1951,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-14",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1945,9 +2004,10 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-10-14",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -1992,6 +2052,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2002,7 +2070,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2018,7 +2086,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.5 122B A10B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.1953,
@@ -2059,9 +2127,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2110,6 +2180,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2120,7 +2198,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2136,7 +2214,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.5 27B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -2173,9 +2251,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2220,6 +2300,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2230,7 +2318,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2246,7 +2334,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.5 35B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2411,
@@ -2287,9 +2375,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-02-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2334,6 +2424,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2344,7 +2442,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2360,7 +2458,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.5 397B A17B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -2397,9 +2495,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-02-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2448,6 +2548,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2458,7 +2566,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2474,7 +2582,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.5 4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -2513,7 +2621,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2566,9 +2674,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-03-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2617,6 +2727,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2627,7 +2745,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2682,7 +2800,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2737,7 +2855,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2753,7 +2871,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.6 27B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.3982,
@@ -2794,9 +2912,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2845,6 +2965,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2855,7 +2983,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2871,7 +2999,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Qwen3.6 35B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.6319,
@@ -2912,9 +3040,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2963,6 +3093,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2973,7 +3111,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -2991,7 +3129,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Qwen3.6 Max Preview",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -3026,9 +3164,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-04-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3040,7 +3180,7 @@
     "price_cache_per_M": 0.05,
     "blended_price_per_M": 0.43499999999999994,
     "aa_intelligence_index": 40.5,
-    "arena_elo": null,
+    "arena_elo": 1443.3079938634532,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -3074,9 +3214,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3087,7 +3239,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-05-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3105,7 +3257,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Qwen3.7",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": 0.5413,
     "time_per_index_task_s": null,
     "sources": {
@@ -3136,6 +3288,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3144,9 +3300,10 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-06-01",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3158,7 +3315,7 @@
     "price_cache_per_M": 0.04,
     "blended_price_per_M": 0.268,
     "aa_intelligence_index": 39.4,
-    "arena_elo": null,
+    "arena_elo": 1457.7564773307668,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -3192,9 +3349,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3203,9 +3372,11 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-08-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3223,7 +3394,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Qwen3.8",
-    "effort_tier": "max",
+    "effort_tier": "none",
     "cost_per_index_task_usd": 1.132,
     "time_per_index_task_s": null,
     "sources": {
@@ -3254,6 +3425,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3264,7 +3443,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-03-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3276,7 +3455,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.6940000000000001,
     "aa_intelligence_index": 13.4,
-    "arena_elo": null,
+    "arena_elo": 1336.0863485460961,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -3306,6 +3485,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -3319,7 +3502,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3335,7 +3518,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.2415,
@@ -3378,7 +3561,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3394,7 +3577,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -3433,7 +3616,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3449,7 +3632,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -3488,7 +3671,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3504,7 +3687,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Nova 2.0 Lite",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -3543,7 +3726,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3559,7 +3742,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.2266,
@@ -3602,7 +3785,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3618,7 +3801,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.1835,
@@ -3661,7 +3844,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3677,7 +3860,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Nova 2.0 Pro Preview",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2592,
@@ -3720,7 +3903,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-12-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3775,7 +3958,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-12-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3830,7 +4013,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3885,7 +4068,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3901,7 +4084,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude 4.5 Haiku",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -3940,7 +4123,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -3999,7 +4182,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4015,7 +4198,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude 4.5 Sonnet",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -4054,7 +4237,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4111,9 +4294,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-06-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4125,7 +4309,7 @@
     "price_cache_per_M": 1,
     "blended_price_per_M": 7.7,
     "aa_intelligence_index": 62.1,
-    "arena_elo": null,
+    "arena_elo": 1507.3106921725512,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4159,9 +4343,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4170,9 +4366,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 200000,
     "release_date": "2025-11-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4188,7 +4385,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Opus 4.5",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -4217,6 +4414,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4227,7 +4432,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4282,7 +4487,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4294,7 +4499,7 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 44.9,
-    "arena_elo": null,
+    "arena_elo": 1497.4568269262058,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4324,6 +4529,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -4335,9 +4544,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-02-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4353,7 +4563,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Opus 4.6",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -4382,6 +4592,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4390,9 +4608,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4404,7 +4623,7 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 55,
-    "arena_elo": null,
+    "arena_elo": 1492.8637521706023,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4438,9 +4657,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4451,7 +4682,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4467,7 +4698,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Opus 4.7",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -4504,9 +4735,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-05-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4518,7 +4750,7 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 57.3,
-    "arena_elo": null,
+    "arena_elo": 1472.7241755546625,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4552,9 +4784,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4565,7 +4809,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4577,7 +4821,7 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 61.5,
-    "arena_elo": null,
+    "arena_elo": 1492.7619609725116,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4611,6 +4855,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -4624,7 +4872,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4681,9 +4929,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4695,7 +4944,7 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 3.85,
     "aa_intelligence_index": 63.1,
-    "arena_elo": null,
+    "arena_elo": 1488.4380189611798,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4729,9 +4978,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4742,7 +5003,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4801,7 +5062,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4860,7 +5121,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4872,7 +5133,7 @@
     "price_cache_per_M": 0.3,
     "blended_price_per_M": 2.31,
     "aa_intelligence_index": 48.4,
-    "arena_elo": null,
+    "arena_elo": 1471.9984678154847,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -4906,6 +5167,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -4917,9 +5182,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-02-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4935,7 +5201,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Sonnet 4.6",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -4964,6 +5230,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4974,7 +5248,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -4990,7 +5264,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Sonnet 4.6",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -5027,9 +5301,10 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-06-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5078,6 +5353,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5088,7 +5371,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5104,7 +5387,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Claude Sonnet 5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.4169,
@@ -5147,7 +5430,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-01",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5159,7 +5442,7 @@
     "price_cache_per_M": 0.15,
     "blended_price_per_M": 0.23900000000000002,
     "aa_intelligence_index": 18.6,
-    "arena_elo": null,
+    "arena_elo": 1368.6671950770824,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -5193,9 +5476,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5206,7 +5497,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5261,7 +5552,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5316,7 +5607,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 256000,
     "release_date": "2025-03-13",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5361,6 +5652,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5371,7 +5666,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-05-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5430,7 +5725,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5489,7 +5784,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 8192,
     "release_date": "2025-01-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5534,6 +5829,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5544,7 +5843,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5560,7 +5859,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "DeepSeek V4 Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -5599,7 +5898,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-31",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5648,6 +5947,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5658,7 +5961,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5674,7 +5977,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "DeepSeek V4 Pro",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -5713,7 +6016,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5772,7 +6075,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-04-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5784,7 +6087,7 @@
     "price_cache_per_M": 0,
     "blended_price_per_M": 0.173,
     "aa_intelligence_index": 45.3,
-    "arena_elo": null,
+    "arena_elo": 1457.0657320773553,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -5818,9 +6121,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5829,9 +6140,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2025-05-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5847,7 +6161,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemini 2.5 Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -5876,6 +6190,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5886,7 +6208,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-05-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5939,9 +6261,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2025-06-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -5957,7 +6282,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemini 2.5 Flash-Lite",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -5986,6 +6311,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5996,7 +6329,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-06-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6049,9 +6382,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2025-06-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6063,7 +6399,7 @@
     "price_cache_per_M": 0.13,
     "blended_price_per_M": 1.341,
     "aa_intelligence_index": 25.9,
-    "arena_elo": null,
+    "arena_elo": 1445.5151761091888,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -6097,9 +6433,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6110,7 +6458,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6122,11 +6470,11 @@
     "price_cache_per_M": 0.05,
     "blended_price_per_M": 0.43499999999999994,
     "aa_intelligence_index": 27.9,
-    "arena_elo": null,
+    "arena_elo": 1472.812797387358,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemini 3 Flash Preview",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -6152,6 +6500,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -6165,7 +6517,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6218,9 +6570,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-03-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6269,6 +6624,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6277,9 +6640,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "audio",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-02-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6291,7 +6657,7 @@
     "price_cache_per_M": 0.2,
     "blended_price_per_M": 1.7399999999999998,
     "aa_intelligence_index": 47.7,
-    "arena_elo": null,
+    "arena_elo": 1486.5107330227597,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -6325,9 +6691,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6336,9 +6714,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-05-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6350,11 +6731,11 @@
     "price_cache_per_M": 0.15,
     "blended_price_per_M": 1.3050000000000002,
     "aa_intelligence_index": 52,
-    "arena_elo": null,
+    "arena_elo": 1476.2182178621342,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.6934,
@@ -6384,9 +6765,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6397,7 +6790,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-05-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6409,11 +6802,11 @@
     "price_cache_per_M": 0.15,
     "blended_price_per_M": 1.3050000000000002,
     "aa_intelligence_index": 46.7,
-    "arena_elo": null,
+    "arena_elo": 1474.4783155741166,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -6439,6 +6832,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -6452,7 +6849,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-05-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6468,7 +6865,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Gemini 3.5 Flash",
     "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
@@ -6505,9 +6902,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6519,7 +6919,7 @@
     "price_cache_per_M": 0.03,
     "blended_price_per_M": 0.331,
     "aa_intelligence_index": 37.4,
-    "arena_elo": null,
+    "arena_elo": 1458.858608813945,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -6553,9 +6953,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6564,9 +6976,12 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6578,11 +6993,11 @@
     "price_cache_per_M": 0.15,
     "blended_price_per_M": 1.155,
     "aa_intelligence_index": 51.6,
-    "arena_elo": null,
+    "arena_elo": 1485.051432320638,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Gemini 3.6 Flash",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.5573,
@@ -6612,9 +7027,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6625,7 +7052,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-06-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6680,7 +7107,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6696,7 +7123,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemma 4 12B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -6735,7 +7162,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6794,7 +7221,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6810,7 +7237,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemma 4 26B A4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -6849,7 +7276,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6865,7 +7292,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemma 4 31B",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.0424,
@@ -6908,7 +7335,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6967,7 +7394,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -6983,7 +7410,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Gemma 4 E4B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -7022,7 +7449,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-03",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7081,7 +7508,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7097,7 +7524,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Granite 3.3 8B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -7136,7 +7563,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7191,7 +7618,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2026-04-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7203,7 +7630,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.05500000000000001,
     "aa_intelligence_index": 6.4,
-    "arena_elo": null,
+    "arena_elo": 1305.8323019229979,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -7233,9 +7660,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7258,7 +7693,7 @@
     "price_cache_per_M": 0.03,
     "blended_price_per_M": 0.146,
     "aa_intelligence_index": 21.9,
-    "arena_elo": null,
+    "arena_elo": 1346.6199880210606,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -7292,9 +7727,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7305,7 +7748,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-21",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7350,6 +7793,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7360,7 +7807,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-08-04",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7409,6 +7856,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7419,7 +7870,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7431,7 +7882,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.183,
     "aa_intelligence_index": 9.6,
-    "arena_elo": null,
+    "arena_elo": 1346.2340852313457,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -7461,6 +7912,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -7474,7 +7929,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-07-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7519,6 +7974,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7529,7 +7988,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-09-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7574,6 +8033,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7584,7 +8047,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2025-11-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7629,6 +8092,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7639,7 +8106,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-01-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7655,7 +8122,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Kimi K2.5",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -7692,9 +8159,10 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-01-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7743,6 +8211,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7751,9 +8227,10 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7802,6 +8279,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7812,7 +8297,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7828,7 +8313,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Kimi K2.6",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -7865,9 +8350,10 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-06-12",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7916,6 +8402,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7926,7 +8420,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7942,7 +8436,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Kimi K3",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.2419,
@@ -7983,9 +8477,10 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -7997,11 +8492,11 @@
     "price_cache_per_M": 0.3,
     "blended_price_per_M": 2.31,
     "aa_intelligence_index": 59.7,
-    "arena_elo": null,
+    "arena_elo": 1485.3775225272639,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Kimi K3",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.8375,
@@ -8031,9 +8526,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8044,7 +8551,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-03-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8089,6 +8596,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8099,7 +8610,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-05-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8154,7 +8665,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-01-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8209,7 +8720,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1048756,
     "release_date": "2026-06-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8258,6 +8769,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8268,7 +8783,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-07-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8323,7 +8838,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-07-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8378,7 +8893,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-09-25",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8433,7 +8948,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-12-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8490,9 +9005,10 @@
     "provider": "Meta",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2025-04-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8541,6 +9057,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8549,9 +9073,10 @@
     "provider": "Meta",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1310720,
     "release_date": "2025-04-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8600,6 +9125,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8608,9 +9141,12 @@
     "provider": "Meta",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8622,11 +9158,11 @@
     "price_cache_per_M": 0.15,
     "blended_price_per_M": 0.78,
     "aa_intelligence_index": 53.2,
-    "arena_elo": null,
+    "arena_elo": 1487.4943743654908,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Muse Spark 1.1",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.2923,
@@ -8656,9 +9192,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8669,7 +9217,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-02-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8728,7 +9276,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-02-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8783,7 +9331,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2025-10-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8795,7 +9343,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.39,
     "aa_intelligence_index": 28.9,
-    "arena_elo": null,
+    "arena_elo": 1346.048835282142,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -8825,9 +9373,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8838,7 +9394,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2025-12-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8883,6 +9439,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8893,7 +9453,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2026-02-12",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8905,7 +9465,7 @@
     "price_cache_per_M": 0.03,
     "blended_price_per_M": 0.20099999999999998,
     "aa_intelligence_index": 34.5,
-    "arena_elo": null,
+    "arena_elo": 1389.8779031533857,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -8935,9 +9495,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8948,7 +9516,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2026-03-18",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -8960,7 +9528,7 @@
     "price_cache_per_M": 0.06,
     "blended_price_per_M": 0.22199999999999998,
     "aa_intelligence_index": 38.9,
-    "arena_elo": null,
+    "arena_elo": 1415.984907846438,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -8994,9 +9562,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9005,9 +9581,11 @@
     "provider": "MiniMax",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-06-01",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9019,7 +9597,7 @@
     "price_cache_per_M": 0.06,
     "blended_price_per_M": 0.22199999999999998,
     "aa_intelligence_index": 45.4,
-    "arena_elo": null,
+    "arena_elo": 1444.667445276487,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -9053,9 +9631,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9066,7 +9656,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9125,7 +9715,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9184,7 +9774,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-18",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9202,7 +9792,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Magistral Medium 1.2",
-    "effort_tier": "medium",
+    "effort_tier": "none",
     "cost_per_index_task_usd": 0.8918,
     "time_per_index_task_s": null,
     "sources": {
@@ -9243,7 +9833,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9302,7 +9892,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9361,7 +9951,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9420,7 +10010,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9479,7 +10069,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2023-09-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9491,7 +10081,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.25,
     "aa_intelligence_index": 1.7,
-    "arena_elo": null,
+    "arena_elo": 1109.547927864534,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -9521,6 +10111,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -9534,7 +10128,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9546,7 +10140,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.6,
     "aa_intelligence_index": 15.9,
-    "arena_elo": null,
+    "arena_elo": 1415.2890856873623,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -9580,6 +10174,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -9593,7 +10191,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2023-12-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9611,7 +10209,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Mistral",
-    "effort_tier": "medium",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -9646,9 +10244,10 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-05-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9666,7 +10265,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Mistral Medium 3",
-    "effort_tier": "medium",
+    "effort_tier": "none",
     "cost_per_index_task_usd": null,
     "time_per_index_task_s": null,
     "sources": {
@@ -9693,6 +10292,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9701,9 +10308,10 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-08-12",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9721,7 +10329,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Mistral Medium 3.1",
-    "effort_tier": "medium",
+    "effort_tier": "none",
     "cost_per_index_task_usd": 0.1665,
     "time_per_index_task_s": null,
     "sources": {
@@ -9752,6 +10360,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9760,9 +10376,10 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9780,7 +10397,7 @@
     "gpqa": null,
     "reasoning": false,
     "family_id": "Mistral Medium 3.5",
-    "effort_tier": "medium",
+    "effort_tier": "none",
     "cost_per_index_task_usd": 0.4637,
     "time_per_index_task_s": null,
     "sources": {
@@ -9811,6 +10428,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9821,7 +10446,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-02-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9876,7 +10501,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-09-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9931,7 +10556,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-01-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -9986,7 +10611,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10045,7 +10670,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-06-20",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10104,7 +10729,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10120,7 +10745,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Mistral Small 4",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -10159,7 +10784,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10218,7 +10843,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-05-26",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10275,9 +10900,10 @@
     "provider": "Nex AGI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-06-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10322,6 +10948,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -10332,7 +10966,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2024-08-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10377,6 +11011,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -10387,7 +11025,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10403,7 +11041,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Hermes 4 - Llama-3.1 405B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -10442,7 +11080,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10497,7 +11135,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10513,7 +11151,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Hermes 4 - Llama-3.1 70B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -10552,7 +11190,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-27",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10607,7 +11245,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-10-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10662,7 +11300,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-04-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10674,7 +11312,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.72,
     "aa_intelligence_index": 8.9,
-    "arena_elo": null,
+    "arena_elo": 1347.601162217428,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -10704,6 +11342,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -10717,7 +11359,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-25",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10733,7 +11375,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Llama Nemotron Super 49B v1.5",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -10772,7 +11414,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-07-25",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10827,7 +11469,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10882,7 +11524,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-04",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10941,7 +11583,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -10957,7 +11599,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "NVIDIA Nemotron 3 Nano 30B A3B",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -10996,7 +11638,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11055,7 +11697,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11067,7 +11709,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.26000000000000006,
     "aa_intelligence_index": 25.7,
-    "arena_elo": null,
+    "arena_elo": 1360.8384342516683,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -11101,6 +11743,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -11114,7 +11760,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11130,7 +11776,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "NVIDIA Nemotron Nano 12B v2 VL",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -11169,7 +11815,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-10-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11224,7 +11870,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-18",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11240,7 +11886,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "NVIDIA Nemotron Nano 9B V2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -11279,7 +11925,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-18",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11332,7 +11978,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2023-11-06",
@@ -11379,6 +12026,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11387,9 +12042,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1047576,
     "release_date": "2025-04-14",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11434,6 +12090,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11442,9 +12106,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1047576,
     "release_date": "2025-04-14",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11493,6 +12158,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11501,9 +12174,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1047576,
     "release_date": "2025-04-14",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11552,6 +12226,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11560,7 +12242,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-08-06",
@@ -11574,7 +12257,7 @@
     "price_cache_per_M": 1.25,
     "blended_price_per_M": 2.375,
     "aa_intelligence_index": 9.4,
-    "arena_elo": null,
+    "arena_elo": 1335.2966008945184,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -11604,9 +12287,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11615,7 +12310,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-05-13",
@@ -11629,7 +12325,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 6,
     "aa_intelligence_index": 8.4,
-    "arena_elo": null,
+    "arena_elo": 1345.9379226048545,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -11659,9 +12355,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11670,7 +12378,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-11-20",
@@ -11717,6 +12426,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11725,7 +12442,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-07-18",
@@ -11772,6 +12490,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11780,9 +12506,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11794,11 +12521,11 @@
     "price_cache_per_M": 0.13,
     "blended_price_per_M": 1.341,
     "aa_intelligence_index": 35.3,
-    "arena_elo": null,
+    "arena_elo": 1433.9232107119083,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.2572,
@@ -11828,9 +12555,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11841,7 +12580,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11857,7 +12596,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -11896,7 +12635,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11912,7 +12651,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -11951,7 +12690,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -11967,7 +12706,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5",
     "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
@@ -12004,9 +12743,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12018,11 +12758,11 @@
     "price_cache_per_M": 0.03,
     "blended_price_per_M": 0.271,
     "aa_intelligence_index": 25.8,
-    "arena_elo": null,
+    "arena_elo": 1390.0522978169604,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 mini",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.036,
@@ -12052,9 +12792,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12065,7 +12817,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12081,7 +12833,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 mini",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -12120,7 +12872,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12136,7 +12888,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 mini",
     "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
@@ -12173,9 +12925,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12187,11 +12940,11 @@
     "price_cache_per_M": 0.01,
     "blended_price_per_M": 0.05700000000000001,
     "aa_intelligence_index": 20.1,
-    "arena_elo": null,
+    "arena_elo": 1337.166504778981,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 nano",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -12217,9 +12970,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12230,7 +12995,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12246,7 +13011,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 nano",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -12285,7 +13050,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12301,7 +13066,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5 nano",
     "effort_tier": "minimal",
     "cost_per_index_task_usd": null,
@@ -12338,9 +13103,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2025-11-13",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12352,11 +13118,11 @@
     "price_cache_per_M": 0.13,
     "blended_price_per_M": 1.341,
     "aa_intelligence_index": 37.5,
-    "arena_elo": null,
+    "arena_elo": 1454.4602159496949,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.1",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.304,
@@ -12386,9 +13152,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12399,7 +13177,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-11-13",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12415,7 +13193,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.1",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -12454,7 +13232,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12470,7 +13248,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -12507,9 +13285,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2025-12-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12525,7 +13304,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.2",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": null,
@@ -12554,6 +13333,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12562,9 +13349,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2026-02-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12580,7 +13368,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.3 Codex",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": null,
@@ -12609,6 +13397,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12619,7 +13415,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12635,7 +13431,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -12674,7 +13470,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12690,7 +13486,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.4",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -12727,9 +13523,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1050000,
     "release_date": "2026-03-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12745,7 +13542,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 1.1038,
@@ -12778,6 +13575,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12788,7 +13593,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12804,7 +13609,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4 mini",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -12843,7 +13648,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12859,7 +13664,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.4 mini",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -12896,9 +13701,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12914,7 +13720,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4 mini",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.4948,
@@ -12947,6 +13753,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12957,7 +13771,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -12973,7 +13787,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4 nano",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -13012,7 +13826,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13028,7 +13842,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.4 nano",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -13065,9 +13879,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 400000,
     "release_date": "2026-03-17",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13083,7 +13898,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.4 nano",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.1493,
@@ -13116,6 +13931,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13126,7 +13949,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13138,11 +13961,11 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 4.35,
     "aa_intelligence_index": 54.7,
-    "arena_elo": null,
+    "arena_elo": 1482.0456133051525,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.8033,
@@ -13172,6 +13995,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -13185,7 +14012,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13201,7 +14028,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.5",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.2589,
@@ -13244,7 +14071,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13260,7 +14087,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.5",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.5002,
@@ -13303,7 +14130,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13319,7 +14146,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.5",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2083,
@@ -13360,9 +14187,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1050000,
     "release_date": "2026-04-23",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13378,7 +14206,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.5",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 1.1747,
@@ -13411,6 +14239,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13421,7 +14257,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-25",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13480,7 +14316,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13496,7 +14332,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.0216,
@@ -13539,7 +14375,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13555,7 +14391,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.0088,
@@ -13598,7 +14434,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13614,7 +14450,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.0113,
@@ -13657,7 +14493,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13673,7 +14509,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.0117,
@@ -13716,7 +14552,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13728,11 +14564,11 @@
     "price_cache_per_M": 0.02,
     "blended_price_per_M": 0.174,
     "aa_intelligence_index": 50.1,
-    "arena_elo": null,
+    "arena_elo": 1449.6556636408818,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Luna",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.0316,
@@ -13762,6 +14598,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -13775,7 +14615,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13791,7 +14631,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.5477,
@@ -13834,7 +14674,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13850,7 +14690,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.2311,
@@ -13893,7 +14733,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13909,7 +14749,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.3717,
@@ -13952,7 +14792,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -13968,7 +14808,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2366,
@@ -14011,7 +14851,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14023,11 +14863,11 @@
     "price_cache_per_M": 0.5,
     "blended_price_per_M": 4.35,
     "aa_intelligence_index": 59,
-    "arena_elo": null,
+    "arena_elo": 1481.6123178098655,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Sol",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.8072,
@@ -14057,6 +14897,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -14070,7 +14914,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14086,7 +14930,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.2183,
@@ -14129,7 +14973,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14145,7 +14989,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.0939,
@@ -14188,7 +15032,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14204,7 +15048,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "medium",
     "cost_per_index_task_usd": 0.119,
@@ -14247,7 +15091,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14263,7 +15107,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.1025,
@@ -14306,7 +15150,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-09",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14318,11 +15162,11 @@
     "price_cache_per_M": 0.2,
     "blended_price_per_M": 1.7399999999999998,
     "aa_intelligence_index": 52.8,
-    "arena_elo": null,
+    "arena_elo": 1467.150916363907,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GPT-5.6 Terra",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": 0.305,
@@ -14352,6 +15196,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -14365,7 +15213,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-08-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14381,7 +15229,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "gpt-oss-120b",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.0724,
@@ -14414,6 +15262,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14424,7 +15276,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14440,7 +15292,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "gpt-oss-120b",
     "effort_tier": "low",
     "cost_per_index_task_usd": 0.0201,
@@ -14483,7 +15335,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-08-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14499,7 +15351,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "gpt-oss-20b",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.025,
@@ -14532,6 +15384,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14542,7 +15398,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-05",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14558,7 +15414,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "gpt-oss-20b",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -14595,9 +15451,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 200000,
     "release_date": "2025-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14642,6 +15499,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14652,7 +15517,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 200000,
     "release_date": "2025-01-31",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14697,6 +15562,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14707,7 +15576,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 200000,
     "release_date": "2025-01-31",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14719,11 +15588,11 @@
     "price_cache_per_M": 0.55,
     "blended_price_per_M": 1.0450000000000002,
     "aa_intelligence_index": 15.7,
-    "arena_elo": null,
+    "arena_elo": 1363.5606043194143,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "o3-mini",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -14749,9 +15618,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14760,9 +15637,10 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 200000,
     "release_date": "2025-04-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14778,7 +15656,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "o4-mini",
     "effort_tier": "high",
     "cost_per_index_task_usd": null,
@@ -14807,6 +15685,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14817,7 +15703,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2024-10-04",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14872,7 +15758,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-07-24",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14927,7 +15813,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-02-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14982,7 +15868,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -14998,7 +15884,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Grok 4.20 0309 v2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -15035,9 +15921,10 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 2000000,
     "release_date": "2026-04-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15082,6 +15969,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15090,9 +15985,10 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 1000000,
     "release_date": "2026-04-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15108,7 +16004,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Grok 4.3",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.1454,
@@ -15141,6 +16037,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15151,7 +16055,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15167,7 +16071,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Grok 4.3",
     "effort_tier": "low",
     "cost_per_index_task_usd": null,
@@ -15206,7 +16110,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15222,7 +16126,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Grok 4.3",
     "effort_tier": "medium",
     "cost_per_index_task_usd": null,
@@ -15261,7 +16165,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15277,7 +16181,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "Grok 4.3",
     "effort_tier": "none",
     "cost_per_index_task_usd": 0.2947,
@@ -15318,9 +16222,10 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 500000,
     "release_date": "2026-07-08",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15332,11 +16237,11 @@
     "price_cache_per_M": 0.3,
     "blended_price_per_M": 1.21,
     "aa_intelligence_index": 55.8,
-    "arena_elo": null,
+    "arena_elo": 1468.4150916116691,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Grok 4.5",
     "effort_tier": "high",
     "cost_per_index_task_usd": 0.3601,
@@ -15366,9 +16271,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15379,7 +16296,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15438,7 +16355,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15450,7 +16367,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.12000000000000002,
     "aa_intelligence_index": 26,
-    "arena_elo": null,
+    "arena_elo": 1394.28710212318,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -15480,6 +16397,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -15493,7 +16414,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-04-02",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15538,6 +16459,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15546,9 +16471,11 @@
     "provider": "StepFun",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-05-29",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15597,6 +16524,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15607,7 +16542,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 262144,
     "release_date": "2026-07-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15619,7 +16554,7 @@
     "price_cache_per_M": 0.03,
     "blended_price_per_M": 0.10500000000000001,
     "aa_intelligence_index": 42.2,
-    "arena_elo": null,
+    "arena_elo": 1453.024951260133,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -15653,9 +16588,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15664,9 +16607,11 @@
     "provider": "Thinking Machines",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-07-15",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15678,11 +16623,11 @@
     "price_cache_per_M": 0.17,
     "blended_price_per_M": 0.724,
     "aa_intelligence_index": 42.3,
-    "arena_elo": null,
+    "arena_elo": 1441.5278390832714,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "Inkling",
     "effort_tier": "xhigh",
     "cost_per_index_task_usd": null,
@@ -15708,9 +16653,21 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15719,9 +16676,11 @@
     "provider": "Thinking Machines",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio"
     ],
-    "context_length": 128000,
+    "context_length": 524288,
     "release_date": "2026-07-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15770,6 +16729,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15780,7 +16747,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2026-04-06",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15829,6 +16796,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15839,7 +16810,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15851,7 +16822,7 @@
     "price_cache_per_M": 0,
     "blended_price_per_M": 0.05600000000000001,
     "aa_intelligence_index": 38,
-    "arena_elo": null,
+    "arena_elo": 1434.0018278083257,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -15885,6 +16856,10 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
@@ -15898,7 +16873,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1050000,
     "release_date": "2026-04-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15947,6 +16922,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15957,7 +16936,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -15973,7 +16952,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "MiMo-V2.5-Pro",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16012,7 +16991,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-07-28",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16024,7 +17003,7 @@
     "price_cache_per_M": null,
     "blended_price_per_M": 0.251,
     "aa_intelligence_index": 16.7,
-    "arena_elo": null,
+    "arena_elo": 1372.717280659492,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
@@ -16054,9 +17033,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16065,9 +17052,10 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
-    "context_length": 128000,
+    "context_length": 65536,
     "release_date": "2025-08-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16083,7 +17071,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-4.5V",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16112,6 +17100,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16122,7 +17118,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-08-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16177,7 +17173,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2025-09-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16193,7 +17189,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-4.6",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16222,6 +17218,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16232,7 +17232,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-09-30",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16289,9 +17289,11 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
-    "context_length": 128000,
+    "context_length": 131072,
     "release_date": "2025-12-08",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16307,7 +17309,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-4.6V",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16336,6 +17338,14 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16346,7 +17356,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-08",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16401,7 +17411,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2025-12-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16417,7 +17427,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-4.7",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16456,7 +17466,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2025-12-22",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16505,6 +17515,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16515,7 +17529,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-01-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16531,7 +17545,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-4.7-Flash",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16570,7 +17584,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 202752,
     "release_date": "2026-01-19",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16615,6 +17629,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16625,7 +17643,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-02-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16641,7 +17659,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-5",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16680,7 +17698,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2026-02-11",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16725,6 +17743,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16735,7 +17757,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-04-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16751,7 +17773,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-5.1",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
@@ -16790,7 +17812,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 204800,
     "release_date": "2026-04-07",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16839,6 +17861,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16849,7 +17875,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": 1048576,
     "release_date": "2026-06-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16861,11 +17887,11 @@
     "price_cache_per_M": 0.23,
     "blended_price_per_M": 0.8600000000000001,
     "aa_intelligence_index": 52.6,
-    "arena_elo": null,
+    "arena_elo": 1470.9620912904825,
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": false,
+    "reasoning": true,
     "family_id": "GLM-5.2",
     "effort_tier": "max",
     "cost_per_index_task_usd": 0.3108,
@@ -16895,9 +17921,17 @@
         "origin": "aa-api",
         "kind": "measured"
       },
+      "arena_elo": {
+        "origin": "arena",
+        "kind": "measured"
+      },
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16908,7 +17942,7 @@
     "modality": [
       "text"
     ],
-    "context_length": 128000,
+    "context_length": null,
     "release_date": "2026-06-16",
     "data_date": "2026-08-08",
     "source": "AA Data API free",
@@ -16924,7 +17958,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "gpqa": null,
-    "reasoning": true,
+    "reasoning": false,
     "family_id": "GLM-5.2",
     "effort_tier": "none",
     "cost_per_index_task_usd": null,
