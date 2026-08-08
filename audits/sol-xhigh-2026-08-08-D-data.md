@@ -116,8 +116,8 @@ Target/source files fully opened: `scripts/refresh-catalog.mjs`, `scripts/expand
 
 ### [MEDIUM] D19 — Committed source hard-codes the forbidden private Tailscale endpoint
 - **File:** `scripts/wire-atlas-nucbox.mjs:16-20`; `vite.config.ts:41-44`
-- **Evidence:** Both default to `http://100.113.174.74:8890` when no environment override exists.
-- **Impact:** This violates the explicit no-private-`100.113.174.x` repository invariant, leaks internal topology, and causes every external/local clone to target a private host by default. The Vite default is also active without running the wiring helper.
+- **Evidence:** Both default to a hardcoded private Tailscale IP (redacted) when no environment override exists.
+- **Impact:** This violates the explicit no-private-Tailscale-IP repository invariant, leaks internal topology, and causes every external/local clone to target a private host by default. The Vite default is also active without running the wiring helper.
 - **Fix:** Remove the address from committed source; require an environment value or use loopback, and keep private routing only in gitignored operator configuration.
 
 ## No-findings note
