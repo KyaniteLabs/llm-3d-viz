@@ -184,3 +184,65 @@ describe("enc presentation flag", () => {
     expect(params.get("heat")).toBe("1");
   });
 });
+
+describe("U02 — list serializer round-trips special characters", () => {
+  const cases: Array<[string, "families" | "providers", string[]]> = [
+    ["spaces (Claude Opus 5)", "families", ["Claude Opus 5"]],
+    ["non-ASCII provider Z AI", "providers", ["Z AI"]],
+    ["percent sign", "families", ["100%"]],
+    ["plus sign", "families", ["C++"]],
+    ["comma inside value", "families", ["a,b", "c"]],
+    ["multiple mixed", "providers", ["Z AI", "100%", "Café"]],
+  ];
+  for (const [name, key, values] of cases) {
+    it(`round-trips ${name}`, () => {
+      const filters = { ...DEFAULT_FILTERS, [key]: values };
+      const state = { ...baseShare(), filters };
+      const serialized = serializeShareableState(state);
+      const again = parseShareableState(serialized);
+      // joinList sorts for deterministic URLs; compare order-independent.
+      expect([...again.filters[key]].sort()).toEqual([...values].sort());
+    });
+  }
+
+  it("preserves a hand-typed malformed '%' token without throwing", () => {
+    const state = parseShareableState("?families=50%off");
+    expect(state.filters.families).toEqual(["50%off"]);
+  });
+});
+
+describe("U08 — canonical serializer drops legacy fam alias", () => {
+  it("removes fam when re-serializing so cleared scope does not resurrect", () => {
+    const existing = new URLSearchParams("fam=Claude%20Fable%205&heat=1");
+    const params = serializeShareableState(baseShare(), existing);
+    expect(params.has("fam")).toBe(false);
+    expect(params.has("families")).toBe(false);
+    expect(params.get("heat")).toBe("1");
+  });
+});
+
+describe("U09 — Decide floor/bias/anchor survive decideMode off", () => {
+  it("serializes user-set floor/bias/anchor when decideMode is false", () => {
+    const state = {
+      ...baseShare(),
+      decide: {
+        decideMode: false,
+        intelligenceFloor: 73,
+        costSpeedBias: 0.75,
+        floorAnchorModelId: "Model A",
+        floorSource: "anchor" as const,
+        floorUserSet: true,
+      },
+    };
+    const params = serializeShareableState(state);
+    expect(params.has("decide")).toBe(false);
+    expect(params.get("floor")).toBe("73");
+    expect(params.get("bias")).toBe("0.75");
+    expect(params.get("anchor")).toBe("Model A");
+    const again = parseShareableState(params);
+    expect(again.decide.decideMode).toBe(false);
+    expect(again.decide.intelligenceFloor).toBe(73);
+    expect(again.decide.costSpeedBias).toBe(0.75);
+    expect(again.decide.floorAnchorModelId).toBe("Model A");
+  });
+});

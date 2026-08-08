@@ -66,12 +66,21 @@ const listSep = ",";
 
 function splitList(raw: string | null): string[] {
   if (!raw || !raw.trim()) return [];
-  // URLSearchParams.get() already percent-decodes; a second decodeURIComponent
-  // would throw URIError on malformed "%" and blank the page.
+  // joinList() percent-encodes each token (so the list comma survives), then
+  // URLSearchParams re-encodes on serialize. URLSearchParams.get() decodes once,
+  // so a second guarded decodeURIComponent restores the original token. The guard
+  // preserves raw (e.g. a hand-typed "50%off") when "%" is not a valid escape.
   return raw
     .split(listSep)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((token) => {
+      try {
+        return decodeURIComponent(token);
+      } catch {
+        return token;
+      }
+    });
 }
 
 function joinList(values: readonly string[]): string {
@@ -266,6 +275,7 @@ export function serializeShareableState(
     "openness",
     "vram",
     "nr",
+    "fam",
   ]) {
     params.delete(key);
   }
@@ -329,16 +339,17 @@ export function serializeShareableState(
   const d = state.decide ?? DEFAULT_DECIDE_SHARE;
   if (d.decideMode) {
     params.set("decide", "1");
-    // Only write floor when the user explicitly set it (not default-derived).
-    if (d.floorUserSet || d.floorAnchorModelId) {
-      params.set("floor", String(clampFloor(d.intelligenceFloor)));
-    }
-    if (d.floorAnchorModelId) {
-      params.set("anchor", d.floorAnchorModelId);
-    }
-    if (d.costSpeedBias !== DEFAULT_COST_SPEED_BIAS) {
-      params.set("bias", String(clampBias(d.costSpeedBias)));
-    }
+  }
+  // Serialize user-set floor/bias/anchor independently of decideMode so turning
+  // Decide off for Explore does not silently drop the configured setup on share.
+  if (d.floorUserSet || d.floorAnchorModelId) {
+    params.set("floor", String(clampFloor(d.intelligenceFloor)));
+  }
+  if (d.floorAnchorModelId) {
+    params.set("anchor", d.floorAnchorModelId);
+  }
+  if (d.costSpeedBias !== DEFAULT_COST_SPEED_BIAS) {
+    params.set("bias", String(clampBias(d.costSpeedBias)));
   }
 
   return params;

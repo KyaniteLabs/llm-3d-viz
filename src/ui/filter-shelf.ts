@@ -33,7 +33,7 @@ function esc(s: string): string {
 export class FilterShelf {
   private readonly root: HTMLElement;
   private readonly store: AppStore;
-  private readonly catalog: readonly Model[];
+  private catalog: readonly Model[];
   private readonly referenceDate: () => Date;
   private draft: ModelFilters;
   private search = "";
@@ -61,9 +61,27 @@ export class FilterShelf {
     this.render();
   }
 
+  /** Swap the active catalog (e.g. Local-VRAM ↔ Cloud) and re-sync the draft. */
+  setCatalog(catalog: readonly Model[]) {
+    this.catalog = catalog;
+    this.resetDraftFromStore();
+  }
+
   apply() {
+    // Rebase on the live store: the shelf renders only age/multi/providers/families,
+    // so preserve concurrent changes to openness/vramMaxGb/excludeNonReasoning
+    // (e.g. a Local-VRAM intent or Atlas scope edit) instead of overwriting them
+    // from the stale draft snapshot.
+    const current = this.store.getState().filters;
     this.store.update({
-      filters: cloneFilters(this.draft),
+      filters: {
+        ...current,
+        ageEnabled: this.draft.ageEnabled,
+        ageMonths: this.draft.ageMonths,
+        multiEffortOnly: this.draft.multiEffortOnly,
+        providers: [...this.draft.providers],
+        families: [...this.draft.families],
+      },
       pinnedModelId: null,
       hoveredModelId: null,
     });

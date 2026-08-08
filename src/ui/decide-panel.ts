@@ -100,6 +100,21 @@ export class DecidePanel {
           (b.aa_intelligence_index ?? 0) - (a.aa_intelligence_index ?? 0) ||
           a.model.localeCompare(b.model),
       );
+    // U13: keep an active anchor filtered out of the visible set as a labeled
+    // "out of scope" option so the control does not silently say "— none —"
+    // while the floor remains anchored.
+    const outOfScope: string[] = [];
+    if (
+      current &&
+      !this.models.some((m) => m.model === current) &&
+      this.productCatalog.some((m) => m.model === current)
+    ) {
+      const anchor = this.productCatalog.find((m) => m.model === current);
+      if (anchor && anchor.aa_intelligence_index != null) {
+        const label = `${displayName(anchor.model)} · ${formatIntelligence(anchor.aa_intelligence_index)} (out of scope)`;
+        outOfScope.push(`<option value="${esc(anchor.model)}">${esc(label)}</option>`);
+      }
+    }
     sel.innerHTML =
       `<option value="">— none —</option>` +
       withIntel
@@ -107,7 +122,8 @@ export class DecidePanel {
           const label = `${displayName(m.model)} · ${formatIntelligence(m.aa_intelligence_index!)}`;
           return `<option value="${esc(m.model)}">${esc(label)}</option>`;
         })
-        .join("");
+        .join("") +
+      outOfScope.join("");
     sel.value = current;
   }
 

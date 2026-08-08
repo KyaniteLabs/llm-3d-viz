@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { createStore } from "../src/state";
 import {
   dispatchUiAction,
   dispatchUiActions,
@@ -111,5 +112,45 @@ describe("apply dispatches ui_actions", () => {
     expect(fn).toHaveBeenCalledWith({ k: 1 });
     expect(res.uiDispatched).toEqual(["apply_test"]);
     unregisterUiAction("apply_test");
+  });
+});
+
+describe("U05 — store clamps weights to finite 0..100", () => {
+  it("clamps overflow, negative, and non-finite weights on update", () => {
+    const store = createStore();
+    store.update({ weights: { speed: 1e308, cost: -50, intelligence: Infinity } });
+    const w = store.getState().weights;
+    expect(w.speed).toBe(100);
+    expect(w.cost).toBe(0);
+    expect(w.intelligence).toBe(0);
+  });
+
+  it("clamps weights passed via replace", () => {
+    const store = createStore();
+    const state = store.getState();
+    store.replace({
+      weights: { speed: 200, cost: NaN, intelligence: 42 },
+      axisMapping: state.axisMapping,
+      filters: state.filters,
+      hoveredModelId: null,
+      pinnedModelId: null,
+      cinemaMode: false,
+      decideMode: false,
+      intelligenceFloor: 50,
+      costSpeedBias: 0,
+      floorAnchorModelId: null,
+      floorSource: "default",
+      floorUserSet: false,
+    });
+    const w = store.getState().weights;
+    expect(w.speed).toBe(100);
+    expect(w.cost).toBe(0);
+    expect(w.intelligence).toBe(42);
+  });
+
+  it("clamps weights supplied at construction", () => {
+    const store = createStore({ weights: { speed: 1e308, cost: 1e308, intelligence: 1e308 } });
+    const w = store.getState().weights;
+    expect(w).toEqual({ speed: 100, cost: 100, intelligence: 100 });
   });
 });

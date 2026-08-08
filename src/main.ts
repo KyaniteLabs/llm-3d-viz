@@ -159,7 +159,18 @@ function updateEmptyState(visibleCount: number, filters?: { multiEffortOnly?: bo
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  void boot();
+  void boot().catch((err) => {
+    console.error("[boot] fatal", err);
+    if (document.querySelector("[data-boot-fail]")) return;
+    const banner = document.createElement("div");
+    banner.setAttribute("data-boot-fail", "1");
+    banner.style.cssText =
+      "position:fixed;inset:auto 1rem 1rem 1rem;z-index:9999;padding:0.75rem 1rem;background:#3a1510;color:#f4d58a;font:500 0.8rem/1.4 var(--font-mono);border:1px solid #c47a3a;border-radius:6px;";
+    banner.innerHTML =
+      'Stage failed to initialize. <button type="button" style="margin-left:0.75rem;background:#f4d58a;color:#070c0b;border:0;padding:0.3rem 0.6rem;cursor:pointer;font:inherit">Reload</button>';
+    banner.querySelector("button")?.addEventListener("click", () => location.reload());
+    document.body.appendChild(banner);
+  });
 });
 
 async function boot() {
@@ -224,7 +235,7 @@ async function boot() {
     floorUserSet: fromUrl.decide.floorUserSet,
   });
 
-  const filterShelf = new FilterShelf(filterShelfHost, store, models, sessionReferenceDate);
+  const filterShelf = new FilterShelf(filterShelfHost, store, catalogForFilters(store.getState().filters), sessionReferenceDate);
   filterShelf.render();
 
   const setScopeOpen = (open: boolean) => {
@@ -301,12 +312,13 @@ async function boot() {
   });
   setCanvasMode("3d");
 
-  // boot-blank-guard: if WebGL never produced marks, show hard error (not silent black)
+  // boot-blank-guard: if the WebGL renderer never painted (no canvas / zero
+  // height), show a hard error. A valid empty scope (visibleCount === 0) with a
+  // ready renderer is a successful empty render, not a boot failure (U12).
   window.setTimeout(() => {
-    const n = (window as any).__viz?.visibleCount ?? 0;
     const canvas = document.querySelector(".stage-visual canvas") as HTMLCanvasElement | null;
     const h = canvas?.clientHeight ?? 0;
-    if (n > 0 && h > 40) return;
+    if (h > 40) return;
     if (document.querySelector("[data-boot-fail]")) return;
     const banner = document.createElement("div");
     banner.setAttribute("data-boot-fail", "1");
@@ -394,7 +406,7 @@ async function boot() {
       cinema.downloadFrame();
     }
   });
-  const consoleUi = new DecisionConsole(consoleRoot, store, models, () => cinema.toggle());
+  const consoleUi = new DecisionConsole(consoleRoot, store, catalogForFilters(store.getState().filters), () => cinema.toggle());
   const decideHost = document.createElement("div");
   consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
   const decidePanel = new DecidePanel(decideHost, store, models, productCatalogSnapshot);
@@ -436,6 +448,17 @@ async function boot() {
     decideToggle.classList.toggle("is-active", state.decideMode);
     document.documentElement.dataset.decideMode = state.decideMode ? "1" : "0";
   });
+  // U03: keep FilterShelf + DecisionConsole on the same catalog resolver as the
+  // stage so Local-VRAM scope is reflected in shelf options and family navigation.
+  let lastCatalogMode = store.getState().filters.vramMaxGb ?? null;
+  store.subscribe((state) => {
+    const mode = state.filters.vramMaxGb ?? null;
+    if (mode === lastCatalogMode) return;
+    lastCatalogMode = mode;
+    const cat = catalogForFilters(state.filters);
+    filterShelf.setCatalog(cat);
+    consoleUi.setCatalog(cat);
+  });
   document.querySelector("[data-global-search]")?.addEventListener("keydown", (event) => {
     if ((event as KeyboardEvent).key !== "Enter") return;
     const q = ((event.target as HTMLInputElement).value || "").trim().toLowerCase();
@@ -450,24 +473,6 @@ async function boot() {
     if (hit) {
       store.update({ pinnedModelId: hit.model, hoveredModelId: hit.model });
       setCanvasMode("3d");
-
-  // boot-blank-guard: if WebGL never produced marks, show hard error (not silent black)
-  window.setTimeout(() => {
-    const n = (window as any).__viz?.visibleCount ?? 0;
-    const canvas = document.querySelector(".stage-visual canvas") as HTMLCanvasElement | null;
-    const h = canvas?.clientHeight ?? 0;
-    if (n > 0 && h > 40) return;
-    if (document.querySelector("[data-boot-fail]")) return;
-    const banner = document.createElement("div");
-    banner.setAttribute("data-boot-fail", "1");
-    banner.style.cssText =
-      "position:fixed;inset:auto 1rem 1rem 1rem;z-index:9999;padding:0.75rem 1rem;background:#3a1510;color:#f4d58a;font:500 0.8rem/1.4 var(--font-mono);border:1px solid #c47a3a;border-radius:6px;";
-    banner.innerHTML =
-      "Stage failed to paint (WebGL/layout). <button type=\"button\" style=\"margin-left:0.75rem;background:#f4d58a;color:#070c0b;border:0;padding:0.3rem 0.6rem;cursor:pointer;font:inherit\">Reload</button>";
-    banner.querySelector("button")?.addEventListener("click", () => location.reload());
-    document.body.appendChild(banner);
-  }, 4000);
-
     }
   });
 
@@ -752,6 +757,11 @@ async function boot() {
       atlasPanel.setVisible(visibleNow);
       stageGuide.setModels(visibleNow);
       sweep?.setModels(visibleNow);
+      // U10: re-render the membership table from the fresh visible set whenever
+      // filters change while table mode is active (don't reuse a stale closure).
+      if (canvasHost.dataset.canvasMode === "table" && tableHost) {
+        renderMembershipTable(tableHost, visibleNow, store);
+      }
     }
 
     pending = {
@@ -872,32 +882,47 @@ async function boot() {
   });
 
   // Plotly-backed projections + sweep load in a separate chunk after stage paint.
+  // U11: wrap the deferred chunk load in its own failure boundary so a transient
+  // CDN/deploy miss degrades 2D/sweep to a banner instead of rejecting boot and
+  // killing pointer/Plotly wiring that installs after this block.
   const projectionContainers = Array.from(
     document.querySelectorAll(".projection-row .projection"),
   ) as HTMLElement[];
-  const [{ Projections }, { SweepScheduler }] = await Promise.all([
-    import("./viz/projections"),
-    import("./viz/sweep"),
-  ]);
+  let projectionsModule: typeof import("./viz/projections") | null = null;
+  let sweepModule: typeof import("./viz/sweep") | null = null;
+  try {
+    [projectionsModule, sweepModule] = await Promise.all([
+      import("./viz/projections"),
+      import("./viz/sweep"),
+    ]);
+  } catch (err) {
+    console.error("[viz] deferred chunk load failed; 2D/sweep disabled", err);
+    const banner = document.createElement("div");
+    banner.style.cssText =
+      "position:fixed;inset:auto 1rem 1rem 1rem;z-index:9999;padding:0.75rem 1rem;background:#2a2a35;color:#d8d8e0;font:500 0.8rem/1.4 var(--font-mono);border:1px solid #555;border-radius:6px;";
+    banner.textContent = "Linked 2D views failed to load (network). The 3D stage still works — reload to retry.";
+    document.body.appendChild(banner);
+  }
   projections =
-    projectionContainers.length > 0
-      ? new Projections(projectionContainers, stage.gd, heatEncoding)
+    projectionContainers.length > 0 && projectionsModule
+      ? new projectionsModule.Projections(projectionContainers, stage.gd, heatEncoding)
       : null;
   const initialVisible = applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate());
-  const sweepScheduler = new SweepScheduler(
-    stage.gd,
-    projections?.gds ?? [],
-    store,
-    initialVisible,
-    heatEncoding,
-  );
-  sweep = sweepScheduler;
+  if (sweepModule) {
+    sweep = new sweepModule.SweepScheduler(
+      stage.gd,
+      projections?.gds ?? [],
+      store,
+      initialVisible,
+      heatEncoding,
+    );
+  }
 
   // Re-render once projections exist so 2D views fill, then arm sweep once the
   // stage graph has model ids (setModels restarts ignition against the live set).
   const latest = store.getState();
   renderVisuals(latest.weights, latest.axisMapping, latest.filters);
-  sweepScheduler.setModels(initialVisible);
+  sweep?.setModels(initialVisible);
 
   const plotlyOn = (stage.gd as any).on;
   if (typeof plotlyOn === "function") {

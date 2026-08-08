@@ -46,6 +46,17 @@ export type StateListener = (state: Readonly<AppState>) => void;
 function sameWeights(left: ScoreWeights, right: ScoreWeights): boolean {
   return left.speed === right.speed && left.cost === right.cost && left.intelligence === right.intelligence;
 }
+function clampWeight(n: number): number {
+  return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
+}
+
+function clampWeights(w: ScoreWeights): ScoreWeights {
+  return {
+    speed: clampWeight(w.speed),
+    cost: clampWeight(w.cost),
+    intelligence: clampWeight(w.intelligence),
+  };
+}
 
 export function createStore(initial: Partial<AppState> = {}) {
   const { axisMapping: initialAxes, filters: initialFilters, ...restInitial } = initial;
@@ -66,6 +77,7 @@ export function createStore(initial: Partial<AppState> = {}) {
     ...restInitial,
   };
   state.axisMapping = normalizeAxisMapping(state.axisMapping);
+  state.weights = clampWeights(state.weights);
   state.filters = {
     ...DEFAULT_FILTERS,
     ...state.filters,
@@ -81,6 +93,7 @@ export function createStore(initial: Partial<AppState> = {}) {
     replace: (next: Omit<AppState, "datarevision"> | AppState) => {
       state = {
         ...next,
+        weights: clampWeights(next.weights),
         axisMapping: normalizeAxisMapping(next.axisMapping),
         filters: {
           ...DEFAULT_FILTERS,
@@ -112,7 +125,7 @@ export function createStore(initial: Partial<AppState> = {}) {
       state = {
         ...state,
         ...patch,
-        weights: patch.weights ? { ...patch.weights } : state.weights,
+        weights: patch.weights ? clampWeights(patch.weights) : state.weights,
         axisMapping: patch.axisMapping
           ? normalizeAxisMapping(patch.axisMapping)
           : state.axisMapping,

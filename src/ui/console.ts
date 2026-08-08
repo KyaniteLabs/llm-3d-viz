@@ -71,13 +71,16 @@ export class DecisionConsole {
   private readonly root: HTMLElement;
   private readonly store: AppStore;
   /** Full catalog (for incomplete list + filter option lists). */
-  private readonly catalog: readonly Model[];
+  private catalog: readonly Model[];
   /** Current visible set for scores / charts / readout. */
   private models: readonly Model[];
   private readonly tooltip: HTMLElement;
   private cursor = { x: 0, y: 0 };
   private filtersBound = false;
   private familySearch = "";
+  private unsubscribe?: () => void;
+  private readonly rootClick: (e: Event) => void;
+  private readonly rootInput: (e: Event) => void;
 
   constructor(root: HTMLElement, store: AppStore, models: readonly Model[], onCinemaToggle: () => void) {
     this.root = root;
@@ -144,8 +147,8 @@ export class DecisionConsole {
         /* private mode */
       }
     });
-    this.root.addEventListener("click", (event) => this.onConsoleClick(event));
-    this.root.addEventListener("input", (event) => {
+    this.rootClick = (event) => this.onConsoleClick(event);
+    this.rootInput = (event) => {
       const target = event.target as HTMLElement;
       if (target instanceof HTMLInputElement && target.matches("[data-nav-family-search]")) {
         this.familySearch = target.value;
@@ -157,19 +160,38 @@ export class DecisionConsole {
           if (start != null) again.setSelectionRange(start, start);
         }
       }
-    });
+    };
+    this.root.addEventListener("click", this.rootClick);
+    this.root.addEventListener("input", this.rootInput);
     this.renderIncompleteData();
     this.tooltip = document.createElement("aside");
     this.tooltip.className = "stage-tooltip";
     this.tooltip.hidden = true;
     this.tooltip.setAttribute("role", "status");
     document.body.appendChild(this.tooltip);
-    this.store.subscribe((state) => this.render(state));
+    this.unsubscribe = this.store.subscribe((state) => this.render(state));
   }
 
   setModels(models: readonly Model[]) {
     this.models = models;
     this.render(this.store.getState());
+  }
+
+  /** Swap the active catalog (e.g. Local-VRAM ↔ Cloud) and refresh option lists. */
+  setCatalog(catalog: readonly Model[]) {
+    this.catalog = catalog;
+    this.renderFilterControls();
+    this.renderFamilyNav();
+    this.render(this.store.getState());
+  }
+
+  /** Teardown: unsubscribe from store, remove root listeners and body tooltip. */
+  destroy() {
+    this.unsubscribe?.();
+    this.unsubscribe = undefined;
+    this.root.removeEventListener("click", this.rootClick);
+    this.root.removeEventListener("input", this.rootInput);
+    this.tooltip.remove();
   }
 
   private multiEffortCatalog() {

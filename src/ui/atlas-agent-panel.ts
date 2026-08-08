@@ -43,11 +43,14 @@ export class AtlasAgentPanel {
   private readonly store: AppStore;
   private catalog: readonly Model[] = [];
   private visible: readonly Model[] = [];
+  private visibleInitialized = false;
   private snapshotId = "cat_local";
   private pending: AtlasProposal | null = null;
   private undoState: AppState | null = null;
   private listening = false;
   private listenHandle: { stop: () => void } | null = null;
+  private turnId = 0;
+  private inFlightTurn: number | null = null;
 
   constructor(root: HTMLElement, store: AppStore) {
     this.root = root;
@@ -73,13 +76,14 @@ export class AtlasAgentPanel {
 
   setVisible(models: readonly Model[]) {
     this.visible = models;
+    this.visibleInitialized = true;
   }
 
   private ctx(): AtlasAgentContext {
     const s = this.store.getState();
     return {
       catalog: this.catalog,
-      visible: this.visible.length ? this.visible : this.catalog,
+      visible: this.visibleInitialized ? this.visible : this.catalog,
       floor: s.intelligenceFloor,
       costSpeedBias: s.costSpeedBias,
       catalogSnapshotId: this.snapshotId,
@@ -273,8 +277,18 @@ export class AtlasAgentPanel {
 
   private async submit(raw: string) {
     const text = raw.trim();
-    if (!text) return;
+    if (!text || this.inFlightTurn !== null) return;
+    const myTurn = ++this.turnId;
+    this.inFlightTurn = myTurn;
+    this.setBusy(true);
     const proposal = await runAtlasTurn(text, this.ctx(), { speak: !isAtlasVoiceMuted() });
+    // Ignore completions superseded by a newer turn.
+    const stale = this.inFlightTurn !== myTurn;
+    if (this.inFlightTurn === myTurn) {
+      this.inFlightTurn = null;
+      this.setBusy(false);
+    }
+    if (stale) return;
     this.showTrace(proposal.tool_trace ?? []);
     if (!validateProposal(proposal)) {
       this.pending = null;
@@ -289,6 +303,30 @@ export class AtlasAgentPanel {
     } else {
       this.showProposal(proposal);
     }
+  }
+
+  private setBusy(busy: boolean) {
+    const run = this.root.querySelector<HTMLButtonElement>("[data-atlas-run]");
+    const input = this.root.querySelector<HTMLInputElement>("[data-atlas-input]");
+    if (run) run.disabled = busy;
+    if (input) input.disabled = busy;
+  }
+
+  /** Clamp agent-supplied weights to finite 0..100 before they enter the store. */
+  private clampProposalWeights(p: AtlasProposal): AtlasProposal {
+    if (!p.weights) return p;
+    const clamp = (n: unknown): number => {
+      if (typeof n !== "number" || !Number.isFinite(n)) return 0;
+      return Math.min(100, Math.max(0, n));
+    };
+    return {
+      ...p,
+      weights: {
+        speed: clamp(p.weights.speed),
+        cost: clamp(p.weights.cost),
+        intelligence: clamp(p.weights.intelligence),
+      },
+    };
   }
 
   private showTrace(trace: { name: string; ok: boolean; detail?: string }[]) {
@@ -333,8 +371,9 @@ export class AtlasAgentPanel {
   }
 
   private applyPending(opts?: { auto?: boolean }) {
-    const p = this.pending;
+    let p = this.pending;
     if (!p || !validateProposal(p)) return;
+    p = this.clampProposalWeights(p);
     const prev = this.store.getState();
     this.undoState = {
       ...prev,
