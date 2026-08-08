@@ -655,7 +655,7 @@ async function boot() {
     });
     updateEmptyState(visibleSet.length, filters);
     projections?.setPresentationMode?.(presentationMode);
-    projections?.render(weights, visibleSet);
+    projections?.render(weights, visibleSet, { axisMapping, presentationMode });
     sweep?.setPresentationMode?.(presentationMode);
     updateEffortStrip(visibleSet, store.getState(), store);
     // Console/guide track the visible set; do NOT restart the sweep here.
