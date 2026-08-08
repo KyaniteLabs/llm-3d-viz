@@ -236,16 +236,20 @@ export class FilterShelf {
 
   private toggleLab(lab: string, on: boolean) {
     // Normalize away sentinel
-    if (this.draft.providers.includes("__none__")) this.draft.providers = [];
+    const wasNone = this.draft.providers.includes("__none__");
+    if (wasNone) this.draft.providers = [];
 
     const labFams = this.allFamiliesForLab(lab);
     if (on) {
       // Ensure lab is included: if providers was restrictive, add lab; clear family-only restrictions for that lab
-      if (this.draft.providers.length) {
+      if (wasNone || this.draft.providers.length) {
         if (!this.draft.providers.includes(lab)) this.draft.providers.push(lab);
       }
-      // If families restricted, add all of this lab's families
-      if (this.draft.families.length) {
+      // If coming from None, restrict families to this lab's families
+      if (wasNone) {
+        this.draft.families = [...labFams];
+      } else if (this.draft.families.length) {
+        // If families restricted, add all of this lab's families
         for (const f of labFams) {
           if (!this.draft.families.includes(f)) this.draft.families.push(f);
         }
@@ -268,7 +272,16 @@ export class FilterShelf {
   }
 
   private toggleFamily(lab: string, fam: string, on: boolean) {
-    if (this.draft.providers.includes("__none__")) this.draft.providers = [];
+    const wasNone = this.draft.providers.includes("__none__");
+    if (wasNone) this.draft.providers = [];
+
+    // Coming from None and turning a family on: select just that family and its lab
+    if (on && wasNone) {
+      this.draft.families = [fam];
+      this.draft.providers = [lab];
+      this.compactFamilyFilter();
+      return;
+    }
 
     // Expand current membership to explicit family list if unrestricted
     if (!this.draft.families.length && !this.draft.providers.length) {

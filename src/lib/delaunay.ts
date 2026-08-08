@@ -28,9 +28,10 @@ export function delaunay2d(
     if (y > maxY) maxY = y;
   }
   const span = Math.max(maxX - minX, maxY - minY) || 1;
-  // Tie-break threshold for the in-circle predicate (see inCircle). Absolute;
-  // fine for the O(1)-scale scene coordinates this meshes.
-  const EPS = 1e-9;
+  // Tie-break threshold for the in-circle predicate (see inCircle). Scale-relative:
+  // the determinant scales as length^4, so an absolute 1e-9 rejects valid
+  // small-scale (clustered) triangles. Size EPS to span^4 to stay relative.
+  const EPS = 1e-9 * span * span * span * span;
   const delta = 20 * span;
   const midx = (minX + maxX) / 2;
   const midy = (minY + maxY) / 2;

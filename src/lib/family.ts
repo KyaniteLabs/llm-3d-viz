@@ -20,8 +20,8 @@ export const EFFORT_RANK: Readonly<Record<string, number>> = {
   low: 1,
   medium: 2,
   high: 3,
-  max: 4,
-  xhigh: 5,
+  xhigh: 4,
+  max: 5,
   minimal: 1,
   default: 3,
 };

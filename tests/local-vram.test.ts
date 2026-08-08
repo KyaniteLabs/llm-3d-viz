@@ -3,6 +3,7 @@ import {
   LOCAL_VRAM_TIERS,
   fitsLocalVram,
   parseParamsBillions,
+  parseTotalParamsBillions,
 } from "../src/lib/local-vram";
 
 describe("LOCAL_VRAM_TIERS", () => {
@@ -36,6 +37,22 @@ describe("parseParamsBillions", () => {
   });
 });
 
+describe("parseTotalParamsBillions", () => {
+  it("extracts MoE total stored params (large number before A)", () => {
+    expect(parseTotalParamsBillions("Qwen3 235B A22B")).toBe(235);
+    expect(parseTotalParamsBillions("Qwen3-235B-A22B")).toBe(235);
+    expect(parseTotalParamsBillions("DeepSeek-V3 671B A37B")).toBe(671);
+    expect(parseTotalParamsBillions("Qwen3.5 397B A17B")).toBe(397);
+    expect(parseTotalParamsBillions("LFM2.5-8B-A1B")).toBe(8);
+  });
+
+  it("falls back to dense params when no MoE active marker", () => {
+    expect(parseTotalParamsBillions("Qwen3-8B")).toBe(8);
+    expect(parseTotalParamsBillions("Llama-3.1-70B-Instruct")).toBe(70);
+    expect(parseTotalParamsBillions("Phi-3.5-mini")).toBeNull();
+  });
+});
+
 describe("fitsLocalVram", () => {
   it("gates 8 / 12 / 24 GB by Q4-class param caps", () => {
     expect(fitsLocalVram("Qwen3-8B", 8)).toBe(true);
@@ -47,10 +64,13 @@ describe("fitsLocalVram", () => {
     expect(fitsLocalVram("Llama-3.1-70B", 24)).toBe(false);
   });
 
-  it("uses MoE active params for fit", () => {
-    // 22B active fits 24GB, not 12GB
-    expect(fitsLocalVram("Qwen3-235B-A22B", 24)).toBe(true);
+  it("uses MoE total stored params for fit", () => {
+    // 235B total stored params — needs ~117.5GB, fits no consumer tier
+    expect(fitsLocalVram("Qwen3-235B-A22B", 24)).toBe(false);
     expect(fitsLocalVram("Qwen3-235B-A22B", 12)).toBe(false);
+    // 30B total fits 24GB (Q4), not 12GB
+    expect(fitsLocalVram("Qwen3 30B A3B", 24)).toBe(true);
+    expect(fitsLocalVram("Qwen3 30B A3B", 12)).toBe(false);
   });
 
   it("fail-closes when size cannot be parsed", () => {

@@ -24,7 +24,6 @@ import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
 import { delaunay2d, hullEdges } from "../lib/delaunay";
 import {
-  isSingleton,
   pointEncoding,
   type PresentationMode,
   type SemanticPointClass,
@@ -52,6 +51,7 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 /** Scene half-extent of the data cube (cube spans [-S, S] on each axis). */
 const S = 1;
 const EYE_Y_FLOOR = 0.15;
+const LABEL_CAP = 40;
 
 type GlyphKind = SceneGlyphKind | "box" | "box-open";
 
@@ -129,6 +129,7 @@ export class Stage3DThree implements Stage3DSurface {
   private hoverId: string | null = null;
   private animFrame: number | null = null;
   private resizeObs: ResizeObserver | null = null;
+  private resizeHandler: (() => void) | null = null;
 
   constructor(
     container: HTMLElement,
@@ -376,6 +377,7 @@ export class Stage3DThree implements Stage3DSurface {
       resize();
       requestAnimationFrame(resize);
     });
+    this.resizeHandler = resize;
     window.addEventListener("resize", resize, { passive: true });
     this.resizeObs = new ResizeObserver(resize);
     this.resizeObs.observe(this.el);
@@ -404,6 +406,11 @@ export class Stage3DThree implements Stage3DSurface {
 
   public setCamera(camera: Partial<StageCamera> | StageCamera) {
     const next = camera as StageCamera;
+    // Reject NaN/Infinity in any supplied eye/center/up component — a single
+    // non-finite value corrupts the camera and can freeze the render loop.
+    if (next.eye && !Object.values(next.eye).every(Number.isFinite)) return;
+    if (next.center && !Object.values(next.center).every(Number.isFinite)) return;
+    if (next.up && !Object.values(next.up).every(Number.isFinite)) return;
     this.cameraState = {
       eye: { ...this.cameraState.eye, ...(next.eye || {}) },
       up: { ...this.cameraState.up, ...(next.up || {}) },
@@ -915,7 +922,7 @@ export class Stage3DThree implements Stage3DSurface {
             : [...options.labelFocusIds],
         )
       : null;
-    const labelFocus = labelFocusRaw && labelFocusRaw.size > 0 ? labelFocusRaw : null;
+    let labelFocus = labelFocusRaw && labelFocusRaw.size > 0 ? labelFocusRaw : null;
 
     // Plot models that have all three mapped metrics.
     // Decide mode (intelligenceFloor set): suppress value-score optimum AND classic
@@ -927,6 +934,27 @@ export class Stage3DThree implements Stage3DSurface {
     const optimumModel = decideMode ? undefined : weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((m) => m.model));
     const markerDensity = densityMarkerScale(plottable.length);
+    // O(1) lookups instead of O(n) scans per model in the render loop below.
+    const scoreById = new Map(scores.map((s) => [s.model.model, s.score]));
+    const plottableById = new Map(plottable.map((m) => [m.model, m]));
+    const familyCounts = new Map<string, number>();
+    for (const m of plottable) {
+      const fid = familyIdOf(m);
+      familyCounts.set(fid, (familyCounts.get(fid) ?? 0) + 1);
+    }
+    const singletonSet = new Set<string>();
+    for (const m of plottable) {
+      if ((familyCounts.get(familyIdOf(m)) ?? 0) < 2) singletonSet.add(m.model);
+    }
+    // Cap label focus to the top-scoring models so dense catalogs don't create
+    // an unbounded label set that NMS must process every orbit frame.
+    if (labelFocus && labelFocus.size > LABEL_CAP) {
+      labelFocus = new Set(
+        [...labelFocus]
+          .sort((a, b) => (scoreById.get(b) ?? 0) - (scoreById.get(a) ?? 0))
+          .slice(0, LABEL_CAP),
+      );
+    }
 
     const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
     this.domains = {
@@ -999,9 +1027,9 @@ export class Stage3DThree implements Stage3DSurface {
           : isFrontier
             ? "frontier"
             : "dominated";
-      const score = scores.find((c) => c.model.model === model.model)?.score ?? 0;
+      const score = scoreById.get(model.model) ?? 0;
       const fid = familyIdOf(model);
-      const singleton = isSingleton(model, plottable, familyIdOf);
+      const singleton = singletonSet.has(model.model);
       const soloThis =
         Boolean(this.soloFamily) ||
         (Boolean(this.highlightFamilyId) && this.highlightFamilyId === fid);
@@ -1107,7 +1135,7 @@ export class Stage3DThree implements Stage3DSurface {
       mesh.userData.reasoning = Boolean(model.reasoning);
       mesh.userData.familyId = fid;
       mesh.userData.singleton = singleton;
-      mesh.userData.encOpacity = enc.opacity; // pre-highlight base
+      mesh.userData.effectiveOpacity = opacity; // post decide/cinema-adjusted base for highlight restore
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
       this.pointMeshes.push(mesh);
@@ -1240,7 +1268,7 @@ export class Stage3DThree implements Stage3DSurface {
     const focusLabels = plottable.length > 0 && plottable.length <= 12;
     for (const mesh of this.pointMeshes) {
       const id = mesh.userData.modelId as string;
-      const model = plottable.find((m) => m.model === id);
+      const model = plottableById.get(id);
       if (!model) continue;
       const isOptimum = mesh.userData.semanticClass === "optimum";
       const isFrontier = mesh.userData.semanticClass === "frontier";
@@ -1327,7 +1355,7 @@ export class Stage3DThree implements Stage3DSurface {
     this.highlightFamilyId = familyId;
     for (const mesh of this.pointMeshes) {
       const fid = mesh.userData.familyId as string | undefined;
-      const base = (mesh.userData.encOpacity as number) ?? 1;
+      const base = (mesh.userData.effectiveOpacity as number) ?? 1;
       const mat = mesh.material as THREE.MeshBasicMaterial;
       if (familyId && fid && fid !== familyId) {
         mat.transparent = true;
@@ -1401,7 +1429,6 @@ export class Stage3DThree implements Stage3DSurface {
   }
 
   private paintLabels() {
-    this.labelRoot.innerHTML = "";
     const w = this.el.clientWidth;
     const h = this.el.clientHeight;
     if (w < 2 || h < 2) return;
@@ -1434,16 +1461,43 @@ export class Stage3DThree implements Stage3DSurface {
     }
 
     // NMS for mark + task labels: higher priority wins; axis titles/ticks always keep.
-    const kept: Placed[] = [];
+    const edgePad = 6;
+    // Measure actual text extents so collision boxes match the real rendered width
+    // instead of a fixed 72px/36px estimate.
+    const measureCtx = document.createElement("canvas").getContext("2d");
+    const measureLabelWidth = (p: Placed): number => {
+      if (!measureCtx) return p.kind === "task" ? 144 : 72;
+      const weight = p.kind === "title" || p.kind === "mark" || p.kind === "task" ? 500 : 400;
+      measureCtx.font = `${weight} 10px ${this.tokens.fontMono}`;
+      return measureCtx.measureText(p.text).width + edgePad * 2;
+    };
+    // Apply the same edge-aware clamping the render pass uses, so NMS detects
+    // collisions at the POST-clamp positions labels actually occupy.
+    const clampPos = (p: Placed): { left: number; top: number } => {
+      const isTask = p.kind === "task";
+      let left = p.x;
+      let top = p.y;
+      if (isTask) {
+        left = Math.max(edgePad + 4, Math.min(p.x, w * 0.38));
+      } else if (p.x < 56) {
+        left = edgePad;
+      } else if (p.x > w - 56) {
+        left = w - edgePad;
+      } else {
+        left = Math.min(w - edgePad, Math.max(edgePad, p.x));
+      }
+      if (p.y < edgePad + 4) {
+        top = edgePad;
+      } else if (p.y > h - 4) {
+        top = h - edgePad;
+      }
+      return { left, top };
+    };
     const labelBox = (p: Placed) => {
-      const halfW = p.kind === "task" ? 72 : 36;
+      const { left, top } = clampPos(p);
+      const halfW = measureLabelWidth(p) / 2;
       const halfH = p.kind === "task" ? 12 : 8;
-      return {
-        l: p.x - halfW,
-        r: p.x + halfW,
-        t: p.y - halfH,
-        b: p.y + halfH,
-      };
+      return { l: left - halfW, r: left + halfW, t: top - halfH, b: top + halfH };
     };
     const overlap = (a: ReturnType<typeof labelBox>, b: ReturnType<typeof labelBox>) =>
       !(a.r < b.l || a.l > b.r || a.b < b.t || a.t > b.b);
@@ -1461,14 +1515,18 @@ export class Stage3DThree implements Stage3DSurface {
       if (acceptedSoft.some((k) => overlap(box, labelBox(k)))) continue;
       acceptedSoft.push(m);
     }
+    const kept: Placed[] = [];
     kept.push(...always, ...acceptedSoft);
-
-    const edgePad = 6;
-    for (const { text, x, y, kind, title } of kept) {
-      const el = document.createElement("span");
+    const existing = this.labelRoot.children;
+    for (let i = 0; i < kept.length; i++) {
+      const { text, x, y, kind, title } = kept[i];
+      // Reuse existing spans across orbit frames instead of clearing/recreating.
+      const el = (existing[i] as HTMLSpanElement | undefined) ?? document.createElement("span");
       el.textContent = text;
       if (title) el.title = title;
+      else el.removeAttribute("title");
       if (kind === "task") el.className = "stage-task-anchor";
+      else el.className = "";
       const isTask = kind === "task";
       const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : isTask ? "10px" : "10px";
       const color =
@@ -1521,7 +1579,11 @@ export class Stage3DThree implements Stage3DSurface {
         border:${isTask ? "1px solid rgba(201,212,196,0.18)" : "0"};
         padding:${isTask ? "3px 7px" : "0"};border-radius:${isTask ? "4px" : "0"};
         box-shadow:${isTask ? "0 0 12px rgba(7,12,11,0.5)" : "none"};`;
-      this.labelRoot.appendChild(el);
+      if (el !== existing[i]) this.labelRoot.appendChild(el);
+    }
+    // Trim surplus spans from a previous frame with more labels.
+    while (this.labelRoot.children.length > kept.length) {
+      this.labelRoot.removeChild(this.labelRoot.lastChild!);
     }
   }
 
@@ -1641,10 +1703,20 @@ export class Stage3DThree implements Stage3DSurface {
   }
 
   destroy() {
+    if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
+    this.resizeHandler = null;
     if (this.animFrame !== null) cancelAnimationFrame(this.animFrame);
     this.resizeObs?.disconnect();
     this.controls.dispose();
+    this.scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.geometry) mesh.geometry.dispose();
+      const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
+      if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+      else if (mat) mat.dispose();
+    });
     this.renderer.dispose();
     this.el.remove();
+    if ((window as any).__viz?.stageThree === this) delete (window as any).__viz.stageThree;
   }
 }

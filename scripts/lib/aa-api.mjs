@@ -86,9 +86,8 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     provider,
     openness,
     modality: ["text"],
-    // Free API omits context window (Pro field) — use a positive placeholder so
-    // the catalog schema accepts rows; not used as a plot axis.
-    context_length: 128_000,
+    // Free API omits context window — 0 signals unknown; not used as a plot axis.
+    context_length: 0,
     release_date: release,
     data_date: today,
     source: sourceLabel,

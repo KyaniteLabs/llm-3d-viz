@@ -74,6 +74,24 @@ export function parseParamsBillions(modelName: string): number | null {
   }
   return null;
 }
+/**
+ * Parse TOTAL stored parameters in billions from a model name.
+ * For MoE models, all expert weights must reside in VRAM, so the total
+ * (the large number before the active `AxxB` marker) governs fit — not the
+ * active parameter count. Falls back to `parseParamsBillions` for dense
+ * models where total equals the single B number.
+ */
+export function parseTotalParamsBillions(modelName: string): number | null {
+  const name = modelName;
+  // MoE: "235B A22B", "397B A17B", "8B-A1B" — the total is the large number before A
+  const moeTotal = name.match(/(\d+(?:\.\d+)?)\s*B[\s\-]*A\d+(?:\.\d+)?\s*B/i);
+  if (moeTotal) {
+    const n = Number(moeTotal[1]);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  // Dense models: total = the single B number
+  return parseParamsBillions(modelName);
+}
 
 /** Whether a model fits in `vramMaxGb` under Q4-class heuristics. */
 export function fitsLocalVram(
@@ -82,7 +100,7 @@ export function fitsLocalVram(
 ): boolean {
   const tier = LOCAL_VRAM_TIERS.find((t) => t.vramMaxGb === vramMaxGb);
   if (!tier) return false;
-  const paramsB = parseParamsBillions(modelName);
+  const paramsB = parseTotalParamsBillions(modelName);
   if (paramsB == null) return false; // unknown size — exclude (fail-closed for local gate)
   return paramsB <= tier.maxParamsB + 1e-9;
 }

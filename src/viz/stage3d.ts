@@ -179,6 +179,13 @@ export class Stage3D {
   }
 
   public setCamera(camera: any) {
+    // Reject NaN/Infinity in any supplied eye/center/up component.
+    const eye = camera?.eye;
+    const center = camera?.center;
+    const up = camera?.up;
+    if (eye && !Object.values(eye).every(Number.isFinite)) return;
+    if (center && !Object.values(center).every(Number.isFinite)) return;
+    if (up && !Object.values(up).every(Number.isFinite)) return;
     this.camera = {
       ...this.camera,
       ...camera,
@@ -589,5 +596,13 @@ export class Stage3D {
         );
       }
     });
+  }
+  destroy() {
+    this.renderGen++; // invalidate any pending async renders
+    const Plotly = (window as any).Plotly;
+    if (Plotly && this.gd) {
+      try { Plotly.purge(this.gd); } catch {}
+    }
+    if (this.gd?.parentNode) this.gd.parentNode.removeChild(this.gd);
   }
 }

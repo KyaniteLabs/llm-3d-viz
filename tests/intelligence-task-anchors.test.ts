@@ -34,8 +34,12 @@ describe("intelligence-task-anchors", () => {
   });
 
   it("nearest band maps Index values for tooltips", () => {
-    expect(nearestTaskAnchor(20).short).toMatch(/email|FAQ|notes/i);
-    expect(nearestTaskAnchor(52).short).toMatch(/bug|fix/i);
-    expect(nearestTaskAnchor(62).short).toMatch(/autonomous|project|babysitting/i);
+    expect(nearestTaskAnchor(20)!.short).toMatch(/email|FAQ|notes/i);
+    expect(nearestTaskAnchor(52)!.short).toMatch(/bug|fix/i);
+    expect(nearestTaskAnchor(62)!.short).toMatch(/autonomous|project|babysitting/i);
+  });
+
+  it("returns null for an empty anchor table", () => {
+    expect(nearestTaskAnchor(50, [])).toBeNull();
   });
 });

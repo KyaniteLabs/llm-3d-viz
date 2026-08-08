@@ -84,7 +84,7 @@ export function normalizeFamily(s: string): string {
 export function lastSlugSegment(raw: string): string {
   if (typeof raw !== "string" || !raw.trim()) return "";
   let seg = raw.trim().split("/").pop() || "";
-  seg = seg.replace(/-(text|agent|vertex|search|search-v2|v2)$/i, "");
+  seg = seg.replace(/-(text|agent|vertex|search|search-v2)$/i, "");
   return seg.toLowerCase();
 }
 

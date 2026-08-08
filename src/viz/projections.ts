@@ -108,6 +108,7 @@ export class Projections {
   private isProgrammatic = false;
   private coupled = false;
   private renderGen = 0;
+  private destroyFn: (() => void) | null = null;
 
   constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
     this.containers = containers;
@@ -417,12 +418,18 @@ export class Projections {
     const stageOn = (this.stageGd as any).on;
     if (typeof stageOn === "function") stageOn.call(this.stageGd, "plotly_hover", onHover);
     // Three stage emits stage:hover with model id (no plotly_hover path).
-    this.stageGd.addEventListener("stage:hover", ((event: CustomEvent<{ modelId: string | null }>) => {
+    const onStageHover = ((event: CustomEvent<{ modelId: string | null }>) => {
       if (this.isProgrammatic) return;
       const modelId = event.detail?.modelId;
       if (!modelId) return;
       this.fanOut(modelId);
-    }) as EventListener);
+    }) as EventListener;
+    this.stageGd.addEventListener("stage:hover", onStageHover);
+    // Allow destroy() to tear down the DOM-level coupling listener. Plotly-level
+    // plotly_hover listeners are cleaned by Plotly.purge on each graph div.
+    this.destroyFn = () => {
+      this.stageGd.removeEventListener("stage:hover", onStageHover);
+    };
   }
 
   /**
@@ -458,5 +465,17 @@ export class Projections {
       // best-effort; the coupling contract is the Fx.hover call by model id.
       // Swallow so a no-op never breaks coupling.
     }
+  }
+  destroy() {
+    this.renderGen++;
+    const Plotly = (window as any).Plotly;
+    if (Plotly) {
+      this.gds.forEach((gd) => { try { Plotly.purge(gd); } catch {} });
+      if (this.stageGd) { try { Plotly.purge(this.stageGd); } catch {} }
+    }
+    this.gds.forEach((gd) => { if (gd.parentNode) gd.parentNode.removeChild(gd); });
+    this.destroyFn?.();
+    this.destroyFn = null;
+    this.coupled = false;
   }
 }

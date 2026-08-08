@@ -4,6 +4,7 @@
  */
 import { isScorable, type Model } from "../data/models";
 import { FORK_DEFAULTS } from "../config/fork-defaults";
+import { roundTo } from "./pareto";
 
 /** Forker override: `src/config/fork-defaults.ts` → decideFloor. */
 export const DEFAULT_INTELLIGENCE_FLOOR = FORK_DEFAULTS.decideFloor;
@@ -75,10 +76,10 @@ export function filterPickEligible(models: readonly Model[], floor: number): Mod
 /** 2D dominance on cost (min) × speed/tps (max) among pick-eligible models. */
 export function dominatesCostSpeed(a: Model, b: Model): boolean {
   if (!isScorable(a) || !isScorable(b)) return false;
-  const aCost = Math.round(a.blended_price_per_M! * 100) / 100;
-  const bCost = Math.round(b.blended_price_per_M! * 100) / 100;
-  const aSpeed = Math.round(a.tps! * 10) / 10;
-  const bSpeed = Math.round(b.tps! * 10) / 10;
+  const aCost = roundTo(a.blended_price_per_M!, 2);
+  const bCost = roundTo(b.blended_price_per_M!, 2);
+  const aSpeed = roundTo(a.tps!, 1);
+  const bSpeed = roundTo(b.tps!, 1);
   const atLeast = aCost <= bCost && aSpeed >= bSpeed;
   const strict = aCost < bCost || aSpeed > bSpeed;
   return atLeast && strict;
@@ -129,10 +130,11 @@ export function shortlistFromDecide(
   bias: CostSpeedBias,
   n = DEFAULT_SHORTLIST_N,
 ): { eligible: Model[]; pareto: Model[]; shortlist: Model[] } {
+  const safeN = Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_SHORTLIST_N;
   const eligible = filterPickEligible(models, floor);
   const pareto = costSpeedPareto(eligible);
   const ranked = rankParetoByBias(pareto, bias);
-  const shortlist = ranked.slice(0, Math.max(0, n));
+  const shortlist = ranked.slice(0, safeN);
   return { eligible, pareto, shortlist };
 }
 

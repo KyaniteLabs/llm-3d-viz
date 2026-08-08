@@ -5,13 +5,14 @@
  *
  * Param schema (all optional; defaults match product landing):
  * - age=0|1          age filter off / on (default on, 6 months)
+ * - agem=<n>         age window in months (default 6; omitted when 6)
  * - providers=a,b    multi-select; empty ≡ all
  * - families=a,b     multi-select; empty ≡ all (comma-separated family_ids)
  * - fam=a,b          alias for families=
  * - ax=x,y,z         AxisMetricId triple for scene X/Y/Z
  * - w=s,c,i          raw weight triple speed,cost,intelligence
  * - decide=1         Decide mode on
- * - floor=<0..100>   intelligence floor (written whenever decide=1)
+ * - floor=<0..100>   intelligence floor (written when user-set or anchor, not default)
  * - bias=<-1..1>     cost/speed bias (omit when 0)
  * - anchor=<modelId> floor anchor (when set, floor number is resolved Index)
  * - heat=1 / stage= / enc=  already consumed at boot for renderer flags (left alone)
@@ -171,6 +172,13 @@ export function parseShareableState(
     const age = params.get("age");
     filters.ageEnabled = age !== "0" && age !== "false";
   }
+  const ageMonthsRaw = params.get("agem");
+  if (ageMonthsRaw) {
+    const am = Number(ageMonthsRaw);
+    if (Number.isFinite(am) && am > 0 && am <= 60) {
+      filters.ageMonths = am;
+    }
+  }
   if (params.has("providers")) {
     filters.providers = splitList(params.get("providers"));
   }
@@ -244,6 +252,7 @@ export function serializeShareableState(
 
   for (const key of [
     "age",
+    "agem",
     "providers",
     "families",
     "ax",
@@ -266,6 +275,9 @@ export function serializeShareableState(
 
   if (!state.filters.ageEnabled) {
     params.set("age", "0");
+  }
+  if (state.filters.ageMonths != null && state.filters.ageMonths !== 6) {
+    params.set("agem", String(state.filters.ageMonths));
   }
   if (!state.filters.multiEffortOnly) {
     params.set("me", "0");
@@ -317,8 +329,10 @@ export function serializeShareableState(
   const d = state.decide ?? DEFAULT_DECIDE_SHARE;
   if (d.decideMode) {
     params.set("decide", "1");
-    // Always write floor when decide is on.
-    params.set("floor", String(clampFloor(d.intelligenceFloor)));
+    // Only write floor when the user explicitly set it (not default-derived).
+    if (d.floorUserSet || d.floorAnchorModelId) {
+      params.set("floor", String(clampFloor(d.intelligenceFloor)));
+    }
     if (d.floorAnchorModelId) {
       params.set("anchor", d.floorAnchorModelId);
     }

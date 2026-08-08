@@ -84,7 +84,7 @@ export const ATLAS_TOOL_DEFINITIONS = [
       properties: {
         floor: { type: "number" },
         objective: { type: "string", enum: ["min_cost", "max_speed", "balanced"] },
-        n: { type: "number" },
+        n: { type: "number", minimum: 1, maximum: 20 },
       },
       required: ["floor", "objective"],
       additionalProperties: false,

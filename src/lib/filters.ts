@@ -69,7 +69,13 @@ export function sameFilters(a: ModelFilters, b: ModelFilters): boolean {
 
 function monthsBefore(reference: Date, months: number): Date {
   const d = new Date(reference.getTime());
+  const originalDay = d.getUTCDate();
+  // setUTCDate(1) first so month subtraction never rolls over (e.g. Aug 31 − 6mo).
+  d.setUTCDate(1);
   d.setUTCMonth(d.getUTCMonth() - months);
+  // Clamp the original day to the target month's last valid day.
+  const daysInTargetMonth = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(originalDay, daysInTargetMonth));
   return d;
 }
 
@@ -87,49 +93,24 @@ export function applyFilters(
   filters: ModelFilters,
   referenceDate: Date,
 ): Model[] {
+  // Sentinel: explicit empty membership from filter shelf "None"
+  if (filters.providers.includes("__none__")) return [];
+
   const providerSet =
     filters.providers.length === 0 ? null : new Set(filters.providers);
   const familySet = filters.families.length === 0 ? null : new Set(filters.families);
   const cutoff =
     filters.ageEnabled ? monthsBefore(referenceDate, filters.ageMonths) : null;
-
-  // Precompute multi-effort family membership when the filter is on.
-  // Explicit family picks win: if the analyst selected families (e.g. Claude Fable 5,
-  // a singleton on AA), multi-effort-only must NOT zero the stage. The gate only
-  // applies in browse mode (families empty ≡ all).
-  //
-  // Also keep *frontier singletons* (high Intelligence Index) so Fable / Grok 4.5 /
-  // Muse Spark are not silently dropped just because AA only publishes one effort.
-  const FRONTIER_SINGLETON_IQ = 48;
-  let multiEffortFamilies: Set<string> | null = null;
-  if (filters.multiEffortOnly && !familySet) {
-    const counts = new Map<string, number>();
-    const maxIq = new Map<string, number>();
-    for (const model of models) {
-      const id = familyIdOf(model);
-      counts.set(id, (counts.get(id) ?? 0) + 1);
-      const iq = model.aa_intelligence_index;
-      if (typeof iq === "number" && Number.isFinite(iq)) {
-        maxIq.set(id, Math.max(maxIq.get(id) ?? -Infinity, iq));
-      }
-    }
-    multiEffortFamilies = new Set(
-      [...counts.entries()]
-        .filter(([id, n]) => n >= 2 || (maxIq.get(id) ?? -Infinity) >= FRONTIER_SINGLETON_IQ)
-        .map(([id]) => id),
-    );
-  }
-
-  // Sentinel: explicit empty membership from filter shelf "None"
-  if (filters.providers.includes("__none__")) return [];
-
   const openness = filters.openness ?? "all";
 
-  return models.filter((model) => {
+  // Apply all non-multi-effort filters first, so that multi-effort family counts
+  // reflect the post-exclusion candidate set (e.g. a family with one reasoning +
+  // one non-reasoning row must NOT count as multi-effort after the non-reasoning
+  // row is dropped).
+  const candidateModels = models.filter((model) => {
     if (providerSet && !providerSet.has(model.provider)) return false;
     const fid = familyIdOf(model);
     if (familySet && !familySet.has(fid)) return false;
-    if (multiEffortFamilies && !multiEffortFamilies.has(fid)) return false;
     if (openness === "open" && model.openness !== "open") return false;
     if (openness === "closed" && model.openness !== "closed") return false;
     if (filters.vramMaxGb != null) {
@@ -143,6 +124,34 @@ export function applyFilters(
     }
     return true;
   });
+
+  // Precompute multi-effort family membership on the candidate set when the
+  // filter is on. Explicit family picks win: if the analyst selected families
+  // (e.g. Claude Fable 5, a singleton on AA), multi-effort-only must NOT zero
+  // the stage. The gate only applies in browse mode (families empty ≡ all).
+  //
+  // Also keep *frontier singletons* (high Intelligence Index) so Fable / Grok 4.5 /
+  // Muse Spark are not silently dropped just because AA only publishes one effort.
+  const FRONTIER_SINGLETON_IQ = 48;
+  if (!filters.multiEffortOnly || familySet) return candidateModels;
+
+  const counts = new Map<string, number>();
+  const maxIq = new Map<string, number>();
+  for (const model of candidateModels) {
+    const id = familyIdOf(model);
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+    const iq = model.aa_intelligence_index;
+    if (typeof iq === "number" && Number.isFinite(iq)) {
+      maxIq.set(id, Math.max(maxIq.get(id) ?? -Infinity, iq));
+    }
+  }
+  const multiEffortFamilies = new Set(
+    [...counts.entries()]
+      .filter(([id, n]) => n >= 2 || (maxIq.get(id) ?? -Infinity) >= FRONTIER_SINGLETON_IQ)
+      .map(([id]) => id),
+  );
+
+  return candidateModels.filter((model) => multiEffortFamilies.has(familyIdOf(model)));
 }
 
 /** Distinct providers in catalog (sorted). */

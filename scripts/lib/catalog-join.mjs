@@ -429,8 +429,12 @@ function parseEntriesArray(sub) {
 export function canAdmitPlotTriple(row) {
   if (!row || typeof row !== "object") return false;
   const hasIq =
-    row.aa_intelligence_index != null && Number.isFinite(Number(row.aa_intelligence_index));
-  const hasTps = row.tps != null && Number.isFinite(Number(row.tps));
+    row.aa_intelligence_index != null &&
+    Number.isFinite(Number(row.aa_intelligence_index)) &&
+    Number(row.aa_intelligence_index) >= 0 &&
+    Number(row.aa_intelligence_index) <= 100;
+  const hasTps =
+    row.tps != null && Number.isFinite(Number(row.tps)) && Number(row.tps) >= 0;
   const hasCost =
     row.blended_price_per_M != null &&
     Number.isFinite(Number(row.blended_price_per_M)) &&

@@ -96,7 +96,8 @@ export function taskAnchorsInDomain(
 export function nearestTaskAnchor(
   indexValue: number,
   anchors: readonly IntelligenceTaskAnchor[] = INTELLIGENCE_TASK_ANCHORS,
-): IntelligenceTaskAnchor {
+): IntelligenceTaskAnchor | null {
+  if (!anchors.length) return null;
   let best = anchors[0]!;
   let bestDist = Math.abs(best.index - indexValue);
   for (let i = 1; i < anchors.length; i++) {

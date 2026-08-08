@@ -476,6 +476,13 @@ async function boot() {
   let renderedFilters: ModelFilters | null = null;
   let renderedDecideKey = "";
   let renderedCinemaMode = false;
+  let latestShareInput: {
+    story: string;
+    axes: string;
+    sources: string;
+    asOf: string;
+    nPlottable: number;
+  } = { story: "", axes: "", sources: "", asOf: "", nPlottable: 0 };
   let pending: {
     weights: AppState["weights"];
     axisMapping: AxisMapping;
@@ -517,6 +524,7 @@ async function boot() {
     const axes = `${axisMapping.x} × ${axisMapping.y} × ${axisMapping.z}`;
     const asOf = new Date().toISOString().slice(0, 10);
     const sources = "Artificial Analysis · OpenRouter · Arena (CC BY 4.0)";
+    latestShareInput = { story, axes, sources, asOf, nPlottable: visibleSet.length };
     const costTaskN = visibleSet.filter(
       (m) => m.cost_per_index_task_usd != null && m.cost_per_index_task_usd > 0,
     ).length;
@@ -540,11 +548,11 @@ async function boot() {
       copyInsightBtn.addEventListener("click", async () => {
         const text = buildInsightMethodCopy({
           title: "Model Observatory",
-          story,
-          axes,
-          sources,
-          asOf,
-          nPlottable: visibleSet.length,
+          story: latestShareInput.story,
+          axes: latestShareInput.axes,
+          sources: latestShareInput.sources,
+          asOf: latestShareInput.asOf,
+          nPlottable: latestShareInput.nPlottable,
           url: window.location.href,
         });
         try {

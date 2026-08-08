@@ -84,6 +84,7 @@ export class SweepScheduler {
   private reduced = motionPreference()?.matches ?? false;
   private readonly heatEncoding: boolean;
   private presentationMode: PresentationMode = "curve";
+  private unsubscribe: (() => void) | null = null;
   private removeMotionListener: (() => void) | null = null;
   // FIX-D (#29): plotly_afterplot re-assert hardening. `afterPlotRegistered` is
   // set once a listener is attached to every plot (stage + projections). The
@@ -112,7 +113,7 @@ export class SweepScheduler {
       media.addEventListener?.("change", onChange);
       this.removeMotionListener = () => media.removeEventListener?.("change", onChange);
     }
-    this.store.subscribe((state) => {
+    this.unsubscribe = this.store.subscribe((state) => {
       this.ensureAfterPlotListeners();
       const weightsChanged =
         !this.previousWeights ||
@@ -156,6 +157,8 @@ export class SweepScheduler {
   }
 
   destroy() {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
     this.cancel();
     this.removeMotionListener?.();
   }
