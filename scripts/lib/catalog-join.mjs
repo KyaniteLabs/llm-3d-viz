@@ -92,6 +92,102 @@ export function applyAaDerivedBlend(aaRows) {
   });
 }
 
+/** Build a lookup index over OpenRouter models (id, bare slug, name). */
+export function buildOpenRouterIndex(orModels) {
+  const byId = new Map();
+  for (const m of orModels ?? []) {
+    const id = String(m.id || "").toLowerCase();
+    const name = String(m.name || "").toLowerCase();
+    if (id) {
+      byId.set(id, m);
+      const bare = id.includes("/") ? id.split("/").pop() : id;
+      if (bare && !byId.has(bare)) byId.set(bare, m);
+    }
+    if (name) byId.set(name, m);
+  }
+  return byId;
+}
+
+const OPENROUTER_ORG_HINTS = [
+  "anthropic", "openai", "google", "x-ai", "meta-llama", "meta", "qwen",
+  "deepseek", "mistralai", "moonshotai", "z-ai", "minimax", "nvidia",
+];
+
+/**
+ * Match a catalog row to its OpenRouter model (slug transforms + multi-host +
+ * fuzzy endsWith). Returns the OR model object or null. Shared by pricing and
+ * modality overlays so both attach to the same identity.
+ */
+export function matchOpenRouterModel(row, byId) {
+  const slug = aaSlugFromSourceUrl(row.source_url || "");
+  const modelLc = String(row.model || "").toLowerCase();
+  const providerLc = String(row.provider || "").toLowerCase();
+  // AA often uses grok-4-5; OpenRouter uses grok-4.5 (digit-digit → digit.digit).
+  const slugOrStyle = slug ? slug.replace(/(\d+)-(\d+)/g, "$1.$2") : "";
+  const slugDash = slug ? slug.replace(/\./g, "-") : "";
+  const candidates = [
+    slug, slugOrStyle, slugDash,
+    ...OPENROUTER_ORG_HINTS.flatMap((o) =>
+      slug ? [`${o}/${slug}`, `${o}/${slugOrStyle}`, `${o}/${slugDash}`] : [],
+    ),
+    modelLc,
+    modelLc.replace(/\s+/g, "-"),
+    modelLc.replace(/\s+/g, "-").replace(/(\d+)-(\d+)/g, "$1.$2"),
+    modelLc.replace(/\s*\([^)]*\)\s*/g, "").trim(),
+    slug?.startsWith("grok") ? `x-ai/${slug}` : null,
+    slug?.startsWith("grok") ? `x-ai/${slugOrStyle}` : null,
+    providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slug}` : null,
+    providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slugOrStyle}` : null,
+  ].filter(Boolean);
+  for (const c of candidates) {
+    if (byId.has(c)) return byId.get(c);
+  }
+  if (slug) {
+    for (const [id, m] of byId) {
+      if (typeof id === "string" && (id === slug || id.endsWith(`/${slug}`) || id.endsWith(slug))) {
+        return m;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * OpenRouter modality overlay — attaches input modalities (vision/audio/video)
+ * from the OpenRouter models list. Only ever ADDS modalities (union with the
+ * row's existing set), never downgrades curated data. Same legal public source
+ * the pricing overlay already uses; just consumes architecture.input_modalities.
+ * Vocab map: OpenRouter "image" → catalog "vision".
+ */
+export function applyOpenRouterModality(aaRows, orModels) {
+  if (!orModels?.length) return { rows: aaRows, attaches: 0 };
+  const byId = buildOpenRouterIndex(orModels);
+  const VOCAB = { text: "text", image: "vision", audio: "audio", video: "video" };
+  let attaches = 0;
+  const rows = aaRows.map((row) => {
+    const hit = matchOpenRouterModel(row, byId);
+    const inputMods = hit?.architecture?.input_modalities;
+    if (!Array.isArray(inputMods) || !inputMods.length) return row;
+    const existing = new Set(row.modality ?? []);
+    let improved = false;
+    const merged = [...existing];
+    for (const raw of inputMods) {
+      const mapped = VOCAB[String(raw).toLowerCase()];
+      if (mapped && !existing.has(mapped)) {
+        existing.add(mapped);
+        merged.push(mapped);
+        improved = true;
+      }
+    }
+    if (!improved) return row;
+    attaches += 1;
+    let next = { ...row, modality: merged };
+    next = setSource(next, "modality", { origin: "openrouter", kind: "list" });
+    return next;
+  });
+  return { rows, attaches };
+}
+
 /**
  * OpenRouter pricing overlay — never writes IQ/TPS (intelligence/speed stay AA spine).
  * May fill missing price sides; labels list / derived_list_blend.
@@ -99,18 +195,7 @@ export function applyAaDerivedBlend(aaRows) {
  */
 export function applyOpenRouterPricing(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, overlays: 0 };
-  const byId = new Map();
-  for (const m of orModels) {
-    const id = String(m.id || "").toLowerCase();
-    const name = String(m.name || "").toLowerCase();
-    if (id) {
-      byId.set(id, m);
-      // bare slug after org/
-      const bare = id.includes("/") ? id.split("/").pop() : id;
-      if (bare && !byId.has(bare)) byId.set(bare, m);
-    }
-    if (name) byId.set(name, m);
-  }
+  const byId = buildOpenRouterIndex(orModels);
   let overlays = 0;
   const rows = aaRows.map((row) => {
     const needIn = row.price_in_per_M == null;
@@ -118,64 +203,7 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     const needBlend = row.blended_price_per_M == null;
     if (!needIn && !needOut && !needBlend) return row;
 
-    const slug = aaSlugFromSourceUrl(row.source_url || "");
-    const modelLc = String(row.model || "").toLowerCase();
-    const providerLc = String(row.provider || "").toLowerCase();
-    const orgHints = [
-      "anthropic",
-      "openai",
-      "google",
-      "x-ai",
-      "meta-llama",
-      "meta",
-      "qwen",
-      "deepseek",
-      "mistralai",
-      "moonshotai",
-      "z-ai",
-      "minimax",
-      "nvidia",
-    ];
-    // AA often uses grok-4-5; OpenRouter uses grok-4.5 (digit-digit → digit.digit).
-    const slugOrStyle = slug
-      ? slug.replace(/(\d+)-(\d+)/g, "$1.$2")
-      : "";
-    const slugDash = slug ? slug.replace(/\./g, "-") : "";
-    const candidates = [
-      slug,
-      slugOrStyle,
-      slugDash,
-      ...orgHints.flatMap((o) =>
-        slug
-          ? [`${o}/${slug}`, `${o}/${slugOrStyle}`, `${o}/${slugDash}`]
-          : [],
-      ),
-      modelLc,
-      modelLc.replace(/\s+/g, "-"),
-      modelLc.replace(/\s+/g, "-").replace(/(\d+)-(\d+)/g, "$1.$2"),
-      modelLc.replace(/\s*\([^)]*\)\s*/g, "").trim(),
-      // Grok / xAI common ids (AA: grok-4-5; OpenRouter: x-ai/grok-4.5)
-      slug?.startsWith("grok") ? `x-ai/${slug}` : null,
-      slug?.startsWith("grok") ? `x-ai/${slugOrStyle}` : null,
-      providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slug}` : null,
-      providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slugOrStyle}` : null,
-    ].filter(Boolean);
-    let hit = null;
-    for (const c of candidates) {
-      if (byId.has(c)) {
-        hit = byId.get(c);
-        break;
-      }
-    }
-    // Fuzzy: id ends with slug
-    if (!hit && slug) {
-      for (const [id, m] of byId) {
-        if (typeof id === "string" && (id === slug || id.endsWith(`/${slug}`) || id.endsWith(slug))) {
-          hit = m;
-          break;
-        }
-      }
-    }
+    const hit = matchOpenRouterModel(row, byId);
     if (!hit?.pricing) return row;
     const pinTok = Number(hit.pricing.prompt);
     const poutTok = Number(hit.pricing.completion);
@@ -409,6 +437,8 @@ export function joinCatalog(aaRows, overlays = {}) {
   rows = arena.rows;
   const priced = applyOpenRouterPricing(rows, overlays.orModels || []);
   rows = priced.rows;
+  const modal = applyOpenRouterModality(rows, overlays.orModels || []);
+  rows = modal.rows;
   const scorable = rows.filter(canAdmitPlotTriple);
   return {
     all: rows,
@@ -416,5 +446,6 @@ export function joinCatalog(aaRows, overlays = {}) {
     arenaAttaches: arena.attaches,
     arenaLogs: arena.logs,
     openrouterOverlays: priced.overlays,
+    openrouterModalityAttaches: modal.attaches,
   };
 }
