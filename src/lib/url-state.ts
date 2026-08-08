@@ -214,7 +214,12 @@ export function parseShareableState(
   if (w) {
     const parts = w.split(listSep).map((s) => Number(s.trim()));
     if (parts.length === 3 && parts.every((n) => Number.isFinite(n) && n >= 0)) {
-      weights = { speed: parts[0], cost: parts[1], intelligence: parts[2] };
+      // Cap each weight at 100 to prevent Infinity totals from extreme values (e.g. 1e308).
+      weights = {
+        speed: Math.min(100, parts[0]),
+        cost: Math.min(100, parts[1]),
+        intelligence: Math.min(100, parts[2]),
+      };
     }
   }
 

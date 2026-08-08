@@ -127,9 +127,12 @@ export const models: Model[] = filterProductCatalog(allModels, catalogScope);
 export function isScorable(model: Model): boolean {
   return (
     model.tps !== null &&
+    Number.isFinite(model.tps) &&
     model.blended_price_per_M !== null &&
+    Number.isFinite(model.blended_price_per_M) &&
     model.blended_price_per_M >= 0 &&
-    model.aa_intelligence_index !== null
+    model.aa_intelligence_index !== null &&
+    Number.isFinite(model.aa_intelligence_index)
   );
 }
 
