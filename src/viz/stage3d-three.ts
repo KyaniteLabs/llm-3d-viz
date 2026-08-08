@@ -1710,10 +1710,10 @@ export class Stage3DThree implements Stage3DSurface {
     this.controls.dispose();
     this.scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
-      if (mesh.geometry) mesh.geometry.dispose();
+      mesh.geometry?.dispose();
       const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
       if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
-      else if (mat) mat.dispose();
+      else mat?.dispose();
     });
     this.renderer.dispose();
     this.el.remove();
