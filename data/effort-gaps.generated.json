@@ -20,50 +20,11 @@
     {
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
-      "skipped": false,
-      "entries": 385,
-      "attaches": 90,
-      "log_sample": [
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-6-thinking",
-          "slug": "claude-opus-4-6-thinking"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-7-thinking",
-          "slug": "claude-opus-4-7-thinking"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-8-thinking",
-          "slug": "claude-opus-4-8-thinking"
-        },
-        {
-          "code": "arena_no_tier_match",
-          "key": "gpt-5.4-high",
-          "tier": "high"
-        },
-        {
-          "code": "arena_ambiguous_family",
-          "key": "gpt-5.5"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "gpt-5.2-chat-latest-20260210",
-          "slug": "gpt-5.2-chat-latest-20260210"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "qwen3.7-max-preview",
-          "slug": "qwen3.7-max-preview"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "grok-4.20-beta1",
-          "slug": "grok-4.20-beta1"
-        }
-      ]
+      "skipped": true,
+      "error": null,
+      "entries": 0,
+      "attaches": 0,
+      "log_sample": []
     },
     {
       "source": "OpenRouter /api/v1/models",
@@ -80,8 +41,9 @@
   },
   "arena": {
     "ok": true,
-    "entries": 385,
-    "attaches": 90,
+    "entries": 0,
+    "attaches": 0,
+    "error": null,
     "license": "CC BY 4.0"
   },
   "gaps": [

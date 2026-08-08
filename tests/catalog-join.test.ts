@@ -292,7 +292,8 @@ describe("catalog-join", () => {
     });
     const out = joinCatalog([row]);
     expect(out.scorable).toHaveLength(1);
-    expect(out.scorable[0].blended_price_per_M).toBeCloseTo((10 * 7 + 50 * 2) / 10);
+    // No cache price → conservative fallback treats cache as input: (7*in + 2*in + 1*out) / 10
+    expect(out.scorable[0].blended_price_per_M).toBeCloseTo((10 * 7 + 10 * 2 + 50 * 1) / 10);
     expect(out.scorable[0].sources?.blended_price_per_M?.origin).toBe("aa");
     expect(out.scorable[0].sources?.blended_price_per_M?.kind).toBe("derived");
   });

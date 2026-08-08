@@ -46,6 +46,8 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     typeof pricing.price_1m_input_tokens === "number" ? pricing.price_1m_input_tokens : null;
   const priceOut =
     typeof pricing.price_1m_output_tokens === "number" ? pricing.price_1m_output_tokens : null;
+  const priceCache =
+    typeof pricing.price_1m_cache_hit_tokens === "number" ? pricing.price_1m_cache_hit_tokens : null;
   // Free tier has no blended field — applyAaDerivedBlend fills 7:2:1 later.
   const intel =
     typeof evals.artificial_analysis_intelligence_index === "number"
@@ -95,13 +97,14 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     ttft: ttftMs,
     price_in_per_M: priceIn,
     price_out_per_M: priceOut,
+    price_cache_per_M: priceCache,
     blended_price_per_M: null,
     aa_intelligence_index: intel,
     arena_elo: null,
     swe_bench: null,
     aider_pct: null,
     gpqa: null,
-    reasoning: /\b(reason|think|adaptive)\b/i.test(name),
+    reasoning: /\b(reason|think|adaptive)/i.test(name),
     family_id,
     effort_tier,
     cost_per_index_task_usd,

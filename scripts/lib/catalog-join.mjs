@@ -75,7 +75,12 @@ export function mergeBySpine(into, rows) {
   return [...byKey.values()];
 }
 
-/** AA 7:2:1 blend when in/out present and blend missing. */
+/**
+ * AA 7:2:1 blend: 70% cache-hit, 20% input, 10% output tokens.
+ * When cache pricing is available: (7*cache + 2*input + 1*output) / 10.
+ * When cache is null, fall back conservatively: treat cache as input price
+ * → (7*input + 2*input + 1*output) / 10 = (9*input + output) / 10.
+ */
 export function applyAaDerivedBlend(aaRows) {
   return aaRows.map((row) => {
     if (row.blended_price_per_M != null) return row;
@@ -83,9 +88,12 @@ export function applyAaDerivedBlend(aaRows) {
     const pout = row.price_out_per_M;
     if (pin == null || pout == null) return row;
     if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
+    const pcache = typeof row.price_cache_per_M === "number" && Number.isFinite(row.price_cache_per_M)
+      ? row.price_cache_per_M
+      : pin; // conservative fallback: cache = input price when unknown
     let next = {
       ...row,
-      blended_price_per_M: (pin * 7 + pout * 2) / 10,
+      blended_price_per_M: (pcache * 7 + pin * 2 + pout * 1) / 10,
     };
     next = setSource(next, "blended_price_per_M", { origin: "aa", kind: "derived" });
     return next;
@@ -219,7 +227,10 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     if (needOut) next = setSource(next, "price_out_per_M", { origin: "openrouter", kind: "list" });
 
     if (needBlend && price_in_per_M != null && price_out_per_M != null) {
-      next.blended_price_per_M = (price_in_per_M * 7 + price_out_per_M * 2) / 10;
+      const pcache = typeof next.price_cache_per_M === "number" && Number.isFinite(next.price_cache_per_M)
+        ? next.price_cache_per_M
+        : price_in_per_M;
+      next.blended_price_per_M = (pcache * 7 + price_in_per_M * 2 + price_out_per_M * 1) / 10;
       next = setSource(next, "blended_price_per_M", {
         origin: "openrouter",
         kind: "derived_list_blend",
