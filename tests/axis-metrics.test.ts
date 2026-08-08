@@ -180,3 +180,25 @@ describe("task economy axes never blank the stage", () => {
     expect(n).toBeGreaterThan(10);
   });
 });
+
+
+describe("M001 — non-finite metrics never freeze the stage", () => {
+  it("hasMappedAxes rejects Infinity / NaN on otherwise-good models", () => {
+    const good = models.find((m) => hasMappedAxes(m, DEFAULT_AXIS_MAPPING));
+    expect(good).toBeTruthy();
+    expect(hasMappedAxes({ ...good!, tps: Infinity } as typeof good, DEFAULT_AXIS_MAPPING)).toBe(false);
+    expect(hasMappedAxes({ ...good!, aa_intelligence_index: NaN } as typeof good, DEFAULT_AXIS_MAPPING)).toBe(false);
+  });
+
+  it("buildAxisDomain over a Number.MAX_VALUE log metric terminates with finite ticks", () => {
+    const good = models.find((m) => hasMappedAxes(m, DEFAULT_AXIS_MAPPING));
+    expect(good).toBeTruthy();
+    // MAX_VALUE is finite (so it passes the raw filter) but would overflow
+    // max·pad to Infinity and loop tick generation forever without the M001 caps.
+    const rows = [good!, { ...good!, blended_price_per_M: Number.MAX_VALUE } as typeof good];
+    const dom = buildAxisDomain("blended_price", rows);
+    expect(Number.isFinite(dom.min)).toBe(true);
+    expect(Number.isFinite(dom.max)).toBe(true);
+    expect(dom.ticks.every((t) => Number.isFinite(t.value))).toBe(true);
+  });
+});
