@@ -49,7 +49,7 @@ export interface DecideResponseV1 {
 
 export function clampFloor(n: number): number {
   if (!Number.isFinite(n)) return DEFAULT_INTELLIGENCE_FLOOR;
-  return Math.min(100, Math.max(0, Math.round(n)));
+  return Math.min(100, Math.max(0, n));
 }
 
 export function clampBias(n: number): number {

@@ -95,7 +95,7 @@ export function toolQueryCatalog(
   ctx: AtlasAgentContext,
   c: CatalogConstraints = {},
 ): { result: ModelSummary[]; trace: AtlasToolTrace } {
-  const pool = ctx.visible.length ? ctx.visible.slice() : ctx.catalog.slice();
+  const pool = ctx.visible.slice();
   const f = num(c.floor) ? c.floor : ctx.floor;
 
   let rows = pool.filter((m) => {

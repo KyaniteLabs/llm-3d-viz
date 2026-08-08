@@ -31,7 +31,7 @@ export function delaunay2d(
   // Tie-break threshold for the in-circle predicate (see inCircle). Absolute;
   // fine for the O(1)-scale scene coordinates this meshes.
   const EPS = 1e-9;
-  const delta = 4 * span;
+  const delta = 20 * span;
   const midx = (minX + maxX) / 2;
   const midy = (minY + maxY) / 2;
   // Super-triangle vertices appended at indices n, n+1, n+2 (then stripped).

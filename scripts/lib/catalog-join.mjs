@@ -213,9 +213,11 @@ export function applyOpenRouterPricing(aaRows, orModels) {
 
     const hit = matchOpenRouterModel(row, byId);
     if (!hit?.pricing) return row;
+    // Reject null/non-numeric prices — Number(null)===0 would make models falsely free.
+    if (hit.pricing.prompt == null || hit.pricing.completion == null) return row;
     const pinTok = Number(hit.pricing.prompt);
     const poutTok = Number(hit.pricing.completion);
-    if (!Number.isFinite(pinTok) || !Number.isFinite(poutTok)) return row;
+    if (!Number.isFinite(pinTok) || !Number.isFinite(poutTok) || pinTok < 0 || poutTok < 0) return row;
 
     overlays += 1;
     let next = { ...row };

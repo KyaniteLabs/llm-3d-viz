@@ -138,7 +138,7 @@ export function toolListEligible(
   trace: AtlasToolTrace;
 } {
   const f = clampFloor(floor);
-  const pool = ctx.visible.length ? ctx.visible : ctx.catalog;
+  const pool = ctx.visible;
   const eligible = filterPickEligible(pool, f).map(summary);
   const excluded_sample: { id: string; reason: string }[] = [];
   for (const m of pool) {
@@ -174,7 +174,7 @@ export function toolRankEligible(
   const f = clampFloor(floor);
   const bias: CostSpeedBias =
     objective === "min_cost" ? -1 : objective === "max_speed" ? 1 : clampBias(ctx.costSpeedBias);
-  const pool = ctx.visible.length ? ctx.visible : ctx.catalog;
+  const pool = ctx.visible;
   const { shortlist } = shortlistFromDecide(pool, f, bias, n);
   return {
     result: { shortlist: shortlist.map(summary), bias },
