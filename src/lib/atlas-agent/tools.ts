@@ -21,9 +21,15 @@ export interface ModelSummary {
   tps: number | null;
   price: number | null;
   openness: string;
+  /** Capability fields — optional, populated for richer query results. */
+  modalities?: string[];
+  context?: number;
+  reasoning?: boolean;
+  swe_bench?: number | null;
+  gpqa?: number | null;
 }
 
-function summary(m: Model): ModelSummary {
+export function summary(m: Model): ModelSummary {
   return {
     id: m.model,
     display: displayName(m.model),
@@ -32,8 +38,14 @@ function summary(m: Model): ModelSummary {
     tps: m.tps,
     price: m.blended_price_per_M,
     openness: m.openness,
+    modalities: m.modality,
+    context: m.context_length,
+    reasoning: m.reasoning,
+    swe_bench: m.swe_bench,
+    gpqa: m.gpqa,
   };
 }
+
 
 function findModel(catalog: readonly Model[], q: string): Model | null {
   const needle = q.trim().toLowerCase();

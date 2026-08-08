@@ -25,6 +25,14 @@ export interface AtlasTurnOptions {
 }
 
 /**
+ * After an LLM failure, skip re-attempting the endpoint for this window so a
+ * persistently-down host (e.g. NUCBox Unsloth offline) doesn't penalize every
+ * turn with a timeout. The offline router (Phase-1 smart) answers meanwhile.
+ */
+const LLM_BACKOFF_MS = 60_000;
+let lastLlmFailureAt = 0;
+
+/**
  * Execute one Atlas turn.
  * - If LLM config is ready (enabled + base URL + model + key): tool-calling loop
  *   over OpenAI-compatible or Anthropic-compatible endpoints (any host).
@@ -37,18 +45,20 @@ export async function runAtlasTurn(
 ): Promise<AtlasProposal> {
   const cfg = opts.llm === undefined ? loadAtlasLlmConfig() : opts.llm;
   let proposal: AtlasProposal;
+  const llmReady = cfg && isAtlasLlmReady(cfg) && Date.now() - lastLlmFailureAt > LLM_BACKOFF_MS;
 
-  if (cfg && isAtlasLlmReady(cfg)) {
+  if (llmReady) {
     try {
-      proposal = await runLlmAtlas(utterance, ctx, cfg, {
+      proposal = await runLlmAtlas(utterance, ctx, cfg!, {
         fetchImpl: opts.fetchImpl,
       });
     } catch (err) {
+      lastLlmFailureAt = Date.now();
       const detail = err instanceof Error ? err.message : String(err);
       const offline = runOfflineAtlas(utterance, ctx);
       proposal = {
         ...offline,
-        summary: `${offline.summary} (LLM failed — offline fallback: ${detail.slice(0, 120)})`,
+        summary: `${offline.summary} (LLM unavailable — offline fallback: ${detail.slice(0, 120)})`,
         tool_trace: [
           { name: "llm", ok: false, detail: detail.slice(0, 200) },
           ...offline.tool_trace,

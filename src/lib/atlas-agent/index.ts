@@ -6,6 +6,8 @@ export * from "./offline-router";
 export * from "./voice";
 export * from "./llm-config";
 export * from "./tool-dispatch";
+export * from "./query-catalog";
+export * from "./ui-actions";
 export { runLlmAtlas } from "./llm-loop";
 // kokoro-tts is dynamic-imported only (keeps ONNX WASM out of first paint)
 export { runAtlasTurn } from "./controller";

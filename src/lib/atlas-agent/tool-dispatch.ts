@@ -28,6 +28,7 @@ import {
   toolSetView,
   toolSetWeights,
 } from "./app-tools";
+import { toolQueryCatalog, type CatalogConstraints } from "./query-catalog";
 
 /** Shared JSON Schema-ish properties for both protocols. */
 export const ATLAS_TOOL_DEFINITIONS = [
@@ -110,6 +111,31 @@ export const ATLAS_TOOL_DEFINITIONS = [
         names: { type: "array", items: { type: "string" } },
       },
       required: ["names"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "query_catalog",
+    description:
+      "Compositional filter+rank over the catalog: combine objective (min_cost/max_speed/max_intelligence) with constraints (floor, openness, maxPrice $/M, minTps tok/s, modality vision|audio, minContext tokens, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider). Returns ranked ModelSummary[]. Use for any multi-axis question.",
+    parameters: {
+      type: "object",
+      properties: {
+        objective: { type: "string", enum: ["min_cost", "max_speed", "max_intelligence"] },
+        floor: { type: "number" },
+        openness: { type: "string", enum: ["open", "closed"] },
+        maxPrice: { type: "number" },
+        minTps: { type: "number" },
+        modality: { type: "string", enum: ["vision", "audio"] },
+        minContext: { type: "number" },
+        reasoning: { type: "boolean" },
+        frontierOnly: { type: "boolean" },
+        minSweBench: { type: "number" },
+        minGpqa: { type: "number" },
+        provider: { type: "string" },
+        excludeProvider: { type: "string" },
+        limit: { type: "number" },
+      },
       additionalProperties: false,
     },
   },
@@ -243,6 +269,20 @@ export const ATLAS_TOOL_DEFINITIONS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "ui_action",
+    description:
+      "Invoke a registered view-local UI action (e.g. reset_view to recenter the camera). Use for controls that are not store state. The host allow-lists ids; unknown ids are ignored.",
+    parameters: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        args: { type: "object", additionalProperties: true },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 export function openaiToolsPayload() {
@@ -372,6 +412,27 @@ export function dispatchAtlasTool(
       const { result, trace } = toolCompareModels(ctx, names);
       return { kind: "tool_result", content: result, trace };
     }
+    case "query_catalog": {
+      const c: CatalogConstraints = {};
+      const obj = str(args.objective);
+      if (obj === "min_cost" || obj === "max_speed" || obj === "max_intelligence") c.objective = obj;
+      if (num(args.floor) != null) c.floor = num(args.floor);
+      if (args.openness === "open" || args.openness === "closed") c.openness = args.openness;
+      if (num(args.maxPrice) != null) c.maxPrice = num(args.maxPrice);
+      if (num(args.minTps) != null) c.minTps = num(args.minTps);
+      const mod = str(args.modality);
+      if (mod === "vision" || mod === "audio") c.modality = mod;
+      if (num(args.minContext) != null) c.minContext = num(args.minContext);
+      if (bool(args.reasoning) != null) c.reasoning = bool(args.reasoning)!;
+      if (bool(args.frontierOnly) != null) c.frontierOnly = bool(args.frontierOnly)!;
+      if (num(args.minSweBench) != null) c.minSweBench = num(args.minSweBench);
+      if (num(args.minGpqa) != null) c.minGpqa = num(args.minGpqa);
+      if (str(args.provider)) c.provider = str(args.provider);
+      if (str(args.excludeProvider)) c.excludeProvider = str(args.excludeProvider);
+      if (num(args.limit) != null) c.limit = num(args.limit);
+      const { result, trace } = toolQueryCatalog(ctx, c);
+      return { kind: "tool_result", content: result, trace };
+    }
     case "list_providers": {
       const { result, trace } = toolListProviders(ctx);
       return { kind: "tool_result", content: result, trace };
@@ -439,6 +500,18 @@ export function dispatchAtlasTool(
     case "reset_scope": {
       const { proposal, trace } = toolResetScope(ctx);
       return finishFromProposal(proposal, trace);
+    }
+    case "ui_action": {
+      const id = str(args.id);
+      const t: AtlasToolTrace = { name: "ui_action", ok: Boolean(id), detail: id || "no id" };
+      if (!id) return { kind: "tool_result", content: { error: "id required" }, trace: t };
+      const proposal = emptyProposal(ctx.catalogSnapshotId, `UI action: ${id}.`, {
+        ui_actions: [{ id, args: asObj(args.args) }],
+        needs_confirm: false,
+        auto_apply: true,
+        tool_trace: [t],
+      });
+      return finishFromProposal(proposal, t);
     }
     case "finish_turn": {
       const summary = str(args.summary).trim();

@@ -1602,7 +1602,8 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-09-23",
@@ -1652,6 +1653,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1714,7 +1719,8 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-10-03",
@@ -1760,6 +1766,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1822,7 +1832,8 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-10-21",
@@ -1868,6 +1879,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -1930,7 +1945,8 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-10-14",
@@ -1976,6 +1992,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2042,7 +2062,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-02-24",
@@ -2092,6 +2114,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2154,7 +2180,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-02-24",
@@ -2200,6 +2228,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2266,7 +2298,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-02-24",
@@ -2312,6 +2346,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2374,7 +2412,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-02-16",
@@ -2424,6 +2464,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2540,7 +2584,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-03-02",
@@ -2590,6 +2636,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2764,7 +2814,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-04-22",
@@ -2814,6 +2866,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2876,7 +2932,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-04-16",
@@ -2926,6 +2984,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -2992,7 +3054,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-04-02",
@@ -3046,6 +3110,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3112,7 +3180,8 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-06-01",
@@ -3166,6 +3235,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -3174,7 +3247,9 @@
     "provider": "Alibaba",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-08-03",
@@ -3228,6 +3303,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4058,7 +4137,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-06-09",
@@ -4112,6 +4192,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4120,7 +4204,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-11-24",
@@ -4166,6 +4251,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4286,7 +4375,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-02-05",
@@ -4332,6 +4422,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4340,7 +4434,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-16",
@@ -4394,6 +4489,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4456,7 +4555,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-05-28",
@@ -4510,6 +4610,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4518,7 +4622,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-24",
@@ -4572,6 +4677,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4580,7 +4689,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-24",
@@ -4630,6 +4740,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4638,7 +4752,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-24",
@@ -4692,6 +4807,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4700,7 +4819,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-24",
@@ -4750,6 +4870,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4758,7 +4882,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-24",
@@ -4808,6 +4933,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4878,7 +5007,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-02-17",
@@ -4924,6 +5054,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -4986,7 +5120,8 @@
     "provider": "Anthropic",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-06-30",
@@ -5036,6 +5171,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5778,7 +5917,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2025-05-20",
@@ -5824,6 +5966,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5886,7 +6032,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2025-06-17",
@@ -5932,6 +6081,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -5994,7 +6147,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2025-06-05",
@@ -6048,6 +6204,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6168,7 +6328,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-03-03",
@@ -6218,6 +6381,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6226,7 +6393,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "audio",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-02-19",
@@ -6280,6 +6450,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6288,7 +6462,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-05-19",
@@ -6342,6 +6519,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6462,7 +6643,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-07-21",
@@ -6516,6 +6700,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -6524,7 +6712,10 @@
     "provider": "Google",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-07-21",
@@ -6578,6 +6769,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7636,7 +7831,8 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-01-27",
@@ -7686,6 +7882,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7694,7 +7894,8 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-20",
@@ -7744,6 +7945,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7806,7 +8011,8 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-06-12",
@@ -7856,6 +8062,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -7922,7 +8132,8 @@
     "provider": "Kimi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-16",
@@ -7972,6 +8183,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8412,7 +8627,8 @@
     "provider": "Meta",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-05",
@@ -8462,6 +8678,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8470,7 +8690,8 @@
     "provider": "Meta",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-05",
@@ -8520,6 +8741,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8528,7 +8753,10 @@
     "provider": "Meta",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-07-09",
@@ -8582,6 +8810,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -8926,7 +9158,9 @@
     "provider": "MiniMax",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-06-01",
@@ -8980,6 +9214,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9572,7 +9810,8 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-05-07",
@@ -9618,6 +9857,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9626,7 +9869,8 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-12",
@@ -9676,6 +9920,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -9684,7 +9932,8 @@
     "provider": "Mistral",
     "openness": "open",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-29",
@@ -9738,6 +9987,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -10194,7 +10447,8 @@
     "provider": "Nex AGI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-06-02",
@@ -10240,6 +10494,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11240,7 +11498,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2023-11-06",
@@ -11286,6 +11545,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11294,7 +11557,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-14",
@@ -11340,6 +11604,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11348,7 +11616,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-14",
@@ -11398,6 +11667,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11406,7 +11679,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-14",
@@ -11456,6 +11730,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11464,7 +11742,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-08-06",
@@ -11514,6 +11793,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11522,7 +11805,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-05-13",
@@ -11572,6 +11856,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11580,7 +11868,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-11-20",
@@ -11626,6 +11915,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11634,7 +11927,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2024-07-18",
@@ -11680,6 +11974,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11688,7 +11986,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -11742,6 +12041,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11750,7 +12053,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -11796,6 +12100,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11804,7 +12112,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -11850,6 +12159,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11858,7 +12171,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -11904,6 +12218,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -11912,7 +12230,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -11966,6 +12285,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12082,7 +12405,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-07",
@@ -12132,6 +12456,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12248,7 +12576,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-11-13",
@@ -12302,6 +12631,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12310,7 +12643,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-11-13",
@@ -12356,6 +12690,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12364,7 +12702,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-12-11",
@@ -12410,6 +12749,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12418,7 +12761,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-12-11",
@@ -12464,6 +12808,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12472,7 +12820,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-02-05",
@@ -12518,6 +12867,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12526,7 +12879,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-03-05",
@@ -12572,6 +12926,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12580,7 +12938,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-03-05",
@@ -12626,6 +12985,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12634,7 +12997,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-03-05",
@@ -12684,6 +13048,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12800,7 +13168,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-03-17",
@@ -12850,6 +13219,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -12966,7 +13339,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-03-17",
@@ -13016,6 +13390,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13024,7 +13402,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-23",
@@ -13078,6 +13457,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13086,7 +13469,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-23",
@@ -13136,6 +13520,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13144,7 +13532,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-23",
@@ -13194,6 +13583,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13202,7 +13595,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-23",
@@ -13252,6 +13646,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13260,7 +13658,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-23",
@@ -13310,6 +13709,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13492,7 +13895,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-09",
@@ -13542,6 +13946,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -13844,7 +14252,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-09",
@@ -13894,6 +14303,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14196,7 +14609,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-09",
@@ -14246,6 +14660,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14660,7 +15078,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-16",
@@ -14706,6 +15125,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -14826,7 +15249,8 @@
     "provider": "OpenAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-04-16",
@@ -14872,6 +15296,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15096,7 +15524,8 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-07",
@@ -15142,6 +15571,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15150,7 +15583,8 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-04-30",
@@ -15200,6 +15634,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15374,7 +15812,8 @@
     "provider": "SpaceXAI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2026-07-08",
@@ -15428,6 +15867,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15606,7 +16049,9 @@
     "provider": "StepFun",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-05-29",
@@ -15656,6 +16101,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15726,7 +16175,9 @@
     "provider": "Thinking Machines",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-07-15",
@@ -15776,6 +16227,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15784,7 +16239,9 @@
     "provider": "Thinking Machines",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "audio"
     ],
     "context_length": 128000,
     "release_date": "2026-07-30",
@@ -15834,6 +16291,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -15900,7 +16361,10 @@
     "provider": "Xiaomi",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "audio",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2026-04-22",
@@ -15954,6 +16418,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16132,7 +16600,8 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-11",
@@ -16178,6 +16647,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16186,7 +16659,8 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision"
     ],
     "context_length": 128000,
     "release_date": "2025-08-11",
@@ -16232,6 +16706,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16352,7 +16830,9 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2025-12-08",
@@ -16398,6 +16878,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },
@@ -16406,7 +16890,9 @@
     "provider": "Z AI",
     "openness": "closed",
     "modality": [
-      "text"
+      "text",
+      "vision",
+      "video"
     ],
     "context_length": 128000,
     "release_date": "2025-12-08",
@@ -16452,6 +16938,10 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
       }
     }
   },

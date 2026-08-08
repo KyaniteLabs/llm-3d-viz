@@ -12,12 +12,17 @@ import { DEFAULT_FILTERS, type ModelFilters } from "../filters";
 import { presets, type PresetId, type ScoreWeights } from "../score";
 import type { AppStore } from "../../state";
 import type { AtlasProposal } from "./types";
+import { dispatchUiActions } from "./ui-actions";
 
 export type AppStorePatch = Parameters<AppStore["update"]>[0];
 
 export interface ApplyResult {
   patch: AppStorePatch;
   appliedKeys: string[];
+  /** View-local UI action ids the host successfully dispatched. */
+  uiDispatched?: string[];
+  /** UI action ids the agent requested but no handler registered (ignored). */
+  uiUnknown?: string[];
 }
 
 /**
@@ -112,6 +117,12 @@ export function applyProposalToStore(store: AppStore, p: AtlasProposal): ApplyRe
   const result = proposalToStorePatch(p, state.filters, state.axisMapping);
   if (result.appliedKeys.length > 0) {
     store.update(result.patch);
+  }
+  // View-local UI actions (allow-listed by the host) — dispatched after store apply.
+  if (p.ui_actions?.length) {
+    const { dispatched, unknown } = dispatchUiActions(p.ui_actions);
+    result.uiDispatched = dispatched;
+    result.uiUnknown = unknown;
   }
   return result;
 }

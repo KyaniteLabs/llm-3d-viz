@@ -20,6 +20,7 @@ import {
 import { DecisionConsole } from "./ui/console";
 import { DecidePanel } from "./ui/decide-panel";
 import { AtlasAgentPanel } from "./ui/atlas-agent-panel";
+import { registerUiAction } from "./lib/atlas-agent";
 import { FilterShelf, formatScopeSummary } from "./ui/filter-shelf";
 import { renderMembershipTable } from "./ui/membership-table";
 import { APP_BRANDING } from "./config/app-branding";
@@ -377,6 +378,16 @@ async function boot() {
   );
 
   const cinema = new CinemaMode(stage, store);
+  // Agent ↔ view-local control parity: register the controls that aren't store
+  // state so Atlas can drive them too (ui_action bus, allow-listed).
+  registerUiAction("reset_view", "Recenter the 3D camera and clear the pin", () => {
+    store.update({ pinnedModelId: null, hoveredModelId: null });
+    stage.setCamera({
+      eye: { x: -2.35, y: 1.55, z: 2.15 },
+      up: { x: 0, y: 1, z: 0 },
+      center: { x: 0, y: 0, z: 0 },
+    });
+  });
   // L9: cinema frame export — 'S' while in cinema composites + downloads a 2× PNG.
   window.addEventListener("keydown", (e) => {
     if (store.getState().cinemaMode && (e.key === "s" || e.key === "S")) {

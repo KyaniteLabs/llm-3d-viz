@@ -5,8 +5,18 @@
 
 import { displayName } from "../display-name";
 import { DEFAULT_FILTERS } from "../filters";
+import type { ModelFilters } from "../filters";
 import type { AtlasAgentContext, AtlasProposal, AtlasToolTrace } from "./types";
 import { emptyProposal } from "./types";
+import type { CatalogConstraints } from "./query-catalog";
+import {
+  describeConstraints,
+  dropUnsupportedData,
+  isCompositional,
+  parseConstraints,
+  toolQueryCatalog,
+  unsupportedDataAxes,
+} from "./query-catalog";
 import {
   toolCompareModels,
   toolGetCatalogMeta,
@@ -23,6 +33,37 @@ function speakableList(ids: string[], max = 3): string {
   if (names.length === 1) return names[0]!;
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+/** Map compositional constraints onto the viz filter surface (best-effort). */
+function constraintFiltersPatch(
+  ctx: AtlasAgentContext,
+  c: CatalogConstraints,
+): Partial<ModelFilters> {
+  const patch: Partial<ModelFilters> = {};
+  if (c.openness) patch.openness = c.openness;
+  if (c.reasoning) patch.excludeNonReasoning = true;
+  if (c.family) patch.families = [c.family];
+  if (c.provider) {
+    // providers filters match exact display names — resolve the hint to real names.
+    const hint = c.provider.toLowerCase();
+    const names = [
+      ...new Set(
+        ctx.catalog.filter((m) => m.provider.toLowerCase().includes(hint)).map((m) => m.provider),
+      ),
+    ];
+    if (names.length) patch.providers = names;
+  }
+  return patch;
+}
+
+/** Shallow equality over the set constraint axes (ignores `limit`). */
+function sameConstraints(a: CatalogConstraints, b: CatalogConstraints): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)].filter((k) => k !== "limit"));
+  for (const k of keys) {
+    if ((a as Record<string, unknown>)[k] !== (b as Record<string, unknown>)[k]) return false;
+  }
+  return true;
 }
 
 /**
@@ -53,6 +94,88 @@ export function runOfflineAtlas(
       `I can set an intelligence floor, list who's eligible, pick cheapest or fastest among them, or explain why a model is out. Catalog has ${meta.result.model_count} models; current floor ${meta.result.floor}. Try: floor 50. Floor from Claude. Cheapest eligible. Why is Gemini out.`,
       { needs_confirm: false, tool_trace: trace },
     );
+  }
+
+  // --- compositional constraint query ---
+  // Handles multi-axis questions the single-intent regex blocks below cannot
+  // express ("cheapest open model above floor 50 with vision"). Fires only when
+  // ≥2 axes are detected, or a single axis the legacy intents don't cover. Plain
+  // shorthands ("cheapest eligible", "floor 50") keep hitting their own intents.
+  {
+    const parsed = parseConstraints(raw, ctx);
+    if (isCompositional(parsed)) {
+      const c = parsed.constraints;
+      const q = toolQueryCatalog(ctx, c);
+      trace.push(q.trace);
+      let ids = q.result.map((s) => s.id);
+      let active = c;
+      let label = describeConstraints(c);
+
+      // Empty result? If a constraint sits on an axis the catalog has no data
+      // for (vision modality, SWE-bench, GPQA), de-scope it and re-query so the
+      // user still gets real answers — and say so honestly.
+      if (ids.length === 0) {
+        const gaps = unsupportedDataAxes(ctx, c);
+        const scoped = dropUnsupportedData(ctx, c);
+        const hasOtherAxes = Object.entries(scoped).some(
+          ([k, v]) => k !== "limit" && v != null,
+        );
+        if (gaps.length && hasOtherAxes && !sameConstraints(scoped, c)) {
+          const q2 = toolQueryCatalog(ctx, scoped);
+          trace.push(q2.trace);
+          const ids2 = q2.result.map((s) => s.id);
+          if (ids2.length) {
+            ids = ids2;
+            active = scoped;
+            label = `${describeConstraints(scoped)} (ignored: ${gaps.join(", ")})`;
+          }
+        }
+        if (ids.length === 0) {
+          const why = gaps.length
+            ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
+            : `No models match (${label}). Try loosening a constraint.`;
+          return emptyProposal(snap, why, {
+            needs_confirm: false,
+            refuse_reason: gaps.length ? "unsupported data" : "empty query",
+            tool_trace: trace,
+          });
+        }
+      }
+
+      // Objective set → Decide + ranked shortlist, honoring every constraint.
+      if (active.objective) {
+        return emptyProposal(
+          snap,
+          `${label.charAt(0).toUpperCase()}${label.slice(1)}: ${speakableList(ids)}. Apply Decide with this ranking?`,
+          {
+            floor: active.floor ?? ctx.floor,
+            decide_mode: true,
+            cost_speed_bias:
+              active.objective === "min_cost"
+                ? -1
+                : active.objective === "max_speed"
+                  ? 1
+                  : ctx.costSpeedBias,
+            shortlist_ids: ids,
+            highlight_model_ids: ids,
+            filters_patch: constraintFiltersPatch(ctx, active),
+            needs_confirm: true,
+            tool_trace: trace,
+          },
+        );
+      }
+      // Pure filter query → narrow the view + highlight the matches.
+      return emptyProposal(
+        snap,
+        `${ids.length} ${label} model(s): ${speakableList(ids)}. Apply to filter the view?`,
+        {
+          filters_patch: constraintFiltersPatch(ctx, active),
+          highlight_model_ids: ids,
+          needs_confirm: true,
+          tool_trace: trace,
+        },
+      );
+    }
   }
 
   // --- floor from number ---
@@ -311,6 +434,14 @@ export function runOfflineAtlas(
           tool_trace: [{ name: "reset_scope", ok: true, detail: "defaults" }],
         },
       );
+    }
+    if (/\b(reset\s+(?:the\s+)?(?:view|camera|angle)|recenter|recenter\s+view)\b/.test(text)) {
+      return emptyProposal(snap, "Reset the camera view.", {
+        ui_actions: [{ id: "reset_view" }],
+        needs_confirm: false,
+        auto_apply: true,
+        tool_trace: [{ name: "ui_action", ok: true, detail: "reset_view" }],
+      });
     }
     const pin = text.match(/\b(?:pin|focus|select|highlight)\s+(.+)$/i);
     if (pin) {
