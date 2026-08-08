@@ -17,6 +17,10 @@ export interface LlmLoopDeps {
   fetchImpl?: typeof fetch;
 }
 
+/** Per-request timeout for the LLM endpoint — fail fast so a dead endpoint
+ *  triggers offline fallback instead of hanging the turn. */
+const ATLAS_LLM_TIMEOUT_MS = 45_000;
+
 type OpenAiMessage =
   | { role: "system"; content: string }
   | { role: "user"; content: string }
@@ -92,7 +96,17 @@ export async function runLlmAtlas(
   cfg: AtlasLlmConfig,
   deps: LlmLoopDeps = {},
 ): Promise<AtlasProposal> {
-  const fetchImpl = deps.fetchImpl ?? fetch;
+  // Wrap the fetch with a per-request timeout so a dead/unreachable endpoint
+  // (e.g. NUCBox Unsloth offline) fails fast instead of hanging the turn — the
+  // controller then falls back to the offline router.
+  const baseFetch = deps.fetchImpl ?? fetch;
+  const timedFetch: typeof fetch = (input, init) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ATLAS_LLM_TIMEOUT_MS);
+    return baseFetch(input, { ...init, signal: controller.signal }).finally(() =>
+      clearTimeout(timer),
+    );
+  };
   const traces: AtlasToolTrace[] = [
     {
       name: "llm",
@@ -102,9 +116,9 @@ export async function runLlmAtlas(
   ];
 
   if (cfg.protocol === "anthropic") {
-    return runAnthropicLoop(utterance, ctx, cfg, fetchImpl, traces);
+    return runAnthropicLoop(utterance, ctx, cfg, timedFetch, traces);
   }
-  return runOpenAiLoop(utterance, ctx, cfg, fetchImpl, traces);
+  return runOpenAiLoop(utterance, ctx, cfg, timedFetch, traces);
 }
 
 async function runOpenAiLoop(

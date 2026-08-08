@@ -338,3 +338,26 @@ describe("runAtlasTurn llm fallback", () => {
     expect(p.floor).toBe(50);
   });
 });
+
+describe("runAtlasTurn LLM backoff", () => {
+  it("skips re-attempting the LLM for the backoff window after a failure", async () => {
+    // Fresh controller module → reset module-level backoff state.
+    vi.resetModules();
+    const { runAtlasTurn: freshTurn } = await import("../src/lib/atlas-agent/controller");
+    const fetchImpl = vi.fn(async () => new Response("nope", { status: 503})) as unknown as typeof fetch;
+    const llm = {
+      enabled: true,
+      protocol: "openai" as const,
+      baseUrl: "https://dead.example/v1",
+      apiKey: "k",
+      model: "x",
+      maxToolRounds: 2,
+    };
+    // First turn: LLM attempted (and fails) → sets backoff.
+    await freshTurn("floor 50", ctx(40), { speak: false, llm, fetchImpl });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    // Second turn within the backoff window → LLM NOT re-attempted (straight to offline).
+    await freshTurn("floor 50", ctx(40), { speak: false, llm, fetchImpl });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+});
