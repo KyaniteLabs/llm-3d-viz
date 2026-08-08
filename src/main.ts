@@ -495,7 +495,7 @@ async function boot() {
   } | null = null;
   let renderFrame: number | null = null;
   let projections: {
-    render: (w: AppState["weights"], m: typeof models) => void;
+    render: (w: AppState["weights"], m: typeof models, options?: { axisMapping?: AppState["axisMapping"]; presentationMode?: "curve" | "openness" }) => void;
     gds: HTMLDivElement[];
     setPresentationMode?: (m: "curve" | "openness") => void;
   } | null = null;
