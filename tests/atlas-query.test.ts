@@ -239,6 +239,16 @@ describe("runOfflineAtlas — compositional queries", () => {
     expect(validateProposal(p)).toBe(true);
     expect(p.shortlist_ids?.length).toBeGreaterThan(0);
   });
+
+  it("narrows the VIEW to a provider ('only anthropic')", () => {
+    const p = runOfflineAtlas("only anthropic models", ctx());
+    expect(p.filters_patch?.providers).toEqual(["Anthropic"]);
+  });
+
+  it("solos a family into the view filter", () => {
+    const p = runOfflineAtlas("solo the open coder family", ctx());
+    expect(p.filters_patch?.families?.length).toBe(1);
+  });
 });
 
 describe("describeConstraints", () => {

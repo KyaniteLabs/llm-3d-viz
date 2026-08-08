@@ -11,6 +11,7 @@
 import type { Model } from "../../data/models";
 import { frontier } from "../pareto";
 import { displayName } from "../display-name";
+import { familyIdOf } from "../family";
 import type { AtlasAgentContext, AtlasToolTrace } from "./types";
 import { findModel, summary, type ModelSummary } from "./tools";
 
@@ -42,6 +43,8 @@ export interface CatalogConstraints {
   provider?: string;
   /** Provider substring to exclude. */
   excludeProvider?: string;
+  /** Family id to restrict to (e.g. "claude", "gpt") — resolves via the catalog. */
+  family?: string;
   limit?: number;
 }
 
@@ -63,6 +66,8 @@ const NEW_AXES: (keyof CatalogConstraints)[] = [
   "minSweBench",
   "minGpqa",
   "excludeProvider",
+  "family",
+  "provider",
 ];
 
 function num(v: number | undefined): v is number {
@@ -110,6 +115,7 @@ export function toolQueryCatalog(
     if (c.provider && !m.provider.toLowerCase().includes(c.provider.toLowerCase())) return false;
     if (c.excludeProvider && m.provider.toLowerCase().includes(c.excludeProvider.toLowerCase()))
       return false;
+    if (c.family && !familyIdOf(m).toLowerCase().includes(c.family.toLowerCase())) return false;
     return true;
   });
 
@@ -143,6 +149,7 @@ export function toolQueryCatalog(
   if (num(c.minGpqa)) bits.push(`GPQA≥${c.minGpqa}`);
   if (c.provider) bits.push(`@${c.provider}`);
   if (c.excludeProvider) bits.push(`!${c.excludeProvider}`);
+  if (c.family) bits.push(`family:${c.family}`);
 
   return {
     result: top,
@@ -311,6 +318,23 @@ export function parseConstraints(text: string, ctx: AtlasAgentContext): ParsedCo
     }
   }
 
+  // --- family (solo / focus / "<X> family") — resolve to a catalog family_id ---
+  {
+    const famM = t.match(/\b(?:solo|focus(?:\s+on)?|isolate|only)\s+(?:the\s+)?([a-z0-9][a-z0-9.-]{1,24})/) || t.match(/\b([a-z0-9][a-z0-9.-]{1,24})\s+family\b/);
+    if (famM) {
+      const needle = famM[1]!.toLowerCase();
+      const counts = new Map<string, number>();
+      for (const m of ctx.catalog) {
+        const fid = familyIdOf(m).toLowerCase();
+        if (fid && fid.includes(needle)) counts.set(fid, (counts.get(fid) ?? 0) + 1);
+      }
+      if (counts.size) {
+        c.family = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]![0];
+        signals++;
+      }
+    }
+  }
+
   return { constraints: c, signals };
 }
 
@@ -339,6 +363,7 @@ export function describeConstraints(c: CatalogConstraints): string {
   if (c.floor != null) parts.push(`≥${c.floor} Index`);
   if (c.provider) parts.push(`from ${displayName(c.provider)}`);
   if (c.excludeProvider) parts.push(`not ${displayName(c.excludeProvider)}`);
+  if (c.family) parts.push(`${c.family} family`);
   return parts.length ? parts.join(" · ") : "best match";
 }
 

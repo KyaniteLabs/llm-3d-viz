@@ -36,10 +36,24 @@ function speakableList(ids: string[], max = 3): string {
 }
 
 /** Map compositional constraints onto the viz filter surface (best-effort). */
-function constraintFiltersPatch(c: CatalogConstraints): Partial<ModelFilters> {
+function constraintFiltersPatch(
+  ctx: AtlasAgentContext,
+  c: CatalogConstraints,
+): Partial<ModelFilters> {
   const patch: Partial<ModelFilters> = {};
   if (c.openness) patch.openness = c.openness;
   if (c.reasoning) patch.excludeNonReasoning = true;
+  if (c.family) patch.families = [c.family];
+  if (c.provider) {
+    // providers filters match exact display names — resolve the hint to real names.
+    const hint = c.provider.toLowerCase();
+    const names = [
+      ...new Set(
+        ctx.catalog.filter((m) => m.provider.toLowerCase().includes(hint)).map((m) => m.provider),
+      ),
+    ];
+    if (names.length) patch.providers = names;
+  }
   return patch;
 }
 
@@ -144,7 +158,7 @@ export function runOfflineAtlas(
                   : ctx.costSpeedBias,
             shortlist_ids: ids,
             highlight_model_ids: ids,
-            filters_patch: constraintFiltersPatch(active),
+            filters_patch: constraintFiltersPatch(ctx, active),
             needs_confirm: true,
             tool_trace: trace,
           },
@@ -155,7 +169,7 @@ export function runOfflineAtlas(
         snap,
         `${ids.length} ${label} model(s): ${speakableList(ids)}. Apply to filter the view?`,
         {
-          filters_patch: constraintFiltersPatch(active),
+          filters_patch: constraintFiltersPatch(ctx, active),
           highlight_model_ids: ids,
           needs_confirm: true,
           tool_trace: trace,
