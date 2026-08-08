@@ -40,7 +40,7 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
  */
 function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
   const target =
-    env.ATLAS_UNSLOTH_TARGET?.trim() || "http://100.113.174.74:8890";
+    env.ATLAS_UNSLOTH_TARGET?.trim() || "http://YOUR_NUCBOX_TAILSCALE_IP:8890";
   const apiKey = env.ATLAS_UNSLOTH_API_KEY?.trim() || "";
   const prefix = "/api/atlas/llm";
 

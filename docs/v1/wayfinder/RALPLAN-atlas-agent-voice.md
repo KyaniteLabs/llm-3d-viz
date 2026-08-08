@@ -55,7 +55,7 @@ Browser localStorage config (never `VITE_` product keys):
 
 ### NUCBox Unsloth (Simon default)
 - Preset **NUCBox Unsloth** → base `/api/atlas/llm/v1`, model `SC117/Ornith-1.0-35B-MTP-APEX-GGUF`, key `proxy`.
-- Vite same-origin proxy (curl, not Node http) → Tailscale `http://100.113.174.74:8890` with `ATLAS_UNSLOTH_API_KEY` from `.env.local`.
+- Vite same-origin proxy (curl, not Node http) → Tailscale `http://YOUR_NUCBOX_TAILSCALE_IP:8890` with `ATLAS_UNSLOTH_API_KEY` from `.env.local`.
 - One-shot: `node scripts/wire-atlas-nucbox.mjs` (ssh pulls agent key; never commits).
 - Studio has no CORS; public CF Pages cannot reach NUCBox — local Vite (or a Tailnet host) only.
 - If gen canary fails: `ssh nucbox 'systemctl --user restart unsloth-openai-proxy.service'`.

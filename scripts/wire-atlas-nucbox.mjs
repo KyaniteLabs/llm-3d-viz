@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ENV_PATH = resolve(ROOT, ".env.local");
-const TARGET = process.env.ATLAS_UNSLOTH_TARGET || "http://100.113.174.74:8890";
+const TARGET = process.env.ATLAS_UNSLOTH_TARGET || "http://YOUR_NUCBOX_TAILSCALE_IP:8890";
 const MODEL =
   process.env.ATLAS_UNSLOTH_MODEL || "SC117/Ornith-1.0-35B-MTP-APEX-GGUF";
 
