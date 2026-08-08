@@ -159,8 +159,21 @@ export class Projections {
     };
 
     this.specs = this.computeSpecs(this.axisMapping);
-
+    this.updateEyebrows();
     this.buildGraphDivs();
+  }
+
+  /** P3-2: sync the static eyebrow labels to the active axis mapping. */
+  private updateEyebrows(): void {
+    this.specs.forEach((spec, i) => {
+      const container = this.containers[i];
+      if (!container) return;
+      const eyebrow = container.querySelector<HTMLElement>(".eyebrow");
+      if (!eyebrow) return;
+      const shortX = getAxisMetric(spec.x).title.split(" (")[0];
+      const shortY = getAxisMetric(spec.y).title.split(" (")[0];
+      eyebrow.textContent = `${shortX} / ${shortY}`;
+    });
   }
 
   /**
@@ -363,6 +376,7 @@ export class Projections {
       // A new mapping means a new set of faces — drop cached graph state so the
       // next pass takes the newPlot path instead of react-ing over stale traces.
       this.initialized = false;
+      this.updateEyebrows();
     }
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
