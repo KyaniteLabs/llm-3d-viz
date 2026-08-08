@@ -40,7 +40,7 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
  */
 function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
   const target =
-    env.ATLAS_UNSLOTH_TARGET?.trim() || "http://100.113.174.74:8890";
+    env.ATLAS_UNSLOTH_TARGET?.trim() || "";
   const apiKey = env.ATLAS_UNSLOTH_API_KEY?.trim() || "";
   const prefix = "/api/atlas/llm";
 
@@ -58,7 +58,7 @@ function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
   ) => {
     middlewares.use((req, res, next) => {
       const url = req.url || "";
-      if (!url.startsWith(prefix)) {
+      if (!target || !url.startsWith(prefix)) {
         next();
         return;
       }

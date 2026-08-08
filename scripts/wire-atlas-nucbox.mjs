@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ENV_PATH = resolve(ROOT, ".env.local");
-const TARGET = process.env.ATLAS_UNSLOTH_TARGET || "http://100.113.174.74:8890";
+const TARGET = process.env.ATLAS_UNSLOTH_TARGET || "";
 const MODEL =
   process.env.ATLAS_UNSLOTH_MODEL || "SC117/Ornith-1.0-35B-MTP-APEX-GGUF";
 
@@ -105,6 +105,12 @@ function health(key) {
   }
 }
 
+if (!TARGET.trim()) {
+  die(
+    "ATLAS_UNSLOTH_TARGET is required. Set it in the environment (e.g. the Tailnet host); " +
+      "the private default was removed from committed source.",
+  );
+}
 const key = pullKey();
 upsertEnv(ENV_PATH, {
   ATLAS_UNSLOTH_TARGET: TARGET,

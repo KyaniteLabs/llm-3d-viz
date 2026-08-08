@@ -697,7 +697,7 @@ export class DecisionConsole {
     const multiN = [...groupByFamily(this.models).values()].filter((rows) => rows.length >= 2).length;
     const solo =
       state.filters.families.length === 1
-        ? `<p class="preset-outcome">Focused curve · ${state.filters.families[0]} · <button type="button" class="text-link" data-nav-show-all>show all curves</button></p>`
+        ? `<p class="preset-outcome">Focused curve · ${escapeHtml(state.filters.families[0])} · <button type="button" class="text-link" data-nav-show-all>show all curves</button></p>`
         : multiN > 0
           ? `<p class="axis-hint">${multiN} multi-effort curves in view — open Navigate to solo a family.</p>`
           : "";
