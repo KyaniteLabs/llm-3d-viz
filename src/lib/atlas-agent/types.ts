@@ -59,6 +59,8 @@ export interface AtlasProposal {
   economy_basis?: "rate" | "task";
   weights?: ScoreWeights;
   weight_preset?: string;
+  /** View-local UI actions (camera reset, expand, …) — allow-listed by the host. */
+  ui_actions?: Array<{ id: string; args?: Record<string, unknown> }>;
   refuse_reason?: string | null;
   tool_trace: AtlasToolTrace[];
   catalog_snapshot_id: string;

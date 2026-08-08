@@ -435,6 +435,14 @@ export function runOfflineAtlas(
         },
       );
     }
+    if (/\b(reset\s+(?:the\s+)?(?:view|camera|angle)|recenter|recenter\s+view)\b/.test(text)) {
+      return emptyProposal(snap, "Reset the camera view.", {
+        ui_actions: [{ id: "reset_view" }],
+        needs_confirm: false,
+        auto_apply: true,
+        tool_trace: [{ name: "ui_action", ok: true, detail: "reset_view" }],
+      });
+    }
     const pin = text.match(/\b(?:pin|focus|select|highlight)\s+(.+)$/i);
     if (pin) {
       const name = pin[1]!.replace(/[?.!]+$/, "").trim();

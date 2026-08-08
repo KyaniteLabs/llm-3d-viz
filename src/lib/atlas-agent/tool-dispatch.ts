@@ -269,6 +269,20 @@ export const ATLAS_TOOL_DEFINITIONS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "ui_action",
+    description:
+      "Invoke a registered view-local UI action (e.g. reset_view to recenter the camera). Use for controls that are not store state. The host allow-lists ids; unknown ids are ignored.",
+    parameters: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        args: { type: "object", additionalProperties: true },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 export function openaiToolsPayload() {
@@ -486,6 +500,18 @@ export function dispatchAtlasTool(
     case "reset_scope": {
       const { proposal, trace } = toolResetScope(ctx);
       return finishFromProposal(proposal, trace);
+    }
+    case "ui_action": {
+      const id = str(args.id);
+      const t: AtlasToolTrace = { name: "ui_action", ok: Boolean(id), detail: id || "no id" };
+      if (!id) return { kind: "tool_result", content: { error: "id required" }, trace: t };
+      const proposal = emptyProposal(ctx.catalogSnapshotId, `UI action: ${id}.`, {
+        ui_actions: [{ id, args: asObj(args.args) }],
+        needs_confirm: false,
+        auto_apply: true,
+        tool_trace: [t],
+      });
+      return finishFromProposal(proposal, t);
     }
     case "finish_turn": {
       const summary = str(args.summary).trim();
