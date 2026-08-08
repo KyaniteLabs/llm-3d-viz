@@ -22,6 +22,7 @@ import {
 } from "../lib/axis-metrics";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
+import { delaunay2d, hullEdges } from "../lib/delaunay";
 import {
   isSingleton,
   pointEncoding,
@@ -104,6 +105,8 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly pointsGroup = new THREE.Group();
   private readonly ridgeMesh: THREE.Mesh;
   private readonly ridgeGlow: THREE.Mesh;
+  private readonly membraneMesh: THREE.Mesh;
+  private readonly skirtMesh: THREE.Mesh;
   private cinemaFog: THREE.FogExp2 | null = null;
   private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
@@ -270,8 +273,40 @@ export class Stage3DThree implements Stage3DSurface {
       }),
     );
     this.ridgeGlow.renderOrder = 3;
+    // Pareto membrane: the true 3-objective frontier is a 2D surface, not a line.
+    // Triangulated from the frontier vertices (Delaunay over the cost×speed
+    // plane, lifted by intelligence y). Rendered as a translucent sheet —
+    // dominated models sit on the worse side; the sheet IS the frontier.
+    this.membraneMesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        color: ridgeColor,
+        transparent: true,
+        opacity: 0.12,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }),
+    );
+    this.membraneMesh.renderOrder = 2;
+    // Skirt: the membrane's hull boundary dropped to the intelligence floor
+    // (y = -S). A faint wall that turns the frontier surface into a readable
+    // "tradeoff volume" — the region of intelligence the frontier occupies.
+    this.skirtMesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        color: ridgeColor,
+        transparent: true,
+        opacity: 0.06,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    this.skirtMesh.renderOrder = 1;
     this.scene.add(this.ridgeGlow);
     this.scene.add(this.ridgeMesh);
+    this.scene.add(this.membraneMesh);
+    this.scene.add(this.skirtMesh);
 
     this.applyCameraState();
     this.buildAxes();
@@ -1152,6 +1187,47 @@ export class Stage3DThree implements Stage3DSurface {
     this.ridgeMesh.geometry = coreGeom;
     this.ridgeGlow.geometry.dispose();
     this.ridgeGlow.geometry = glowGeom;
+    // Pareto membrane + skirt: the true 2-objective frontier SURFACE. Delaunay
+    // over the (x,z) = (cost, speed) projection — the frontier is single-valued
+    // there (no two frontier models share a cost×speed pair, else one dominates),
+    // so the triangulation lifts cleanly to a manifold by world y = intelligence.
+    let membraneGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
+    let skirtGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
+    if (ridgePts.length >= 3) {
+      const tris = delaunay2d(ridgePts.map((p) => [p.x, p.z] as [number, number]));
+      if (tris.length) {
+        const pos = new Float32Array(ridgePts.length * 3);
+        ridgePts.forEach((p, i) => {
+          pos[i * 3] = p.x;
+          pos[i * 3 + 1] = p.y;
+          pos[i * 3 + 2] = p.z;
+        });
+        membraneGeom.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        const idx: number[] = [];
+        for (const [a, b, c] of tris) idx.push(a, b, c);
+        membraneGeom.setIndex(idx);
+        // Skirt: hull-boundary edges dropped to the intelligence floor (y = -S).
+        const floor = -S;
+        const sPos: number[] = [];
+        const sIdx: number[] = [];
+        let vi = 0;
+        for (const [u, v] of hullEdges(tris)) {
+          const pu = ridgePts[u];
+          const pv = ridgePts[v];
+          sPos.push(pu.x, pu.y, pu.z, pv.x, pv.y, pv.z, pv.x, floor, pv.z, pu.x, floor, pu.z);
+          sIdx.push(vi, vi + 1, vi + 2, vi, vi + 2, vi + 3);
+          vi += 4;
+        }
+        if (sIdx.length) {
+          skirtGeom.setAttribute("position", new THREE.Float32BufferAttribute(sPos, 3));
+          skirtGeom.setIndex(sIdx);
+        }
+      }
+    }
+    this.membraneMesh.geometry.dispose();
+    this.membraneMesh.geometry = membraneGeom;
+    this.skirtMesh.geometry.dispose();
+    this.skirtMesh.geometry = skirtGeom;
 
     // Labels: always mark optimum; label the D10 focus-set (frontier ∪ optimum ∪
     // selected ∪ shortlist ∪ top-K) by short name so identity is reachable WITHOUT
