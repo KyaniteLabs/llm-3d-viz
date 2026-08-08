@@ -5,14 +5,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { defineConfig, loadEnv, type Plugin } from "vite";
-import { models, validateModels } from "./src/data/models";
+import { allModels, validateModels } from "./src/data/models";
 
-/** Enforces the curated-data contract before Vite emits any production assets. */
+/**
+ * Enforces the curated-data contract before Vite emits any production assets.
+ * D18: Validate allModels (full draft) so held-lab rows exposed via ?catalog=all
+ * are also checked — not just the default cloud scope.
+ */
 function validateDataset(): Plugin {
   return {
     name: "validate-model-dataset",
     buildStart() {
-      validateModels(models);
+      validateModels(allModels);
     },
   };
 }

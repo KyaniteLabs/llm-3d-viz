@@ -39,7 +39,7 @@ export function summary(m: Model): ModelSummary {
     price: m.blended_price_per_M,
     openness: m.openness,
     modalities: m.modality,
-    context: m.context_length,
+    context: m.context_length ?? undefined,
     reasoning: m.reasoning,
     swe_bench: m.swe_bench,
     gpqa: m.gpqa,

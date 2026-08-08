@@ -39,6 +39,15 @@ done
 unset __envf
 cd "$REPO_ROOT"
 
+# D10: Non-blocking singleton lock — record overlap instead of stacking writers.
+LOCK_FILE="$STATE_DIR/catalog-auto-update.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  log "ABORT: another catalog-auto-update is already running (overlap)"
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"lock\",\"reason\":\"overlap\"}" >"$STATUS_FILE"
+  exit 10
+fi
+
 if ! command -v node >/dev/null 2>&1; then
   log "ERROR: node not on PATH"
   exit 1
@@ -63,23 +72,27 @@ fi
 after_hash="$(shasum -a 256 "$DATA_FILE" | awk '{print $1}')"
 row_count="$(node -e "const m=require('./data/models.v0.draft.json'); console.log(Array.isArray(m)?m.length:(m.models||[]).length)")"
 # Empty-catalog guard: AA field-rename or empty 200 → empty draft.
-# Abort before build/deploy if rows drop below a sane floor or shrink >50% vs previous.
+# Abort before build/deploy if rows drop below a sane floor.
 MIN_ROWS="${MIN_ROWS:-50}"
-prev_rows=""
-[[ -f "$STATE_DIR/last-rows" ]] && prev_rows="$(cat "$STATE_DIR/last-rows")"
+# D09: Compare shrink against last-deployed-rows (not last scrape) so staged
+# degradation + downstream failure cannot bypass the guard.
+DEPLOYED_ROWS_FILE="$STATE_DIR/last-deployed-rows"
+deployed_rows=""
+[[ -f "$DEPLOYED_ROWS_FILE" ]] && deployed_rows="$(cat "$DEPLOYED_ROWS_FILE")"
 if [[ "$row_count" -lt "$MIN_ROWS" ]]; then
   log "ABORT: row_count=$row_count below MIN_ROWS=$MIN_ROWS — likely AA schema change or empty scrape"
   printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"reason\":\"below_min\"}" >"$STATUS_FILE"
   exit 8
 fi
-if [[ -n "$prev_rows" && "$prev_rows" -gt 0 ]]; then
-  shrink_pct=$(( (prev_rows - row_count) * 100 / prev_rows ))
+if [[ -n "$deployed_rows" && "$deployed_rows" -gt 0 ]]; then
+  shrink_pct=$(( (deployed_rows - row_count) * 100 / deployed_rows ))
   if [[ "$shrink_pct" -gt 50 ]]; then
-    log "ABORT: row_count=$row_count dropped ${shrink_pct}% from $prev_rows — likely scrape failure"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"prev\":$prev_rows,\"shrink\":$shrink_pct}" >"$STATUS_FILE"
+    log "ABORT: row_count=$row_count dropped ${shrink_pct}% from last deployed $deployed_rows — likely scrape failure"
+    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"prev\":$deployed_rows,\"shrink\":$shrink_pct}" >"$STATUS_FILE"
     exit 8
   fi
 fi
+# Track scrape count separately for diagnostics (not used for shrink gate).
 echo "$row_count" >"$STATE_DIR/last-rows"
 changed=0
 if [[ "$after_hash" != "$before_hash" || "$after_hash" != "$prev_hash" || "${FORCE:-0}" == "1" ]]; then
@@ -102,24 +115,35 @@ if [[ "$changed" -eq 0 ]]; then
   exit 0
 fi
 
-# 2) Build
-if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
-  log "building…"
-  if ! npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
-    log "ERROR: build failed"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"build\",\"rows\":$row_count}" >"$STATUS_FILE"
-    exit 3
-  fi
-  log "build ok"
+# D08: SKIP_BUILD=1 means scrape only — exit before any deployment and do NOT
+# advance the deployed hash. The data has been refreshed but the running build
+# is stale; the next non-SKIP_BUILD run will build+deploy.
+if [[ "${SKIP_BUILD:-0}" == "1" ]]; then
+  log "SKIP_BUILD=1 — scrape only, skipping build and deploy (deployed:false)"
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":true,\"scraped\":true,\"deployed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\"}" >"$STATUS_FILE"
+  exit 0
 fi
 
+# 2) Build
+log "building…"
+if ! npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+  log "ERROR: build failed"
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"build\",\"rows\":$row_count}" >"$STATUS_FILE"
+  exit 3
+fi
+log "build ok"
+
 # 3) Deploy private Tailscale instance
-# Reject empty/root/broad rsync destinations before --delete can cause damage.
+# D11: Strict allow-list — only permit the dedicated deploy path for rsync --delete.
+if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
 case "$DEPLOY_DIST" in
-  ""|"/"|"/var"*|"/usr"*|"/etc"*|"/home"|"~"|"~/"|"$HOME"|"$HOME/")
-    log "ABORT: DEPLOY_DIST='$DEPLOY_DIST' is unsafe for rsync --delete"
+  */sites/llm-3d-viz/dist|~/*/sites/llm-3d-viz/dist)
+    : ;; # allowed — dedicated deploy path
+  *)
+    log "ABORT: DEPLOY_DIST='$DEPLOY_DIST' is not the required '*/sites/llm-3d-viz/dist' path for rsync --delete"
     exit 9 ;;
 esac
+fi
 if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   log "deploy → $DEPLOY_HOST:$DEPLOY_DIST"
   # Expand ~ on remote via ssh shell
@@ -163,7 +187,10 @@ else
   log "pages deploy skipped (set DEPLOY_PAGES=1 + CLOUDFLARE_API_TOKEN + PAGES_PROJECT in .env to enable)"
 fi
 
+# D08+D09: Advance deployed hash and last-deployed-rows ONLY after successful
+# build + deploy + health. This is the point where the catalog is truly live.
 echo "$after_hash" >"$HASH_FILE"
+echo "$row_count" >"$DEPLOYED_ROWS_FILE"
 printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":true,\"rows\":$row_count,\"hash\":\"$after_hash\",\"deployed\":true}" >"$STATUS_FILE"
 log "DONE catalog updated and deployed (rows=$row_count)"
 exit 0

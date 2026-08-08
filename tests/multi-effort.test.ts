@@ -72,3 +72,83 @@ describe("release floor", () => {
     expect(allModels.some((m) => !meetsReleaseFloor(m.release_date))).toBe(true);
   });
 });
+
+describe("M005: isScorable range guards", () => {
+  it("rejects negative tps even when finite", () => {
+    expect(
+      isScorable({
+        model: "X",
+        provider: "OpenAI",
+        openness: "closed",
+        modality: ["text"],
+        context_length: 128000,
+        release_date: "2026-01-01",
+        source_url: "x",
+        data_date: "2026-08-08",
+        source: "test",
+        tps: -1,
+        ttft: null,
+        price_in_per_M: 1,
+        price_out_per_M: 2,
+        blended_price_per_M: 1.5,
+        aa_intelligence_index: 60,
+        arena_elo: null,
+        gpqa: null,
+        swe_bench: null,
+        aider_pct: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects aa_intelligence_index > 100", () => {
+    expect(
+      isScorable({
+        model: "Y",
+        provider: "OpenAI",
+        openness: "closed",
+        modality: ["text"],
+        context_length: 128000,
+        release_date: "2026-01-01",
+        source_url: "x",
+        data_date: "2026-08-08",
+        source: "test",
+        tps: 10,
+        ttft: null,
+        price_in_per_M: 1,
+        price_out_per_M: 2,
+        blended_price_per_M: 1.5,
+        aa_intelligence_index: 101,
+        arena_elo: null,
+        gpqa: null,
+        swe_bench: null,
+        aider_pct: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("admits valid row with tps=0 and index=0", () => {
+    expect(
+      isScorable({
+        model: "Z",
+        provider: "OpenAI",
+        openness: "closed",
+        modality: ["text"],
+        context_length: 128000,
+        release_date: "2026-01-01",
+        source_url: "x",
+        data_date: "2026-08-08",
+        source: "test",
+        tps: 0,
+        ttft: null,
+        price_in_per_M: 1,
+        price_out_per_M: 2,
+        blended_price_per_M: 1.5,
+        aa_intelligence_index: 0,
+        arena_elo: null,
+        gpqa: null,
+        swe_bench: null,
+        aider_pct: null,
+      }),
+    ).toBe(true);
+  });
+});

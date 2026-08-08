@@ -3,12 +3,18 @@ import {
   joinCatalog,
   applyArenaElo,
   applyOpenRouterPricing,
+  buildOpenRouterIndex,
+  matchOpenRouterModel,
   candidatesForArena,
   spineKey,
   isScorable,
   canAdmitPlotTriple,
 } from "../scripts/lib/catalog-join.mjs";
-import { parseArenaIdentity } from "../src/lib/family-effort.shared";
+import {
+  parseArenaIdentity,
+  deriveEffortTierFromName,
+  deriveReasoningFromName,
+} from "../src/lib/family-effort.shared";
 
 function aaRow(partial: Record<string, unknown>) {
   return {
@@ -353,5 +359,119 @@ describe("catalog-join", () => {
     ];
     const { attaches } = applyArenaElo(rows, arena);
     expect(attaches).toBeGreaterThanOrEqual(3);
+  });
+
+  // D03: Reasoning/effort heuristics — negation first, parentheticals only
+  it("D03: Non-reasoning name yields reasoning=false even though 'reason' is a substring", () => {
+    expect(deriveReasoningFromName("Qwen3 14B (Non-reasoning)")).toBe(false);
+  });
+
+  it("D03: effort tier from parenthetical (xhigh) signals reasoning=true", () => {
+    expect(deriveReasoningFromName("GPT-5.6 Sol (xhigh)")).toBe(true);
+  });
+
+  it("D03: edition words like 'Max'/'Medium' are NOT effort tiers", () => {
+    expect(deriveEffortTierFromName("Qwen3 Max", false)).toBe("none");
+    expect(deriveEffortTierFromName("Mistral Medium", false)).toBe("none");
+  });
+
+  it("D03: parenthetical effort markers are recognized", () => {
+    expect(deriveEffortTierFromName("GPT-5.6 Sol (xhigh)", false)).toBe("xhigh");
+    expect(deriveEffortTierFromName("Claude Opus 5 (Max)", false)).toBe("max");
+    expect(deriveEffortTierFromName("Claude Opus 5 (High)", false)).toBe("high");
+    expect(deriveEffortTierFromName("Qwen3 14B (Non-reasoning)", false)).toBe("none");
+  });
+
+  it("D03: slug-terminal tokens are recognized", () => {
+    expect(deriveEffortTierFromName("claude-opus-5-high", false)).toBe("high");
+    expect(deriveEffortTierFromName("gpt-5-sol-xhigh", false)).toBe("xhigh");
+  });
+
+  // D05: cache price in 7:2:1 blend
+  it("D05: OpenRouter input_cache_read used in cache slot", () => {
+    const row = aaRow({
+      price_in_per_M: null,
+      price_out_per_M: null,
+      blended_price_per_M: null,
+      source_url: "https://artificialanalysis.ai/models/test-model",
+    });
+    const { rows } = applyOpenRouterPricing([row], [
+      {
+        id: "anthropic/test-model",
+        pricing: {
+          prompt: "0.00000125",
+          completion: "0.00000425",
+          input_cache_read: "0.00000015",
+        },
+      },
+    ]);
+    // cache = 0.15 $/M, input = 1.25, output = 4.25
+    // blend = (0.15*7 + 1.25*2 + 4.25*1) / 10 = (1.05 + 2.5 + 4.25) / 10 = 0.78
+    expect(rows[0].blended_price_per_M).toBeCloseTo(0.78, 1);
+    expect(rows[0].price_cache_per_M).toBeCloseTo(0.15, 1);
+  });
+
+  // D12: empty string prices rejected
+  it("D12: empty string OpenRouter prices do not become zero", () => {
+    const row = aaRow({
+      price_in_per_M: null,
+      price_out_per_M: null,
+      blended_price_per_M: null,
+      source_url: "https://artificialanalysis.ai/models/empty-price",
+    });
+    const { rows, overlays } = applyOpenRouterPricing([row], [
+      {
+        id: "anthropic/empty-price",
+        pricing: { prompt: "", completion: "" },
+      },
+    ]);
+    expect(overlays).toBe(0);
+    expect(rows[0].price_in_per_M).toBeNull();
+  });
+
+  // D13: identity matching collision prevention
+  it("D13: bare slug collision between providers does not match wrong org", () => {
+    const orModels = [
+      { id: "foo/model-x", pricing: { prompt: "0.001", completion: "0.002" } },
+      { id: "bar/model-x", pricing: { prompt: "0.01", completion: "0.02" } },
+    ];
+    const index = buildOpenRouterIndex(orModels);
+    // Catalog row for Bar provider should NOT match Foo's entry
+    const row = aaRow({
+      provider: "Bar",
+      source_url: "https://artificialanalysis.ai/models/model-x",
+    });
+    // No PROVIDER_TO_ORG mapping for "Bar" → bare slug has 2 owners → no match
+    const match = matchOpenRouterModel(row, index);
+    expect(match).toBeNull();
+  });
+
+  // D14: Arena rating null/blank/zero rejected
+  it("D14: Arena Elo zero rating is not attached", () => {
+    const row = aaRow({
+      model: "Test Model",
+      family_id: "Test Model",
+      effort_tier: "max",
+      source_url: "https://artificialanalysis.ai/models/test-model",
+    });
+    const { attaches } = applyArenaElo([row], [
+      {
+        modelDisplayName: "test-model",
+        modelKey: "test-model",
+        modelOrganization: "Test",
+        rating: 0,
+      },
+    ]);
+    expect(attaches).toBe(0);
+  });
+
+  // M008: key-only effort extraction
+  it("M008: parseArenaIdentity derives effort from modelKey slug-terminal", () => {
+    const id = parseArenaIdentity({
+      modelDisplayName: "Acme Pro",
+      modelKey: "acme/acme-pro-max",
+      rating: 1500,
+    });
+    expect(id.effort_tier).toBe("max");
   });
 });

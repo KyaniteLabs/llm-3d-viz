@@ -40,15 +40,55 @@ export function deriveFamilyId(modelName: string): string {
  */
 export function deriveEffortTierFromName(name: string, isReasoning = false): string {
   const lower = String(name || "").toLowerCase();
-  if (/\(xhigh\)|xhigh effort|\bxhigh\b/.test(lower)) return "xhigh";
-  if (/\(max\)|max effort|\bmax\b/.test(lower)) return "max";
-  if (/\(high\)|high effort|\bhigh\b/.test(lower)) return "high";
-  if (/\(medium\)|medium effort|\bmedium\b|\bmid\b/.test(lower)) return "medium";
-  if (/\(low\)|low effort|\blow\b/.test(lower)) return "low";
-  if (/\(minimal\)|minimal effort|\bminimal\b/.test(lower)) return "minimal";
-  if (/non-reasoning/.test(lower)) return "none";
+
+  // 1. Parenthetical effort markers: "(xhigh)", "(high effort)", "(max, low)"
+  const parens = lower.match(/\(([^)]*)\)/g);
+  if (parens) {
+    for (const p of parens) {
+      const tier = matchTierWord(p.slice(1, -1));
+      if (tier) return tier;
+    }
+  }
+
+  // 2. Explicit "effort" phrases: "high effort", "max effort"
+  const effortPhrase = lower.match(/\b(xhigh|max|high|medium|low|minimal)\s+effort\b/);
+  if (effortPhrase) return effortPhrase[1];
+
+  // 3. Slug-terminal token: "model-xhigh", "model-high", "model-high-variant"
+  const slugTier = lower.match(/-(xhigh|max|high|medium|low|minimal)(?:-|$)/);
+  if (slugTier) return slugTier[1];
+
+  if (/non-?reasoning/.test(lower)) return "none";
   if (isReasoning) return "default";
   return "none";
+}
+
+const EFFORT_TIER_WORDS = ["xhigh", "max", "high", "medium", "low", "minimal"];
+
+/** Match a known effort tier word within a string using word boundaries. */
+function matchTierWord(s: string): string | null {
+  const lower = s.toLowerCase();
+  for (const tier of EFFORT_TIER_WORDS) {
+    if (new RegExp(`\\b${tier}\\b`).test(lower)) return tier;
+  }
+  return null;
+}
+
+/**
+ * Determine whether a model name indicates a reasoning/thinking model.
+ * Explicit negation ("Non-reasoning") is checked FIRST so the "reason"
+ * substring inside "Non-reasoning" never flips the result. Explicit effort
+ * markers (parentheticals) signal reasoning models.
+ */
+export function deriveReasoningFromName(name: string): boolean {
+  const lower = String(name || "").toLowerCase();
+  // Explicit negation first — "Non-reasoning" contains the substring "reason"
+  if (/non[\s_-]?reason/i.test(lower)) return false;
+  // Explicit effort markers (parentheticals) signal reasoning/thinking models
+  if (/\([^)]*\b(xhigh|max|high|medium|low|minimal)\b[^)]*\)/i.test(lower)) return true;
+  // Explicit reasoning/thinking/adaptive cues
+  if (/\b(reason|think|adaptive)/i.test(lower)) return true;
+  return false;
 }
 
 /**
@@ -120,8 +160,7 @@ export function parseArenaIdentity(entry: ArenaEntryLike | null | undefined): Pa
   let effort = deriveEffortTierFromName(displayName, false);
   const hasToken =
     /\((?:xhigh|max|high|medium|low|minimal)\)/i.test(displayName) ||
-    /\b(xhigh|max effort|high effort|medium effort|low effort|minimal)\b/i.test(displayName) ||
-    /-(xhigh|max|high|medium|low|minimal)\b/i.test(modelKey);
+    /\b(xhigh|max effort|high effort|medium effort|low effort|minimal)\b/i.test(displayName);
   if (!hasToken && (effort === "none" || effort === "default")) {
     effort = "unspecified";
   }

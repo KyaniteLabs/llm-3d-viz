@@ -38,7 +38,8 @@ export interface Model {
   family_id?: string;
   /** Effort intensity tier (none|low|medium|high|max|xhigh|…); derived when absent. */
   effort_tier?: string;
-  context_length: number;
+  /** Context window in tokens; null when unknown (never 0 to signal unknown). */
+  context_length: number | null;
   release_date: string;
   source_url: string;
   tps: number | null;
@@ -128,11 +129,14 @@ export function isScorable(model: Model): boolean {
   return (
     model.tps !== null &&
     Number.isFinite(model.tps) &&
+    model.tps >= 0 &&
     model.blended_price_per_M !== null &&
     Number.isFinite(model.blended_price_per_M) &&
     model.blended_price_per_M >= 0 &&
     model.aa_intelligence_index !== null &&
-    Number.isFinite(model.aa_intelligence_index)
+    Number.isFinite(model.aa_intelligence_index) &&
+    model.aa_intelligence_index >= 0 &&
+    model.aa_intelligence_index <= 100
   );
 }
 
@@ -150,16 +154,26 @@ function hasNegativePrice(model: Model): boolean {
 
 /** Throws a descriptive error so Vite aborts before emitting an invalid dataset build. */
 export function validateModels(candidateModels: readonly Model[]): void {
+  const seenModelIds = new Set<string>();
+  const seenSpineKeys = new Set<string>();
   candidateModels.forEach((row, index) => {
     const label = `models[${index}]`;
     if (isMissingString(row.model) || isMissingString(row.provider)) {
       throw new Error(`${label}: model and provider must be non-empty strings`);
     }
+    // D18: unique model IDs
+    if (seenModelIds.has(row.model)) {
+      throw new Error(`${label} (${row.model}): duplicate model ID`);
+    }
+    seenModelIds.add(row.model);
     if (row.reasoning !== undefined && typeof row.reasoning !== "boolean") {
       throw new Error(`${label} (${row.model}): reasoning must be a boolean when present`);
     }
-    if (!Number.isFinite(row.context_length) || row.context_length <= 0) {
-      throw new Error(`${label} (${row.model}): context_length is required and must be positive`);
+    // D01: context_length must be null (unknown) or a finite positive number.
+    if (row.context_length !== null) {
+      if (!Number.isFinite(row.context_length) || row.context_length <= 0) {
+        throw new Error(`${label} (${row.model}): context_length must be null or a positive number`);
+      }
     }
     if (row.tps !== null && (!Number.isFinite(row.tps) || row.tps < 0)) {
       throw new Error(`${label} (${row.model}): tps must be null or a number >= 0`);
@@ -177,6 +191,37 @@ export function validateModels(candidateModels: readonly Model[]): void {
     ) {
       throw new Error(`${label} (${row.model}): aa_intelligence_index must be null or within 0-100`);
     }
+    // D18: openness enum
+    if (row.openness !== "open" && row.openness !== "closed") {
+      throw new Error(`${label} (${row.model}): openness must be "open" or "closed"`);
+    }
+    // D18: modality array shape + vocabulary
+    if (!Array.isArray(row.modality) || row.modality.length === 0) {
+      throw new Error(`${label} (${row.model}): modality must be a non-empty array`);
+    }
+    for (const mod of row.modality) {
+      if (!["text", "vision", "audio", "video"].includes(mod)) {
+        throw new Error(`${label} (${row.model}): modality contains invalid value "${mod}"`);
+      }
+    }
+    // D18: valid release_date (ISO calendar)
+    if (typeof row.release_date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(row.release_date.slice(0, 10))) {
+      throw new Error(`${label} (${row.model}): release_date must be a valid YYYY-MM-DD date`);
+    }
+    // D18: valid data_date
+    if (typeof row.data_date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(row.data_date.slice(0, 10))) {
+      throw new Error(`${label} (${row.model}): data_date must be a valid YYYY-MM-DD date`);
+    }
+    // D18: source_url required
+    if (isMissingString(row.source_url)) {
+      throw new Error(`${label} (${row.model}): source_url is required`);
+    }
+    // D18: unique spine keys (model + effort)
+    const spine = `${row.model}::${String(row.effort_tier || "none").toLowerCase()}`;
+    if (seenSpineKeys.has(spine)) {
+      throw new Error(`${label} (${row.model}): duplicate spine key "${spine}"`);
+    }
+    seenSpineKeys.add(spine);
     const excluded =
       row.tps === null ||
       row.blended_price_per_M === null ||

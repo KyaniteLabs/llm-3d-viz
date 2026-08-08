@@ -88,9 +88,11 @@ export function applyAaDerivedBlend(aaRows) {
     const pout = row.price_out_per_M;
     if (pin == null || pout == null) return row;
     if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
+    if (pin < 0 || pout < 0) return row; // D12: reject negative price components
     const pcache = typeof row.price_cache_per_M === "number" && Number.isFinite(row.price_cache_per_M)
       ? row.price_cache_per_M
       : pin; // conservative fallback: cache = input price when unknown
+    if (pcache < 0) return row; // D12: reject negative cache price
     let next = {
       ...row,
       blended_price_per_M: (pcache * 7 + pin * 2 + pout * 1) / 10,
@@ -100,63 +102,87 @@ export function applyAaDerivedBlend(aaRows) {
   });
 }
 
-/** Build a lookup index over OpenRouter models (id, bare slug, name). */
+/**
+ * Build a lookup index over OpenRouter models.
+ * Indexes canonical full IDs (`org/model`) in byId and bare slugs → array of
+ * models in byBareSlug so collisions are visible. Never registers display names
+ * (too ambiguous) or bare slugs as first-wins keys.
+ */
 export function buildOpenRouterIndex(orModels) {
   const byId = new Map();
+  const byBareSlug = new Map();
   for (const m of orModels ?? []) {
     const id = String(m.id || "").toLowerCase();
-    const name = String(m.name || "").toLowerCase();
-    if (id) {
-      byId.set(id, m);
-      const bare = id.includes("/") ? id.split("/").pop() : id;
-      if (bare && !byId.has(bare)) byId.set(bare, m);
+    if (!id) continue;
+    byId.set(id, m);
+    const bare = id.includes("/") ? id.split("/").pop() : id;
+    if (bare) {
+      let list = byBareSlug.get(bare);
+      if (!list) {
+        list = [];
+        byBareSlug.set(bare, list);
+      }
+      list.push(m);
     }
-    if (name) byId.set(name, m);
   }
-  return byId;
+  return { byId, byBareSlug };
 }
 
-const OPENROUTER_ORG_HINTS = [
-  "anthropic", "openai", "google", "x-ai", "meta-llama", "meta", "qwen",
-  "deepseek", "mistralai", "moonshotai", "z-ai", "minimax", "nvidia",
-];
+/** AA provider → OpenRouter organization slug mapping for exact-match candidates. */
+const PROVIDER_TO_ORG = {
+  openai: "openai",
+  anthropic: "anthropic",
+  google: "google",
+  deepseek: "deepseek",
+  nvidia: "nvidia",
+  kimi: "moonshotai",
+  zai: "z-ai",
+  alibaba: "qwen",
+  minimax: "minimax",
+  xai: "x-ai",
+  meta: "meta-llama",
+  mistral: "mistralai",
+};
 
 /**
- * Match a catalog row to its OpenRouter model (slug transforms + multi-host +
- * fuzzy endsWith). Returns the OR model object or null. Shared by pricing and
- * modality overlays so both attach to the same identity.
+ * Match a catalog row to its OpenRouter model using provider-compatible exact
+ * IDs. Returns { model, matchedId } or null. No unbounded suffix/name fallback.
+ * Bare-slug match only resolves when exactly one OpenRouter org owns that slug.
  */
-export function matchOpenRouterModel(row, byId) {
+export function matchOpenRouterModel(row, index) {
+  const { byId, byBareSlug } = index;
   const slug = aaSlugFromSourceUrl(row.source_url || "");
-  const modelLc = String(row.model || "").toLowerCase();
-  const providerLc = String(row.provider || "").toLowerCase();
-  // AA often uses grok-4-5; OpenRouter uses grok-4.5 (digit-digit → digit.digit).
-  const slugOrStyle = slug ? slug.replace(/(\d+)-(\d+)/g, "$1.$2") : "";
-  const slugDash = slug ? slug.replace(/\./g, "-") : "";
-  const candidates = [
-    slug, slugOrStyle, slugDash,
-    ...OPENROUTER_ORG_HINTS.flatMap((o) =>
-      slug ? [`${o}/${slug}`, `${o}/${slugOrStyle}`, `${o}/${slugDash}`] : [],
-    ),
-    modelLc,
-    modelLc.replace(/\s+/g, "-"),
-    modelLc.replace(/\s+/g, "-").replace(/(\d+)-(\d+)/g, "$1.$2"),
-    modelLc.replace(/\s*\([^)]*\)\s*/g, "").trim(),
-    slug?.startsWith("grok") ? `x-ai/${slug}` : null,
-    slug?.startsWith("grok") ? `x-ai/${slugOrStyle}` : null,
-    providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slug}` : null,
-    providerLc.includes("spacex") || providerLc === "xai" ? `x-ai/${slugOrStyle}` : null,
-  ].filter(Boolean);
-  for (const c of candidates) {
-    if (byId.has(c)) return byId.get(c);
+  if (!slug) return null;
+  const providerNorm = normalizeProvider(row.provider || "");
+  const orgHint = PROVIDER_TO_ORG[providerNorm] || "";
+
+  // AA uses grok-4-5; OpenRouter uses grok-4.5 (digit-digit → digit.digit).
+  const slugOrStyle = slug.replace(/(\d+)-(\d+)/g, "$1.$2");
+  const slugDash = slug.replace(/\./g, "-");
+
+  // 1. Try exact full IDs with org prefix
+  const candidates = [];
+  if (orgHint) {
+    candidates.push(
+      `${orgHint}/${slug}`,
+      `${orgHint}/${slugOrStyle}`,
+      `${orgHint}/${slugDash}`,
+    );
   }
-  if (slug) {
-    for (const [id, m] of byId) {
-      if (typeof id === "string" && (id === slug || id.endsWith(`/${slug}`) || id.endsWith(slug))) {
-        return m;
-      }
+  candidates.push(slug, slugOrStyle, slugDash);
+  for (const c of candidates) {
+    const hit = byId.get(c);
+    if (hit) return { model: hit, matchedId: c };
+  }
+
+  // 2. Bare-slug match only when exactly one provider owns the slug (no collision)
+  for (const s of [slug, slugOrStyle]) {
+    const list = byBareSlug.get(s);
+    if (list && list.length === 1) {
+      return { model: list[0], matchedId: String(list[0].id || "").toLowerCase() };
     }
   }
+
   return null;
 }
 
@@ -169,11 +195,12 @@ export function matchOpenRouterModel(row, byId) {
  */
 export function applyOpenRouterModality(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, attaches: 0 };
-  const byId = buildOpenRouterIndex(orModels);
+  const index = buildOpenRouterIndex(orModels);
   const VOCAB = { text: "text", image: "vision", audio: "audio", video: "video" };
   let attaches = 0;
   const rows = aaRows.map((row) => {
-    const hit = matchOpenRouterModel(row, byId);
+    const match = matchOpenRouterModel(row, index);
+    const hit = match?.model;
     const inputMods = hit?.architecture?.input_modalities;
     if (!Array.isArray(inputMods) || !inputMods.length) return row;
     const existing = new Set(row.modality ?? []);
@@ -203,7 +230,7 @@ export function applyOpenRouterModality(aaRows, orModels) {
  */
 export function applyOpenRouterPricing(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, overlays: 0 };
-  const byId = buildOpenRouterIndex(orModels);
+  const index = buildOpenRouterIndex(orModels);
   let overlays = 0;
   const rows = aaRows.map((row) => {
     const needIn = row.price_in_per_M == null;
@@ -211,10 +238,12 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     const needBlend = row.blended_price_per_M == null;
     if (!needIn && !needOut && !needBlend) return row;
 
-    const hit = matchOpenRouterModel(row, byId);
+    const match = matchOpenRouterModel(row, index);
+    const hit = match?.model;
     if (!hit?.pricing) return row;
-    // Reject null/non-numeric prices — Number(null)===0 would make models falsely free.
-    if (hit.pricing.prompt == null || hit.pricing.completion == null) return row;
+    // D12: Reject null/empty/non-numeric prices — Number("")===0 would make models falsely free.
+    if (hit.pricing.prompt == null || hit.pricing.prompt === "") return row;
+    if (hit.pricing.completion == null || hit.pricing.completion === "") return row;
     const pinTok = Number(hit.pricing.prompt);
     const poutTok = Number(hit.pricing.completion);
     if (!Number.isFinite(pinTok) || !Number.isFinite(poutTok) || pinTok < 0 || poutTok < 0) return row;
@@ -228,17 +257,28 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     if (needIn) next = setSource(next, "price_in_per_M", { origin: "openrouter", kind: "list" });
     if (needOut) next = setSource(next, "price_out_per_M", { origin: "openrouter", kind: "list" });
 
+    // D05: Read cache-read price from OpenRouter, convert to $/M, use in cache slot.
+    const cacheRaw = hit.pricing.input_cache_read;
+    let pcache = typeof next.price_cache_per_M === "number" && Number.isFinite(next.price_cache_per_M) && next.price_cache_per_M >= 0
+      ? next.price_cache_per_M
+      : price_in_per_M; // fallback: cache = input price when genuinely absent
+    if (cacheRaw != null && cacheRaw !== "") {
+      const cacheTok = Number(cacheRaw);
+      if (Number.isFinite(cacheTok) && cacheTok >= 0) {
+        pcache = cacheTok * 1e6;
+        next.price_cache_per_M = pcache;
+        next = setSource(next, "price_cache_per_M", { origin: "openrouter", kind: "list" });
+      }
+    }
+
     if (needBlend && price_in_per_M != null && price_out_per_M != null) {
-      const pcache = typeof next.price_cache_per_M === "number" && Number.isFinite(next.price_cache_per_M)
-        ? next.price_cache_per_M
-        : price_in_per_M;
       next.blended_price_per_M = (pcache * 7 + price_in_per_M * 2 + price_out_per_M * 1) / 10;
       next = setSource(next, "blended_price_per_M", {
         origin: "openrouter",
         kind: "derived_list_blend",
       });
     }
-    next.source = `${row.source || "aa"}; OpenRouter pricing overlay`;
+    next.source = `${row.source || "aa"}; OpenRouter pricing overlay (${match.matchedId})`;
     return next;
   });
   return { rows, overlays };
@@ -279,6 +319,11 @@ export function applyArenaElo(aaRows, arenaEntries) {
     const arenaId = parseArenaIdentity(entry);
     if (arenaId.rating == null || !Number.isFinite(arenaId.rating)) {
       logs.push({ code: "arena_no_rating", key: entry?.modelKey });
+      continue;
+    }
+    // D14: Enforce plausible positive Elo range — reject zero/negative/implausible.
+    if (arenaId.rating <= 0 || arenaId.rating > 2500) {
+      logs.push({ code: "arena_implausible_rating", key: entry?.modelKey, rating: arenaId.rating });
       continue;
     }
     const candidates = candidatesForArena(rows, arenaId);
@@ -441,6 +486,27 @@ export function canAdmitPlotTriple(row) {
     Number(row.blended_price_per_M) >= 0;
   return hasIq && hasTps && hasCost && isScorable(row);
 }
+/**
+ * D01: OpenRouter context_length overlay — fills unknown context_length (null)
+ * from OpenRouter where identity matches exactly. Validates positive integer.
+ */
+export function applyOpenRouterContext(aaRows, orModels) {
+  if (!orModels?.length) return { rows: aaRows, overlays: 0 };
+  const index = buildOpenRouterIndex(orModels);
+  let overlays = 0;
+  const rows = aaRows.map((row) => {
+    if (row.context_length != null && row.context_length > 0) return row;
+    const match = matchOpenRouterModel(row, index);
+    const hit = match?.model;
+    const ctx = hit?.context_length;
+    if (typeof ctx !== "number" || !Number.isFinite(ctx) || ctx <= 0) return row;
+    overlays += 1;
+    let next = { ...row, context_length: ctx };
+    next = setSource(next, "context_length", { origin: "openrouter", kind: "list" });
+    return next;
+  });
+  return { rows, overlays };
+}
 
 /**
  * Full join pipeline on in-memory rows (no network).
@@ -456,6 +522,8 @@ export function joinCatalog(aaRows, overlays = {}) {
   rows = priced.rows;
   const modal = applyOpenRouterModality(rows, overlays.orModels || []);
   rows = modal.rows;
+  const ctx = applyOpenRouterContext(rows, overlays.orModels || []);
+  rows = ctx.rows;
   const scorable = rows.filter(canAdmitPlotTriple);
   return {
     all: rows,
@@ -464,5 +532,6 @@ export function joinCatalog(aaRows, overlays = {}) {
     arenaLogs: arena.logs,
     openrouterOverlays: priced.overlays,
     openrouterModalityAttaches: modal.attaches,
+    openrouterContextOverlays: ctx.overlays,
   };
 }

@@ -108,7 +108,7 @@ export function toolQueryCatalog(
     if (num(c.minTps) && (m.tps == null || m.tps < c.minTps!)) return false;
     if (c.modality && !(m.modality ?? []).includes(c.modality as Model["modality"][number]))
       return false;
-    if (num(c.minContext) && m.context_length < c.minContext!) return false;
+    if (num(c.minContext) && (m.context_length == null || m.context_length < c.minContext!)) return false;
     if (c.reasoning === true && !m.reasoning) return false;
     if (num(c.minSweBench) && (m.swe_bench == null || m.swe_bench < c.minSweBench!)) return false;
     if (num(c.minGpqa) && (m.gpqa == null || m.gpqa < c.minGpqa!)) return false;

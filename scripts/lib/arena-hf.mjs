@@ -32,8 +32,13 @@ export function hfRowToArenaEntry(row) {
   const category = String(row.category || "overall").toLowerCase();
   // Style-control overall is the product Elo surface we historically used.
   if (category && category !== "overall") return null;
-  const rating = Number(row.rating);
-  if (!Number.isFinite(rating)) return null;
+  // D14: Reject null/blank/wrong-typed ratings BEFORE conversion.
+  // Number(null)===0 and Number("")===0 would coerce missing to Elo 0.
+  if (row.rating == null || typeof row.rating !== "number" || !Number.isFinite(row.rating)) {
+    return null;
+  }
+  const rating = row.rating;
+  if (rating <= 0) return null; // D14: enforce plausible positive Elo
   return {
     modelDisplayName: name,
     modelKey: name,
@@ -70,6 +75,7 @@ export async function fetchArenaEntriesFromHf(options = {}) {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": ARENA_UA, Accept: "application/octet-stream,*/*" },
+      signal: AbortSignal.timeout(options.timeoutMs ?? 60_000),
     });
     if (!res.ok) {
       return { ok: false, entries: [], error: `${url} → ${res.status}` };

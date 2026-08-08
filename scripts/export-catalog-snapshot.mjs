@@ -2,8 +2,13 @@
 /**
  * Export catalog snapshot for CLI/MCP (copy + light meta).
  * Source of truth remains data/models.v0.draft.json.
+ *
+ * D07: Includes source SHA-256 and data_date so consumers can detect drift.
+ * Note: expand-aa-multi-effort.mjs now exports snapshot+meta atomically as part
+ * of the refresh transaction; this script remains for manual re-export.
  */
 import { copyFileSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,15 +27,25 @@ if (!Array.isArray(models)) {
 mkdirSync(OUT_DIR, { recursive: true });
 copyFileSync(SRC, OUT);
 
+const draftContent = readFileSync(SRC, "utf8");
+const sourceHash = createHash("sha256").update(draftContent).digest("hex");
+
+const dataDate =
+  models.length > 0 && models[0].data_date
+    ? models[0].data_date
+    : new Date().toISOString().slice(0, 10);
+
 const meta = {
-  schema_version: "1.0",
+  schema_version: "1.1",
   exported_at: new Date().toISOString(),
   model_count: models.length,
   source: "data/models.v0.draft.json",
   snapshot_file: "data/atlas-catalog-snapshot.json",
+  source_sha256: sourceHash,
+  data_date: dataDate,
   note: "Null metrics preserved. Never invent Index/tok/s/price client-side.",
 };
 
 writeFileSync(META, `${JSON.stringify(meta, null, 2)}\n`);
 console.log(`[export-catalog-snapshot] ${models.length} models → ${OUT}`);
-console.log(`[export-catalog-snapshot] meta → ${META}`);
+console.log(`[export-catalog-snapshot] meta → ${META} (sha256=${sourceHash.slice(0, 12)}…)`);

@@ -26,10 +26,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import crypto from "node:crypto";
 import { isScorable, deriveFamilyId } from "./lib/aa-extract.mjs";
 import {
   mergeBySpine,
   applyOpenRouterPricing,
+  applyOpenRouterModality,
+  applyOpenRouterContext,
   applyAaDerivedBlend,
   applyArenaElo,
   stampAaMeasured,
@@ -46,6 +49,9 @@ const gapsPath = path.join(root, "data/effort-gaps.generated.json");
 const openrouterPath = path.join(root, "data/openrouter-snapshot.json");
 const laddersPath = path.join(root, "data/expected-effort-ladders.json");
 const aaSnapshotPath = path.join(root, "data/aa-api-snapshot.json");
+const snapshotPath = path.join(root, "data/atlas-catalog-snapshot.json");
+const metaPath = path.join(root, "data/atlas-catalog-meta.json");
+const MIN_ROWS = Number(process.env.MIN_ROWS ?? 50);
 
 function buildEffortGaps(aaRows, laddersDoc, partialByFamily = new Map()) {
   const byFamily = new Map();
@@ -150,6 +156,20 @@ if (!aa.ok) {
   );
   process.exit(1);
 }
+// D02: Reject empty/unexpected response shapes BEFORE writing.
+if (!aa.models?.length) {
+  console.error(
+    JSON.stringify(
+      {
+        fatal: true,
+        error: "AA returned 0 models — empty response or schema change. Aborting before write.",
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
 
 const aaMapped = aa.models.map((m) =>
   stampAaMeasured(mapAaApiModel(m, today, "AA Data API free")),
@@ -168,6 +188,18 @@ sourceStats.push({
 
 // --- 2. Arena Elo via HF CC BY 4.0 dataset (not arena.ai HTML) ---
 const arena = await fetchArenaEntriesFromHf({ cacheDir: path.join(root, "data") });
+// D06: When a source is enabled and fails, fail the refresh instead of silently
+// producing a degraded catalog with null Arena Elo.
+if (!arena.ok && !arena.skipped) {
+  console.error(
+    JSON.stringify(
+      { fatal: true, error: `Arena source failed: ${arena.error}. Set SKIP_ARENA=1 to skip.` },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
 let arenaAttaches = 0;
 let arenaLogs = [];
 if (arena.entries?.length) {
@@ -186,32 +218,50 @@ sourceStats.push({
   log_sample: arenaLogs.slice(0, 8),
 });
 
-// --- 3. AA-derived blend, then OpenRouter list prices ---
+// --- 3. AA-derived blend, then OpenRouter list prices + modality + context ---
 merged = applyAaDerivedBlend(merged);
 sourceStats[0].scorable_after_blend = merged.filter(isScorable).length;
 const or = await fetchOpenRouterModels();
-if (or.ok) {
-  fs.writeFileSync(
-    openrouterPath,
-    `${JSON.stringify(
-      {
-        data_date: today,
-        count: or.models.length,
-        authenticated: or.authenticated,
-        models: or.models,
-      },
+// D06: OpenRouter failure → fail the refresh (do not silently overlay empty data).
+if (!or.ok) {
+  console.error(
+    JSON.stringify(
+      { fatal: true, error: `OpenRouter source failed: ${or.error}.` },
       null,
       2,
-    )}\n`,
+    ),
   );
+  process.exit(1);
 }
+fs.writeFileSync(
+  openrouterPath,
+  `${JSON.stringify(
+    {
+      data_date: today,
+      count: or.models.length,
+      authenticated: or.authenticated,
+      models: or.models,
+    },
+    null,
+    2,
+  )}\n`,
+);
+// D04: Apply modality overlay (vision/audio/video) from OpenRouter.
+const modal = applyOpenRouterModality(merged, or.models || []);
+merged = modal.rows;
+// D05: Apply pricing overlay (with cache-read price support).
 const priced = applyOpenRouterPricing(merged, or.models || []);
 merged = priced.rows;
+// D01: Apply context_length overlay from OpenRouter.
+const ctx = applyOpenRouterContext(merged, or.models || []);
+merged = ctx.rows;
 sourceStats.push({
   source: "OpenRouter /api/v1/models",
   ok: or.ok,
   models: or.models?.length ?? 0,
   price_overlays: priced.overlays,
+  modality_overlays: modal.attaches,
+  context_overlays: ctx.overlays,
   authenticated: or.authenticated ?? false,
   error: or.error,
 });
@@ -240,44 +290,147 @@ scorable.sort(
   (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
 );
 
-fs.writeFileSync(dataPath, `${JSON.stringify(scorable, null, 2)}\n`);
+// D02: Validate the complete candidate in memory BEFORE writing.
+// Reject empty catalogs and enforce a shrink gate vs the previous draft.
+if (!scorable.length) {
+  console.error(
+    JSON.stringify(
+      { fatal: true, error: "0 scorable rows after join — aborting before write." },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
+let prevRowCount = 0;
+if (fs.existsSync(dataPath)) {
+  try {
+    const prev = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    prevRowCount = Array.isArray(prev) ? prev.length : 0;
+  } catch { /* ignore parse error on stale file */ }
+}
+if (prevRowCount > 0) {
+  const shrinkPct = Math.round(((prevRowCount - scorable.length) / prevRowCount) * 100);
+  if (shrinkPct > 50) {
+    console.error(
+      JSON.stringify(
+        {
+          fatal: true,
+          error: `scorable rows dropped ${shrinkPct}% (${prevRowCount} → ${scorable.length}) — aborting before write.`,
+        },
+        null,
+        2,
+      ),
+    );
+    process.exit(1);
+  }
+}
+if (scorable.length < MIN_ROWS) {
+  console.error(
+    JSON.stringify(
+      { fatal: true, error: `scorable rows ${scorable.length} < MIN_ROWS=${MIN_ROWS} — aborting before write.` },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
 
+// --- 5. Build effort gaps (D17: include partial tiers from rows missing only IQ) ---
 let laddersDoc = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
   laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
 }
-const gaps = buildEffortGaps(scorable, laddersDoc, new Map());
-fs.writeFileSync(
-  gapsPath,
-  `${JSON.stringify(
-    {
-      data_date: today,
-      ingestion: "official-api-only",
-      attribution: {
-        artificial_analysis: "https://artificialanalysis.ai (Data API)",
-        openrouter: "https://openrouter.ai (models list prices)",
-        arena: "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset (CC BY 4.0)",
-      },
-      source_stats: sourceStats,
-      openrouter: {
-        ok: or.ok,
-        models: or.models?.length ?? 0,
-        price_overlays: priced.overlays,
-      },
-      arena: {
-        ok: arena.ok,
-        entries: arena.entries?.length ?? 0,
-        attaches: arenaAttaches,
-        error: arena.error,
-        license: "CC BY 4.0",
-      },
-      gaps,
-      fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
-    },
-    null,
-    2,
-  )}\n`,
-);
+// D17: partialByFamily from joined rows that have speed+price but are missing IQ.
+const partialByFamily = new Map();
+for (const row of merged) {
+  if (
+    row.aa_intelligence_index == null &&
+    row.tps != null &&
+    Number.isFinite(row.tps) &&
+    row.blended_price_per_M != null &&
+    Number.isFinite(row.blended_price_per_M)
+  ) {
+    const family = row.family_id || row.model;
+    let list = partialByFamily.get(family);
+    if (!list) {
+      list = [];
+      partialByFamily.set(family, list);
+    }
+    list.push({ tier: row.effort_tier, slug: String(row.source_url || "").split("/").pop() || row.model || "" });
+  }
+}
+const gaps = buildEffortGaps(scorable, laddersDoc, partialByFamily);
+
+const gapsDoc = {
+  data_date: today,
+  ingestion: "official-api-only",
+  attribution: {
+    artificial_analysis: "https://artificialanalysis.ai (Data API)",
+    openrouter: "https://openrouter.ai (models list prices)",
+    arena: "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset (CC BY 4.0)",
+  },
+  source_stats: sourceStats,
+  openrouter: {
+    ok: or.ok,
+    models: or.models?.length ?? 0,
+    price_overlays: priced.overlays,
+    modality_overlays: modal.attaches,
+    context_overlays: ctx.overlays,
+  },
+  arena: {
+    ok: arena.ok,
+    entries: arena.entries?.length ?? 0,
+    attaches: arenaAttaches,
+    error: arena.error,
+    license: "CC BY 4.0",
+  },
+  gaps,
+  fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
+};
+
+// --- 6. D02+D07: Atomic transaction — write all outputs to temp, then rename ---
+const draftJson = `${JSON.stringify(scorable, null, 2)}\n`;
+const gapsJson = `${JSON.stringify(gapsDoc, null, 2)}\n`;
+const sourceHash = crypto.createHash("sha256").update(draftJson).digest("hex");
+const snapshotJson = draftJson; // snapshot is a copy of the draft
+const meta = {
+  schema_version: "1.1",
+  exported_at: new Date().toISOString(),
+  model_count: scorable.length,
+  source: "data/models.v0.draft.json",
+  snapshot_file: "data/atlas-catalog-snapshot.json",
+  source_sha256: sourceHash,
+  data_date: today,
+  note: "Null metrics preserved. Never invent Index/tok/s/price client-side.",
+};
+const metaJson = `${JSON.stringify(meta, null, 2)}\n`;
+
+const tempFiles = [
+  [dataPath, draftJson],
+  [gapsPath, gapsJson],
+  [snapshotPath, snapshotJson],
+  [metaPath, metaJson],
+];
+try {
+  // Write all temp files first
+  for (const [dest, content] of tempFiles) {
+    fs.writeFileSync(`${dest}.tmp`, content);
+  }
+  // Rename all atomically (on same filesystem, rename is atomic)
+  for (const [dest] of tempFiles) {
+    fs.renameSync(`${dest}.tmp`, dest);
+  }
+} catch (err) {
+  // Clean up any leftover temp files
+  for (const [dest] of tempFiles) {
+    try { fs.unlinkSync(`${dest}.tmp`); } catch { /* ignore */ }
+  }
+  console.error(
+    JSON.stringify({ fatal: true, error: `Atomic write failed: ${err}` }, null, 2),
+  );
+  process.exit(1);
+}
 
 const byFamily = new Map();
 for (const row of scorable) {
@@ -299,6 +452,7 @@ console.log(
       arena_attaches: arenaAttaches,
       effort_gaps: gaps.length,
       aa_key_present: Boolean(resolveAaApiKey()),
+      source_sha256: sourceHash,
       examples: multi
         .slice(0, 10)
         .map(([fam, tiers]) => ({ family: fam, tiers: [...new Set(tiers)], n: tiers.length })),

@@ -12,6 +12,7 @@
 import {
   deriveFamilyId,
   deriveEffortTierFromName,
+  deriveReasoningFromName,
 } from "../../src/lib/family-effort.shared.ts";
 
 export const AA_API_BASE = "https://artificialanalysis.ai/api/v2";
@@ -86,8 +87,8 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     provider,
     openness,
     modality: ["text"],
-    // Free API omits context window — 0 signals unknown; not used as a plot axis.
-    context_length: 0,
+    // Free API omits context window — null signals unknown (never 0).
+    context_length: null,
     release_date: release,
     data_date: today,
     source: sourceLabel,
@@ -103,7 +104,7 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     swe_bench: null,
     aider_pct: null,
     gpqa: null,
-    reasoning: /\b(reason|think|adaptive)/i.test(name),
+    reasoning: deriveReasoningFromName(name),
     family_id,
     effort_tier,
     cost_per_index_task_usd,
@@ -137,10 +138,13 @@ export async function fetchAaLanguageModelsFree(options = {}) {
 
   const base = options.baseUrl || AA_API_BASE;
   const models = [];
+  const seenIds = new Set();
   let page = 1;
   let pages = 0;
   let tier;
+  let truncated = false;
   const maxPages = options.maxPages ?? 20;
+  const timeoutMs = options.timeoutMs ?? 30_000;
 
   while (page <= maxPages) {
     const url = `${base}/language/models/free?page=${page}`;
@@ -150,6 +154,7 @@ export async function fetchAaLanguageModelsFree(options = {}) {
         "User-Agent": AA_UA,
         "x-api-key": key,
       },
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
@@ -163,15 +168,42 @@ export async function fetchAaLanguageModelsFree(options = {}) {
     const json = await res.json();
     tier = json.tier ?? tier;
     const batch = Array.isArray(json.data) ? json.data : [];
-    models.push(...batch);
+    // Deduplicate stable IDs across pages
+    for (const m of batch) {
+      const id = m?.slug || m?.name;
+      if (id && !seenIds.has(id)) {
+        seenIds.add(id);
+        models.push(m);
+      }
+    }
     pages += 1;
     const pag = json.pagination || {};
-    if (!pag.has_more) break;
-    page = (pag.page || page) + 1;
+    const hasMore = pag.has_more === true;
+    if (!hasMore) break;
+    // Validate integer page progression
+    const nextPage = typeof pag.page === "number" && Number.isFinite(pag.page)
+      ? pag.page + 1
+      : page + 1;
+    if (page >= maxPages && hasMore) {
+      truncated = true;
+      break;
+    }
+    page = nextPage;
     // Be polite within Free 100 req/24h budget
     if (options.delayMs) {
       await new Promise((r) => setTimeout(r, options.delayMs));
     }
+  }
+
+  if (truncated) {
+    return {
+      ok: false,
+      models,
+      error: `pagination truncated at maxPages=${maxPages} with has_more=true — increase maxPages or investigate`,
+      tier,
+      pages,
+      truncated: true,
+    };
   }
 
   return { ok: true, models, tier, pages };
