@@ -1,107 +1,98 @@
-# HANDOFF — llm-3d-viz
+# HANDOFF — llm-3d-viz audit + hardening (2026-08-08)
 
-**Last updated:** 2026-08-08 (membrane + Atlas intelligence + push — all shipped to both remotes + production)
+## Status: ALL 4 Sol@xhigh audits complete. 15 findings patched + deployed. Remaining are lifecycle/edge-case.
 
-## What this is
+## What was done this session
 
-Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). Three.js stage, Pareto frontier **membrane** (2-objective surface), multi-effort trails, Decide mode, Atlas decision agent with **compositional queries** + **always-on LLM**, shareable URL state.
+### Sol@xhigh adversarial audit — 4 domains, all FAIL
+| Domain | Verdict | Findings |
+|--------|---------|----------|
+| Data Pipeline | FAIL | 2 CRITICAL, 4 HIGH, 3 MEDIUM |
+| Math/Scoring | FAIL | 3 HIGH, 2 MEDIUM, 2 LOW |
+| UI State | FAIL | 1 HIGH, 5 MEDIUM, 3 LOW |
+| Viz/Rendering | FAIL | 5 HIGH, 5 MEDIUM, 1 LOW |
 
-- **Repo (Forgejo SoT):** https://git.kyanitelabs.tech/simon/llm-3d-viz
-- **OSS (public MIT):** https://github.com/KyaniteLabs/llm-3d-viz (`oss/public` branch)
-- **Live:** https://viz.kyanitelabs.tech/
-- **Run:** `npm install && npm run dev`
-- **Tests:** `npm test` (271 unit tests, 32 files)
+Reports at `/tmp/audit-{data,math,ui,viz}.out.txt`.
 
-## Current state (2026-08-08) — resume here
+### Patched (15 findings, 6 commits, all live)
 
-**Everything pushed and deployed.** Local `main` = `origin/main` = `a673e51`. `oss/public` = `7fe32d5` on GitHub. Production deployed to `viz.kyanitelabs.tech` (Cloudflare Pages main, commit `27f2fb4`).
+**Security & Ops (6 HIGH + 2 Sol-specific):**
+1. **Stored XSS** (`console.ts`) — `escapeHtml()` on all catalog-derived innerHTML sinks (model IDs, display names, providers, families, tiers, axis labels, option values)
+2. **Boot DoS** (`url-state.ts`) — removed redundant `decodeURIComponent` in `splitList()` + `parseDecideFromParams()` (URLSearchParams already decodes; `%` throws URIError)
+3. **TTS credit-burn** (`workers/viz-kyanitelabs-proxy/src/index.js`) — origin allowlist (`viz.kyanitelabs.tech`, `llm-3d-viz.pages.dev` only) + per-IP KV rate limit (10 req/min). Non-allowlisted → 403. KV namespace `TTS_RATE_LIMIT` created.
+4. **Empty-catalog auto-deploy** (`catalog-auto-update.sh`) — `MIN_ROWS=50` floor + >50% shrink threshold guard before build/deploy
+5. **Pages approval gate** (`catalog-auto-update.sh`) — requires `DEPLOY_PAGES=1` in addition to `CLOUDFLARE_API_TOKEN` + `PAGES_PROJECT` (closes cron auto-publish bypass)
+6. **rsync --delete safety** (`catalog-auto-update.sh`) — rejects root/broad `DEPLOY_DIST` destinations
 
-### This session's commits (all on `origin/main` + `oss/public`)
+**Data Pipeline (1 CRITICAL + 3 HIGH):**
+7. **Cost formula** (`aa-api.mjs`, `catalog-join.mjs`) — correct AA 7:2:1 blend: `(7*cache + 2*input + 1*output) / 10`. Extracts `price_1m_cache_hit_tokens` (available for 209/595 models). Conservative fallback when cache=null. Sol blend: $9.50→$4.35.
+8. **Reasoning regex** (`aa-api.mjs`) — dropped trailing `\b` so `(Reasoning)` matches. 49 models now correctly flagged.
+9. **Null OpenRouter prices** (`catalog-join.mjs`) — reject null/non-numeric before `Number()` (was `Number(null)===0` → falsely free)
+10. **OpenAI xhigh cap** (prior session, retained) — `NON_USER_TIERS` filter, durable across cron
 
-| Commit | Summary |
-|--------|---------|
-| `c595528` | Pareto frontier membrane + skirt — true 2-objective surface (zero-dep Delaunay) |
-| `149c965` | Atlas compositional constraint queries (filter+rank over 15+ axes) |
-| `c2a66ac` | LLM always-on via NUCBox Unsloth (Ornith 35B) + fail-fast resilience |
-| `dbac442` | Modality data gap fill from OpenRouter (91 vision / 23 video / 12 audio) |
-| `1ae11ef` | Filter-control parity (solo family, only/hide provider) |
-| `76960e6` | UI-action bus — agent parity for view-local controls (reset_view etc.) |
-| `2a4c8a3` | Membrane whiteout regression guard script |
-| `a673e51` | Remove dead constant leaking private Tailscale IP (security scrub) |
+**Math/Scoring (3 HIGH + 1 MEDIUM):**
+11. **Atlas empty filter scope** (`query-catalog.ts`, `tools.ts`) — use `ctx.visible` directly, don't fall back to full catalog when `visible=[]`
+12. **Decimal anchor floor** (`decide.ts`) — removed `Math.round` from `clampFloor` (IQ 62.5 was rounded to 63, excluding the anchor from its own floor)
+13. **isScorable finite guards** (`models.ts`) — `Number.isFinite` checks prevent Infinity/NaN from entering axis domains
+14. **URL weight cap** (`url-state.ts`) — clamp each weight to [0,100] (prevents 1e308 → Infinity total → NaN scores)
 
-### Gates (all green)
+**Viz/Rendering (1 HIGH):**
+15. **Delaunay super-triangle** (`delaunay.ts`) — increased from 4×span to 20×span (fixes incomplete meshes, false hull edges)
 
-| Gate | Result |
-|------|--------|
-| `npx tsc --noEmit` | Clean |
-| `npm test` | **271 pass** (32 files) |
-| `npm run build` | Clean (~14s; chunk-size warning cosmetic/pre-existing) |
-| Production membrane verify | `whitePct 1.22%` (healthy; whiteout ≈50%) |
+### Config reverted
+- `~/.gjc/agent/config.yml` `task.agentModelOverrides` → `{}` (was Sol@xhigh for all task agents; spendy default)
 
-## Key architecture (this session)
+### Deployments
+- **Cloudflare Pages**: 4 deploys this session, all verified live (`viz.kyanitelabs.tech` HTTP 200)
+- **Worker**: deployed 2× with origin allowlist + KV rate limit (verified: non-allowlisted origin → 403, allowlisted → passes)
+- **Forgejo origin**: pushed all 6 commits to `simon/llm-3d-viz` main
 
-### Pareto membrane (`src/lib/delaunay.ts` + `stage3d-three.ts`)
-The 3-objective Pareto front is genuinely 2D. Delaunay triangulation over (cost,speed) projection, lifted by y=intelligence. Zero-dependency Bowyer-Watson (cocircular-robust via 1e-9 tie-break). `membraneMesh` (translucent, opacity 0.12, depthWrite false, renderOrder 2) + `skirtMesh` (hull→floor, additive, renderOrder 1). Spine tube kept on top.
+## Remaining unpatched findings (prioritized)
 
-### Atlas compositional queries (`src/lib/atlas-agent/query-catalog.ts`)
-15+ filter/rank axes: objective (min_cost/max_speed/max_intelligence), floor, openness, maxPrice, minTps, modality, minContext, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider, family. Honest data-gap handling (`unsupportedDataAxes`/`dropUnsupportedData`). Wired into `offline-router.ts` (fires on ≥2 axes) + `tool-dispatch.ts` (`query_catalog` LLM tool).
+### HIGH — deferred (lifecycle/structural, lower real-world urgency)
+| # | Finding | Files | Impact |
+|---|---------|-------|--------|
+| V3 | `Stage3DThree.destroy()` leaks listener + scene resources | `stage3d-three.ts:352-383` | Only on stage switch/HMR remount |
+| V4 | `SweepScheduler.destroy()` doesn't unsubscribe from store | `sweep.ts:115-143` | Same — stacks schedulers on remount |
+| V5 | Plotly stage/projection: no teardown at all | `stage3d.ts:503-513`, `projections.ts:376-462` | Same — leaks WebGL contexts |
+| M3 | MoE VRAM uses active params instead of total | `local-vram.ts:50,87` | Qwen3-235B-A22B admitted to 24GB tier |
+| D9 | Identity normalization cross-model match | `family-effort.shared.ts:87` | k2-v2 → k2 → Kimi k2 pricing on MBZUAI row |
 
-### LLM always-on (`llm-config.ts` + `llm-loop.ts` + `controller.ts`)
-Default preset: NUCBox Unsloth (Ornith 35B, same-origin `/api/atlas/llm/v1`, apiKey "proxy"). 45s timeout (35B + tool-calling needs budget). 60s failure backoff (skips dead endpoints). Headless/no-localStorage stays disabled (tests stay offline).
+### MEDIUM — deferred
+| # | Finding | Files |
+|---|---------|-------|
+| D7 | Free API fields asserted as facts (context_length: 128000) | `aa-api.mjs:89`, `catalog-scope.ts:49` |
+| D11 | Admission accepts impossible axis values | `catalog-join.mjs:418`, `models.ts:127` |
+| D12 | max/xhigh sorted wrong (moot — max removed) | `family.ts:23-24` |
+| D10 | Bare "Max" product names → false effort tiers | `family-effort.shared.ts:29` |
+| U3 | "None" then one selection → "All" | `filter-shelf.ts:222-270` |
+| U4 | Stale share copy with current URL | `main.ts:538-548` |
+| U5 | "Multi-effort only" can emit one-row family | `filters.ts:96-139` |
+| U6 | Default Decide state round-trips as user-authored | `url-state.ts:130,313` |
+| V6 | Hover highlighting destroys Decide/cinema opacity | `stage3d-three.ts:1050-1110` |
+| V7 | Absolute Delaunay epsilon rejects valid small triangles | `delaunay.ts:31-34` |
+| V8 | Label collision O(n²) per orbit frame | `stage3d-three.ts:231-242` |
+| V9 | Point rendering O(n²) scans | `stage3d-three.ts:1002-1004` |
+| V10 | Camera APIs accept NaN/Infinity | `stage3d-three.ts:395-430` |
+| M4 | Published-precision quantization not decimal-safe | `pareto.ts:12`, `decide.ts:78` |
 
-### UI-action bus (`src/lib/atlas-agent/ui-actions.ts`)
-`registerUiAction`/`dispatchUiAction` allow-listed bus for view-local controls. `reset_view` registered in `main.ts` (recenter camera + clear pin). Extensible: leaderboard expand, effort-step nav, etc.
+### LOW — deferred
+U7 ageMonths not serialized · U8 month-end age overflow · U9 share text injection · M6 empty shortlist accepted · M7 empty anchor table crash · V11 label NMS pre-clamp + fake width
 
-## Still open (parked — do not pretend done)
+## Cron state
+- `crontab -l` block `# BEGIN llm-3d-viz-catalog-sync` at 06:07/14:07/22:07 local
+- Script self-loads `.env` for `AA_API_KEY`
+- Empty-catalog guard + Pages gate now active in cron runs
+- No reinstall needed (script updated in-place)
 
-| Item | Notes |
-|------|-------|
-| **Public-site always-on LLM** | Does `viz-kyanitelabs-proxy` Worker forward `/api/atlas/llm` → NUCBox? If not, public site gracefully falls back to offline (current behavior). Needs Worker inspection. |
-| **SWE-bench / GPQA data** | Still null (0/302). Need confirmed legal source (AA Pro? official leaderboards?). Filter code is forward-compatible — lights up when data lands. |
-| **`v1.1.0` tag + releases** | Membrane + Atlas + modality are notable enough for a minor bump. Ready to cut on request. Forgejo API release + `gh release create`. |
-| **Cosmetic UI actions** | Leaderboard `<details>` expand, console effort-step nav — one `registerUiAction` each. |
-| **Pre-existing decide-mode spec** | `tests/decide-mode.spec.ts` "Decide mode v1" aria assertion fails on baseline `638cf97` too — NOT caused by this session. |
-| CF Managed robots AI blocks | Zone-level; `llms.txt` still live |
-| Public HTTP MCP | Local stdio only; needs auth + rate limit |
+## Live verification
+- `viz.kyanitelabs.tech` → HTTP 200
+- TTS non-allowlisted origin → HTTP 403 ✓
+- TTS allowlisted origin → passes (503 if OPENAI_API_KEY not set as Worker secret — it was never set)
+- 299 rows, 0 OpenAI max, GPT-5.6 Sol blend = $4.35
 
-## Quick commands
-
-```bash
-npm run dev
-npm test                              # 271 unit tests
-npx tsc --noEmit                      # typecheck
-npm run build                         # ~14s
-npm run catalog:coverage
-npm run atlas:cli -- meta
-
-# verify production membrane (deterministic pixel check):
-CAPTURE_URL="https://viz.kyanitelabs.tech/" node scripts/verify-membrane.mjs
-
-# deploy (operator): npx wrangler pages deploy dist --project-name=llm-3d-viz --branch=main --commit-dirty=true
-```
-
-### NUCBox Atlas LLM (local only)
-
-```bash
-node scripts/wire-atlas-nucbox.mjs   # writes .env.local (gitignored)
-npm run dev                          # proxy /api/atlas/llm → NUCBox:8890
-# UI: Atlas → NUCBox Unsloth (default preset)
-```
-
-## Dual-repo model
-
-- **Product SoT:** Forgejo `origin` only. Push is approval-gated.
-- **Open source:** GitHub `oss` remote, `oss/public` branch. Intentional publish only — scrub private IPs/secrets before push.
-- See `docs/agents/dual-repo.md`.
-
-## Agent docs
-
-- Issues: `docs/agents/issue-tracker.md`
-- Domain: `docs/agents/domain.md`
-- Dual-repo: `docs/agents/dual-repo.md`
-- MCP requirements: `docs/agents/mcp-cli-api-api-requirements.md`
-
-## Session history
-
-- 2026-08-08 (this session): `docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-08-membrane-atlas-push.md`
-- 2026-08-07: `docs/v1/wayfinder/SESSION-CLOSEOUT-2026-08-07-atlas-agentic.md`
+## Next steps
+1. **Viz lifecycle HIGHs (V3-V5)**: implement `destroy()` teardown for Stage3DThree (remove resize listener, dispose scene resources), SweepScheduler (store + call unsubscribe), and Plotly stage/projections (`Plotly.purge()`). ~200 lines across 4 files.
+2. **MoE VRAM (M3)**: parse total params separately from active in `local-vram.ts`.
+3. **Identity normalization (D9)**: separate Arena-channel suffix stripping from canonical slug matching.
+4. **Worker secret**: set `OPENAI_API_KEY` via `wrangler secret put` if TTS should be live.
