@@ -27,6 +27,13 @@ export class CinemaMode {
   /** performance.now() after which pointerenter may exit cinema. */
   private detuneArmedAt = 0;
   private wasCinema = false;
+  // V07: store the store-subscribe disposer so destroy() tears down the live
+  // subscriber (an orphan render() would restart the RAF against a disposed stage).
+  private unsubscribe: (() => void) | null = null;
+  // V07: track the FAB + its click handler so destroy/remount removes the stale
+  // closure over the old store and a remounted instance rebinds a working exit.
+  private exitFab: HTMLButtonElement | null = null;
+  private exitFabHandler: ((e: Event) => void) | null = null;
 
   constructor(stage: Stage3DSurface, store: AppStore) {
     this.stage = stage;
@@ -41,7 +48,7 @@ export class CinemaMode {
       media.addEventListener?.("change", onChange);
       this.removeMotionListener = () => media.removeEventListener?.("change", onChange);
     }
-    this.store.subscribe((state) => this.render(state));
+    this.unsubscribe = this.store.subscribe((state) => this.render(state));
     // Exit controls: floating FAB, keyboard C, Atlas "cinema off".
     // Do NOT exit on pointerenter — reflow after enter was firing false exits
     // and cinema hid all chrome so users could not recover without keyboard.
@@ -50,6 +57,14 @@ export class CinemaMode {
 
   private ensureExitFab() {
     let fab = document.querySelector<HTMLButtonElement>("[data-cinema-exit]");
+    // V07: a remount may reuse a FAB left in the DOM by a prior (now destroyed)
+    // instance. Strip the stale click handler (closure over the old store) and
+    // bind a fresh one so this instance's visible Exit control actually works.
+    const makeHandler = () => (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (this.store.getState().cinemaMode) this.store.update({ cinemaMode: false });
+    };
     if (!fab) {
       fab = document.createElement("button");
       fab.type = "button";
@@ -57,18 +72,35 @@ export class CinemaMode {
       fab.setAttribute("data-cinema-exit", "1");
       fab.setAttribute("aria-label", "Exit cinema mode");
       fab.textContent = "Exit cinema [C]";
-      fab.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (this.store.getState().cinemaMode) this.store.update({ cinemaMode: false });
-      });
       document.body.appendChild(fab);
+    } else if (this.exitFabHandler) {
+      fab.removeEventListener("click", this.exitFabHandler);
     }
+    const handler = makeHandler();
+    fab.addEventListener("click", handler);
+    this.exitFab = fab;
+    this.exitFabHandler = handler;
   }
 
   destroy() {
+    // V07: tear down the live subscriber and the FAB click handler so a later
+    // old-store cinema update cannot invoke this instance's render()/RAF against
+    // the disposed stage, and the persistent FAB stops driving the old store.
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    if (this.exitFab && this.exitFabHandler) {
+      this.exitFab.removeEventListener("click", this.exitFabHandler);
+    }
+    this.exitFabHandler = null;
     this.stop();
     this.removeMotionListener?.();
+    // V07: clear cinema chrome so a destroyed/remounted instance does not inherit
+    // a stuck is-cinema shell, method overlay, or atmosphere from the prior run.
+    document.querySelector(".app-shell")?.classList.remove("is-cinema");
+    document.documentElement.classList.remove("is-cinema");
+    this.syncMethodOverlay(false);
+    this.stage.setCinemaAtmosphere?.(false);
+    this.wasCinema = false;
   }
 
   private render(state: Readonly<AppState>) {

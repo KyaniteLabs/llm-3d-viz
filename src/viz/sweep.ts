@@ -81,6 +81,16 @@ export class SweepScheduler {
   private previousFilters: ModelFilters | null = null;
   private lastBatch = -1;
   private currentAppearance: CurrentAppearance | null = null;
+  // V06: cached appearance is keyed by the graph model ids + semantic mode it
+  // was computed for; an axis/Decide/cinema change invalidates it so a classic
+  // sweep never reasserts stale colors/sizes over a semantically different stage.
+  private currentAppearanceStageIds: string[] | null = null;
+  private previousModeKey: string | null = null;
+  // V08: per-graph plotly_afterplot callbacks, removed on destroy so destroyed
+  // schedulers cannot keep restyling live graphs.
+  private readonly afterPlotCallbacks = new Map<Graph, () => void>();
+  // V08: terminal flag guards queued afterplot microtasks after teardown.
+  private destroyed = false;
   private reduced = motionPreference()?.matches ?? false;
   private readonly heatEncoding: boolean;
   private presentationMode: PresentationMode = "curve";
@@ -115,6 +125,25 @@ export class SweepScheduler {
     }
     this.unsubscribe = this.store.subscribe((state) => {
       this.ensureAfterPlotListeners();
+      // V06: axis/Decide/cinema are appearance-invalidating state. While a
+      // semantically-driven mode (Decide or cinema) is active the stage owns the
+      // paint (floor/Pareto/shortlist or focus dim) — the sweep must NOT
+      // reassert classic frontier/optimum styling over it. Invalidate the cache
+      // and stay out of the way until those modes clear.
+      const modeKey = `${state.axisMapping.x}/${state.axisMapping.y}/${state.axisMapping.z}|cinema=${state.cinemaMode}|decide=${state.decideMode}|floor=${state.intelligenceFloor}`;
+      const modeChanged = this.previousModeKey !== null && this.previousModeKey !== modeKey;
+      this.previousModeKey = modeKey;
+      const semanticActive = Boolean(state.decideMode || state.cinemaMode);
+      if (modeChanged) {
+        // The stage re-rendered with new semantics (new model ids / styling) —
+        // drop the stale appearance so it is never reasserted.
+        this.currentAppearance = null;
+        this.currentAppearanceStageIds = null;
+      }
+      if (semanticActive) {
+        // Decide/cinema: the stage owns appearance; the classic sweep steps aside.
+        return;
+      }
       const weightsChanged =
         !this.previousWeights ||
         Object.keys(state.weights).some(
@@ -125,7 +154,7 @@ export class SweepScheduler {
       const filtersChanged =
         !this.previousFilters || !sameFilters(this.previousFilters, state.filters);
       if (!weightsChanged && !filtersChanged && this.previousWeights) {
-        // Store updates such as cinema mode re-render Plotly without starting a
+        // Store updates such as a hover re-render Plotly without starting a
         // sweep. Re-assert only when the visible universe is unchanged — never
         // clobber a filter-correct stage with stale full-catalog colors.
         this.reassertAppearance();
@@ -157,10 +186,26 @@ export class SweepScheduler {
   }
 
   destroy() {
+    this.destroyed = true; // V08: terminal flag for queued afterplot microtasks.
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.cancel();
     this.removeMotionListener?.();
+    // V08: detach every tracked plotly_afterplot listener via the graph
+    // emitter's listener-removal API so a destroyed scheduler can no longer
+    // restyle live graphs after each redraw.
+    this.afterPlotCallbacks.forEach((cb, gd) => {
+      const remove = (gd as any).removeListener;
+      if (typeof remove === "function") {
+        try { remove.call(gd, "plotly_afterplot", cb); } catch {}
+      }
+    });
+    this.afterPlotCallbacks.clear();
+    this.afterPlotRegistered = false;
+    this.afterPlotCheckQueued = false;
+    // V06/V08: drop the cached appearance so nothing reasserts stale arrays.
+    this.currentAppearance = null;
+    this.currentAppearanceStageIds = null;
   }
 
   private cancel() {
@@ -209,6 +254,7 @@ export class SweepScheduler {
           familyId: familyIdOf(model),
           singleton: isSingleton(model, this.models, familyIdOf),
           provider: model.provider,
+          modelId: model.model,
         }).fill;
       });
       const sizes = ids.map((id) => {
@@ -225,6 +271,7 @@ export class SweepScheduler {
             ? isSingleton(model, this.models, familyIdOf)
             : true,
           provider: model?.provider,
+          modelId: model?.model,
         });
         let size = Math.max(4, Math.round(8 * enc.sizeScale));
         if (target && id === optimum) size = Math.max(size, 16);
@@ -280,6 +327,8 @@ export class SweepScheduler {
         viz.markerSizes = sizeCopy.slice();
         (window as any).__viz = viz;
       }
+    }).catch(() => {
+      // V13: a failed/purged graph must not flood an unhandled promise here.
     });
   }
 
@@ -290,6 +339,10 @@ export class SweepScheduler {
       if (projection) this.write(gd, projection.colors, projection.sizes);
     });
     this.currentAppearance = appearance;
+    // V06: remember the stage model ids this appearance was computed for, so a
+    // later reassert can detect a remapped/refreshed stage and refuse to apply
+    // stale index-aligned arrays to different model ids.
+    this.currentAppearanceStageIds = graphIds(this.stage);
     // Plots are guaranteed ready once we have written them — arm the afterplot
     // re-assert here too (idempotent) so it registers even if no later store tick
     // would have done it before a styling-dropping render lands.
@@ -298,6 +351,20 @@ export class SweepScheduler {
 
   private reassertAppearance() {
     if (!this.currentAppearance) return;
+    // V06: never reassert a classic appearance over a stage whose model ids no
+    // longer match the ones it was computed for (axis remap / refresh). The
+    // arrays are index-aligned; applying them to a reordered set would corrupt
+    // per-model color/size identity.
+    const stageIds = graphIds(this.stage);
+    if (
+      this.currentAppearanceStageIds === null ||
+      stageIds.length !== this.currentAppearanceStageIds.length ||
+      stageIds.some((id, i) => id !== this.currentAppearanceStageIds![i])
+    ) {
+      this.currentAppearance = null;
+      this.currentAppearanceStageIds = null;
+      return;
+    }
     this.writeAppearance({
       stage: {
         colors: this.currentAppearance.stage.colors.slice(),
@@ -326,9 +393,14 @@ export class SweepScheduler {
     // Wait until projections exist (chunk may load after stage).
     if (this.projections.length > 0 && plotlyGraphs.length < this.projections.length) return;
     this.afterPlotRegistered = true;
-    plotlyGraphs.forEach((gd) =>
-      (gd as any).on.call(gd, "plotly_afterplot", () => this.onAfterPlot(gd)),
-    );
+    plotlyGraphs.forEach((gd) => {
+      // V08: track the exact closure so destroy() can remove it via the graph
+      // emitter's listener-removal API (otherwise every remount leaks a closure
+      // that keeps restyling stale arrays after every redraw).
+      const cb = () => this.onAfterPlot(gd);
+      this.afterPlotCallbacks.set(gd, cb);
+      (gd as any).on.call(gd, "plotly_afterplot", cb);
+    });
   }
 
   /** The appearance slice the scheduler owns for one graph div (stage or a projection). */
@@ -379,11 +451,25 @@ export class SweepScheduler {
    * appearance writes nothing.
    */
   private onAfterPlot(_gd: Graph) {
-    if (this.afterPlotCheckQueued || !this.currentAppearance) return;
+    // V08: a destroyed scheduler must not enqueue restyles.
+    if (this.destroyed || this.afterPlotCheckQueued || !this.currentAppearance) return;
     this.afterPlotCheckQueued = true;
     queueMicrotask(() => {
       this.afterPlotCheckQueued = false;
-      if (!this.currentAppearance) return;
+      // V08: recheck the terminal flag inside the deferred microtask too.
+      if (this.destroyed || !this.currentAppearance) return;
+      // V06: if the stage's model ids have drifted from the cached appearance,
+      // drop it instead of writing stale index-aligned arrays.
+      const stageIds = graphIds(this.stage);
+      if (
+        this.currentAppearanceStageIds === null ||
+        stageIds.length !== this.currentAppearanceStageIds.length ||
+        stageIds.some((id, i) => id !== this.currentAppearanceStageIds![i])
+      ) {
+        this.currentAppearance = null;
+        this.currentAppearanceStageIds = null;
+        return;
+      }
       for (const gd of [this.stage, ...this.projections]) {
         const slice = this.appearanceFor(gd);
         if (slice && !this.liveMatchesAppearance(gd)) {

@@ -14,6 +14,7 @@ import {
   DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
   densityMarkerScale,
+  getAxisMetric,
   hasMappedAxes,
   modelToSceneCoords,
   normalizeAxisMapping,
@@ -442,7 +443,29 @@ export class Stage3DThree implements Stage3DSurface {
     if (!this.domains) return null;
     const coords = modelToSceneCoords(model, this.axisMapping, this.domains, S);
     if (!coords) return null;
+    // V02: reject non-finite scene coordinates. Positive Infinity slips through
+    // hasMappedAxes() (which only rejects null/NaN) and would corrupt the cube
+    // domain or produce a NaN mesh position; axis-metrics.ts is owned elsewhere,
+    // so guard defensively here.
+    if (!Number.isFinite(coords.x) || !Number.isFinite(coords.y) || !Number.isFinite(coords.z)) {
+      return null;
+    }
     return new THREE.Vector3(coords.x, coords.y, coords.z);
+  }
+
+  /**
+   * V02: local finite-aware axis predicate. `hasMappedAxes` (axis-metrics.ts)
+   * only rejects null/NaN, so a row with `tps: Infinity` is admitted and poisons
+   * the log domain (max = Infinity) and mesh coordinates. Require every mapped
+   * axis value to be finite, retaining the log non-negative rule. This also
+   * shields `buildAxisDomain` since the filtered set is what reaches it.
+   */
+  private hasFiniteMappedAxes(model: Model, mapping: AxisMapping): boolean {
+    if (!hasMappedAxes(model, mapping)) return false;
+    return (["x", "y", "z"] as const).every((axis) => {
+      const v = getAxisMetric(mapping[axis]).getValue(model);
+      return v !== null && Number.isFinite(v);
+    });
   }
 
   /** Map a raw tick value on a scene axis into a world coordinate on that axis. */
@@ -928,7 +951,7 @@ export class Stage3DThree implements Stage3DSurface {
     // Decide mode (intelligenceFloor set): suppress value-score optimum AND classic
     // multi-axis frontier primacy — only floor dim + cost×speed Pareto/shortlist rank.
     const decideMode = floor != null;
-    const plottable = modelsList.filter((m) => hasMappedAxes(m, this.axisMapping));
+    const plottable = modelsList.filter((m) => this.hasFiniteMappedAxes(m, this.axisMapping));
     const frontierModels = decideMode ? [] : frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
     const optimumModel = decideMode ? undefined : weightedOptimum(scores)?.model;
@@ -1118,18 +1141,33 @@ export class Stage3DThree implements Stage3DSurface {
         decideMode && floor != null && (model.aa_intelligence_index == null || model.aa_intelligence_index < floor);
       const accent = !belowFloor && enc.showRing ? enc.accent : undefined;
       const core = !belowFloor && enc.showCore ? enc.core : undefined;
+      // V09: a cinema-suppressed mark (opacity 0, size 0.01) must not be an
+      // invisible depth/hover occluder. Hide it, drop depthWrite on every
+      // material, and keep it out of the raycast/model-id/export arrays
+      // (domains still include the row, so the cube bounds are unaffected).
+      const suppressed = Boolean(cinemaFocus && cinemaFocus.size > 0 && !cinemaFocus.has(model.model));
       const mesh = this.makePointMesh(kind, color, size, accent, core);
       mesh.position.copy(pos);
+      if (suppressed) mesh.visible = false;
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.transparent = opacity < 0.99 || mat.transparent;
       mat.opacity = opacity;
+      if (suppressed) mat.depthWrite = false;
       for (const key of ["accentShell", "coreShell"] as const) {
         const shell = mesh.userData[key] as THREE.Mesh | undefined;
         if (shell) {
           const sm = shell.material as THREE.MeshBasicMaterial;
           sm.opacity = Math.min(sm.opacity, opacity);
+          if (suppressed) sm.depthWrite = false;
         }
       }
+      // V12: persist each material's post-render base opacity so family
+      // highlight can restore the exact value (not a hard-coded 0.92) and dim
+      // accent/core child layers consistently with the body.
+      const accentShell = mesh.userData.accentShell as THREE.Mesh | undefined;
+      if (accentShell) mesh.userData.accentBaseOpacity = (accentShell.material as THREE.MeshBasicMaterial).opacity;
+      const coreShell = mesh.userData.coreShell as THREE.Mesh | undefined;
+      if (coreShell) mesh.userData.coreBaseOpacity = (coreShell.material as THREE.MeshBasicMaterial).opacity;
       mesh.userData.modelId = model.model;
       mesh.userData.semanticClass = semanticClass;
       mesh.userData.reasoning = Boolean(model.reasoning);
@@ -1138,8 +1176,10 @@ export class Stage3DThree implements Stage3DSurface {
       mesh.userData.effectiveOpacity = opacity; // post decide/cinema-adjusted base for highlight restore
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
-      this.pointMeshes.push(mesh);
-      this.modelIds.push(model.model);
+      if (!suppressed) {
+        this.pointMeshes.push(mesh);
+        this.modelIds.push(model.model);
+      }
     });
 
     // Family effort trails: connect every measured intensity step for a family
@@ -1185,6 +1225,9 @@ export class Stage3DThree implements Stage3DSurface {
       const line = new THREE.Line(geom, mat);
       line.renderOrder = 0;
       line.userData.familyId = famId;
+      // V12: persist the trail's idle base opacity (already adjusted for solo)
+      // so setFamilyHighlight restores the exact quiet value, not 0.92.
+      line.userData.baseOpacity = trailOpacity;
       this.trailsGroup.add(line);
       trailCount += 1;
     }
@@ -1192,7 +1235,7 @@ export class Stage3DThree implements Stage3DSurface {
     (this.gd as any).__familyTrailCount = trailCount;
 
     // Ridge only among frontier models that are also plottable on the current axes.
-    const ridgeSource = frontierModels.filter((m) => hasMappedAxes(m, this.axisMapping));
+    const ridgeSource = frontierModels.filter((m) => this.hasFiniteMappedAxes(m, this.axisMapping));
     const vertices = ridgeOrder(ridgeSource);
     const ridgePts = vertices
       .map((v) => this.modelToScene(v.model))
@@ -1356,14 +1399,28 @@ export class Stage3DThree implements Stage3DSurface {
     for (const mesh of this.pointMeshes) {
       const fid = mesh.userData.familyId as string | undefined;
       const base = (mesh.userData.effectiveOpacity as number) ?? 1;
+      const dim = Boolean(familyId && fid && fid !== familyId);
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      if (familyId && fid && fid !== familyId) {
+      if (dim) {
         mat.transparent = true;
         mat.opacity = Math.min(base, 0.18);
         mesh.scale.setScalar(0.72);
       } else {
         mat.opacity = base;
         mesh.scale.setScalar(1);
+      }
+      // V12: apply the same opacity treatment to brand child shells so a dimmed
+      // mark cannot retain a bright ring/core, and restore each to its exact
+      // persisted base when the highlight clears.
+      for (const [key, baseKey] of [
+        ["accentShell", "accentBaseOpacity"],
+        ["coreShell", "coreBaseOpacity"],
+      ] as const) {
+        const shell = mesh.userData[key] as THREE.Mesh | undefined;
+        if (!shell) continue;
+        const shellBase = (mesh.userData[baseKey] as number | undefined) ?? 1;
+        const sm = shell.material as THREE.MeshBasicMaterial;
+        sm.opacity = dim ? Math.min(shellBase, 0.18) : shellBase;
       }
     }
     for (const child of this.trailsGroup.children) {
@@ -1375,7 +1432,10 @@ export class Stage3DThree implements Stage3DSurface {
       } else if (familyId && fid === familyId) {
         mat.opacity = 1;
       } else {
-        mat.opacity = 0.92;
+        // V12: restore the trail's exact persisted idle opacity (≈0.18 / 0.88
+        // solo) instead of a hard-coded 0.92 that permanently brightened every
+        // effort trail after a single hover.
+        mat.opacity = (line.userData.baseOpacity as number | undefined) ?? 0.18;
       }
     }
   }
@@ -1384,6 +1444,10 @@ export class Stage3DThree implements Stage3DSurface {
     const n = Math.min(colors.length, sizes.length, this.pointMeshes.length);
     for (let i = 0; i < n; i++) {
       const mesh = this.pointMeshes[i];
+      // V06/V09: never restyle a cinema-suppressed mark — it is intentionally
+      // invisible and excluded from hover/export. A stale sweep size on its tiny
+      // base would otherwise inflate an invisible depth/hover occluder (scale 800×).
+      if (mesh.visible === false) continue;
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.color.set(colors[i]);
       const base = (mesh.userData.baseSizePx as number) || 10;
@@ -1606,7 +1670,7 @@ export class Stage3DThree implements Stage3DSurface {
 
   public fitToVisible(models: Model[], mode: StageFitMode = "multi-effort"): void {
     if (mode === "none") return;
-    const plottable = models.filter((m) => hasMappedAxes(m, this.axisMapping));
+    const plottable = models.filter((m) => this.hasFiniteMappedAxes(m, this.axisMapping));
     let targets = plottable;
     if (mode === "multi-effort") {
       const byFam = groupByFamily(plottable);

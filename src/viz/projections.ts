@@ -1,4 +1,4 @@
-import { loadPlotly } from "./plotly-loader";
+import { loadPlotly, type PlotlyModule } from "./plotly-loader";
 import { Model, isScorable, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier } from "../lib/pareto";
@@ -6,10 +6,16 @@ import { isSingleton, pointEncoding, type PresentationMode, type SemanticPointCl
 import { markChannels } from "./mark-encoding";
 import { familyIdOf } from "../lib/family";
 import {
+  DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
   densityMarkerScale,
+  getAxisMetric,
+  normalizeAxisMapping,
   type AxisDomain,
+  type AxisMapping,
+  type AxisMetricId,
 } from "../lib/axis-metrics";
+import type { StageRenderOptions } from "./stage-api";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 // Kept identical to stage3d.ts so both views resolve the same palette when a
@@ -24,17 +30,15 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
   fontMono: '"IBM Plex Mono", "Geist Mono", ui-monospace, monospace',
 } as const;
 
-/** One of the stage's three axes; each projection picks two. */
-type AxisKind = "tps" | "cost" | "intelligence";
-
-/** The three orthogonal 2D projections of the SPEED × COST × INTELLIGENCE stage. */
-type ProjectionKind = "tps-intelligence" | "tps-cost" | "cost-intelligence";
+/** A stage-axis metric id; each projection plots two of the active three. */
+type AxisKind = AxisMetricId;
 
 /** A graph host after Plotly has attached its runtime graph properties. */
 type PlotlyGraphDiv = HTMLDivElement & { data?: unknown };
 
 interface ProjectionSpec {
-  kind: ProjectionKind;
+  /** Stable key for CSS class + uirevision (`${x}--${y}`). */
+  kind: string;
   x: AxisKind;
   y: AxisKind;
 }
@@ -91,23 +95,32 @@ export class Projections {
   };
   /** One graph div per projection, in `ProjectionSpec` order. */
   public readonly gds: PlotlyGraphDiv[] = [];
-  private readonly specs: ProjectionSpec[];
+  // V05: active axis mapping threaded in via render(); the three orthogonal
+  // 2D specs are derived from its X/Y/Z instead of hard-coded tps/cost/intelligence.
+  private axisMapping: AxisMapping = { ...DEFAULT_AXIS_MAPPING };
+  private specs: ProjectionSpec[] = [];
   private initialized = false;
   private presentationMode: PresentationMode = "curve";
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
-  /** Shared domain builder snapshots for the current visible set (stage parity). */
-  private domains: {
-    tps: AxisDomain;
-    cost: AxisDomain;
-    intelligence: AxisDomain;
-  } | null = null;
+  /**
+   * Shared domain builder snapshots for the current visible set (stage parity).
+   * V05: keyed by the active metric ids (the three mapped axes), not a fixed
+   * tps/cost/intelligence triple.
+   */
+  private domains: Record<string, AxisDomain> = {};
   /** Incremented every render so Plotly.react never silently skips a data diff. */
   private datarevision = 0;
   /** True while either direction of a coupling fan-out is driving Fx.hover. */
   private isProgrammatic = false;
   private coupled = false;
   private renderGen = 0;
+  // V03: retain the resolved Plotly module so destroy() can purge owned graphs
+  // without relying on window.Plotly (never set in the bundled path).
+  private plotly: PlotlyModule | null = null;
+  // V04: terminal flag so a render waiting on the lazy import cannot resurrect a
+  // destroyed instance after teardown.
+  private destroyed = false;
   private destroyFn: (() => void) | null = null;
 
   constructor(containers: HTMLElement[], stageGd: HTMLDivElement, heatEncoding = true) {
@@ -117,28 +130,60 @@ export class Projections {
     const styles = getComputedStyle(document.documentElement);
     const resolveToken = (name: string, fallback: string) =>
       styles.getPropertyValue(name).trim() || fallback;
+    // V01: color tokens serialize as color(display-p3 …) on wide-gamut browsers,
+    // and Plotly's legacy parser (and this class's own colorWithAlpha) cannot
+    // consume that syntax — it falls through to invalid/white (the projection
+    // whiteout). Route the six color tokens through a 2D canvas so we always
+    // hand Plotly browser-converted sRGB bytes (same implementation as
+    // stage3d.ts / stage3d-three.ts). Plain resolveToken stays for --font-mono.
+    const resolveColorToken = (name: string, fallback: string): string => {
+      const raw = styles.getPropertyValue(name).trim();
+      if (!raw) return fallback;
+      const c = document.createElement("canvas");
+      c.width = 1; c.height = 1;
+      const ctx = c.getContext("2d");
+      if (!ctx) return fallback;
+      ctx.fillStyle = raw;
+      ctx.fillRect(0, 0, 1, 1);
+      const d = ctx.getImageData(0, 0, 1, 1).data;
+      return `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
+    };
     this.tokens = {
-      filament: resolveToken("--filament", DESIGN_SYSTEM_TOKEN_FALLBACKS.filament),
-      filamentDim: resolveToken("--filament-dim", DESIGN_SYSTEM_TOKEN_FALLBACKS.filamentDim),
-      slateCyan: resolveToken("--slate-cyan", DESIGN_SYSTEM_TOKEN_FALLBACKS.slateCyan),
-      textWarm: resolveToken("--text-warm", DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm),
-      textMuted: resolveToken("--text-muted", DESIGN_SYSTEM_TOKEN_FALLBACKS.textMuted),
-      inkField: resolveToken("--ink-field", DESIGN_SYSTEM_TOKEN_FALLBACKS.inkField),
+      filament: resolveColorToken("--filament", DESIGN_SYSTEM_TOKEN_FALLBACKS.filament),
+      filamentDim: resolveColorToken("--filament-dim", DESIGN_SYSTEM_TOKEN_FALLBACKS.filamentDim),
+      slateCyan: resolveColorToken("--slate-cyan", DESIGN_SYSTEM_TOKEN_FALLBACKS.slateCyan),
+      textWarm: resolveColorToken("--text-warm", DESIGN_SYSTEM_TOKEN_FALLBACKS.textWarm),
+      textMuted: resolveColorToken("--text-muted", DESIGN_SYSTEM_TOKEN_FALLBACKS.textMuted),
+      inkField: resolveColorToken("--ink-field", DESIGN_SYSTEM_TOKEN_FALLBACKS.inkField),
       fontMono: resolveToken("--font-mono", DESIGN_SYSTEM_TOKEN_FALLBACKS.fontMono),
     };
 
-    this.specs = [
-      { kind: "tps-intelligence", x: "tps", y: "intelligence" },
-      { kind: "tps-cost", x: "tps", y: "cost" },
-      { kind: "cost-intelligence", x: "cost", y: "intelligence" },
-    ];
+    this.specs = this.computeSpecs(this.axisMapping);
 
     this.buildGraphDivs();
+  }
+
+  /**
+   * V05: derive the three orthogonal 2D projection specs (the X/Y, X/Z and Y/Z
+   * faces) from the active axis mapping, instead of a fixed
+   * tps/cost/intelligence triple. Each face's metrics follow the live controls.
+   */
+  private computeSpecs(mapping: AxisMapping): ProjectionSpec[] {
+    // Face order (z,y), (z,x), (x,y) reproduces the original rate-basis panel
+    // order so the static HTML eyebrows (SPEED/INTEL, SPEED/COST, COST/INTEL)
+    // keep matching the default mapping; non-default mappings follow the live axes.
+    return [
+      { kind: `${mapping.z}--${mapping.y}`, x: mapping.z, y: mapping.y },
+      { kind: `${mapping.z}--${mapping.x}`, x: mapping.z, y: mapping.x },
+      { kind: `${mapping.x}--${mapping.y}`, x: mapping.x, y: mapping.y },
+    ];
   }
 
   /** Materialise one plot div per projection container, in spec order. */
   private buildGraphDivs() {
     this.gds.length = 0;
+    // V05: divs are face slots (X/Y, X/Z, Y/Z); the metrics plotted into each
+    // follow the active mapping, recomputed every render.
     this.specs.forEach((spec, index) => {
       const container = this.containers[index];
       if (!container) return;
@@ -171,16 +216,20 @@ export class Projections {
     return resolvedColor;
   }
 
-  /** Coordinates for one projection, ε-clamping cost exactly as the stage does. */
-  private axisValue(kind: AxisKind, model: Model): number {
-    switch (kind) {
-      case "tps":
-        return model.tps!;
-      case "intelligence":
-        return model.aa_intelligence_index!;
-      case "cost":
-        return model.blended_price_per_M! <= 0 ? this.priceFloor : model.blended_price_per_M!;
+  /**
+   * Coordinates for one projection axis (V05). Resolves the active metric via
+   * getAxisMetric and ε-clamps log axes to the domain floor (same as the stage),
+   * so a remapped projection plots the correct metric instead of a fixed
+   * cost/intelligence/speed field. Returns null for missing/non-finite values.
+   */
+  private axisValue(kind: AxisKind, model: Model): number | null {
+    const v = getAxisMetric(kind).getValue(model);
+    if (v === null || !Number.isFinite(v)) return null;
+    const domain = this.domains[kind];
+    if (domain && domain.scale === "log") {
+      return v <= 0 ? domain.floor : Math.max(v, domain.floor);
     }
+    return v;
   }
 
   /**
@@ -236,12 +285,13 @@ export class Projections {
   }
 
   private axisLayout(kind: AxisKind): Record<string, unknown> {
-    // Intelligence is LINEAR data min–max (frontier-math §3.3 — logging would
-    // distort); speed + cost stay log. Domains match the 3D stage.
-    const domain = this.domains?.[kind];
+    // V05: scale/labels/title follow the active metric's domain (buildAxisDomain),
+    // not a hard-coded intelligence=linear / else=log guess.
+    const domain = this.domains[kind];
     if (!domain) {
       // Pre-first-render fallback (should not paint).
-      return { type: kind === "intelligence" ? "linear" : "log", automargin: true };
+      const def = getAxisMetric(kind);
+      return { type: def.scale, automargin: true };
     }
     const scale = domain.scale;
     const range: [number, number] =
@@ -284,25 +334,49 @@ export class Projections {
     };
   }
 
-  render(weights: ScoreWeights, modelsList: Model[]): void {
-    void this.renderWithPlotly(weights, modelsList);
+  render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions): void {
+    void this.renderWithPlotly(weights, modelsList, options);
   }
 
-  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]): Promise<void> {
-    const Plotly = await loadPlotly();
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions): Promise<void> {
+    // V04: capture the generation BEFORE the first await so a destroy() issued
+    // while the lazy import is in flight cannot let this continuation resurrect
+    // a torn-down instance.
     const gen = ++this.renderGen;
+    if (this.destroyed) return;
+    const Plotly = await loadPlotly();
+    // Recheck after the await: destroy() may have run (bumped the gen / set the
+    // terminal flag) while we were waiting on the chunk.
+    if (this.destroyed || gen !== this.renderGen) return;
+    this.plotly = Plotly;
+    // V05: derive the active mapping from options, or fall back to the mapping
+    // main.ts publishes to window.__viz.axisMapping (main.ts owns the render
+    // callsite and does not pass options here yet). Defaults to the rate basis.
+    const published = (typeof window !== "undefined"
+      ? (window as any).__viz?.axisMapping
+      : undefined) as AxisMapping | undefined;
+    const mapping = normalizeAxisMapping(options?.axisMapping ?? published ?? this.axisMapping);
+    const mappingChanged = mapping.x !== this.axisMapping.x || mapping.y !== this.axisMapping.y || mapping.z !== this.axisMapping.z;
+    this.axisMapping = mapping;
+    if (mappingChanged) {
+      this.specs = this.computeSpecs(mapping);
+      // A new mapping means a new set of faces — drop cached graph state so the
+      // next pass takes the newPlot path instead of react-ing over stale traces.
+      this.initialized = false;
+    }
     const scorable = modelsList.filter(isScorable);
     const frontierModels = frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
     const scoreById = new Map(scores.map((entry) => [entry.model.model, entry.score]));
     const optimumModel = weightedOptimum(scores)?.model;
     const frontierIds = new Set(frontierModels.map((model) => model.model));
+    // V05: domains keyed by the active metric ids (not a fixed tps/cost/intel triple).
     this.domains = {
-      tps: buildAxisDomain("tps", scorable),
-      cost: buildAxisDomain("blended_price", scorable),
-      intelligence: buildAxisDomain("intelligence", scorable),
+      [mapping.x]: buildAxisDomain(mapping.x, scorable),
+      [mapping.y]: buildAxisDomain(mapping.y, scorable),
+      [mapping.z]: buildAxisDomain(mapping.z, scorable),
     };
-    this.priceFloor = this.domains.cost.floor;
+    this.priceFloor = this.domains[mapping.x]?.floor ?? this.priceFloor;
 
     const traces = this.specs.map((spec) => {
       const x: number[] = [];
@@ -313,8 +387,13 @@ export class Projections {
       const sizes: number[] = [];
       const symbols: Plotly3dSymbol[] = [];
       scorable.forEach((model) => {
-        x.push(this.axisValue(spec.x, model));
-        y.push(this.axisValue(spec.y, model));
+        // V05: axisValue now returns null for missing/non-finite mapped values;
+        // skip such a row on this face so Plotly never sees a null coordinate.
+        const xv = this.axisValue(spec.x, model);
+        const yv = this.axisValue(spec.y, model);
+        if (xv === null || yv === null) return;
+        x.push(xv);
+        y.push(yv);
         text.push(model.model);
         const style = this.pointStyle(
           model,
@@ -375,15 +454,17 @@ export class Projections {
         yaxis: this.axisLayout(spec.y),
       };
       if (!this.initialized || gd.data === undefined) {
-        if (gen !== this.renderGen) return;
+        if (this.destroyed || gen !== this.renderGen) return;
         Plotly.newPlot(gd, [traces[index]], layout as any, config);
       } else {
-        if (gen !== this.renderGen) return;
+        if (this.destroyed || gen !== this.renderGen) return;
         Plotly.react(gd, [traces[index]], layout as any, config);
       }
     });
     this.initialized = true;
 
+    // V04: do not attach listeners / publish after teardown.
+    if (this.destroyed || gen !== this.renderGen) return;
     // Coupling listeners attach once, after the first plot exists.
     this.attachCoupling();
 
@@ -459,6 +540,8 @@ export class Projections {
     try {
       void loadPlotly().then((Plotly) => {
         Plotly.Fx.hover(gd, [{ curveNumber: 0, pointNumber }], subplot);
+      }).catch(() => {
+        // V13: programmatic hover is best-effort; never flood an unhandled promise.
       });
     } catch {
       // Programmatic hover on a de-chromed plot (hoverinfo 'none') is
@@ -468,10 +551,13 @@ export class Projections {
   }
   destroy() {
     this.renderGen++;
-    const Plotly = (window as any).Plotly;
+    this.destroyed = true; // V04: terminal flag invalidates any in-flight import.
+    // V03: purge via the retained module, not window.Plotly (never set in the
+    // bundled path). V11: purge ONLY this.gds — stageGd is borrowed for hover
+    // coupling and is owned by Stage3D; purging it blanks a still-live hero.
+    const Plotly = this.plotly;
     if (Plotly) {
       this.gds.forEach((gd) => { try { Plotly.purge(gd); } catch {} });
-      if (this.stageGd) { try { Plotly.purge(this.stageGd); } catch {} }
     }
     this.gds.forEach((gd) => { if (gd.parentNode) gd.parentNode.removeChild(gd); });
     this.destroyFn?.();

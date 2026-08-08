@@ -44,3 +44,30 @@ describe("motion timing", () => {
     vi.useRealTimers();
   });
 });
+describe("plotly loader retry (V13)", () => {
+  it("resets the cached import on rejection so a later call retries", async () => {
+    vi.resetModules();
+    const { loadPlotly } = await import("../src/viz/plotly-loader");
+    const fakeModule = {
+      newPlot() {},
+      react() {},
+      restyle() {},
+      purge() {},
+      relayout() {},
+      Fx: { hover() {} },
+    };
+    let shouldReject = true;
+    const importFn = async () => {
+      if (shouldReject) throw new Error("offline");
+      return fakeModule;
+    };
+    // First call rejects; the loader's rejection handler must reset the cache.
+    await expect(loadPlotly(importFn)).rejects.toThrow("offline");
+    // After reset, the next call retries instead of returning the cached
+    // rejection (the V13 defect cached one failure for the whole session).
+    shouldReject = false;
+    const mod = await loadPlotly(importFn);
+    expect(mod).toBe(fakeModule);
+    vi.resetModules();
+  });
+});

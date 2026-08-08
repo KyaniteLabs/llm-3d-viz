@@ -1,4 +1,4 @@
-import { loadPlotly } from "./plotly-loader";
+import { loadPlotly, type PlotlyModule } from "./plotly-loader";
 import { Model, isScorable, Plotly3dSymbol } from "../data/models";
 import { ScoreWeights, normalizedScores, weightedOptimum } from "../lib/score";
 import { frontier, ridgeOrder } from "../lib/pareto";
@@ -9,8 +9,12 @@ import {
   DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
   densityMarkerScale,
+  getAxisMetric,
   hasMappedAxes,
+  normalizeAxisMapping,
+  type AxisMapping,
 } from "../lib/axis-metrics";
+import type { StageRenderOptions } from "./stage-api";
 
 // Fallbacks mirror the DESIGN-SYSTEM.md token block, the visual source of truth.
 const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
@@ -47,6 +51,13 @@ export class Stage3D {
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
   private renderGen = 0; // default fallback, will be computed dynamically
+  // V03: retain the resolved Plotly module so destroy() can purge the owned hero
+  // graph without relying on window.Plotly (never set in the bundled path).
+  private plotly: PlotlyModule | null = null;
+  // V04: terminal flag invalidating any render waiting on the lazy import.
+  private destroyed = false;
+  // V05: active axis mapping threaded from StageRenderOptions (default rate basis).
+  private axisMapping: AxisMapping = { ...DEFAULT_AXIS_MAPPING };
 
   constructor(container: HTMLElement, heatEncoding = true) {
     this.container = container;
@@ -195,6 +206,8 @@ export class Stage3D {
     void loadPlotly().then((Plotly) => {
       const plotly = (window as any).__viz?.Plotly ?? Plotly;
       return plotly.relayout(this.gd, { "scene.camera": this.camera });
+    }).catch(() => {
+      // V13: de-chromed relayout is best-effort; never flood an unhandled promise.
     });
   }
 
@@ -213,29 +226,66 @@ export class Stage3D {
     });
   }
 
-  public render(weights: ScoreWeights, modelsList: Model[], options?: import("./stage-api").StageRenderOptions) {
+  public render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
     if (options?.presentationMode) this.presentationMode = options.presentationMode;
-    // Plotly fallback keeps the product default axes; remapping is Three-primary.
-    void options;
-    void this.renderWithPlotly(weights, modelsList);
+    // V05: thread StageRenderOptions into the Plotly hero so displayed axes/Decide
+    // semantics match the active controls instead of the hard-coded rate basis.
+    void this.renderWithPlotly(weights, modelsList, options);
   }
 
-  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[]) {
-    const Plotly = await loadPlotly();
+  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
+    // V04: capture generation BEFORE the first await so a destroy() issued while
+    // the lazy import is in flight cannot resurrect a torn-down instance.
     const gen = ++this.renderGen;
-    const mapping = DEFAULT_AXIS_MAPPING;
+    if (this.destroyed) return;
+    const Plotly = await loadPlotly();
+    if (this.destroyed || gen !== this.renderGen) return;
+    this.plotly = Plotly;
+    // V05: derive scene axes from the active mapping (default rate basis), not a
+    // hard-coded cost×intelligence×speed triple.
+    const mapping = normalizeAxisMapping(options?.axisMapping ?? this.axisMapping);
+    this.axisMapping = mapping;
     const scorable = modelsList.filter((m) => isScorable(m) && hasMappedAxes(m, mapping));
-    const frontierModels = frontier(modelsList);
+    // V05: Decide mode — suppress classic optimum/frontier primacy; paint floor,
+    // cost×speed Pareto, and shortlist (same contract as the Three stage).
+    const floor =
+      options?.intelligenceFloor != null && Number.isFinite(options.intelligenceFloor)
+        ? options.intelligenceFloor
+        : null;
+    const decideMode = floor != null;
+    const decidePareto = new Set(
+      options?.decideParetoIds
+        ? Array.isArray(options.decideParetoIds)
+          ? options.decideParetoIds
+          : [...options.decideParetoIds]
+        : [],
+    );
+    const decideShortlist = new Set(
+      options?.decideShortlistIds
+        ? Array.isArray(options.decideShortlistIds)
+          ? options.decideShortlistIds
+          : [...options.decideShortlistIds]
+        : [],
+    );
+    const frontierModels = decideMode ? [] : frontier(modelsList);
     const scores = normalizedScores(modelsList, weights, modelsList);
     const optimumScore = weightedOptimum(scores);
-    const optimumModel = optimumScore?.model;
+    const optimumModel = decideMode ? undefined : optimumScore?.model;
 
     const containerWidth = this.container.clientWidth;
     const narrow = containerWidth > 0 && containerWidth < Stage3D.NARROW_PX;
-    const costDomain = buildAxisDomain("blended_price", scorable, { narrow });
-    const intelDomain = buildAxisDomain("intelligence", scorable, { narrow });
-    const speedDomain = buildAxisDomain("tps", scorable, { narrow });
-    this.priceFloor = costDomain.floor;
+    const xDomain = buildAxisDomain(mapping.x, scorable, { narrow });
+    const yDomain = buildAxisDomain(mapping.y, scorable, { narrow });
+    const zDomain = buildAxisDomain(mapping.z, scorable, { narrow });
+    this.priceFloor = xDomain.floor;
+    // V05: raw per-axis value with the same ε floor clamp log axes use everywhere.
+    const domainsByAxis = { x: xDomain, y: yDomain, z: zDomain } as const;
+    const axisRawValue = (axis: "x" | "y" | "z", model: Model): number | null => {
+      const domain = domainsByAxis[axis];
+      const v = getAxisMetric(mapping[axis]).getValue(model);
+      if (v === null || !Number.isFinite(v)) return null;
+      return domain.scale === "log" ? (v <= 0 ? domain.floor : Math.max(v, domain.floor)) : v;
+    };
     const markerDensity = densityMarkerScale(scorable.length);
 
     // Build lists for Scatter3D points
@@ -252,18 +302,23 @@ export class Stage3D {
     scorable.forEach((model) => {
       const isOptimum = Boolean(optimumModel && model.model === optimumModel.model);
       const isFrontier = frontierModels.some((fm) => fm.model === model.model);
-      const semanticClass: SemanticPointClass = isOptimum
-        ? "optimum"
-        : isFrontier
-          ? "frontier"
-          : "dominated";
+      const semanticClass: SemanticPointClass = decideMode
+        ? "dominated"
+        : isOptimum
+          ? "optimum"
+          : isFrontier
+            ? "frontier"
+            : "dominated";
 
-      // Axis mapping (locked by Simon 2026-08-02): x = COST, y = INTELLIGENCE, z = SPEED.
-      const price =
-        model.blended_price_per_M! <= 0 ? this.priceFloor : model.blended_price_per_M!;
-      x.push(price);
-      y.push(model.aa_intelligence_index!);
-      z.push(model.tps!);
+      // V05: scene coordinates come from the active mapping (X/Y/Z), ε-clamped
+      // for log axes, not hard-coded cost/intelligence/speed fields.
+      const rv = axisRawValue("x", model);
+      const yv = axisRawValue("y", model);
+      const zv = axisRawValue("z", model);
+      if (rv === null || yv === null || zv === null) return;
+      x.push(rv);
+      y.push(yv);
+      z.push(zv);
 
       // Glyph = openness × reasoning only (lab is color; optimum is gold+size).
       symbols.push(markChannels(model).plotlySymbol);
@@ -278,6 +333,7 @@ export class Stage3D {
         familyId: familyIdOf(model),
         singleton: isSingleton(model, scorable, familyIdOf),
         provider: model.provider,
+        modelId: model.model,
         palette: {
           slateCyan: this.tokens.slateCyan,
           filamentDim: this.tokens.filamentDim,
@@ -286,14 +342,37 @@ export class Stage3D {
           gold: "#F4D58A",
         },
       });
-      colors.push(enc.fill);
+      let color = enc.fill;
+      colors.push(color);
       accents.push(enc.accent);
 
       // Size = value-score (enc.sizeScale) + hierarchy floors for frontier/optimum.
       let size = Math.max(4, Math.round(8 * enc.sizeScale));
-      if (isOptimum) size = Math.max(size, 16);
-      else if (isFrontier) size = Math.max(size, 11);
+      if (!decideMode) {
+        if (isOptimum) size = Math.max(size, 16);
+        else if (isFrontier) size = Math.max(size, 11);
+      }
       size = Math.max(3, Math.round(size * (isOptimum ? Math.max(markerDensity, 0.85) : markerDensity)));
+      // V05: Decide mode — size/color from floor eligibility, Pareto, shortlist
+      // (value-score optimum + classic frontier primacy suppressed), mirroring
+      // the Three stage so both heroes agree while Decide is on.
+      if (decideMode && floor != null) {
+        const idx = model.aa_intelligence_index;
+        const below = idx === null || idx < floor;
+        if (below) {
+          size = Math.max(3, Math.round(size * 0.55));
+          color = this.tokens.slateCyan;
+        } else if (decideShortlist.has(model.model)) {
+          size = 18;
+          color = this.tokens.filament;
+        } else if (decidePareto.has(model.model)) {
+          size = 14;
+          color = this.tokens.filamentDim;
+        } else {
+          size = 9;
+        }
+        colors[colors.length - 1] = color;
+      }
       sizes.push(size);
 
       textLabels.push(model.model);
@@ -322,11 +401,21 @@ export class Stage3D {
 
     // Trace 1: Pareto ridge polyline
     const vertices = ridgeOrder(frontierModels);
-    const ridgeX = vertices.map((v) =>
-      v.model.blended_price_per_M! <= 0 ? this.priceFloor : v.model.blended_price_per_M!
-    );
-    const ridgeY = vertices.map((v) => v.model.aa_intelligence_index!);
-    const ridgeZ = vertices.map((v) => v.model.tps!);
+    // V05: ridge vertices plotted on the active mapping (X/Y/Z), skipping any
+    // vertex whose mapped values are not finite (null-guarded like the points).
+    const ridgePts = vertices
+      .map((v) => {
+        const rx = axisRawValue("x", v.model);
+        const ry = axisRawValue("y", v.model);
+        const rz = axisRawValue("z", v.model);
+        return rx !== null && ry !== null && rz !== null
+          ? { x: rx, y: ry, z: rz }
+          : null;
+      })
+      .filter((p): p is { x: number; y: number; z: number } => p !== null);
+    const ridgeX = ridgePts.map((p) => p.x);
+    const ridgeY = ridgePts.map((p) => p.y);
+    const ridgeZ = ridgePts.map((p) => p.z);
 
     const ridgeTrace = {
       type: "scatter3d",
@@ -341,31 +430,37 @@ export class Stage3D {
       hoverinfo: "none",
     };
 
-    // De-chromed axis config. Speed and cost stay LOG (heavy-tailed). Intelligence
-    // is LINEAR data min–max (frontier-math §3.3) — logging AA Index would distort.
-    // Domains come from buildAxisDomain over the visible set (same as Three stage).
-    // FIX-D (#29): narrow-stage axis legibility (see NARROW_PX).
+    // De-chromed axis config. Each scene axis derives its scale, ticks, title
+    // and range from the active mapping's domain (V05), so a remapped stage
+    // (e.g. task basis) shows the correct metrics instead of hard-coded
+    // cost/intelligence/speed. FIX-D (#29): narrow-stage axis legibility.
     const axisTitleSize = narrow ? 10 : 11;
     const axisTickSize = 10;
-    const pickTicks = (domain: { ticks: Array<{ value: number; label: string }>; title: string }, shortTitle: string) => {
+    // V05: per-scene-axis config derived from the active mapping domain.
+    const sceneAxisConfig = (axis: "x" | "y" | "z") => {
+      const domain = domainsByAxis[axis];
       let ticks = domain.ticks;
-      // On a narrow stage the three axes converge at one corner — keep fewer labels.
       if (narrow && ticks.length > 3) {
         ticks = [ticks[0], ticks[Math.floor(ticks.length / 2)], ticks[ticks.length - 1]];
       } else if (narrow && ticks.length > 2) {
         ticks = [ticks[Math.floor(ticks.length / 2)], ticks[ticks.length - 1]];
       }
+      const shortTitle = domain.title.split(" ")[0] ?? domain.title;
+      const range: [number, number] =
+        domain.scale === "log"
+          ? [Math.log10(domain.min), Math.log10(domain.max)]
+          : [domain.min, domain.max];
       return {
         title: narrow ? shortTitle : domain.title,
         ticks: ticks.map((t) => t.value),
         labels: ticks.map((t) => t.label),
+        scale: domain.scale,
+        range,
       };
     };
-    const axisCfg = {
-      cost: pickTicks(costDomain, "COST"),
-      intelligence: pickTicks(intelDomain, "INTEL"),
-      speed: pickTicks(speedDomain, "SPEED"),
-    };
+    const xAxisCfg = sceneAxisConfig("x");
+    const yAxisCfg = sceneAxisConfig("y");
+    const zAxisCfg = sceneAxisConfig("z");
 
     const axisLayout = (
       titleText: string,
@@ -420,27 +515,27 @@ export class Stage3D {
         aspectmode: "manual",
         aspectratio: { x: 1.15, y: 1, z: 1 },
         // Explicit ascending ranges from the shared domain builder so Plotly and
-        // Three stages stay aligned (data-fit cost/speed log + intelligence linear).
+        // Three stages stay aligned (V05: scales/ranges now follow the mapping).
         xaxis: axisLayout(
-          axisCfg.cost.title,
-          axisCfg.cost.ticks,
-          axisCfg.cost.labels,
-          "log",
-          [Math.log10(costDomain.min), Math.log10(costDomain.max)],
+          xAxisCfg.title,
+          xAxisCfg.ticks,
+          xAxisCfg.labels,
+          xAxisCfg.scale,
+          xAxisCfg.range,
         ),
         yaxis: axisLayout(
-          axisCfg.intelligence.title,
-          axisCfg.intelligence.ticks,
-          axisCfg.intelligence.labels,
-          "linear",
-          [intelDomain.min, intelDomain.max],
+          yAxisCfg.title,
+          yAxisCfg.ticks,
+          yAxisCfg.labels,
+          yAxisCfg.scale,
+          yAxisCfg.range,
         ),
         zaxis: axisLayout(
-          axisCfg.speed.title,
-          axisCfg.speed.ticks,
-          axisCfg.speed.labels,
-          "log",
-          [Math.log10(speedDomain.min), Math.log10(speedDomain.max)],
+          zAxisCfg.title,
+          zAxisCfg.ticks,
+          zAxisCfg.labels,
+          zAxisCfg.scale,
+          zAxisCfg.range,
         ),
         camera: this.camera,
         // 'closest' (not false) so the stage emits plotly_hover on hover and the
@@ -498,7 +593,7 @@ export class Stage3D {
     };
 
     const applyMarkers = async () => {
-      if (gen !== this.renderGen) return;
+      if (this.destroyed || gen !== this.renderGen) return;
       // gl3d can drop per-point marker arrays; re-assert after plot and mirror on __viz.
       // Copies so Plotly cannot empty the intentional arrays we keep for QA.
       const colorCopy = colors.slice();
@@ -508,18 +603,22 @@ export class Stage3D {
     };
 
     if (!this.isInitialized) {
-      if (gen !== this.renderGen) return;
+      if (this.destroyed || gen !== this.renderGen) return;
       const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
       this.isInitialized = true;
       void plotReady.then(async () => {
+        // V04: recheck after the async newPlot resolves — destroy() may have run.
+        if (this.destroyed || gen !== this.renderGen) return;
         this.setupPlotlyListeners();
         await applyMarkers();
       });
     } else {
-      if (gen !== this.renderGen) return;
+      if (this.destroyed || gen !== this.renderGen) return;
       void Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config).then(applyMarkers);
     }
 
+    // V04: do not publish after teardown.
+    if (this.destroyed || gen !== this.renderGen) return;
     // Publish immediately with intentional arrays so tests don't race plotReady.
     publishViz();
   }
@@ -593,13 +692,18 @@ export class Stage3D {
         this.relayoutClampInFlight = true;
         void loadPlotly().then((Plotly) => Plotly.relayout(this.gd, { "scene.camera": this.camera })).then(
           () => { this.relayoutClampInFlight = false; },
+          // V13: a rejected/purged graph must not flood an unhandled promise.
+          () => { this.relayoutClampInFlight = false; },
         );
       }
     });
   }
   destroy() {
     this.renderGen++; // invalidate any pending async renders
-    const Plotly = (window as any).Plotly;
+    this.destroyed = true; // V04: terminal flag invalidates any in-flight import.
+    // V03: purge via the retained module, not window.Plotly (never set in the
+    // bundled path).
+    const Plotly = this.plotly;
     if (Plotly && this.gd) {
       try { Plotly.purge(this.gd); } catch {}
     }
