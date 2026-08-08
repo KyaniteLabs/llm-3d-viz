@@ -54,9 +54,6 @@ export const ATLAS_PRESET_NUCBOX_UNSLOTH: AtlasLlmConfig = {
   maxToolRounds: 6,
 };
 
-/** Direct Tailscale URL (only works if the proxy sends CORS — Unsloth Studio currently does not). */
-export const ATLAS_NUCBOX_UNSLOTH_DIRECT_BASE =
-  "http://100.113.174.74:8890/v1";
 
 export const ATLAS_LLM_PRESETS = {
   "nucbox-unsloth": ATLAS_PRESET_NUCBOX_UNSLOTH,
