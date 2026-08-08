@@ -67,7 +67,16 @@ export function sameFilters(a: ModelFilters, b: ModelFilters): boolean {
   );
 }
 
-function monthsBefore(reference: Date, months: number): Date {
+/** Finite integer months in the supported [1,60] window (URL caps here; Atlas must too). */
+function isValidAgeMonths(months: number): boolean {
+  return Number.isFinite(months) && Number.isInteger(months) && months >= 1 && months <= 60;
+}
+
+function monthsBefore(reference: Date, months: number): Date | null {
+  // Fail deterministically on an out-of-range value (Atlas can bypass URL caps)
+  // rather than compute an Invalid Date (1e308) or a future cutoff (-6) and then
+  // compare catalog dates against it.
+  if (!isValidAgeMonths(months)) return null;
   const d = new Date(reference.getTime());
   const originalDay = d.getUTCDate();
   // setUTCDate(1) first so month subtraction never rolls over (e.g. Aug 31 − 6mo).
@@ -99,8 +108,13 @@ export function applyFilters(
   const providerSet =
     filters.providers.length === 0 ? null : new Set(filters.providers);
   const familySet = filters.families.length === 0 ? null : new Set(filters.families);
+  // An invalid ageMonths (Atlas can bypass URL caps) yields a null cutoff so the
+  // age gate is skipped deterministically rather than compared against an Invalid
+  // Date (1e308 → all pass) or a future cutoff (-6 → all dropped).
   const cutoff =
-    filters.ageEnabled ? monthsBefore(referenceDate, filters.ageMonths) : null;
+    filters.ageEnabled && isValidAgeMonths(filters.ageMonths)
+      ? monthsBefore(referenceDate, filters.ageMonths)
+      : null;
   const openness = filters.openness ?? "all";
 
   // Apply all non-multi-effort filters first, so that multi-effort family counts

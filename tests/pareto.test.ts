@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Model } from "../src/data/models";
-import { dominates, frontier, ridgeOrder } from "../src/lib/pareto";
+import { dominates, frontier, ridgeOrder, roundTo } from "../src/lib/pareto";
 
 const model = (name: string, tps: number, price: number, intel: number): Model => ({
   model: name,
@@ -86,5 +86,25 @@ describe("Pareto frontier", () => {
     expect(frontier([complete, missingIntel, negative]).map(({ model: name }) => name)).toEqual([
       "complete",
     ]);
+  });
+});
+describe("roundTo", () => {
+  it("rounds 10.075 to 10.08 (magnitude-aware, audit M006)", () => {
+    // IEEE-754 stores 10.075 as 10.074999…; a fixed epsilon rounds it down to 10.07.
+    // The magnitude-aware correction scales the epsilon with |value| so the
+    // published-cent value 10.08 is recovered.
+    expect(roundTo(10.075, 2)).toBe(10.08);
+  });
+
+  it("keeps half-cent derived prices correct at small magnitudes", () => {
+    expect(roundTo(1.005, 2)).toBe(1.01);
+    expect(roundTo(2.004, 2)).toBe(2.0);
+    expect(roundTo(0.125, 2)).toBe(0.13);
+  });
+
+  it("does not regress existing published-precision rounding", () => {
+    expect(roundTo(100.04, 1)).toBe(100.0);
+    expect(roundTo(2.004, 2)).toBe(2.0);
+    expect(roundTo(80.04, 1)).toBe(80.0);
   });
 });

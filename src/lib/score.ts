@@ -104,13 +104,31 @@ function clampUnit(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
+/** Per-component weight ceiling. Keeps finite-but-huge weights (e.g. Atlas 1e308)
+ *  from overflowing the weighted sum to Infinity/NaN. */
+const MAX_WEIGHT_COMPONENT = 100;
+
+/** Canonical weight sanitizer: finite, non-negative, per-component capped.
+ *  Applied inside composite() so no caller — URL, sliders, presets, or Atlas —
+ *  can blow up the value-score total. Internal to score.ts. */
+function sanitizeWeights(weights: ScoreWeights): ScoreWeights {
+  const clip = (w: number): number =>
+    !Number.isFinite(w) || w < 0 ? 0 : Math.min(w, MAX_WEIGHT_COMPONENT);
+  return {
+    speed: clip(weights.speed),
+    cost: clip(weights.cost),
+    intelligence: clip(weights.intelligence),
+  };
+}
+
 function composite(normalized: NormalizedAxes, weights: ScoreWeights): number {
-  const total = Math.max(0, weights.speed) + Math.max(0, weights.cost) + Math.max(0, weights.intelligence);
+  const w = sanitizeWeights(weights);
+  const total = w.speed + w.cost + w.intelligence;
   if (total === 0) return (normalized.speed + normalized.cost + normalized.intelligence) / 3;
   return (
-    Math.max(0, weights.speed) * normalized.speed +
-    Math.max(0, weights.cost) * normalized.cost +
-    Math.max(0, weights.intelligence) * normalized.intelligence
+    w.speed * normalized.speed +
+    w.cost * normalized.cost +
+    w.intelligence * normalized.intelligence
   ) / total;
 }
 

@@ -271,7 +271,7 @@ export function hasMappedAxes(model: Model, mapping: AxisMapping): boolean {
   return (["x", "y", "z"] as const).every((axis) => {
     const def = getAxisMetric(mapping[axis]);
     const v = def.getValue(model);
-    if (v === null || Number.isNaN(v)) return false;
+    if (v === null || !Number.isFinite(v)) return false;
     // Log-scale axes need a positive value (or will be floored later for $0).
     if (def.scale === "log" && v < 0) return false;
     return true;
@@ -340,6 +340,14 @@ function robustDataExtent(
   return { min, max };
 }
 
+/** Clamp on the log-domain padding exponent. The visible catalog span never needs
+ *  more than a fraction of a decade of breath; a pathological extreme-but-finite
+ *  outlier (e.g. Number.MAX_VALUE) would otherwise inflate padding in log space
+ *  and overflow max·pad to Infinity, freezing tick generation. */
+const LOG_DOMAIN_PAD_EXPONENT_CAP = 1;
+/** Hard finite iteration bound for niceLogTicks so no input can loop forever. */
+const LOG_TICK_MAX_DECADES = 20;
+
 /**
  * Log ticks that adapt to the *visible* span:
  * - multi-decade: 1–2–5 mid-decade marks when the view is tight
@@ -347,13 +355,21 @@ function robustDataExtent(
  * - always denser than the old decade-only grid so solo-family views stay readable
  */
 function niceLogTicks(min: number, max: number, narrow: boolean): number[] {
-  const lo = Math.log10(Math.max(min, Number.MIN_VALUE));
-  const hi = Math.log10(Math.max(max, min * 1.01));
+  // Reject non-finite / non-positive / inverted bounds so an extreme-but-finite
+  // outlier (or any upstream overflow) can never make tick generation freeze the
+  // stage. Returning [] lets the caller fall back to a [min,max] pair safely.
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max <= min) {
+    return [];
+  }
+  const lo = Math.log10(min);
+  const hi = Math.log10(max);
   const spanDecades = hi - lo;
   const mags = [1, 2, 5];
   const out: number[] = [];
   const e0 = Math.floor(lo);
-  const e1 = Math.ceil(hi);
+  // Finite iteration bound: even with a finite but huge span (e.g. a MAX_VALUE
+  // domain), e1 − e0 is bounded so the loop always terminates.
+  const e1 = Math.min(Math.ceil(hi), e0 + LOG_TICK_MAX_DECADES);
   for (let e = e0; e <= e1; e++) {
     for (const m of mags) {
       const v = m * 10 ** e;
@@ -418,7 +434,7 @@ export function buildAxisDomain(
   const axisTitle = def.scale === "log" ? `${def.title} · log` : def.title;
   const raw = models
     .map((m) => def.getValue(m))
-    .filter((v): v is number => v !== null && !Number.isNaN(v));
+    .filter((v): v is number => v !== null && Number.isFinite(v));
 
   if (def.fixedDomain) {
     const [min, max] = def.fixedDomain;
@@ -454,9 +470,12 @@ export function buildAxisDomain(
     if (max <= min) max = min * 10;
     // Modest edge breath — enough that marks are not glued to the wall, small
     // enough that the data band still owns most of the axis (inter-point space).
-    const logPad = 10 ** ((Math.log10(max) - Math.log10(min)) * 0.07);
+    // Compute padding in log space with a capped exponent so an extreme-but-finite
+    // outlier (Number.MAX_VALUE) cannot overflow max·pad to Infinity. Cap the
+    // padded max at Number.MAX_VALUE as the final finite backstop.
+    const logPad = 10 ** Math.min((Math.log10(max) - Math.log10(min)) * 0.07, LOG_DOMAIN_PAD_EXPONENT_CAP);
     min = Math.max(floor * 0.9, min / Math.max(logPad, 1.06));
-    max = max * Math.max(logPad, 1.06);
+    max = Math.min(max * Math.max(logPad, 1.06), Number.MAX_VALUE);
     if (metricId === "blended_price" || metricId === "price_in" || metricId === "price_out") {
       // Keep a small floor marker context without inflating to $100 when looking at cheap models.
       min = Math.min(min, floor);

@@ -51,6 +51,15 @@ describe("parseTotalParamsBillions", () => {
     expect(parseTotalParamsBillions("Llama-3.1-70B-Instruct")).toBe(70);
     expect(parseTotalParamsBillions("Phi-3.5-mini")).toBeNull();
   });
+  it("uses total stored params (not active) for Llama 4 MoE specials (audit M003)", () => {
+    // Meta spec: Scout 109B total / Maverick 400B total. The ~17B active is only
+    // the per-token routed subset; all expert weights must reside in VRAM.
+    expect(parseTotalParamsBillions("Llama 4 Scout")).toBe(109);
+    expect(parseTotalParamsBillions("Llama 4 Maverick")).toBe(400);
+    // Active-size gate is unchanged (still ~17B for per-token costing).
+    expect(parseParamsBillions("Llama 4 Scout")).toBe(17);
+    expect(parseParamsBillions("Llama 4 Maverick")).toBe(17);
+  });
 });
 
 describe("fitsLocalVram", () => {
@@ -76,5 +85,12 @@ describe("fitsLocalVram", () => {
   it("fail-closes when size cannot be parsed", () => {
     expect(fitsLocalVram("Claude Opus 4.1", 24)).toBe(false);
     expect(fitsLocalVram("gpt-oss-something", 8)).toBe(false);
+  });
+  it("Llama 4 MoE specials fail every consumer VRAM tier under total stored params (audit M003)", () => {
+    // Q4 of 109B ≈ 54.5 GB and 400B ≈ 200 GB — neither fits 8/12/24 GB.
+    for (const tier of [8, 12, 24] as const) {
+      expect(fitsLocalVram("Llama 4 Scout", tier)).toBe(false);
+      expect(fitsLocalVram("Llama 4 Maverick", tier)).toBe(false);
+    }
   });
 });

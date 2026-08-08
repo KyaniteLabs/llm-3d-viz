@@ -7,7 +7,7 @@
  * Top-3 community tiers (local LLM, 2025–26):
  *   8 GB  — laptop / entry (≤ ~9B)
  *  12 GB  — mid desktop (≤ ~14B)
- *  24 GB  — 3090/4090 class (≤ ~34B dense, or MoE active ≤ ~34B)
+ *  24 GB  — 3090/4090 class (≤ ~34B dense, or MoE total stored ≤ ~34B)
  */
 
 /** Popular consumer VRAM ceilings (GB). */
@@ -15,7 +15,7 @@ export type LocalVramGb = 8 | 12 | 24;
 
 export const LOCAL_VRAM_TIERS: readonly {
   vramMaxGb: LocalVramGb;
-  /** Max dense (or MoE-active) params that fit Q4-class local run. */
+  /** Max dense (or MoE total stored) params that fit Q4-class local run. */
   maxParamsB: number;
   label: string;
   blurb: string;
@@ -36,7 +36,7 @@ export const LOCAL_VRAM_TIERS: readonly {
     vramMaxGb: 24,
     maxParamsB: 34,
     label: "Local · 24 GB",
-    blurb: "4090-class — open models up to ~34B dense / MoE active (Q4).",
+    blurb: "4090-class — open models up to ~34B dense / MoE total stored parameters (Q4).",
   },
 ] as const;
 
@@ -89,6 +89,10 @@ export function parseTotalParamsBillions(modelName: string): number | null {
     const n = Number(moeTotal[1]);
     if (Number.isFinite(n) && n > 0) return n;
   }
+  // Llama 4 MoE specials — TOTAL stored params govern VRAM fit (the ~17B
+  // active is only the per-token routed subset; all expert weights must load).
+  if (/\bLlama\s*4\s+Scout\b/i.test(name)) return 109;
+  if (/\bLlama\s*4\s+Maverick\b/i.test(name)) return 400;
   // Dense models: total = the single B number
   return parseParamsBillions(modelName);
 }

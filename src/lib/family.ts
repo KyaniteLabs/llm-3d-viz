@@ -22,7 +22,7 @@ export const EFFORT_RANK: Readonly<Record<string, number>> = {
   high: 3,
   xhigh: 4,
   max: 5,
-  minimal: 1,
+  minimal: 0.5,
   default: 3,
 };
 

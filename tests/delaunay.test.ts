@@ -97,6 +97,71 @@ describe("delaunay2d", () => {
     const b = delaunay2d(pts);
     expect(b).toEqual(a);
   });
+  it("completes a triangulation the old super-triangle code dropped (interior point)", () => {
+    // Audit M002 counterexample: point 2 is inside the 3-vertex hull, so a complete
+    // planar triangulation has 2n-2-h = 3 triangles. The old code returned only 2
+    // (missing [1,2,3]) because the far super-triangle defeated the in-circle test.
+    const pts: Array<[number, number]> = [
+      [0.36, -0.39],
+      [-0.97, 0.57],
+      [0.12, 0.20],
+      [0.53, 0.07],
+    ];
+    const tris = delaunay2d(pts);
+    expect(tris).toHaveLength(3);
+    expect(valid(4, tris)).toBe(true);
+  });
+
+  it("does not blank a non-collinear cloud that the old code returned [] for", () => {
+    // Audit M002: hull area 0.0073 but the old code returned [], blanking the membrane.
+    const pts: Array<[number, number]> = [
+      [-0.47, 0.24],
+      [-0.36, 0.27],
+      [0.45, 0.49],
+      [0.87, 0.62],
+    ];
+    const tris = delaunay2d(pts);
+    expect(tris.length).toBeGreaterThan(0);
+    expect(valid(4, tris)).toBe(true);
+  });
+
+  it("triangulates a tiny-scale triangle after unit-normalization", () => {
+    // Audit M002: the old absolute area<1e-12 floor dropped this; unit-normalization
+    // makes the threshold scale-independent so it yields one face.
+    const pts: Array<[number, number]> = [
+      [0, 0],
+      [1e-7, 0],
+      [0, 1e-7],
+    ];
+    const tris = delaunay2d(pts);
+    expect(tris).toHaveLength(1);
+    expect(valid(3, tris)).toBe(true);
+  });
+
+  it("enforces the planar topology invariant T = 2n−2−h on scattered clouds", () => {
+    const pts: Array<[number, number]> = [
+      [0.1, 0.2],
+      [0.8, 0.1],
+      [0.9, 0.7],
+      [0.4, 0.9],
+      [0.0, 0.8],
+      [0.5, 0.5],
+    ];
+    const tris = delaunay2d(pts);
+    // 6 points, one interior (h=5) → T = 2*6-2-5 = 5.
+    expect(tris).toHaveLength(5);
+    // Watertight: every interior edge shared exactly twice.
+    const count = new Map<string, number>();
+    const key = (u: number, v: number) => (u < v ? `${u}:${v}` : `${v}:${u}`);
+    for (const [a, b, c] of tris)
+      for (const [u, v] of [
+        [a, b],
+        [b, c],
+        [c, a],
+      ])
+        count.set(key(u, v), (count.get(key(u, v)) ?? 0) + 1);
+    for (const c of count.values()) expect(c).toBeLessThanOrEqual(2);
+  });
 });
 
 describe("hullEdges", () => {

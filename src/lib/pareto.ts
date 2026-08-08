@@ -7,10 +7,12 @@ export interface RidgeVertex {
   aliases: Model[];
 }
 
-/** Decimal-safe rounding: avoids IEEE 754 errors like Math.round(1.005 * 100) / 100 === 1. */
+/** Decimal-safe rounding: avoids IEEE 754 errors like Math.round(1.005 * 100) / 100 === 1.
+ *  Magnitude-aware: the epsilon correction scales with |value| so 10.075 → 10.08
+ *  (not 10.07) while keeping small derived-price half-cents correct. */
 export function roundTo(value: number, decimals: number): number {
   const factor = 10 ** decimals;
-  return Math.round((value + Number.EPSILON) * factor) / factor;
+  return Math.round((value + Number.EPSILON * Math.max(1, Math.abs(value))) * factor) / factor;
 }
 
 function publishedMetrics(model: Model): [number, number, number] {

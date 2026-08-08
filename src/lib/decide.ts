@@ -140,8 +140,14 @@ export function shortlistFromDecide(
 
 export function floorFromAnchor(models: readonly Model[], anchorModelId: string): number | null {
   const row = models.find((m) => m.model === anchorModelId);
-  if (!row || row.aa_intelligence_index === null) return null;
-  return clampFloor(row.aa_intelligence_index);
+  if (!row) return null;
+  const idx = row.aa_intelligence_index;
+  // Fail-closed provenance: only a measured, physically valid Index [0,100]
+  // may be labeled anchor-derived. Clamp only user-entered floors (clampFloor),
+  // never source data — an out-of-range/NaN/Infinity anchor yields null so the
+  // UI falls back to a default rather than falsifying the provenance label.
+  if (idx === null || !Number.isFinite(idx) || idx < 0 || idx > 100) return null;
+  return idx;
 }
 
 /** Canonical catalog payload for snapshot hashing (stable row order). */
@@ -211,10 +217,14 @@ export function buildDecideResponse(
   },
 ): DecideResponseV1 {
   const floor = clampFloor(opts.floor);
+  // Clamp bias ONCE and reuse it for ranking, request output, AND reason
+  // labeling so the exported reasons can never disagree with the numeric
+  // authority (e.g. raw bias=Infinity clamps to 0 → "bias_balanced", not "bias_fast").
+  const bias = clampBias(opts.bias);
   const { eligible, pareto, shortlist } = shortlistFromDecide(
     visibleModels,
     floor,
-    opts.bias,
+    bias,
     opts.shortlistN ?? DEFAULT_SHORTLIST_N,
   );
   const refusals: string[] = [];
@@ -238,7 +248,7 @@ export function buildDecideResponse(
       rank: i + 1,
       reasons: [
         "on_pareto",
-        opts.bias < -0.25 ? "bias_cheap" : opts.bias > 0.25 ? "bias_fast" : "bias_balanced",
+        bias < -0.25 ? "bias_cheap" : bias > 0.25 ? "bias_fast" : "bias_balanced",
       ],
     })),
     catalog_snapshot_id: snap,

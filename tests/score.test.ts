@@ -169,4 +169,30 @@ describe("value-score normalization", () => {
     expect(weightedOptimum(second)?.model.model).toBe("smart");
     expect(frontier([cheap, smart]).map(({ model: name }) => name)).toEqual(["cheap", "smart"]);
   });
+
+  it("clamps finite-but-huge weights so the composite cannot overflow to Infinity/NaN (audit M004)", () => {
+    const low = model("low", 10, 1, 10);
+    const high = model("high", 100, 100, 100);
+    // {1e308,1e308,1e308} is JSON-finite but sums to Infinity; equal-share weights
+    // should give low=1/3 (only cost normalized to 1) and high=2/3 (speed+intel).
+    const scores = normalizedScores([low, high], weights(1e308, 1e308, 1e308), [low, high]);
+    const lowScore = scores.find(({ model: row }) => row.model === "low")!;
+    const highScore = scores.find(({ model: row }) => row.model === "high")!;
+    expect(Number.isFinite(lowScore.score)).toBe(true);
+    expect(Number.isFinite(highScore.score)).toBe(true);
+    expect(lowScore.score).toBeCloseTo(1 / 3);
+    expect(highScore.score).toBeCloseTo(2 / 3);
+  });
+
+  it("treats non-finite / negative weight components as zero", () => {
+    const a = model("a", 10, 1, 10);
+    const b = model("b", 100, 100, 100);
+    // Infinity / NaN / negative components are sanitized to 0 → equal weights.
+    const scores = normalizedScores(
+      [a, b],
+      weights(Infinity, NaN, -5),
+      [a, b],
+    );
+    for (const { score } of scores) expect(Number.isFinite(score)).toBe(true);
+  });
 });
