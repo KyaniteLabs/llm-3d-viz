@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "exported_at": "2026-08-08T01:53:46.499Z",
-  "model_count": 302,
+  "exported_at": "2026-08-08T12:01:28.169Z",
+  "model_count": 299,
   "source": "data/models.v0.draft.json",
   "snapshot_file": "data/atlas-catalog-snapshot.json",
   "note": "Null metrics preserved. Never invent Index/tok/s/price client-side."

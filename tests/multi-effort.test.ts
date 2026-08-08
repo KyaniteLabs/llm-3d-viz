@@ -19,7 +19,8 @@ describe("multi-effort catalog (AA expansion)", () => {
     const opusTiers = new Set(opus.map((m) => deriveEffortTier(m)));
     expect(sol.length).toBeGreaterThanOrEqual(5);
     expect(opus.length).toBeGreaterThanOrEqual(4);
-    expect(solTiers.has("max")).toBe(true);
+    expect(solTiers.has("xhigh")).toBe(true);
+    expect(solTiers.has("max")).toBe(false);
     expect(solTiers.has("high") || solTiers.has("xhigh")).toBe(true);
     expect(opusTiers.has("max")).toBe(true);
   });

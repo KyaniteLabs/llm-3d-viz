@@ -31,6 +31,12 @@ ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 log() { echo "[$(ts)] $*" | tee -a "$LOG_DIR/catalog-auto-update.log"; }
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin${PATH:+:$PATH}"
+# Load operator secrets (AA_API_KEY, optional CF token) so cron runs succeed
+# without an interactive shell. .env / .env.local are gitignored.
+for __envf in "$REPO_ROOT/.env" "$REPO_ROOT/.env.local"; do
+  [ -f "$__envf" ] && set -a && . "$__envf" && set +a
+done
+unset __envf
 cd "$REPO_ROOT"
 
 if ! command -v node >/dev/null 2>&1; then
@@ -56,6 +62,25 @@ fi
 
 after_hash="$(shasum -a 256 "$DATA_FILE" | awk '{print $1}')"
 row_count="$(node -e "const m=require('./data/models.v0.draft.json'); console.log(Array.isArray(m)?m.length:(m.models||[]).length)")"
+# Empty-catalog guard: AA field-rename or empty 200 → empty draft.
+# Abort before build/deploy if rows drop below a sane floor or shrink >50% vs previous.
+MIN_ROWS="${MIN_ROWS:-50}"
+prev_rows=""
+[[ -f "$STATE_DIR/last-rows" ]] && prev_rows="$(cat "$STATE_DIR/last-rows")"
+if [[ "$row_count" -lt "$MIN_ROWS" ]]; then
+  log "ABORT: row_count=$row_count below MIN_ROWS=$MIN_ROWS — likely AA schema change or empty scrape"
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"reason\":\"below_min\"}" >"$STATUS_FILE"
+  exit 8
+fi
+if [[ -n "$prev_rows" && "$prev_rows" -gt 0 ]]; then
+  shrink_pct=$(( (prev_rows - row_count) * 100 / prev_rows ))
+  if [[ "$shrink_pct" -gt 50 ]]; then
+    log "ABORT: row_count=$row_count dropped ${shrink_pct}% from $prev_rows — likely scrape failure"
+    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"prev\":$prev_rows,\"shrink\":$shrink_pct}" >"$STATUS_FILE"
+    exit 8
+  fi
+fi
+echo "$row_count" >"$STATE_DIR/last-rows"
 changed=0
 if [[ "$after_hash" != "$before_hash" || "$after_hash" != "$prev_hash" || "${FORCE:-0}" == "1" ]]; then
   changed=1
@@ -89,6 +114,12 @@ if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
 fi
 
 # 3) Deploy private Tailscale instance
+# Reject empty/root/broad rsync destinations before --delete can cause damage.
+case "$DEPLOY_DIST" in
+  ""|"/"|"/var"*|"/usr"*|"/etc"*|"/home"|"~"|"~/"|"$HOME"|"$HOME/")
+    log "ABORT: DEPLOY_DIST='$DEPLOY_DIST' is unsafe for rsync --delete"
+    exit 9 ;;
+esac
 if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   log "deploy → $DEPLOY_HOST:$DEPLOY_DIST"
   # Expand ~ on remote via ssh shell
@@ -113,6 +144,23 @@ if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   else
     log "health skipped (set HEALTH_URL to enable)"
   fi
+fi
+
+# 4) Deploy to Cloudflare Pages — public publish. Double-gated: requires
+#    DEPLOY_PAGES=1 in addition to CLOUDFLARE_API_TOKEN + PAGES_PROJECT.
+#    This preserves the approval-gated public-publish policy (see `npm run deploy:pages`).
+if [[ "${DEPLOY_PAGES:-0}" == "1" && "${SKIP_PAGES:-0}" != "1" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${PAGES_PROJECT:-}" ]]; then
+  log "deploy pages → $PAGES_PROJECT (branch=${PAGES_BRANCH:-main})"
+  if ! npx wrangler pages deploy "$REPO_ROOT/dist" \
+        --project-name="$PAGES_PROJECT" --branch="${PAGES_BRANCH:-main}" --commit-dirty=true \
+        >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+    log "ERROR: pages deploy failed"
+    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"pages\",\"rows\":$row_count}" >"$STATUS_FILE"
+    exit 7
+  fi
+  log "pages deploy ok"
+else
+  log "pages deploy skipped (set DEPLOY_PAGES=1 + CLOUDFLARE_API_TOKEN + PAGES_PROJECT in .env to enable)"
 fi
 
 echo "$after_hash" >"$HASH_FILE"

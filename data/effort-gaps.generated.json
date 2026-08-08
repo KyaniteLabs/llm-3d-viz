@@ -1,5 +1,5 @@
 {
-  "data_date": "2026-08-07",
+  "data_date": "2026-08-08",
   "ingestion": "official-api-only",
   "attribution": {
     "artificial_analysis": "https://artificialanalysis.ai (Data API)",
@@ -21,8 +21,8 @@
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
       "skipped": false,
-      "entries": 383,
-      "attaches": 88,
+      "entries": 385,
+      "attaches": 90,
       "log_sample": [
         {
           "code": "arena_no_family",
@@ -80,8 +80,8 @@
   },
   "arena": {
     "ok": true,
-    "entries": 383,
-    "attaches": 88,
+    "entries": 385,
+    "attaches": 90,
     "license": "CC BY 4.0"
   },
   "gaps": [

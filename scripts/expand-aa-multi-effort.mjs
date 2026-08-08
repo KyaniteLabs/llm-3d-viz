@@ -216,8 +216,26 @@ sourceStats.push({
   error: or.error,
 });
 
+/**
+ * Effort tiers dropped from the product catalog per provider — rungs above the
+ * lab's highest user-selectable effort. Artificial Analysis sometimes publishes
+ * measured points for privileged/internal tiers real users cannot choose; those
+ * would distort the instrument, so they are cut before admission.
+ *
+ *   OpenAI `max` — AA measures it, but OpenAI's API/playground exposes effort
+ *   only up to `xhigh` ("extra high"); `max` is not user-selectable.
+ */
+const NON_USER_TIERS = {
+  OpenAI: ["max"],
+};
+function isUserSelectableTier(row) {
+  const drop = NON_USER_TIERS[row.provider];
+  if (!drop?.length) return true;
+  return !drop.includes((row.effort_tier || "").toLowerCase());
+}
+
 // --- 4. Admit scorable product catalog ---
-const scorable = merged.filter(canAdmitPlotTriple);
+const scorable = merged.filter(canAdmitPlotTriple).filter(isUserSelectableTier);
 scorable.sort(
   (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
 );

@@ -1,6 +1,6 @@
 {
   "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage — never to invent metrics.",
-  "updated": "2026-08-05",
+  "updated": "2026-08-08",
   "ladders": {
     "Claude Fable 5": {
       "provider": "Anthropic",
@@ -19,18 +19,18 @@
     },
     "GPT-5.6 Sol": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
-      "notes": "OpenAI reasoning effort ladder."
+      "expected_tiers": ["low", "medium", "high", "xhigh"],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "GPT-5.6 Luna": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
-      "notes": "OpenAI reasoning effort ladder."
+      "expected_tiers": ["low", "medium", "high", "xhigh"],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "GPT-5.6 Terra": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
-      "notes": "OpenAI reasoning effort ladder."
+      "expected_tiers": ["low", "medium", "high", "xhigh"],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "Gemini 3.5 Flash": {
       "provider": "Google",

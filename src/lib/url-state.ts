@@ -65,9 +65,11 @@ const listSep = ",";
 
 function splitList(raw: string | null): string[] {
   if (!raw || !raw.trim()) return [];
+  // URLSearchParams.get() already percent-decodes; a second decodeURIComponent
+  // would throw URIError on malformed "%" and blank the page.
   return raw
     .split(listSep)
-    .map((s) => decodeURIComponent(s.trim()))
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
@@ -105,7 +107,7 @@ export function parseDecideFromParams(
   const catalog = opts?.catalog;
 
   if (anchorRaw && anchorRaw.trim()) {
-    const id = decodeURIComponent(anchorRaw.trim());
+    const id = anchorRaw.trim();
     const row = catalog?.find((m) => m.model === id);
     if (row && row.aa_intelligence_index != null) {
       floorAnchorModelId = id;

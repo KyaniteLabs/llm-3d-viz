@@ -7,6 +7,12 @@
  */
 const ORIGIN = "llm-3d-viz.pages.dev";
 
+/** Only allow TTS requests from our own origins — blocks cross-site credit-burn. */
+const ALLOWED_ORIGINS = new Set([
+  "https://viz.kyanitelabs.tech",
+  "https://llm-3d-viz.pages.dev",
+]);
+
 /** Male, operator-grade voice. onyx = deep; ash = clear male; cedar = high quality when available. */
 const TTS_VOICE = "onyx";
 const TTS_MODEL = "gpt-4o-mini-tts";
@@ -14,19 +20,33 @@ const TTS_INSTRUCTIONS =
   "Speak as a calm, competent adult male technical operator. Mid-low register, natural conversational pacing, confident but not theatrical. No cartoon, no whisper, no uptalk.";
 
 function corsHeaders(origin) {
+  // Only echo the origin if it is in our allowlist; otherwise send no ACAO header
+  // so the browser blocks cross-origin script access to the TTS endpoint.
+  const allowed = origin && ALLOWED_ORIGINS.has(origin) ? origin : null;
+  if (!allowed) return {};
   return {
-    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
+    "Vary": "Origin",
   };
 }
 
 async function handleAtlasTts(request, env) {
-  const origin = request.headers.get("Origin") || "*";
+  const origin = request.headers.get("Origin");
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders(origin) });
   }
+
+  // Origin allowlist: reject cross-site requests that would burn OpenAI credits.
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+    return new Response(JSON.stringify({ error: "origin_not_allowed" }), {
+      status: 403,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   if (request.method !== "POST") {
     return new Response(JSON.stringify({ error: "POST only" }), {
       status: 405,
@@ -34,6 +54,26 @@ async function handleAtlasTts(request, env) {
     });
   }
 
+  // Per-IP rate limit via Cloudflare's cf metadata: max 10 TTS requests / minute.
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const rlKey = `tts:${ip}`;
+  const rlWindow = 60;
+  const rlMax = 10;
+  const now = Math.floor(Date.now() / 1000);
+  const stored = await env.TTS_RATE_LIMIT?.get(rlKey);
+  const bucket = JSON.parse(stored || '{"count":0,"reset":0}');
+  if (now >= bucket.reset) {
+    bucket.count = 0;
+    bucket.reset = now + rlWindow;
+  }
+  bucket.count++;
+  await env.TTS_RATE_LIMIT?.put(rlKey, JSON.stringify(bucket), { expirationTtl: rlWindow });
+  if (bucket.count > rlMax) {
+    return new Response(JSON.stringify({ error: "rate_limited" }), {
+      status: 429,
+      headers: { "content-type": "application/json", "Retry-After": String(bucket.reset - now), ...corsHeaders(origin) },
+    });
+  }
   const key = env.OPENAI_API_KEY;
   if (!key || typeof key !== "string" || key.length < 10) {
     return new Response(

@@ -13891,69 +13891,6 @@
     }
   },
   {
-    "model": "GPT-5.6 Luna (max)",
-    "provider": "OpenAI",
-    "openness": "closed",
-    "modality": [
-      "text",
-      "vision"
-    ],
-    "context_length": 128000,
-    "release_date": "2026-07-09",
-    "data_date": "2026-08-07",
-    "source": "AA Data API free",
-    "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna",
-    "tps": 189.7,
-    "ttft": 101580,
-    "price_in_per_M": 0.2,
-    "price_out_per_M": 1.2,
-    "blended_price_per_M": 0.38,
-    "aa_intelligence_index": 52.3,
-    "arena_elo": null,
-    "swe_bench": null,
-    "aider_pct": null,
-    "gpqa": null,
-    "reasoning": false,
-    "family_id": "GPT-5.6 Luna",
-    "effort_tier": "max",
-    "cost_per_index_task_usd": 0.0471,
-    "time_per_index_task_s": null,
-    "sources": {
-      "aa_intelligence_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "tps": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "ttft": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_in_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_out_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "cost_per_index_task_usd": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
-      },
-      "modality": {
-        "origin": "openrouter",
-        "kind": "list"
-      }
-    }
-  },
-  {
     "model": "GPT-5.6 Luna (medium)",
     "provider": "OpenAI",
     "openness": "closed",
@@ -14248,69 +14185,6 @@
     }
   },
   {
-    "model": "GPT-5.6 Sol (max)",
-    "provider": "OpenAI",
-    "openness": "closed",
-    "modality": [
-      "text",
-      "vision"
-    ],
-    "context_length": 128000,
-    "release_date": "2026-07-09",
-    "data_date": "2026-08-07",
-    "source": "AA Data API free",
-    "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol",
-    "tps": 62.89,
-    "ttft": 145630,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "blended_price_per_M": 9.5,
-    "aa_intelligence_index": 60.9,
-    "arena_elo": null,
-    "swe_bench": null,
-    "aider_pct": null,
-    "gpqa": null,
-    "reasoning": false,
-    "family_id": "GPT-5.6 Sol",
-    "effort_tier": "max",
-    "cost_per_index_task_usd": 1.2312,
-    "time_per_index_task_s": null,
-    "sources": {
-      "aa_intelligence_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "tps": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "ttft": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_in_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_out_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "cost_per_index_task_usd": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
-      },
-      "modality": {
-        "origin": "openrouter",
-        "kind": "list"
-      }
-    }
-  },
-  {
     "model": "GPT-5.6 Sol (medium)",
     "provider": "OpenAI",
     "openness": "closed",
@@ -14601,69 +14475,6 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
-      }
-    }
-  },
-  {
-    "model": "GPT-5.6 Terra (max)",
-    "provider": "OpenAI",
-    "openness": "closed",
-    "modality": [
-      "text",
-      "vision"
-    ],
-    "context_length": 128000,
-    "release_date": "2026-07-09",
-    "data_date": "2026-08-07",
-    "source": "AA Data API free",
-    "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra",
-    "tps": 124.54,
-    "ttft": 182800,
-    "price_in_per_M": 2,
-    "price_out_per_M": 12,
-    "blended_price_per_M": 3.8,
-    "aa_intelligence_index": 56.6,
-    "arena_elo": null,
-    "swe_bench": null,
-    "aider_pct": null,
-    "gpqa": null,
-    "reasoning": false,
-    "family_id": "GPT-5.6 Terra",
-    "effort_tier": "max",
-    "cost_per_index_task_usd": 0.508,
-    "time_per_index_task_s": null,
-    "sources": {
-      "aa_intelligence_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "tps": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "ttft": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_in_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_out_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "cost_per_index_task_usd": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
-      },
-      "modality": {
-        "origin": "openrouter",
-        "kind": "list"
       }
     }
   },

@@ -19,7 +19,7 @@ CRON_PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
 BLOCK=$(cat <<EOF
 $MARKER_BEGIN
-# Thrice-daily AA catalog refresh → private deploy (llm-3d-viz)
+# Thrice-daily AA catalog refresh → private VPS deploy + (optional) Cloudflare Pages
 SHELL=/bin/bash
 PATH=$CRON_PATH
 7 6,14,22 * * * cd "$REPO_ROOT" && /bin/bash "$JOB" >> "$LOG_DIR/catalog-cron.stdout" 2>&1

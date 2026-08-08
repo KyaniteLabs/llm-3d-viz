@@ -3,5 +3,13 @@ main = "src/index.js"
 compatibility_date = "2026-08-01"
 workers_dev = true
 
+# KV namespace for TTS rate limiting (per-IP bucket). Create with:
+#   npx wrangler kv namespace create TTS_RATE_LIMIT
+# Then paste the returned id below. Until bound, rate limiting degrades gracefully
+# (origin allowlist alone blocks cross-site credit-burn).
+[[kv_namespaces]]
+binding = "TTS_RATE_LIMIT"
+id = "4ff7baa6b1074a3fbd6480611d80f82a"
+
 # Custom domain viz.kyanitelabs.tech is attached in the dashboard / prior deploy.
 # Redeploy only updates script; domain binding persists.

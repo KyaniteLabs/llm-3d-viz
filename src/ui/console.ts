@@ -321,7 +321,7 @@ export class DecisionConsole {
             const title = single
               ? "Single published effort on AA — click to solo (turns off multi-effort-only if needed)"
               : `${count} effort steps — click again to show all`;
-            return `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}${single ? " is-singleton" : ""}" data-solo-family="${family}" role="listitem" title="${title}">${family} <em>${count}</em></button>`;
+            return `<button type="button" class="family-chip${selectedFamilies.has(family) ? " is-active" : ""}${single ? " is-singleton" : ""}" data-solo-family="${escapeHtml(family)}" role="listitem" title="${escapeHtml(title)}">${escapeHtml(family)} <em>${count}</em></button>`;
           })
           .join("")}
       </div>
@@ -378,7 +378,7 @@ export class DecisionConsole {
           ${providers
             .map(
               (p) =>
-                `<option value="${p}"${selectedProviders.has(p) ? " selected" : ""}>${p}</option>`,
+                `<option value="${escapeHtml(p)}"${selectedProviders.has(p) ? " selected" : ""}>${escapeHtml(p)}</option>`,
             )
             .join("")}
         </select>
@@ -390,7 +390,7 @@ export class DecisionConsole {
             .map((f) => {
               const n = multi.find((m) => m.family === f)?.count;
               const label = n && n >= 2 ? `${f} · ${n} steps` : f;
-              return `<option value="${f}"${selectedFamilies.has(f) ? " selected" : ""}>${label}</option>`;
+              return `<option value="${escapeHtml(f)}"${selectedFamilies.has(f) ? " selected" : ""}>${escapeHtml(label)}</option>`;
             })
             .join("")}
         </select>
@@ -637,9 +637,9 @@ export class DecisionConsole {
     section.innerHTML = `<details class="incomplete-disclosure"><summary>INCOMPLETE DATA / EXCLUDED <span>${incomplete.length}</span></summary><div class="incomplete-data-body">${incomplete
       .map((model) => {
         const axes = incompleteAxisCoverage(model)
-          .map((a) => `<span class="incomplete-axis">${a.label}: ${a.display}</span>`)
+          .map((a) => `<span class="incomplete-axis">${escapeHtml(a.label)}: ${escapeHtml(a.display)}</span>`)
           .join("");
-        return `<p class="incomplete-data-entry" data-model-id="${model.model}"><strong>${displayName(model.model)}</strong>${axes}</p>`;
+        return `<p class="incomplete-data-entry" data-model-id="${escapeHtml(model.model)}"><strong>${escapeHtml(displayName(model.model))}</strong>${axes}</p>`;
       })
       .join("")}</div></details>`;
   }
@@ -661,20 +661,20 @@ export class DecisionConsole {
     const tier = deriveEffortTier(model);
     const curveSteps = groupByFamily(this.catalog).get(family)?.length ?? 1;
     const soloActive = state.filters.families.length === 1 && state.filters.families[0] === family;
-    return `<strong class="selection-name" data-model-id="${model.model}">${displayName(model.model)}</strong><span>${model.provider} · ${model.openness}${model.reasoning ? " · reasoning" : ""} · effort <em>${tier}</em>${curveSteps >= 2 ? ` · ${curveSteps}-step curve` : ""}${selectionExtras(model)}</span>
+    return `<strong class="selection-name" data-model-id="${escapeHtml(model.model)}">${escapeHtml(displayName(model.model))}</strong><span>${escapeHtml(model.provider)} · ${escapeHtml(model.openness)}${model.reasoning ? " · reasoning" : ""} · effort <em>${escapeHtml(tier)}</em>${curveSteps >= 2 ? ` · ${curveSteps}-step curve` : ""}${selectionExtras(model)}</span>
       <dl><div><dt>TPS</dt><dd>${formatTps(model.tps)}</dd></div>
       <div><dt>TTFT</dt><dd>${ttftCell}</dd></div>
       <div><dt>Blended price</dt><dd>${formatPricePerM(model.blended_price_per_M)}</dd></div>
       <div><dt>AA index</dt><dd>${formatIntelligence(model.aa_intelligence_index)}</dd></div>
       ${optionalMetricDlRows(model)}
-      <div><dt>Family</dt><dd>${family}</dd></div>
-      <div><dt>Effort tier</dt><dd>${tier}</dd></div>
+      <div><dt>Family</dt><dd>${escapeHtml(family)}</dd></div>
+      <div><dt>Effort tier</dt><dd>${escapeHtml(tier)}</dd></div>
       <div><dt>Curve steps</dt><dd>${curveSteps}${curveSteps >= 2 ? " (multi-effort)" : ""}</dd></div>
       <div><dt>Value score</dt><dd>${score === undefined ? "—" : score.toFixed(3)}</dd></div>
       <div class="provenance-row"><dt>Provenance</dt><dd class="provenance-line">${escapeHtml(formatProvenanceLine(model))}</dd></div></dl>
       ${
         curveSteps >= 2
-          ? `<button type="button" class="family-chip is-action" data-solo-family="${family}">${soloActive ? "Exit solo · show all curves" : "Solo family curve"}</button>`
+          ? `<button type="button" class="family-chip is-action" data-solo-family="${escapeHtml(family)}">${soloActive ? "Exit solo · show all curves" : "Solo family curve"}</button>`
           : ""
       }`;
   }
@@ -703,12 +703,12 @@ export class DecisionConsole {
           : "";
     return `<section class="value-leaderboard" aria-label="Current value-score leaderboard">
       <p class="eyebrow">TOP PICK · ${this.models.length} VISIBLE</p>
-      <p class="optimum-readout" data-optimum-model-id="${optimum.model.model}" data-focus-family="${familyIdOf(optimum.model)}"><strong>${displayName(optimum.model.model)}</strong><span>${optimum.score.toFixed(3)} score · ${deriveEffortTier(optimum.model)}</span></p>
+      <p class="optimum-readout" data-optimum-model-id="${escapeHtml(optimum.model.model)}" data-focus-family="${escapeHtml(familyIdOf(optimum.model))}"><strong>${escapeHtml(displayName(optimum.model.model))}</strong><span>${optimum.score.toFixed(3)} score · ${escapeHtml(deriveEffortTier(optimum.model))}</span></p>
       <ol data-leaderboard-list>${scores
         .slice(0, 5)
         .map(
           ({ model, score }) =>
-            `<li data-model-id="${model.model}" data-focus-family="${familyIdOf(model)}"><span>${displayName(model.model)} <small>${deriveEffortTier(model)}</small></span><strong>${score.toFixed(3)}</strong></li>`,
+            `<li data-model-id="${escapeHtml(model.model)}" data-focus-family="${escapeHtml(familyIdOf(model))}"><span>${escapeHtml(displayName(model.model))} <small>${escapeHtml(deriveEffortTier(model))}</small></span><strong>${score.toFixed(3)}</strong></li>`,
         )
         .join("")}</ol>
       ${
@@ -719,13 +719,13 @@ export class DecisionConsole {
                 .slice(5)
                 .map(
                   ({ model, score }) =>
-                    `<li data-model-id="${model.model}" data-focus-family="${familyIdOf(model)}"><span>${displayName(model.model)} <small>${deriveEffortTier(model)}</small></span><strong>${score.toFixed(3)}</strong></li>`,
+                    `<li data-model-id="${escapeHtml(model.model)}" data-focus-family="${escapeHtml(familyIdOf(model))}"><span>${escapeHtml(displayName(model.model))} <small>${escapeHtml(deriveEffortTier(model))}</small></span><strong>${score.toFixed(3)}</strong></li>`,
                 )
                 .join("")}</ol>
             </details>`
           : ""
       }
-      <p class="preset-outcome" data-preset-outcome="${activePreset ?? "custom"}">${presetLabel} · ${shares.speed}% speed / ${shares.cost}% cost / ${shares.intelligence}% intelligence → ${displayName(optimum.model.model)}</p>
+      <p class="preset-outcome" data-preset-outcome="${activePreset ?? "custom"}">${escapeHtml(presetLabel)} · ${shares.speed}% speed / ${shares.cost}% cost / ${shares.intelligence}% intelligence → ${escapeHtml(displayName(optimum.model.model))}</p>
       ${solo}
     </section>`;
   }
@@ -749,7 +749,7 @@ export class DecisionConsole {
             .slice(0, 12)
             .map(
               (m) =>
-                `<li data-model-id="${m.model}"><span>${displayName(m.model)}</span><strong>$${m.cost_per_index_task_usd!.toFixed(4)}</strong></li>`,
+                `<li data-model-id="${escapeHtml(m.model)}"><span>${escapeHtml(displayName(m.model))}</span><strong>$${m.cost_per_index_task_usd!.toFixed(4)}</strong></li>`,
             )
             .join("")}</ol>`;
 
@@ -760,7 +760,7 @@ export class DecisionConsole {
             .slice(0, 12)
             .map(
               (m) =>
-                `<li data-model-id="${m.model}"><span>${displayName(m.model)}</span><strong>${m.time_per_index_task_s!.toFixed(1)}s</strong></li>`,
+                `<li data-model-id="${escapeHtml(m.model)}"><span>${escapeHtml(displayName(m.model))}</span><strong>${m.time_per_index_task_s!.toFixed(1)}s</strong></li>`,
             )
             .join("")}</ol>`;
 
@@ -893,10 +893,10 @@ export class DecisionConsole {
             : frontierIds.has(model.model)
               ? "frontier"
               : "dominated";
-        return `<tr data-model-id="${model.model}" data-role="${role}" tabindex="0">
-          <th scope="row">${displayName(model.model)}</th>
-          <td>${model.provider}</td>
-          <td>${model.openness}</td>
+        return `<tr data-model-id="${escapeHtml(model.model)}" data-role="${role}" tabindex="0">
+          <th scope="row">${escapeHtml(displayName(model.model))}</th>
+          <td>${escapeHtml(model.provider)}</td>
+          <td>${escapeHtml(model.openness)}</td>
           <td>${formatTps(model.tps)}</td>
           <td>${formatPricePerM(model.blended_price_per_M)}</td>
           <td>${formatIntelligence(model.aa_intelligence_index)}</td>
