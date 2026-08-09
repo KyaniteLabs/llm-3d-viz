@@ -109,6 +109,7 @@ export class Stage3DThree implements Stage3DSurface {
   private readonly membraneMesh: THREE.Mesh;
   private readonly skirtMesh: THREE.Mesh;
   private cinemaFog: THREE.FogExp2 | null = null;
+  private narrowStage = false;
   private readonly trailsGroup = new THREE.Group();
   private readonly axisGroup = new THREE.Group();
   /** Decide mode: visible intelligence-floor plane(s) in the data cube. */
@@ -709,12 +710,13 @@ export class Stage3DThree implements Stage3DSurface {
     }
 
     // Face grids (cost–intel at low speed; cost–speed at low intel; intel–speed at low cost).
-    const steps = 4;
+    const steps = this.narrowStage ? 2 : 4;
+    const gridOp = this.narrowStage ? 0.1 : 0.22;
     for (let i = 0; i <= steps; i++) {
       const t = (i / steps) * 2 * S - S;
       // Floor (y = -S): cost × speed
-      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, -S, S), grid, 0.22);
-      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(S, -S, t), grid, 0.22);
+      this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, -S, S), grid, gridOp);
+      this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(S, -S, t), grid, gridOp);
       // Back (z = -S): cost × intel
       this.addLine(new THREE.Vector3(t, -S, -S), new THREE.Vector3(t, S, -S), grid, 0.1);
       this.addLine(new THREE.Vector3(-S, t, -S), new THREE.Vector3(S, t, -S), grid, 0.1);
@@ -722,6 +724,8 @@ export class Stage3DThree implements Stage3DSurface {
       this.addLine(new THREE.Vector3(-S, t, -S), new THREE.Vector3(-S, t, S), grid, 0.1);
       this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(-S, S, t), grid, 0.1);
     }
+
+    if (this.narrowStage) return; // suppress domain titles/ticks on mobile — they clip
 
     const domains = this.domains;
     if (!domains) return;
@@ -979,7 +983,8 @@ export class Stage3DThree implements Stage3DSurface {
       );
     }
 
-    const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 520;
+    const narrow = this.el.clientWidth > 0 && this.el.clientWidth < 640;
+    this.narrowStage = narrow;
     this.domains = {
       x: buildAxisDomain(this.axisMapping.x, plottable, { narrow }),
       y: buildAxisDomain(this.axisMapping.y, plottable, { narrow }),
@@ -1127,10 +1132,12 @@ export class Stage3DThree implements Stage3DSurface {
         }
       }
       // Cinema density (W5): tiered opacity — focus full, frontier dimmed (0.65×),
-      // dominated ghosts (0.12×). Nothing hidden; ghosts stay near-invisible.
+      // dominated ghosts (0.08× + size shrunk 50%). Nothing hidden; ghosts near-invisible.
       if (cinemaFocus && cinemaFocus.size > 0) {
         if (!cinemaFocus.has(model.model)) {
-          opacity *= frontierIds.has(model.model) ? 0.65 : 0.12;
+          const isFtr = frontierIds.has(model.model);
+          opacity *= isFtr ? 0.65 : 0.08;
+          if (!isFtr) size *= 0.5;
         } else {
           opacity = Math.max(opacity, 0.96);
           size = Math.max(size, isOptimum ? 22 : isFrontier ? 16 : 13);
@@ -1317,7 +1324,8 @@ export class Stage3DThree implements Stage3DSurface {
       const isOptimum = mesh.userData.semanticClass === "optimum";
       const isFrontier = mesh.userData.semanticClass === "frontier";
       const inLabelFocus = !!labelFocus?.has(id);
-      if (!isOptimum && !focusLabels && !inLabelFocus) continue;
+      if (narrow) { if (!isOptimum) continue; }
+      else if (!isOptimum && !focusLabels && !inLabelFocus) continue;
       const tier = (model.effort_tier || "").toString().toLowerCase();
       let text: string;
       if (isOptimum) {

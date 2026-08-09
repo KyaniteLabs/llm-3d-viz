@@ -727,6 +727,10 @@ html.is-cinema .cinema-exit-fab {
   .effort-strip:not([hidden]) { max-height: 3rem; overflow: hidden; font-size: 0.625rem; }
   .console { padding-bottom: 1.5rem; }
   .selection-panel { overflow-y: auto; max-height: 100%; }
+  .scope-bar { flex-wrap: wrap; padding: 0.3rem 0.5rem; gap: 0.2rem; }
+  .scope-summary { display: none; }
+  .scope-bar-brand h1 { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scope-bar-actions { margin-left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
@@ -1773,7 +1777,7 @@ html.is-cinema .cinema-exit-fab {
 
 /* STAGE KEY open HUD: cap height so stage stays subject */
 .stage-guide-body {
-  max-height: 4.5rem;
+  max-height: 6rem;
   overflow: auto;
 }
 .stage-guide-disclosure[open] .stage-guide-body {

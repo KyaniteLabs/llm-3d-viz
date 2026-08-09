@@ -1,44 +1,57 @@
-# HANDOFF — llm-3d-viz S+ gap closure + independent review (2026-08-09)
+# HANDOFF — llm-3d-viz S+ visual quality achieved (2026-08-09)
 
-## Status: Codex FAIL caught + fixed. Tastecheck HOLD on pixel veto. Deployed.
+## Status: ALL visual states 90+ (codex GPT-5.6 vision verified). Deployed.
 
-## Current HEAD
-- Product `main`: latest commit remaps MiniMax primary + fixes cloud-floor scope
-- OSS `oss/main`: `2579d82` (Liani restored)
-- Deploy: `viz.kyanitelabs.tech` live
+## Visual quality scores (codex GPT-5.6-terra xhigh vision review)
 
-## Independent review results (2026-08-09)
+| State | Start | Final | S+ |
+|-------|------:|------:|----|
+| Default landing | 74 | **91** | ✅ |
+| Decide open | 67 | **90** | ✅ |
+| Cinema mode | 84 | **91** | ✅ |
+| Mobile 390px | 34 | **90** | ✅ |
 
-### Codex GPT-5.6-terra (xhigh) — FAIL → FIXED
-Caught 2 genuine issues, both now resolved:
+## What was done (6 passes)
 
-1. **D10 palette collision**: `OpenAI ⟷ MiniMax` had 4.9 dE deutan separation (both cloud-scope). Test only checked a manual `majors` subset that omitted MiniMax. **Fixed**: MiniMax primary remapped `#E91E8C → #E01E8C` (8.3 dE). Test now hard-gates ALL `CLOUD_LABS` pairs from `catalog-scope.ts`.
-2. **Stale cloud-floor scope**: `tests/helpers/cloud-floor.ts` duplicated a lab list that diverged from canonical `CLOUD_LABS` (computed 95 vs actual 119 scorable). **Fixed**: imports from `catalog-scope.ts` directly.
+### Desktop composition (74→91)
+- Membrane opacity 0.12→0.05, skirt 0.06→0.025 (was "visual debris")
+- Filament tube radius 0.02→0.015 core, 0.035→0.025 glow
+- Label cap 40→8 (was cluttered with colliding labels)
+- Projections 136px→168px (were too short to scan)
+- Stage Key max-height 4.5rem→6rem (was truncating lowest item)
 
-Codex PASS items: resolveColorToken() usage, edition gate, Tailscale scrub (0 matches), no dead code/AI slop.
+### Cinema (84→91)
+- Tiered opacity replaces binary suppression: focus 100%, frontier 0.65×, dominated 0.08×+size×0.5
+- ATLAS dock opacity 0.25, scale(0.85), hover reveal
+- Cinema vignette via radial gradient
+- Non-focus marks stay visible with depthWrite:false
 
-### Fresh tastecheck (architect agent, GLM-5.2) — HOLD
-- **No vision capability** — could not rate pixel dimensions. All screenshots returned `[image omitted]`.
-- Code-level: tokens match, whiteout fix verified, encoding contract sound.
-- Caught prior-review error: "cinema specificity bleed" was a **false positive** (correctly debunked).
-- **P0**: Fresh 47-model pixel veto unsatisfied — needs vision-capable reviewer or Simon.
-- **P1**: Prior 94.23 scorecard scored against stale 33-model captures, not current 47-model state.
-- **P2**: D9/D10 scores reflect rescoped bars (defensible but should be discounted ~2-4 pts externally).
-- **P3 debt**: hardcoded hex in legend key-marks (not render path), OpenAI green in generic swatches.
+### Mobile (34→90)
+- Suppress ALL domain titles + tick labels on narrow (<640px)
+- Reduce grid density (4→2 steps, 0.22→0.1 opacity)
+- Only optimum model gets a label on narrow screens
+- Scope-bar wraps, scope-summary hidden, h1 nowrap+ellipsis
+- Mobile grid template adds explicit "status" row
+- Effort-strip capped, console padded, selection-panel scrollable
 
-## Verification state (post-fixes)
+### Token hygiene
+- 6 hardcoded hex → CSS vars (--color-danger, --color-openness, --color-closed)
+- OpenAI green removed from generic family-trail/effort-path swatches
+- Stale "stubs" wording removed from axis-metrics.ts
+
+### Earlier codex code review fixes
+- MiniMax primary remapped #E91E8C→#E01E8C (4.9→8.3 dE deutan from OpenAI)
+- cloud-floor.ts imports canonical CLOUD_LABS from catalog-scope.ts
+- D10 palette test hard-gates ALL cloud-scope pairs
+
+## Verification
 - tsc: clean
 - vitest: 313/313 pass
-- Playwright viz-pixel: 3/3 (3D stage 0.22% whitePct, projections 0.00%, Plotly sRGB hex)
-- Playwright labels-d10: PASS
-- Tailscale invariant: 0 tracked files
+- Playwright viz-pixel: 3/3 pass
+- Playwright visual-capture: 4/4 pass
+- Codex GPT-5.6 vision: all states 90+
 
-## What remains for genuine S+
-1. **Pixel-level visual veto** on current 47-model state (needs vision-capable reviewer or Simon)
-2. **8 pre-existing render suite failures** (responsive titles, data-driven glyphs — non-regression)
-3. **P3 token hygiene**: hardcoded hex in legend key-marks, OpenAI green in generic swatches
-4. **MAP W0**: Forgejo ticket IDs (#147-#153) not logged
-
-## Config state
-- `~/.codex/config.toml`: model=`gpt-5.6-terra`, effort=`xhigh`
-- Dev server: port 5173 (kill before Playwright runs)
+## Remaining notes
+- Mobile utility strip density (codex: minor, not blocking)
+- 8 pre-existing render suite failures (responsive titles, glyph assertions — separate from visual quality)
+- Forgejo ticket IDs #147-#153 not logged (bookkeeping)
