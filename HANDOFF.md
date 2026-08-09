@@ -1,29 +1,44 @@
-# HANDOFF — llm-3d-viz audit complete (2026-08-08)
+# HANDOFF — llm-3d-viz S+ gap closure + independent review (2026-08-09)
 
-## Status: ALL audit findings patched. 40/40 resolved. Live and deployed.
+## Status: Codex FAIL caught + fixed. Tastecheck HOLD on pixel veto. Deployed.
 
-## Sol@xhigh audit results — all 4 domains FAIL, all findings now fixed
+## Current HEAD
+- Product `main`: latest commit remaps MiniMax primary + fixes cloud-floor scope
+- OSS `oss/main`: `2579d82` (Liani restored)
+- Deploy: `viz.kyanitelabs.tech` live
 
-| Domain | Verdict | Total findings | Patched |
-|--------|---------|---------------|---------|
-| Data Pipeline | FAIL | 12 | 12 |
-| Math/Scoring | FAIL | 7 | 7 |
-| UI State | FAIL | 9 | 9 |
-| Viz/Rendering | FAIL | 11 | 11 |
-| **Total** | | **40** (incl. 2 CRITICAL, 13 HIGH) | **40** |
+## Independent review results (2026-08-09)
 
-## 8 commits this session (all pushed to Forgejo origin)
+### Codex GPT-5.6-terra (xhigh) — FAIL → FIXED
+Caught 2 genuine issues, both now resolved:
 
-1. `5496f5e` — 6 HIGH: XSS, boot DoS, TTS credit-burn, empty-catalog guard, Pages gate, rsync safety
-2. `dcea940` — CRITICAL: correct 7:2:1 blended-cost formula + reasoning regex fix
-3. `35f09b6` — 4 HIGH: Atlas empty scope, Delaunay super-triangle, decimal anchor floor, null prices
-4. `729dac5` — isScorable finite guards + URL weight cap
-5. `88193f4` — all 25 remaining: viz lifecycle teardown, MoE VRAM, filters, share copy, etc.
+1. **D10 palette collision**: `OpenAI ⟷ MiniMax` had 4.9 dE deutan separation (both cloud-scope). Test only checked a manual `majors` subset that omitted MiniMax. **Fixed**: MiniMax primary remapped `#E91E8C → #E01E8C` (8.3 dE). Test now hard-gates ALL `CLOUD_LABS` pairs from `catalog-scope.ts`.
+2. **Stale cloud-floor scope**: `tests/helpers/cloud-floor.ts` duplicated a lab list that diverged from canonical `CLOUD_LABS` (computed 95 vs actual 119 scorable). **Fixed**: imports from `catalog-scope.ts` directly.
 
-## All deployments verified live
-- `viz.kyanitelabs.tech` → HTTP 200
-- TTS non-allowlisted origin → HTTP 403
-- 299 rows, 0 OpenAI max, Sol blend $4.35
+Codex PASS items: resolveColorToken() usage, edition gate, Tailscale scrub (0 matches), no dead code/AI slop.
+
+### Fresh tastecheck (architect agent, GLM-5.2) — HOLD
+- **No vision capability** — could not rate pixel dimensions. All screenshots returned `[image omitted]`.
+- Code-level: tokens match, whiteout fix verified, encoding contract sound.
+- Caught prior-review error: "cinema specificity bleed" was a **false positive** (correctly debunked).
+- **P0**: Fresh 47-model pixel veto unsatisfied — needs vision-capable reviewer or Simon.
+- **P1**: Prior 94.23 scorecard scored against stale 33-model captures, not current 47-model state.
+- **P2**: D9/D10 scores reflect rescoped bars (defensible but should be discounted ~2-4 pts externally).
+- **P3 debt**: hardcoded hex in legend key-marks (not render path), OpenAI green in generic swatches.
+
+## Verification state (post-fixes)
+- tsc: clean
+- vitest: 313/313 pass
+- Playwright viz-pixel: 3/3 (3D stage 0.22% whitePct, projections 0.00%, Plotly sRGB hex)
+- Playwright labels-d10: PASS
+- Tailscale invariant: 0 tracked files
+
+## What remains for genuine S+
+1. **Pixel-level visual veto** on current 47-model state (needs vision-capable reviewer or Simon)
+2. **8 pre-existing render suite failures** (responsive titles, data-driven glyphs — non-regression)
+3. **P3 token hygiene**: hardcoded hex in legend key-marks, OpenAI green in generic swatches
+4. **MAP W0**: Forgejo ticket IDs (#147-#153) not logged
 
 ## Config state
-- `~/.gjc/agent/config.yml` `task.agentModelOverrides` → `{}` (reverted from Sol@xhigh)
+- `~/.codex/config.toml`: model=`gpt-5.6-terra`, effort=`xhigh`
+- Dev server: port 5173 (kill before Playwright runs)
