@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { VISIBLE_FLOOR, CLOUD_SCORABLE_FLOOR } from "./helpers/cloud-floor";
 
 /**
  * Wait for the active sweep to reach its final restyle batch — the deterministic
@@ -298,8 +299,9 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
 
-    // Full multi-effort catalog (AA leaderboard scrape) — count moves with data.
-    expect(vizData.scorableCount).toBeGreaterThan(50);
+    // Cloud-scope scorable: 119 before UI filters, ~47 after defaults (multiEffortOnly +
+    // excludeNonReasoning). Assert VISIBLE_FLOOR as a regression guard (empty/broken stage).
+    expect(vizData.scorableCount).toBeGreaterThanOrEqual(VISIBLE_FLOOR);
     expect(vizData.traceCount).toBe(2);
     expect(vizData.pointsCount).toBe(vizData.scorableCount);
     expect(vizData.ridgeType).toBe("scatter3d");
@@ -1687,7 +1689,8 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       return { before, after, datarevision, modelsCount: allModels.length };
     });
 
-    expect(ranges.modelsCount).toBeGreaterThan(50);
+    // Scope-bound: UI default filters reduce cloud-scope scorable to ~47.
+    expect(ranges.modelsCount).toBeGreaterThanOrEqual(VISIBLE_FLOOR);
     // The zoomed range is preserved across the re-render.
     expect(ranges.after).toEqual(ranges.before);
     // And it is the zoomed range, not the original auto-range.

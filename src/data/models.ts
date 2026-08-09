@@ -139,6 +139,17 @@ export function isScorable(model: Model): boolean {
     model.aa_intelligence_index <= 100
   );
 }
+/**
+ * Cloud-scoped scorable model count. Test thresholds bind to this constant
+ * instead of a hardcoded magic number, so catalog-scope changes (CLOUD_LABS
+ * additions, release-floor moves) automatically update test expectations.
+ *
+ * Note: UI default filters (multiEffortOnly + excludeNonReasoning) further
+ * reduce the visible set below this count (currently ~47 from 119). Tests
+ * should use `Math.floor(CLOUD_SCORABLE_FLOOR / 3)` as a visible-count floor
+ * to catch empty/broken stages without masking legitimate scope changes.
+ */
+export const CLOUD_SCORABLE_FLOOR = models.filter(isScorable).length;
 
 function isMissingString(value: unknown): boolean {
   return typeof value !== "string" || value.trim().length === 0;

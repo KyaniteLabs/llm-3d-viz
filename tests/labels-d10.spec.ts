@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { VISIBLE_FLOOR } from "./helpers/cloud-floor";
 
 /**
  * D10 (redefined 2026-08-07): lab identity must be reachable WITHOUT color.
@@ -21,10 +22,11 @@ test("D10: focus-set direct labels render in the default r3f stage", async ({ pa
 
   // Three stage ready + a real optimum computed + at least one label painted.
   await page.waitForFunction(
-    () =>
+    (floor) =>
       document.documentElement.dataset.stageBackend === "r3f" &&
       !!((window as any).__viz?.optimumModelId) &&
-      ((window as any).__viz?.visibleCount ?? 0) > 50,
+      ((window as any).__viz?.visibleCount ?? 0) >= floor,
+    VISIBLE_FLOOR,
     { timeout: 15000 },
   );
   // Mark labels (optimum + focus-set) are painted during render(); settle a beat.
