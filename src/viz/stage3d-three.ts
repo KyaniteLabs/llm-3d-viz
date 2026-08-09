@@ -52,7 +52,7 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 /** Scene half-extent of the data cube (cube spans [-S, S] on each axis). */
 const S = 1;
 const EYE_Y_FLOOR = 0.15;
-const LABEL_CAP = 14;
+const LABEL_CAP = 8;
 
 type GlyphKind = SceneGlyphKind | "box" | "box-open";
 
@@ -1126,11 +1126,11 @@ export class Stage3DThree implements Stage3DSurface {
           opacity = Math.min(opacity, 0.55);
         }
       }
-      // Cinema density (W5): tiered opacity — focus full, frontier dimmed (0.70×),
-      // dominated ghosts (0.22×). Nothing hidden; ghosts stay near-invisible.
+      // Cinema density (W5): tiered opacity — focus full, frontier dimmed (0.65×),
+      // dominated ghosts (0.12×). Nothing hidden; ghosts stay near-invisible.
       if (cinemaFocus && cinemaFocus.size > 0) {
         if (!cinemaFocus.has(model.model)) {
-          opacity *= frontierIds.has(model.model) ? 0.70 : 0.22;
+          opacity *= frontierIds.has(model.model) ? 0.65 : 0.12;
         } else {
           opacity = Math.max(opacity, 0.96);
           size = Math.max(size, isOptimum ? 22 : isFrontier ? 16 : 13);
@@ -1142,7 +1142,7 @@ export class Stage3DThree implements Stage3DSurface {
       const accent = !belowFloor && enc.showRing ? enc.accent : undefined;
       const core = !belowFloor && enc.showCore ? enc.core : undefined;
       // V09/W5 (revised): cinema no longer hides non-focus marks. They render at
-      // tiered opacity (frontier 0.70×, dominated 0.22×) but drop depthWrite so
+      // tiered opacity (frontier 0.65×, dominated 0.12×) but drop depthWrite so
       // they never occlude focus marks in depth tests, and stay out of the
       // raycast/label/export arrays (pointMeshes) so they are neither hover
       // targets, label candidates, nor export rows — the cube bounds are
