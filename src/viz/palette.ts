@@ -307,7 +307,7 @@ export const LAB_BRANDS: Readonly<Record<string, LabBrand>> = {
   // Microsoft logo square colors
   Microsoft: brand(["#6366F1", "#312E81", "#C7D2FE", "#0F0E1A"], "Microsoft indigo · deep · lilac · ink"),
   // MiniMax product magenta system
-  MiniMax: brand(["#E91E8C", "#6B21A8", "#FBCFE8", "#1A0B1F"], "MiniMax magenta · violet · blush · ink"),
+  MiniMax: brand(["#E01E8C", "#6B21A8", "#FBCFE8", "#1A0B1F"], "MiniMax magenta · violet · blush · ink"),
   // NVIDIA trademark: green · dark gray · white (PDF guidelines)
   NVIDIA: brand(["#84CC16", "#14532D", "#FFFFFF", "#052E16"], "NVIDIA lime · forest · white · ink"),
   // xAI / Grok (AA: SpaceXAI): black · white · cool gray (brand guidelines monochrome)

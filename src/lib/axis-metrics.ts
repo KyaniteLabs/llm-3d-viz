@@ -12,7 +12,7 @@ import type { Model } from "../data/models";
 /** Scene axis in product coordinates (Three: x/y/z = right / up / toward camera-depth). */
 export type SceneAxis = "x" | "y" | "z";
 
-/** Metrics that can be bound to a scene axis. Stubs stay listed but unavailable. */
+/** Metrics that can be bound to a scene axis. */
 export type AxisMetricId =
   | "blended_price"
   | "price_in"

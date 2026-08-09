@@ -1,3 +1,4 @@
+import { CLOUD_LABS } from "../src/data/catalog-scope";
 import { describe, expect, it } from "vitest";
 import {
   dominatedFill,
@@ -601,19 +602,13 @@ describe("D10 CVD — identity-without-color palette floor", () => {
     expect(dups, dups.join("; ")).toEqual([]);
   });
 
-  it("high-signal lab deutan separation is label-mitigated (diagnostic)", () => {
-    // Per redefined D10 (owner-approved 2026-08-07): identity is reachable WITHOUT
-    // color via focus-set direct labels, so major brand colors are PRESERVED even
-    // where deutan separation is weak (Anthropic↔Mistral, Google↔Microsoft,
-    // NVIDIA↔Alibaba all merge ~8–10 dE). This logs the worst major pairs but only
-    // hard-gates a true near-identical degenerate merge (<5 dE), which would mean
-    // two brands are indistinguishable even with effort. Includes Arcee + Upstage
-    // (the primaries this campaign recolored) so a recolor can't sneak in a merge.
-    const majors = [
-      "OpenAI", "Anthropic", "Google", "Meta", "DeepSeek", "Qwen",
-      "Microsoft", "NVIDIA", "Kimi", "SpaceXAI", "Mistral", "Alibaba", "Amazon",
-      "Arcee AI", "Upstage",
-    ];
+  it("cloud-scope lab deutan separation clears <5 dE hard gate", () => {
+    // D10 redefined bar (owner-approved 2026-08-07): no identical primaries +
+    // no degenerate <5 dE deutan merges + identity-without-color via focus-set
+    // labels. The hard gate applies to ALL cloud-scope labs (CLOUD_LABS from
+    // catalog-scope.ts), not a manually curated subset. Non-cloud labs remain
+    // diagnostic-only (they appear in the full-list report below).
+    const majors = [...CLOUD_LABS];
     const HARD = 5;
     const pairD = (a: string, b: string) => {
       const pa = primaries.find((p) => p.k === a);
@@ -627,9 +622,8 @@ describe("D10 CVD — identity-without-color palette floor", () => {
       }
     }
     pairs.sort((x, y) => x.d - y.d);
-    // Full-list diagnostic: surface EVERY <5 dE pair (incl. brand-preserved ones like
-    // Alibaba↔Xiaomi orange) so degenerate merges are visible in CI even where the
-    // owner declined a remap. Not a gate — label-mitigated per the redefined D10.
+    // Full-list diagnostic: surface EVERY <5 dE pair across ALL primaries
+    // (including non-cloud labs like Alibaba↔Xiaomi) for CI visibility.
     const allDegenerate: Array<{ d: number; label: string }> = [];
     for (let i = 0; i < primaries.length; i++) {
       for (let j = i + 1; j < primaries.length; j++) {
@@ -638,14 +632,14 @@ describe("D10 CVD — identity-without-color palette floor", () => {
       }
     }
     allDegenerate.sort((x, y) => x.d - y.d);
-    // biome-ignore lint/suspicious/noConsole: D10 label-mitigated collision record
+    // biome-ignore lint/suspicious/noConsole: D10 cloud-scope collision record
     console.log(
-      `[D10] worst major deutan pairs (label-mitigated; brand colors preserved):\n${pairs
+      `[D10] worst cloud-scope deutan pairs:\n${pairs
         .slice(0, 5)
         .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
         .join("\n")}` +
         (allDegenerate.length
-          ? `\n[D10] full-list <${HARD} dE pairs (known/brand-preserved, not gated):\n${allDegenerate
+          ? `\n[D10] non-cloud <${HARD} dE pairs (diagnostic, not gated):\n${allDegenerate
               .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
               .join("\n")}`
           : ""),
@@ -653,7 +647,7 @@ describe("D10 CVD — identity-without-color palette floor", () => {
     const degenerate = pairs.filter((p) => p.d < HARD);
     expect(
       degenerate,
-      `near-identical deutan merge (<${HARD} dE) among majors/recolored — would need a remap:\n${degenerate
+      `near-identical deutan merge (<${HARD} dE) among cloud-scope labs:\n${degenerate
         .map((p) => `  ${p.d.toFixed(1)}  ${p.label}`)
         .join("\n")}`,
     ).toEqual([]);

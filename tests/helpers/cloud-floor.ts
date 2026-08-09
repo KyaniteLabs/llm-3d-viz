@@ -1,11 +1,9 @@
 /**
  * Compute the product-scope scorable floor from actual catalog data.
  *
- * Playwright's esbuild runner cannot import JSON via resolveJsonModule,
- * so we read the file directly and replicate the catalog-scope + isScorable
- * logic. This keeps test thresholds bound to the actual product scope
- * (CLOUD_LABS + RELEASE_FLOOR_ISO) without importing source modules that
- * pull in JSON.
+ * Imports CLOUD_LABS + RELEASE_FLOOR_ISO from the canonical catalog-scope
+ * module (no duplication). Playwright's esbuild runner can import pure TS
+ * modules — only JSON imports require this file's readFileSync approach.
  *
  * Source of truth: src/data/catalog-scope.ts (CLOUD_LABS, RELEASE_FLOOR_ISO)
  *                   src/data/models.ts (isScorable)
@@ -13,24 +11,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { CLOUD_LABS, RELEASE_FLOOR_ISO } from "../../src/data/catalog-scope";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const CLOUD_LABS = new Set([
-  "OpenAI",
-  "Anthropic",
-  "Google",
-  "DeepSeek",
-  "Meta",
-  "Mistral",
-  "Cohere",
-  "Alibaba",
-  "Amazon",
-  "Microsoft",
-  "Samsung",
-]);
-
-const RELEASE_FLOOR_ISO = "2026-01-01";
+const CLOUD_LAB_SET = new Set<string>(CLOUD_LABS);
 
 function isScorable(m: {
   tps: number | null;
@@ -62,7 +47,7 @@ const catalog = JSON.parse(
 }>;
 
 const cloudScoped = catalog.filter(
-  (m) => CLOUD_LABS.has(m.provider) && m.release_date >= RELEASE_FLOOR_ISO,
+  (m) => CLOUD_LAB_SET.has(m.provider) && m.release_date >= RELEASE_FLOOR_ISO,
 );
 
 /** Cloud-scoped scorable model count (source: actual catalog data). */
@@ -71,7 +56,7 @@ export const CLOUD_SCORABLE_FLOOR = cloudScoped.filter(isScorable).length;
 /**
  * Visible-count floor for Playwright tests. UI default filters
  * (multiEffortOnly + excludeNonReasoning) reduce CLOUD_SCORABLE_FLOOR
- * (currently 119) to ~47 visible. We assert >= 1/3 as a regression guard
+ * to ~47 visible. We assert >= 1/3 as a regression guard
  * that catches empty/broken stages without masking catalog-scope changes.
  */
 export const VISIBLE_FLOOR = Math.floor(CLOUD_SCORABLE_FLOOR / 3);
