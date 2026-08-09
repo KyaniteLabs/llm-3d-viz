@@ -39,6 +39,7 @@ import {
   type CatalogSnapshot,
 } from "./lib/catalog-diff";
 import { formatCoverageBadge } from "./lib/provenance";
+import { isOssEdition } from "./config/edition";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
 // so a hover point resolves to a stable model identity regardless of point order.
@@ -429,6 +430,18 @@ async function boot() {
   consoleRoot.insertBefore(decideHost, consoleRoot.firstChild);
   const decidePanel = new DecidePanel(decideHost, store, models, productCatalogSnapshot);
   decidePanel.setModels(applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate()));
+  // Liani / average-user simple picker — OSS edition only (never product Forgejo default).
+  let simpleDecision: { setModels: (m: readonly Model[]) => void } | null = null;
+  if (isOssEdition) {
+    document.documentElement.dataset.edition = "oss";
+    const { SimpleDecision } = await import("./ui/simple-decision");
+    simpleDecision = new SimpleDecision(consoleRoot, store);
+    simpleDecision.setModels(
+      applyFilters(catalogForFilters(store.getState().filters), store.getState().filters, sessionReferenceDate()),
+    );
+  } else {
+    document.documentElement.dataset.edition = "product";
+  }
   const atlasHost =
     document.querySelector<HTMLElement>("[data-atlas-agent]") ??
     (() => {
@@ -697,6 +710,7 @@ async function boot() {
     // and made Playwright settle checks flaky.
     consoleUi.setModels(visibleSet);
     decidePanel.setModels(visibleSet);
+    simpleDecision?.setModels(visibleSet);
     atlasPanel.setVisible(visibleSet);
     stageGuide.setModels(visibleSet);
     updateTrustChrome(visibleSet, weights, axisMapping, appState);
@@ -787,6 +801,7 @@ async function boot() {
     if (!filtersSame) {
       const visibleNow = applyFilters(catalogForFilters(state.filters), state.filters, sessionReferenceDate());
       consoleUi.setModels(visibleNow);
+      simpleDecision?.setModels(visibleNow);
       atlasPanel.setVisible(visibleNow);
       stageGuide.setModels(visibleNow);
       sweep?.setModels(visibleNow);

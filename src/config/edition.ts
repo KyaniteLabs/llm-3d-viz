@@ -5,7 +5,7 @@
  */
 export type Edition = "product" | "oss";
 
-/** Product builds: "product". OSS publish branch rewrites this to "oss". */
-export const EDITION = "product" as Edition;
+/** OSS publish branch. Product main keeps "product". */
+export const EDITION = "oss" as Edition;
 
 export const isOssEdition: boolean = EDITION === "oss";
