@@ -79,6 +79,10 @@
   --viz-frontier-point: var(--filament-dim);
   --viz-dominated: var(--slate-cyan);   /* chrome/subtraction — marks use brand chroma pull, not slate fill */
   /* provider differentiation = SHAPE, not a --series-* hue ramp */
+  /* semantic palette roles (generic legend marks — not brand-specific) */
+  --color-danger: #e8b4a8;
+  --color-openness: #5b9bd5;
+  --color-closed: #6a7580;
 
   /* MOTION */
   --dur-fast: 180ms;   /* chrome */
@@ -219,6 +223,11 @@ body { text-wrap: pretty; }
   display: none !important;
 }
 .is-cinema .stage { grid-template-columns: minmax(0, 1fr); padding: 0.25rem; }
+
+/* Cinema: fade scene edges with a vignette (grid/cube are Three.js meshes, not CSS-selectable). */
+.is-cinema .canvas-host .grid-line,
+.is-cinema .canvas-host .cube-edge { opacity: 0.15; }
+.is-cinema .stage-visual { background: radial-gradient(ellipse at center, transparent 40%, rgba(7, 12, 11, 0.95) 100%); }
 .is-cinema .model-readout { font-size: var(--step-1); }
 .axis-controls, .filter-controls, .task-charts { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
 .filter-count { float: right; color: var(--filament-dim); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.65rem; }
@@ -282,8 +291,8 @@ html, body { height: 100%; }
 .task-rank { margin: 0.35rem 0 0; padding-left: 1.1rem; font: 400 var(--step--1) var(--font-mono); color: var(--color-text-muted); }
 .task-rank li { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.15rem 0; }
 .task-rank strong { color: var(--filament); font-variant-numeric: tabular-nums; }
-.key-mark--open { background: #5B9BD5; }
-.key-mark--closed { background: #6A7580; border: 1px solid var(--color-border); }
+.key-mark--open { background: var(--color-openness, #5b9bd5); }
+.key-mark--closed { background: var(--color-closed, #6a7580); border: 1px solid var(--color-border); }
 .key-mark--reasoning { background: transparent; border: 1px solid var(--filament-dim); border-radius: 50%; }
 .weight-controls { margin-top: 0.75rem; border-top: 1px solid var(--color-border); }
 .weight-heading { margin: 0; padding: 0.45rem 0 0.1rem; color: var(--color-text-muted); font: 400 var(--step--1) var(--font-mono); letter-spacing: 0.1em; }
@@ -339,8 +348,8 @@ html, body { height: 100%; }
 .projection-row .projection .js-plotly-plot,
 .projection-row .projection .plot-container,
 .projection-row .projection .svg-container {
-  max-height: 5.6rem !important;
-  height: 5.6rem !important;
+  max-height: 8rem !important;
+  height: 8rem !important;
 }
 /* L1: Plotly's injected stylesheet sets .plot-container to "Open Sans" — override to
    the instrument mono so any text without an explicit layout font never leaks the
@@ -590,7 +599,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   white-space: nowrap;
 }
 .atlas-chip.ok { border-color: color-mix(in oklab, var(--filament-dim) 50%, transparent); }
-.atlas-chip.bad { border-color: rgba(196, 80, 60, 0.5); color: #e8b4a8; }
+.atlas-chip.bad { border-color: rgba(196, 80, 60, 0.5); color: var(--color-danger, #e8b4a8); }
 .atlas-proposal {
   padding: 0.4rem 0.45rem;
   border: 1px solid color-mix(in oklab, var(--filament-dim) 30%, transparent);
@@ -599,7 +608,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
 }
 .atlas-summary-text { margin: 0 0 0.35rem; font-size: 0.72rem; line-height: 1.4; color: var(--color-text); }
 .atlas-shortlist, .atlas-meta, .atlas-refuse { margin: 0.2rem 0; font-size: 0.625rem; /* L8 micro-type floor: 10px */ color: var(--color-text-muted); }
-.atlas-refuse { color: #e8b4a8; }
+.atlas-refuse { color: var(--color-danger, #e8b4a8); }
 .atlas-actions { display: flex; gap: 0.35rem; margin-top: 0.4rem; }
 /* Keep Atlas usable in cinema — floating dock so "cinema off" still works. */
 .app-shell.is-cinema .atlas-dock {
@@ -616,6 +625,9 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   border-radius: 6px;
   background: color-mix(in oklab, var(--color-surface) 92%, #000);
 }
+
+/* Collapse ATLAS dock in cinema — minimized sliver, still exit-able (2026-08-09). */
+.app-shell.is-cinema .atlas-dock { max-height: 2rem; overflow: hidden; opacity: 0.5; }
 .app-shell.is-cinema .atlas-dock .atlas-llm-details {
   display: none; /* keep chrome thin in cinema */
 }
@@ -703,6 +715,14 @@ html.is-cinema .cinema-exit-fab {
     margin: 0;
   }
   .projection-row { grid-template-columns: 1fr; }
+  /* W-mobile (2026-08-09): declutter narrow screens, prevent footer overlap */
+  .stage-guide { display: none; }
+  h1 { font-size: var(--step-0); }
+  .observatory-subtitle, .heat-encoding-note { display: none; }
+  .console { position: relative; z-index: 1; }
+  .selection-panel { padding-bottom: 0.5rem; }
+  .stage { min-height: 55vh; }
+  .status-bar { font-size: 0.625rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
@@ -784,7 +804,7 @@ html.is-cinema .cinema-exit-fab {
   letter-spacing: 0.02em;
   opacity: 0.85;
 }
-.key-mark--family-trail { width: 1rem; height: 0.12rem; margin-top: 0.4rem; background: #10a37f; }
+.key-mark--family-trail { width: 1rem; height: 0.12rem; margin-top: 0.4rem; background: var(--filament, #e8f1e4); }
 .lab-color-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -810,8 +830,8 @@ html.is-cinema .cinema-exit-fab {
 }
 .lab-disclosure > summary { cursor: pointer; list-style: none; }
 .lab-disclosure > summary::-webkit-details-marker { display: none; }
-.key-mark--effort-path { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: #10a37f; box-shadow: 0.35rem 0 0 -0.15rem #0d8f6e, 0.7rem 0 0 -0.25rem #09664f; }
-.key-mark--singleton-dim { border-radius: 50%; background: #3d5560; opacity: 0.35; }
+.key-mark--effort-path { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: var(--filament-dim, #c9d4c4); box-shadow: 0.35rem 0 0 -0.15rem color-mix(in oklab, var(--filament-dim, #c9d4c4), #000 20%), 0.7rem 0 0 -0.25rem color-mix(in oklab, var(--filament-dim, #c9d4c4), #000 40%); }
+.key-mark--singleton-dim { border-radius: 50%; background: var(--slate-cyan, #3d5560); opacity: 0.35; }
 .key-mark--open-closed-glyph { border-radius: 50%; border: 1.5px solid var(--filament-dim); background: transparent; }
 .key-mark--glyph-standard { border-radius: 50%; background: var(--filament-dim); }
 .key-mark--glyph-reasoning {
@@ -831,8 +851,8 @@ html.is-cinema .cinema-exit-fab {
   background: var(--filament-dim);
   box-shadow: 0.45rem 0.1rem 0 -0.12rem rgba(201, 212, 196, 0.55);
 }
-.key-mark--open, .key-mark--open-point { border-radius: 50%; background: #5b9bd5; }
-.key-mark--closed, .key-mark--closed-point { border-radius: 50%; background: #6a7580; }
+.key-mark--open, .key-mark--open-point { border-radius: 50%; background: var(--color-openness, #5b9bd5); }
+.key-mark--closed, .key-mark--closed-point { border-radius: 50%; background: var(--color-closed, #6a7580); }
 .key-mark--reasoning-mark { border-radius: 50%; border: 1.5px dashed var(--filament-dim); background: transparent; }
 .is-cinema .effort-strip { display: none; }
 
@@ -1174,8 +1194,12 @@ html.is-cinema .cinema-exit-fab {
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--color-border);
+  overflow: auto;
+  max-height: 100%;
 }
 .decide-panel[hidden] { display: none !important; }
+
+.decide-shortlist { padding-bottom: 2rem; }
 .decide-title {
   font-size: 0.9rem;
   font-weight: 500;
@@ -1706,8 +1730,8 @@ html.is-cinema .cinema-exit-fab {
 .canvas-host[data-canvas-mode="3d"] .projection-row:not([hidden]) {
   display: grid !important;
   grid-template-columns: 1fr 1fr 1fr;
-  height: 8.5rem;
-  max-height: 9.25rem;
+  height: 10.5rem;
+  max-height: 10.5rem;
   min-height: 7.5rem;
   gap: 0.25rem;
   align-self: end;
@@ -2148,7 +2172,7 @@ select:focus-visible {
 
 /* Hybrid strip hard cap 148px */
 .canvas-host[data-canvas-mode="3d"] .projection-row:not([hidden]) {
-  max-height: 148px;
+  max-height: 168px;
 }
 
 

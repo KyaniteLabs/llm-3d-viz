@@ -52,7 +52,7 @@ const DESIGN_SYSTEM_TOKEN_FALLBACKS = {
 /** Scene half-extent of the data cube (cube spans [-S, S] on each axis). */
 const S = 1;
 const EYE_Y_FLOOR = 0.15;
-const LABEL_CAP = 40;
+const LABEL_CAP = 14;
 
 type GlyphKind = SceneGlyphKind | "box" | "box-open";
 
@@ -284,7 +284,7 @@ export class Stage3DThree implements Stage3DSurface {
       new THREE.MeshBasicMaterial({
         color: ridgeColor,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.05,
         side: THREE.DoubleSide,
         depthWrite: false,
       }),
@@ -298,7 +298,7 @@ export class Stage3DThree implements Stage3DSurface {
       new THREE.MeshBasicMaterial({
         color: ridgeColor,
         transparent: true,
-        opacity: 0.06,
+        opacity: 0.025,
         side: THREE.DoubleSide,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -1126,11 +1126,11 @@ export class Stage3DThree implements Stage3DSurface {
           opacity = Math.min(opacity, 0.55);
         }
       }
-      // Cinema density (W5): non-focus fully suppressed — export is focus-set only.
+      // Cinema density (W5): tiered opacity — focus full, frontier dimmed (0.70×),
+      // dominated ghosts (0.22×). Nothing hidden; ghosts stay near-invisible.
       if (cinemaFocus && cinemaFocus.size > 0) {
         if (!cinemaFocus.has(model.model)) {
-          opacity = 0;
-          size = 0.01;
+          opacity *= frontierIds.has(model.model) ? 0.70 : 0.22;
         } else {
           opacity = Math.max(opacity, 0.96);
           size = Math.max(size, isOptimum ? 22 : isFrontier ? 16 : 13);
@@ -1141,24 +1141,25 @@ export class Stage3DThree implements Stage3DSurface {
         decideMode && floor != null && (model.aa_intelligence_index == null || model.aa_intelligence_index < floor);
       const accent = !belowFloor && enc.showRing ? enc.accent : undefined;
       const core = !belowFloor && enc.showCore ? enc.core : undefined;
-      // V09: a cinema-suppressed mark (opacity 0, size 0.01) must not be an
-      // invisible depth/hover occluder. Hide it, drop depthWrite on every
-      // material, and keep it out of the raycast/model-id/export arrays
-      // (domains still include the row, so the cube bounds are unaffected).
-      const suppressed = Boolean(cinemaFocus && cinemaFocus.size > 0 && !cinemaFocus.has(model.model));
+      // V09/W5 (revised): cinema no longer hides non-focus marks. They render at
+      // tiered opacity (frontier 0.70×, dominated 0.22×) but drop depthWrite so
+      // they never occlude focus marks in depth tests, and stay out of the
+      // raycast/label/export arrays (pointMeshes) so they are neither hover
+      // targets, label candidates, nor export rows — the cube bounds are
+      // unaffected (domains still include the row).
+      const cinemaNonFocus = Boolean(cinemaFocus && cinemaFocus.size > 0 && !cinemaFocus.has(model.model));
       const mesh = this.makePointMesh(kind, color, size, accent, core);
       mesh.position.copy(pos);
-      if (suppressed) mesh.visible = false;
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.transparent = opacity < 0.99 || mat.transparent;
       mat.opacity = opacity;
-      if (suppressed) mat.depthWrite = false;
+      if (cinemaNonFocus) mat.depthWrite = false;
       for (const key of ["accentShell", "coreShell"] as const) {
         const shell = mesh.userData[key] as THREE.Mesh | undefined;
         if (shell) {
           const sm = shell.material as THREE.MeshBasicMaterial;
           sm.opacity = Math.min(sm.opacity, opacity);
-          if (suppressed) sm.depthWrite = false;
+          if (cinemaNonFocus) sm.depthWrite = false;
         }
       }
       // V12: persist each material's post-render base opacity so family
@@ -1176,7 +1177,7 @@ export class Stage3DThree implements Stage3DSurface {
       mesh.userData.effectiveOpacity = opacity; // post decide/cinema-adjusted base for highlight restore
       mesh.renderOrder = isOptimum ? 3 : isFrontier ? 2 : 1;
       this.pointsGroup.add(mesh);
-      if (!suppressed) {
+      if (!cinemaNonFocus) {
         this.pointMeshes.push(mesh);
         this.modelIds.push(model.model);
       }
@@ -1245,14 +1246,14 @@ export class Stage3DThree implements Stage3DSurface {
     if (ridgePts.length >= 2) {
       // Centripetal Catmull-Rom passes through every frontier vertex (no
       // invented points) with minimal overshoot — honest yet smooth. Tube
-      // radii calibrated to the [-S, S] cube: core (0.02 ≈ 21px at default
-      // zoom) thinner than marks (0.045–0.10) so nodes still pop; glow (0.035)
+      // radii calibrated to the [-S, S] cube: core (0.015 ≈ 16px at default
+      // zoom) thinner than marks (0.045–0.10) so nodes still pop; glow (0.025)
       // is a tight bloom UNDER the thinner marks so it halo'd the wire without
       // washing frontier nodes (the prior 0.055 ≈ 58px was mark-sized → blowout).
       const curve = new THREE.CatmullRomCurve3(ridgePts, false, "centripetal");
       const tubularSegments = Math.max(64, ridgePts.length * 32);
-      coreGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.02, 8, false);
-      glowGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.035, 8, false);
+      coreGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.015, 8, false);
+      glowGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.025, 8, false);
     }
     this.ridgeMesh.geometry.dispose();
     this.ridgeMesh.geometry = coreGeom;
@@ -1444,9 +1445,10 @@ export class Stage3DThree implements Stage3DSurface {
     const n = Math.min(colors.length, sizes.length, this.pointMeshes.length);
     for (let i = 0; i < n; i++) {
       const mesh = this.pointMeshes[i];
-      // V06/V09: never restyle a cinema-suppressed mark — it is intentionally
-      // invisible and excluded from hover/export. A stale sweep size on its tiny
-      // base would otherwise inflate an invisible depth/hover occluder (scale 800×).
+      // V06/V09: cinema non-focus marks are excluded from pointMeshes (see the
+      // render loop), so this sweep only restyles interactive marks. The visible
+      // guard is a safety net — a stale size on a hidden base would inflate an
+      // invisible depth/hover occluder (scale 800×).
       if (mesh.visible === false) continue;
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.color.set(colors[i]);
