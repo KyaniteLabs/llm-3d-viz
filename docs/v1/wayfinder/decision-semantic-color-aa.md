@@ -43,3 +43,14 @@ Supersedes canvas-only monochrome / “copper never on canvas” / “never cate
 | Legacy AA openness fill | `?enc=openness` regression / screenshot path only |
 
 Dim is **visual only** — does not remove models from the visible set, value-score, or frontier math.
+
+---
+
+## S+ hierarchy overlay (2026-08-07)
+
+**Supersedes for product paint:** the curve-focus singleton "dim slate (opacity 0.30)" default above. Primary fill is now **glanceable full brand `colors[0]` always-on** for every visible mark; hierarchy is carried by ridge + size + quiet trails — **never** by muting or desaturating lab fill.
+
+- **Singleton policy (S+):** size/α hierarchy **only if lab hue stays nameable** — no slate-mud fill. W1 locks policy A (keep α ≥ 0.42 + glanceable hue) or B (opacity 1 + size-only). See [decision-filament-hierarchy.md](./decision-filament-hierarchy.md).
+- **Equal-chroma carnival refused:** full catalog never shows all marks at equal chroma weight; filament ridge + size + quiet trails carry rank.
+- **Emoji/star banned:** no ⚡ ★ or symbol prefixes on marks/labels.
+- **Authority:** [decision-filament-hierarchy.md](./decision-filament-hierarchy.md) · W5 scorecard in [RALPLAN-s-plus-observatory-quality.md](./RALPLAN-s-plus-observatory-quality.md).

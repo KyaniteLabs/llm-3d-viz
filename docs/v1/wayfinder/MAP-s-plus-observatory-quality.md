@@ -40,11 +40,11 @@ docs   paint  HUD    chrome hybrid  scorecard
 **Blocked by:** None  
 **Evidence:** docs only  
 
-- [ ] `decision-filament-hierarchy.md` status locked (algorithms + principle rank)  
+- [x] `decision-filament-hierarchy.md` status locked (algorithms + principle rank)
 - [x] ~~non-frontier desat~~ **SUPERSEDED** → glanceable fill + chroma pull (see MAP-s-plus-maximal-dataviz-beauty) · rings/core focus-gated · filament ridge · no carnival · no emoji  
-- [ ] A2 supersession pointer (idle trail α; rings) in wayfinder docs  
-- [ ] `decision-semantic-color-aa.md` pointer to S+ hierarchy overlay  
-- [ ] RALPLAN W5 scorecard + mid-train binary rule published  
+- [x] A2 supersession pointer (idle trail α; rings) in wayfinder docs
+- [x] `decision-semantic-color-aa.md` pointer to S+ hierarchy overlay
+- [x] RALPLAN W5 scorecard + mid-train binary rule published
 
 ---
 

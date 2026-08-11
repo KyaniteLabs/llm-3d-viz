@@ -1,6 +1,7 @@
 # llm-3d-viz
 
 Interactive 3D LLM benchmark visualization (speed × cost × intelligence). Product spec in `SPEC.md`; visual system in `DESIGN-SYSTEM.md`; session resume point in `HANDOFF.md`.
+Tool assignment: **GJC** (GLM 5.2 / MiniMax M3). Escalate hardest cases to **Kimi**. Previously used Codex (GPT-5.6-terra) — reassigned 2026-08-10 after ChatGPT.app deletion. See `simons-workbench/fleet-routing.md` for full routing map.
 
 ## Agent skills
 
