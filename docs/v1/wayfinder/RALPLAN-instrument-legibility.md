@@ -64,7 +64,7 @@ Context = **post-filter visible set**. Dim is visual only; score/frontier member
 ## Density path
 1. age ≤ 6 months (existing default)
 2. dim singletons (above)
-3. trail emphasis (stroke strong; opacity ≥ 0.85)
+3. trail emphasis (stroke strong; opacity ≥ 0.85) — **SUPERSEDED 2026-08-07** by S+ filament hierarchy: idle trail α = **0.18** (not 0.85); rings/core default **off** at full density. See [decision-filament-hierarchy.md](./decision-filament-hierarchy.md).
 4. first-paint camera: soft fit once to **multi-effort subset bounds** (padding 1.15), then free orbit
 5. If **#84 fails**: stop train; amend filters decision for durable multi-effort visible-set filter before #82–#85. Do not ship prettier mudball. Do not treat today’s chip-list-only `multiEffortOnly` as stage density fix.
 
