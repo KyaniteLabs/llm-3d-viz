@@ -73,13 +73,13 @@
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
       "records": 107,
-      "delta_changed": 2
+      "delta_changed": 0
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
       "models": 411,
-      "price_overlays": 11,
+      "price_overlays": 36,
       "modality_overlays": 89,
       "context_overlays": 148,
       "authenticated": false
@@ -88,7 +88,7 @@
   "openrouter": {
     "ok": true,
     "models": 411,
-    "price_overlays": 11,
+    "price_overlays": 36,
     "modality_overlays": 89,
     "context_overlays": 148
   },
@@ -100,7 +100,7 @@
   },
   "price_divergences": {
     "count": 107,
-    "delta_count": 2,
+    "delta_count": 0,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
@@ -1097,7 +1097,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1109,7 +1109,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {

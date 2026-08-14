@@ -6,11 +6,140 @@
   "added": [],
   "removed": [],
   "renamed": [],
-  "price_deltas": [],
+  "price_deltas": [
+    {
+      "model": "Qwen3 Max",
+      "provider": "Alibaba",
+      "field": "blended_price_per_M",
+      "from": 1.6800000000000002,
+      "to": 0.9492,
+      "pct": 44
+    },
+    {
+      "model": "Qwen3 Next 80B A3B Instruct",
+      "provider": "Alibaba",
+      "field": "blended_price_per_M",
+      "from": 0.65,
+      "to": 0.34900000000000003,
+      "pct": 46
+    },
+    {
+      "model": "Qwen3.6 27B (Reasoning)",
+      "provider": "Alibaba",
+      "field": "blended_price_per_M",
+      "from": 0.9,
+      "to": 0.5640000000000001,
+      "pct": 37
+    },
+    {
+      "model": "Qwen3.6 35B A3B (Reasoning)",
+      "provider": "Alibaba",
+      "field": "blended_price_per_M",
+      "from": 0.567,
+      "to": 0.33599999999999997,
+      "pct": 41
+    },
+    {
+      "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+      "provider": "DeepSeek",
+      "field": "blended_price_per_M",
+      "from": 0.15400000000000003,
+      "to": 0.0756,
+      "pct": 51
+    },
+    {
+      "model": "Ring-2.6-1T",
+      "provider": "InclusionAI",
+      "field": "blended_price_per_M",
+      "from": 0.52,
+      "to": 0.3205,
+      "pct": 38
+    },
+    {
+      "model": "Kimi K2 Thinking",
+      "provider": "Kimi",
+      "field": "blended_price_per_M",
+      "from": 0.79,
+      "to": 0.475,
+      "pct": 40
+    },
+    {
+      "model": "MiniMax-M2.1",
+      "provider": "MiniMax",
+      "field": "blended_price_per_M",
+      "from": 0.39,
+      "to": 0.20099999999999998,
+      "pct": 48
+    },
+    {
+      "model": "Mistral Medium 3",
+      "provider": "Mistral",
+      "field": "blended_price_per_M",
+      "from": 0.56,
+      "to": 0.308,
+      "pct": 45
+    },
+    {
+      "model": "Mistral Medium 3.1",
+      "provider": "Mistral",
+      "field": "blended_price_per_M",
+      "from": 0.56,
+      "to": 0.308,
+      "pct": 45
+    },
+    {
+      "model": "gpt-oss-20b (high)",
+      "provider": "OpenAI",
+      "field": "blended_price_per_M",
+      "from": 0.073,
+      "to": 0.052000000000000005,
+      "pct": 29
+    },
+    {
+      "model": "MiMo-V2.5-Pro",
+      "provider": "Xiaomi",
+      "field": "blended_price_per_M",
+      "from": 0.4739999999999999,
+      "to": 0.17551999999999998,
+      "pct": 63
+    },
+    {
+      "model": "GLM-4.5-Air",
+      "provider": "Z AI",
+      "field": "blended_price_per_M",
+      "from": 0.251,
+      "to": 0.14950000000000002,
+      "pct": 40
+    },
+    {
+      "model": "GLM-4.5V (Non-reasoning)",
+      "provider": "Z AI",
+      "field": "blended_price_per_M",
+      "from": 0.72,
+      "to": 0.377,
+      "pct": 48
+    },
+    {
+      "model": "GLM-4.6 (Non-reasoning)",
+      "provider": "Z AI",
+      "field": "blended_price_per_M",
+      "from": 0.733,
+      "to": 0.41100000000000003,
+      "pct": 44
+    },
+    {
+      "model": "GLM-4.6V (Non-reasoning)",
+      "provider": "Z AI",
+      "field": "blended_price_per_M",
+      "from": 0.36,
+      "to": 0.1885,
+      "pct": 48
+    }
+  ],
   "counts": {
     "added": 0,
     "removed": 0,
     "renamed": 0,
-    "price_deltas": 0
+    "price_deltas": 16
   }
 }

@@ -1027,14 +1027,14 @@
     "context_length": 262144,
     "release_date": "2025-09-23",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3-max)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-max",
     "tps": 63.61,
     "ttft": 2360,
     "price_in_per_M": 1.2,
     "price_out_per_M": 6,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 1.6800000000000002,
+    "price_cache_per_M": 0.156,
+    "blended_price_per_M": 0.9492,
     "aa_intelligence_index": 24.5,
     "arena_elo": null,
     "swe_bench": null,
@@ -1067,8 +1067,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -1255,14 +1259,14 @@
     "context_length": 262144,
     "release_date": "2025-09-11",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3-next-80b-a3b-instruct)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-instruct",
     "tps": 186.83,
     "ttft": 2160,
     "price_in_per_M": 0.5,
     "price_out_per_M": 2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.65,
+    "price_cache_per_M": 0.07,
+    "blended_price_per_M": 0.34900000000000003,
     "aa_intelligence_index": 13.8,
     "arena_elo": 1400.8873286548542,
     "swe_bench": null,
@@ -1299,8 +1303,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -2217,14 +2225,14 @@
     "context_length": 262144,
     "release_date": "2026-02-24",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.5-35b-a3b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-35b-a3b",
     "tps": 154.35,
     "ttft": 2120,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.425,
+    "price_cache_per_M": 0.22499999999999998,
+    "blended_price_per_M": 0.4074999999999999,
     "aa_intelligence_index": 29.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -2257,10 +2265,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -2809,14 +2821,14 @@
     "context_length": 262144,
     "release_date": "2026-04-22",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.6-27b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-27b",
     "tps": 54.62,
     "ttft": 3750,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.9,
+    "price_cache_per_M": 0.12,
+    "blended_price_per_M": 0.5640000000000001,
     "aa_intelligence_index": 37.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -2853,10 +2865,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -2933,14 +2949,14 @@
     "context_length": 262144,
     "release_date": "2026-04-16",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.6-35b-a3b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b",
     "tps": 146.3,
     "ttft": 2180,
     "price_in_per_M": 0.38,
     "price_out_per_M": 2.25,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.567,
+    "price_cache_per_M": 0.049999999999999996,
+    "blended_price_per_M": 0.33599999999999997,
     "aa_intelligence_index": 32.1,
     "arena_elo": null,
     "swe_bench": null,
@@ -2977,10 +2993,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -5787,14 +5807,14 @@
     "context_length": 1048576,
     "release_date": "2026-07-31",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (deepseek/deepseek-v4-flash)",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-flash",
     "tps": 119.94,
     "ttft": 1440,
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.28,
-    "price_cache_per_M": 0,
-    "blended_price_per_M": 0.15400000000000003,
+    "price_cache_per_M": 0.028,
+    "blended_price_per_M": 0.0756,
     "aa_intelligence_index": 51.8,
     "arena_elo": null,
     "swe_bench": null,
@@ -5831,8 +5851,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -7742,14 +7766,14 @@
     "context_length": 131072,
     "release_date": "2026-04-29",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (ibm-granite/granite-4.1-8b)",
     "source_url": "https://artificialanalysis.ai/models/granite-4-1-8b",
     "tps": 113.4,
     "ttft": 760,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.1,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.05500000000000001,
+    "price_cache_per_M": 0.049999999999999996,
+    "blended_price_per_M": 0.05499999999999999,
     "aa_intelligence_index": 6.4,
     "arena_elo": 1305.6538044315,
     "swe_bench": null,
@@ -7786,8 +7810,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -8112,14 +8140,14 @@
     "context_length": 262144,
     "release_date": "2026-05-08",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (inclusionai/ring-2.6-1t)",
     "source_url": "https://artificialanalysis.ai/models/ring-2-6-1t",
     "tps": 121.22,
     "ttft": 3150,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.52,
+    "price_cache_per_M": 0.015,
+    "blended_price_per_M": 0.3205,
     "aa_intelligence_index": 31.3,
     "arena_elo": null,
     "swe_bench": null,
@@ -8152,8 +8180,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -8289,14 +8321,14 @@
     "context_length": 262144,
     "release_date": "2025-11-06",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (moonshotai/kimi-k2-thinking)",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-thinking",
     "tps": 119.64,
     "ttft": 1310,
     "price_in_per_M": 0.6,
     "price_out_per_M": 2.5,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.79,
+    "price_cache_per_M": 0.15,
+    "blended_price_per_M": 0.475,
     "aa_intelligence_index": 33.5,
     "arena_elo": null,
     "swe_bench": null,
@@ -8329,8 +8361,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -9751,14 +9787,14 @@
     "context_length": 204800,
     "release_date": "2025-12-23",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (minimax/minimax-m2.1)",
     "source_url": "https://artificialanalysis.ai/models/minimax-m2-1",
     "tps": 99.68,
     "ttft": 1790,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.39,
+    "price_cache_per_M": 0.03,
+    "blended_price_per_M": 0.20099999999999998,
     "aa_intelligence_index": 32.1,
     "arena_elo": null,
     "swe_bench": null,
@@ -9791,8 +9827,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -10604,14 +10644,14 @@
     "context_length": 131072,
     "release_date": "2025-05-07",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (mistralai/mistral-medium-3)",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium-3",
     "tps": 52.64,
     "ttft": 1570,
     "price_in_per_M": 0.4,
     "price_out_per_M": 2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.56,
+    "price_cache_per_M": 0.04,
+    "blended_price_per_M": 0.308,
     "aa_intelligence_index": 12.5,
     "arena_elo": null,
     "swe_bench": null,
@@ -10644,10 +10684,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -10668,14 +10712,14 @@
     "context_length": 131072,
     "release_date": "2025-08-12",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (mistralai/mistral-medium-3.1)",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium-3-1",
     "tps": 102.17,
     "ttft": 1500,
     "price_in_per_M": 0.4,
     "price_out_per_M": 2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.56,
+    "price_cache_per_M": 0.04,
+    "blended_price_per_M": 0.308,
     "aa_intelligence_index": 14.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -10712,10 +10756,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -15696,14 +15744,14 @@
     "context_length": 131072,
     "release_date": "2025-08-05",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (openai/gpt-oss-20b)",
     "source_url": "https://artificialanalysis.ai/models/gpt-oss-20b",
     "tps": 131.78,
     "ttft": 990,
     "price_in_per_M": 0.06,
     "price_out_per_M": 0.19,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.073,
+    "price_cache_per_M": 0.03,
+    "blended_price_per_M": 0.052000000000000005,
     "aa_intelligence_index": 15.2,
     "arena_elo": null,
     "swe_bench": null,
@@ -15740,8 +15788,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -17377,14 +17429,14 @@
     "context_length": 1050000,
     "release_date": "2026-04-22",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (xiaomi/mimo-v2.5-pro)",
     "source_url": "https://artificialanalysis.ai/models/mimo-v2-5-pro",
     "tps": 46.01,
     "ttft": 3450,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
-    "price_cache_per_M": 0,
-    "blended_price_per_M": 0.4739999999999999,
+    "price_cache_per_M": 0.0036,
+    "blended_price_per_M": 0.17551999999999998,
     "aa_intelligence_index": 42.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -17421,8 +17473,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -17495,14 +17551,14 @@
     "context_length": 131072,
     "release_date": "2025-07-28",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.5-air)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-5-air",
     "tps": 68.13,
     "ttft": 2750,
     "price_in_per_M": 0.17,
     "price_out_per_M": 0.98,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.251,
+    "price_cache_per_M": 0.024999999999999998,
+    "blended_price_per_M": 0.14950000000000002,
     "aa_intelligence_index": 16.7,
     "arena_elo": 1372.8411444275775,
     "swe_bench": null,
@@ -17539,8 +17595,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -17559,14 +17619,14 @@
     "context_length": 65536,
     "release_date": "2025-08-11",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.5v)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-5v",
     "tps": 95.84,
     "ttft": 1860,
     "price_in_per_M": 0.6,
     "price_out_per_M": 1.8,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.72,
+    "price_cache_per_M": 0.11,
+    "blended_price_per_M": 0.377,
     "aa_intelligence_index": 6.8,
     "arena_elo": null,
     "swe_bench": null,
@@ -17599,10 +17659,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
@@ -17677,14 +17741,14 @@
     "context_length": 204800,
     "release_date": "2025-09-30",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.6)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6",
     "tps": 67.14,
     "ttft": 2710,
     "price_in_per_M": 0.57,
     "price_out_per_M": 2.2,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.733,
+    "price_cache_per_M": 0.11,
+    "blended_price_per_M": 0.41100000000000003,
     "aa_intelligence_index": 23.4,
     "arena_elo": null,
     "swe_bench": null,
@@ -17717,8 +17781,12 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
+      },
+      "price_cache_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
       },
       "context_length": {
         "origin": "openrouter",
@@ -17797,14 +17865,14 @@
     "context_length": 131072,
     "release_date": "2025-12-08",
     "data_date": "2026-08-14",
-    "source": "AA Data API free",
+    "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.6v)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6v",
     "tps": 76.13,
     "ttft": 4190,
     "price_in_per_M": 0.3,
     "price_out_per_M": 0.9,
-    "price_cache_per_M": null,
-    "blended_price_per_M": 0.36,
+    "price_cache_per_M": 0.055,
+    "blended_price_per_M": 0.1885,
     "aa_intelligence_index": 10.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -17837,10 +17905,14 @@
         "kind": "measured"
       },
       "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
+        "origin": "openrouter",
+        "kind": "derived_list_blend"
       },
       "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
         "origin": "openrouter",
         "kind": "list"
       },
