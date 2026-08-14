@@ -299,9 +299,12 @@ merged = ctx.rows;
 // --- 3b. AA↔OpenRouter price-divergence canary (plan WS2 stage 1) ---
 // Records level divergences with aging + flap grace; alerts fire on DELTA
 // (scripts/lib/catalog-alerts.mjs --evaluate). Never mutates prices.
-const prevGapsDoc = fs.existsSync(gapsPath)
-  ? JSON.parse(fs.readFileSync(gapsPath, "utf8"))
-  : {};
+let prevGapsDoc = {};
+if (fs.existsSync(gapsPath)) {
+  try {
+    prevGapsDoc = JSON.parse(fs.readFileSync(gapsPath, "utf8"));
+  } catch { /* corrupt/truncated gaps file: start from empty divergence state */ }
+}
 const currentDivergences = computeCurrentDivergences(merged, or.models || [], today);
 const divergenceRecords = mergeDivergenceRecords(
   currentDivergences,

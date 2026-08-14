@@ -207,11 +207,15 @@ export async function fireAlert(events, opts = {}) {
   if (!fresh.length) return { fired: false, reason: "all_deduped" };
   const payload = buildAlertPayload(fresh, { prefix });
   const result = await deliver(payload, opts);
-  const now = Date.now();
-  for (const e of fresh) {
-    store[dedupByKind ? e.kind : `${prefix}:${e.key}`] = now;
+  // Record signatures ONLY on successful delivery (either channel): a failed
+  // delivery must not swallow events for the TTL — they retry next run.
+  if (result.ok) {
+    const now = Date.now();
+    for (const e of fresh) {
+      store[dedupByKind ? e.kind : `${prefix}:${e.key}`] = now;
+    }
+    saveDedupStore(store, storePath);
   }
-  saveDedupStore(store, storePath);
   return { fired: true, events: fresh.length, ...result };
 }
 

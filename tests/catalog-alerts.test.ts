@@ -106,6 +106,19 @@ describe("catalog-alerts — aggregated payload + dedup", () => {
     expect(third.fired).toBe(true);
   });
 
+  it("failed delivery records NO signatures — events retry next run", async () => {
+    const deliver = vi.fn().mockResolvedValue({ ok: false, channels: { forgejo: "no_token", localNotification: "error" } });
+    const storePath = path.join(dir, "dedup.json");
+    const events = [{ kind: "cloud_removal", key: "cloud_removal:M", line: "removed" }];
+    const first = await fireAlert(events, { storePath, deliver });
+    expect(first.fired).toBe(true);
+    expect(first.ok).toBe(false);
+    expect(loadDedupStore(storePath)).toEqual({});
+    const second = await fireAlert(events, { storePath, deliver });
+    expect(second.fired).toBe(true); // not deduped — retried
+    expect(deliver).toHaveBeenCalledTimes(2);
+  });
+
   it("kind-dedup mode (silence) fires once for repeated calls", async () => {
     const deliver = vi.fn().mockResolvedValue({ ok: true, channels: {} });
     const storePath = path.join(dir, "dedup.json");

@@ -85,6 +85,17 @@ describe("draft-diff", () => {
     expect(d.counts).toEqual({ added: 1, removed: 1, renamed: 0, price_deltas: 0 });
   });
 
+  it("does not pair a tier swap (drop max, add high) — must surface as removal+add", () => {
+    const prev = [
+      row({ model: "X (max)", family_id: "X", effort_tier: "max", source_url: "https://artificialanalysis.ai/models/x-max" }),
+    ];
+    const next = [
+      row({ model: "X (high)", family_id: "X", effort_tier: "high", source_url: "https://artificialanalysis.ai/models/x-high" }),
+    ];
+    const d = diffDrafts(prev, next);
+    expect(d.counts).toEqual({ added: 1, removed: 1, renamed: 0, price_deltas: 0 });
+  });
+
   it("records price deltas above 10%, ignores below", () => {
     const prev = [row({})];
     const next = [row({ price_in_per_M: 1.05, price_out_per_M: 2.6, blended_price_per_M: 1.2 })];

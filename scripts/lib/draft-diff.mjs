@@ -33,8 +33,11 @@ export function diffDrafts(prevRows, nextRows) {
   const removedKeys = [...prev.keys()].filter((k) => !next.has(k));
 
   // Rename pairing: removed × added with same provider + same normalized family
-  // (covers AA renames like "Ling-3.0-flash"→"Ling 3.0 Flash" and manual→AA
-  // supersede like z.ai glm-5.3 → artificialanalysis glm-5-3 slugs).
+  // AND same effort tier. Tier-equality matters: a cloud lab dropping "X (max)"
+  // while adding "X (high)" is a tier retirement, not a rename — it must surface
+  // as a removal + add (cloud_removal alert), never be absorbed as a rename.
+  // Covers AA renames like "Ling-3.0-flash"→"Ling 3.0 Flash" (tier "none" both)
+  // and manual→AA supersede (z.ai glm-5.3 max → artificialanalysis glm-5-3 max).
   const renamed = [];
   const pairedAdded = new Set();
   const pairedRemoved = new Set();
@@ -42,10 +45,12 @@ export function diffDrafts(prevRows, nextRows) {
     const rem = prev.get(rk);
     const remFam = normalizeFamily(rem.family_id || rem.model || "");
     if (!remFam) continue;
+    const remTier = String(rem.effort_tier || "none").toLowerCase();
     for (const ak of addedKeys) {
       if (pairedAdded.has(ak)) continue;
       const add = next.get(ak);
       if (add.provider !== rem.provider) continue;
+      if (String(add.effort_tier || "none").toLowerCase() !== remTier) continue;
       if (normalizeFamily(add.family_id || add.model || "") !== remFam) continue;
       renamed.push({ from: rem.model, to: add.model, provider: rem.provider });
       pairedAdded.add(ak);

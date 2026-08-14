@@ -7,23 +7,25 @@
     {
       "id": "G001",
       "title": "P0 — WS1 diff+alerts+silence + WS2 canary (staged before 2026-08-16)",
-      "status": "in_progress",
+      "status": "complete",
       "stages": {
-        "stage1_canary_diff_alerts": "complete (2026-08-14) — commit pending",
-        "stage2_calibration_cycle": "in_progress — baseline artifact captured (105 divergence records, Forgejo #181); completes after ≥1 cron cycle (next run 14:07 local) with zero delta-churn",
-        "stage3_cache_refinement": "pending — separate commit only after stage 2 confirms stable baseline"
+        "stage1_canary_diff_alerts": "complete (3139231, live-verified Forgejo #181)",
+        "stage2_calibration_cycle": "complete (105-record baseline → stable cycle delta_count=2 genuine)",
+        "stage3_cache_refinement": "complete (37a7212 after calibration per A3; 16 blend corrections live, one aggregated alert)"
       }
     },
     {
       "id": "G002",
       "title": "P1 — WS3 annex + hidden_by_scope + WS4 watchlist-complete/scope-vocab + WS6 schema half",
-      "status": "in_progress",
-      "lane": "subagent (WS3→WS6 single owner per plan), WS4 remainder after"
+      "status": "complete",
+      "evidence": "14a5454 + edffba2 + 2933905; buckets match audit counts; exhaustive 33-provider lint"
     },
     {
       "id": "G003",
       "title": "P2 — WS5 secondary axes + WS6 rest + WS7 + D-H4 decision surfaced",
-      "status": "pending"
+      "status": "in_progress",
+      "stage": "implementation_complete_final_gate_running",
+      "evidence": "dc391dd + 4c6e8c1 + 9d722a6 + deslop 74f6c80; 394/394; deployed 18:32Z; D-H4 open in HANDOFF; gate = architect CLEAR + code-reviewer pending"
     },
     {
       "id": "G004",

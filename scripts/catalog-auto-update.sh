@@ -45,7 +45,10 @@ on_exit() {
     fi
   fi
 }
-trap on_exit EXIT
+# Single EXIT trap: on_exit (history + failure alert) then lock release.
+# Bash keeps only one handler per signal — a second `trap ... EXIT` elsewhere
+# would silently clobber this one (caught by the ultragoal final review).
+trap 'on_exit; lock_cleanup' EXIT
 
 ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 log() { echo "[$(ts)] $*" | tee -a "$LOG_DIR/catalog-auto-update.log"; }
@@ -67,7 +70,6 @@ LOCK_FILE="$STATE_DIR/catalog-auto-update.lock"
 LOCK_DIR="$STATE_DIR/catalog-auto-update.lockd"
 LOCK_HELD_DIR=""
 lock_cleanup() { [[ -n "$LOCK_HELD_DIR" ]] && rm -rf "$LOCK_HELD_DIR"; }
-trap lock_cleanup EXIT
 acquire_lock() {
   if command -v flock >/dev/null 2>&1; then
     exec 9>"$LOCK_FILE"
