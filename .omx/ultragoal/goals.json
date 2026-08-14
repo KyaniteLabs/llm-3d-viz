@@ -23,8 +23,8 @@
     {
       "id": "G003",
       "title": "P2 — WS5 secondary axes + WS6 rest + WS7 + D-H4 decision surfaced",
-      "status": "in_progress",
-      "stage": "implementation_complete_final_gate_running",
+      "status": "complete",
+      "stage": "final_gate_passed",
       "evidence": "dc391dd + 4c6e8c1 + 9d722a6 + deslop 74f6c80; 394/394; deployed 18:32Z; D-H4 open in HANDOFF; gate = architect CLEAR + code-reviewer pending"
     },
     {
