@@ -7,6 +7,11 @@
  * for later local / archive work.
  */
 
+// Explicit .ts extension: this module is imported by the node
+// --experimental-strip-types build scripts, whose ESM resolution requires
+// extensions (same convention as the scripts/lib/*.mjs imports).
+import { normalizeFamily } from "../lib/family-effort.shared.ts";
+
 /** Labs in the default cloud product set (exact `provider` strings). */
 export const CLOUD_LABS = [
   "OpenAI",
@@ -47,23 +52,130 @@ export const RELEASE_FLOOR_ISO = "2026-01-01";
 export const GENERATION_DEPTH = 2;
 
 /**
- * CLOUD_LABS members that ship open weights (downloadable, runnable after
- * supersession). Their rows bypass the generation cap. The row-level
- * `openness` field is NOT used for this: the AA free tier has no real
- * open-weights flag and the name-keyword heuristic mislabels whole labs
- * (audit L4) — a lab-level lifecycle class is the honest discriminator.
+ * Lifecycle class of a lab for the W1 truth-source openness map
+ * (plan data-stewardship-v2): how the lab ships model weights.
  */
-export const OPEN_WEIGHT_LABS = [
-  "DeepSeek",
-  "Alibaba", // Qwen
-  "Z AI", // GLM
-  "Kimi", // Moonshot
-  "Meta", // Muse
-  "MiniMax",
-  "NVIDIA", // Nemotron
-] as const;
+export type LabOpennessClass = "open" | "closed" | "mixed";
 
-const OPEN_WEIGHT_SET = new Set<string>(OPEN_WEIGHT_LABS);
+/**
+ * W1 truth source for row-level `openness` (ticket #188). Replaces the
+ * retired name-keyword guess (audit L4: it mislabeled whole labs) with a
+ * curated lab → class map covering the full scope vocabulary
+ * (CLOUD_LABS ∪ HELD_LABS_FOR_LATER — every provider that can appear in a
+ * draft; the exhaustive-lint test fails when a draft provider is missing).
+ * Labs absent from the map resolve `closed` (unknown → closed, honest default).
+ *
+ *  - `open`  : ships open weights across its catalog — weights stay
+ *              downloadable and runnable after supersession (local lifecycle;
+ *              also the D-H4 generation-cap exemption set).
+ *  - `mixed` : both open-weight and closed-API families; defaults `closed`
+ *              per family unless excepted (FAMILY_OPENNESS_EXCEPTIONS).
+ *  - `closed`: closed-API lifecycle.
+ */
+export const LAB_OPENNESS_CLASS: Readonly<Record<string, LabOpennessClass>> = {
+  // Open-weight labs (D-H4 generation-cap exemption — derived from these).
+  DeepSeek: "open",
+  Alibaba: "open", // Qwen
+  "Z AI": "open", // GLM
+  Kimi: "open", // Moonshot
+  Meta: "open", // Muse / Llama
+  MiniMax: "open",
+  NVIDIA: "open", // Nemotron
+  // Mixed portfolio: open-weight AND closed-API families; closed by default.
+  "ByteDance Seed": "mixed", // Seed-OSS line is open; the rest closed
+  Microsoft: "mixed", // Phi open; MAI closed
+  Amazon: "mixed", // Nova mostly closed; selected open releases
+  Mistral: "mixed", // Small/Devstral/Magistral-Small open; Large/Medium closed
+  Tencent: "mixed", // Hunyuan open releases; Hy3 closed
+  Xiaomi: "mixed", // MiMo open releases; Pro tier closed
+  // Closed-API labs.
+  OpenAI: "closed", // gpt-oss families excepted per-family below
+  Anthropic: "closed",
+  Google: "closed",
+  SpaceXAI: "closed", // xAI Grok
+  "AI21 Labs": "closed",
+  "Arcee AI": "closed",
+  Celeris: "closed",
+  Cohere: "closed",
+  IBM: "closed",
+  Inception: "closed",
+  InclusionAI: "closed",
+  KwaiKAT: "closed",
+  "Liquid AI": "closed",
+  LongCat: "closed",
+  "Multiverse Computing": "closed",
+  "Nex AGI": "closed",
+  "Nous Research": "closed", // Hermes families excepted per-family below
+  "Reka AI": "closed",
+  "Sapiens AI": "closed",
+  StepFun: "closed",
+  "Thinking Machines": "closed",
+  Upstage: "closed",
+};
+
+/**
+ * Persistent per-family openness exceptions (W1): keys are
+ * `normalizeFamily(family_id || model)` output, values are the family's
+ * truth when the lab class would be wrong. Unlike a manual-additions row,
+ * this list SURVIVES manual-row supersede — when AA publishes the family,
+ * the curated exception still wins over the lab class. This is the durable
+ * override channel (the manual channel's fatal flaw, fixed).
+ */
+export const FAMILY_OPENNESS_EXCEPTIONS: Readonly<Record<string, "open" | "closed">> = {
+  // OpenAI gpt-oss family — open weights inside a closed-API lab.
+  "gpt-oss-120b": "open",
+  "gpt-oss-20b": "open",
+  // ByteDance Seed OSS line — open weights inside a mixed lab.
+  "seed-oss-36b-instruct": "open",
+  // Z.ai GLM-5.3 — provider says weights ship ~2 weeks post-announcement
+  // (2026-08-14); closed until downloadable. Remove when weights are out.
+  // (Key is normalizeFamily("GLM-5.3") — dots collapse to dashes.)
+  "glm-5-3": "closed",
+  // Nous Research Hermes line — open weights (Llama-based finetunes).
+  "hermes-3-llama-3-1-70b": "open",
+  "hermes-4-llama-3-1-405b": "open",
+  "hermes-4-llama-3-1-70b": "open",
+  // Mistral open-weight families (Apache-2.0 lines) inside a mixed lab.
+  "mistral-7b-instruct": "open",
+  "mistral-small": "open", // covers the open (Sep '24) re-release key
+  "mistral-small-3": "open",
+  "mistral-small-3-1": "open",
+  "mistral-small-3-2": "open",
+  "mistral-small-4": "open",
+  "devstral-small-2": "open",
+  "magistral-small-1-2": "open",
+};
+
+/** Lab's curated openness class; unknown labs resolve `closed` (W1). */
+export function labOpennessClass(provider: string): LabOpennessClass {
+  return LAB_OPENNESS_CLASS[provider] ?? "closed";
+}
+
+/**
+ * Resolve a row's `openness` from the curated truth map (W1): per-family
+ * exception first (survives supersede), then lab class (mixed → closed,
+ * unknown lab → closed). Manual-additions values win while their row is
+ * alive — that precedence lives in the build-time overlay
+ * (applyCuratedOpenness in scripts/lib/catalog-join.mjs).
+ */
+export function opennessForLab(provider: string, family: string): "open" | "closed" {
+  const famKey = normalizeFamily(family ?? "");
+  const exception = famKey ? FAMILY_OPENNESS_EXCEPTIONS[famKey] : undefined;
+  if (exception === "open" || exception === "closed") return exception;
+  return labOpennessClass(provider) === "open" ? "open" : "closed";
+}
+
+/**
+ * D-H4 exemption set, DERIVED from the truth map's open classes (W1: one
+ * module, decoupled concerns). Identical semantics to the retired
+ * OPEN_WEIGHT_LABS list: labs whose rows bypass the generation cap because
+ * open weights stay runnable after supersession.
+ */
+const OPEN_LIFECYCLE_SET: ReadonlySet<string> = new Set(
+  Object.entries(LAB_OPENNESS_CLASS)
+    .filter(([, labClass]) => labClass === "open")
+    .map(([provider]) => provider),
+);
 
 const EDITION_WORDS = [
   "mini", "nano", "lite", "flash", "pro", "max", "coder", "omni", "plus",
@@ -100,7 +212,8 @@ export function parseFamilyLineGen(familyId: string): FamilyLineGen {
 /**
  * Rows whose generation is within the newest GENERATION_DEPTH distinct
  * generations of their product line. Versionless families and open-weight-lab
- * rows (local lifecycle — see OPEN_WEIGHT_LABS) pass uncapped.
+ * rows (local lifecycle — exemption set derived from the truth map's open
+ * classes, see OPEN_LIFECYCLE_SET) pass uncapped.
  */
 export function meetsGenerationDepth<
   T extends { provider: string; family_id?: string; model: string },
@@ -108,7 +221,7 @@ export function meetsGenerationDepth<
   const byLine = new Map<string, Map<number, T[]>>();
   const versionless: T[] = [];
   for (const r of rows) {
-    if (OPEN_WEIGHT_SET.has(r.provider)) {
+    if (OPEN_LIFECYCLE_SET.has(r.provider)) {
       versionless.push(r); // open-weight lifecycle: no generation retirement
       continue;
     }

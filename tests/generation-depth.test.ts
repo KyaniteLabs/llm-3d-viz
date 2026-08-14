@@ -3,6 +3,7 @@ import {
   parseFamilyLineGen,
   meetsGenerationDepth,
   GENERATION_DEPTH,
+  LAB_OPENNESS_CLASS,
 } from "../src/data/catalog-scope";
 
 describe("parseFamilyLineGen (D-H4)", () => {
@@ -107,5 +108,43 @@ describe("meetsGenerationDepth (D-H4: newest + previous per product line)", () =
 
   it("GENERATION_DEPTH is newest + previous", () => {
     expect(GENERATION_DEPTH).toBe(2);
+  });
+});
+
+describe("D-H4 exemption derives from the W1 truth map (ticket #188 regression)", () => {
+  /** Three generations of one line under `provider` — newest two survive a cap. */
+  const genRows = (provider: string) =>
+    ["Fam 3", "Fam 2.7", "Fam 2.6"].map((f, i) => ({
+      provider,
+      family_id: f,
+      model: `${provider} ${f} ${i}`,
+      release_date: "2026-01-01",
+    }));
+
+  // Generated from the map — no hardcoded lab list; adding a lab extends this.
+  it.each(Object.entries(LAB_OPENNESS_CLASS))(
+    "lab %s (class %s): open class bypasses the cap, mixed/closed cap",
+    (lab, cls) => {
+      const rows = genRows(lab);
+      const keep = meetsGenerationDepth(rows);
+      if (cls === "open") {
+        expect(keep.size).toBe(rows.length); // local lifecycle: uncapped
+      } else {
+        expect(keep.has(rows[0])).toBe(true); // newest
+        expect(keep.has(rows[1])).toBe(true); // previous
+        expect(keep.has(rows[2])).toBe(false); // capped
+      }
+    },
+  );
+
+  it("exemption set is exactly the map's open classes — identical to the retired OPEN_WEIGHT_LABS (spot check)", () => {
+    const openLabs = Object.entries(LAB_OPENNESS_CLASS)
+      .filter(([, cls]) => cls === "open")
+      .map(([lab]) => lab)
+      .sort();
+    // The retired OPEN_WEIGHT_LABS list, pinned once so the derivation cannot drift.
+    expect(openLabs).toEqual(
+      ["Alibaba", "DeepSeek", "Kimi", "Meta", "MiniMax", "NVIDIA", "Z AI"].sort(),
+    );
   });
 });

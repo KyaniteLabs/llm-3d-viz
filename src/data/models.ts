@@ -81,8 +81,8 @@ export interface Model {
    */
   sources?: Partial<
     Record<
-      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "price_cache_per_M" | "context_length" | "modality" | "cost_per_index_task_usd" | "time_per_index_task_s" | "coding_index" | "agentic_index" | "arena_elo",
-      { origin: "aa" | "aa-api" | "arena" | "openrouter" | "provider"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
+      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "price_cache_per_M" | "context_length" | "modality" | "cost_per_index_task_usd" | "time_per_index_task_s" | "coding_index" | "agentic_index" | "arena_elo" | "openness",
+      { origin: "aa" | "aa-api" | "arena" | "openrouter" | "provider" | "curated"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
     >
   >;
 }
@@ -272,7 +272,7 @@ export function validateModels(candidateModels: readonly Model[]): void {
         }
         const origin = (meta as { origin?: string }).origin;
         const kind = (meta as { kind?: string }).kind;
-        if (origin && !["aa", "aa-api", "arena", "openrouter", "provider"].includes(origin)) {
+        if (origin && !["aa", "aa-api", "arena", "openrouter", "provider", "curated"].includes(origin)) {
           throw new Error(`${label} (${row.model}): sources.${field}.origin invalid`);
         }
         if (

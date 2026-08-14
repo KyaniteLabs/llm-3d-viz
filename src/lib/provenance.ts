@@ -13,6 +13,7 @@ const ORIGIN_LABEL: Record<string, string> = {
   arena: "Arena",
   openrouter: "OpenRouter",
   provider: "Provider announcement",
+  curated: "curated lab map", // W1 truth-source openness — curation, not a provider statement
 };
 
 const KIND_LABEL: Record<string, string> = {
@@ -37,6 +38,7 @@ const FIELD_SHORT: Record<string, string> = {
   cost_per_index_task_usd: "cost/task",
   time_per_index_task_s: "time/task",
   arena_elo: "Arena Elo",
+  openness: "openness",
 };
 
 /** One-line provenance from optional per-field sources map. */

@@ -10,11 +10,52 @@ import {
   aaSlugFromSourceUrl,
   lastSlugSegment,
 } from "../../src/lib/family-effort.shared.ts";
+import { opennessForLab } from "../../src/data/catalog-scope.ts";
 import { isScorable } from "./aa-extract.mjs";
 
 export { isScorable };
 
-/** AA spine key for merge uniqueness. */
+/**
+ * W1 truth-source openness overlay (ticket #188, plan data-stewardship-v2):
+ * replaces the retired name-keyword guess with the curated lab-class map in
+ * src/data/catalog-scope.ts. Precedence per row:
+ *   1. manual-additions value wins while the row is alive (rows matched by
+ *      normalized family — superseded manual rows are already dropped
+ *      upstream, so the match cannot leak onto an AA row);
+ *   2. per-family exception list (survives manual-row supersede);
+ *   3. lab class (mixed → closed; unknown lab → closed).
+ * Every non-null openness is stamped { origin: "curated", kind: "list" } —
+ * curation is not a provider statement, so the origin is never "provider".
+ * Pure; returns { rows, flips, stamped } (flips = values that changed).
+ */
+export function applyCuratedOpenness(rows, manualRows = []) {
+  const manualFamilies = new Set(
+    (manualRows ?? [])
+      .map((r) => normalizeFamily(r?.family_id || r?.model || ""))
+      .filter(Boolean),
+  );
+  let flips = 0;
+  let stamped = 0;
+  const out = (rows ?? []).map((row) => {
+    if (row?.openness == null) return row;
+    const famKey = normalizeFamily(row.family_id || row.model || "");
+    const openness =
+      famKey && manualFamilies.has(famKey)
+        ? row.openness // manual addition wins while alive
+        : opennessForLab(row.provider || "", famKey || row.model || "");
+    if (openness !== row.openness) flips += 1;
+    stamped += 1;
+    return setSource({ ...row, openness }, "openness", {
+      origin: "curated",
+      kind: "list",
+    });
+  });
+  return { rows: out, flips, stamped };
+}
+
+/**
+ * AA spine key for merge uniqueness.
+ */
 export function spineKey(row) {
   const slug = aaSlugFromSourceUrl(row.source_url || "") || lastSlugSegment(row.model || "");
   const effort = String(row.effort_tier || "none").toLowerCase();

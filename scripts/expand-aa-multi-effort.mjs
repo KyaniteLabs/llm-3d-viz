@@ -37,6 +37,7 @@ import {
   applyAaDerivedBlend,
   applyArenaElo,
   stampAaMeasured,
+  applyCuratedOpenness,
   canAdmitPlotTriple,
 } from "./lib/catalog-join.mjs";
 import {
@@ -215,6 +216,20 @@ sourceStats.push({
   active: manual.active.length,
   superseded: manual.superseded.length,
   rejected: manual.rejected,
+});
+
+// --- 1c. W1 truth-source openness overlay (ticket #188) ---
+// Curated lab-class map (src/data/catalog-scope.ts) replaces the retired
+// name-keyword guess. Manual-row value wins while alive; per-family
+// exceptions survive supersede; mixed labs default closed. Every non-null
+// openness is stamped { origin: "curated", kind: "list" }.
+const openTruth = applyCuratedOpenness(merged, manual.active);
+merged = openTruth.rows;
+sourceStats.push({
+  source: "curated lab-class openness map (W1 truth source)",
+  stamped: openTruth.stamped,
+  flips: openTruth.flips,
+  note: "Precedence: manual-row value while alive, then per-family exception (survives supersede), then lab class (mixed/unknown → closed). Flip count = rows whose openness value changed vs the pre-overlay value.",
 });
 sourceStats.push({
   source: aa.source,
@@ -579,6 +594,7 @@ console.log(
       measured_rows: measured.length,
       manual_additions: manualAdmitted.length,
       manual_superseded: manual.superseded.length,
+      openness_flips: openTruth.flips,
       partials_in_memory: merged.length - measured.length,
       awaiting_measurement:
         awaitingMeasurement.missing_tps.count +
