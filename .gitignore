@@ -12,6 +12,8 @@
 data/aa-api-snapshot.json
 data/arena-text-style-control-latest.parquet
 data/openrouter-snapshot.json
+# Dataset raw snapshot archive (W5/#191 — 30d prune, never shipped)
+archive/
 dist/
 logs/
 node_modules/

@@ -13,6 +13,8 @@
 #   SKIP_BUILD=1  scrape only
 #   FORCE=1       rebuild+deploy even if data hash unchanged
 #   LOG_DIR       default: $REPO_ROOT/logs
+#   ARCHIVE_TAG_ENABLED=1  after DONE: tag the deployed state (data/YYYY-MM-DD-HHMM)
+#                          + archive raw snapshots (W5/#191). Default on; 0 disables.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -253,4 +255,17 @@ echo "$after_hash" >"$HASH_FILE"
 echo "$row_count" >"$DEPLOYED_ROWS_FILE"
 printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":true,\"rows\":$row_count,\"hash\":\"$after_hash\",\"deployed\":true}" >"$STATUS_FILE"
 log "DONE catalog updated and deployed (rows=$row_count)"
+
+# W5 / ticket #191 — dataset release tag + pruned raw snapshot archive.
+# Runs ONLY after the DONE status write above: env-gated (ARCHIVE_TAG_ENABLED,
+# default on) and strictly non-fatal — a tag/archive problem must never unwind
+# a successful deploy. NOTE: this block deliberately installs NO trap of its
+# own; the single EXIT trap near the top stays the only one.
+if [[ "${ARCHIVE_TAG_ENABLED:-1}" == "1" ]]; then
+  if ! bash "$SCRIPT_DIR/catalog-archive-tag.sh" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+    log "WARN: catalog-archive-tag failed (non-fatal)"
+  else
+    log "catalog-archive-tag ok"
+  fi
+fi
 exit 0
