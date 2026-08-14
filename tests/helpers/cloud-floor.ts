@@ -56,7 +56,7 @@ export const CLOUD_SCORABLE_FLOOR = cloudScoped.filter(isScorable).length;
 /**
  * Visible-count floor for Playwright tests. UI default filters
  * (multiEffortOnly + excludeNonReasoning) reduce CLOUD_SCORABLE_FLOOR
- * to ~47 visible. We assert >= 1/3 as a regression guard
+ * further. We assert >= 1/3 of CLOUD_SCORABLE_FLOOR as a regression guard
  * that catches empty/broken stages without masking catalog-scope changes.
  */
 export const VISIBLE_FLOOR = Math.floor(CLOUD_SCORABLE_FLOOR / 3);

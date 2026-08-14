@@ -6,5 +6,5 @@
   "snapshot_file": "data/atlas-catalog-snapshot.json",
   "source_sha256": "401d5a07774dd1f17ebf92cb5152e52a21a88b2d8c7dc97402db52d16a09c5e4",
   "data_date": "2026-08-14",
-  "note": "Null metrics preserved. Never invent Index/tok/s/price client-side."
+  "note": "Null metrics preserved. Never invent Index/tok/s/price client-side. Snapshot duplicates data/models.v0.draft.json byte-for-byte; dedupe is leader-gated (WS7/L2)."
 }

@@ -530,7 +530,7 @@ const meta = {
   snapshot_file: "data/atlas-catalog-snapshot.json",
   source_sha256: sourceHash,
   data_date: today,
-  note: "Null metrics preserved. Never invent Index/tok/s/price client-side.",
+  note: "Null metrics preserved. Never invent Index/tok/s/price client-side. Snapshot duplicates data/models.v0.draft.json byte-for-byte; dedupe is leader-gated (WS7/L2).",
 };
 const metaJson = `${JSON.stringify(meta, null, 2)}\n`;
 

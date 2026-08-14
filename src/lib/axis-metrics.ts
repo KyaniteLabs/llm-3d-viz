@@ -38,7 +38,12 @@ export interface AxisMetricDef {
   /** Axis title drawn on the stage. */
   title: string;
   scale: AxisScale;
-  /** True when the dataset carries enough rows for this metric to be selectable. */
+  /**
+   * True when the dataset carries enough rows for this metric to be selectable.
+   * Honesty note (WS7): `available` means "axis renderable" — not "measured
+   * coverage". E.g. `time_per_index` stays available while individual rows on
+   * it fall back to estimates (see estimateTimePerIndexTaskS).
+   */
   available: boolean;
   /** Raw value used for positioning; null when unmeasured. */
   getValue: (model: Model) => number | null;

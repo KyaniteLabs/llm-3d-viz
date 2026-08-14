@@ -299,8 +299,9 @@ test.describe("3D Stage Render Specs", () => {
       };
     });
 
-    // Cloud-scope scorable: 119 before UI filters, ~47 after defaults (multiEffortOnly +
-    // excludeNonReasoning). Assert VISIBLE_FLOOR as a regression guard (empty/broken stage).
+    // Cloud-scope scorable (CLOUD_SCORABLE_FLOOR) before UI filters; defaults
+    // (multiEffortOnly + excludeNonReasoning) reduce it further. Assert
+    // VISIBLE_FLOOR as a regression guard (empty/broken stage).
     expect(vizData.scorableCount).toBeGreaterThanOrEqual(VISIBLE_FLOOR);
     expect(vizData.traceCount).toBe(2);
     expect(vizData.pointsCount).toBe(vizData.scorableCount);
@@ -1689,7 +1690,8 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       return { before, after, datarevision, modelsCount: allModels.length };
     });
 
-    // Scope-bound: UI default filters reduce cloud-scope scorable to ~47.
+    // Scope-bound: UI default filters reduce the cloud-scope scorable set
+    // (CLOUD_SCORABLE_FLOOR) — bind to VISIBLE_FLOOR, not a hardcoded count.
     expect(ranges.modelsCount).toBeGreaterThanOrEqual(VISIBLE_FLOOR);
     // The zoomed range is preserved across the re-render.
     expect(ranges.after).toEqual(ranges.before);
