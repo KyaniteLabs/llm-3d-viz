@@ -1,0 +1,15 @@
+{
+  "slug": "data-stewardship-v2",
+  "status": "consensus_approved_pending_publish",
+  "date": "2026-08-14",
+  "chosen": "A_seven_workstream_program",
+  "plan": ".omx/plans/prd-data-stewardship-v2.md",
+  "test_spec": ".omx/plans/test-spec-data-stewardship-v2.md",
+  "context": ".omx/context/data-stewardship-v2-20260814T220000Z.md",
+  "iterations": 2,
+  "architect": "APPROVE_WITH_AMENDMENTS (W1 curated origin + lab-class map + persistent exceptions; W2 vitest-side gate; W5 dirty-tree guard + keep-N retention) -> CONFIRM after repairs + ADR wording fix",
+  "critic": "ITERATE (stale AC2 wording + 3 minors) -> APPROVE after repairs; one residual spec one-liner folded (keep-12 survivor assertion)",
+  "ralplan_consensus_gate": { "complete": true, "architect_before_critic": true },
+  "outputs": "to-spec issue + wayfinder map + 7 child tickets on Forgejo (ready-for-agent)",
+  "execution": "awaiting lane selection — recommend $ultragoal W1->W2 single owner, W3/W4/W5 parallel, W6 then W7"
+}
