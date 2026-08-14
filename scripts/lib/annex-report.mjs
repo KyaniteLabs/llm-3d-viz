@@ -12,6 +12,9 @@
  *    NON_USER_TIERS filter (privileged tiers users cannot select).
  *  - buildHiddenByScope: admitted rows the product scope hides — floor-hidden
  *    (a1/a2/a3) and held 2026 rows (b). Evidence for decision item D-H4.
+ *  - buildArenaMatchFailures: counts of Arena attach failures by code plus the
+ *    top unmatched model names (plan WS6, audit M2 — the ~23% attach rate's
+ *    first measurable improvement target).
  */
 import { meetsReleaseFloor } from "../../src/data/catalog-scope.ts";
 import { aaSlugFromSourceUrl, lastSlugSegment } from "../../src/lib/family-effort.shared.ts";
@@ -109,6 +112,52 @@ export function buildNonUserTierDrops(mergedRows, nonUserTiers) {
 }
 
 const NOTABLE_CAP = 50;
+
+/** Every failure code applyArenaElo can log (stable vocabulary for the gaps doc). */
+export const ARENA_FAILURE_CODES = Object.freeze([
+  "arena_no_family",
+  "arena_no_tier_match",
+  "arena_ambiguous_family",
+  "arena_multi_candidate",
+  "arena_implausible_rating",
+  "arena_no_rating",
+]);
+
+/**
+ * Persist Arena attach failures (plan WS6, audit M2): counts by code plus the
+ * top-N unmatched model names from applyArenaElo logs. Report-only — derived
+ * entirely from logs the join already produced; never feeds back into matching.
+ *
+ * @param {{ code?: string, key?: string, slug?: string }[]} logs
+ * @param {{ topN?: number }} [opts]
+ */
+export function buildArenaMatchFailures(logs, opts = {}) {
+  const topN = Number.isFinite(opts.topN) ? opts.topN : 10;
+  const countsByCode = Object.fromEntries(ARENA_FAILURE_CODES.map((c) => [c, 0]));
+  const nameCounts = new Map();
+  let total = 0;
+  for (const log of logs ?? []) {
+    const code = log?.code;
+    if (!code) continue;
+    total += 1;
+    if (countsByCode[code] === undefined) countsByCode[code] = 0;
+    countsByCode[code] += 1;
+    const name = String(log.key || log.slug || "").trim();
+    if (!name) continue;
+    nameCounts.set(name, (nameCounts.get(name) || 0) + 1);
+  }
+  const unmatchedTop = [...nameCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, topN)
+    .map(([name, count]) => ({ name, count }));
+  return {
+    note: "Counts of Arena attach failures by code + most-frequent unmatched model names (from applyArenaElo logs; names span all failure codes). Persisted so attach-rate regressions are diffable run over run.",
+    total_failures: total,
+    counts_by_code: countsByCode,
+    unmatched_top: unmatchedTop,
+  };
+}
+
 
 function notableNames(rows, cap) {
   return rows

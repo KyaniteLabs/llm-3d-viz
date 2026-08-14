@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  ARENA_FAILURE_CODES,
+  buildArenaMatchFailures,
   buildAwaitingMeasurement,
   buildHiddenByScope,
   buildNonUserTierDrops,
@@ -219,5 +221,62 @@ describe("hidden_by_scope report (WS3, H4 visibility half)", () => {
     expect(draftFixture).toHaveLength(6);
     const serialized = JSON.stringify(report);
     expect(serialized).not.toMatch(/"tps"|"blended_price_per_M"/); // counts + names only
+  });
+});
+
+describe("arena_match_failures persistence (WS6, M2)", () => {
+  const logs = [
+    { code: "arena_no_family", key: "model-x", slug: "model-x" },
+    { code: "arena_no_family", key: "model-y" },
+    { code: "arena_no_family", key: "model-x" }, // repeat name — counts up
+    { code: "arena_no_tier_match", key: "model-z", tier: "medium" },
+    { code: "arena_ambiguous_family", key: "model-w" },
+    { code: "arena_multi_candidate", key: "model-v", tier: "high" },
+    { code: "arena_implausible_rating", key: "model-u", rating: 9000 },
+    { code: "arena_no_rating", key: "model-t" },
+    { code: "arena_no_family", slug: "slug-only-entry" }, // slug fallback when key absent
+    { code: "some_new_code", key: "model-x" }, // unknown code still counted
+    { code: null }, // malformed entry ignored
+  ];
+
+  it("counts failures by code, initializing the full known vocabulary to zero", () => {
+    const report = buildArenaMatchFailures(logs);
+    expect(report.total_failures).toBe(10);
+    expect(report.counts_by_code).toEqual({
+      arena_no_family: 4,
+      arena_no_tier_match: 1,
+      arena_ambiguous_family: 1,
+      arena_multi_candidate: 1,
+      arena_implausible_rating: 1,
+      arena_no_rating: 1,
+      some_new_code: 1,
+    });
+    for (const code of ARENA_FAILURE_CODES) {
+      expect(report.counts_by_code).toHaveProperty(code);
+    }
+  });
+
+  it("lists the top unmatched model names by frequency (key, then slug fallback)", () => {
+    const report = buildArenaMatchFailures(logs);
+    expect(report.unmatched_top[0]).toEqual({ name: "model-x", count: 3 });
+    const names = report.unmatched_top.map((e: { name: string }) => e.name);
+    expect(names).toContain("slug-only-entry");
+    expect(names).not.toContain("");
+  });
+
+  it("caps the unmatched-names list at topN (default 10)", () => {
+    const many = Array.from({ length: 15 }, (_, i) => ({
+      code: "arena_no_family",
+      key: `unmatched-${i}`,
+    }));
+    expect(buildArenaMatchFailures(many).unmatched_top).toHaveLength(10);
+    expect(buildArenaMatchFailures(many, { topN: 3 }).unmatched_top).toHaveLength(3);
+  });
+
+  it("returns an all-zero report for empty logs (e.g. SKIP_ARENA=1 runs)", () => {
+    const report = buildArenaMatchFailures([]);
+    expect(report.total_failures).toBe(0);
+    expect(report.unmatched_top).toEqual([]);
+    expect(report.counts_by_code.arena_no_family).toBe(0);
   });
 });

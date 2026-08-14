@@ -54,9 +54,11 @@ import {
 } from "./lib/model-watchlist.mjs";
 import {
   buildAwaitingMeasurement,
+  buildArenaMatchFailures,
   buildHiddenByScope,
   buildNonUserTierDrops,
 } from "./lib/annex-report.mjs";
+import { buildOrOverlayTelemetry } from "./lib/or-telemetry.mjs";
 import {
   CLOUD_LABS,
   RELEASE_FLOOR_ISO,
@@ -323,6 +325,10 @@ sourceStats.push({
   error: or.error,
 });
 
+// --- 3c. OR overlay telemetry (plan WS6, M3): report-only match-rate histogram.
+// Reuses the production matcher over the same merged rows — no behavior change.
+const orTelemetry = buildOrOverlayTelemetry(merged, or.models || []);
+
 /**
  * Effort tiers dropped from the product catalog per provider — rungs above the
  * lab's highest user-selectable effort. Artificial Analysis sometimes publishes
@@ -441,6 +447,11 @@ for (const row of merged) {
 }
 const gaps = buildEffortGaps(admitted, laddersDoc, partialByFamily);
 
+// --- 5a. Arena match-failure persistence (plan WS6, M2): counts by code +
+// top unmatched names from the join logs — attach-rate regressions become
+// diffable run over run. Report-only.
+const arenaMatchFailures = buildArenaMatchFailures(arenaLogs);
+
 // --- 5b. Watchlist report (plan WS4): announced-but-unmeasured models ---
 const watchlistEntries = loadWatchlistEntries(
   path.join(root, "data/model-watchlist.json"),
@@ -481,6 +492,14 @@ const gapsDoc = {
     attaches: arenaAttaches,
     error: arena.error,
     license: "CC BY 4.0",
+  },
+  arena_match_failures: arenaMatchFailures,
+  or_overlay_telemetry: {
+    note: "Report-only (WS6, M3): overlay attach counts + OpenRouter match-rate histogram over merged rows (production matcher, no behavior change). The unmatched-provider histogram tells us whether context/modality null-coverage is fixable by org-map growth.",
+    price_overlays: priced.overlays,
+    modality_overlays: modal.attaches,
+    context_overlays: ctx.overlays,
+    ...orTelemetry,
   },
   price_divergences: {
     count: divergenceRecords.length,
@@ -577,6 +596,18 @@ console.log(
       source_stats: sourceStats,
       openrouter_overlays: priced.overlays,
       arena_attaches: arenaAttaches,
+      arena_match_failures: {
+        total: arenaMatchFailures.total_failures,
+        counts_by_code: arenaMatchFailures.counts_by_code,
+        unmatched_top: arenaMatchFailures.unmatched_top,
+      },
+      or_overlay_telemetry: {
+        price_overlays: priced.overlays,
+        modality_overlays: modal.attaches,
+        context_overlays: ctx.overlays,
+        rows_matched: orTelemetry.rows_matched,
+        rows_unmatched: orTelemetry.rows_unmatched,
+      },
       effort_gaps: gaps.length,
       aa_key_present: Boolean(resolveAaApiKey()),
       source_sha256: sourceHash,
