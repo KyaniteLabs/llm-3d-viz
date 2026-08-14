@@ -1,5 +1,5 @@
 {
-  "data_date": "2026-08-08",
+  "data_date": "2026-08-14",
   "ingestion": "official-api-only",
   "attribution": {
     "artificial_analysis": "https://artificialanalysis.ai (Data API)",
@@ -10,48 +10,38 @@
     {
       "source": "AA Data API /language/models/free",
       "ok": true,
-      "raw": 595,
-      "mapped": 595,
+      "raw": 608,
+      "mapped": 608,
       "scorable_pre_blend": 0,
       "tier": "free",
-      "pages": 3,
-      "scorable_after_blend": 302
+      "pages": 4,
+      "scorable_after_blend": 310
     },
     {
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
       "skipped": false,
-      "entries": 385,
-      "attaches": 84,
+      "entries": 389,
+      "attaches": 88,
       "log_sample": [
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-6-thinking",
-          "slug": "claude-opus-4-6-thinking"
-        },
-        {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-7-thinking",
-          "slug": "claude-opus-4-7-thinking"
-        },
         {
           "code": "arena_no_tier_match",
           "key": "qwen3.8-max",
           "tier": "max"
         },
         {
-          "code": "arena_no_family",
-          "key": "claude-opus-4-8-thinking",
-          "slug": "claude-opus-4-8-thinking"
-        },
-        {
           "code": "arena_no_tier_match",
-          "key": "gpt-5.4-high",
+          "key": "claude-opus-4-8-high",
           "tier": "high"
         },
         {
           "code": "arena_ambiguous_family",
           "key": "gpt-5.5"
+        },
+        {
+          "code": "arena_no_tier_match",
+          "key": "gpt-5.4-high",
+          "tier": "high"
         },
         {
           "code": "arena_no_family",
@@ -60,32 +50,41 @@
         },
         {
           "code": "arena_no_family",
+          "key": "grok-4.20-beta1",
+          "slug": "grok-4.20-beta1"
+        },
+        {
+          "code": "arena_no_family",
           "key": "qwen3.7-max-preview",
           "slug": "qwen3.7-max-preview"
+        },
+        {
+          "code": "arena_ambiguous_family",
+          "key": "gpt-5.5-instant"
         }
       ]
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
-      "models": 400,
+      "models": 411,
       "price_overlays": 11,
-      "modality_overlays": 87,
-      "context_overlays": 143,
+      "modality_overlays": 89,
+      "context_overlays": 148,
       "authenticated": false
     }
   ],
   "openrouter": {
     "ok": true,
-    "models": 400,
+    "models": 411,
     "price_overlays": 11,
-    "modality_overlays": 87,
-    "context_overlays": 143
+    "modality_overlays": 89,
+    "context_overlays": 148
   },
   "arena": {
     "ok": true,
-    "entries": 385,
-    "attaches": 84,
+    "entries": 389,
+    "attaches": 88,
     "license": "CC BY 4.0"
   },
   "gaps": [
@@ -172,6 +171,20 @@
     },
     {
       "family": "DeepSeek V4 Flash 0731",
+      "provider": "DeepSeek",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "DeepSeek V4 Pro 0813",
       "provider": "DeepSeek",
       "expected_tiers": [],
       "published_tiers": [

@@ -40,9 +40,39 @@ unset __envf
 cd "$REPO_ROOT"
 
 # D10: Non-blocking singleton lock — record overlap instead of stacking writers.
+# flock when available (Linux); macOS cron has no flock, so fall back to a
+# mkdir lock with a PID staleness check. A missing flock previously exited 127,
+# which read as "overlap" and silently stalled every cron run for days.
 LOCK_FILE="$STATE_DIR/catalog-auto-update.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
+LOCK_DIR="$STATE_DIR/catalog-auto-update.lockd"
+LOCK_HELD_DIR=""
+lock_cleanup() { [[ -n "$LOCK_HELD_DIR" ]] && rm -rf "$LOCK_HELD_DIR"; }
+trap lock_cleanup EXIT
+acquire_lock() {
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    flock -n 9
+    return $?
+  fi
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    LOCK_HELD_DIR="$LOCK_DIR"
+    printf '%s\n' "$$" >"$LOCK_DIR/pid"
+    return 0
+  fi
+  local pid
+  pid="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
+  if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
+    log "stale lock (pid ${pid:-?} gone) — reclaiming"
+    rm -rf "$LOCK_DIR"
+    if mkdir "$LOCK_DIR" 2>/dev/null; then
+      LOCK_HELD_DIR="$LOCK_DIR"
+      printf '%s\n' "$$" >"$LOCK_DIR/pid"
+      return 0
+    fi
+  fi
+  return 1
+}
+if ! acquire_lock; then
   log "ABORT: another catalog-auto-update is already running (overlap)"
   printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"lock\",\"reason\":\"overlap\"}" >"$STATUS_FILE"
   exit 10
