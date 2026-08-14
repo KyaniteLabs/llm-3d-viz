@@ -211,10 +211,6 @@ export async function fireAlert(events, opts = {}) {
   for (const e of fresh) {
     store[dedupByKind ? e.kind : `${prefix}:${e.key}`] = now;
   }
-  // dedupByKind (failure/silence): one issue per kind until TTL.
-  if (dedupByKind) {
-    store = { ...store };
-  }
   saveDedupStore(store, storePath);
   return { fired: true, events: fresh.length, ...result };
 }

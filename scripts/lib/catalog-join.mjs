@@ -257,11 +257,7 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     if (!hit?.pricing) return row;
     let next = { ...row };
 
-    // D12: Reject null/empty/non-numeric prices — Number("")===0 would make models falsely free.
-    if ((needIn || needOut) && (hit.pricing.prompt == null || hit.pricing.prompt === "" ||
-        hit.pricing.completion == null || hit.pricing.completion === "")) {
-      // Missing OR in/out: still allow the cache-slot completion below.
-    }
+    // Per-side fills (D12: null/empty/non-numeric OR prices never become 0).
     if (needIn && hit.pricing.prompt != null && hit.pricing.prompt !== "") {
       const pinTok = Number(hit.pricing.prompt);
       if (Number.isFinite(pinTok) && pinTok >= 0) {
