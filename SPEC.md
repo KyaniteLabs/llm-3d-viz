@@ -41,7 +41,7 @@ Living spec. Compressed from research (2026-08-01) + user brainstorm. Updated in
   - identity: `model`, `provider`, `openness` (open/closed), `modality` (text/vision/audio), `context_length`, `release_date`, `source_url`
   - speed: `tps` (output tokens/sec), `ttft` (time-to-first-token, ms)
   - cost: `price_in_per_M`, `price_out_per_M`, `blended_price_per_M` (AA 7:2:1)
-  - intelligence: `aa_intelligence_index` (primary) + switchable `arena_elo`, `gpqa`, `swe_bench`, `aider_pct`
+  - intelligence: `aa_intelligence_index` (primary) + switchable `arena_elo`, `coding_index`, `agentic_index` (amended 2026-08-14, plan WS5 — added from AA Data API); `gpqa`, `swe_bench`, `aider_pct` deprecated pending sources
   - workload→weight presets: coding / chat / vision / RAG / long-context → default speed/cost/intel weights
   - meta: `data_date`, `source` (AA / HF / provider docs)
 - **Views:** (1) 3D hero scatter — x=speed, y=intelligence, z=cost (log axes) — with Pareto surface; (2) linked 2D projections (the perception aids); (3) value-score panel (sliders → live composite + frontier re-highlight); (4) workload recommender; (5) filter/slice controls.

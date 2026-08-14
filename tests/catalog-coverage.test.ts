@@ -72,6 +72,9 @@ describe("provenance + task time honesty", () => {
   it("accepts every stamped field/origin/kind and renders friendly labels only", () => {
     const stampedSources: Required<NonNullable<Model["sources"]>> = {
       aa_intelligence_index: { origin: "aa-api", kind: "measured" },
+      coding_index: { origin: "aa-api", kind: "measured" },
+      agentic_index: { origin: "aa-api", kind: "measured" },
+      time_per_index_task_s: { origin: "aa-api", kind: "measured" },
       tps: { origin: "aa", kind: "measured" },
       ttft: { origin: "aa-api", kind: "measured" },
       blended_price_per_M: { origin: "aa", kind: "derived" },
@@ -89,12 +92,15 @@ describe("provenance + task time honesty", () => {
     const line = formatProvenanceLine(stamped);
     // One bit per stamped field, all with friendly labels — no raw field
     // names (snake_case) leak into the inspector line.
-    expect(line.split(" · ")).toHaveLength(11);
+    expect(line.split(" · ")).toHaveLength(14);
     expect(line).not.toMatch(/[a-z]_[a-z]/);
     expect(line).toContain("cache $: OpenRouter");
     expect(line).toContain("context: OpenRouter");
     expect(line).toContain("modality: OpenRouter");
     expect(line).toContain("cost/task: Artificial Analysis");
+    expect(line).toContain("coding idx: Artificial Analysis");
+    expect(line).toContain("agentic idx: Artificial Analysis");
+    expect(line).toContain("time/task: Artificial Analysis");
   });
 
   it("labels estimated task time when wall time missing", () => {

@@ -66,6 +66,54 @@ describe("model data validation", () => {
     expect(quarantined).toEqual([{ ...negative, reason: DATA_ERROR }]);
     expect(incompleteModels().every(({ null_reason }) => null_reason.length > 0)).toBe(true);
   });
+
+  // WS5: AA secondary intelligence sub-indices — nullable, 0–100 when present.
+  describe("WS5 secondary intelligence axes (coding_index / agentic_index)", () => {
+    const prices = { price_in_per_M: 1, price_out_per_M: 2, blended_price_per_M: 1.7 };
+
+    it.each(["coding_index", "agentic_index"] as const)(
+      "rejects an out-of-range %s loudly",
+      (field) => {
+        expect(() =>
+          validateModels([{ ...model(prices), [field]: 100.5 } as Model]),
+        ).toThrow(new RegExp(`${field} must be null or within 0-100`));
+        expect(() =>
+          validateModels([{ ...model(prices), [field]: -1 } as Model]),
+        ).toThrow(new RegExp(`${field} must be null or within 0-100`));
+        expect(() =>
+          validateModels([{ ...model(prices), [field]: Number.NaN } as Model]),
+        ).toThrow(new RegExp(`${field} must be null or within 0-100`));
+      },
+    );
+
+    it("accepts null and the full 0–100 range for both sub-indices", () => {
+      expect(() =>
+        validateModels([
+          { ...model(prices), coding_index: null, agentic_index: null },
+          { ...model(prices), model: "fixture-2", coding_index: 0, agentic_index: 100 },
+          { ...model(prices), model: "fixture-3", coding_index: 47.3, agentic_index: 12.9 },
+        ]),
+      ).not.toThrow();
+    });
+
+    it("round-trips aa-api measured provenance keys through validateModels", () => {
+      expect(() =>
+        validateModels([
+          {
+            ...model(prices),
+            coding_index: 63,
+            agentic_index: 41,
+            time_per_index_task_s: 9.09,
+            sources: {
+              coding_index: { origin: "aa-api", kind: "measured" },
+              agentic_index: { origin: "aa-api", kind: "measured" },
+              time_per_index_task_s: { origin: "aa-api", kind: "measured" },
+            },
+          },
+        ]),
+      ).not.toThrow();
+    });
+  });
 });
 
 describe("incompleteAxisCoverage (FIX-C #28: per-axis missing-data labels)", () => {

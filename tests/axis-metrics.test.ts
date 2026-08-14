@@ -8,6 +8,7 @@ import {
   densityMarkerScale,
   detectEconomyBasis,
   estimateTimePerIndexTaskS,
+  getAxisMetric,
   hasMappedAxes,
   mappingHeading,
   modelToSceneCoords,
@@ -172,6 +173,15 @@ describe("task economy axes never blank the stage", () => {
 
   it("prefers measured time when present", () => {
     expect(estimateTimePerIndexTaskS({ time_per_index_task_s: 3.5, tps: 100, ttft: 1000 })).toBe(3.5);
+  });
+
+  it("labels the task-time axis honestly for mixed measured/estimated rows (WS5)", () => {
+    const def = getAxisMetric("time_per_index");
+    // The dataset mixes measured rows (AA end-to-end) with estimated rows
+    // (TTFT + 1000/TPS) — the axis must not claim a pure "(est.)".
+    expect(def.label).toBe("Time / Index task (meas./est.)");
+    expect(def.title).toBe("TIME / TASK (meas./est.)");
+    expect(def.label).not.toBe("Time / Index task (est.)");
   });
 
   it("task mapping has plottable models with cost+estimated time", () => {

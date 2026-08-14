@@ -75,7 +75,7 @@ export const ECONOMY_BASIS_LABELS: Record<EconomyBasis, { short: string; detail:
   task: {
     short: "$/task · s/task≈",
     detail:
-      "Cost per AA Index task when measured. Time is measured wall-time when available; otherwise estimated as TTFT + 1000/TPS (not AA free-API wall time).",
+      "Cost per AA Index task when measured. Time is AA-measured end-to-end response time when present; otherwise estimated as TTFT + 1000/TPS.",
   },
 };
 
@@ -218,15 +218,19 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
   },
   {
     id: "time_per_index",
-    /** AA free API omits measured wall time — values are often estimated. */
-    label: "Time / Index task (est.)",
-    title: "TIME / TASK (est.)",
+    /**
+     * WS5 honesty fix: the dataset is now mixed — rows with a measured AA
+     * end-to-end time (time_per_index_task_s) sit next to estimated rows
+     * (TTFT + 1000/TPS), so the axis must not claim a pure "(est.)".
+     */
+    label: "Time / Index task (meas./est.)",
+    title: "TIME / TASK (meas./est.)",
     scale: "log",
     available: true,
     getValue: (m) => estimateTimePerIndexTaskS(m),
     formatTick: (v) => {
       const body = v >= 100 ? `${Math.round(v)}s` : `${Number(v.toPrecision(3))}s`;
-      // Tick labels stay short; "est." is in the axis title.
+      // Tick labels stay short; "meas./est." is in the axis title.
       return body;
     },
   },

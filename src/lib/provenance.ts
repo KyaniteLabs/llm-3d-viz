@@ -24,6 +24,8 @@ const KIND_LABEL: Record<string, string> = {
 
 const FIELD_SHORT: Record<string, string> = {
   aa_intelligence_index: "Index",
+  coding_index: "coding idx",
+  agentic_index: "agentic idx",
   tps: "tok/s",
   ttft: "TTFT",
   blended_price_per_M: "blended $",
@@ -127,8 +129,8 @@ export function optionalMetricDlRows(model: Model): string {
     tt.kind !== "missing"
       ? `<div><dt>Time / Index task</dt><dd title="${
           tt.kind === "estimated"
-            ? `Estimated: TTFT + ${INDEX_TASK_OUTPUT_TOKENS_EST}/TPS — AA free API has no measured wall time`
-            : "Measured Index-task wall time"
+            ? `Estimated: TTFT + ${INDEX_TASK_OUTPUT_TOKENS_EST}/TPS — no AA-measured end-to-end time for this model`
+            : "Measured AA end-to-end response time"
         }">${tt.label}</dd></div>`
       : "";
   return arena + costTask + timeTask;

@@ -48,11 +48,25 @@ export interface Model {
   price_out_per_M: number | null;
   blended_price_per_M: number | null;
   aa_intelligence_index: number | null;
+  /**
+   * WS5 (SPEC §5 switchable-axis intent): AA secondary intelligence sub-indices,
+   * mapped data-layer-only from the AA Data API (artificial_analysis_coding_index
+   * / artificial_analysis_agentic_index). Nullable passthrough — null when AA
+   * has not measured them; validated 0–100 when present. Axis-switching UI is
+   * explicitly out of scope for WS5.
+   */
+  coding_index?: number | null;
+  agentic_index?: number | null;
   /** AA Cost per Intelligence Index Task (USD); null until scraped. */
   cost_per_index_task_usd?: number | null;
   /** AA Time per Intelligence Index Task (seconds); null until scraped. */
   time_per_index_task_s?: number | null;
   arena_elo: number | null;
+  /**
+   * @deprecated SPEC §5 amendment (2026-08-14, plan WS5): gpqa/swe_bench/aider_pct
+   * are dead axes — no current source publishes them. Retained as nullable
+   * fields pending sources; do not wire UI to them.
+   */
   gpqa: number | null;
   swe_bench: number | null;
   aider_pct: number | null;
@@ -65,7 +79,7 @@ export interface Model {
    */
   sources?: Partial<
     Record<
-      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "price_cache_per_M" | "context_length" | "modality" | "cost_per_index_task_usd" | "arena_elo",
+      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "price_cache_per_M" | "context_length" | "modality" | "cost_per_index_task_usd" | "time_per_index_task_s" | "coding_index" | "agentic_index" | "arena_elo",
       { origin: "aa" | "aa-api" | "arena" | "openrouter" | "provider"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
     >
   >;
@@ -103,6 +117,8 @@ export const allModels: Model[] = (rawModels as Model[]).map((row) => ({
   ...row,
   family_id: row.family_id?.trim() || deriveFamilyId(row.model),
   effort_tier: row.effort_tier?.trim() || deriveEffortTier(row),
+  coding_index: row.coding_index ?? null,
+  agentic_index: row.agentic_index ?? null,
   cost_per_index_task_usd: row.cost_per_index_task_usd ?? null,
   time_per_index_task_s: row.time_per_index_task_s ?? null,
 }));
@@ -196,6 +212,15 @@ export function validateModels(candidateModels: readonly Model[]): void {
         row.aa_intelligence_index > 100)
     ) {
       throw new Error(`${label} (${row.model}): aa_intelligence_index must be null or within 0-100`);
+    }
+    // WS5: AA secondary sub-indices share the 0–100 instrument range.
+    for (const [field, value] of [
+      ["coding_index", row.coding_index],
+      ["agentic_index", row.agentic_index],
+    ] as const) {
+      if (value != null && (!Number.isFinite(value) || value < 0 || value > 100)) {
+        throw new Error(`${label} (${row.model}): ${field} must be null or within 0-100`);
+      }
     }
     // D18: openness enum
     if (row.openness !== "open" && row.openness !== "closed") {

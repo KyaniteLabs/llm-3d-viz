@@ -79,8 +79,24 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     cost_per_index_task_usd = costBlock.cost_per_task.total_cost;
   }
 
-  // Free shape has no Index-task wall time; leave null (do not invent).
-  const time_per_index_task_s = null;
+  // WS5 (plan): AA free API exposes median end-to-end response time — map it as
+  // the measured task-time value. Null passes through when the field is absent.
+  const e2eSeconds =
+    typeof perf.median_end_to_end_response_time_seconds === "number"
+      ? perf.median_end_to_end_response_time_seconds
+      : null;
+  const time_per_index_task_s = e2eSeconds;
+
+  // WS5 (plan): AA sub-indices — nullable passthrough, validated 0–100
+  // downstream (validateModels). Never invented or clamped here.
+  const coding_index =
+    typeof evals.artificial_analysis_coding_index === "number"
+      ? evals.artificial_analysis_coding_index
+      : null;
+  const agentic_index =
+    typeof evals.artificial_analysis_agentic_index === "number"
+      ? evals.artificial_analysis_agentic_index
+      : null;
 
   return {
     model: name,
@@ -107,10 +123,16 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
     reasoning: deriveReasoningFromName(name),
     family_id,
     effort_tier,
+    coding_index,
+    agentic_index,
     cost_per_index_task_usd,
     time_per_index_task_s,
     sources: {
       aa_intelligence_index: { origin: "aa-api", kind: "measured" },
+      coding_index: coding_index != null ? { origin: "aa-api", kind: "measured" } : undefined,
+      agentic_index: agentic_index != null ? { origin: "aa-api", kind: "measured" } : undefined,
+      time_per_index_task_s:
+        time_per_index_task_s != null ? { origin: "aa-api", kind: "measured" } : undefined,
       tps: tps != null ? { origin: "aa-api", kind: "measured" } : undefined,
       ttft: ttftMs != null ? { origin: "aa-api", kind: "measured" } : undefined,
       price_in_per_M: priceIn != null ? { origin: "aa-api", kind: "measured" } : undefined,
