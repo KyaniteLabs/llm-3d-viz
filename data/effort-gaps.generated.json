@@ -98,6 +98,287 @@
     "attaches": 88,
     "license": "CC BY 4.0"
   },
+  "arena_match_failures": {
+    "note": "Counts of Arena attach failures by code + most-frequent unmatched model names (from applyArenaElo logs; names span all failure codes). Persisted so attach-rate regressions are diffable run over run.",
+    "total_failures": 301,
+    "counts_by_code": {
+      "arena_no_family": 250,
+      "arena_no_tier_match": 11,
+      "arena_ambiguous_family": 39,
+      "arena_multi_candidate": 1,
+      "arena_implausible_rating": 0,
+      "arena_no_rating": 0
+    },
+    "unmatched_top": [
+      {
+        "name": "alpaca-13b",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-10-09",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-10-20",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-11-10",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-12-10",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-26-01-10",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-experimental-chat-26-02-10",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-lite-v1.0",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-micro-v1.0",
+        "count": 1
+      },
+      {
+        "name": "amazon-nova-pro-v1.0",
+        "count": 1
+      }
+    ]
+  },
+  "or_overlay_telemetry": {
+    "note": "Report-only (WS6, M3): overlay attach counts + OpenRouter match-rate histogram over merged rows (production matcher, no behavior change). The unmatched-provider histogram tells us whether context/modality null-coverage is fixable by org-map growth.",
+    "price_overlays": 36,
+    "modality_overlays": 89,
+    "context_overlays": 148,
+    "rows_total": 609,
+    "rows_matched": 148,
+    "rows_unmatched": 461,
+    "unmatched_by_provider": [
+      {
+        "provider": "Alibaba",
+        "count": 62
+      },
+      {
+        "provider": "Google",
+        "count": 53
+      },
+      {
+        "provider": "OpenAI",
+        "count": 49
+      },
+      {
+        "provider": "Anthropic",
+        "count": 34
+      },
+      {
+        "provider": "DeepSeek",
+        "count": 27
+      },
+      {
+        "provider": "Mistral",
+        "count": 26
+      },
+      {
+        "provider": "SpaceXAI",
+        "count": 19
+      },
+      {
+        "provider": "NVIDIA",
+        "count": 18
+      },
+      {
+        "provider": "Meta",
+        "count": 16
+      },
+      {
+        "provider": "Amazon",
+        "count": 14
+      },
+      {
+        "provider": "Allen Institute for AI",
+        "count": 9
+      },
+      {
+        "provider": "IBM",
+        "count": 9
+      },
+      {
+        "provider": "LG AI Research",
+        "count": 9
+      },
+      {
+        "provider": "Liquid AI",
+        "count": 9
+      },
+      {
+        "provider": "Z AI",
+        "count": 9
+      },
+      {
+        "provider": "Xiaomi",
+        "count": 8
+      },
+      {
+        "provider": "AI21 Labs",
+        "count": 7
+      },
+      {
+        "provider": "Upstage",
+        "count": 7
+      },
+      {
+        "provider": "InclusionAI",
+        "count": 6
+      },
+      {
+        "provider": "Nous Research",
+        "count": 6
+      },
+      {
+        "provider": "Cohere",
+        "count": 5
+      },
+      {
+        "provider": "Kimi",
+        "count": 4
+      },
+      {
+        "provider": "MBZUAI Institute of Foundation Models",
+        "count": 4
+      },
+      {
+        "provider": "China Mobile",
+        "count": 3
+      },
+      {
+        "provider": "Microsoft",
+        "count": 3
+      },
+      {
+        "provider": "Motif Technologies",
+        "count": 3
+      },
+      {
+        "provider": "OpenBMB",
+        "count": 3
+      },
+      {
+        "provider": "Sarvam",
+        "count": 3
+      },
+      {
+        "provider": "AI9Stars",
+        "count": 2
+      },
+      {
+        "provider": "Baidu",
+        "count": 2
+      },
+      {
+        "provider": "ByteDance Seed",
+        "count": 2
+      },
+      {
+        "provider": "Korea Telecom",
+        "count": 2
+      },
+      {
+        "provider": "MiniMax",
+        "count": 2
+      },
+      {
+        "provider": "Perplexity",
+        "count": 2
+      },
+      {
+        "provider": "ServiceNow",
+        "count": 2
+      },
+      {
+        "provider": "StepFun",
+        "count": 2
+      },
+      {
+        "provider": "Swiss AI Initiative",
+        "count": 2
+      },
+      {
+        "provider": "Trillion Labs",
+        "count": 2
+      },
+      {
+        "provider": "Celeris",
+        "count": 1
+      },
+      {
+        "provider": "Databricks",
+        "count": 1
+      },
+      {
+        "provider": "Deep Cogito",
+        "count": 1
+      },
+      {
+        "provider": "KwaiKAT",
+        "count": 1
+      },
+      {
+        "provider": "LongCat",
+        "count": 1
+      },
+      {
+        "provider": "Multiverse Computing",
+        "count": 1
+      },
+      {
+        "provider": "Nanbeige",
+        "count": 1
+      },
+      {
+        "provider": "Naver",
+        "count": 1
+      },
+      {
+        "provider": "OpenChat",
+        "count": 1
+      },
+      {
+        "provider": "Prime Intellect",
+        "count": 1
+      },
+      {
+        "provider": "Reka AI",
+        "count": 1
+      },
+      {
+        "provider": "Sapiens AI",
+        "count": 1
+      },
+      {
+        "provider": "SK Telecom",
+        "count": 1
+      },
+      {
+        "provider": "Snowflake",
+        "count": 1
+      },
+      {
+        "provider": "Tencent",
+        "count": 1
+      },
+      {
+        "provider": "TII UAE",
+        "count": 1
+      }
+    ]
+  },
   "price_divergences": {
     "count": 107,
     "delta_count": 0,
