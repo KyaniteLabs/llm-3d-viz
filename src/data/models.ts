@@ -139,9 +139,10 @@ export function isScorable(model: Model): boolean {
  * additions, release-floor moves) automatically update test expectations.
  *
  * Note: UI default filters (multiEffortOnly + excludeNonReasoning) further
- * reduce the visible set below this count (currently ~47 from 119). Tests
- * should use `Math.floor(CLOUD_SCORABLE_FLOOR / 3)` as a visible-count floor
- * to catch empty/broken stages without masking legitimate scope changes.
+ * reduce the visible set below this count. Tests should bind to
+ * `CLOUD_SCORABLE_FLOOR` (or `Math.floor(CLOUD_SCORABLE_FLOOR / 3)` as a
+ * visible-count floor) rather than any hardcoded row count, so catalog
+ * refreshes don't leave stale numbers behind.
  */
 export const CLOUD_SCORABLE_FLOOR = models.filter(isScorable).length;
 
