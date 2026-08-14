@@ -249,7 +249,18 @@ export function buildOpenRouterIndex(orModels) {
   return { byId, byBareSlug };
 }
 
-/** AA provider → OpenRouter organization slug mapping for exact-match candidates. */
+/**
+ * AA provider → OpenRouter organization slug mapping for exact-match candidates.
+ * Keys are normalizeProvider outputs (lowercased, legal suffixes stripped).
+ * W6 (ticket #192): grown from the unmatched_by_provider histogram in
+ * data/effort-gaps.generated.json. Every org below was verified present in
+ * data/openrouter-snapshot.json (2026-08-14) before adding. Two of the planned
+ * slugs were corrected against the snapshot: OpenRouter lists `stepfun`
+ * (not "stepfun-ai") and `xiaomi` (not "xiaomimi"). On this snapshot the new
+ * orgs hold no exact AA-slug match yet (OpenRouter lists different strings for
+ * those families — version/date suffixes, word order); the mappings are still
+ * the verified org anchors so future snapshots join without another edit.
+ */
 const PROVIDER_TO_ORG = {
   openai: "openai",
   anthropic: "anthropic",
@@ -263,6 +274,19 @@ const PROVIDER_TO_ORG = {
   xai: "x-ai",
   meta: "meta-llama",
   mistral: "mistralai",
+  // W6 additions (verified vs data/openrouter-snapshot.json, 2026-08-14)
+  "bytedance seed": "bytedance-seed",
+  "reka ai": "rekaai",
+  amazon: "amazon",
+  microsoft: "microsoft",
+  stepfun: "stepfun",
+  tencent: "tencent",
+  inclusionai: "inclusionai",
+  xiaomi: "xiaomi",
+  "ai21 labs": "ai21",
+  cohere: "cohere",
+  ibm: "ibm-granite",
+  upstage: "upstage",
 };
 
 /**
@@ -438,7 +462,19 @@ export function applyOpenRouterPricing(aaRows, orModels) {
 }
 
 /**
+ * Canonical numeric slug style for Arena ↔ AA bridging: digit-dash ↔ digit-dot
+ * (gemini-3-1 ↔ gemini-3.1). Same rule matchOpenRouterModel already applies to
+ * OpenRouter ids; versions still differ across models (4.1 ≠ 4.3), so this only
+ * erases punctuation, never version differences.
+ */
+const canonNumericSlug = (s) => s.replace(/(\d+)-(\d+)/g, "$1.$2");
+
+/**
  * Build candidate AA rows for an Arena identity (slug / normalizeFamily bridge).
+ * W6 (ticket #192): slug comparisons also try the canonical numeric style —
+ * Arena writes version dots (qwen2.5-coder-32b-instruct) where AA slugs use
+ * dashes (qwen2-5-coder-32b-instruct). Exact match stays first; normalizeFamily
+ * equality only — never startsWith (avoids gpt-5 → gpt-5-6-sol).
  * @param {object[]} aaRows
  * @param {ReturnType<typeof parseArenaIdentity>} arenaId
  */
@@ -450,6 +486,13 @@ export function candidatesForArena(aaRows, arenaId) {
     // Arena effort-suffixed key vs AA base slug: claude-opus-5-high ↔ claude-opus-5 (exact base only)
     const baseArena = arenaId.slug.replace(/-(xhigh|max|high|medium|low|minimal)$/i, "");
     if (baseArena && aaSlug && aaSlug === baseArena) return true;
+    // W6: numeric dot/dash equivalence (arena gemini-3.1 ↔ aa gemini-3-1)
+    if (arenaId.slug && aaSlug && canonNumericSlug(aaSlug) === canonNumericSlug(arenaId.slug)) {
+      return true;
+    }
+    if (baseArena && aaSlug && canonNumericSlug(aaSlug) === canonNumericSlug(baseArena)) {
+      return true;
+    }
     // normalizeFamily equality only — never startsWith (avoids gpt-5 → gpt-5-6-sol)
     const famNorm = normalizeFamily(row.family_id || row.model || "");
     if (arenaId.familyNorm && famNorm && famNorm === arenaId.familyNorm) return true;
@@ -461,6 +504,16 @@ export function candidatesForArena(aaRows, arenaId) {
 /**
  * Effort-safe Arena Elo attach (algorithm A–C from ralplan).
  * Returns { rows, attaches, logs }
+ *
+ * W6 residual ceilings (ticket #192; these logs feed arena_match_failures in
+ * data/effort-gaps.generated.json): no name bridge can lift them —
+ *   - Attach rate: most arena_no_family names are families AA simply does not
+ *     publish (older snapshots, differently-sized variants) or deliberately
+ *     ambiguous multi-effort families (arena_ambiguous_family protects
+ *     effort-safety); wrong-version bridging is worse than a logged miss.
+ *   - Field coverage is AA-publish-limited: coding 52%, agentic 44%,
+ *     cost/task 42% — the AA free API does not publish those columns for the
+ *     remaining rows, so the ceiling moves only when AA publishes more.
  */
 export function applyArenaElo(aaRows, arenaEntries) {
   const logs = [];
@@ -511,8 +564,27 @@ export function applyArenaElo(aaRows, arenaEntries) {
           logs.push({ code: "arena_ambiguous_family", key: entry?.modelKey });
           continue;
         } else {
-          logs.push({ code: "arena_ambiguous_family", key: entry?.modelKey });
-          continue;
+          // W6 exact-slug tie-break: when a family label collides across AA rows
+          // (e.g. "Step 3.5 Flash" 0202 + 2603), an arena key whose slug —
+          // exact or canonically numeric — equals exactly one candidate's AA
+          // slug is a provable identity; the label-only hit is not.
+          const baseArena = arenaId.slug.replace(/-(xhigh|max|high|medium|low|minimal)$/i, "");
+          const slugHits = pool.filter((r) => {
+            const aaSlug = aaSlugFromSourceUrl(r.source_url || "");
+            return (
+              (aaSlug && aaSlug === arenaId.slug) ||
+              (baseArena && aaSlug && aaSlug === baseArena) ||
+              (aaSlug &&
+                arenaId.slug &&
+                canonNumericSlug(aaSlug) === canonNumericSlug(arenaId.slug)) ||
+              (aaSlug && baseArena && canonNumericSlug(aaSlug) === canonNumericSlug(baseArena))
+            );
+          });
+          if (slugHits.length === 1) target = slugHits[0];
+          else {
+            logs.push({ code: "arena_ambiguous_family", key: entry?.modelKey });
+            continue;
+          }
         }
       }
     }
