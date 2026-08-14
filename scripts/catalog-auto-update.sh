@@ -25,7 +25,27 @@ DATA_FILE="$REPO_ROOT/data/models.v0.draft.json"
 STATE_DIR="$REPO_ROOT/.cache/catalog-sync"
 HASH_FILE="$STATE_DIR/last-data.sha256"
 STATUS_FILE="$STATE_DIR/last-status.json"
+HISTORY_FILE="$STATE_DIR/status-history.jsonl"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
+
+# Plan WS1 (audit H5/M7): durable status history + failure alerting. Every exit
+# path writes STATUS_FILE before exiting; this trap appends it to the history
+# (consumed by scripts/catalog-silence-check.sh) and fires one aggregated
+# failure alert via the shared dedup store — lock overlap is NOT a failure.
+on_exit() {
+  rc=$?
+  if [[ -f "$STATUS_FILE" ]]; then
+    cat "$STATUS_FILE" >>"$HISTORY_FILE" 2>/dev/null || true
+  fi
+  if [[ $rc -ne 0 ]]; then
+    stage="$(node -e "try{const s=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));console.log(s.stage||'unknown')}catch{console.log('unknown')}" "$STATUS_FILE" 2>/dev/null || echo unknown)"
+    if [[ "$stage" != "lock" ]]; then
+      log "ALERT: firing pipeline-failure alert (stage=$stage rc=$rc)"
+      node "$REPO_ROOT/scripts/lib/catalog-alerts.mjs" --failure "$stage" >>"$LOG_DIR/catalog-auto-update.log" 2>&1 || true
+    fi
+  fi
+}
+trap on_exit EXIT
 
 ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 log() { echo "[$(ts)] $*" | tee -a "$LOG_DIR/catalog-auto-update.log"; }
@@ -136,6 +156,14 @@ if ! node "$REPO_ROOT/scripts/catalog-coverage-report.mjs" --out "$LOG_DIR/catal
   log "WARN: catalog coverage report failed (non-fatal)"
 else
   log "coverage → $LOG_DIR/catalog-coverage.txt"
+fi
+
+# Plan WS1: evaluate diff + canary alerts after every successful scrape.
+# Aggregated per-run payload, signature-deduped; alerting never fails the run.
+if ! node "$REPO_ROOT/scripts/lib/catalog-alerts.mjs" --evaluate >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+  log "WARN: alert evaluate failed (non-fatal)"
+else
+  log "alerts evaluated (diff + canary)"
 fi
 
 if [[ "$changed" -eq 0 ]]; then

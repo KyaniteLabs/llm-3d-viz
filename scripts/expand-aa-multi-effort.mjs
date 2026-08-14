@@ -43,6 +43,15 @@ import {
   loadManualAdditions,
   selectManualAdmissions,
 } from "./lib/manual-additions.mjs";
+import { diffDrafts } from "./lib/draft-diff.mjs";
+import {
+  computeCurrentDivergences,
+  mergeDivergenceRecords,
+} from "./lib/price-divergence.mjs";
+import {
+  buildWatchlistReport,
+  loadWatchlistEntries,
+} from "./lib/model-watchlist.mjs";
 import { fetchAaLanguageModelsFree, mapAaApiModel, resolveAaApiKey } from "./lib/aa-api.mjs";
 import { fetchArenaEntriesFromHf } from "./lib/arena-hf.mjs";
 import { fetchOpenRouterModels } from "./lib/openrouter-api.mjs";
@@ -275,6 +284,25 @@ merged = priced.rows;
 // D01: Apply context_length overlay from OpenRouter.
 const ctx = applyOpenRouterContext(merged, or.models || []);
 merged = ctx.rows;
+
+// --- 3b. AA↔OpenRouter price-divergence canary (plan WS2 stage 1) ---
+// Records level divergences with aging + flap grace; alerts fire on DELTA
+// (scripts/lib/catalog-alerts.mjs --evaluate). Never mutates prices.
+const prevGapsDoc = fs.existsSync(gapsPath)
+  ? JSON.parse(fs.readFileSync(gapsPath, "utf8"))
+  : {};
+const currentDivergences = computeCurrentDivergences(merged, or.models || [], today);
+const divergenceRecords = mergeDivergenceRecords(
+  currentDivergences,
+  prevGapsDoc?.price_divergences?.records ?? null,
+  today,
+);
+const divergenceDeltaCount = divergenceRecords.filter((r) => r.changed && !r.stale).length;
+sourceStats.push({
+  source: "price-divergence canary (AA vs OpenRouter)",
+  records: divergenceRecords.length,
+  delta_changed: divergenceDeltaCount,
+});
 sourceStats.push({
   source: "OpenRouter /api/v1/models",
   ok: or.ok,
@@ -331,10 +359,14 @@ if (!admitted.length) {
   process.exit(1);
 }
 let prevRowCount = 0;
+let prevDraftRows = null;
 if (fs.existsSync(dataPath)) {
   try {
     const prev = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-    prevRowCount = Array.isArray(prev) ? prev.length : 0;
+    if (Array.isArray(prev)) {
+      prevRowCount = prev.length;
+      prevDraftRows = prev; // kept whole for the WS1 row diff below
+    }
   } catch { /* ignore parse error on stale file */ }
 }
 if (prevRowCount > 0) {
@@ -390,6 +422,24 @@ for (const row of merged) {
 }
 const gaps = buildEffortGaps(admitted, laddersDoc, partialByFamily);
 
+// --- 5b. Watchlist report (plan WS4): announced-but-unmeasured models ---
+const watchlistEntries = loadWatchlistEntries(
+  path.join(root, "data/model-watchlist.json"),
+  fs,
+);
+const watchlist = buildWatchlistReport(watchlistEntries, aaMapped, manual.active, today);
+
+// --- 5c. Draft diff (plan WS1): previous → admitted, rename-aware ---
+const draftDiff = diffDrafts(prevDraftRows, admitted);
+const diffPath = path.join(root, "data/catalog-diff.generated.json");
+const diffDoc = {
+  data_date: today,
+  available: draftDiff.available,
+  prev_row_count: prevRowCount,
+  next_row_count: admitted.length,
+  ...draftDiff,
+};
+
 const gapsDoc = {
   data_date: today,
   ingestion: "official-api-only",
@@ -413,6 +463,14 @@ const gapsDoc = {
     error: arena.error,
     license: "CC BY 4.0",
   },
+  price_divergences: {
+    count: divergenceRecords.length,
+    delta_count: divergenceDeltaCount,
+    record_ratio_threshold: 1.25,
+    note: "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
+    records: divergenceRecords,
+  },
+  watchlist,
   gaps,
   fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
 };
@@ -420,6 +478,7 @@ const gapsDoc = {
 // --- 6. D02+D07: Atomic transaction — write all outputs to temp, then rename ---
 const draftJson = `${JSON.stringify(admitted, null, 2)}\n`;
 const gapsJson = `${JSON.stringify(gapsDoc, null, 2)}\n`;
+const diffJson = `${JSON.stringify(diffDoc, null, 2)}\n`;
 const sourceHash = crypto.createHash("sha256").update(draftJson).digest("hex");
 const snapshotJson = draftJson; // snapshot is a copy of the draft
 const meta = {
@@ -439,6 +498,7 @@ const tempFiles = [
   [gapsPath, gapsJson],
   [snapshotPath, snapshotJson],
   [metaPath, metaJson],
+  [diffPath, diffJson],
 ];
 try {
   // Write all temp files first
@@ -476,6 +536,10 @@ console.log(
       manual_additions: manualAdmitted.length,
       manual_superseded: manual.superseded.length,
       partials_in_memory: merged.length - measured.length,
+      diff: draftDiff.available ? draftDiff.counts : "unavailable-first-run",
+      price_divergences: divergenceRecords.length,
+      price_divergence_deltas: divergenceDeltaCount,
+      watchlist_awaiting: watchlist.filter((w) => w.status === "awaiting_aa_measurement").length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
       source_stats: sourceStats,

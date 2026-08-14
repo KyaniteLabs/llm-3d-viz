@@ -1,0 +1,24 @@
+{
+  "$schema_note": "Announced-but-unmeasured models the operator expects to appear (plan WS4 / audit H2). Reporting only — never admits rows, never carries metrics. Status + aging surface in effort-gaps.generated.json (watchlist section); the moment AA measures a family the entry flips to measured_by_aa and any manual-additions row auto-supersedes. NEVER attribute sibling-model benchmark numbers to a watchlist entry.",
+  "updated": "2026-08-14",
+  "entries": [
+    {
+      "family": "Qwen3.8 27B",
+      "provider": "Alibaba",
+      "announced_date": "2026-08-03",
+      "note": "Open-weights 27B; weights promised week of 2026-08-10, delayed — no HF model card, no license, no 27B-specific benchmarks published as of 2026-08-14 (community quant repos exist, provenance unclear). Benchmarks circulating (GPQA 92.6, Terminal-Bench 2.1 86.6, SWE-bench Pro 67.7) belong to Qwen3.8-Max and must NOT be attributed to the 27B."
+    },
+    {
+      "family": "Seed 2.1 Turbo",
+      "provider": "ByteDance Seed",
+      "announced_date": "2026-08-10",
+      "note": "Text model released 2026-08-10; absent from AA snapshot (only Seed-OSS-36B + Doubao Seed Code exist). ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD)."
+    },
+    {
+      "family": "GLM-5.3",
+      "provider": "Z AI",
+      "announced_date": "2026-08-14",
+      "note": "Announced 2026-08-14 (z.ai/blog/glm-5.3); tracked via data/manual-additions.json row (tps=115 AA-cited; IQ/cost null). Watchlist entry doubles as the manual→AA supersede regression case: when AA measures the family, the manual row auto-supersedes and the diff must classify it as a rename."
+    }
+  ]
+}

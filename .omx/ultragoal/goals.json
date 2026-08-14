@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0-adapted",
+  "created": "2026-08-14T18:01:00Z",
+  "runtime_note": "omx CLI + Codex goal tools unavailable in this ZCode session — leader-maintained ultragoal artifacts per the contract in brief.md; checkpoints carry verifiable evidence in place of get_goal snapshots (deviation recorded per checkpoint). No hidden goal mutation.",
+  "aggregate_objective": "pointer:.omx/plans/prd-data-quality-remediation-v1.md",
+  "goals": [
+    {
+      "id": "G001",
+      "title": "P0 — WS1 diff+alerts+silence + WS2 canary (staged before 2026-08-16)",
+      "status": "in_progress",
+      "stages": {
+        "stage1_canary_diff_alerts": "complete (2026-08-14) — commit pending",
+        "stage2_calibration_cycle": "in_progress — baseline artifact captured (105 divergence records, Forgejo #181); completes after ≥1 cron cycle (next run 14:07 local) with zero delta-churn",
+        "stage3_cache_refinement": "pending — separate commit only after stage 2 confirms stable baseline"
+      }
+    },
+    {
+      "id": "G002",
+      "title": "P1 — WS3 annex + hidden_by_scope + WS4 watchlist-complete/scope-vocab + WS6 schema half",
+      "status": "in_progress",
+      "lane": "subagent (WS3→WS6 single owner per plan), WS4 remainder after"
+    },
+    {
+      "id": "G003",
+      "title": "P2 — WS5 secondary axes + WS6 rest + WS7 + D-H4 decision surfaced",
+      "status": "pending"
+    },
+    {
+      "id": "G004",
+      "title": "Steer — include Qwen3.8 27B benchmarks honestly (user rider 2026-08-14)",
+      "status": "complete",
+      "note": "27B verified UNRELEASED (announced 2026-08-03, delayed past week-of-08-10; zero 27B-published benchmarks; circulating numbers belong to Qwen3.8-Max). Included via model-watchlist entry with no-sibling-attribution note + aging (11 days as of 2026-08-14). Honest inclusion ≠ invented row."
+    }
+  ]
+}
