@@ -16,6 +16,79 @@ import { isScorable } from "./aa-extract.mjs";
 export { isScorable };
 
 /**
+ * W2 provenance-completion gate (ticket #193): every non-null field in the
+ * stampable set must carry a sources stamp. Shared by the vitest
+ * meta-assertion (tests/provenance-gate.test.ts) and the optional fatal exit
+ * in scripts/expand-aa-multi-effort.mjs — never by the non-fatal
+ * coverage-report script. Failure messages name the likely ingestion point so
+ * legitimate future sources fix forward instead of fighting the gate.
+ */
+export const PROVENANCE_STAMPABLE_FIELDS = [
+  "aa_intelligence_index",
+  "tps",
+  "ttft",
+  "price_in_per_M",
+  "price_out_per_M",
+  "price_cache_per_M",
+  "blended_price_per_M",
+  "context_length",
+  "modality",
+  "arena_elo",
+  "coding_index",
+  "agentic_index",
+  "time_per_index_task_s",
+  "openness",
+];
+
+const LIKELY_INGESTION_POINT = {
+  aa_intelligence_index: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  tps: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  ttft: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  coding_index: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  agentic_index: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  time_per_index_task_s: "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured)",
+  price_in_per_M:
+    "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured) or applyOpenRouterPricing (openrouter/list)",
+  price_out_per_M:
+    "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured) or applyOpenRouterPricing (openrouter/list)",
+  price_cache_per_M:
+    "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/measured) or applyOpenRouterPricing (openrouter/list)",
+  blended_price_per_M:
+    "applyAaDerivedBlend (aa/derived) or applyOpenRouterPricing (openrouter/derived_list_blend)",
+  context_length:
+    "applyOpenRouterContext (openrouter/list) or the manual-additions row's own sources",
+  modality:
+    "scripts/lib/aa-api.mjs mapAaApiModel (aa-api/list) or applyOpenRouterModality (openrouter/list)",
+  arena_elo: "applyArenaElo (arena/measured)",
+  openness: "applyCuratedOpenness curated truth overlay (curated/list)",
+};
+
+/**
+ * @param {object[]} rows built catalog rows
+ * @returns {{ field: string, model: string, message: string }[]}
+ */
+export function provenanceGateViolations(rows) {
+  const violations = [];
+  for (const row of rows ?? []) {
+    if (!row || typeof row !== "object") continue;
+    for (const field of PROVENANCE_STAMPABLE_FIELDS) {
+      if (row[field] == null) continue;
+      const meta = row.sources?.[field];
+      if (!meta?.origin) {
+        violations.push({
+          field,
+          model: row.model,
+          message:
+            `provenance gate: ${field} is non-null but unstamped on "${row.model}" — ` +
+            `likely ingestion point: ${LIKELY_INGESTION_POINT[field] ?? "stamp the field where it is written"}`,
+        });
+      }
+    }
+  }
+  return violations;
+}
+
+/**
  * W1 truth-source openness overlay (ticket #188, plan data-stewardship-v2):
  * replaces the retired name-keyword guess with the curated lab-class map in
  * src/data/catalog-scope.ts. Precedence per row:

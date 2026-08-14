@@ -137,6 +137,11 @@ export function mapAaApiModel(m, today, sourceLabel = "AA Data API free") {
       ttft: ttftMs != null ? { origin: "aa-api", kind: "measured" } : undefined,
       price_in_per_M: priceIn != null ? { origin: "aa-api", kind: "measured" } : undefined,
       price_out_per_M: priceOut != null ? { origin: "aa-api", kind: "measured" } : undefined,
+      // W2 (ticket #193): the free tier's baseline modality is an AA-published
+      // list fact, and the cache price is AA-measured — stamp both at ingestion.
+      modality: { origin: "aa-api", kind: "list" },
+      price_cache_per_M:
+        priceCache != null ? { origin: "aa-api", kind: "measured" } : undefined,
       cost_per_index_task_usd:
         cost_per_index_task_usd != null ? { origin: "aa-api", kind: "measured" } : undefined,
     },

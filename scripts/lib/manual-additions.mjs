@@ -22,6 +22,23 @@ import { normalizeFamily } from "../../src/lib/family-effort.shared.ts";
 const AA_ONLY_FIELDS = ["aa_intelligence_index", "ttft"];
 
 /**
+ * W2 (ticket #193): fill-if-unstamped provenance at the manual ingestion
+ * point. Legacy manual rows carried modality without a stamp; a manual row's
+ * baseline modality is a provider-announced list fact, so it stamps
+ * provider/list. Existing stamps always win (never rewrites a row's own
+ * provenance — e.g. an OpenRouter-listed row keeps openrouter/list).
+ */
+function stampLegacyManualProvenance(row) {
+  if (row.modality != null && !row.sources?.modality) {
+    return {
+      ...row,
+      sources: { ...(row.sources || {}), modality: { origin: "provider", kind: "list" } },
+    };
+  }
+  return row;
+}
+
+/**
  * Validate + filter manual candidate rows.
  * Returns { rows, rejected } — rejected carries { model, reason } for the log.
  */
@@ -47,7 +64,7 @@ export function vetManualRows(candidates) {
       rejected.push({ model, reason: `aa_only_field_present:${invented.join(",")}` });
       continue;
     }
-    rows.push({ ...row });
+    rows.push(stampLegacyManualProvenance({ ...row }));
   }
   return { rows, rejected };
 }

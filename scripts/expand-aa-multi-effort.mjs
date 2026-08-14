@@ -38,6 +38,7 @@ import {
   applyArenaElo,
   stampAaMeasured,
   applyCuratedOpenness,
+  provenanceGateViolations,
   canAdmitPlotTriple,
 } from "./lib/catalog-join.mjs";
 import {
@@ -535,6 +536,28 @@ const gapsDoc = {
 };
 
 // --- 6. D02+D07: Atomic transaction — write all outputs to temp, then rename ---
+// W2 provenance completion (ticket #193): hard gate before write — every
+// non-null stampable field in the admitted rows must carry a sources stamp
+// (same rule the vitest meta-assertion enforces). The live draft carries
+// legacy unstamped fields until this run regenerates them; bypass once with
+// ALLOW_UNSTAMPED_FIELDS=1. Never part of the non-fatal coverage report.
+const provenanceViolations = provenanceGateViolations(admitted);
+if (provenanceViolations.length && process.env.ALLOW_UNSTAMPED_FIELDS !== "1") {
+  console.error(
+    JSON.stringify(
+      {
+        fatal: true,
+        error: `provenance gate: ${provenanceViolations.length} unstamped non-null fields in admitted rows`,
+        violations: provenanceViolations.slice(0, 25),
+        hint: "Stamp each field at its ingestion point (see messages), or set ALLOW_UNSTAMPED_FIELDS=1 to bypass once.",
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
+
 const draftJson = `${JSON.stringify(admitted, null, 2)}\n`;
 const gapsJson = `${JSON.stringify(gapsDoc, null, 2)}\n`;
 const diffJson = `${JSON.stringify(diffDoc, null, 2)}\n`;
