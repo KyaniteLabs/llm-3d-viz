@@ -72,14 +72,14 @@
     },
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
-      "records": 107,
-      "delta_changed": 0
+      "records": 112,
+      "delta_changed": 3
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
       "models": 411,
-      "price_overlays": 36,
+      "price_overlays": 35,
       "modality_overlays": 89,
       "context_overlays": 148,
       "authenticated": false
@@ -88,7 +88,7 @@
   "openrouter": {
     "ok": true,
     "models": 411,
-    "price_overlays": 36,
+    "price_overlays": 35,
     "modality_overlays": 89,
     "context_overlays": 148
   },
@@ -154,7 +154,7 @@
   },
   "or_overlay_telemetry": {
     "note": "Report-only (WS6, M3): overlay attach counts + OpenRouter match-rate histogram over merged rows (production matcher, no behavior change). The unmatched-provider histogram tells us whether context/modality null-coverage is fixable by org-map growth.",
-    "price_overlays": 36,
+    "price_overlays": 35,
     "modality_overlays": 89,
     "context_overlays": 148,
     "rows_total": 609,
@@ -380,8 +380,8 @@
     ]
   },
   "price_divergences": {
-    "count": 107,
-    "delta_count": 0,
+    "count": 112,
+    "delta_count": 3,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
@@ -590,6 +590,18 @@
         "absent_runs": 0
       },
       {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_out_per_M",
+        "aa_per_M": 1.32,
+        "or_per_M": 0.28,
+        "ratio": 4.71,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
         "model": "Ling-2.6-1T",
         "provider": "InclusionAI",
         "field": "price_in_per_M",
@@ -698,12 +710,36 @@
         "absent_runs": 0
       },
       {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.44,
+        "or_per_M": 0.14,
+        "ratio": 3.14,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
         "model": "Qwen3 Coder Next",
         "provider": "Alibaba",
         "field": "price_in_per_M",
         "aa_per_M": 0.35,
         "or_per_M": 0.12,
         "ratio": 2.92,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.01,
+        "or_per_M": 0.03,
+        "ratio": 2.8,
         "first_seen": "2026-08-14",
         "age_days": 0,
         "changed": false,
@@ -1226,6 +1262,42 @@
         "absent_runs": 0
       },
       {
+        "model": "GLM-5 (Reasoning)",
+        "provider": "Z AI",
+        "field": "price_in_per_M",
+        "aa_per_M": 1,
+        "or_per_M": 0.6,
+        "ratio": 1.67,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GLM-5 (Reasoning)",
+        "provider": "Z AI",
+        "field": "price_out_per_M",
+        "aa_per_M": 3.2,
+        "or_per_M": 1.92,
+        "ratio": 1.67,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GLM-5 (Reasoning)",
+        "provider": "Z AI",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.2,
+        "or_per_M": 0.12,
+        "ratio": 1.67,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
         "model": "Inkling Small",
         "provider": "Thinking Machines",
         "field": "price_cache_per_M",
@@ -1616,18 +1688,6 @@
         "aa_per_M": 2.2,
         "or_per_M": 1.75,
         "ratio": 1.26,
-        "first_seen": "2026-08-14",
-        "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GLM-5 (Reasoning)",
-        "provider": "Z AI",
-        "field": "price_out_per_M",
-        "aa_per_M": 3.2,
-        "or_per_M": 2.55,
-        "ratio": 1.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
         "changed": false,
@@ -2741,7 +2801,7 @@
       ]
     },
     "c_generation_capped": {
-      "count": 46,
+      "count": 19,
       "notable_names": [
         "Claude Opus 4.6 (Adaptive Reasoning, Max Effort) (Anthropic)",
         "Claude Opus 4.6 (Non-reasoning, High Effort) (Anthropic)",
@@ -2752,12 +2812,6 @@
         "Gemini 3.5 Flash (medium) (Google)",
         "Gemini 3.5 Flash (minimal) (Google)",
         "Gemini 3.5 Flash-Lite (Google)",
-        "GLM-4.7-Flash (Non-reasoning) (Z AI)",
-        "GLM-4.7-Flash (Reasoning) (Z AI)",
-        "GLM-5 (Non-reasoning) (Z AI)",
-        "GLM-5 (Reasoning) (Z AI)",
-        "GLM-5.1 (Non-reasoning) (Z AI)",
-        "GLM-5.1 (Reasoning) (Z AI)",
         "GPT-5.3 Codex (xhigh) (OpenAI)",
         "GPT-5.4 (low) (OpenAI)",
         "GPT-5.4 (Non-reasoning) (OpenAI)",
@@ -2767,28 +2821,7 @@
         "Grok 4.3 (high) (SpaceXAI)",
         "Grok 4.3 (low) (SpaceXAI)",
         "Grok 4.3 (medium) (SpaceXAI)",
-        "Grok 4.3 (Non-reasoning) (SpaceXAI)",
-        "Kimi K2.5 (Non-reasoning) (Kimi)",
-        "Kimi K2.5 (Reasoning) (Kimi)",
-        "Kimi K2.6 (Kimi)",
-        "Kimi K2.6 (Non-reasoning) (Kimi)",
-        "MiniMax-M2.5 (MiniMax)",
-        "Qwen3.5 122B A10B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 122B A10B (Reasoning) (Alibaba)",
-        "Qwen3.5 27B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 27B (Reasoning) (Alibaba)",
-        "Qwen3.5 35B A3B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 35B A3B (Reasoning) (Alibaba)",
-        "Qwen3.5 397B A17B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 397B A17B (Reasoning) (Alibaba)",
-        "Qwen3.5 4B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 4B (Reasoning) (Alibaba)",
-        "Qwen3.5 9B (Non-reasoning) (Alibaba)",
-        "Qwen3.5 9B (Reasoning) (Alibaba)",
-        "Qwen3.6 27B (Non-reasoning) (Alibaba)",
-        "Qwen3.6 27B (Reasoning) (Alibaba)",
-        "Qwen3.6 35B A3B (Non-reasoning) (Alibaba)",
-        "Qwen3.6 35B A3B (Reasoning) (Alibaba)"
+        "Grok 4.3 (Non-reasoning) (SpaceXAI)"
       ],
       "note": "Cloud rows released ≥ floor, hidden from the default scope ONLY by the D-H4 generation cap (newest + previous per product line). Visible via ?catalog=all."
     }

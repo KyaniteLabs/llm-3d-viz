@@ -63,9 +63,11 @@ export interface Model {
   time_per_index_task_s?: number | null;
   arena_elo: number | null;
   /**
-   * @deprecated SPEC §5 amendment (2026-08-14, plan WS5): gpqa/swe_bench/aider_pct
-   * are dead axes — no current source publishes them. Retained as nullable
-   * fields pending sources; do not wire UI to them.
+   * Provider-published curated benchmarks (2026-08-14 amendment): the AA free
+   * API does not supply these, but provider announcements do — manual-additions
+   * rows may carry them as PRELIMINARY vendor-reported values (origin
+   * "provider", kind "list"), auto-superseded when AA measures the family.
+   * Not yet axis-switchable UI; provenance always shown.
    */
   gpqa: number | null;
   swe_bench: number | null;

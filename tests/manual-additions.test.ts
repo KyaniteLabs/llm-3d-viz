@@ -131,6 +131,17 @@ describe("manual additions — curated file regression", () => {
     expect(() => validateModels(vetted.rows as unknown as Model[])).not.toThrow();
   });
 
+  it("carries preliminary provider-reported benchmarks pending AA confirmation", () => {
+    const glm = vetManualRows(rows).rows.find((r) => r.family_id === "GLM-5.3");
+    expect(glm).toBeDefined();
+    expect(glm.gpqa).toBe(84.8);
+    expect(glm.swe_bench).toBe(80.6);
+    expect(glm.aider_pct).toBe(89.6);
+    expect(glm.aa_intelligence_index).toBeNull(); // never preliminary
+    expect(glm.sources?.gpqa).toEqual({ origin: "provider", kind: "list" });
+    expect(glm.source).toContain("PRELIMINARY");
+  });
+
   it("loadManualAdditions reads the file and applies AA supersede", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "manual-add-"));
     const file = path.join(dir, "manual-additions.json");

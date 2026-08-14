@@ -26,10 +26,16 @@
       "swe_bench": null,
       "aider_pct": null,
       "data_date": "2026-08-14",
-      "source": "Z.ai announcement 2026-08-14 (manual addition). Thinking-only; efforts low/high/max, max recommended+default. No PAYG $/M pricing yet — Coding Plan points only (in ×6.9 / cached ×1.7 / out ×24 per 10K tok). Open weights ~2 weeks post-announcement (openness flips when downloadable). tps=115 as cited from Artificial Analysis in the announcement's ExploitGym footnote (effort tier of that figure unstated).",
+      "source": "Z.ai announcement 2026-08-14 (manual addition, PRELIMINARY vendor-reported benchmarks — AA confirmation pending; row auto-supersedes when AA measures the family). Thinking-only; efforts low/high/max, max recommended+default. No PAYG $/M pricing yet — Coding Plan points only (in ×6.9 / cached ×1.7 / out ×24 per 10K tok). Open weights ~2 weeks post-announcement (openness flips when downloadable). tps=115 as cited from Artificial Analysis in the announcement's ExploitGym footnote (effort tier of that figure unstated).",
       "null_reason": "not_measured",
+      "gpqa": 84.8,
+      "swe_bench": 80.6,
+      "aider_pct": 89.6,
       "sources": {
-        "tps": { "origin": "provider", "kind": "measured" }
+        "tps": { "origin": "provider", "kind": "measured" },
+        "gpqa": { "origin": "provider", "kind": "list" },
+        "swe_bench": { "origin": "provider", "kind": "list" },
+        "aider_pct": { "origin": "provider", "kind": "list" }
       }
     }
   ]
