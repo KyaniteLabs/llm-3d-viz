@@ -46,6 +46,7 @@ import {
   selectManualAdmissions,
 } from "./lib/manual-additions.mjs";
 import { diffDrafts } from "./lib/draft-diff.mjs";
+import { buildStaleCostTask } from "./lib/stale-cost-task.mjs";
 import {
   computeCurrentDivergences,
   mergeDivergenceRecords,
@@ -489,6 +490,15 @@ const diffDoc = {
   ...draftDiff,
 };
 
+// --- 5d. Cost-per-task staleness flag (W4 / ticket #190): report-only ---
+// cost_per_index_task_usd is measured at AA measurement time; prices can move
+// afterwards and measurement-time prices are not stored. Approximation: flag a
+// row when a CURRENT price side (in/out/blended) differs by >25% from the
+// same family+effort spine (spineKey identity) in the PREVIOUS pre-write
+// draft (prevDraftRows, loaded above for the WS1 diff). First run flags
+// nothing. Data flag only — UI surfacing is deferred to the UI/UX line.
+const staleCostTask = buildStaleCostTask(admitted, { prevRows: prevDraftRows });
+
 const gapsDoc = {
   data_date: today,
   ingestion: "official-api-only",
@@ -526,6 +536,10 @@ const gapsDoc = {
     record_ratio_threshold: 1.25,
     note: "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     records: divergenceRecords,
+  },
+  stale_cost_task: {
+    ...staleCostTask,
+    note: "Rows with non-null cost_per_index_task_usd whose current price side (in/out/blended) moved >25% vs the previous draft's same family+effort spine (spineKey identity: model slug + effort tier). Approximation — measurement-time prices are not stored; first run (no previous draft) flags nothing. Data flag only; UI surfacing deferred to the UI/UX line.",
   },
   watchlist,
   awaiting_measurement: awaitingMeasurement,
@@ -632,6 +646,7 @@ console.log(
       diff: draftDiff.available ? draftDiff.counts : "unavailable-first-run",
       price_divergences: divergenceRecords.length,
       price_divergence_deltas: divergenceDeltaCount,
+      stale_cost_task: staleCostTask.count,
       watchlist_awaiting: watchlist.filter((w) => w.status === "awaiting_aa_measurement").length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
