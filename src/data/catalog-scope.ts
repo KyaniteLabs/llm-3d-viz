@@ -32,9 +32,12 @@ const CLOUD_SET = new Set<string>(CLOUD_LABS);
 export const RELEASE_FLOOR_ISO = "2026-01-01";
 
 /**
- * D-H4 (Simon, 2026-08-14): per product line, keep only the newest
- * GENERATION_DEPTH distinct generations — "if GPT 5.6 exists we have no reason
- * to keep anything older than GPT 5.5". A product line is the vendor name
+ * D-H4 (Simon, 2026-08-14, amended same day): per product line, keep only the
+ * newest GENERATION_DEPTH distinct generations — "if GPT 5.6 exists we have no
+ * reason to keep anything older than GPT 5.5." **Closed-API lifecycle only:**
+ * open-weight labs are exempt because local models last longer — superseded
+ * weights stay downloadable and runnable, so generation retirement is a
+ * cloud-endpoint behavior, not a local one. A product line is the vendor name
  * plus the leading words before the generation number, plus an edition word
  * (flash/pro/mini/coder/…) when it directly follows the version — so
  * "Gemini 3.7 Flash" and "Gemini 3.1 Pro" are independent lines, and
@@ -42,6 +45,25 @@ export const RELEASE_FLOOR_ISO = "2026-01-01";
  * `?catalog=all` remains the uncut archive view.
  */
 export const GENERATION_DEPTH = 2;
+
+/**
+ * CLOUD_LABS members that ship open weights (downloadable, runnable after
+ * supersession). Their rows bypass the generation cap. The row-level
+ * `openness` field is NOT used for this: the AA free tier has no real
+ * open-weights flag and the name-keyword heuristic mislabels whole labs
+ * (audit L4) — a lab-level lifecycle class is the honest discriminator.
+ */
+export const OPEN_WEIGHT_LABS = [
+  "DeepSeek",
+  "Alibaba", // Qwen
+  "Z AI", // GLM
+  "Kimi", // Moonshot
+  "Meta", // Muse
+  "MiniMax",
+  "NVIDIA", // Nemotron
+] as const;
+
+const OPEN_WEIGHT_SET = new Set<string>(OPEN_WEIGHT_LABS);
 
 const EDITION_WORDS = [
   "mini", "nano", "lite", "flash", "pro", "max", "coder", "omni", "plus",
@@ -77,16 +99,19 @@ export function parseFamilyLineGen(familyId: string): FamilyLineGen {
 
 /**
  * Rows whose generation is within the newest GENERATION_DEPTH distinct
- * generations of their product line. Versionless families and lines with
- * ≤DEPTH generations pass unchanged.
+ * generations of their product line. Versionless families and open-weight-lab
+ * rows (local lifecycle — see OPEN_WEIGHT_LABS) pass uncapped.
  */
-export function meetsGenerationDepth<T extends { provider: string; family_id?: string; model: string }>(
-  rows: readonly T[],
-  depth: number = GENERATION_DEPTH,
-): Set<T> {
+export function meetsGenerationDepth<
+  T extends { provider: string; family_id?: string; model: string },
+>(rows: readonly T[], depth: number = GENERATION_DEPTH): Set<T> {
   const byLine = new Map<string, Map<number, T[]>>();
   const versionless: T[] = [];
   for (const r of rows) {
+    if (OPEN_WEIGHT_SET.has(r.provider)) {
+      versionless.push(r); // open-weight lifecycle: no generation retirement
+      continue;
+    }
     const { line, generation } = parseFamilyLineGen(r.family_id || r.model);
     if (generation == null) {
       versionless.push(r);

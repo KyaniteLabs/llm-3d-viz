@@ -57,9 +57,9 @@ describe("meetsGenerationDepth (D-H4: newest + previous per product line)", () =
     expect(keep.has(rows[2])).toBe(true); // no newer mini exists
   });
 
-  it("Kimi case: K3 + K2.7 kept, K2.6/K2.5 dropped", () => {
-    const rows = ["Kimi K3", "Kimi K2.7 Code", "Kimi K2.6", "Kimi K2.5"].map((f) => ({
-      provider: "Kimi",
+  it("closed-API lifecycle caps: K-line analog keeps newest+previous (OpenAI-shaped)", () => {
+    const rows = ["Fam K3", "Fam K2.7 Code", "Fam K2.6", "Fam K2.5"].map((f) => ({
+      provider: "OpenAI", // closed-API lab → generation cap applies
       family_id: f,
       model: f,
       release_date: "2026-01-01",
@@ -69,6 +69,17 @@ describe("meetsGenerationDepth (D-H4: newest + previous per product line)", () =
     expect(keep.has(rows[1])).toBe(true);
     expect(keep.has(rows[2])).toBe(false);
     expect(keep.has(rows[3])).toBe(false);
+  });
+
+  it("open-weight labs bypass the generation cap (local lifecycle lasts longer)", () => {
+    const rows = ["Kimi K3", "Kimi K2.7 Code", "Kimi K2.6", "Kimi K2.5", "Qwen3.5 27B"].map((f) => ({
+      provider: "Kimi",
+      family_id: f,
+      model: f,
+      release_date: "2026-01-01",
+    }));
+    const keep = meetsGenerationDepth(rows);
+    expect(keep.size).toBe(rows.length); // all pass uncapped
   });
 
   it("versionless rows always pass; depth respects custom values", () => {
