@@ -234,6 +234,12 @@ export function applyOpenRouterModality(aaRows, orModels) {
  * OpenRouter pricing overlay — never writes IQ/TPS (intelligence/speed stay AA spine).
  * May fill missing price sides; labels list / derived_list_blend.
  * Matching is multi-host (x-ai, meta, qwen, …) so joined rows can admit with OR cost.
+ *
+ * WS2 stage-3 (plan; Architect carve-out): an AA cache price of 0/absent is a
+ * sentinel, not a price — when OpenRouter publishes a positive cache-read
+ * price, complete the cache slot from OR (openrouter/list) and re-derive OUR
+ * fallback blend with the real cache price (openrouter/derived_list_blend).
+ * Never recomputes an AA-measured blend; never touches a positive AA cache.
  */
 export function applyOpenRouterPricing(aaRows, orModels) {
   if (!orModels?.length) return { rows: aaRows, overlays: 0 };
@@ -243,48 +249,78 @@ export function applyOpenRouterPricing(aaRows, orModels) {
     const needIn = row.price_in_per_M == null;
     const needOut = row.price_out_per_M == null;
     const needBlend = row.blended_price_per_M == null;
-    if (!needIn && !needOut && !needBlend) return row;
+    const cacheSentinel = row.price_cache_per_M == null || row.price_cache_per_M === 0;
+    if (!needIn && !needOut && !needBlend && !cacheSentinel) return row;
 
     const match = matchOpenRouterModel(row, index);
     const hit = match?.model;
     if (!hit?.pricing) return row;
-    // D12: Reject null/empty/non-numeric prices — Number("")===0 would make models falsely free.
-    if (hit.pricing.prompt == null || hit.pricing.prompt === "") return row;
-    if (hit.pricing.completion == null || hit.pricing.completion === "") return row;
-    const pinTok = Number(hit.pricing.prompt);
-    const poutTok = Number(hit.pricing.completion);
-    if (!Number.isFinite(pinTok) || !Number.isFinite(poutTok) || pinTok < 0 || poutTok < 0) return row;
-
-    overlays += 1;
     let next = { ...row };
-    const price_in_per_M = needIn ? pinTok * 1e6 : row.price_in_per_M;
-    const price_out_per_M = needOut ? poutTok * 1e6 : row.price_out_per_M;
-    next.price_in_per_M = price_in_per_M;
-    next.price_out_per_M = price_out_per_M;
-    if (needIn) next = setSource(next, "price_in_per_M", { origin: "openrouter", kind: "list" });
-    if (needOut) next = setSource(next, "price_out_per_M", { origin: "openrouter", kind: "list" });
 
-    // D05: Read cache-read price from OpenRouter, convert to $/M, use in cache slot.
-    const cacheRaw = hit.pricing.input_cache_read;
-    let pcache = typeof next.price_cache_per_M === "number" && Number.isFinite(next.price_cache_per_M) && next.price_cache_per_M >= 0
-      ? next.price_cache_per_M
-      : price_in_per_M; // fallback: cache = input price when genuinely absent
-    if (cacheRaw != null && cacheRaw !== "") {
-      const cacheTok = Number(cacheRaw);
-      if (Number.isFinite(cacheTok) && cacheTok >= 0) {
-        pcache = cacheTok * 1e6;
-        next.price_cache_per_M = pcache;
-        next = setSource(next, "price_cache_per_M", { origin: "openrouter", kind: "list" });
+    // D12: Reject null/empty/non-numeric prices — Number("")===0 would make models falsely free.
+    if ((needIn || needOut) && (hit.pricing.prompt == null || hit.pricing.prompt === "" ||
+        hit.pricing.completion == null || hit.pricing.completion === "")) {
+      // Missing OR in/out: still allow the cache-slot completion below.
+    }
+    if (needIn && hit.pricing.prompt != null && hit.pricing.prompt !== "") {
+      const pinTok = Number(hit.pricing.prompt);
+      if (Number.isFinite(pinTok) && pinTok >= 0) {
+        next.price_in_per_M = pinTok * 1e6;
+        next = setSource(next, "price_in_per_M", { origin: "openrouter", kind: "list" });
+      }
+    }
+    if (needOut && hit.pricing.completion != null && hit.pricing.completion !== "") {
+      const poutTok = Number(hit.pricing.completion);
+      if (Number.isFinite(poutTok) && poutTok >= 0) {
+        next.price_out_per_M = poutTok * 1e6;
+        next = setSource(next, "price_out_per_M", { origin: "openrouter", kind: "list" });
       }
     }
 
-    if (needBlend && price_in_per_M != null && price_out_per_M != null) {
-      next.blended_price_per_M = (pcache * 7 + price_in_per_M * 2 + price_out_per_M * 1) / 10;
+    // D05 + stage-3: cache-slot completion from OR list price.
+    let cacheCompleted = false;
+    const cacheRaw = hit.pricing.input_cache_read;
+    if (cacheSentinel && cacheRaw != null && cacheRaw !== "") {
+      const cacheTok = Number(cacheRaw);
+      if (Number.isFinite(cacheTok) && cacheTok > 0) {
+        next.price_cache_per_M = cacheTok * 1e6;
+        next = setSource(next, "price_cache_per_M", { origin: "openrouter", kind: "list" });
+        cacheCompleted = true;
+      }
+    }
+
+    const pin = next.price_in_per_M;
+    const pout = next.price_out_per_M;
+    const ourFallbackBlend =
+      next.sources?.blended_price_per_M?.origin === "aa" &&
+      next.sources?.blended_price_per_M?.kind === "derived";
+    if (cacheCompleted && (needBlend || ourFallbackBlend) && pin != null && pout != null &&
+        Number.isFinite(pin) && Number.isFinite(pout)) {
+      next.blended_price_per_M = (next.price_cache_per_M * 7 + pin * 2 + pout) / 10;
+      next = setSource(next, "blended_price_per_M", {
+        origin: "openrouter",
+        kind: "derived_list_blend",
+      });
+    } else if (needBlend && pin != null && pout != null &&
+        Number.isFinite(pin) && Number.isFinite(pout)) {
+      const pcache =
+        typeof next.price_cache_per_M === "number" && Number.isFinite(next.price_cache_per_M) && next.price_cache_per_M > 0
+          ? next.price_cache_per_M
+          : pin; // conservative fallback: cache = input price when unknown
+      next.blended_price_per_M = (pcache * 7 + pin * 2 + pout) / 10;
       next = setSource(next, "blended_price_per_M", {
         origin: "openrouter",
         kind: "derived_list_blend",
       });
     }
+
+    const changed =
+      next.price_in_per_M !== row.price_in_per_M ||
+      next.price_out_per_M !== row.price_out_per_M ||
+      next.blended_price_per_M !== row.blended_price_per_M ||
+      next.price_cache_per_M !== row.price_cache_per_M;
+    if (!changed) return row;
+    overlays += 1;
     next.source = `${row.source || "aa"}; OpenRouter pricing overlay (${match.matchedId})`;
     return next;
   });

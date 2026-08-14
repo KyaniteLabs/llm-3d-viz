@@ -72,8 +72,8 @@
     },
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
-      "records": 105,
-      "delta_changed": 105
+      "records": 107,
+      "delta_changed": 2
     },
     {
       "source": "OpenRouter /api/v1/models",
@@ -99,8 +99,8 @@
     "license": "CC BY 4.0"
   },
   "price_divergences": {
-    "count": 105,
-    "delta_count": 105,
+    "count": 107,
+    "delta_count": 2,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
@@ -113,7 +113,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -125,7 +125,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -137,7 +137,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -149,7 +149,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -161,7 +161,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -173,7 +173,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -185,7 +185,7 @@
         "ratio": 10,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -197,7 +197,7 @@
         "ratio": 8.04,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -209,7 +209,7 @@
         "ratio": 7.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -221,7 +221,7 @@
         "ratio": 7,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -233,7 +233,7 @@
         "ratio": 6.73,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -245,7 +245,7 @@
         "ratio": 6.73,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -257,7 +257,7 @@
         "ratio": 6.43,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -269,7 +269,7 @@
         "ratio": 5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -281,7 +281,7 @@
         "ratio": 5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -293,7 +293,7 @@
         "ratio": 5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -305,7 +305,7 @@
         "ratio": 5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -317,7 +317,7 @@
         "ratio": 4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -329,7 +329,7 @@
         "ratio": 4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -341,7 +341,7 @@
         "ratio": 4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -353,7 +353,7 @@
         "ratio": 4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -365,7 +365,7 @@
         "ratio": 4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -377,7 +377,7 @@
         "ratio": 3.57,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -389,7 +389,7 @@
         "ratio": 3.53,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -401,7 +401,7 @@
         "ratio": 3.49,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -413,7 +413,7 @@
         "ratio": 3.33,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -425,7 +425,7 @@
         "ratio": 2.92,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -437,7 +437,7 @@
         "ratio": 2.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -449,7 +449,7 @@
         "ratio": 2.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -461,7 +461,7 @@
         "ratio": 2.53,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -473,7 +473,7 @@
         "ratio": 2.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -485,7 +485,7 @@
         "ratio": 2.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -497,7 +497,7 @@
         "ratio": 2.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -509,7 +509,7 @@
         "ratio": 2.46,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -521,7 +521,7 @@
         "ratio": 2.46,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -533,7 +533,7 @@
         "ratio": 2.38,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -545,7 +545,7 @@
         "ratio": 2.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -557,7 +557,7 @@
         "ratio": 2.2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -569,7 +569,7 @@
         "ratio": 2.08,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -581,7 +581,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -593,7 +593,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -605,7 +605,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -617,7 +617,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -629,7 +629,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -641,7 +641,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -653,7 +653,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -665,7 +665,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -677,7 +677,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -689,7 +689,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -701,7 +701,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -713,7 +713,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -725,7 +725,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -737,7 +737,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -749,7 +749,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -761,7 +761,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -773,7 +773,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -785,7 +785,7 @@
         "ratio": 2,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -797,7 +797,7 @@
         "ratio": 1.93,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -809,7 +809,7 @@
         "ratio": 1.87,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -821,7 +821,7 @@
         "ratio": 1.86,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -833,7 +833,7 @@
         "ratio": 1.82,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -845,7 +845,7 @@
         "ratio": 1.8,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -857,7 +857,7 @@
         "ratio": 1.7,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -869,7 +869,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -881,7 +881,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -893,7 +893,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -905,7 +905,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -917,7 +917,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -929,7 +929,7 @@
         "ratio": 1.69,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -941,7 +941,7 @@
         "ratio": 1.68,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -953,7 +953,7 @@
         "ratio": 1.67,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -965,7 +965,7 @@
         "ratio": 1.67,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -977,7 +977,7 @@
         "ratio": 1.67,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -989,7 +989,7 @@
         "ratio": 1.6,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1001,7 +1001,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1013,7 +1013,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1025,7 +1025,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1037,7 +1037,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1049,7 +1049,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1061,7 +1061,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1073,7 +1073,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1082,6 +1082,30 @@
         "field": "price_out_per_M",
         "aa_per_M": 2.4,
         "or_per_M": 1.56,
+        "ratio": 1.54,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.5 397B A17B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.6,
+        "or_per_M": 0.39,
+        "ratio": 1.54,
+        "first_seen": "2026-08-14",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.5 397B A17B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "price_out_per_M",
+        "aa_per_M": 3.6,
+        "or_per_M": 2.34,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
@@ -1097,7 +1121,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1109,7 +1133,7 @@
         "ratio": 1.54,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1121,7 +1145,7 @@
         "ratio": 1.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1133,7 +1157,7 @@
         "ratio": 1.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1145,7 +1169,7 @@
         "ratio": 1.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1157,7 +1181,7 @@
         "ratio": 1.5,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1169,7 +1193,7 @@
         "ratio": 1.46,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1181,7 +1205,7 @@
         "ratio": 1.4,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1193,7 +1217,7 @@
         "ratio": 1.38,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1205,7 +1229,7 @@
         "ratio": 1.38,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1217,7 +1241,7 @@
         "ratio": 1.36,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1229,7 +1253,7 @@
         "ratio": 1.35,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1241,7 +1265,7 @@
         "ratio": 1.34,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1253,7 +1277,7 @@
         "ratio": 1.33,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1265,7 +1289,7 @@
         "ratio": 1.33,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1277,7 +1301,7 @@
         "ratio": 1.33,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1289,7 +1313,7 @@
         "ratio": 1.31,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1301,7 +1325,7 @@
         "ratio": 1.27,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1313,7 +1337,7 @@
         "ratio": 1.26,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1325,7 +1349,7 @@
         "ratio": 1.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1337,7 +1361,7 @@
         "ratio": 1.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1349,7 +1373,7 @@
         "ratio": 1.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1361,7 +1385,7 @@
         "ratio": 1.25,
         "first_seen": "2026-08-14",
         "age_days": 0,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       }
     ]
@@ -1392,6 +1416,1050 @@
       "note": "Announced 2026-08-14 (z.ai/blog/glm-5.3); tracked via data/manual-additions.json row (tps=115 AA-cited; IQ/cost null). Watchlist entry doubles as the manual→AA supersede regression case: when AA measures the family, the manual row auto-supersedes and the diff must classify it as a rename."
     }
   ],
+  "awaiting_measurement": {
+    "note": "Report-only: merged rows with exactly two of three triple elements, not admitted. Never promoted to the draft. Entries capped per bucket.",
+    "entry_cap": 250,
+    "missing_tps": {
+      "count": 102,
+      "capped": false,
+      "entries": [
+        {
+          "family_id": "Apertus 70B Instruct",
+          "model": "Apertus 70B Instruct",
+          "provider": "Swiss AI Initiative",
+          "release_date": "2025-09-02",
+          "missing_axis": "tps",
+          "source_url_slug": "apertus-70b-instruct"
+        },
+        {
+          "family_id": "Apertus 8B Instruct",
+          "model": "Apertus 8B Instruct",
+          "provider": "Swiss AI Initiative",
+          "release_date": "2025-09-02",
+          "missing_axis": "tps",
+          "source_url_slug": "apertus-8b-instruct"
+        },
+        {
+          "family_id": "Apriel-v1.5-15B-Thinker",
+          "model": "Apriel-v1.5-15B-Thinker",
+          "provider": "ServiceNow",
+          "release_date": "2025-09-30",
+          "missing_axis": "tps",
+          "source_url_slug": "apriel-v1-5-15b-thinker"
+        },
+        {
+          "family_id": "Apriel-v1.6-15B-Thinker",
+          "model": "Apriel-v1.6-15B-Thinker",
+          "provider": "ServiceNow",
+          "release_date": "2025-11-25",
+          "missing_axis": "tps",
+          "source_url_slug": "apriel-v1-6-15b-thinker"
+        },
+        {
+          "family_id": "Claude 3 Haiku",
+          "model": "Claude 3 Haiku",
+          "provider": "Anthropic",
+          "release_date": "2024-03-04",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-3-haiku"
+        },
+        {
+          "family_id": "Claude 3 Opus",
+          "model": "Claude 3 Opus",
+          "provider": "Anthropic",
+          "release_date": "2024-03-04",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-3-opus"
+        },
+        {
+          "family_id": "Claude 3.5 Sonnet (June '24)",
+          "model": "Claude 3.5 Sonnet (June '24)",
+          "provider": "Anthropic",
+          "release_date": "2024-06-21",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-35-sonnet-june-24"
+        },
+        {
+          "family_id": "Claude 3.5 Sonnet (Oct '24)",
+          "model": "Claude 3.5 Sonnet (Oct '24)",
+          "provider": "Anthropic",
+          "release_date": "2024-10-22",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-35-sonnet"
+        },
+        {
+          "family_id": "Claude 3.7 Sonnet",
+          "model": "Claude 3.7 Sonnet (Non-reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-02-24",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-3-7-sonnet"
+        },
+        {
+          "family_id": "Claude 4 Opus",
+          "model": "Claude 4 Opus (Non-reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-05-22",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-opus"
+        },
+        {
+          "family_id": "Claude 4 Opus",
+          "model": "Claude 4 Opus (Reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-05-22",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-opus-thinking"
+        },
+        {
+          "family_id": "Claude 4 Sonnet",
+          "model": "Claude 4 Sonnet (Non-reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-05-22",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-sonnet"
+        },
+        {
+          "family_id": "Claude 4 Sonnet",
+          "model": "Claude 4 Sonnet (Reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-05-22",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-sonnet-thinking"
+        },
+        {
+          "family_id": "Claude 4.1 Opus",
+          "model": "Claude 4.1 Opus (Non-reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-08-05",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-1-opus"
+        },
+        {
+          "family_id": "Claude 4.1 Opus",
+          "model": "Claude 4.1 Opus (Reasoning)",
+          "provider": "Anthropic",
+          "release_date": "2025-08-05",
+          "missing_axis": "tps",
+          "source_url_slug": "claude-4-1-opus-thinking"
+        },
+        {
+          "family_id": "Command-R (Mar '24)",
+          "model": "Command-R (Mar '24)",
+          "provider": "Cohere",
+          "release_date": "2024-03-12",
+          "missing_axis": "tps",
+          "source_url_slug": "command-r-03-2024"
+        },
+        {
+          "family_id": "Command-R+ (Apr '24)",
+          "model": "Command-R+ (Apr '24)",
+          "provider": "Cohere",
+          "release_date": "2024-04-04",
+          "missing_axis": "tps",
+          "source_url_slug": "command-r-plus-04-2024"
+        },
+        {
+          "family_id": "DeepSeek R1 (Jan '25)",
+          "model": "DeepSeek R1 (Jan '25)",
+          "provider": "DeepSeek",
+          "release_date": "2025-01-20",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-r1-0120"
+        },
+        {
+          "family_id": "DeepSeek R1 0528 (May '25)",
+          "model": "DeepSeek R1 0528 (May '25)",
+          "provider": "DeepSeek",
+          "release_date": "2025-05-28",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-r1"
+        },
+        {
+          "family_id": "DeepSeek V3 (Dec '24)",
+          "model": "DeepSeek V3 (Dec '24)",
+          "provider": "DeepSeek",
+          "release_date": "2024-12-26",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3"
+        },
+        {
+          "family_id": "DeepSeek V3 0324",
+          "model": "DeepSeek V3 0324",
+          "provider": "DeepSeek",
+          "release_date": "2025-03-25",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-0324"
+        },
+        {
+          "family_id": "DeepSeek V3.1",
+          "model": "DeepSeek V3.1 (Non-reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-08-21",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-1"
+        },
+        {
+          "family_id": "DeepSeek V3.1",
+          "model": "DeepSeek V3.1 (Reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-08-21",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-1-reasoning"
+        },
+        {
+          "family_id": "DeepSeek V3.1 Terminus",
+          "model": "DeepSeek V3.1 Terminus (Non-reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-09-22",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-1-terminus"
+        },
+        {
+          "family_id": "DeepSeek V3.1 Terminus",
+          "model": "DeepSeek V3.1 Terminus (Reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-09-22",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-1-terminus-reasoning"
+        },
+        {
+          "family_id": "DeepSeek V3.2",
+          "model": "DeepSeek V3.2 (Non-reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-12-01",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-2"
+        },
+        {
+          "family_id": "DeepSeek V3.2",
+          "model": "DeepSeek V3.2 (Reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-12-01",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-2-reasoning"
+        },
+        {
+          "family_id": "DeepSeek V3.2 Exp",
+          "model": "DeepSeek V3.2 Exp (Non-reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-09-29",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-2-0925"
+        },
+        {
+          "family_id": "DeepSeek V3.2 Exp",
+          "model": "DeepSeek V3.2 Exp (Reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2025-09-29",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v3-2-reasoning-0925"
+        },
+        {
+          "family_id": "DeepSeek V4 Flash",
+          "model": "DeepSeek V4 Flash (Non-reasoning)",
+          "provider": "DeepSeek",
+          "release_date": "2026-04-24",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v4-flash-non-reasoning"
+        },
+        {
+          "family_id": "DeepSeek V4 Flash",
+          "model": "DeepSeek V4 Flash (Reasoning, High Effort)",
+          "provider": "DeepSeek",
+          "release_date": "2026-04-24",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v4-flash-0420-high"
+        },
+        {
+          "family_id": "DeepSeek V4 Flash",
+          "model": "DeepSeek V4 Flash (Reasoning, Max Effort)",
+          "provider": "DeepSeek",
+          "release_date": "2026-04-24",
+          "missing_axis": "tps",
+          "source_url_slug": "deepseek-v4-flash-0420"
+        },
+        {
+          "family_id": "ERNIE 4.5 300B A47B",
+          "model": "ERNIE 4.5 300B A47B",
+          "provider": "Baidu",
+          "release_date": "2025-06-30",
+          "missing_axis": "tps",
+          "source_url_slug": "ernie-4-5-300b-a47b"
+        },
+        {
+          "family_id": "G9v3-39A5B",
+          "model": "G9v3-39A5B",
+          "provider": "AI9Stars",
+          "release_date": "2026-08-03",
+          "missing_axis": "tps",
+          "source_url_slug": "g9v3-39a5b"
+        },
+        {
+          "family_id": "G9v3-3B",
+          "model": "G9v3-3B",
+          "provider": "AI9Stars",
+          "release_date": "2026-07-23",
+          "missing_axis": "tps",
+          "source_url_slug": "g9v3-3b"
+        },
+        {
+          "family_id": "Gemini 2.0 Flash (experimental)",
+          "model": "Gemini 2.0 Flash (experimental)",
+          "provider": "Google",
+          "release_date": "2024-12-11",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-2-0-flash-experimental"
+        },
+        {
+          "family_id": "Gemini 2.5 Flash-Lite Preview (Sep '25)",
+          "model": "Gemini 2.5 Flash-Lite Preview (Sep '25) (Non-reasoning)",
+          "provider": "Google",
+          "release_date": "2025-09-25",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-2-5-flash-lite-preview-09-2025"
+        },
+        {
+          "family_id": "Gemini 2.5 Flash-Lite Preview (Sep '25)",
+          "model": "Gemini 2.5 Flash-Lite Preview (Sep '25) (Reasoning)",
+          "provider": "Google",
+          "release_date": "2025-09-08",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-2-5-flash-lite-preview-09-2025-reasoning"
+        },
+        {
+          "family_id": "Gemini 2.5 Pro Preview (May' 25)",
+          "model": "Gemini 2.5 Pro Preview (May' 25)",
+          "provider": "Google",
+          "release_date": "2025-05-06",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-2-5-pro-05-06"
+        },
+        {
+          "family_id": "Gemini 3 Pro Preview",
+          "model": "Gemini 3 Pro Preview (high)",
+          "provider": "Google",
+          "release_date": "2025-11-18",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-3-pro"
+        },
+        {
+          "family_id": "Gemini 3 Pro Preview",
+          "model": "Gemini 3 Pro Preview (low)",
+          "provider": "Google",
+          "release_date": "2025-11-18",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-3-pro-low"
+        },
+        {
+          "family_id": "Gemma 3 12B Instruct",
+          "model": "Gemma 3 12B Instruct",
+          "provider": "Google",
+          "release_date": "2025-03-12",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-3-12b"
+        },
+        {
+          "family_id": "Gemma 3 1B Instruct",
+          "model": "Gemma 3 1B Instruct",
+          "provider": "Google",
+          "release_date": "2025-03-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-3-1b"
+        },
+        {
+          "family_id": "Gemma 3 27B Instruct",
+          "model": "Gemma 3 27B Instruct",
+          "provider": "Google",
+          "release_date": "2025-03-12",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-3-27b"
+        },
+        {
+          "family_id": "Gemma 3 4B Instruct",
+          "model": "Gemma 3 4B Instruct",
+          "provider": "Google",
+          "release_date": "2025-03-12",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-3-4b"
+        },
+        {
+          "family_id": "Gemma 3n E2B Instruct",
+          "model": "Gemma 3n E2B Instruct",
+          "provider": "Google",
+          "release_date": "2025-06-26",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-3n-e2b"
+        },
+        {
+          "family_id": "Gemma 4 26B A4B",
+          "model": "Gemma 4 26B A4B (Reasoning)",
+          "provider": "Google",
+          "release_date": "2026-04-02",
+          "missing_axis": "tps",
+          "source_url_slug": "gemma-4-26b-a4b"
+        },
+        {
+          "family_id": "GLM 5V Turbo",
+          "model": "GLM 5V Turbo (Reasoning)",
+          "provider": "Z AI",
+          "release_date": "2026-04-01",
+          "missing_axis": "tps",
+          "source_url_slug": "glm-5v-turbo"
+        },
+        {
+          "family_id": "GLM-4.5",
+          "model": "GLM-4.5 (Reasoning)",
+          "provider": "Z AI",
+          "release_date": "2025-07-28",
+          "missing_axis": "tps",
+          "source_url_slug": "glm-4.5"
+        },
+        {
+          "family_id": "GLM-5-Turbo",
+          "model": "GLM-5-Turbo",
+          "provider": "Z AI",
+          "release_date": "2026-03-15",
+          "missing_axis": "tps",
+          "source_url_slug": "glm-5-turbo"
+        },
+        {
+          "family_id": "GPT-3.5 Turbo",
+          "model": "GPT-3.5 Turbo",
+          "provider": "OpenAI",
+          "release_date": "2022-11-30",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-35-turbo"
+        },
+        {
+          "family_id": "GPT-4",
+          "model": "GPT-4",
+          "provider": "OpenAI",
+          "release_date": "2023-03-14",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-4"
+        },
+        {
+          "family_id": "GPT-5 Codex",
+          "model": "GPT-5 Codex (high)",
+          "provider": "OpenAI",
+          "release_date": "2025-09-23",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-codex"
+        },
+        {
+          "family_id": "GPT-5.1 Codex",
+          "model": "GPT-5.1 Codex (high)",
+          "provider": "OpenAI",
+          "release_date": "2025-11-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-1-codex"
+        },
+        {
+          "family_id": "GPT-5.1 Codex mini",
+          "model": "GPT-5.1 Codex mini (high)",
+          "provider": "OpenAI",
+          "release_date": "2025-11-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-1-codex-mini"
+        },
+        {
+          "family_id": "GPT-5.2",
+          "model": "GPT-5.2 (medium)",
+          "provider": "OpenAI",
+          "release_date": "2025-12-11",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-2-medium"
+        },
+        {
+          "family_id": "GPT-5.2 Codex",
+          "model": "GPT-5.2 Codex (xhigh)",
+          "provider": "OpenAI",
+          "release_date": "2025-12-11",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-2-codex"
+        },
+        {
+          "family_id": "GPT-5.5 Instant (May 2026)",
+          "model": "GPT-5.5 Instant (May 2026)",
+          "provider": "OpenAI",
+          "release_date": "2026-05-05",
+          "missing_axis": "tps",
+          "source_url_slug": "gpt-5-5-instant-05-26"
+        },
+        {
+          "family_id": "Grok 3",
+          "model": "Grok 3",
+          "provider": "SpaceXAI",
+          "release_date": "2025-02-19",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-3"
+        },
+        {
+          "family_id": "Grok 4",
+          "model": "Grok 4",
+          "provider": "SpaceXAI",
+          "release_date": "2025-07-10",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-4"
+        },
+        {
+          "family_id": "Grok 4 Fast",
+          "model": "Grok 4 Fast (Non-reasoning)",
+          "provider": "SpaceXAI",
+          "release_date": "2025-09-19",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-4-fast"
+        },
+        {
+          "family_id": "Grok 4 Fast",
+          "model": "Grok 4 Fast (Reasoning)",
+          "provider": "SpaceXAI",
+          "release_date": "2025-09-19",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-4-fast-reasoning"
+        },
+        {
+          "family_id": "Grok 4.20 0309",
+          "model": "Grok 4.20 0309 (Non-reasoning)",
+          "provider": "SpaceXAI",
+          "release_date": "2026-03-10",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-4-20-0309-non-reasoning"
+        },
+        {
+          "family_id": "Grok 4.20 0309",
+          "model": "Grok 4.20 0309 (Reasoning)",
+          "provider": "SpaceXAI",
+          "release_date": "2026-03-10",
+          "missing_axis": "tps",
+          "source_url_slug": "grok-4-20-0309"
+        },
+        {
+          "family_id": "Hy3-preview",
+          "model": "Hy3-preview (Non-reasoning)",
+          "provider": "Tencent",
+          "release_date": "2026-04-23",
+          "missing_axis": "tps",
+          "source_url_slug": "hy3-non-reasoning"
+        },
+        {
+          "family_id": "Hy3-preview",
+          "model": "Hy3-preview (Reasoning)",
+          "provider": "Tencent",
+          "release_date": "2026-04-23",
+          "missing_axis": "tps",
+          "source_url_slug": "hy3-preview"
+        },
+        {
+          "family_id": "Jamba 1.5 Large",
+          "model": "Jamba 1.5 Large",
+          "provider": "AI21 Labs",
+          "release_date": "2024-08-22",
+          "missing_axis": "tps",
+          "source_url_slug": "jamba-1-5-large"
+        },
+        {
+          "family_id": "Jamba 1.5 Mini",
+          "model": "Jamba 1.5 Mini",
+          "provider": "AI21 Labs",
+          "release_date": "2024-08-22",
+          "missing_axis": "tps",
+          "source_url_slug": "jamba-1-5-mini"
+        },
+        {
+          "family_id": "Ling-2.6-1T",
+          "model": "Ling-2.6-1T",
+          "provider": "InclusionAI",
+          "release_date": "2026-04-23",
+          "missing_axis": "tps",
+          "source_url_slug": "ling-2-6-1t"
+        },
+        {
+          "family_id": "Llama 2 Chat 7B",
+          "model": "Llama 2 Chat 7B",
+          "provider": "Meta",
+          "release_date": "2023-07-18",
+          "missing_axis": "tps",
+          "source_url_slug": "llama-2-chat-7b"
+        },
+        {
+          "family_id": "Llama 3 Instruct 70B",
+          "model": "Llama 3 Instruct 70B",
+          "provider": "Meta",
+          "release_date": "2024-04-18",
+          "missing_axis": "tps",
+          "source_url_slug": "llama-3-instruct-70b"
+        },
+        {
+          "family_id": "Llama 3 Instruct 8B",
+          "model": "Llama 3 Instruct 8B",
+          "provider": "Meta",
+          "release_date": "2024-04-18",
+          "missing_axis": "tps",
+          "source_url_slug": "llama-3-instruct-8b"
+        },
+        {
+          "family_id": "MiMo-V2-Flash",
+          "model": "MiMo-V2-Flash (Reasoning)",
+          "provider": "Xiaomi",
+          "release_date": "2025-12-16",
+          "missing_axis": "tps",
+          "source_url_slug": "mimo-v2-flash-reasoning"
+        },
+        {
+          "family_id": "MiniMax M1 80k",
+          "model": "MiniMax M1 80k",
+          "provider": "MiniMax",
+          "release_date": "2025-06-17",
+          "missing_axis": "tps",
+          "source_url_slug": "minimax-m1-80k"
+        },
+        {
+          "family_id": "Mistral Large (Feb '24)",
+          "model": "Mistral Large (Feb '24)",
+          "provider": "Mistral",
+          "release_date": "2024-02-26",
+          "missing_axis": "tps",
+          "source_url_slug": "mistral-large"
+        },
+        {
+          "family_id": "Mistral Large 2 (Jul '24)",
+          "model": "Mistral Large 2 (Jul '24)",
+          "provider": "Mistral",
+          "release_date": "2024-07-24",
+          "missing_axis": "tps",
+          "source_url_slug": "mistral-large-2407"
+        },
+        {
+          "family_id": "Mistral Saba",
+          "model": "Mistral Saba",
+          "provider": "Mistral",
+          "release_date": "2025-02-17",
+          "missing_axis": "tps",
+          "source_url_slug": "mistral-saba"
+        },
+        {
+          "family_id": "Mixtral 8x7B Instruct",
+          "model": "Mixtral 8x7B Instruct",
+          "provider": "Mistral",
+          "release_date": "2023-12-11",
+          "missing_axis": "tps",
+          "source_url_slug": "mixtral-8x7b-instruct"
+        },
+        {
+          "family_id": "Muse Spark 1.2",
+          "model": "Muse Spark 1.2 (xhigh)",
+          "provider": "Meta",
+          "release_date": "2026-08-05",
+          "missing_axis": "tps",
+          "source_url_slug": "muse-spark-1-2"
+        },
+        {
+          "family_id": "Nova 2.0 Omni",
+          "model": "Nova 2.0 Omni (low)",
+          "provider": "Amazon",
+          "release_date": "2025-11-26",
+          "missing_axis": "tps",
+          "source_url_slug": "nova-2-0-omni-reasoning-low"
+        },
+        {
+          "family_id": "Nova 2.0 Omni",
+          "model": "Nova 2.0 Omni (medium)",
+          "provider": "Amazon",
+          "release_date": "2025-11-26",
+          "missing_axis": "tps",
+          "source_url_slug": "nova-2-0-omni-reasoning-medium"
+        },
+        {
+          "family_id": "Nova 2.0 Omni",
+          "model": "Nova 2.0 Omni (Non-reasoning)",
+          "provider": "Amazon",
+          "release_date": "2025-11-26",
+          "missing_axis": "tps",
+          "source_url_slug": "nova-2-0-omni"
+        },
+        {
+          "family_id": "Nova Pro",
+          "model": "Nova Pro",
+          "provider": "Amazon",
+          "release_date": "2024-12-03",
+          "missing_axis": "tps",
+          "source_url_slug": "nova-pro"
+        },
+        {
+          "family_id": "o1",
+          "model": "o1",
+          "provider": "OpenAI",
+          "release_date": "2024-12-05",
+          "missing_axis": "tps",
+          "source_url_slug": "o1"
+        },
+        {
+          "family_id": "o1-preview",
+          "model": "o1-preview",
+          "provider": "OpenAI",
+          "release_date": "2024-09-12",
+          "missing_axis": "tps",
+          "source_url_slug": "o1-preview"
+        },
+        {
+          "family_id": "o1-pro",
+          "model": "o1-pro",
+          "provider": "OpenAI",
+          "release_date": "2025-03-19",
+          "missing_axis": "tps",
+          "source_url_slug": "o1-pro"
+        },
+        {
+          "family_id": "o3-pro",
+          "model": "o3-pro",
+          "provider": "OpenAI",
+          "release_date": "2025-06-10",
+          "missing_axis": "tps",
+          "source_url_slug": "o3-pro"
+        },
+        {
+          "family_id": "Olmo 3 32B Think",
+          "model": "Olmo 3 32B Think",
+          "provider": "Allen Institute for AI",
+          "release_date": "2025-11-20",
+          "missing_axis": "tps",
+          "source_url_slug": "olmo-3-32b-think"
+        },
+        {
+          "family_id": "Olmo 3 7B Instruct",
+          "model": "Olmo 3 7B Instruct",
+          "provider": "Allen Institute for AI",
+          "release_date": "2025-11-20",
+          "missing_axis": "tps",
+          "source_url_slug": "olmo-3-7b-instruct"
+        },
+        {
+          "family_id": "Olmo 3.1 32B Think",
+          "model": "Olmo 3.1 32B Think",
+          "provider": "Allen Institute for AI",
+          "release_date": "2025-12-12",
+          "missing_axis": "tps",
+          "source_url_slug": "olmo-3-1-32b-think"
+        },
+        {
+          "family_id": "Qwen2.5 Instruct 72B",
+          "model": "Qwen2.5 Instruct 72B",
+          "provider": "Alibaba",
+          "release_date": "2024-09-19",
+          "missing_axis": "tps",
+          "source_url_slug": "qwen2-5-72b-instruct"
+        },
+        {
+          "family_id": "Qwen3 Max Thinking",
+          "model": "Qwen3 Max Thinking",
+          "provider": "Alibaba",
+          "release_date": "2026-01-26",
+          "missing_axis": "tps",
+          "source_url_slug": "qwen3-max-thinking"
+        },
+        {
+          "family_id": "Reka Flash 3",
+          "model": "Reka Flash 3",
+          "provider": "Reka AI",
+          "release_date": "2025-03-10",
+          "missing_axis": "tps",
+          "source_url_slug": "reka-flash-3"
+        },
+        {
+          "family_id": "Ring-flash-2.0",
+          "model": "Ring-flash-2.0",
+          "provider": "InclusionAI",
+          "release_date": "2025-09-19",
+          "missing_axis": "tps",
+          "source_url_slug": "ring-flash-2-0"
+        },
+        {
+          "family_id": "Sarvam 105B",
+          "model": "Sarvam 105B (high)",
+          "provider": "Sarvam",
+          "release_date": "2026-03-06",
+          "missing_axis": "tps",
+          "source_url_slug": "sarvam-105b"
+        },
+        {
+          "family_id": "Sarvam 30B",
+          "model": "Sarvam 30B (high)",
+          "provider": "Sarvam",
+          "release_date": "2026-03-06",
+          "missing_axis": "tps",
+          "source_url_slug": "sarvam-30b"
+        },
+        {
+          "family_id": "Sarvam M",
+          "model": "Sarvam M (Reasoning)",
+          "provider": "Sarvam",
+          "release_date": "2025-05-23",
+          "missing_axis": "tps",
+          "source_url_slug": "sarvam-m-reasoning"
+        },
+        {
+          "family_id": "Solar Mini",
+          "model": "Solar Mini",
+          "provider": "Upstage",
+          "release_date": "2024-01-25",
+          "missing_axis": "tps",
+          "source_url_slug": "solar-mini"
+        },
+        {
+          "family_id": "Sonar",
+          "model": "Sonar",
+          "provider": "Perplexity",
+          "release_date": "2025-01-21",
+          "missing_axis": "tps",
+          "source_url_slug": "sonar"
+        },
+        {
+          "family_id": "Sonar Pro",
+          "model": "Sonar Pro",
+          "provider": "Perplexity",
+          "release_date": "2025-01-21",
+          "missing_axis": "tps",
+          "source_url_slug": "sonar-pro"
+        },
+        {
+          "family_id": "Sonar Reasoning Pro",
+          "model": "Sonar Reasoning Pro",
+          "provider": "Perplexity",
+          "release_date": "2025-01-28",
+          "missing_axis": "tps",
+          "source_url_slug": "sonar-reasoning-pro"
+        },
+        {
+          "family_id": "Tiny Aya Global",
+          "model": "Tiny Aya Global",
+          "provider": "Cohere",
+          "release_date": "2026-02-17",
+          "missing_axis": "tps",
+          "source_url_slug": "tiny-aya-global"
+        }
+      ]
+    },
+    "missing_iq": {
+      "count": 4,
+      "capped": false,
+      "entries": [
+        {
+          "family_id": "Claude Sonnet 5",
+          "model": "Claude Sonnet 5 (Adaptive Reasoning, High Effort)",
+          "provider": "Anthropic",
+          "release_date": "2026-06-30",
+          "missing_axis": "iq",
+          "source_url_slug": "claude-sonnet-5-high"
+        },
+        {
+          "family_id": "Claude Sonnet 5",
+          "model": "Claude Sonnet 5 (Adaptive Reasoning, Low Effort)",
+          "provider": "Anthropic",
+          "release_date": "2026-06-30",
+          "missing_axis": "iq",
+          "source_url_slug": "claude-sonnet-5-low"
+        },
+        {
+          "family_id": "Claude Sonnet 5",
+          "model": "Claude Sonnet 5 (Adaptive Reasoning, Medium Effort)",
+          "provider": "Anthropic",
+          "release_date": "2026-06-30",
+          "missing_axis": "iq",
+          "source_url_slug": "claude-sonnet-5-medium"
+        },
+        {
+          "family_id": "Claude Sonnet 5",
+          "model": "Claude Sonnet 5 (Adaptive Reasoning, Xhigh Effort)",
+          "provider": "Anthropic",
+          "release_date": "2026-06-30",
+          "missing_axis": "iq",
+          "source_url_slug": "claude-sonnet-5-xhigh"
+        }
+      ]
+    },
+    "missing_price": {
+      "count": 0,
+      "capped": false,
+      "entries": []
+    }
+  },
+  "non_user_tier_drops": {
+    "note": "Rows with a complete triple dropped for privileged/internal effort tiers users cannot select (NON_USER_TIERS in expand-aa-multi-effort.mjs).",
+    "count": 3,
+    "entries": [
+      {
+        "model": "GPT-5.6 Luna (max)",
+        "provider": "OpenAI",
+        "effort_tier": "max"
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "effort_tier": "max"
+      },
+      {
+        "model": "GPT-5.6 Terra (max)",
+        "provider": "OpenAI",
+        "effort_tier": "max"
+      }
+    ]
+  },
+  "hidden_by_scope": {
+    "note": "Report-only evidence for decision D-H4 (floor + held-lab policy). Zero scope constants changed, zero draft rows added. Held = provider not in CLOUD_LABS, so unlisted providers count as held.",
+    "floor": "2026-01-01",
+    "recent_floor": "2025-09-01",
+    "a1_floor_hidden_all_labs": {
+      "count": 150,
+      "notable_names": [
+        "Claude 4.5 Haiku (Non-reasoning) (Anthropic)",
+        "Claude 4.5 Haiku (Reasoning) (Anthropic)",
+        "Claude 4.5 Sonnet (Non-reasoning) (Anthropic)",
+        "Claude 4.5 Sonnet (Reasoning) (Anthropic)",
+        "Claude Opus 4.5 (Non-reasoning) (Anthropic)",
+        "Claude Opus 4.5 (Reasoning) (Anthropic)",
+        "Command A (Cohere)",
+        "DeepSeek R1 Distill Llama 70B (DeepSeek)",
+        "Devstral 2 (Mistral)",
+        "Devstral Small 2 (Mistral)",
+        "Gemini 2.5 Flash (Non-reasoning) (Google)",
+        "Gemini 2.5 Flash (Reasoning) (Google)",
+        "Gemini 2.5 Flash-Lite (Non-reasoning) (Google)",
+        "Gemini 2.5 Flash-Lite (Reasoning) (Google)",
+        "Gemini 2.5 Pro (Google)",
+        "Gemini 3 Flash Preview (Non-reasoning) (Google)",
+        "Gemini 3 Flash Preview (Reasoning) (Google)",
+        "Gemma 3n E4B Instruct (Google)",
+        "GLM-4.5-Air (Z AI)",
+        "GLM-4.5V (Non-reasoning) (Z AI)",
+        "GLM-4.5V (Reasoning) (Z AI)",
+        "GLM-4.6 (Non-reasoning) (Z AI)",
+        "GLM-4.6 (Reasoning) (Z AI)",
+        "GLM-4.6V (Non-reasoning) (Z AI)",
+        "GLM-4.6V (Reasoning) (Z AI)",
+        "GLM-4.7 (Non-reasoning) (Z AI)",
+        "GLM-4.7 (Reasoning) (Z AI)",
+        "GPT-4 Turbo (OpenAI)",
+        "GPT-4.1 (OpenAI)",
+        "GPT-4.1 mini (OpenAI)",
+        "GPT-4.1 nano (OpenAI)",
+        "GPT-4o (Aug '24) (OpenAI)",
+        "GPT-4o (May '24) (OpenAI)",
+        "GPT-4o (Nov '24) (OpenAI)",
+        "GPT-4o mini (OpenAI)",
+        "GPT-5 (high) (OpenAI)",
+        "GPT-5 (low) (OpenAI)",
+        "GPT-5 (medium) (OpenAI)",
+        "GPT-5 (minimal) (OpenAI)",
+        "GPT-5 mini (high) (OpenAI)",
+        "GPT-5 mini (medium) (OpenAI)",
+        "GPT-5 mini (minimal) (OpenAI)",
+        "GPT-5 nano (high) (OpenAI)",
+        "GPT-5 nano (medium) (OpenAI)",
+        "GPT-5 nano (minimal) (OpenAI)",
+        "GPT-5.1 (high) (OpenAI)",
+        "GPT-5.1 (Non-reasoning) (OpenAI)",
+        "GPT-5.2 (Non-reasoning) (OpenAI)",
+        "GPT-5.2 (xhigh) (OpenAI)",
+        "gpt-oss-120b (high) (OpenAI)"
+      ]
+    },
+    "a2_floor_hidden_cloud_labs": {
+      "count": 109,
+      "notable_names": [
+        "Claude 4.5 Haiku (Non-reasoning) (Anthropic)",
+        "Claude 4.5 Haiku (Reasoning) (Anthropic)",
+        "Claude 4.5 Sonnet (Non-reasoning) (Anthropic)",
+        "Claude 4.5 Sonnet (Reasoning) (Anthropic)",
+        "Claude Opus 4.5 (Non-reasoning) (Anthropic)",
+        "Claude Opus 4.5 (Reasoning) (Anthropic)",
+        "DeepSeek R1 Distill Llama 70B (DeepSeek)",
+        "Gemini 2.5 Flash (Non-reasoning) (Google)",
+        "Gemini 2.5 Flash (Reasoning) (Google)",
+        "Gemini 2.5 Flash-Lite (Non-reasoning) (Google)",
+        "Gemini 2.5 Flash-Lite (Reasoning) (Google)",
+        "Gemini 2.5 Pro (Google)",
+        "Gemini 3 Flash Preview (Non-reasoning) (Google)",
+        "Gemini 3 Flash Preview (Reasoning) (Google)",
+        "Gemma 3n E4B Instruct (Google)",
+        "GLM-4.5-Air (Z AI)",
+        "GLM-4.5V (Non-reasoning) (Z AI)",
+        "GLM-4.5V (Reasoning) (Z AI)",
+        "GLM-4.6 (Non-reasoning) (Z AI)",
+        "GLM-4.6 (Reasoning) (Z AI)",
+        "GLM-4.6V (Non-reasoning) (Z AI)",
+        "GLM-4.6V (Reasoning) (Z AI)",
+        "GLM-4.7 (Non-reasoning) (Z AI)",
+        "GLM-4.7 (Reasoning) (Z AI)",
+        "GPT-4 Turbo (OpenAI)",
+        "GPT-4.1 (OpenAI)",
+        "GPT-4.1 mini (OpenAI)",
+        "GPT-4.1 nano (OpenAI)",
+        "GPT-4o (Aug '24) (OpenAI)",
+        "GPT-4o (May '24) (OpenAI)",
+        "GPT-4o (Nov '24) (OpenAI)",
+        "GPT-4o mini (OpenAI)",
+        "GPT-5 (high) (OpenAI)",
+        "GPT-5 (low) (OpenAI)",
+        "GPT-5 (medium) (OpenAI)",
+        "GPT-5 (minimal) (OpenAI)",
+        "GPT-5 mini (high) (OpenAI)",
+        "GPT-5 mini (medium) (OpenAI)",
+        "GPT-5 mini (minimal) (OpenAI)",
+        "GPT-5 nano (high) (OpenAI)",
+        "GPT-5 nano (medium) (OpenAI)",
+        "GPT-5 nano (minimal) (OpenAI)",
+        "GPT-5.1 (high) (OpenAI)",
+        "GPT-5.1 (Non-reasoning) (OpenAI)",
+        "GPT-5.2 (Non-reasoning) (OpenAI)",
+        "GPT-5.2 (xhigh) (OpenAI)",
+        "gpt-oss-120b (high) (OpenAI)",
+        "gpt-oss-120b (low) (OpenAI)",
+        "gpt-oss-20b (high) (OpenAI)",
+        "gpt-oss-20b (low) (OpenAI)"
+      ]
+    },
+    "a3_floor_hidden_cloud_since_recent": {
+      "count": 41,
+      "note": "a2 rows released on/after 2025-09-01 — the recent notable cloud pool D-H4 weighs most."
+    },
+    "b_held_2026_rows": {
+      "count": 30,
+      "notable_names": [
+        "Agnes 2.5 Pro Alpha (Sapiens AI)",
+        "Celeris-1 (Celeris)",
+        "Command A+ (Cohere)",
+        "Granite 4.1 8B (IBM)",
+        "Hy3 (Tencent)",
+        "Inkling (xhigh) (Thinking Machines)",
+        "Inkling Small (Thinking Machines)",
+        "KAT Coder Pro V2 (KwaiKAT)",
+        "LFM2.5-8B-A1B (Liquid AI)",
+        "LFM2.5-VL-1.6B (Liquid AI)",
+        "Ling 2.6 Flash (InclusionAI)",
+        "Ling 3.0 Flash (InclusionAI)",
+        "Ling 3.0 Tiny (InclusionAI)",
+        "LongCat 2.0 (LongCat)",
+        "Mercury 2 (Inception)",
+        "MiMo-V2.5 (Xiaomi)",
+        "MiMo-V2.5-Pro (Non-reasoning) (Xiaomi)",
+        "MiMo-V2.5-Pro (Xiaomi)",
+        "Mistral Medium 3.5 (Mistral)",
+        "Mistral Small 4 (Non-reasoning) (Mistral)",
+        "Mistral Small 4 (Reasoning) (Mistral)",
+        "Nex-N2-Pro (Nex AGI)",
+        "North Mini Code (Cohere)",
+        "Ring-2.6-1T (InclusionAI)",
+        "Solar Pro 3 (Upstage)",
+        "Solar Pro 4 (Upstage)",
+        "Step 3.5 Flash (StepFun)",
+        "Step 3.5 Flash 2603 (StepFun)",
+        "Step 3.7 Flash (StepFun)",
+        "Trinity Large Thinking (Arcee AI)"
+      ]
+    }
+  },
   "gaps": [
     {
       "family": "Claude Fable 5",
