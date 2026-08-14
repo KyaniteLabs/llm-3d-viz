@@ -213,7 +213,11 @@ const manual = loadManualAdditions(
   path.join(root, "data/manual-additions.json"),
   aaMapped,
 );
-merged = mergeBySpine(merged, manual.active);
+// Stamp manual rows through the curated overlay BEFORE merge: admission
+// re-adds manual rows from this list (they bypass the scorable spine), so the
+// admitted copies must already carry openness provenance (gate-proven fix).
+const manualStamped = applyCuratedOpenness(manual.active, manual.active).rows;
+merged = mergeBySpine(merged, manualStamped);
 sourceStats.push({
   source: "manual additions (provider announcements)",
   active: manual.active.length,
@@ -373,7 +377,7 @@ function isUserSelectableTier(row) {
 // manual additions (provider announcements) are admitted without it, deduped
 // by spine in case an overlay completed their triple upstream.
 const measured = merged.filter(canAdmitPlotTriple).filter(isUserSelectableTier);
-const manualAdmitted = selectManualAdmissions(manual.active, measured, {
+const manualAdmitted = selectManualAdmissions(manualStamped, measured, {
   spineKeyOf: spineKey,
   isUserSelectable: isUserSelectableTier,
 });
@@ -478,7 +482,7 @@ const watchlistEntries = loadWatchlistEntries(
   path.join(root, "data/model-watchlist.json"),
   fs,
 );
-const watchlist = buildWatchlistReport(watchlistEntries, aaMapped, manual.active, today);
+const watchlist = buildWatchlistReport(watchlistEntries, aaMapped, manualStamped, today);
 
 // --- 5c. Draft diff (plan WS1): previous → admitted, rename-aware ---
 const draftDiff = diffDrafts(prevDraftRows, admitted);
