@@ -65,8 +65,8 @@ export interface Model {
    */
   sources?: Partial<
     Record<
-      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "arena_elo",
-      { origin: "aa" | "arena" | "openrouter" | "provider"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
+      "aa_intelligence_index" | "tps" | "ttft" | "blended_price_per_M" | "price_in_per_M" | "price_out_per_M" | "price_cache_per_M" | "context_length" | "modality" | "cost_per_index_task_usd" | "arena_elo",
+      { origin: "aa" | "aa-api" | "arena" | "openrouter" | "provider"; kind: "measured" | "list" | "derived" | "derived_list_blend" }
     >
   >;
 }

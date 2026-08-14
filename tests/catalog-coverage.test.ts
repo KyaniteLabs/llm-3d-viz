@@ -9,7 +9,7 @@ import {
   formatProvenanceLine,
   taskTimeInfo,
 } from "../src/lib/provenance";
-import type { Model } from "../src/data/models";
+import { validateModels, type Model } from "../src/data/models";
 
 function row(partial: Partial<Model> & Pick<Model, "model">): Model {
   return {
@@ -64,6 +64,37 @@ describe("provenance + task time honesty", () => {
     expect(line).toMatch(/Index: Artificial Analysis/);
     expect(line).toMatch(/OpenRouter/);
     expect(line).toMatch(/Arena/);
+  });
+
+  // WS6-schema: every field the pipeline can stamp, every origin + kind in the
+  // sources union. Required<> makes this fixture enumerate the union — tsc
+  // fails if a key is added to Model.sources without being covered here.
+  it("accepts every stamped field/origin/kind and renders friendly labels only", () => {
+    const stampedSources: Required<NonNullable<Model["sources"]>> = {
+      aa_intelligence_index: { origin: "aa-api", kind: "measured" },
+      tps: { origin: "aa", kind: "measured" },
+      ttft: { origin: "aa-api", kind: "measured" },
+      blended_price_per_M: { origin: "aa", kind: "derived" },
+      price_in_per_M: { origin: "provider", kind: "list" },
+      price_out_per_M: { origin: "openrouter", kind: "derived_list_blend" },
+      price_cache_per_M: { origin: "openrouter", kind: "list" },
+      context_length: { origin: "openrouter", kind: "list" },
+      modality: { origin: "openrouter", kind: "list" },
+      cost_per_index_task_usd: { origin: "aa-api", kind: "measured" },
+      arena_elo: { origin: "arena", kind: "measured" },
+    };
+    const stamped = row({ model: "Stamped Fixture", sources: stampedSources });
+    expect(() => validateModels([stamped])).not.toThrow();
+
+    const line = formatProvenanceLine(stamped);
+    // One bit per stamped field, all with friendly labels — no raw field
+    // names (snake_case) leak into the inspector line.
+    expect(line.split(" · ")).toHaveLength(11);
+    expect(line).not.toMatch(/[a-z]_[a-z]/);
+    expect(line).toContain("cache $: OpenRouter");
+    expect(line).toContain("context: OpenRouter");
+    expect(line).toContain("modality: OpenRouter");
+    expect(line).toContain("cost/task: Artificial Analysis");
   });
 
   it("labels estimated task time when wall time missing", () => {
