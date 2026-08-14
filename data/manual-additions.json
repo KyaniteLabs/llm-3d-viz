@@ -37,6 +37,40 @@
         "swe_bench": { "origin": "provider", "kind": "list" },
         "aider_pct": { "origin": "provider", "kind": "list" }
       }
+    },
+    {
+      "model": "Seed 2.1 Turbo",
+      "provider": "ByteDance Seed",
+      "openness": "closed",
+      "modality": ["text", "vision", "video"],
+      "reasoning": true,
+      "family_id": "Seed 2.1 Turbo",
+      "effort_tier": "default",
+      "context_length": 262144,
+      "release_date": "2026-08-10",
+      "source_url": "https://openrouter.ai/bytedance-seed/seed-2-1-turbo",
+      "tps": null,
+      "ttft": null,
+      "price_in_per_M": 0.5,
+      "price_out_per_M": 2.5,
+      "blended_price_per_M": null,
+      "price_cache_per_M": null,
+      "aa_intelligence_index": null,
+      "cost_per_index_task_usd": null,
+      "time_per_index_task_s": null,
+      "arena_elo": null,
+      "gpqa": null,
+      "swe_bench": null,
+      "aider_pct": null,
+      "data_date": "2026-08-14",
+      "source": "OpenRouter listing bytedance-seed/seed-2-1-turbo (manual addition, PRELIMINARY vendor/OpenRouter list data; AA confirmation pending; row auto-superseded when AA measures the family). List prices $0.50 in / $2.50 out per M, context 262,144, input modality text+image+video mirrored as text+vision+video. openness=closed is the conservative default: Turbo ships as an API model with no published weights; the ByteDance Seed lab is mixed-portfolio (Seed-OSS exists), so closed-by-default until an open-weights exception is confirmed. reasoning=true per the OpenRouter reasoning capability (thinking supported, not mandatory). No exact-schema vendor benchmarks confirmed on the listing — gpqa/swe_bench/aider_pct stay null, none invented. tps/ttft/blended/cache null: not measured; blended and cache derive from the OpenRouter overlay on the next pipeline run. ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD); row visible under ?catalog=all.",
+      "null_reason": "not_measured",
+      "sources": {
+        "price_in_per_M": { "origin": "openrouter", "kind": "list" },
+        "price_out_per_M": { "origin": "openrouter", "kind": "list" },
+        "context_length": { "origin": "openrouter", "kind": "list" },
+        "modality": { "origin": "openrouter", "kind": "list" }
+      }
     }
   ]
 }

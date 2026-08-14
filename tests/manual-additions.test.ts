@@ -9,8 +9,10 @@ import {
   loadManualAdditions,
 } from "../scripts/lib/manual-additions.mjs";
 import { applyAaDerivedBlend, spineKey } from "../scripts/lib/catalog-join.mjs";
+import { buildWatchlistReport } from "../scripts/lib/model-watchlist.mjs";
 import { validateModels, type Model } from "../src/data/models";
 import manualDoc from "../data/manual-additions.json";
+import watchlistDoc from "../data/model-watchlist.json";
 
 const glm53Manual = {
   model: "GLM-5.3 (max)",
@@ -140,6 +142,51 @@ describe("manual additions — curated file regression", () => {
     expect(glm.aa_intelligence_index).toBeNull(); // never preliminary
     expect(glm.sources?.gpqa).toEqual({ origin: "provider", kind: "list" });
     expect(glm.source).toContain("PRELIMINARY");
+  });
+
+  it("the tracked Seed 2.1 Turbo row vets clean and passes dataset validation (#189)", () => {
+    const vetted = vetManualRows(rows);
+    expect(vetted.rejected).toHaveLength(0);
+    const seed = vetted.rows.find((r) => r.family_id === "Seed 2.1 Turbo");
+    expect(seed).toBeDefined();
+    expect(() => validateModels(vetted.rows as unknown as Model[])).not.toThrow();
+    expect(seed.model).toBe("Seed 2.1 Turbo");
+    expect(seed.provider).toBe("ByteDance Seed");
+    expect(seed.openness).toBe("closed"); // conservative default, noted in source
+    expect(seed.modality).toEqual(["text", "vision", "video"]); // mirrors OR text+image+video input
+    expect(seed.reasoning).toBe(true);
+    expect(seed.release_date).toBe("2026-08-10");
+    expect(seed.price_in_per_M).toBe(0.5);
+    expect(seed.price_out_per_M).toBe(2.5);
+    expect(seed.context_length).toBe(262144);
+    expect(seed.blended_price_per_M).toBeNull(); // overlay derives on the next pipeline run
+    expect(seed.price_cache_per_M).toBeNull();
+    expect(seed.tps).toBeNull();
+    expect(seed.ttft).toBeNull(); // AA-only domain — never on a manual row
+    expect(seed.aa_intelligence_index).toBeNull();
+    expect(seed.gpqa).toBeNull(); // no exact-schema vendor benchmarks — do not invent
+    expect(seed.swe_bench).toBeNull();
+    expect(seed.aider_pct).toBeNull();
+    expect(seed.null_reason).toBe("not_measured");
+    expect(seed.source).toContain("PRELIMINARY");
+    expect(seed.sources?.price_in_per_M).toEqual({ origin: "openrouter", kind: "list" });
+    expect(seed.sources?.price_out_per_M).toEqual({ origin: "openrouter", kind: "list" });
+    expect(seed.sources?.context_length).toEqual({ origin: "openrouter", kind: "list" });
+    expect(seed.sources?.modality).toEqual({ origin: "openrouter", kind: "list" });
+  });
+
+  it("watchlist reports Seed 2.1 Turbo as tracked_via_manual_row (#189)", () => {
+    const active = vetManualRows(rows).rows;
+    const report = buildWatchlistReport(
+      (watchlistDoc as { entries: unknown[] }).entries,
+      [],
+      active,
+      "2026-08-14",
+    );
+    const seed = report.find((r) => r.family === "Seed 2.1 Turbo");
+    expect(seed).toBeDefined();
+    expect(seed.status).toBe("tracked_via_manual_row");
+    expect(seed.note).toContain("manual-additions.json");
   });
 
   it("loadManualAdditions reads the file and applies AA supersede", () => {
