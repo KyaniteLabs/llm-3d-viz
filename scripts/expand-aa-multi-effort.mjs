@@ -47,6 +47,7 @@ import {
 } from "./lib/manual-additions.mjs";
 import { diffDrafts } from "./lib/draft-diff.mjs";
 import { buildStaleCostTask } from "./lib/stale-cost-task.mjs";
+import { buildIntelConsistency } from "./lib/intel-consistency.mjs";
 import {
   computeCurrentDivergences,
   mergeDivergenceRecords,
@@ -499,6 +500,14 @@ const diffDoc = {
 // nothing. Data flag only — UI surfacing is deferred to the UI/UX line.
 const staleCostTask = buildStaleCostTask(admitted, { prevRows: prevDraftRows });
 
+// --- 5e. AA-Index ↔ Arena-Elo consistency report (W7 / ticket #194):
+// report-only ---
+// Single-source risk, measured: per-family effort spread of both metrics plus
+// the rank disagreement between the two orderings over families whose rows
+// carry BOTH. A consistency measurement — NOT a replacement score; never
+// feeds admission. UI surfacing is deferred to the UI/UX audit line.
+const intelConsistency = buildIntelConsistency(admitted);
+
 const gapsDoc = {
   data_date: today,
   ingestion: "official-api-only",
@@ -541,6 +550,7 @@ const gapsDoc = {
     ...staleCostTask,
     note: "Rows with non-null cost_per_index_task_usd whose current price side (in/out/blended) moved >25% vs the previous draft's same family+effort spine (spineKey identity: model slug + effort tier). Approximation — measurement-time prices are not stored; first run (no previous draft) flags nothing. Data flag only; UI surfacing deferred to the UI/UX line.",
   },
+  intel_consistency: intelConsistency,
   watchlist,
   awaiting_measurement: awaitingMeasurement,
   non_user_tier_drops: nonUserTierDrops,
@@ -647,6 +657,7 @@ console.log(
       price_divergences: divergenceRecords.length,
       price_divergence_deltas: divergenceDeltaCount,
       stale_cost_task: staleCostTask.count,
+      intel_consistency_max_rank_gap: intelConsistency.max_rank_gap,
       watchlist_awaiting: watchlist.filter((w) => w.status === "awaiting_aa_measurement").length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
