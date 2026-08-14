@@ -89,10 +89,17 @@ export function applyAaDerivedBlend(aaRows) {
     if (pin == null || pout == null) return row;
     if (!Number.isFinite(pin) || !Number.isFinite(pout)) return row;
     if (pin < 0 || pout < 0) return row; // D12: reject negative price components
-    const pcache = typeof row.price_cache_per_M === "number" && Number.isFinite(row.price_cache_per_M)
-      ? row.price_cache_per_M
-      : pin; // conservative fallback: cache = input price when unknown
-    if (pcache < 0) return row; // D12: reject negative cache price
+    // C1 (datagaps audit 2026-08-14): a cache price of 0 is a sentinel, not a
+    // price — no provider serves cache reads for free (OpenRouter lists
+    // non-zero cache for models AA reports as 0). With cache at 70% blend
+    // weight, trusting 0 understated blended cost up to 2.75× (4 DeepSeek rows
+    // on stage). 0/absent/unknown falls back to input price: conservative
+    // overestimate, never an understatement.
+    const rawCache = row.price_cache_per_M;
+    const pcache =
+      typeof rawCache === "number" && Number.isFinite(rawCache) && rawCache > 0
+        ? rawCache
+        : pin; // conservative fallback: cache = input price when unknown/zero
     let next = {
       ...row,
       blended_price_per_M: (pcache * 7 + pin * 2 + pout * 1) / 10,

@@ -5794,7 +5794,7 @@
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.28,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.05600000000000001,
+    "blended_price_per_M": 0.15400000000000003,
     "aa_intelligence_index": 51.8,
     "arena_elo": null,
     "swe_bench": null,
@@ -5857,7 +5857,7 @@
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.173,
+    "blended_price_per_M": 0.4739999999999999,
     "aa_intelligence_index": 31.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -5912,7 +5912,7 @@
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.173,
+    "blended_price_per_M": 0.4739999999999999,
     "aa_intelligence_index": 43.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -5971,7 +5971,7 @@
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.173,
+    "blended_price_per_M": 0.4739999999999999,
     "aa_intelligence_index": 45.3,
     "arena_elo": null,
     "swe_bench": null,
@@ -16126,7 +16126,7 @@
     "price_in_per_M": 0.45,
     "price_out_per_M": 0.9,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.18,
+    "blended_price_per_M": 0.495,
     "aa_intelligence_index": 39.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -17321,7 +17321,7 @@
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.28,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.05600000000000001,
+    "blended_price_per_M": 0.15400000000000003,
     "aa_intelligence_index": 38,
     "arena_elo": 1434.0210821995508,
     "swe_bench": null,
@@ -17384,7 +17384,7 @@
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.173,
+    "blended_price_per_M": 0.4739999999999999,
     "aa_intelligence_index": 42.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -17447,7 +17447,7 @@
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
-    "blended_price_per_M": 0.173,
+    "blended_price_per_M": 0.4739999999999999,
     "aa_intelligence_index": 28.4,
     "arena_elo": null,
     "swe_bench": null,
@@ -18488,6 +18488,41 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      }
+    }
+  },
+  {
+    "model": "GLM-5.3 (max)",
+    "provider": "Z AI",
+    "openness": "closed",
+    "modality": [
+      "text"
+    ],
+    "reasoning": true,
+    "family_id": "GLM-5.3",
+    "effort_tier": "max",
+    "context_length": null,
+    "release_date": "2026-08-14",
+    "source_url": "https://z.ai/blog/glm-5.3",
+    "tps": 115,
+    "ttft": null,
+    "price_in_per_M": null,
+    "price_out_per_M": null,
+    "blended_price_per_M": null,
+    "aa_intelligence_index": null,
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null,
+    "arena_elo": null,
+    "gpqa": null,
+    "swe_bench": null,
+    "aider_pct": null,
+    "data_date": "2026-08-14",
+    "source": "Z.ai announcement 2026-08-14 (manual addition). Thinking-only; efforts low/high/max, max recommended+default. No PAYG $/M pricing yet — Coding Plan points only (in ×6.9 / cached ×1.7 / out ×24 per 10K tok). Open weights ~2 weeks post-announcement (openness flips when downloadable). tps=115 as cited from Artificial Analysis in the announcement's ExploitGym footnote (effort tier of that figure unstated).",
+    "null_reason": "not_measured",
+    "sources": {
+      "tps": {
+        "origin": "provider",
+        "kind": "measured"
       }
     }
   }

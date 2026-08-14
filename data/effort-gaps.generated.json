@@ -8,14 +8,20 @@
   },
   "source_stats": [
     {
+      "source": "manual additions (provider announcements)",
+      "active": 1,
+      "superseded": 0,
+      "rejected": [],
+      "scorable_after_blend": 310
+    },
+    {
       "source": "AA Data API /language/models/free",
       "ok": true,
       "raw": 608,
       "mapped": 608,
       "scorable_pre_blend": 0,
       "tier": "free",
-      "pages": 4,
-      "scorable_after_blend": 310
+      "pages": 4
     },
     {
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
@@ -196,6 +202,26 @@
       "published_rows": 1,
       "complete": false,
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "GLM-5.3",
+      "provider": "Z AI",
+      "expected_tiers": [
+        "low",
+        "high",
+        "max"
+      ],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "low",
+        "high"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "",
+      "partial_tiers": []
     }
   ],
   "fable": {

@@ -30,6 +30,7 @@ import crypto from "node:crypto";
 import { isScorable, deriveFamilyId } from "./lib/aa-extract.mjs";
 import {
   mergeBySpine,
+  spineKey,
   applyOpenRouterPricing,
   applyOpenRouterModality,
   applyOpenRouterContext,
@@ -38,6 +39,10 @@ import {
   stampAaMeasured,
   canAdmitPlotTriple,
 } from "./lib/catalog-join.mjs";
+import {
+  loadManualAdditions,
+  selectManualAdmissions,
+} from "./lib/manual-additions.mjs";
 import { fetchAaLanguageModelsFree, mapAaApiModel, resolveAaApiKey } from "./lib/aa-api.mjs";
 import { fetchArenaEntriesFromHf } from "./lib/arena-hf.mjs";
 import { fetchOpenRouterModels } from "./lib/openrouter-api.mjs";
@@ -176,6 +181,21 @@ const aaMapped = aa.models.map((m) =>
 );
 // Free API often omits blended $/M until applyAaDerivedBlend — count scorable after blend later.
 let merged = mergeBySpine([], aaMapped);
+
+// --- 1b. Provider-announced manual additions (pre-AA rows) ---
+// Vetted + AA-superseded inside loadManualAdditions; merged into the spine
+// BEFORE the overlays so OpenRouter/Arena enrich them like any AA row.
+const manual = loadManualAdditions(
+  path.join(root, "data/manual-additions.json"),
+  aaMapped,
+);
+merged = mergeBySpine(merged, manual.active);
+sourceStats.push({
+  source: "manual additions (provider announcements)",
+  active: manual.active.length,
+  superseded: manual.superseded.length,
+  rejected: manual.rejected,
+});
 sourceStats.push({
   source: aa.source,
   ok: true,
@@ -284,18 +304,26 @@ function isUserSelectableTier(row) {
   return !drop.includes((row.effort_tier || "").toLowerCase());
 }
 
-// --- 4. Admit scorable product catalog ---
-const scorable = merged.filter(canAdmitPlotTriple).filter(isUserSelectableTier);
-scorable.sort(
+// --- 4. Admit product catalog ---
+// Measured rows require the complete speed×cost×intelligence triple; vetted
+// manual additions (provider announcements) are admitted without it, deduped
+// by spine in case an overlay completed their triple upstream.
+const measured = merged.filter(canAdmitPlotTriple).filter(isUserSelectableTier);
+const manualAdmitted = selectManualAdmissions(manual.active, measured, {
+  spineKeyOf: spineKey,
+  isUserSelectable: isUserSelectableTier,
+});
+const admitted = [...measured, ...manualAdmitted];
+admitted.sort(
   (a, b) => a.provider.localeCompare(b.provider) || a.model.localeCompare(b.model),
 );
 
 // D02: Validate the complete candidate in memory BEFORE writing.
 // Reject empty catalogs and enforce a shrink gate vs the previous draft.
-if (!scorable.length) {
+if (!admitted.length) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: "0 scorable rows after join — aborting before write." },
+      { fatal: true, error: "0 admitted rows after join — aborting before write." },
       null,
       2,
     ),
@@ -310,13 +338,13 @@ if (fs.existsSync(dataPath)) {
   } catch { /* ignore parse error on stale file */ }
 }
 if (prevRowCount > 0) {
-  const shrinkPct = Math.round(((prevRowCount - scorable.length) / prevRowCount) * 100);
+  const shrinkPct = Math.round(((prevRowCount - admitted.length) / prevRowCount) * 100);
   if (shrinkPct > 50) {
     console.error(
       JSON.stringify(
         {
           fatal: true,
-          error: `scorable rows dropped ${shrinkPct}% (${prevRowCount} → ${scorable.length}) — aborting before write.`,
+          error: `admitted rows dropped ${shrinkPct}% (${prevRowCount} → ${admitted.length}) — aborting before write.`,
         },
         null,
         2,
@@ -325,10 +353,10 @@ if (prevRowCount > 0) {
     process.exit(1);
   }
 }
-if (scorable.length < MIN_ROWS) {
+if (admitted.length < MIN_ROWS) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: `scorable rows ${scorable.length} < MIN_ROWS=${MIN_ROWS} — aborting before write.` },
+      { fatal: true, error: `admitted rows ${admitted.length} < MIN_ROWS=${MIN_ROWS} — aborting before write.` },
       null,
       2,
     ),
@@ -360,7 +388,7 @@ for (const row of merged) {
     list.push({ tier: row.effort_tier, slug: String(row.source_url || "").split("/").pop() || row.model || "" });
   }
 }
-const gaps = buildEffortGaps(scorable, laddersDoc, partialByFamily);
+const gaps = buildEffortGaps(admitted, laddersDoc, partialByFamily);
 
 const gapsDoc = {
   data_date: today,
@@ -390,14 +418,14 @@ const gapsDoc = {
 };
 
 // --- 6. D02+D07: Atomic transaction — write all outputs to temp, then rename ---
-const draftJson = `${JSON.stringify(scorable, null, 2)}\n`;
+const draftJson = `${JSON.stringify(admitted, null, 2)}\n`;
 const gapsJson = `${JSON.stringify(gapsDoc, null, 2)}\n`;
 const sourceHash = crypto.createHash("sha256").update(draftJson).digest("hex");
 const snapshotJson = draftJson; // snapshot is a copy of the draft
 const meta = {
   schema_version: "1.1",
   exported_at: new Date().toISOString(),
-  model_count: scorable.length,
+  model_count: admitted.length,
   source: "data/models.v0.draft.json",
   snapshot_file: "data/atlas-catalog-snapshot.json",
   source_sha256: sourceHash,
@@ -433,7 +461,7 @@ try {
 }
 
 const byFamily = new Map();
-for (const row of scorable) {
+for (const row of admitted) {
   const list = byFamily.get(row.family_id) ?? [];
   list.push(row.effort_tier);
   byFamily.set(row.family_id, list);
@@ -443,8 +471,11 @@ const multi = [...byFamily.entries()].filter(([, tiers]) => tiers.length > 1);
 console.log(
   JSON.stringify(
     {
-      rows: scorable.length,
-      partials_in_memory: merged.length - scorable.length,
+      rows: admitted.length,
+      measured_rows: measured.length,
+      manual_additions: manualAdmitted.length,
+      manual_superseded: manual.superseded.length,
+      partials_in_memory: merged.length - measured.length,
       families: byFamily.size,
       multiEffortFamilies: multi.length,
       source_stats: sourceStats,

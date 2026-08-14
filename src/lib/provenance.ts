@@ -12,6 +12,7 @@ const ORIGIN_LABEL: Record<string, string> = {
   "aa-api": "Artificial Analysis",
   arena: "Arena",
   openrouter: "OpenRouter",
+  provider: "Provider announcement",
 };
 
 const KIND_LABEL: Record<string, string> = {

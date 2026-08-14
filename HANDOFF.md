@@ -55,3 +55,5 @@
 - Mobile utility strip density (codex: minor, not blocking)
 - 8 pre-existing render suite failures (responsive titles, glyph assertions — separate from visual quality)
 - Forgejo ticket IDs #147-#153 not logged (bookkeeping)
+- **DeepSeek repricing effective 2026-08-16** (announced ~Aug 6: output ~$1.32/M peak, half off-peak) — cron auto-propagates new prices from AA/OpenRouter; watch blends around that date. Full data-gap audit: `audits/glm53-2026-08-14-G-datagaps.md` (1 CRIT fixed — cache=0 sentinel in 7:2:1 blend; HIGHs open: admission blind spots, AA↔OR price divergence, silent row removals)
+- GLM-5.3 tracked via `data/manual-additions.json` (provider announcement, pre-AA); auto-supersedes when AA measures the family. Same mechanism ready for future pre-AA releases (e.g. ByteDance Seed 2.1 Turbo)

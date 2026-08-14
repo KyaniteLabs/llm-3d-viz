@@ -1,6 +1,6 @@
 {
   "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage — never to invent metrics.",
-  "updated": "2026-08-08",
+  "updated": "2026-08-14",
   "ladders": {
     "Claude Fable 5": {
       "provider": "Anthropic",
@@ -46,6 +46,11 @@
       "provider": "Kimi",
       "expected_tiers": ["low", "max"],
       "notes": "AA often publishes low + max."
+    },
+    "GLM-5.3": {
+      "provider": "Z AI",
+      "expected_tiers": ["low", "high", "max"],
+      "notes": "Announced 2026-08-14 (z.ai/blog/glm-5.3): thinking-only — no non-thinking mode, no medium tier. Max is the API default and Z.ai's recommended effort. Tracked via manual addition until AA measures the ladder; open weights ~2 weeks post-announcement."
     }
   }
 }
