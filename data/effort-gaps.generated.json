@@ -2588,7 +2588,7 @@
     ]
   },
   "hidden_by_scope": {
-    "note": "Report-only evidence for decision D-H4 (floor + held-lab policy). Zero scope constants changed, zero draft rows added. Held = provider not in CLOUD_LABS, so unlisted providers count as held.",
+    "note": "Report-only evidence for decision D-H4 (floor + held-lab policy). Zero scope constants changed, zero draft rows added. Held = provider not in CLOUD_LABS, so unlisted providers count as held. Decision 2026-08-14: generation cap (newest+previous per product line) is LIVE in the default scope — c_generation_capped tracks its cut; ?catalog=all remains the uncut archive.",
     "floor": "2026-01-01",
     "recent_floor": "2025-09-01",
     "a1_floor_hidden_all_labs": {
@@ -2739,6 +2739,58 @@
         "Step 3.7 Flash (StepFun)",
         "Trinity Large Thinking (Arcee AI)"
       ]
+    },
+    "c_generation_capped": {
+      "count": 46,
+      "notable_names": [
+        "Claude Opus 4.6 (Adaptive Reasoning, Max Effort) (Anthropic)",
+        "Claude Opus 4.6 (Non-reasoning, High Effort) (Anthropic)",
+        "Claude Opus 4.7 (Adaptive Reasoning, Max Effort) (Anthropic)",
+        "Claude Opus 4.7 (Non-reasoning, High Effort) (Anthropic)",
+        "Gemini 3.1 Flash-Lite (Google)",
+        "Gemini 3.5 Flash (high) (Google)",
+        "Gemini 3.5 Flash (medium) (Google)",
+        "Gemini 3.5 Flash (minimal) (Google)",
+        "Gemini 3.5 Flash-Lite (Google)",
+        "GLM-4.7-Flash (Non-reasoning) (Z AI)",
+        "GLM-4.7-Flash (Reasoning) (Z AI)",
+        "GLM-5 (Non-reasoning) (Z AI)",
+        "GLM-5 (Reasoning) (Z AI)",
+        "GLM-5.1 (Non-reasoning) (Z AI)",
+        "GLM-5.1 (Reasoning) (Z AI)",
+        "GPT-5.3 Codex (xhigh) (OpenAI)",
+        "GPT-5.4 (low) (OpenAI)",
+        "GPT-5.4 (Non-reasoning) (OpenAI)",
+        "GPT-5.4 (xhigh) (OpenAI)",
+        "Grok 4.20 0309 v2 (Non-reasoning) (SpaceXAI)",
+        "Grok 4.20 0309 v2 (Reasoning) (SpaceXAI)",
+        "Grok 4.3 (high) (SpaceXAI)",
+        "Grok 4.3 (low) (SpaceXAI)",
+        "Grok 4.3 (medium) (SpaceXAI)",
+        "Grok 4.3 (Non-reasoning) (SpaceXAI)",
+        "Kimi K2.5 (Non-reasoning) (Kimi)",
+        "Kimi K2.5 (Reasoning) (Kimi)",
+        "Kimi K2.6 (Kimi)",
+        "Kimi K2.6 (Non-reasoning) (Kimi)",
+        "MiniMax-M2.5 (MiniMax)",
+        "Qwen3.5 122B A10B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 122B A10B (Reasoning) (Alibaba)",
+        "Qwen3.5 27B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 27B (Reasoning) (Alibaba)",
+        "Qwen3.5 35B A3B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 35B A3B (Reasoning) (Alibaba)",
+        "Qwen3.5 397B A17B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 397B A17B (Reasoning) (Alibaba)",
+        "Qwen3.5 4B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 4B (Reasoning) (Alibaba)",
+        "Qwen3.5 9B (Non-reasoning) (Alibaba)",
+        "Qwen3.5 9B (Reasoning) (Alibaba)",
+        "Qwen3.6 27B (Non-reasoning) (Alibaba)",
+        "Qwen3.6 27B (Reasoning) (Alibaba)",
+        "Qwen3.6 35B A3B (Non-reasoning) (Alibaba)",
+        "Qwen3.6 35B A3B (Reasoning) (Alibaba)"
+      ],
+      "note": "Cloud rows released ≥ floor, hidden from the default scope ONLY by the D-H4 generation cap (newest + previous per product line). Visible via ?catalog=all."
     }
   },
   "gaps": [

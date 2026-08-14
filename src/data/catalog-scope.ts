@@ -31,6 +31,87 @@ const CLOUD_SET = new Set<string>(CLOUD_LABS);
 /** Inclusive lower bound on `release_date` for the product instrument (ISO date). */
 export const RELEASE_FLOOR_ISO = "2026-01-01";
 
+/**
+ * D-H4 (Simon, 2026-08-14): per product line, keep only the newest
+ * GENERATION_DEPTH distinct generations — "if GPT 5.6 exists we have no reason
+ * to keep anything older than GPT 5.5". A product line is the vendor name
+ * plus the leading words before the generation number, plus an edition word
+ * (flash/pro/mini/coder/…) when it directly follows the version — so
+ * "Gemini 3.7 Flash" and "Gemini 3.1 Pro" are independent lines, and
+ * "GPT-5.4 mini" survives until a newer mini exists. Default scope only;
+ * `?catalog=all` remains the uncut archive view.
+ */
+export const GENERATION_DEPTH = 2;
+
+const EDITION_WORDS = [
+  "mini", "nano", "lite", "flash", "pro", "max", "coder", "omni", "plus",
+  "instant", "turbo", "air", "spark", "glimmer",
+] as const;
+
+export interface FamilyLineGen {
+  line: string;
+  generation: number | null;
+}
+
+/** Parse a family display name into (product line, generation). Pure. */
+export function parseFamilyLineGen(familyId: string): FamilyLineGen {
+  const raw = (familyId || "").trim();
+  // Leading alpha words before the first version-ish token (V4, 5.6, 3.8…)
+  const m = raw.match(/^([A-Za-z][A-Za-z]*(?:[ -][A-Za-z]+)*?)[\s-]*(?:V(\d+)|(\d+(?:\.\d+)?))/i);
+  if (!m) {
+    return {
+      line: raw.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "unknown",
+      generation: null,
+    };
+  }
+  let line = m[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const generation = parseFloat(m[3] ?? m[2]);
+  // Edition word directly after the version: "Gemini 3.7 Flash", "GPT-5.4 mini"
+  const rest = raw.slice(m[0].length).trim().toLowerCase();
+  const firstWord = rest.match(/^([a-z]+)/);
+  if (firstWord && (EDITION_WORDS as readonly string[]).includes(firstWord[1])) {
+    line = `${line}-${firstWord[1]}`;
+  }
+  return { line: line || "unknown", generation: Number.isFinite(generation) ? generation : null };
+}
+
+/**
+ * Rows whose generation is within the newest GENERATION_DEPTH distinct
+ * generations of their product line. Versionless families and lines with
+ * ≤DEPTH generations pass unchanged.
+ */
+export function meetsGenerationDepth<T extends { provider: string; family_id?: string; model: string }>(
+  rows: readonly T[],
+  depth: number = GENERATION_DEPTH,
+): Set<T> {
+  const byLine = new Map<string, Map<number, T[]>>();
+  const versionless: T[] = [];
+  for (const r of rows) {
+    const { line, generation } = parseFamilyLineGen(r.family_id || r.model);
+    if (generation == null) {
+      versionless.push(r);
+      continue;
+    }
+    const key = `${r.provider}::${line}`;
+    let gens = byLine.get(key);
+    if (!gens) {
+      gens = new Map();
+      byLine.set(key, gens);
+    }
+    const bucket = gens.get(generation) ?? [];
+    bucket.push(r);
+    gens.set(generation, bucket);
+  }
+  const keep = new Set<T>(versionless);
+  for (const gens of byLine.values()) {
+    const allowed = [...gens.keys()].sort((a, b) => b - a).slice(0, depth);
+    for (const g of allowed) {
+      for (const r of gens.get(g) ?? []) keep.add(r);
+    }
+  }
+  return keep;
+}
+
 export function isCloudLab(provider: string): boolean {
   return CLOUD_SET.has(provider);
 }
@@ -95,13 +176,16 @@ export function catalogScopeFromSearch(
 }
 
 /** Apply product membership rules to a candidate list. */
-export function filterProductCatalog<T extends { provider: string; release_date: string }>(
-  candidates: readonly T[],
-  scope: CatalogScope = "cloud",
-): T[] {
-  return candidates.filter((m) => {
+export function filterProductCatalog<
+  T extends { provider: string; release_date: string; family_id?: string; model: string },
+>(candidates: readonly T[], scope: CatalogScope = "cloud"): T[] {
+  const floored = candidates.filter((m) => {
     if (!meetsReleaseFloor(m.release_date)) return false;
     if (scope === "cloud" && !isCloudLab(m.provider)) return false;
     return true;
   });
+  if (scope !== "cloud") return floored;
+  // D-H4: newest + previous generation per product line (default scope only).
+  const keep = meetsGenerationDepth(floored);
+  return floored.filter((m) => keep.has(m));
 }

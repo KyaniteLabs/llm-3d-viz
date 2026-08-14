@@ -16,7 +16,7 @@
  *    top unmatched model names (plan WS6, audit M2 — the ~23% attach rate's
  *    first measurable improvement target).
  */
-import { meetsReleaseFloor } from "../../src/data/catalog-scope.ts";
+import { meetsReleaseFloor, meetsGenerationDepth } from "../../src/data/catalog-scope.ts";
 import { aaSlugFromSourceUrl, lastSlugSegment } from "../../src/lib/family-effort.shared.ts";
 import { canAdmitPlotTriple, spineKey } from "./catalog-join.mjs";
 
@@ -197,9 +197,16 @@ export function buildHiddenByScope(admittedRows, cloudLabs, opts = {}) {
   const b = (admittedRows ?? []).filter(
     (r) => meetsReleaseFloor(r.release_date, floorIso) && !cloudSet.has(r.provider),
   );
+  // D-H4 resolution (2026-08-14): generation cap now ACTIVE in the default
+  // scope — surface what it cuts so the operator always sees the trim.
+  const cloudFloored = (admittedRows ?? []).filter(
+    (r) => meetsReleaseFloor(r.release_date, floorIso) && cloudSet.has(r.provider),
+  );
+  const genKeep = meetsGenerationDepth(cloudFloored);
+  const c = cloudFloored.filter((r) => !genKeep.has(r));
 
   return {
-    note: "Report-only evidence for decision D-H4 (floor + held-lab policy). Zero scope constants changed, zero draft rows added. Held = provider not in CLOUD_LABS, so unlisted providers count as held.",
+    note: "Report-only evidence for decision D-H4 (floor + held-lab policy). Zero scope constants changed, zero draft rows added. Held = provider not in CLOUD_LABS, so unlisted providers count as held. Decision 2026-08-14: generation cap (newest+previous per product line) is LIVE in the default scope — c_generation_capped tracks its cut; ?catalog=all remains the uncut archive.",
     floor: floorIso,
     recent_floor: recentFloorIso,
     a1_floor_hidden_all_labs: {
@@ -217,6 +224,11 @@ export function buildHiddenByScope(admittedRows, cloudLabs, opts = {}) {
     b_held_2026_rows: {
       count: b.length,
       notable_names: notableNames(b, notableCap),
+    },
+    c_generation_capped: {
+      count: c.length,
+      notable_names: notableNames(c, notableCap),
+      note: "Cloud rows released ≥ floor, hidden from the default scope ONLY by the D-H4 generation cap (newest + previous per product line). Visible via ?catalog=all.",
     },
   };
 }
