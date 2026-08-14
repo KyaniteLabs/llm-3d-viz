@@ -52,6 +52,15 @@ import {
   buildWatchlistReport,
   loadWatchlistEntries,
 } from "./lib/model-watchlist.mjs";
+import {
+  buildAwaitingMeasurement,
+  buildHiddenByScope,
+  buildNonUserTierDrops,
+} from "./lib/annex-report.mjs";
+import {
+  CLOUD_LABS,
+  RELEASE_FLOOR_ISO,
+} from "../src/data/catalog-scope.ts";
 import { fetchAaLanguageModelsFree, mapAaApiModel, resolveAaApiKey } from "./lib/aa-api.mjs";
 import { fetchArenaEntriesFromHf } from "./lib/arena-hf.mjs";
 import { fetchOpenRouterModels } from "./lib/openrouter-api.mjs";
@@ -396,6 +405,16 @@ if (admitted.length < MIN_ROWS) {
   process.exit(1);
 }
 
+// --- 4b. Pre-admission visibility annex (plan WS3): report-only, no admission ---
+// Awaiting-measurement pool from in-memory merged rows; NON_USER_TIERS drops
+// named; hidden_by_scope evidence for decision item D-H4. Scope semantics come
+// from the imported scope module — never re-hardcoded lists.
+const awaitingMeasurement = buildAwaitingMeasurement(merged, admitted);
+const nonUserTierDrops = buildNonUserTierDrops(merged, NON_USER_TIERS);
+const hiddenByScope = buildHiddenByScope(admitted, CLOUD_LABS, {
+  floorIso: RELEASE_FLOOR_ISO,
+});
+
 // --- 5. Build effort gaps (D17: include partial tiers from rows missing only IQ) ---
 let laddersDoc = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
@@ -471,6 +490,9 @@ const gapsDoc = {
     records: divergenceRecords,
   },
   watchlist,
+  awaiting_measurement: awaitingMeasurement,
+  non_user_tier_drops: nonUserTierDrops,
+  hidden_by_scope: hiddenByScope,
   gaps,
   fable: gaps.find((g) => g.family === "Claude Fable 5") ?? null,
 };
@@ -536,6 +558,16 @@ console.log(
       manual_additions: manualAdmitted.length,
       manual_superseded: manual.superseded.length,
       partials_in_memory: merged.length - measured.length,
+      awaiting_measurement:
+        awaitingMeasurement.missing_tps.count +
+        awaitingMeasurement.missing_iq.count +
+        awaitingMeasurement.missing_price.count,
+      non_user_tier_drops: nonUserTierDrops.count,
+      hidden_by_scope: {
+        a1_floor_hidden_all_labs: hiddenByScope.a1_floor_hidden_all_labs.count,
+        a2_floor_hidden_cloud_labs: hiddenByScope.a2_floor_hidden_cloud_labs.count,
+        b_held_2026_rows: hiddenByScope.b_held_2026_rows.count,
+      },
       diff: draftDiff.available ? draftDiff.counts : "unavailable-first-run",
       price_divergences: divergenceRecords.length,
       price_divergence_deltas: divergenceDeltaCount,
