@@ -1,21 +1,14 @@
 {
-  "data_date": "2026-08-14",
+  "data_date": "2026-08-15",
   "available": true,
   "prev_row_count": 308,
-  "next_row_count": 309,
-  "added": [
-    {
-      "model": "Seed 2.1 Turbo",
-      "provider": "ByteDance Seed",
-      "family_id": "Seed 2.1 Turbo",
-      "release_date": "2026-08-10"
-    }
-  ],
+  "next_row_count": 308,
+  "added": [],
   "removed": [],
   "renamed": [],
   "price_deltas": [],
   "counts": {
-    "added": 1,
+    "added": 0,
     "removed": 0,
     "renamed": 0,
     "price_deltas": 0
