@@ -194,3 +194,47 @@ Iteration-2 corrected baseline: 83 / 76 / 59 / 66. Every DOM-confirmed driver of
 - Cheap re-proof: screenshots + probes preserved under `.scratch/uiux-splus/verify3-*`; re-run the kimi pass + adjudication when quota refreshes (~10 min) and append "Iteration 4 (scoring completion)".
 
 **Judgment:** iterations 1→3 moved every confirmed defect to fixed-and-verified; remaining deltas at iter-2 were taste-level (trail weight, scope-summary ellipsis) or protocol artifacts. The instrument has never been more legible: mobile decodes, cinema names all 12 focus models, nothing collides, nothing truncates, the pick wins the page.
+
+## Iteration 4 — scoring completion (substitute vision critic, per Simon 2026-08-15)
+
+**Protocol condition:** kimi k3 still quota-dead (403). Per Simon's instruction a different vision model ran the pass: **GLM-4.5v vision** (Z.ai MCP `analyze_image`), one scored pass per state over the same `.scratch/uiux-splus/verify3-*.png` captures (deployed a441b20, 02:40Z), full-rubric prompts structurally identical to the kimi pass (harsh 0–100, dark-theme intent exempted); GLM 5.3 adjudicated every claim against the verify3 DOM probes, same convention as iterations 1–2 (Refuted +2/+3, Split +1/+2, By design +1, Confirmed 0). Caveats stated plainly: (a) substitute ≠ kimi — cross-critic comparability is approximate; (b) a terse-format retry returned out-of-scale scores (5-scale / 0–1) and was used only to enumerate issues, never for numbers.
+
+### Four-state scores
+
+| State | 4.5v (harsh) | corrected | Δ vs iter-2 corrected | S+ gap |
+|---|---:|---:|---:|---:|
+| Landing | 78 | **83** | 83→83 (0) | −7 |
+| Decide | 85 | **89** | 76→89 (+13) | −1 |
+| Cinema | 86 | **89** | 59→89 (+30) | −1 |
+| Mobile 390 | 85 | **89** | 66→89 (+23) | −1 |
+
+Corrected arithmetic is strict this pass (raw + per-claim restores, no judgment uplift). Decide/cinema/mobile land one point under the gate; landing −7.
+
+### Per-claim corrections (4.5v → verified)
+
+| # | critic claim (state) | Verdict | Evidence (verify3 probes, deployed a441b20) |
+|---|---|---|---|
+| 1 | Stage Key text too small / low-contrast (landing) | **By design** +1 | 12 legend items, 0 overlaps, scrolls (`+31 more below`); 10–11px muted = DESIGN-SYSTEM quiet chrome (same ruling as iter-1 #7, iter-2 #7) |
+| 2 | Model names truncated/obscured, e.g. "GPT-5.6 Luna", "Dee…" (landing) | **Refuted** +3 | `truncated=[]`, markXmark=0, markXtick=0, titleXmark=0 — no truncated or overlapped label exists; optimum paints full name |
+| 3 | "Filament ridge" jargon (landing) | **Split** +1 | story line defines it inline: "Top pick … is Gemini 3.7 Flash; **filament ridge marks the efficient frontier**"; compact-term taste stands |
+| 4 | "2 of 2 on ridge" reads truncated / completeness unclear (decide) | **Refuted** +2 | complete count-driven heading "SHORTLIST · 2 of 2 on ridge · 31 eligible" ↔ blurb "shortlist of 2", rows 1–2 painted (H3 evidence) — "2 of 2" *is* the completeness statement |
+| 5 | Stage key "Pareto ridge" dimmed/small (decide) | **By design** +1 | same quiet-chrome stance as #1 |
+| 6 | Cost/speed chart dots overlapping / small (decide) | **Split** +1 | size fixed + verified: eligible 6.18px @ 0.78 (was 3.9 @ 0.55), shortlist 8.83 @ 1.0; residual overlap = 31 points in a 280×160 sparkline — density, not defect (iter-2 #6 lineage) |
+| 7 | Headline wraps at awkward break position (cinema) | **Split** +1 | the wrap itself is the wave-3 R5 fix (0 truncated labels); break-position nit is taste |
+| 8 | "INTELLIGENCE" axis label low contrast (cinema) | **By design** +1 | axis-title token typography, quiet-chrome stance (third identical ruling) |
+| 9 | "EXIT CINEMA [C]" too small (cinema) | **By design** +1 | control chrome at token size; wired + aria-pressed both states verified (M1) |
+| — | *(extra, terse pass)* "Gemini 3.7 Flash" label misaligned from node (cinema) | **By design** | offset placement is the label encoding (keeps text off the sphere); markXmark=0, no overlap |
+| 10 | "tok/s·log" truncated, losing clarity (mobile) | **Split** +1 | complete string painted (`$.`/`M·log`, `INDEX`, `tok/s·log`); compact decode layer documented (iter-1 #13, iter-2 #14 — third adjudication) |
+| 11 | "Top pick for current weights is" lead-in small (mobile) | **By design** +1 | story base at 11.5px muted is the H4 hierarchy design; the pick itself is 15.2px filament-bright, untruncated — the exact recorded PASS evidence |
+| 12 | "SHOW ALL 45 RANKED" truncated / incomplete (mobile) | **Refuted** +2 | complete copy "Show all 45 ranked" in DOM, `offCanvas=[]`, count accurate (45 ranked); fold fade is the R3 mask by design |
+
+### Behavioral thresholds — ALL still PASS (re-verified from verify3 probes this pass)
+
+0 overlapping span pairs of any kind in every state (mark/tick/task/title); 0 truncated labels; 12/12 cinema focus labels + key line visible; ATLAS fully hidden in cinema; Decide copy count-consistent; mobile pick/chip clear (108.9px gap); M1 pressed-state wiring both states; stage key scrollable.
+
+### VERDICT: GOAL NOT PASS at budget end — final ceiling 83 / 89 / 89 / 89
+
+- The numeric gate is now **proven, not unproven** (supersedes iteration-3's ceiling close): 3 of 4 states sit one point under 90; landing −7.
+- Every mechanical defect across the audit's lineage (H1–H4, M1–M3, R1–R5, W3 bundle) remains fixed-and-DOM-verified. The entire residual gap is **taste-level chrome and terminology that needs a design decision, not a fix wave**: (1) stage-key/axis chrome size + contrast (quiet-chrome stance vs readability — the one recurring claim across all four states); (2) "filament ridge" / "·log" compact terminology; (3) cinema headline break position; (4) mini-chart hover emphasis.
+- If Simon opts to relax quiet chrome: key/axis chrome 10→11.5px + one-line gloss for the ridge would plausibly close decide/cinema/mobile; landing additionally hinges on that same stage-key readability call.
+- Per the contract (3 fix→verify iterations), no wave 4 was run. Artifacts preserved under `.scratch/uiux-splus/verify3-*` for a kimi re-pass at quota refresh.

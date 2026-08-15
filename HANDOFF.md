@@ -1,8 +1,10 @@
-# HANDOFF — llm-3d-viz S+ visual quality achieved (2026-08-09)
+# HANDOFF — llm-3d-viz
 
-## Status: ALL visual states 90+ (codex GPT-5.6 vision verified). Deployed.
+## Status: dual-critic (harsh vision + DOM adjudication) ceiling 83 / 89 / 89 / 89 — goal NOT passed at budget end
 
-## Visual quality scores (codex GPT-5.6-terra xhigh vision review)
+See `audits/uiux-splus-2026-08-15.md` iteration 4 (substitute vision critic pass, 2026-08-15): every mechanical defect fixed-and-DOM-verified (0 collisions, 0 truncations, all behaviors PASS); residual gap is taste-level chrome/terminology awaiting a Simon design call (stage-key/axis quiet-chrome size+contrast is the recurring item). The codex table below is the older 2026-08-09 pass, kept for history.
+
+## Visual quality scores (codex GPT-5.6-terra xhigh vision review, 2026-08-09)
 
 | State | Start | Final | S+ |
 |-------|------:|------:|----|
