@@ -144,8 +144,10 @@ export class CinemaMode {
   private syncMethodOverlay(active: boolean) {
     const host = this.stage.el ?? this.stage.gd;
     let el = host.querySelector<HTMLElement>("[data-cinema-method]");
+    let key = host.querySelector<HTMLElement>("[data-cinema-key]");
     if (!active) {
       el?.remove();
+      key?.remove();
       return;
     }
     if (!el) {
@@ -162,6 +164,17 @@ export class CinemaMode {
     el.textContent =
       `Model Observatory · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
       (n != null ? ` · N=${n}` : "");
+    // Wave 3 (cinema comprehension): a minimal encoding key rides just above
+    // the method line — tiny, low-opacity, never competing with the canvas.
+    // The only chrome beyond the exit control; nothing else returns.
+    if (!key) {
+      key = document.createElement("div");
+      key.className = "cinema-key-line";
+      key.setAttribute("data-cinema-key", "1");
+      key.setAttribute("aria-hidden", "true");
+      host.appendChild(key);
+    }
+    key.textContent = "color = lab · ring = focus · filament = frontier";
   }
   /**
    * L9 — cinema export artifact: composite the live stage canvas with an ink-field

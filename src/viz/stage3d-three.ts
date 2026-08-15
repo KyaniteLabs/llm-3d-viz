@@ -66,6 +66,12 @@ type LabelSpec = {
   priority?: number;
   /** Owning scene axis for ticks — drives cross-axis corner de-collision. */
   axis?: "x" | "y" | "z";
+  /**
+   * Wave 3 (cinema): focus-family mark labels always render — the NMS pass
+   * offsets them to a free slot instead of dropping, and styles them with
+   * 2-line wrap + one-step-smaller font so dense hero clusters stay readable.
+   */
+  cinemaFocus?: boolean;
 };
 
 /** Slight transparency on dim slate so occluded frontier marks read through. */
@@ -732,7 +738,7 @@ export class Stage3DThree implements Stage3DSurface {
     if (!domains) return;
 
     // H1 (uiux 2026-08-15): narrow stages keep a compact decode layer instead of
-    // full suppression — abbreviated titles ("$/M·log" / "IQ" / "tok/s") at the
+    // full suppression — abbreviated titles ("$/M·log" / "INDEX" / "tok/s·log") at the
     // high ends + sparse ticks (buildAxisDomain already thins ticks to ≤3 when
     // narrow) at reduced opacity (paintLabels). Long plain-English task callouts
     // stay desktop-only — they are the part that actually clipped on phones.
@@ -987,7 +993,12 @@ export class Stage3DThree implements Stage3DSurface {
     }
     // Cap label focus to the top-scoring models so dense catalogs don't create
     // an unbounded label set that NMS must process every orbit frame.
-    if (labelFocus && labelFocus.size > LABEL_CAP) {
+    // Wave 3 (cinema): the budget lifts to the FULL focus set — every
+    // focus-family mark must carry its name in cinema; placement (wrap,
+    // smaller font, offset ladder) resolves density instead of a cap.
+    if (cinemaFocus) {
+      labelFocus = new Set([...(labelFocus ?? []), ...cinemaFocus]);
+    } else if (labelFocus && labelFocus.size > LABEL_CAP) {
       labelFocus = new Set(
         [...labelFocus]
           .sort((a, b) => (scoreById.get(b) ?? 0) - (scoreById.get(a) ?? 0))
@@ -1282,8 +1293,11 @@ export class Stage3DThree implements Stage3DSurface {
       // washing frontier nodes (the prior 0.055 ≈ 58px was mark-sized → blowout).
       const curve = new THREE.CatmullRomCurve3(ridgePts, false, "centripetal");
       const tubularSegments = Math.max(64, ridgePts.length * 32);
-      coreGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.015, 8, false);
-      glowGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.025, 8, false);
+      // Wave 3 (mobile taste): the ridge filament thins slightly on narrow
+      // stages (<640px) so the tube does not dominate a small canvas.
+      const tubeScale = this.narrowStage ? 0.75 : 1;
+      coreGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.015 * tubeScale, 8, false);
+      glowGeom = new THREE.TubeGeometry(curve, tubularSegments, 0.025 * tubeScale, 8, false);
     }
     this.ridgeMesh.geometry.dispose();
     this.ridgeMesh.geometry = coreGeom;
@@ -1347,7 +1361,10 @@ export class Stage3DThree implements Stage3DSurface {
       const isOptimum = mesh.userData.semanticClass === "optimum";
       const isFrontier = mesh.userData.semanticClass === "frontier";
       const inLabelFocus = !!labelFocus?.has(id);
-      if (narrow) { if (!isOptimum) continue; }
+      // Wave 3: cinema focus marks label even on narrow stages — in cinema the
+      // focus set IS the content; identity must not depend on viewport width.
+      const cinemaFocusMark = Boolean(cinemaFocus?.has(id));
+      if (narrow && !cinemaFocus) { if (!isOptimum) continue; }
       else if (!isOptimum && !focusLabels && !inLabelFocus) continue;
       const tier = (model.effort_tier || "").toString().toLowerCase();
       let text: string;
@@ -1382,6 +1399,7 @@ export class Stage3DThree implements Stage3DSurface {
         world: mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)),
         kind: "mark",
         priority,
+        cinemaFocus: cinemaFocusMark,
       });
     }
 
@@ -1541,9 +1559,10 @@ export class Stage3DThree implements Stage3DSurface {
       priority: number;
       title?: string;
       axis?: "x" | "y" | "z";
+      cinemaFocus?: boolean;
     };
     const candidates: Placed[] = [];
-    for (const { text, world, kind, priority, title, axis } of this.labelSpecs) {
+    for (const { text, world, kind, priority, title, axis, cinemaFocus } of this.labelSpecs) {
       const projected = world.clone().project(this.camera);
       if (projected.z > 1 || projected.z < -1) continue;
       if (projected.x < -1.2 || projected.x > 1.2 || projected.y < -1.2 || projected.y > 1.2) continue;
@@ -1556,6 +1575,7 @@ export class Stage3DThree implements Stage3DSurface {
         kind,
         title,
         axis,
+        cinemaFocus,
         priority:
           priority ??
           (kind === "title" ? 4 : kind === "task" ? 2 : kind === "mark" ? 1 : 0),
@@ -1597,9 +1617,19 @@ export class Stage3DThree implements Stage3DSurface {
     };
     const labelBox = (p: Placed) => {
       const { left, top } = clampPos(p);
-      const halfW = measureLabelWidth(p) / 2;
+      // Wave 3 (cinema focus labels wrap at 9rem ≈ 144px) — clamp the
+      // collision width to the wrap ceiling so 2-line labels claim realistic
+      // bounds (helps the offset ladder find genuinely free slots).
+      const wrapMax = p.cinemaFocus ? 144 : Number.POSITIVE_INFINITY;
+      const halfW = Math.min(measureLabelWidth(p), wrapMax + edgePad * 2) / 2;
       // R5: optima may wrap to two lines — size their collision box accordingly.
-      const halfH = p.kind === "task" ? 12 : p.kind === "mark" && p.priority === 3 ? 12 : 8;
+      // Wave 3: cinema focus labels wrap too.
+      const halfH =
+        p.kind === "task"
+          ? 12
+          : (p.kind === "mark" && p.priority === 3) || p.cinemaFocus
+            ? 11
+            : 8;
       return { l: left - halfW, r: left + halfW, t: top - halfH, b: top + halfH };
     };
     const overlap = (a: ReturnType<typeof labelBox>, b: ReturnType<typeof labelBox>) =>
@@ -1610,22 +1640,60 @@ export class Stage3DThree implements Stage3DSurface {
     // corners — cost/speed decade ticks can project onto the same screen point
     // ("0.1" over "0.1", "29" over "30"). First axis in x→y→z order keeps the
     // corner; the losing duplicate is dropped (its axis keeps its other ticks).
+    // Wave 3: (a) SAME-axis ticks with identical text at projective coincidence
+    // dedup too (landing cost corner painted "0.1" twice, worlds −1/−0.941);
+    // (b) ticks yield to task anchor rails — a callout grazing a tick band
+    // ("Hard expert Q&A…" × "0.2") keeps, the tick under it drops.
     const always = candidates.filter(
       (c) => c.kind === "title" || c.kind === "task",
     );
     const keptTicks: Placed[] = [];
     for (const t of candidates.filter((c) => c.kind === "tick")) {
       const box = labelBox(t);
-      const clash = keptTicks.some(
-        (k) => k.axis !== t.axis && overlap(box, labelBox(k)),
-      );
+      const clash =
+        keptTicks.some(
+          (k) =>
+            (k.axis !== t.axis || k.text === t.text) && overlap(box, labelBox(k)),
+        ) ||
+        always.some((a) => a.kind === "task" && overlap(box, labelBox(a)));
       if (!clash) keptTicks.push(t);
     }
     const soft = candidates
       .filter((c) => c.kind === "mark")
       .sort((a, b) => b.priority - a.priority);
     const acceptedSoft: Placed[] = [];
+    const taken = () => [...always, ...keptTicks, ...acceptedSoft];
     for (const m of soft) {
+      if (m.cinemaFocus) {
+        // Wave 3 (cinema): every focus-family mark carries its name. Walk an
+        // offset ladder (up/down/side, then farther) for a collision-free
+        // slot; if the cluster is fully packed, keep the base position —
+        // a readable overlap beats anonymity.
+        const ladder: Array<[number, number]> = [
+          [0, 0],
+          [0, 18],
+          [0, -18],
+          [30, 0],
+          [-30, 0],
+          [30, 18],
+          [-30, 18],
+          [30, -18],
+          [-30, -18],
+          [0, 34],
+          [0, -34],
+        ];
+        let placed = false;
+        for (const [dx, dy] of ladder) {
+          const shifted: Placed = { ...m, x: m.x + dx, y: m.y + dy };
+          if (!taken().some((k) => overlap(labelBox(shifted), labelBox(k)))) {
+            acceptedSoft.push(shifted);
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) acceptedSoft.push(m);
+        continue;
+      }
       const box = labelBox(m);
       if (acceptedSoft.some((k) => overlap(box, labelBox(k)))) continue;
       acceptedSoft.push(m);
@@ -1635,6 +1703,7 @@ export class Stage3DThree implements Stage3DSurface {
     const existing = this.labelRoot.children;
     for (let i = 0; i < kept.length; i++) {
       const { text, x, y, kind, title, priority } = kept[i];
+      const cinemaFocus = Boolean(kept[i].cinemaFocus);
       // Reuse existing spans across orbit frames instead of clearing/recreating.
       const el = (existing[i] as HTMLSpanElement | undefined) ?? document.createElement("span");
       el.textContent = text;
@@ -1643,8 +1712,20 @@ export class Stage3DThree implements Stage3DSurface {
       if (kind === "task") el.className = "stage-task-anchor";
       else el.className = "";
       const isTask = kind === "task";
+      // Wave 3 (cinema): focus marks shrink one font step (10px → 9px) so the
+      // full focus cast fits with 2-line wrap; the optimum keeps its 10px hero size.
       const size =
-        kind === "title" ? (this.narrowStage ? "10px" : "11px") : kind === "mark" ? "10px" : isTask ? "10px" : "10px";
+        kind === "title"
+          ? this.narrowStage
+            ? "10px"
+            : "11px"
+          : cinemaFocus && priority !== 3
+            ? "9px"
+            : kind === "mark"
+              ? "10px"
+              : isTask
+                ? "10px"
+                : "10px";
       const color =
         kind === "title"
           ? this.tokens.textWarm
@@ -1686,6 +1767,8 @@ export class Stage3DThree implements Stage3DSurface {
       // R5 (uiux 2026-08-15): optimum (pick) labels never truncate — full name,
       // wrapping to a second line when long. Other marks get a wider budget with
       // a CSS-ellipsis fallback that never fires under the 26-char cap.
+      // Wave 3 (cinema): focus marks wrap at 9rem (2 lines) instead of
+      // colliding horizontally — smaller footprint in the dense hero cluster.
       const isOptimumMark = kind === "mark" && priority === 3;
       const maxW =
         kind === "title"
@@ -1694,7 +1777,9 @@ export class Stage3DThree implements Stage3DSurface {
             ? "min(15rem, 32vw)"
             : isOptimumMark
               ? "min(18rem, 72vw)"
-              : "14rem";
+              : cinemaFocus
+                ? "9rem"
+                : "14rem";
       // H1: compact decode layer reads as supporting chrome on phones — ticks
       // and titles detune so the marks stay the subject, but stay decodable.
       const opacity =
@@ -1711,7 +1796,7 @@ export class Stage3DThree implements Stage3DSurface {
                 : 0.78;
       el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
         color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.02em;
-        white-space:${isTask || isOptimumMark ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : isOptimumMark ? "center" : "left"};
+        white-space:${isTask || isOptimumMark || cinemaFocus ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : isOptimumMark || cinemaFocus ? "center" : "left"};
         opacity:${opacity};text-shadow:0 0 8px ${this.tokens.inkField},0 0 2px ${this.tokens.inkField};
         max-width:${maxW};overflow:${kind === "title" ? "visible" : "hidden"};text-overflow:${kind === "mark" && !isOptimumMark ? "ellipsis" : "clip"};
         pointer-events:${title ? "auto" : "none"};cursor:${title ? "help" : "default"};

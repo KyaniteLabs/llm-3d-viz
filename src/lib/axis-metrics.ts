@@ -212,7 +212,9 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "intelligence",
     label: "AA Intelligence",
     title: "INTELLIGENCE",
-    compactTitle: "IQ",
+    // Wave 3 (mobile taste): "INDEX" over "IQ" — same compactness, less jargon
+    // ("IQ" read as a psychological claim about the models, not the metric).
+    compactTitle: "INDEX",
     scale: "linear",
     available: true,
     getValue: (m) => m.aa_intelligence_index,
@@ -265,7 +267,7 @@ export function getAxisMetric(id: AxisMetricId): AxisMetricDef {
 
 /**
  * Abbreviated stage title for narrow (<640px) stages — H1 (uiux 2026-08-15):
- * phones keep a compact decode layer ("$/M ·log" / "IQ" / "tok/s") instead of
+ * phones keep a compact decode layer ("$/M·log" / "INDEX" / "tok/s·log") instead of
  * losing axis context entirely. Keeps the W6 log-scale honesty marker.
  */
 export function compactAxisTitle(domain: Pick<AxisDomain, "metricId" | "scale">): string {

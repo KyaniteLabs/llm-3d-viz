@@ -303,7 +303,10 @@ export class DecidePanel {
           : paretoIds.has(m.model)
             ? "pareto"
             : "eligible";
-        const r = kind === "shortlist" ? 5 : kind === "pareto" ? 3.5 : 2.2;
+        // Wave 3 (decide legibility): eligible dots were 3.9px @ 0.55 — below
+        // readable. ≥6px at panel width now (r3.5 → ~6.2px rendered); the
+        // pareto/shortlist steps stay ahead so hierarchy still reads.
+        const r = kind === "shortlist" ? 5 : kind === "pareto" ? 4.2 : 3.5;
         return `<circle class="decide-dot is-${kind}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" data-model="${esc(m.model)}"><title>${esc(displayName(m.model))} · ${formatPricePerM(m.blended_price_per_M!)} · ${formatTps(m.tps!)}</title></circle>`;
       })
       .join("");
