@@ -64,6 +64,8 @@ type LabelSpec = {
   /** Longer title attribute for task frames of reference. */
   title?: string;
   priority?: number;
+  /** Owning scene axis for ticks — drives cross-axis corner de-collision. */
+  axis?: "x" | "y" | "z";
 };
 
 /** Slight transparency on dim slate so occluded frontier marks read through. */
@@ -750,6 +752,7 @@ export class Stage3DThree implements Stage3DSurface {
         text: t.label,
         world: new THREE.Vector3(sx, -S - 0.08, -S - 0.02),
         kind: "tick",
+        axis: "x",
       });
     }
     for (const t of domains.y.ticks) {
@@ -759,6 +762,7 @@ export class Stage3DThree implements Stage3DSurface {
         text: t.label,
         world: new THREE.Vector3(-S - 0.08, sy, -S - 0.02),
         kind: "tick",
+        axis: "y",
       });
     }
     for (const t of domains.z.ticks) {
@@ -767,6 +771,7 @@ export class Stage3DThree implements Stage3DSurface {
         text: t.label,
         world: new THREE.Vector3(-S - 0.02, -S - 0.08, sz),
         kind: "tick",
+        axis: "z",
       });
     }
 
@@ -1230,6 +1235,17 @@ export class Stage3DThree implements Stage3DSurface {
       if (this.highlightFamilyId && famId !== this.highlightFamilyId) trailOpacity = 0.08;
       else if (this.highlightFamilyId && famId === this.highlightFamilyId) trailOpacity = 0.88;
       else if (this.soloFamily) trailOpacity = 0.88;
+      // R6 (uiux 2026-08-15): cinema — trails of families with no focus member
+      // step back to the ghost tier so the focus filament + optimum read first
+      // (trail is context, marks stay the subject). Focus-family/solo trails
+      // keep their full weight.
+      if (
+        cinemaFocus &&
+        cinemaFocus.size > 0 &&
+        !members.some((m) => cinemaFocus.has(m.model))
+      ) {
+        trailOpacity = Math.min(trailOpacity, 0.07);
+      }
       const mat = new THREE.LineBasicMaterial({
         color: new THREE.Color(trailEnc.trailColor),
         transparent: true,
@@ -1336,8 +1352,9 @@ export class Stage3DThree implements Stage3DSurface {
       const tier = (model.effort_tier || "").toString().toLowerCase();
       let text: string;
       if (isOptimum) {
-        const shortBase = displayName(id);
-        text = shortBase.length > 20 ? shortBase.slice(0, 18) + "…" : shortBase;
+        // R5 (uiux 2026-08-15): never truncate the pick's own name — the full
+        // display name renders (paintLabels wraps long optima to a 2nd line).
+        text = displayName(id);
       } else if (focusLabels) {
         // Solo/focus: effort tier primary (optional short stem).
         const stem = displayName(id).split(/[\s(]/)[0]?.slice(0, 8) ?? "";
@@ -1350,8 +1367,10 @@ export class Stage3DThree implements Stage3DSurface {
         text = tier && tier !== "default" ? tierLabel : `${stem} ${tierLabel}`.trim();
       } else {
         // D10 focus-set direct label (default view): short name = identity w/o color.
+        // R5: wider char budget (16→26) so hero-cluster names read whole
+        // ("Gemini 3.7 Flash (medium)"); only pathological ids still abbreviate.
         const shortBase = displayName(id);
-        text = shortBase.length > 16 ? shortBase.slice(0, 14) + "…" : shortBase;
+        text = shortBase.length > 26 ? shortBase.slice(0, 24) + "…" : shortBase;
       }
       // NMS priority: optimum (3) and frontier (2) reliably win the collision pass, so
       // they are the always-visible identity anchors; selected/shortlist/top-K (1) are
@@ -1521,9 +1540,10 @@ export class Stage3DThree implements Stage3DSurface {
       kind: LabelSpec["kind"];
       priority: number;
       title?: string;
+      axis?: "x" | "y" | "z";
     };
     const candidates: Placed[] = [];
-    for (const { text, world, kind, priority, title } of this.labelSpecs) {
+    for (const { text, world, kind, priority, title, axis } of this.labelSpecs) {
       const projected = world.clone().project(this.camera);
       if (projected.z > 1 || projected.z < -1) continue;
       if (projected.x < -1.2 || projected.x > 1.2 || projected.y < -1.2 || projected.y > 1.2) continue;
@@ -1535,6 +1555,7 @@ export class Stage3DThree implements Stage3DSurface {
         y,
         kind,
         title,
+        axis,
         priority:
           priority ??
           (kind === "title" ? 4 : kind === "task" ? 2 : kind === "mark" ? 1 : 0),
@@ -1577,16 +1598,29 @@ export class Stage3DThree implements Stage3DSurface {
     const labelBox = (p: Placed) => {
       const { left, top } = clampPos(p);
       const halfW = measureLabelWidth(p) / 2;
-      const halfH = p.kind === "task" ? 12 : 8;
+      // R5: optima may wrap to two lines — size their collision box accordingly.
+      const halfH = p.kind === "task" ? 12 : p.kind === "mark" && p.priority === 3 ? 12 : 8;
       return { l: left - halfW, r: left + halfW, t: top - halfH, b: top + halfH };
     };
     const overlap = (a: ReturnType<typeof labelBox>, b: ReturnType<typeof labelBox>) =>
       !(a.r < b.l || a.l > b.r || a.b < b.t || a.t > b.b);
 
     // Task frames always keep (orientation rails); only model marks NMS.
+    // R4 (uiux 2026-08-15): ticks from DIFFERENT axes de-collide at shared cube
+    // corners — cost/speed decade ticks can project onto the same screen point
+    // ("0.1" over "0.1", "29" over "30"). First axis in x→y→z order keeps the
+    // corner; the losing duplicate is dropped (its axis keeps its other ticks).
     const always = candidates.filter(
-      (c) => c.kind === "title" || c.kind === "tick" || c.kind === "task",
+      (c) => c.kind === "title" || c.kind === "task",
     );
+    const keptTicks: Placed[] = [];
+    for (const t of candidates.filter((c) => c.kind === "tick")) {
+      const box = labelBox(t);
+      const clash = keptTicks.some(
+        (k) => k.axis !== t.axis && overlap(box, labelBox(k)),
+      );
+      if (!clash) keptTicks.push(t);
+    }
     const soft = candidates
       .filter((c) => c.kind === "mark")
       .sort((a, b) => b.priority - a.priority);
@@ -1597,10 +1631,10 @@ export class Stage3DThree implements Stage3DSurface {
       acceptedSoft.push(m);
     }
     const kept: Placed[] = [];
-    kept.push(...always, ...acceptedSoft);
+    kept.push(...always, ...keptTicks, ...acceptedSoft);
     const existing = this.labelRoot.children;
     for (let i = 0; i < kept.length; i++) {
-      const { text, x, y, kind, title } = kept[i];
+      const { text, x, y, kind, title, priority } = kept[i];
       // Reuse existing spans across orbit frames instead of clearing/recreating.
       const el = (existing[i] as HTMLSpanElement | undefined) ?? document.createElement("span");
       el.textContent = text;
@@ -1649,7 +1683,18 @@ export class Stage3DThree implements Stage3DSurface {
         ty = "-100%";
       }
 
-      const maxW = kind === "title" ? "none" : isTask ? "min(15rem, 32vw)" : "12rem";
+      // R5 (uiux 2026-08-15): optimum (pick) labels never truncate — full name,
+      // wrapping to a second line when long. Other marks get a wider budget with
+      // a CSS-ellipsis fallback that never fires under the 26-char cap.
+      const isOptimumMark = kind === "mark" && priority === 3;
+      const maxW =
+        kind === "title"
+          ? "none"
+          : isTask
+            ? "min(15rem, 32vw)"
+            : isOptimumMark
+              ? "min(18rem, 72vw)"
+              : "14rem";
       // H1: compact decode layer reads as supporting chrome on phones — ticks
       // and titles detune so the marks stay the subject, but stay decodable.
       const opacity =
@@ -1666,9 +1711,9 @@ export class Stage3DThree implements Stage3DSurface {
                 : 0.78;
       el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
         color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.02em;
-        white-space:${isTask ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : "left"};
+        white-space:${isTask || isOptimumMark ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : isOptimumMark ? "center" : "left"};
         opacity:${opacity};text-shadow:0 0 8px ${this.tokens.inkField},0 0 2px ${this.tokens.inkField};
-        max-width:${maxW};overflow:${kind === "title" ? "visible" : "hidden"};
+        max-width:${maxW};overflow:${kind === "title" ? "visible" : "hidden"};text-overflow:${kind === "mark" && !isOptimumMark ? "ellipsis" : "clip"};
         pointer-events:${title ? "auto" : "none"};cursor:${title ? "help" : "default"};
         background:${isTask ? "rgba(7,12,11,0.72)" : "transparent"};
         border:${isTask ? "1px solid rgba(201,212,196,0.18)" : "0"};

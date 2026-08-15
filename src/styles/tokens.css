@@ -626,9 +626,11 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   background: color-mix(in oklab, var(--color-surface) 92%, #000);
 }
 
-/* Collapse ATLAS dock in cinema — minimized sliver, still exit-able (2026-08-09). */
-.app-shell.is-cinema .atlas-dock { max-height: 1.5rem; overflow: hidden; opacity: 0.25; transform: scale(0.85); transform-origin: bottom right; transition: opacity 0.3s; }
-.app-shell.is-cinema .atlas-dock:hover { opacity: 0.7; }
+/* R2 / M4 (uiux 2026-08-15): ATLAS dock is fully hidden in cinema (the old
+   0.25-opacity 1.5rem sliver leaked endpoint/model plumbing onto the
+   presentation surface). Authoritative !important overrides live after the
+   `.app-shell.is-cinema .inspector` block below, where they win the cascade
+   against both the floating-dock and inspector mount treatments. */
 .app-shell.is-cinema .atlas-dock .atlas-llm-details {
   display: none; /* keep chrome thin in cinema */
 }
@@ -1728,6 +1730,21 @@ html.is-cinema .cinema-exit-fab {
   border: none;
   background: transparent;
 }
+/* R2 / M4 (uiux 2026-08-15): fully hide ATLAS in cinema — the presentation
+   canvas is chrome-free (no 0.25-opacity sliver, no endpoint/model plumbing).
+   Exit cinema via the FAB or [C]. Placed after the floating-dock + inspector
+   blocks above so these !important hides win the cascade for both mount
+   paths; the inspector itself would otherwise linger as an empty bordered
+   shell once its only visible child (the dock) is gone. */
+.app-shell.is-cinema .inspector {
+  display: none !important;
+}
+.app-shell.is-cinema .atlas-dock,
+.app-shell.is-cinema .inspector .atlas-dock,
+html.is-cinema .atlas-dock {
+  display: none !important;
+  visibility: hidden;
+}
 .app-shell.is-cinema .canvas-host {
   grid-template-rows: minmax(0, 1fr);
   padding: 0;
@@ -2035,13 +2052,16 @@ select:focus-visible {
   }
 
   /* H1/H4: story line (the answer) and the STAGE KEY chip share the top strip
-     without overlapping — story gets 52%, key chip ≤46%. */
-  .story-line {
+     without overlapping — story gets 52%, key chip ≤46%.
+     R1 (uiux 2026-08-15): scope under .stage-visual so this block outranks the
+     later base `.story-line` rule (min(42rem,70%)) that shadowed it and let the
+     pick text print into the STAGE KEY chip at 390px. */
+  .stage-visual .story-line {
     max-width: min(42rem, 52%);
     top: 0.35rem;
     font-size: 0.65rem;
   }
-  .story-line strong { font-size: 0.8rem; }
+  .stage-visual .story-line strong { font-size: 0.8rem; }
 
   .inspector,
   .console {
@@ -2049,6 +2069,20 @@ select:focus-visible {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0.4rem 0.5rem;
+    /* M7/R3 (uiux 2026-08-15): no row sliced mid-glyph at the sheet fold —
+       rows fade out across the last 1.5rem of the sheet, and the extra
+       bottom padding lets the final row scroll clear above the fade. */
+    padding-bottom: 1.9rem;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
   }
   /* Do NOT use flex+order here — flex-shrink collapses .model-readout (min-height:0). */
 
