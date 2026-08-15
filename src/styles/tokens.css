@@ -716,8 +716,11 @@ html.is-cinema .cinema-exit-fab {
     margin: 0;
   }
   .projection-row { grid-template-columns: 1fr; }
-  /* W-mobile (2026-08-09): declutter narrow screens, prevent footer overlap */
-  .stage-guide { display: none; }
+  /* H1 (uiux 2026-08-15): the legend returns on phones as a collapsed STAGE KEY
+     disclosure — chip + frontier count always visible, tap to expand (styling in
+     the stage-first mobile block below). Suppression made the stage undecodable
+     as data; the compact decode layer (abbreviated axis titles + sparse ticks)
+     replaces the old all-or-nothing declutter. */
   h1 { font-size: var(--step-0); }
   .observatory-subtitle, .heat-encoding-note { display: none; }
   .console { position: relative; z-index: 1; }
@@ -1775,14 +1778,42 @@ html.is-cinema .cinema-exit-fab {
   max-height: 4rem;
 }
 
-/* STAGE KEY open HUD: cap height so stage stays subject */
+/* STAGE KEY open HUD: cap height so stage stays subject.
+   H2 (uiux 2026-08-15): containment must be legible — visible slim scrollbar +
+   sticky fade affordance (`.stage-guide-more`, count set in stage-guide.ts).
+   Never a silent cut: the open panel reads as a scroll region, not clipped. */
 .stage-guide-body {
   max-height: 6rem;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(231, 226, 216, 0.32) transparent;
+}
+.stage-guide-body::-webkit-scrollbar { width: 6px; }
+.stage-guide-body::-webkit-scrollbar-track { background: transparent; }
+.stage-guide-body::-webkit-scrollbar-thumb {
+  background: rgba(231, 226, 216, 0.32);
+  border-radius: 3px;
 }
 .stage-guide-disclosure[open] .stage-guide-body {
-  max-height: min(18rem, 55vh);
+  max-height: min(24rem, 60vh);
 }
+/* "+N more" fade overlay pinned over the scroll region's bottom edge */
+.stage-guide-disclosure { position: relative; }
+.stage-guide-more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0.6rem 0.3rem 0.3rem;
+  color: var(--color-text);
+  font-size: 0.625rem; /* L8 micro-type floor: 10px */
+  letter-spacing: 0.08em;
+  background: linear-gradient(to bottom, rgba(11, 17, 16, 0), rgba(11, 17, 16, 0.94) 60%);
+  pointer-events: none;
+}
+.stage-guide-more[hidden] { display: none; }
 
 /* Instrument inputs — no white native fields */
 input[type="search"],
@@ -1981,14 +2012,14 @@ select:focus-visible {
     padding: 0.35rem 0.5rem !important;
   }
   .stage-guide-disclosure > summary {
-    font-size: 0.58rem !important;
+    font-size: 0.625rem !important; /* L8 micro-type floor: 10px — chip is the decode entry */
     gap: 0.35rem;
     min-height: 2.25rem; /* ≥36px touch — expand hit area */
     display: flex;
     align-items: center;
   }
   .stage-guide-count {
-    font-size: 0.52rem !important;
+    font-size: 0.625rem !important; /* L8 micro-type floor: 10px */
   }
   /* Open body: keep width under 70% canvas; body height capped */
   .stage-guide-disclosure[open] {
@@ -2002,6 +2033,15 @@ select:focus-visible {
   .stage-guide .lab-disclosure {
     display: none;
   }
+
+  /* H1/H4: story line (the answer) and the STAGE KEY chip share the top strip
+     without overlapping — story gets 52%, key chip ≤46%. */
+  .story-line {
+    max-width: min(42rem, 52%);
+    top: 0.35rem;
+    font-size: 0.65rem;
+  }
+  .story-line strong { font-size: 0.8rem; }
 
   .inspector,
   .console {
@@ -2235,6 +2275,18 @@ select:focus-visible {
   pointer-events: none;
 }
 .story-line:empty { display: none; }
+/* H4 (uiux 2026-08-15): the answer out-weighs the instrument — the pick name
+   carries the filament; secondary console blocks step back via spacing/opacity
+   (calm chrome, dramatic canvas — no layout rewrite). */
+.story-line strong {
+  color: var(--filament);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+.console-section-label { opacity: 0.82; }
+.console-section[data-section="navigate"] { margin-top: 1.05rem; }
+.console-section[data-section="navigate"] .family-chip-row { opacity: 0.88; }
 .method-strip:not([hidden]) { display: inline; }
 .copy-insight {
   margin-left: 0.5rem;

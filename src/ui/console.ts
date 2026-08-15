@@ -348,7 +348,7 @@ export class DecisionConsole {
           .join("")}
       </div>
       <details class="nav-help"><summary class="axis-hint">Keyboard</summary>
-      <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all · <kbd>C</kbd> cinema</p></details>`;
+      <p class="axis-hint nav-keys">Keys: <kbd>[</kbd><kbd>]</kbd> family · <kbd>,</kbd><kbd>.</kbd> effort · <kbd>Esc</kbd> all / close · <kbd>C</kbd> cinema · <kbd>S</kbd> save frame (in cinema)</p></details>`;
   }
 
   private filteredFamilyOptions(): string[] {
@@ -878,11 +878,9 @@ export class DecisionConsole {
       button.classList.toggle("is-active", on);
       button.setAttribute("aria-pressed", String(on));
     });
-    const cinemaButton = this.root.querySelector<HTMLButtonElement>("[data-cinema-toggle]");
-    if (cinemaButton) {
-      cinemaButton.setAttribute("aria-pressed", String(state.cinemaMode));
-      cinemaButton.textContent = state.cinemaMode ? "EXIT CINEMA [C]" : "ENTER CINEMA [C]";
-    }
+    // M1 (uiux 2026-08-15): cinema button sync removed — the button lives in the
+    // scope bar (header), so this root-scoped lookup was dead code; the live
+    // sync now runs in main.ts next to the decide-toggle subscription.
     const readout = this.root.querySelector(".model-readout")!;
     const model = this.activeModel(state);
     readout.innerHTML = model ? this.details(model, state) : this.leaderboard(state, activePreset);

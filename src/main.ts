@@ -158,6 +158,24 @@ function updateEmptyState(visibleCount: number, filters?: { multiEffortOnly?: bo
       <p class="axis-hint">Tip: <code>?me=0</code> shows single-effort models; <code>?families=Claude%20Fable%205&amp;me=0</code> solos Fable.</p>`;
 }
 
+/**
+ * H4 (uiux 2026-08-15): the top pick is the answer — it must out-weigh the
+ * console chrome. The story stays one plain sentence (a11y + copy export use
+ * the same string); only the model name gets emphasis via a <strong> node.
+ * Built from text nodes, never innerHTML, so model names cannot inject markup.
+ */
+function renderStoryLine(el: HTMLElement, story: string, topModel: string | null) {
+  if (!topModel || !story.includes(topModel)) {
+    el.textContent = story;
+    return;
+  }
+  const at = story.indexOf(topModel);
+  el.replaceChildren(story.slice(0, at));
+  const name = document.createElement("strong");
+  name.textContent = topModel;
+  el.append(name, story.slice(at + topModel.length));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   void boot().catch((err) => {
     console.error("[boot] fatal", err);
@@ -448,6 +466,15 @@ async function boot() {
     decideToggle.classList.toggle("is-active", state.decideMode);
     document.documentElement.dataset.decideMode = state.decideMode ? "1" : "0";
   });
+  // M1 (uiux 2026-08-15): the cinema button lives in the scope bar (header),
+  // outside the console root — the old console-side lookup never found it, so
+  // aria-pressed stayed "false" forever. Sync pressed state + label from here.
+  const cinemaToggle = document.querySelector<HTMLButtonElement>("[data-cinema-toggle]");
+  store.subscribe((state) => {
+    if (!cinemaToggle) return;
+    cinemaToggle.setAttribute("aria-pressed", String(state.cinemaMode));
+    cinemaToggle.textContent = state.cinemaMode ? "EXIT CINEMA [C]" : "ENTER CINEMA [C]";
+  });
   // U03: keep FilterShelf + DecisionConsole on the same catalog resolver as the
   // stage so Local-VRAM scope is reflected in shelf options and family navigation.
   let lastCatalogMode = store.getState().filters.vramMaxGb ?? null;
@@ -473,6 +500,12 @@ async function boot() {
     if (hit) {
       store.update({ pinnedModelId: hit.model, hoveredModelId: hit.model });
       setCanvasMode("3d");
+    } else if (statusText) {
+      // M3 (uiux 2026-08-15): no silent failure — the footer is aria-live, so
+      // the miss is both visible and announced. Persists until the next state
+      // change rewrites the status line.
+      const shown = q.length > 24 ? `${q.slice(0, 24)}…` : q;
+      statusText.textContent = `No models match “${shown}” in the visible set — try fewer letters or widen scope (Edit scope).`;
     }
   });
 
@@ -525,7 +558,7 @@ async function boot() {
       nPlottable: visibleSet.length,
       intentLabel: null,
     });
-    if (storyLineEl) storyLineEl.textContent = story;
+    if (storyLineEl) renderStoryLine(storyLineEl, story, top ? displayName(top.model) : null);
     const axes = `${axisMapping.x} × ${axisMapping.y} × ${axisMapping.z}`;
     const asOf = new Date().toISOString().slice(0, 10);
     const sources = "Artificial Analysis · OpenRouter · Arena (CC BY 4.0)";
@@ -838,9 +871,16 @@ async function boot() {
     }
     if (key === "Escape") {
       event.preventDefault();
-      // Exit cinema first (button is hidden under is-cinema); then clear family solo.
+      // Exit cinema first (button is hidden under is-cinema); then dismiss any
+      // open overlay before mutating the visible set; then clear family solo.
+      // M2 (uiux 2026-08-15): Esc used to reset scope while the filter shelf
+      // was open — close the shelf first, reset only on a second Esc.
       if (store.getState().cinemaMode) {
         store.update({ cinemaMode: false });
+        return;
+      }
+      if (shell.classList.contains("is-scope-open")) {
+        setScopeOpen(false);
         return;
       }
       consoleUi.showAllFamilies();

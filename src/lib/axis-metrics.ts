@@ -37,6 +37,11 @@ export interface AxisMetricDef {
   label: string;
   /** Axis title drawn on the stage. */
   title: string;
+  /**
+   * Abbreviated axis title for narrow (<640px) stages (H1 · uiux 2026-08-15):
+   * decoding must survive on phones without the full-length title's clipping.
+   */
+  compactTitle: string;
   scale: AxisScale;
   /**
    * True when the dataset carries enough rows for this metric to be selectable.
@@ -156,6 +161,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "blended_price",
     label: "Cost $/M (7:2:1)",
     title: "COST ($/M)",
+    compactTitle: "$/M",
     scale: "log",
     available: true,
     getValue: (m) => m.blended_price_per_M,
@@ -165,6 +171,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "price_in",
     label: "Input $/M",
     title: "INPUT ($/M)",
+    compactTitle: "in $/M",
     scale: "log",
     available: true,
     getValue: (m) => m.price_in_per_M,
@@ -174,6 +181,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "price_out",
     label: "Output $/M",
     title: "OUTPUT ($/M)",
+    compactTitle: "out $/M",
     scale: "log",
     available: true,
     getValue: (m) => m.price_out_per_M,
@@ -183,6 +191,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "tps",
     label: "Speed (tok/s)",
     title: "SPEED (TPS)",
+    compactTitle: "tok/s",
     scale: "log",
     available: true,
     getValue: (m) => m.tps,
@@ -192,6 +201,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "ttft",
     label: "TTFT (s)",
     title: "TTFT (s)",
+    compactTitle: "TTFT",
     scale: "log",
     available: true,
     // Stored ms; domain still uses ms so log floors stay consistent.
@@ -202,6 +212,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "intelligence",
     label: "AA Intelligence",
     title: "INTELLIGENCE",
+    compactTitle: "IQ",
     scale: "linear",
     available: true,
     getValue: (m) => m.aa_intelligence_index,
@@ -213,6 +224,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
     id: "cost_per_index",
     label: "Cost / Index task",
     title: "COST / TASK",
+    compactTitle: "$/task",
     scale: "log",
     available: true,
     getValue: (m) =>
@@ -230,6 +242,7 @@ export const AXIS_METRICS: readonly AxisMetricDef[] = [
      */
     label: "Time / Index task (meas./est.)",
     title: "TIME / TASK (meas./est.)",
+    compactTitle: "s/task",
     scale: "log",
     available: true,
     getValue: (m) => estimateTimePerIndexTaskS(m),
@@ -248,6 +261,16 @@ const METRIC_BY_ID = Object.fromEntries(AXIS_METRICS.map((m) => [m.id, m])) as R
 
 export function getAxisMetric(id: AxisMetricId): AxisMetricDef {
   return METRIC_BY_ID[id];
+}
+
+/**
+ * Abbreviated stage title for narrow (<640px) stages — H1 (uiux 2026-08-15):
+ * phones keep a compact decode layer ("$/M ·log" / "IQ" / "tok/s") instead of
+ * losing axis context entirely. Keeps the W6 log-scale honesty marker.
+ */
+export function compactAxisTitle(domain: Pick<AxisDomain, "metricId" | "scale">): string {
+  const def = getAxisMetric(domain.metricId);
+  return def.scale === "log" ? `${def.compactTitle}·log` : def.compactTitle;
 }
 
 export function availableAxisMetrics(): AxisMetricDef[] {

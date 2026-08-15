@@ -42,7 +42,7 @@ export class DecidePanel {
       <p class="console-note decide-blurb">
         The glowing plane on the 3D stage is your intelligence floor (AA Index; default 50).
         Models below it dim; only models on or above with measured cost + speed enter the pick set.
-        Cost × speed chart + Pareto ridge + shortlist of 3 follow the cheap↔fast bias.
+        <span data-decide-blurb-tail>Cost × speed chart + Pareto ridge + shortlist of up to 3 follow the cheap↔fast bias.</span>
       </p>
       <div class="decide-floor">
         <label class="decide-label">
@@ -242,6 +242,21 @@ export class DecidePanel {
 
     this.renderChart(eligible, pareto, shortlist);
     this.renderShortlist(shortlist, eligible.length, pareto.length);
+    this.renderBlurbTail(shortlist.length);
+  }
+
+  /**
+   * H3 (uiux 2026-08-15): the blurb must never promise "shortlist of 3" while
+   * the ridge shows 2 — keep the promise count-driven so copy matches the
+   * visible header ("N of M on ridge") at every floor/bias.
+   */
+  private renderBlurbTail(shortlistN: number) {
+    const tail = this.root.querySelector<HTMLElement>("[data-decide-blurb-tail]");
+    if (!tail) return;
+    tail.textContent =
+      shortlistN > 0
+        ? `Cost × speed chart + Pareto ridge + shortlist of ${shortlistN} follow the cheap↔fast bias.`
+        : "Cost × speed chart + Pareto ridge follow the cheap↔fast bias — nothing passes this floor yet, so the shortlist is empty.";
   }
 
   private renderChart(eligible: Model[], pareto: Model[], shortlist: Model[]) {

@@ -184,16 +184,46 @@ export class StageGuide {
             </ol>
             <p class="stage-guide-note" id="frontier-label-note">Names stay in this HTML rail so they remain legible through camera moves; Plotly v0 has no 3D-to-pixel label API.</p>
           </section>
-
         </div>
+        <!-- H2: overlay affordance pinned over the scroll region's bottom edge -->
+        <p class="stage-guide-more" data-stage-guide-more hidden aria-hidden="true"></p>
       </details>`;
 
     // Persist toggles from user interaction without waiting for the next store tick.
     this.root.querySelector(".stage-guide-disclosure")?.addEventListener("toggle", (event) => {
       this.stageKeyOpen = (event.currentTarget as HTMLDetailsElement).open;
+      requestAnimationFrame(() => this.updateOverflowAffordance());
     });
     this.root.querySelector(".glyph-disclosure")?.addEventListener("toggle", (event) => {
       this.glyphOpen = (event.currentTarget as HTMLDetailsElement).open;
     });
+    this.root
+      .querySelector(".stage-guide-body")
+      ?.addEventListener("scroll", () => this.updateOverflowAffordance(), { passive: true });
+    requestAnimationFrame(() => this.updateOverflowAffordance());
+  }
+
+  /**
+   * H2 (uiux 2026-08-15): the open STAGE KEY is a contained, visibly scrollable
+   * region — never a silent cut. When entries (labs, glyphs, frontier models)
+   * sit below the fold, a sticky fade + "+N more" count appears at the bottom
+   * edge; it clears once the user reaches the end.
+   */
+  private updateOverflowAffordance() {
+    const body = this.root.querySelector<HTMLElement>(".stage-guide-body");
+    const hint = this.root.querySelector<HTMLElement>("[data-stage-guide-more]");
+    if (!body || !hint) return;
+    const more = body.scrollHeight - body.clientHeight > 8;
+    if (!more) {
+      hint.hidden = true;
+      return;
+    }
+    const fold = body.getBoundingClientRect().bottom - 4;
+    let below = 0;
+    for (const li of body.querySelectorAll<HTMLElement>("li")) {
+      if (li.getBoundingClientRect().top >= fold) below++;
+    }
+    hint.hidden = below === 0;
+    if (below > 0) hint.textContent = `+${below} more below · scroll`;
   }
 }

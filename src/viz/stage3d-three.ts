@@ -13,6 +13,7 @@ import { Model } from "../data/models";
 import {
   DEFAULT_AXIS_MAPPING,
   buildAxisDomain,
+  compactAxisTitle,
   densityMarkerScale,
   getAxisMetric,
   hasMappedAxes,
@@ -725,16 +726,22 @@ export class Stage3DThree implements Stage3DSurface {
       this.addLine(new THREE.Vector3(-S, -S, t), new THREE.Vector3(-S, S, t), grid, 0.1);
     }
 
-    if (this.narrowStage) return; // suppress domain titles/ticks on mobile — they clip
-
     const domains = this.domains;
     if (!domains) return;
 
+    // H1 (uiux 2026-08-15): narrow stages keep a compact decode layer instead of
+    // full suppression — abbreviated titles ("$/M·log" / "IQ" / "tok/s") at the
+    // high ends + sparse ticks (buildAxisDomain already thins ticks to ≤3 when
+    // narrow) at reduced opacity (paintLabels). Long plain-English task callouts
+    // stay desktop-only — they are the part that actually clipped on phones.
+    const compact = this.narrowStage;
+    const axisTitle = (domain: AxisDomain) => (compact ? compactAxisTitle(domain) : domain.title);
+
     // Axis titles at high ends (labels follow the remapped metrics).
     this.labelSpecs.push(
-      { text: domains.x.title, world: new THREE.Vector3(S + 0.12, -S, -S), kind: "title" },
-      { text: domains.y.title, world: new THREE.Vector3(-S, S + 0.12, -S), kind: "title" },
-      { text: domains.z.title, world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
+      { text: axisTitle(domains.x), world: new THREE.Vector3(S + 0.12, -S, -S), kind: "title" },
+      { text: axisTitle(domains.y), world: new THREE.Vector3(-S, S + 0.12, -S), kind: "title" },
+      { text: axisTitle(domains.z), world: new THREE.Vector3(-S, -S, S + 0.12), kind: "title" },
     );
 
     for (const t of domains.x.ticks) {
@@ -765,7 +772,7 @@ export class Stage3DThree implements Stage3DSurface {
 
     // Sparse task frames: same heights as Index, text extends into empty margin
     // OUTSIDE the cube (left of the intelligence face), not over the data.
-    this.pushIntelligenceTaskCallouts(domains);
+    if (!compact) this.pushIntelligenceTaskCallouts(domains);
     this.el.querySelector("[data-intel-axis-rail]")?.remove();
   }
 
@@ -1602,7 +1609,8 @@ export class Stage3DThree implements Stage3DSurface {
       if (kind === "task") el.className = "stage-task-anchor";
       else el.className = "";
       const isTask = kind === "task";
-      const size = kind === "title" ? "11px" : kind === "mark" ? "10px" : isTask ? "10px" : "10px";
+      const size =
+        kind === "title" ? (this.narrowStage ? "10px" : "11px") : kind === "mark" ? "10px" : isTask ? "10px" : "10px";
       const color =
         kind === "title"
           ? this.tokens.textWarm
@@ -1642,7 +1650,20 @@ export class Stage3DThree implements Stage3DSurface {
       }
 
       const maxW = kind === "title" ? "none" : isTask ? "min(15rem, 32vw)" : "12rem";
-      const opacity = kind === "mark" ? 0.92 : kind === "title" ? 0.95 : isTask ? 0.9 : 0.78;
+      // H1: compact decode layer reads as supporting chrome on phones — ticks
+      // and titles detune so the marks stay the subject, but stay decodable.
+      const opacity =
+        kind === "mark"
+          ? 0.92
+          : kind === "title"
+            ? this.narrowStage
+              ? 0.85
+              : 0.95
+            : isTask
+              ? 0.9
+              : this.narrowStage
+                ? 0.55
+                : 0.78;
       el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
         color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.02em;
         white-space:${isTask ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : "left"};
