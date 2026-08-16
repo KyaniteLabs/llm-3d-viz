@@ -13,6 +13,32 @@ const ALLOWED_ORIGINS = new Set([
   "https://llm-3d-viz.pages.dev",
 ]);
 
+/**
+ * Strict egress allowlist: exact-origin match enforced before EVERY outbound
+ * fetch. Covers exactly what this worker legitimately reaches today — the
+ * OpenAI TTS upstream and the Pages origin it reverse-proxies — and nothing
+ * else. Unlisted destinations are rejected loudly (logged + 403 JSON), never
+ * silently passed through.
+ */
+const EGRESS_ALLOWED_ORIGINS = new Set([
+  "https://api.openai.com", // handleAtlasTts upstream
+  `https://${ORIGIN}`, // proxyToPages destination
+]);
+
+/** Returns a loud 403 Response when url's origin is not egress-allowlisted, else null. */
+function egressBlocked(url, route) {
+  if (EGRESS_ALLOWED_ORIGINS.has(url.origin)) return null;
+  console.error(`[egress] destination not allowed (${route}): ${url.origin}`);
+  return new Response(
+    JSON.stringify({
+      error: "egress_destination_not_allowed",
+      route,
+      destination: url.origin,
+    }),
+    { status: 403, headers: { "content-type": "application/json" } },
+  );
+}
+
 /** Male, operator-grade voice. onyx = deep; ash = clear male; cedar = high quality when available. */
 const TTS_VOICE = "onyx";
 const TTS_MODEL = "gpt-4o-mini-tts";
@@ -120,7 +146,12 @@ async function handleAtlasTts(request, env) {
     payload.instructions = body?.instructions || TTS_INSTRUCTIONS;
   }
 
-  const upstream = await fetch("https://api.openai.com/v1/audio/speech", {
+  const ttsUrl = new URL("https://api.openai.com/v1/audio/speech");
+  // Egress allowlist: reject any destination drift before the outbound fetch.
+  const ttsBlocked = egressBlocked(ttsUrl, "atlas-tts");
+  if (ttsBlocked) return ttsBlocked;
+
+  const upstream = await fetch(ttsUrl.toString(), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
@@ -160,6 +191,14 @@ async function handleAtlasTts(request, env) {
 async function proxyToPages(request) {
   const url = new URL(request.url);
   url.hostname = ORIGIN;
+  // The incoming URL's protocol/port are request-controlled; normalize them to
+  // the Pages origin (https, default port) so they cannot survive into the
+  // outbound fetch. No-op for normal https traffic.
+  url.protocol = "https:";
+  url.port = "";
+  // Egress allowlist: reject any destination drift before the outbound fetch.
+  const proxyBlocked = egressBlocked(url, "pages-proxy");
+  if (proxyBlocked) return proxyBlocked;
 
   const headers = new Headers(request.headers);
   headers.set("Host", ORIGIN);

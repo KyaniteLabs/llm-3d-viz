@@ -79,12 +79,15 @@ describe("atlas llm config", () => {
     expect(describeAtlasLlmConfig(openaiish)).toMatch(/openai/);
     expect(describeAtlasLlmConfig(openaiish)).toMatch(/llama3\.2/);
 
+    // Inert fixture — deliberately NOT a real key pattern; env override for CI.
+    const anthropicFixtureKey = process.env.TEST_ANTHROPIC_API_KEY || "test-anthropic-key-fixture";
+
     const anth = normalizeAtlasLlmConfig({
       enabled: true,
       protocol: "anthropic",
       baseUrl: "https://api.anthropic.com",
       model: "claude-sonnet-4-20250514",
-      apiKey: "sk-ant-test",
+      apiKey: anthropicFixtureKey,
     });
     expect(isAtlasLlmReady(anth)).toBe(true);
   });
