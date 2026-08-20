@@ -73,6 +73,7 @@ MAP: `docs/v1/wayfinder/MAP-s-plus-maximal-dataviz-beauty.md`
 - **Display / labels:** refined grotesque — **Söhne / Neue Haas Grotesk** if licensed, else **Inter Tight** (NOT default Inter) / Geist. Tight tracking.
 - **Numerals:** **tabular mono** — IBM Plex Mono or Geist Mono. Tabular figures mandatory so speed/cost/IQ align.
 - **Axis labels:** mono **UPPERCASE**, ~11px, generous letterspacing (the "instrument not dashboard" swap — ~50% of the feel).
+- **Quiet-chrome relaxation (2026-08-20, Simon-approved):** secondary decode chrome sits one step brighter than the original build — stage ticks 11px desktop (10px narrow) at opacity 0.85 (narrow 0.70), stage-key/method-strip/decide-axis secondary text 11px. Four independent vision critics all flagged the 10px/0.55 tier; the observatory calm is kept via hierarchy, not illegibility. See `audits/uiux-splus-2026-08-15.md` iteration 4c.
 - **Contrast intent:** display down to ~300 (light) on dark; mono values 400–500. Restrained weight range.
 
 ## Color palette (→ color-system)

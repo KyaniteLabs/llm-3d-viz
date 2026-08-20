@@ -23,6 +23,10 @@
 
 ## Publish OSS (operator)
 
+**Use the script (2026-08-20):** `scripts/publish-oss.sh [--dry-run]` — codifies the whole procedure: curation branch, internal-only removal (per the oss-publish precedents), hard-fail scrub sweep (private IPs / VPS hostname / fleet paths), Liani OSS-edition cherry-pick, tsc+build gate, force-with-lease push.
+
+Manual equivalent, if ever needed:
+
 ```bash
 # From product checkout, after Simon go:
 git fetch origin

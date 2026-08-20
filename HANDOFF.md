@@ -1,8 +1,15 @@
 # HANDOFF — llm-3d-viz
 
-## Status: fleet-critic ceiling 87 / 91 / 89 / 82 — Decide ≥90; goal NOT passed; residual is one design call
+## Status: S+ program CLOSED 2026-08-20 — lever applied, zero mechanical defects, catalog live at rows=307, all remotes current
 
-See `audits/uiux-splus-2026-08-15.md` iteration 4 + supplement (2026-08-20, kilo/Gemini fleet critic after Simon's routing correction): every mechanical defect fixed-and-DOM-verified on the deployed rows=306 build (0 overlaps, 0 off-canvas, projections NMS'd + presence-gated). Decide crossed 90. Remaining gap = quiet-chrome contrast/size on secondary text + frontier-cluster density — Simon's design sign-off needed (one lever likely closes all four). The codex table below is the older 2026-08-09 pass, kept for history.
+**Where things stand (end of 2026-08-20 session):**
+- **Visual:** quiet-chrome relaxation shipped (ticks 11px @0.85/0.70, secondary text 11px — see DESIGN-SYSTEM Typography note). Four independent critics (kimi-rubric passes: GLM-4.5v, Gemini-via-kilo, codex-terra, plus the original kimi lineage) converge: **zero mechanical defects** on the deployed build (0 overlaps, 0 off-canvas, 0 truncated, projections tick-NMS'd + presence-gated); residual is presentation-philosophy spread only. Full record: `audits/uiux-splus-2026-08-15.md` iterations 1→4c.
+- **Catalog:** rows=307 live (Gemini 3.7 Flash AA-measured; Qwen3.8 27B manual row with own published benchmarks, awaiting AA speed; Seed 2.1 Turbo manual row alive — supersede now fires only on ADMITTED AA rows). Pipeline + canary + watchdog + delivery-gated alerts all live; cron 3×/day.
+- **Open tickets:** #203 (builder exit codes — mislabeled alert stages), #204 (supersede-drift guard), #186/#187 (stewardship SPEC+MAP, reference). BUG-SMELL-REGISTRY holds the battery + prevention plan.
+- **Ops:** OSS publish is `scripts/publish-oss.sh` (scrub-gated, dry-run-able) — last publish `81da1ed`. Forgejo issue reads need a vps-container-minted token (`docs/agents/issue-tracker.md`). Routing doctrine: `~/.local/share/pushing-dispatch/availability.json` first; ollama cloud is NOT a provider anymore.
+- **Next natural work:** #203/#204 tickets; kimi-rubric re-pass at quota refresh if a 5th critic is ever wanted; weekly divergence review.
+
+The codex table below is the older 2026-08-09 pass, kept for history.
 
 ## Visual quality scores (codex GPT-5.6-terra xhigh vision review, 2026-08-09)
 
