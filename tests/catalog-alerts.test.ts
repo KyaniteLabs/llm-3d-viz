@@ -90,7 +90,7 @@ describe("catalog-alerts — aggregated payload + dedup", () => {
   });
 
   it("dedups: second identical run fires nothing; fresh events fire once", async () => {
-    const deliver = vi.fn().mockResolvedValue({ ok: true, channels: { forgejo: "posted", localNotification: "notified" } });
+    const deliver = vi.fn().mockResolvedValue({ ok: true, recordable: true, channels: { forgejo: "posted", localNotification: "notified" } });
     const storePath = path.join(dir, "dedup.json");
     const events = buildAlertEvents({ diff: diffFixture(), divergences: [] });
     const first = await fireAlert(events, { storePath, deliver });
@@ -107,7 +107,7 @@ describe("catalog-alerts — aggregated payload + dedup", () => {
   });
 
   it("failed delivery records NO signatures — events retry next run", async () => {
-    const deliver = vi.fn().mockResolvedValue({ ok: false, channels: { forgejo: "no_token", localNotification: "error" } });
+    const deliver = vi.fn().mockResolvedValue({ ok: false, recordable: false, channels: { forgejo: "no_token", localNotification: "error" } });
     const storePath = path.join(dir, "dedup.json");
     const events = [{ kind: "cloud_removal", key: "cloud_removal:M", line: "removed" }];
     const first = await fireAlert(events, { storePath, deliver });
@@ -119,8 +119,24 @@ describe("catalog-alerts — aggregated payload + dedup", () => {
     expect(deliver).toHaveBeenCalledTimes(2);
   });
 
+  it("regression 2026-08-20: local-only delivery (forgejo failed) records NO signature — the phantom pipeline_failure class", async () => {
+    // Desktop notification succeeded, Forgejo post failed: ok=true but the
+    // durable channel never received the event. Recording here swallowed the
+    // board trail for the 7d TTL while no issue existed.
+    const deliver = vi.fn().mockResolvedValue({ ok: true, recordable: false, channels: { forgejo: "http_403", localNotification: "notified" } });
+    const storePath = path.join(dir, "dedup.json");
+    const events = [{ kind: "pipeline_failure", key: "pipeline_failure:build", line: "failed" }];
+    const first = await fireAlert(events, { storePath, deliver });
+    expect(first.fired).toBe(true);
+    expect(first.ok).toBe(true); // locally visible
+    expect(loadDedupStore(storePath)).toEqual({}); // but nothing recorded
+    const second = await fireAlert(events, { storePath, deliver });
+    expect(second.fired).toBe(true); // retries until the board receives it
+    expect(deliver).toHaveBeenCalledTimes(2);
+  });
+
   it("kind-dedup mode (silence) fires once for repeated calls", async () => {
-    const deliver = vi.fn().mockResolvedValue({ ok: true, channels: {} });
+    const deliver = vi.fn().mockResolvedValue({ ok: true, recordable: true, channels: { forgejo: "posted" } });
     const storePath = path.join(dir, "dedup.json");
     const events = [{ kind: "pipeline_silence", key: "pipeline_silence:24h", line: "silent" }];
     expect((await fireAlert(events, { storePath, deliver, dedupByKind: true })).fired).toBe(true);

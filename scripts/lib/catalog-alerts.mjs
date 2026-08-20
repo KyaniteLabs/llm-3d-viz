@@ -176,7 +176,16 @@ export async function deliverAlert(
   } catch {
     channels.localNotification = "error";
   }
-  return { ok: channels.forgejo === "posted" || channels.localNotification === "notified", channels };
+  // ok = at least one channel surfaced (fired for the caller). recordable = the
+  // DURABLE channel posted — signatures gate on this alone: a local-only
+  // delivery recording its signature swallows the Forgejo trail for the TTL
+  // (the 2026-08-20 phantom pipeline_failure — local notification recorded,
+  // no issue ever existed on the board).
+  return {
+    ok: channels.forgejo === "posted" || channels.localNotification === "notified",
+    recordable: channels.forgejo === "posted",
+    channels,
+  };
 }
 
 function defaultNotify(title) {
@@ -207,9 +216,10 @@ export async function fireAlert(events, opts = {}) {
   if (!fresh.length) return { fired: false, reason: "all_deduped" };
   const payload = buildAlertPayload(fresh, { prefix });
   const result = await deliver(payload, opts);
-  // Record signatures ONLY on successful delivery (either channel): a failed
-  // delivery must not swallow events for the TTL — they retry next run.
-  if (result.ok) {
+  // Record signatures ONLY when the durable Forgejo channel posted. Local-only
+  // delivery stays visible on the desktop but records nothing — the event
+  // retries next run until the board actually receives it.
+  if (result.recordable) {
     const now = Date.now();
     for (const e of fresh) {
       store[dedupByKind ? e.kind : `${prefix}:${e.key}`] = now;
