@@ -7,6 +7,7 @@ Issues and PRDs for this repo live as Forgejo issues on `git.kyanitelabs.tech/si
 - **Auth:** `Authorization: token <TOKEN>` header. The working write-scoped token (`write:issue` verified 2026-08-01) is the Forgejo line in `~/.git-credentials` — extract it with the grep below. **Never print, commit, or paste the token value** into files, issue bodies, or chat. Do NOT use the keychain entries: `forgejo-agent-token` and the osxkeychain `git.kyanitelabs.tech` credential both authenticate but are read-scoped (403 on `write:issue`).
 - **User-Agent required:** the Cloudflare edge in front of Forgejo 403s non-browser UAs (error 1010). Send a browser UA on every call.
 - The API requires auth for every call, including reads.
+- **Token scope caveat (found 2026-08-20):** the git-credentials write token does WRITE ops fine (create/comment/close), but this Forgejo version denies it `read:issue` — and every other local credential too (osxkeychain, `forgejo-agent-token`; the 2026-08-01 "read-scoped keychain" note above no longer holds — all are read-denied now). Listing/searching issues therefore fails on every local token, and token creation via API is edge-blocked for both auth methods. When a read is genuinely needed: generate a token in the Forgejo UI with explicit issue-read scope (Settings → Applications, ~30 seconds), then `git rm` it from rotation after use.
 
 Set up once per shell session:
 

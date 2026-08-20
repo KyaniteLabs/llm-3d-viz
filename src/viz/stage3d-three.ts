@@ -1595,7 +1595,9 @@ export class Stage3DThree implements Stage3DSurface {
     // title×tick mobile).
     const measureCtx = document.createElement("canvas").getContext("2d");
     const fontPxFor = (p: Placed): number => {
-      if (p.kind === "title") return this.narrowStage ? 10 : 11;
+      // Titles and ticks paint at 11px desktop (10px narrow) — see the render
+      // pass; cinema focus at 9px; everything else 10px.
+      if (p.kind === "title" || p.kind === "tick") return this.narrowStage ? 10 : 11;
       if (p.cinemaFocus && p.priority !== 3) return 9;
       return 10;
     };
@@ -1776,7 +1778,9 @@ export class Stage3DThree implements Stage3DSurface {
               ? "10px"
               : isTask
                 ? "10px"
-                : "10px";
+                : this.narrowStage
+                  ? "10px"
+                  : "11px";
       const color =
         kind === "title"
           ? this.tokens.textWarm
@@ -1843,8 +1847,8 @@ export class Stage3DThree implements Stage3DSurface {
             : isTask
               ? 0.9
               : this.narrowStage
-                ? 0.55
-                : 0.78;
+                ? 0.7
+                : 0.85;
       el.style.cssText = `position:absolute;left:${left}px;top:${top}px;transform:translate(${tx},${ty});
         color:${color};font-size:${size};font-weight:${weight};letter-spacing:0.02em;
         white-space:${isTask || isOptimumMark || cinemaFocus ? "normal" : "nowrap"};line-height:1.25;text-align:${isTask ? "right" : isOptimumMark || cinemaFocus ? "center" : "left"};
