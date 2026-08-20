@@ -297,7 +297,7 @@ export class Projections {
     this.presentationMode = mode;
   }
 
-  private axisLayout(kind: AxisKind): Record<string, unknown> {
+  private axisLayout(kind: AxisKind, gd?: HTMLDivElement, isX = false): Record<string, unknown> {
     // V05: scale/labels/title follow the active metric's domain (buildAxisDomain),
     // not a hard-coded intelligence=linear / else=log guess.
     const domain = this.domains[kind];
@@ -314,6 +314,40 @@ export class Projections {
     // F3: title is the single source of truth from buildAxisDomain (already decorated
     // with ' · log' for log axes) — no duplicate kind→label ternary here.
     const titleText = domain.title;
+    // S+ iteration-4 (2026-08-16): Plotly paints every tick we hand it, and on
+    // ~315×80px panels the shared domain tick set collides — measured on the
+    // deployed build: endpoint-vs-nice "29"/"30" (121px²), duplicate floor
+    // "0.1"/"0.1" (258px²), "60"/"65", "5"/"10". Gate ticks in pixel space with
+    // the same keep-first NMS the 3D stage uses for its R4 tick dedup; the first
+    // (lowest) tick always keeps, so an axis is never emptied.
+    const isXAxis = isX;
+    let tickvals: number[];
+    let ticktext: string[];
+    const usablePx = gd
+      ? Math.max(60, isXAxis ? gd.clientWidth - 54 : gd.clientHeight - 48)
+      : 0;
+    if (gd && usablePx > 60) {
+      const pos = (v: number) =>
+        (scale === "log"
+          ? (Math.log10(Math.max(v, domain.floor)) - Math.log10(domain.min)) /
+            (Math.log10(domain.max) - Math.log10(domain.min))
+          : (v - domain.min) / (domain.max - domain.min)) * usablePx;
+      // 10px mono ≈ 6.2px/char + pad; y labels are 13px tall + 6px pad.
+      const clearance = (label: string) => (isXAxis ? label.length * 6.2 + 8 : 19);
+      tickvals = [];
+      ticktext = [];
+      let lastPos: number | null = null;
+      for (const tick of domain.ticks) {
+        const p = pos(tick.value);
+        if (lastPos !== null && Math.abs(p - lastPos) < clearance(tick.label)) continue;
+        tickvals.push(tick.value);
+        ticktext.push(tick.label);
+        lastPos = p;
+      }
+    } else {
+      tickvals = domain.ticks.map((t) => t.value);
+      ticktext = domain.ticks.map((t) => t.label);
+    }
     return {
       type: scale,
       range,
@@ -328,8 +362,8 @@ export class Projections {
       tickwidth: 1,
       tickcolor: this.colorWithAlpha(this.tokens.textWarm, 0.15),
       tickmode: "array",
-      tickvals: domain.ticks.map((t) => t.value),
-      ticktext: domain.ticks.map((t) => t.label),
+      tickvals,
+      ticktext,
       tickfont: {
         family: this.tokens.fontMono,
         size: 10,
@@ -464,8 +498,8 @@ export class Projections {
         uirevision: `llm3d-proj-${spec.kind}`,
         datarevision: this.datarevision,
         hovermode: "closest",
-        xaxis: this.axisLayout(spec.x),
-        yaxis: this.axisLayout(spec.y),
+        xaxis: this.axisLayout(spec.x, gd, true),
+        yaxis: this.axisLayout(spec.y, gd, false),
       };
       if (!this.initialized || gd.data === undefined) {
         if (this.destroyed || gen !== this.renderGen) return;

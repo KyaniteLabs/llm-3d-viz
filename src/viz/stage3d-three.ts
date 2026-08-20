@@ -1694,9 +1694,37 @@ export class Stage3DThree implements Stage3DSurface {
         if (!placed) acceptedSoft.push(m);
         continue;
       }
-      const box = labelBox(m);
-      if (acceptedSoft.some((k) => overlap(box, labelBox(k)))) continue;
-      acceptedSoft.push(m);
+      // S+ iteration-4 fix (2026-08-16): non-focus marks previously NMS'd only
+      // against other MARKS — a label grazing an axis title kept its base slot
+      // (measured: "GPT-5.6 Luna" × "COST ($/M) · log", −1.4px dip). Walk the
+      // same offset ladder cinema focus labels use, against titles/ticks too;
+      // if every slot is taken the base position keeps (readable overlap beats
+      // anonymity).
+      const markLadder: Array<[number, number]> = [
+        [0, 0],
+        [0, -16],
+        [0, 16],
+        [26, 0],
+        [-26, 0],
+        [0, -30],
+      ];
+      let markPlaced = false;
+      for (const [dx, dy] of markLadder) {
+        const shifted: Placed = { ...m, x: m.x + dx, y: m.y + dy };
+        if (!taken().some((k) => overlap(labelBox(shifted), labelBox(k)))) {
+          acceptedSoft.push(shifted);
+          markPlaced = true;
+          break;
+        }
+      }
+      if (!markPlaced) {
+        // Ladder exhausted: fall back to the pre-iteration-4 declutter rule —
+        // keep the base slot only if it clears other marks.
+        const box = labelBox(m);
+        if (acceptedSoft.some((k) => overlap(box, labelBox(k)))) continue;
+        acceptedSoft.push(m);
+      }
+      continue;
     }
     const kept: Placed[] = [];
     kept.push(...always, ...keptTicks, ...acceptedSoft);

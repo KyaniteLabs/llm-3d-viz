@@ -1612,7 +1612,13 @@ html.is-cinema .cinema-exit-fab {
   font-size: 0.625rem; /* L8 micro-type floor: 10px */
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
-  max-width: min(52ch, 42vw);
+  /* S+ iteration-4 fix (2026-08-16): the hard min(52ch, 42vw) cap truncated
+     the method line at 312px while 575px sat free in the status bar row.
+     flex-basis 0 + grow takes the actual remaining middle space and
+     ellipsizes only when genuinely full. */
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
