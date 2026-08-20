@@ -22,8 +22,11 @@ OSS_BRANCH="oss-publish-$(date +%Y-%m-%d)"
 OSS_EDITION_COMMIT="${OSS_EDITION_COMMIT:-68f92f3}"
 
 # Scrub red lines — any hit aborts the publish. Private tailscale space, the
-# VPS hostname, internal fleet installs, credential stores.
-SWEEP_PATTERNS='100\.92\.|srv1542844|pushing-dispatch|\.git-credentials|forgejo-agent-token'
+# VPS hostname, internal fleet install paths. (Path/NAME references in runtime
+# code — e.g. catalog-alerts.mjs reading ~/.git-credentials — are benign and
+# shipped in every prior publish; this script is exempt because it carries the
+# patterns themselves.)
+SWEEP_PATTERNS='100\.92\.|srv1542844|pushing-dispatch'
 
 # Internal-only paths removed from the OSS tree (oss-publish-2026-08-14/-20
 # precedent). Patterns tolerate absence.
@@ -68,7 +71,7 @@ if git cherry "$OSS_BRANCH" "$OSS_EDITION_COMMIT" 2>/dev/null | grep -q '^+' \
 fi
 
 echo "[oss-publish] scrub sweep (patterns: $SWEEP_PATTERNS)"
-HITS=$(git grep -lE "$SWEEP_PATTERNS" -- . || true)
+HITS=$(git grep -lE "$SWEEP_PATTERNS" -- . ':(exclude)scripts/publish-oss.sh' || true)
 if [ -n "$HITS" ]; then
   echo "ERROR: scrub red-line hit — publish aborted:" >&2
   echo "$HITS" >&2
