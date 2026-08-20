@@ -1,5 +1,5 @@
 {
-  "data_date": "2026-08-15",
+  "data_date": "2026-08-16",
   "ingestion": "official-api-only",
   "attribution": {
     "artificial_analysis": "https://artificialanalysis.ai (Data API)",
@@ -12,7 +12,7 @@
       "active": 2,
       "superseded": 0,
       "rejected": [],
-      "scorable_after_blend": 309
+      "scorable_after_blend": 304
     },
     {
       "source": "curated lab-class openness map (W1 truth source)",
@@ -79,13 +79,13 @@
     },
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
-      "records": 116,
-      "delta_changed": 0
+      "records": 123,
+      "delta_changed": 3
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
-      "models": 412,
+      "models": 413,
       "price_overlays": 35,
       "modality_overlays": 89,
       "context_overlays": 148,
@@ -94,7 +94,7 @@
   ],
   "openrouter": {
     "ok": true,
-    "models": 412,
+    "models": 413,
     "price_overlays": 35,
     "modality_overlays": 89,
     "context_overlays": 148
@@ -387,11 +387,23 @@
     ]
   },
   "price_divergences": {
-    "count": 116,
-    "delta_count": 0,
+    "count": 123,
+    "delta_count": 3,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
+      {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_out_per_M",
+        "aa_per_M": 1.32,
+        "or_per_M": 0.12,
+        "ratio": 10.74,
+        "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
       {
         "model": "Ling 2.6 Flash",
         "provider": "InclusionAI",
@@ -400,7 +412,7 @@
         "or_per_M": 0.01,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -412,7 +424,7 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -424,7 +436,7 @@
         "or_per_M": 0,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -436,7 +448,7 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -448,7 +460,7 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -460,7 +472,7 @@
         "or_per_M": 0.12,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -472,19 +484,7 @@
         "or_per_M": 0.01,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_out_per_M",
-        "aa_per_M": 1.32,
-        "or_per_M": 0.16,
-        "ratio": 8.14,
-        "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -496,7 +496,7 @@
         "or_per_M": 0.28,
         "ratio": 8.04,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -508,7 +508,19 @@
         "or_per_M": 0.08,
         "ratio": 7.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.44,
+        "or_per_M": 0.06,
+        "ratio": 7.16,
+        "first_seen": "2026-08-14",
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -520,7 +532,7 @@
         "or_per_M": 0.01,
         "ratio": 7,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -532,7 +544,7 @@
         "or_per_M": 0.1,
         "ratio": 6.73,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -544,7 +556,7 @@
         "or_per_M": 0.42,
         "ratio": 6.73,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -556,19 +568,7 @@
         "or_per_M": 0.07,
         "ratio": 6.43,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.44,
-        "or_per_M": 0.08,
-        "ratio": 5.43,
-        "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -580,7 +580,7 @@
         "or_per_M": 0.03,
         "ratio": 5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -592,7 +592,7 @@
         "or_per_M": 0.03,
         "ratio": 5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -604,7 +604,7 @@
         "or_per_M": 0.07,
         "ratio": 5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -616,6 +616,42 @@
         "or_per_M": 0.1,
         "ratio": 5,
         "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "GLM-5.2 (max)",
+        "provider": "Z AI",
+        "field": "price_in_per_M",
+        "aa_per_M": 1.4,
+        "or_per_M": 0.31,
+        "ratio": 4.55,
+        "first_seen": "2026-08-15",
+        "age_days": 1,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "GLM-5.2 (max)",
+        "provider": "Z AI",
+        "field": "price_out_per_M",
+        "aa_per_M": 4.4,
+        "or_per_M": 0.97,
+        "ratio": 4.55,
+        "first_seen": "2026-08-15",
+        "age_days": 1,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "GLM-5.2 (max)",
+        "provider": "Z AI",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.23,
+        "or_per_M": 0.06,
+        "ratio": 4.02,
+        "first_seen": "2026-08-15",
         "age_days": 1,
         "changed": false,
         "absent_runs": 0
@@ -628,7 +664,7 @@
         "or_per_M": 0.08,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -640,7 +676,7 @@
         "or_per_M": 0.63,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -652,7 +688,7 @@
         "or_per_M": 0.2,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -664,7 +700,7 @@
         "or_per_M": 0.08,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -676,7 +712,7 @@
         "or_per_M": 0.63,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -688,7 +724,7 @@
         "or_per_M": 0.14,
         "ratio": 3.57,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -700,7 +736,7 @@
         "or_per_M": 0.17,
         "ratio": 3.53,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -712,7 +748,7 @@
         "or_per_M": 0.06,
         "ratio": 3.49,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -724,6 +760,30 @@
         "or_per_M": 0.02,
         "ratio": 3.33,
         "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Hy3-preview (Reasoning)",
+        "provider": "Tencent",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.06,
+        "or_per_M": 0.18,
+        "ratio": 3,
+        "first_seen": "2026-08-15",
+        "age_days": 1,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Hy3-preview (Reasoning)",
+        "provider": "Tencent",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.02,
+        "or_per_M": 0.06,
+        "ratio": 3,
+        "first_seen": "2026-08-15",
         "age_days": 1,
         "changed": false,
         "absent_runs": 0
@@ -736,32 +796,32 @@
         "or_per_M": 0.12,
         "ratio": 2.92,
         "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Hy3-preview (Reasoning)",
+        "provider": "Tencent",
+        "field": "price_out_per_M",
+        "aa_per_M": 0.21,
+        "or_per_M": 0.6,
+        "ratio": 2.86,
+        "first_seen": "2026-08-15",
         "age_days": 1,
         "changed": false,
         "absent_runs": 0
       },
       {
-        "model": "GLM-5.2 (max)",
-        "provider": "Z AI",
+        "model": "Qwen3.6 35B A3B (Reasoning)",
+        "provider": "Alibaba",
         "field": "price_in_per_M",
-        "aa_per_M": 1.4,
-        "or_per_M": 0.49,
-        "ratio": 2.86,
-        "first_seen": "2026-08-15",
-        "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GLM-5.2 (max)",
-        "provider": "Z AI",
-        "field": "price_out_per_M",
-        "aa_per_M": 4.4,
-        "or_per_M": 1.54,
-        "ratio": 2.86,
-        "first_seen": "2026-08-15",
-        "age_days": 0,
-        "changed": false,
+        "aa_per_M": 0.38,
+        "or_per_M": 0.14,
+        "ratio": 2.71,
+        "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -772,7 +832,7 @@
         "or_per_M": 0.26,
         "ratio": 2.69,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -784,31 +844,7 @@
         "or_per_M": 1.04,
         "ratio": 2.69,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GLM-5.2 (max)",
-        "provider": "Z AI",
-        "field": "price_cache_per_M",
-        "aa_per_M": 0.23,
-        "or_per_M": 0.09,
-        "ratio": 2.53,
-        "first_seen": "2026-08-15",
-        "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Qwen3.6 35B A3B (Reasoning)",
-        "provider": "Alibaba",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.38,
-        "or_per_M": 0.15,
-        "ratio": 2.53,
-        "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -820,7 +856,7 @@
         "or_per_M": 0.3,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -832,7 +868,7 @@
         "or_per_M": 1,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -844,7 +880,7 @@
         "or_per_M": 0.06,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -856,7 +892,7 @@
         "or_per_M": 0.1,
         "ratio": 2.46,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -868,7 +904,7 @@
         "or_per_M": 1.2,
         "ratio": 2.46,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -880,7 +916,7 @@
         "or_per_M": 0,
         "ratio": 2.38,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -892,7 +928,7 @@
         "or_per_M": 1,
         "ratio": 2.25,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -904,7 +940,7 @@
         "or_per_M": 0.3,
         "ratio": 2.2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -916,7 +952,7 @@
         "or_per_M": 0.13,
         "ratio": 2.08,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -928,7 +964,7 @@
         "or_per_M": 0.75,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -940,7 +976,7 @@
         "or_per_M": 3.75,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -952,7 +988,7 @@
         "or_per_M": 0.08,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -964,7 +1000,7 @@
         "or_per_M": 0.38,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -976,7 +1012,7 @@
         "or_per_M": 1.88,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -988,7 +1024,7 @@
         "or_per_M": 0.01,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1000,7 +1036,7 @@
         "or_per_M": 0.1,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1012,7 +1048,7 @@
         "or_per_M": 0.6,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1024,7 +1060,7 @@
         "or_per_M": 0.01,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1036,7 +1072,7 @@
         "or_per_M": 1,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1048,7 +1084,7 @@
         "or_per_M": 6,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1060,7 +1096,7 @@
         "or_per_M": 0.1,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1072,7 +1108,7 @@
         "or_per_M": 0.03,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1084,7 +1120,7 @@
         "or_per_M": 2,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1096,19 +1132,7 @@
         "or_per_M": 6,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Nemotron 3.5 Lightning",
-        "provider": "NVIDIA",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.05,
-        "or_per_M": 0.1,
-        "ratio": 2,
-        "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1120,7 +1144,19 @@
         "or_per_M": 0.25,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.6 27B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.6,
+        "or_per_M": 0.3,
+        "ratio": 2,
+        "first_seen": "2026-08-16",
+        "age_days": 0,
         "changed": false,
         "absent_runs": 0
       },
@@ -1132,7 +1168,7 @@
         "or_per_M": 0.1,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1144,7 +1180,7 @@
         "or_per_M": 0.7,
         "ratio": 1.93,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1156,7 +1192,7 @@
         "or_per_M": 0.04,
         "ratio": 1.87,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1168,7 +1204,7 @@
         "or_per_M": 0.07,
         "ratio": 1.86,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1180,7 +1216,7 @@
         "or_per_M": 1.1,
         "ratio": 1.82,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1192,6 +1228,54 @@
         "or_per_M": 0.1,
         "ratio": 1.8,
         "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.6 27B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "price_out_per_M",
+        "aa_per_M": 3.6,
+        "or_per_M": 2,
+        "ratio": 1.8,
+        "first_seen": "2026-08-16",
+        "age_days": 0,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Kimi K2.6",
+        "provider": "Kimi",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.95,
+        "or_per_M": 0.54,
+        "ratio": 1.75,
+        "first_seen": "2026-08-14",
+        "age_days": 2,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Kimi K2.6",
+        "provider": "Kimi",
+        "field": "price_out_per_M",
+        "aa_per_M": 4,
+        "or_per_M": 2.28,
+        "ratio": 1.75,
+        "first_seen": "2026-08-15",
+        "age_days": 1,
+        "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Kimi K2.6",
+        "provider": "Kimi",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.16,
+        "or_per_M": 0.09,
+        "ratio": 1.75,
+        "first_seen": "2026-08-15",
         "age_days": 1,
         "changed": false,
         "absent_runs": 0
@@ -1204,7 +1288,7 @@
         "or_per_M": 2.34,
         "ratio": 1.7,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1216,7 +1300,7 @@
         "or_per_M": 1.48,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1228,7 +1312,7 @@
         "or_per_M": 4.43,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1240,7 +1324,7 @@
         "or_per_M": 0.3,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1252,7 +1336,7 @@
         "or_per_M": 2.5,
         "ratio": 1.68,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1264,7 +1348,7 @@
         "or_per_M": 0.6,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1276,7 +1360,7 @@
         "or_per_M": 1.92,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1288,7 +1372,7 @@
         "or_per_M": 0.12,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1300,7 +1384,7 @@
         "or_per_M": 0.1,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1312,7 +1396,7 @@
         "or_per_M": 0.01,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1324,20 +1408,20 @@
         "or_per_M": 0.05,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
       {
-        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_cache_per_M",
-        "aa_per_M": 0.01,
-        "or_per_M": 0.02,
-        "ratio": 1.62,
+        "model": "Nemotron 3.5 Lightning",
+        "provider": "NVIDIA",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.05,
+        "or_per_M": 0.08,
+        "ratio": 1.6,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
+        "age_days": 2,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1348,7 +1432,7 @@
         "or_per_M": 0.06,
         "ratio": 1.6,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1360,7 +1444,7 @@
         "or_per_M": 0.78,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1372,7 +1456,7 @@
         "or_per_M": 3.9,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1384,7 +1468,7 @@
         "or_per_M": 0.13,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1396,7 +1480,7 @@
         "or_per_M": 0.52,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1408,7 +1492,7 @@
         "or_per_M": 0.12,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1420,7 +1504,7 @@
         "or_per_M": 0.45,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1432,7 +1516,7 @@
         "or_per_M": 0.2,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1444,7 +1528,7 @@
         "or_per_M": 1.56,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1456,7 +1540,7 @@
         "or_per_M": 0.39,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1468,7 +1552,7 @@
         "or_per_M": 2.34,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1480,7 +1564,7 @@
         "or_per_M": 0.33,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1492,7 +1576,7 @@
         "or_per_M": 1.95,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1504,7 +1588,7 @@
         "or_per_M": 0.4,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1516,7 +1600,7 @@
         "or_per_M": 0.45,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1528,7 +1612,7 @@
         "or_per_M": 0.8,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1540,7 +1624,7 @@
         "or_per_M": 0.02,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1552,19 +1636,7 @@
         "or_per_M": 0.13,
         "ratio": 1.46,
         "first_seen": "2026-08-14",
-        "age_days": 1,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Kimi K2.6",
-        "provider": "Kimi",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.95,
-        "or_per_M": 0.65,
-        "ratio": 1.46,
-        "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1576,7 +1648,7 @@
         "or_per_M": 3.04,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 0,
+        "age_days": 1,
         "changed": false,
         "absent_runs": 0
       },
@@ -1588,7 +1660,7 @@
         "or_per_M": 0.18,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 0,
+        "age_days": 1,
         "changed": false,
         "absent_runs": 0
       },
@@ -1600,7 +1672,7 @@
         "or_per_M": 0.97,
         "ratio": 1.43,
         "first_seen": "2026-08-15",
-        "age_days": 0,
+        "age_days": 1,
         "changed": false,
         "absent_runs": 0
       },
@@ -1612,7 +1684,7 @@
         "or_per_M": 0.1,
         "ratio": 1.4,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1624,7 +1696,7 @@
         "or_per_M": 0.8,
         "ratio": 1.38,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1636,7 +1708,7 @@
         "or_per_M": 0.29,
         "ratio": 1.38,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1648,7 +1720,7 @@
         "or_per_M": 0.22,
         "ratio": 1.36,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1660,7 +1732,7 @@
         "or_per_M": 0.2,
         "ratio": 1.35,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1672,7 +1744,7 @@
         "or_per_M": 0.71,
         "ratio": 1.34,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1684,7 +1756,7 @@
         "or_per_M": 0.9,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1696,7 +1768,7 @@
         "or_per_M": 2.4,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1708,7 +1780,7 @@
         "or_per_M": 0.15,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1720,7 +1792,7 @@
         "or_per_M": 0.13,
         "ratio": 1.31,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1732,7 +1804,7 @@
         "or_per_M": 0.15,
         "ratio": 1.27,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1744,8 +1816,20 @@
         "or_per_M": 1.75,
         "ratio": 1.26,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Nemotron 3.5 Lightning",
+        "provider": "NVIDIA",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.05,
+        "or_per_M": 0.04,
+        "ratio": 1.25,
+        "first_seen": "2026-08-16",
+        "age_days": 0,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1756,9 +1840,10 @@
         "or_per_M": 0.25,
         "ratio": 1.25,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3.7 Plus",
@@ -1768,7 +1853,7 @@
         "or_per_M": 0.32,
         "ratio": 1.25,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       },
@@ -1780,7 +1865,7 @@
         "or_per_M": 1.28,
         "ratio": 1.25,
         "first_seen": "2026-08-14",
-        "age_days": 1,
+        "age_days": 2,
         "changed": false,
         "absent_runs": 0
       }
@@ -2355,7 +2440,7 @@
       "family": "Qwen3.8 27B",
       "provider": "Alibaba",
       "announced_date": "2026-08-03",
-      "days_since_announcement": 12,
+      "days_since_announcement": 13,
       "status": "awaiting_aa_measurement",
       "note": "Open-weights 27B; weights promised week of 2026-08-10, delayed — no HF model card, no license, no 27B-specific benchmarks published as of 2026-08-14 (community quant repos exist, provenance unclear). Benchmarks circulating (GPQA 92.6, Terminal-Bench 2.1 86.6, SWE-bench Pro 67.7) belong to Qwen3.8-Max and must NOT be attributed to the 27B."
     },
@@ -2363,7 +2448,7 @@
       "family": "Seed 2.1 Turbo",
       "provider": "ByteDance Seed",
       "announced_date": "2026-08-10",
-      "days_since_announcement": 5,
+      "days_since_announcement": 6,
       "status": "tracked_via_manual_row",
       "note": "Released 2026-08-10; absent from AA snapshot (only Seed-OSS-36B + Doubao Seed Code exist). Tracked via data/manual-additions.json row (PRELIMINARY OpenRouter list data: $0.50/$2.50 per M, context 262,144, text+vision+video; tps/IQ null) — auto-superseded when AA measures the family. ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD); row visible under ?catalog=all."
     },
@@ -2371,7 +2456,7 @@
       "family": "GLM-5.3",
       "provider": "Z AI",
       "announced_date": "2026-08-14",
-      "days_since_announcement": 1,
+      "days_since_announcement": 2,
       "status": "tracked_via_manual_row",
       "note": "Announced 2026-08-14 (z.ai/blog/glm-5.3); tracked via data/manual-additions.json row (tps=115 AA-cited; IQ/cost null). Watchlist entry doubles as the manual→AA supersede regression case: when AA measures the family, the manual row auto-supersedes and the diff must classify it as a rename."
     }
@@ -2380,7 +2465,7 @@
     "note": "Report-only: merged rows with exactly two of three triple elements, not admitted. Never promoted to the draft. Entries capped per bucket.",
     "entry_cap": 250,
     "missing_tps": {
-      "count": 103,
+      "count": 108,
       "capped": false,
       "entries": [
         {
@@ -2712,6 +2797,30 @@
           "source_url_slug": "gemini-3-pro-low"
         },
         {
+          "family_id": "Gemini 3.7 Flash",
+          "model": "Gemini 3.7 Flash (high)",
+          "provider": "Google",
+          "release_date": "2026-08-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-3-7-flash"
+        },
+        {
+          "family_id": "Gemini 3.7 Flash",
+          "model": "Gemini 3.7 Flash (low)",
+          "provider": "Google",
+          "release_date": "2026-08-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-3-7-flash-low"
+        },
+        {
+          "family_id": "Gemini 3.7 Flash",
+          "model": "Gemini 3.7 Flash (medium)",
+          "provider": "Google",
+          "release_date": "2026-08-13",
+          "missing_axis": "tps",
+          "source_url_slug": "gemini-3-7-flash-medium"
+        },
+        {
           "family_id": "Gemma 3 12B Instruct",
           "model": "Gemma 3 12B Instruct",
           "provider": "Google",
@@ -2928,6 +3037,14 @@
           "source_url_slug": "jamba-1-5-mini"
         },
         {
+          "family_id": "Ling 3.0 Flash",
+          "model": "Ling 3.0 Flash",
+          "provider": "InclusionAI",
+          "release_date": "2026-08-04",
+          "missing_axis": "tps",
+          "source_url_slug": "ling-3-0-flash"
+        },
+        {
           "family_id": "Ling-2.6-1T",
           "model": "Ling-2.6-1T",
           "provider": "InclusionAI",
@@ -3134,6 +3251,14 @@
           "release_date": "2025-03-10",
           "missing_axis": "tps",
           "source_url_slug": "reka-flash-3"
+        },
+        {
+          "family_id": "Ring-2.6-1T",
+          "model": "Ring-2.6-1T",
+          "provider": "InclusionAI",
+          "release_date": "2026-05-08",
+          "missing_axis": "tps",
+          "source_url_slug": "ring-2-6-1t"
         },
         {
           "family_id": "Ring-flash-2.0",
@@ -3393,7 +3518,7 @@
       "note": "a2 rows released on/after 2025-09-01 — the recent notable cloud pool D-H4 weighs most."
     },
     "b_held_2026_rows": {
-      "count": 31,
+      "count": 29,
       "notable_names": [
         "Agnes 2.5 Pro Alpha (Sapiens AI)",
         "Celeris-1 (Celeris)",
@@ -3406,7 +3531,6 @@
         "LFM2.5-8B-A1B (Liquid AI)",
         "LFM2.5-VL-1.6B (Liquid AI)",
         "Ling 2.6 Flash (InclusionAI)",
-        "Ling 3.0 Flash (InclusionAI)",
         "Ling 3.0 Tiny (InclusionAI)",
         "LongCat 2.0 (LongCat)",
         "Mercury 2 (Inception)",
@@ -3418,7 +3542,6 @@
         "Mistral Small 4 (Reasoning) (Mistral)",
         "Nex-N2-Pro (Nex AGI)",
         "North Mini Code (Cohere)",
-        "Ring-2.6-1T (InclusionAI)",
         "Seed 2.1 Turbo (ByteDance Seed)",
         "Solar Pro 3 (Upstage)",
         "Solar Pro 4 (Upstage)",
@@ -3429,17 +3552,13 @@
       ]
     },
     "c_generation_capped": {
-      "count": 19,
+      "count": 15,
       "notable_names": [
         "Claude Opus 4.6 (Adaptive Reasoning, Max Effort) (Anthropic)",
         "Claude Opus 4.6 (Non-reasoning, High Effort) (Anthropic)",
         "Claude Opus 4.7 (Adaptive Reasoning, Max Effort) (Anthropic)",
         "Claude Opus 4.7 (Non-reasoning, High Effort) (Anthropic)",
         "Gemini 3.1 Flash-Lite (Google)",
-        "Gemini 3.5 Flash (high) (Google)",
-        "Gemini 3.5 Flash (medium) (Google)",
-        "Gemini 3.5 Flash (minimal) (Google)",
-        "Gemini 3.5 Flash-Lite (Google)",
         "GPT-5.3 Codex (xhigh) (OpenAI)",
         "GPT-5.4 (low) (OpenAI)",
         "GPT-5.4 (Non-reasoning) (OpenAI)",
@@ -3563,6 +3682,25 @@
       "published_rows": 1,
       "complete": false,
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Gemini 3.7 Flash",
+      "provider": "Google",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "published_tiers": [],
+      "missing_tiers": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "published_rows": 0,
+      "complete": false,
+      "notes": "",
+      "partial_tiers": []
     },
     {
       "family": "GLM-5.3",
