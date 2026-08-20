@@ -68,13 +68,16 @@ describe("manual additions — vetting", () => {
 });
 
 describe("manual additions — AA supersede", () => {
-  it("drops a manual row once any AA row shares its normalized family", () => {
+  it("drops a manual row once a SCORABLE AA row shares its normalized family", () => {
     const aaRows = [
       {
         model: "GLM-5.3 (max)",
         provider: "Z AI",
         family_id: "GLM-5.3",
         source_url: "https://artificialanalysis.ai/models/glm-5-3",
+        aa_intelligence_index: 61,
+        tps: 112,
+        blended_price_per_M: 0.9,
       },
     ];
     const { active, superseded } = splitSupersededManualRows([glm53Manual], aaRows);
@@ -92,6 +95,32 @@ describe("manual additions — AA supersede", () => {
       },
     ];
     const { active } = splitSupersededManualRows([glm53Manual], aaRows);
+    expect(active).toHaveLength(1);
+  });
+
+  it("regression 2026-08-20: a listed-but-unmeasured AA row does NOT supersede (Qwen3.8 27B vanish bug)", () => {
+    // AA lists the family but has not measured speed — the row sits in
+    // awaiting_measurement and replaces nothing. Superseding here made the
+    // family disappear from the draft entirely (manual row killed, AA row
+    // unadmitted).
+    const aaRows = [
+      {
+        model: "Qwen3.8 27B",
+        provider: "Alibaba",
+        family_id: "Qwen3.8 27B",
+        source_url: "https://artificialanalysis.ai/models/qwen3-8-27b",
+        aa_intelligence_index: 58,
+        tps: null,
+        blended_price_per_M: 1.6,
+      },
+    ];
+    const qwen27bManual = {
+      model: "Qwen3.8 27B",
+      provider: "Alibaba",
+      family_id: "Qwen3.8 27B",
+    };
+    const { active, superseded } = splitSupersededManualRows([qwen27bManual], aaRows);
+    expect(superseded).toHaveLength(0);
     expect(active).toHaveLength(1);
   });
 });
@@ -197,7 +226,14 @@ describe("manual additions — curated file regression", () => {
       const fresh = loadManualAdditions(file, []);
       expect(fresh.active.length).toBeGreaterThanOrEqual(1);
       const supersededRun = loadManualAdditions(file, [
-        { model: "GLM-5.3 (max)", provider: "Z AI", family_id: "GLM-5.3" },
+        {
+          model: "GLM-5.3 (max)",
+          provider: "Z AI",
+          family_id: "GLM-5.3",
+          aa_intelligence_index: 59.5,
+          tps: 84.7,
+          blended_price_per_M: 0.9,
+        },
       ]);
       expect(
         supersededRun.active.filter((r) => r.family_id === "GLM-5.3"),

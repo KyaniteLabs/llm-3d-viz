@@ -44,6 +44,7 @@ import {
 import {
   loadManualAdditions,
   selectManualAdmissions,
+  splitSupersededManualRows,
 } from "./lib/manual-additions.mjs";
 import { diffDrafts } from "./lib/draft-diff.mjs";
 import { buildStaleCostTask } from "./lib/stale-cost-task.mjs";
@@ -207,23 +208,22 @@ const aaMapped = aa.models.map((m) =>
 let merged = mergeBySpine([], aaMapped);
 
 // --- 1b. Provider-announced manual additions (pre-AA rows) ---
-// Vetted + AA-superseded inside loadManualAdditions; merged into the spine
-// BEFORE the overlays so OpenRouter/Arena enrich them like any AA row.
+// Vetted inside loadManualAdditions and merged into the spine BEFORE the
+// overlays so OpenRouter/Arena enrich them like any AA row. Supersede is NOT
+// decided here: AA rows arrive without the derived blended price (computed
+// post-overlay), so an early triple check misreads freshly-measured families
+// and would either keep a stale manual row (duplicate model ID — GLM-5.3
+// 2026-08-20) or drop a family whose AA row sits in awaiting_measurement
+// (Qwen3.8 27B vanish). The split runs post-blend against `measured` below.
 const manual = loadManualAdditions(
   path.join(root, "data/manual-additions.json"),
-  aaMapped,
+  [],
 );
 // Stamp manual rows through the curated overlay BEFORE merge: admission
 // re-adds manual rows from this list (they bypass the scorable spine), so the
 // admitted copies must already carry openness provenance (gate-proven fix).
 const manualStamped = applyCuratedOpenness(manual.active, manual.active).rows;
 merged = mergeBySpine(merged, manualStamped);
-sourceStats.push({
-  source: "manual additions (provider announcements)",
-  active: manual.active.length,
-  superseded: manual.superseded.length,
-  rejected: manual.rejected,
-});
 
 // --- 1c. W1 truth-source openness overlay (ticket #188) ---
 // Curated lab-class map (src/data/catalog-scope.ts) replaces the retired
@@ -377,9 +377,21 @@ function isUserSelectableTier(row) {
 // manual additions (provider announcements) are admitted without it, deduped
 // by spine in case an overlay completed their triple upstream.
 const measured = merged.filter(canAdmitPlotTriple).filter(isUserSelectableTier);
-const manualAdmitted = selectManualAdmissions(manualStamped, measured, {
+// Supersede decision (post-blend, against ADMITTED rows — see 1b note): an AA
+// family row that is actually in the catalog replaces the manual row; one that
+// is not (awaiting_measurement, held) replaces nothing.
+const { active: manualActive, superseded: manualSuperseded } =
+  splitSupersededManualRows(manual.active, measured);
+const manualAdmittedStamped = applyCuratedOpenness(manualActive, manualActive).rows;
+const manualAdmitted = selectManualAdmissions(manualAdmittedStamped, measured, {
   spineKeyOf: spineKey,
   isUserSelectable: isUserSelectableTier,
+});
+sourceStats.push({
+  source: "manual additions (provider announcements)",
+  active: manualActive.length,
+  superseded: manualSuperseded.length,
+  rejected: manual.rejected,
 });
 const admitted = [...measured, ...manualAdmitted];
 admitted.sort(

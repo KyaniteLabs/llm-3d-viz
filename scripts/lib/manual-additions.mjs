@@ -74,10 +74,19 @@ export function vetManualRows(candidates) {
  * Supersede key: normalizeFamily(family_id || model) — the same bridge Arena
  * matching uses, so AA's eventual "GLM-5.3 (max)" card supersedes a manual
  * "GLM-5.3" family row regardless of slug style (glm-5.3 vs glm-5-3).
+ * Supersede requires the AA row to be SCORABLE (full triple: IQ + tps +
+ * blended price): an AA row that merely exists but sits in awaiting_measurement
+ * (e.g. listed-but-speed-unmeasured, the 2026-08-20 Qwen3.8 27B case) or is
+ * otherwise unadmittable replaces nothing — otherwise the family vanishes from
+ * the draft entirely (manual row killed, AA row not admitted).
  */
-export function splitSupersededManualRows(manualRows, aaRows) {
+export function splitSupersededManualRows(manualRows, aaRows, { aaRowScorable = null } = {}) {
+  const scorable = aaRowScorable ?? ((r) =>
+    r?.aa_intelligence_index != null && r?.tps != null && r?.blended_price_per_M != null);
   const aaFamilies = new Set(
-    (aaRows ?? []).map((r) => normalizeFamily(r?.family_id || r?.model || "")),
+    (aaRows ?? [])
+      .filter((r) => scorable(r))
+      .map((r) => normalizeFamily(r?.family_id || r?.model || "")),
   );
   const active = [];
   const superseded = [];
