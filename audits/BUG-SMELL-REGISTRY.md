@@ -23,6 +23,8 @@ Standing CEO law (2026-08-18): every bug OR smell gets one line + timestamp + su
 1. [shipped 2026-08-20] Capture gate asserts projections painted before screenshots (Class A, S2).
 2. [shipped 2026-08-20] Routing memory: availability.json is step zero for any lane decision (Class B).
 3. [this commit] Registry + doctrine: any "0 X" verification claim must state the denominator (Class A).
-4. [ticketed] Builder exit codes: distinct rc for parse/vet failures vs fetch failures so the failure alert names the true stage (Class C) — Forgejo issue filed.
-5. [ticketed] Supersede-drift guard: alert when a manual family exits the draft without a rename event in the diff (would have caught the Seed/Qwen vanish within one run) (Class D residual).
+4. [#203] Builder exit codes: distinct rc for parse/vet failures vs fetch failures so the failure alert names the true stage (Class C).
+5. [#204] Supersede-drift guard: alert when a manual family exits the draft without a rename event in the diff (would have caught the Seed/Qwen vanish within one run) (Class D residual).
 
+
+- 2026-08-20 ~21:20Z — alerting — the 19:48Z pipeline_failure:build signature recorded but NO Forgejo issue exists: the failure alert delivered via local notification only while the Forgejo post failed silently. Signatures must gate on the Forgejo channel specifically or failures must retry (related: #203).
