@@ -1,8 +1,8 @@
 # HANDOFF — llm-3d-viz
 
-## Status: dual-critic (harsh vision + DOM adjudication) ceiling 83 / 89 / 89 / 89 — goal NOT passed at budget end
+## Status: fleet-critic ceiling 87 / 91 / 89 / 82 — Decide ≥90; goal NOT passed; residual is one design call
 
-See `audits/uiux-splus-2026-08-15.md` iteration 4 (substitute vision critic pass, 2026-08-15): every mechanical defect fixed-and-DOM-verified (0 collisions, 0 truncations, all behaviors PASS); residual gap is taste-level chrome/terminology awaiting a Simon design call (stage-key/axis quiet-chrome size+contrast is the recurring item). The codex table below is the older 2026-08-09 pass, kept for history.
+See `audits/uiux-splus-2026-08-15.md` iteration 4 + supplement (2026-08-20, kilo/Gemini fleet critic after Simon's routing correction): every mechanical defect fixed-and-DOM-verified on the deployed rows=306 build (0 overlaps, 0 off-canvas, projections NMS'd + presence-gated). Decide crossed 90. Remaining gap = quiet-chrome contrast/size on secondary text + frontier-cluster density — Simon's design sign-off needed (one lever likely closes all four). The codex table below is the older 2026-08-09 pass, kept for history.
 
 ## Visual quality scores (codex GPT-5.6-terra xhigh vision review, 2026-08-09)
 

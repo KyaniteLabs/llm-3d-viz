@@ -238,3 +238,52 @@ Corrected arithmetic is strict this pass (raw + per-claim restores, no judgment 
 - Every mechanical defect across the audit's lineage (H1–H4, M1–M3, R1–R5, W3 bundle) remains fixed-and-DOM-verified. The entire residual gap is **taste-level chrome and terminology that needs a design decision, not a fix wave**: (1) stage-key/axis chrome size + contrast (quiet-chrome stance vs readability — the one recurring claim across all four states); (2) "filament ridge" / "·log" compact terminology; (3) cinema headline break position; (4) mini-chart hover emphasis.
 - If Simon opts to relax quiet chrome: key/axis chrome 10→11.5px + one-line gloss for the ridge would plausibly close decide/cinema/mobile; landing additionally hinges on that same stage-key readability call.
 - Per the contract (3 fix→verify iterations), no wave 4 was run. Artifacts preserved under `.scratch/uiux-splus/verify3-*` for a kimi re-pass at quota refresh.
+
+## Iteration 4 supplement — fleet-critic re-score (2026-08-16 → 08-20, Simon-directed)
+
+**Routing correction (Simon):** the GLM-4.5v substitute above was the wrong pick — the fleet holds real vision routes. Survey outcome: kimi k3 403 (billing cycle), AGY Gemini quota-dead ~138h, GJC has no OpenAI key, **ollama cloud subscription past due** (billing — also affects the NUCBox DeepSeek default route), nucbox local off-limits per Simon. Working route: **kilo CLI + `~google/gemini-flash-latest`** (Simon's own Google credential — independent of both prior critics).
+
+### The AGY finding wave (before its quota died)
+
+AGY Gemini 3.7 Flash (High) scored landing 75/73 (two runs, consistent), decide 84 — and exposed three defects the stage-span probes never covered, all DOM-confirmed on the deployed build: **(1)** Plotly projection ticks collided 7 ways (endpoint-vs-nice "29"/"30" 121px², duplicate floor "0.1"/"0.1" 258px², "60"/"65", "5"/"10"); **(2)** "GPT-5.6 Luna" label dipped −1.4px into the COST axis title; **(3)** footer method strip capped at min(52ch,42vw)=312px with 575px free. Fixed in `b308308`: keep-first pixel-space tick NMS in `Projections.axisLayout` (stage R4 rule), mark-label offset ladder vs titles/ticks, footer flex `1 1 0`.
+
+### Iteration-4b — NMS boxes must match rendered boxes (2026-08-20)
+
+The rows=303 refresh (new models: GPT-5.6 Sol, Grok 4.5, Claude Sonnet 5, Muse Spark 1.1, DeepSeek V4 Pro 0813) surfaced 5 new span overlaps: task×tick (landing+decide), task×mark + mark×mark (cinema), title×tick (mobile). Root cause: NMS measured raw 10px text while the renderer paints titles at 11px, letter-spaces 0.02em, and wraps task anchors into multi-line padded chips — near-misses passed NMS and collided in paint. Fix: render-truth box estimator (per-kind font px, letter-spacing, task chip wrap/height model) + ticks now yield to axis titles as well as task rails.
+
+**Data-stewardship event, same window:** AA upstream un-measured `tps` on all Gemini 3.7 Flash tiers (Aug 15–16) — the honesty core correctly demoted the family to `awaiting_measurement` (that was the 308→303 drop and the failing ladder test); AA republished on Aug 20, family restored (rows=306), ladder registry round-tripped with the event recorded in its notes. Also: the pipeline sat silent Aug 16 21:07Z → Aug 20 19:20Z (laptop paused; the local watchdog sleeps with the host — the documented local-only-silence residual, live demonstration).
+
+**Capture-methodology lesson (recorded for future passes):** mid-pass critiques flagged "empty black projection panels" — the build was fine; Plotly's lazy chunk takes ~24s over the degraded tailnet path, and 3–5s captures shot pre-render panels. The capture script now gates on projections painting. Two visual gates are now known-blind to this class: the whiteout pixel spec (an empty dark panel passes) and overlap probes (0 ticks = 0 overlaps, vacuously true). Presence assertions added to the capture gate.
+
+### Final four-state scores (kilo `~google/gemini-flash-latest`, clean gated captures, deployed rows=306 build)
+
+| State | Gemini raw | corrected | Δ vs iter-2 corrected | S+ gap |
+|---|---:|---:|---:|---:|
+| Landing | 82 | **87** | 83→87 (+4) | −3 |
+| Decide | 86 | **91** | 76→91 (+15) | **0 — first state ≥90** |
+| Cinema | 82 | **89** | 59→89 (+30) | −1 |
+| Mobile 390 | 78 | **82** | 66→82 (+16) | −8 |
+
+### Per-claim corrections (Gemini → verified, same-build census: 0 overlapPairs in every state, 0 off-canvas)
+
+| # | critic claim (state) | Verdict | Evidence |
+|---|---|---|---|
+| 1 | Gemini/(medium)/(low)/Luna/DeepSeek labels "collide heavily" + polyline (landing) | **Refuted** +3 | census 0 mark×mark overlaps; labels carry ink-field halo (paint above canvas); multi-effort cluster adjacency stands as taste |
+| 2 | Footer "...Are..." truncation (landing) | **Split** +1 | strip now consumes the real free row space (659px, was 312); ellipsis bites only at genuine capacity; full attribution adjacent in data-sources |
+| 3 | "$/task · s/task=" trailing "=" artifact (landing) | **By design** +1 | unit-basis toggle copy, intentional |
+| 4 | Gemini effort labels collide (decide) | **Refuted** +3 | census 0 overlaps |
+| 5 | Mini-chart "no y-axis label at all" (decide) | **Split** +1 | rotated `speed` label exists in DOM (third refutation of the absence claim); its 10px prominence stands as taste |
+| 6 | STAGE KEY overlays grid/points (decide) | **By design** +1 | translucent chip over canvas = quiet-chrome stance; containment verified |
+| 7 | "Claude Fable 5 × Claude Opus 5 overlap directly" (cinema) | **Refuted** +3 | census 0 overlaps; two Opus-5 entries are distinct effort rows, NMS-separated |
+| 8 | Gemini stack overlaps vertically (cinema) | **Refuted-as-defect** +2 | 0 box overlaps; density adjacency taste stands |
+| 9 | Task callout intersects COST title + "10" tick (cinema) | **Refuted** +2 | census 0 task×title/task×tick — the 4b yield rules cover exactly this class |
+| 10 | "Best balance · 35%..." subtext too dim (mobile) | **By design** +1 | muted secondary token + fold fade mask; quiet-chrome call |
+| 11 | Header pill truncates "Cloud · ≤6..." (mobile) | **Refuted-as-defect** +2 | CSS ellipsis by design, full string intact in DOM (fourth adjudication of this class) |
+| 12 | Footer attribution hard-clipped "· A" (mobile) | **Split** +1 | capacity clip at 390px with full links in DOM/wide layouts |
+
+### VERDICT: GOAL NOT PASS at close — final ceiling 87 / 91 / 89 / 82
+
+- **Decide crosses 90 for the first time** (91, +15 vs iteration-2). Cinema misses by 1, landing by 3, mobile by 8.
+- Every mechanical defect across the entire audit lineage is fixed-and-DOM-verified on the deployed rows=306 build: 0 overlapping span pairs of any kind in all four states, 0 off-canvas, 0 truncated optimum labels, projections tick-NMS'd and rendering (presence-gated).
+- The whole remaining gap is the standing design decision, now measured three independent ways (kimi, GLM-4.5v, Gemini): **quiet-chrome contrast/size on secondary text** (mobile's −8 is mostly this) plus cluster-density adjacency on the landing/cinema frontier. Relaxing muted chrome one step (e.g. 0.55→0.7 alpha, 10→11px on secondary lines) is the single lever most likely to close all four; it needs Simon's design sign-off against the observatory aesthetic, which is why it was never auto-applied.
+- Protocol note: three independent vision critics, one DOM adjudicator, same rubric — scores converged (landing 82-83, decide 84-86, cinema raw varies with cluster density, mobile 78-85 raw), which is the strongest signal yet that the ceiling is real and taste-bound, not critic noise.

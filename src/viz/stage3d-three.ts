@@ -1586,12 +1586,25 @@ export class Stage3DThree implements Stage3DSurface {
     const edgePad = 6;
     // Measure actual text extents so collision boxes match the real rendered width
     // instead of a fixed 72px/36px estimate.
+    // S+ iteration-4b (2026-08-20): boxes must match what the renderer paints —
+    // titles render at 11px (10px narrow), cinema focus marks at 9px under a 9rem
+    // wrap, task anchors wrap to multiple lines inside a padded/bordered chip,
+    // and every span letter-spaces 0.02em. The old single-line 10px estimate let
+    // near-misses pass NMS and collide in paint (measured on the rows=303
+    // refresh: task×tick landing+decide, task×mark and mark×mark cinema,
+    // title×tick mobile).
     const measureCtx = document.createElement("canvas").getContext("2d");
-    const measureLabelWidth = (p: Placed): number => {
+    const fontPxFor = (p: Placed): number => {
+      if (p.kind === "title") return this.narrowStage ? 10 : 11;
+      if (p.cinemaFocus && p.priority !== 3) return 9;
+      return 10;
+    };
+    const measureTextWidth = (p: Placed): number => {
       if (!measureCtx) return p.kind === "task" ? 144 : 72;
       const weight = p.kind === "title" || p.kind === "mark" || p.kind === "task" ? 500 : 400;
-      measureCtx.font = `${weight} 10px ${this.tokens.fontMono}`;
-      return measureCtx.measureText(p.text).width + edgePad * 2;
+      const px = fontPxFor(p);
+      measureCtx.font = `${weight} ${px}px ${this.tokens.fontMono}`;
+      return measureCtx.measureText(p.text).width + p.text.length * 0.02 * px;
     };
     // Apply the same edge-aware clamping the render pass uses, so NMS detects
     // collisions at the POST-clamp positions labels actually occupy.
@@ -1617,19 +1630,26 @@ export class Stage3DThree implements Stage3DSurface {
     };
     const labelBox = (p: Placed) => {
       const { left, top } = clampPos(p);
-      // Wave 3 (cinema focus labels wrap at 9rem ≈ 144px) — clamp the
-      // collision width to the wrap ceiling so 2-line labels claim realistic
-      // bounds (helps the offset ladder find genuinely free slots).
-      const wrapMax = p.cinemaFocus ? 144 : Number.POSITIVE_INFINITY;
-      const halfW = Math.min(measureLabelWidth(p), wrapMax + edgePad * 2) / 2;
-      // R5: optima may wrap to two lines — size their collision box accordingly.
-      // Wave 3: cinema focus labels wrap too.
-      const halfH =
-        p.kind === "task"
-          ? 12
-          : (p.kind === "mark" && p.priority === 3) || p.cinemaFocus
-            ? 11
-            : 8;
+      if (p.kind === "task") {
+        // Rendered task chip: right edge anchored at `left`, body grows left,
+        // wraps inside max-width min(15rem, 32vw), padding 3px 7px + 1px border.
+        const chipW = Math.max(80, Math.min(240, 0.32 * w));
+        const textW = measureTextWidth(p);
+        const boxW = Math.min(textW + 16, chipW);
+        const lines = Math.max(1, Math.ceil(textW / Math.max(40, chipW - 16)));
+        const boxH = lines * 12.5 + 8;
+        return { l: left - boxW, r: left, t: top - boxH / 2, b: top + boxH / 2 };
+      }
+      // Wave 3 (cinema focus labels wrap at 9rem ≈ 144px; optimum at 18rem) —
+      // clamp the collision width to the wrap ceiling and grow the height by
+      // the estimated line count so wrapped labels claim realistic bounds.
+      const wrapMax =
+        p.cinemaFocus ? 144 : p.kind === "mark" && p.priority === 3 ? 288 : Number.POSITIVE_INFINITY;
+      const rawW = measureTextWidth(p);
+      const halfW = Math.min(rawW, wrapMax) / 2 + 2;
+      const px = fontPxFor(p);
+      const lines = wrapMax === Number.POSITIVE_INFINITY ? 1 : Math.max(1, Math.ceil(rawW / wrapMax));
+      const halfH = (lines * px * 1.25) / 2 + 1;
       return { l: left - halfW, r: left + halfW, t: top - halfH, b: top + halfH };
     };
     const overlap = (a: ReturnType<typeof labelBox>, b: ReturnType<typeof labelBox>) =>
@@ -1644,6 +1664,9 @@ export class Stage3DThree implements Stage3DSurface {
     // dedup too (landing cost corner painted "0.1" twice, worlds −1/−0.941);
     // (b) ticks yield to task anchor rails — a callout grazing a tick band
     // ("Hard expert Q&A…" × "0.2") keeps, the tick under it drops.
+    // Iteration-4b: ticks yield to axis titles as well — both always keep
+    // (a title-grazing tick slipped through when only tasks were checked;
+    // measured "$/M·log" × "10" at 390px).
     const always = candidates.filter(
       (c) => c.kind === "title" || c.kind === "task",
     );
@@ -1655,7 +1678,7 @@ export class Stage3DThree implements Stage3DSurface {
           (k) =>
             (k.axis !== t.axis || k.text === t.text) && overlap(box, labelBox(k)),
         ) ||
-        always.some((a) => a.kind === "task" && overlap(box, labelBox(a)));
+        always.some((a) => overlap(box, labelBox(a)));
       if (!clash) keptTicks.push(t);
     }
     const soft = candidates

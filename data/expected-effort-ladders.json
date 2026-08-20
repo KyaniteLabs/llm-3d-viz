@@ -1,156 +1,283 @@
 {
-  "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage — never to invent metrics.",
-  "updated": "2026-08-14",
+  "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage \u2014 never to invent metrics.",
+  "updated": "2026-08-20",
   "ladders": {
     "Claude Fable 5": {
       "provider": "Anthropic",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
       "notes": "Product supports multi-effort. AA model card https://artificialanalysis.ai/models/claude-fable-5 is max-only (IQ~60). No claude-fable-5-low/medium/high/xhigh cards exist (404). Verified by direct card scrape 2026-08-05."
     },
     "Claude Opus 5": {
       "provider": "Anthropic",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max"],
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
       "notes": "AA publishes full adaptive ladder."
     },
     "Claude Sonnet 5": {
       "provider": "Anthropic",
-      "expected_tiers": ["low", "medium", "high", "xhigh", "max", "none"],
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "none"
+      ],
       "notes": "Cards exist for low/medium/high/xhigh with speed+price but Intelligence Index is null on those cards (verified). Only max + non-reasoning high are scorable."
     },
     "GPT-5.6 Sol": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh"],
-      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground \u2014 `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "GPT-5.6 Luna": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh"],
-      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground \u2014 `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "GPT-5.6 Terra": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "medium", "high", "xhigh"],
-      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground — `max` is not user-selectable, so it is excluded from the product catalog."
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "notes": "OpenAI reasoning effort ladder. Capped at xhigh: AA publishes a measured `max` rung, but OpenAI exposes effort only up to 'extra high' (xhigh) in the API/playground \u2014 `max` is not user-selectable, so it is excluded from the product catalog."
     },
     "Gemini 3.5 Flash": {
       "provider": "Google",
-      "expected_tiers": ["minimal", "medium", "high"],
+      "expected_tiers": [
+        "minimal",
+        "medium",
+        "high"
+      ],
       "notes": "Thinking budget tiers when published by AA."
     },
     "DeepSeek V4 Pro": {
       "provider": "DeepSeek",
-      "expected_tiers": ["none", "high", "max"],
+      "expected_tiers": [
+        "none",
+        "high",
+        "max"
+      ],
       "notes": "Reasoning on/off + effort when published."
     },
     "Kimi K3": {
       "provider": "Kimi",
-      "expected_tiers": ["low", "max"],
+      "expected_tiers": [
+        "low",
+        "max"
+      ],
       "notes": "AA often publishes low + max."
     },
     "GLM-5.3": {
       "provider": "Z AI",
-      "expected_tiers": ["low", "high", "max"],
-      "notes": "Announced 2026-08-14 (z.ai/blog/glm-5.3): thinking-only — no non-thinking mode, no medium tier. Max is the API default and Z.ai's recommended effort. Tracked via manual addition until AA measures the ladder; open weights ~2 weeks post-announcement."
+      "expected_tiers": [
+        "low",
+        "high",
+        "max"
+      ],
+      "notes": "Announced 2026-08-14 (z.ai/blog/glm-5.3): thinking-only \u2014 no non-thinking mode, no medium tier. Max is the API default and Z.ai's recommended effort. Tracked via manual addition until AA measures the ladder; open weights ~2 weeks post-announcement."
     },
     "Claude Opus 4.6": {
       "provider": "Anthropic",
-      "expected_tiers": ["high", "max"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "high",
+        "max"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "Claude Opus 4.7": {
       "provider": "Anthropic",
-      "expected_tiers": ["high", "max"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "high",
+        "max"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "Claude Sonnet 4.6": {
       "provider": "Anthropic",
-      "expected_tiers": ["low", "high", "max"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "low",
+        "high",
+        "max"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.5": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "low", "medium", "high", "xhigh"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.4": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "low", "xhigh"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "low",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.4 mini": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "medium", "xhigh"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "medium",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.4 nano": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "medium", "xhigh"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "medium",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.2": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "xhigh"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5.1": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5": {
       "provider": "OpenAI",
-      "expected_tiers": ["minimal", "low", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5 mini": {
       "provider": "OpenAI",
-      "expected_tiers": ["minimal", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "minimal",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GPT-5 nano": {
       "provider": "OpenAI",
-      "expected_tiers": ["minimal", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "minimal",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "gpt-oss-120b": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "low",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "gpt-oss-20b": {
       "provider": "OpenAI",
-      "expected_tiers": ["low", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "low",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "o3-mini": {
       "provider": "OpenAI",
-      "expected_tiers": ["none", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
-    },
-    "Gemini 3.7 Flash": {
-      "provider": "Google",
-      "expected_tiers": ["low", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "Grok 4.3": {
       "provider": "SpaceXAI",
-      "expected_tiers": ["none", "low", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "low",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "Nova 2.0 Lite": {
       "provider": "Amazon",
-      "expected_tiers": ["none", "low", "medium", "high"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "low",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "Nova 2.0 Pro Preview": {
       "provider": "Amazon",
-      "expected_tiers": ["none", "low", "medium"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "low",
+        "medium"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
     "GLM-5.2": {
       "provider": "Z AI",
-      "expected_tiers": ["none", "max"],
-      "notes": "observed from draft 2026-08-14, curated — expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+      "expected_tiers": [
+        "none",
+        "max"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
+    },
+    "Gemini 3.7 Flash": {
+      "provider": "Google",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them. 2026-08-16\u219220: AA briefly un-measured tps on all tiers (family sat in awaiting_measurement); republished 2026-08-20."
     }
-  }
+  },
+  "removals_log": []
 }
