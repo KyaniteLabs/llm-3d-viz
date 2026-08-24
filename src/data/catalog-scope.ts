@@ -81,6 +81,8 @@ export const LAB_OPENNESS_CLASS: Readonly<Record<string, LabOpennessClass>> = {
   Meta: "open", // Muse / Llama
   MiniMax: "open",
   NVIDIA: "open", // Nemotron
+  "DeepReinforce AI": "open", // Ornith — MIT self-hosted weights
+  "Stealth": "closed", // Ox Alpha — unknown lab, honest default (identity unverified)
   // Mixed portfolio: open-weight AND closed-API families; closed by default.
   "ByteDance Seed": "mixed", // Seed-OSS line is open; the rest closed
   Microsoft: "mixed", // Phi open; MAI closed
@@ -276,6 +278,7 @@ export const HELD_LABS_FOR_LATER = [
   "ByteDance Seed",
   "Celeris",
   "Cohere",
+  "DeepReinforce AI", // Ornith: open-weight self-hosted lab, no cloud API line
   "IBM",
   "Inception",
   "InclusionAI",
@@ -289,6 +292,7 @@ export const HELD_LABS_FOR_LATER = [
   "Nous Research",
   "Reka AI",
   "Sapiens AI",
+  "Stealth", // Ox Alpha: anonymous unattributed lab — held until identity is verifiable
   "StepFun",
   "Tencent",
   "Thinking Machines",

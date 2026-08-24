@@ -1,33 +1,14 @@
 {
   "data_date": "2026-08-24",
   "available": true,
-  "prev_row_count": 311,
+  "prev_row_count": 314,
   "next_row_count": 314,
-  "added": [
-    {
-      "model": "Ornith-1.0-35B",
-      "provider": "DeepReinforce AI",
-      "family_id": "Ornith-1.0-35B",
-      "release_date": "2026-06-01"
-    },
-    {
-      "model": "Ornith-1.5-35B-A3B",
-      "provider": "DeepReinforce AI",
-      "family_id": "Ornith-1.5-35B-A3B",
-      "release_date": "2026-08-18"
-    },
-    {
-      "model": "Ox Alpha (stealth)",
-      "provider": "Stealth",
-      "family_id": "Ox Alpha",
-      "release_date": "2026-08-20"
-    }
-  ],
+  "added": [],
   "removed": [],
   "renamed": [],
   "price_deltas": [],
   "counts": {
-    "added": 3,
+    "added": 0,
     "removed": 0,
     "renamed": 0,
     "price_deltas": 0

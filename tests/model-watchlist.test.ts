@@ -31,7 +31,8 @@ describe("model watchlist report", () => {
   it("the tracked file's entries vet clean and carry the no-sibling-attribution note", () => {
     const rows = (watchlistDoc as { entries: typeof entries & { note?: string }[] }).entries;
     const report = buildWatchlistReport(rows, [], [], "2026-08-14");
-    expect(report).toHaveLength(3);
+    // Entry count grows as announcements land — pin the floor, not the census.
+    expect(report.length).toBeGreaterThanOrEqual(3);
     const qwen = rows.find((r) => r.family === "Qwen3.8 27B");
     expect(qwen.note).toContain("must NOT be attributed");
   });
