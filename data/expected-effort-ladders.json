@@ -280,7 +280,7 @@
       "notes": "observed from draft 2026-08-24, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them. AA-measured 2026-08-24 (the 2026-08-20 manual PRELIMINARY row auto-superseded)."
     },
     "Grok 4.6": {
-      "provider": "xAI",
+      "provider": "SpaceXAI",
       "expected_tiers": [
         "high",
         "low",

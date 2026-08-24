@@ -28,3 +28,4 @@ Standing CEO law (2026-08-18): every bug OR smell gets one line + timestamp + su
 
 
 - 2026-08-20 ~21:20Z — alerting — the 19:48Z pipeline_failure:build signature recorded but NO Forgejo issue exists: the failure alert delivered via local notification only while the Forgejo post failed silently. Signatures must gate on the Forgejo channel specifically or failures must retry (related: #203).
+- 2026-08-24 16:59Z — process — commit shipped red AGAIN via the same class: `npx vitest run | grep -E "Tests "` gates on grep's exit (grep matches the summary line even when tests fail), so the && chain proceeded. Rule: gate on vitest's own exit code (`npx vitest run >/dev/null 2>&1; [ $? -eq 0 ]`), never on a pipe that always matches. Same-day fix: provider string in the Grok 4.6 ladder (xAI→SpaceXAI).
