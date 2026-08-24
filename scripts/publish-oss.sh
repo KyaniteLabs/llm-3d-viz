@@ -29,13 +29,28 @@ OSS_EDITION_COMMIT="${OSS_EDITION_COMMIT:-68f92f3}"
 SWEEP_PATTERNS='100\.92\.|srv1542844|pushing-dispatch'
 
 # Internal-only paths removed from the OSS tree (oss-publish-2026-08-14/-20
-# precedent). Patterns tolerate absence.
-INTERNAL_PATHS=(
-  ".omx" "audits"
-  "AGENTS.md" "HANDOFF.md" "CONTEXT.md"
-  "docs/agents" "docs/research" "docs/v1"
-  "docs/deploy/STATUS-"*.md "docs/deploy/vps-private-tailscale.md"
-)
+# precedent). Globs expand INSIDE internal_paths_existing() — against the
+# CHECKED-OUT branch, never at script start: a leftover oss-publish HEAD leaves
+# these files off disk, an assignment-time glob collapses to its literal, and
+# curation silently skips them (2026-08-24: dry-run then real-run tripped the
+# scrub gate exactly this way — the gate held, but the curation must not be
+# invocation-state dependent).
+internal_paths_existing() {
+  local p
+  local -a out=()
+  shopt -s nullglob
+  for p in ".omx" "audits" \
+           "AGENTS.md" "HANDOFF.md" "CONTEXT.md" \
+           "docs/agents" "docs/research" "docs/v1" \
+           docs/deploy/STATUS-*.md "docs/deploy/vps-private-tailscale.md"; do
+    # Quoted literals bypass nullglob — existence-check everything; globs
+    # that matched nothing already vanished.
+    [ -e "$p" ] || continue
+    out+=("$p")
+  done
+  shopt -u nullglob
+  printf '%s\n' "${out[@]}"
+}
 
 cd "$(git rev-parse --show-toplevel)"
 
@@ -51,11 +66,7 @@ echo "[oss-publish] branch $OSS_BRANCH off origin/main"
 git checkout -q -B "$OSS_BRANCH" origin/main
 
 echo "[oss-publish] removing internal-only paths"
-EXISTING=()
-for p in "${INTERNAL_PATHS[@]}"; do
-  # shellcheck disable=SC2206
-  [ -e "$p" ] && EXISTING+=("$p")
-done
+mapfile -t EXISTING < <(internal_paths_existing)
 if [ ${#EXISTING[@]} -gt 0 ]; then
   git rm -rq "${EXISTING[@]}"
 fi
@@ -85,8 +96,9 @@ npx tsc --noEmit
 npx vite build >/dev/null
 
 if [ "$DRY_RUN" -eq 1 ]; then
-  echo "[oss-publish] DRY RUN — stopping before push. Branch $OSS_BRANCH is local; inspect then:"
-  echo "  git push --force-with-lease $OSS_REMOTE $OSS_BRANCH:main && git checkout -q main"
+  echo "[oss-publish] DRY RUN — stopping before push."
+  echo "[oss-publish] returning to main (a leftover publish-branch HEAD makes the NEXT run start from a curated tree — see internal_paths_existing note)."
+  git checkout -q main
   exit 0
 fi
 
