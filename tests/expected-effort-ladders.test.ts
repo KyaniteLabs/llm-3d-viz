@@ -65,7 +65,9 @@ describe("expected-effort-ladders refresh (WS6)", () => {
       // published tier was silently dropped (would hide a real gap).
       for (const t of expected) expect(observedTiers.has(t), `${family}: tier "${t}" not in draft`).toBe(true);
       for (const t of observedTiers) expect(expected, `${family}: draft tier "${t}" missing from ladder`).toContain(t);
-      expect(ladders.ladders[family].notes).toMatch(/observed from draft 2026-08-14, curated/);
+      // Refresh convention: the observation date evolves with the draft —
+      // match the pattern, not a pinned historical date.
+      expect(ladders.ladders[family].notes).toMatch(/observed from draft \d{4}-\d{2}-\d{2}, curated/);
       expect(ladders.ladders[family].provider).toBe(observed.get(family)!.provider);
     }
   });

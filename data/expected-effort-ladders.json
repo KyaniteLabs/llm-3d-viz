@@ -1,6 +1,6 @@
 {
   "$schema_note": "Product-level effort ladders we expect multi-effort curves for. Used to detect incomplete catalog coverage \u2014 never to invent metrics.",
-  "updated": "2026-08-20",
+  "updated": "2026-08-24",
   "ladders": {
     "Claude Fable 5": {
       "provider": "Anthropic",
@@ -261,14 +261,6 @@
       ],
       "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     },
-    "GLM-5.2": {
-      "provider": "Z AI",
-      "expected_tiers": [
-        "none",
-        "max"
-      ],
-      "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
-    },
     "Gemini 3.7 Flash": {
       "provider": "Google",
       "expected_tiers": [
@@ -277,7 +269,32 @@
         "high"
       ],
       "notes": "observed from draft 2026-08-14, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them. 2026-08-16\u219220: AA briefly un-measured tps on all tiers (family sat in awaiting_measurement); republished 2026-08-20."
+    },
+    "Qwen3.8 27B": {
+      "provider": "Alibaba",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-24, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them. AA-measured 2026-08-24 (the 2026-08-20 manual PRELIMINARY row auto-superseded)."
+    },
+    "Grok 4.6": {
+      "provider": "xAI",
+      "expected_tiers": [
+        "high",
+        "low",
+        "medium",
+        "xhigh"
+      ],
+      "notes": "observed from draft 2026-08-24, curated \u2014 expected_tiers mirror exactly the tiers the draft publishes; add rungs only when AA publishes them."
     }
   },
-  "removals_log": []
+  "removals_log": [
+    {
+      "family": "GLM-5.2",
+      "removed": "2026-08-24",
+      "reason": "AA retired the (max) row \u2014 family now single-row (Non-reasoning, tier none); no longer multi-effort."
+    }
+  ]
 }

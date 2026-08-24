@@ -1,5 +1,5 @@
 {
-  "data_date": "2026-08-20",
+  "data_date": "2026-08-24",
   "ingestion": "official-api-only",
   "attribution": {
     "artificial_analysis": "https://artificialanalysis.ai (Data API)",
@@ -9,16 +9,16 @@
   "source_stats": [
     {
       "source": "curated lab-class openness map (W1 truth source)",
-      "stamped": 613,
+      "stamped": 619,
       "flips": 150,
       "note": "Precedence: manual-row value while alive, then per-family exception (survives supersede), then lab class (mixed/unknown → closed). Flip count = rows whose openness value changed vs the pre-overlay value.",
-      "scorable_after_blend": 308
+      "scorable_after_blend": 312
     },
     {
       "source": "AA Data API /language/models/free",
       "ok": true,
-      "raw": 610,
-      "mapped": 610,
+      "raw": 616,
+      "mapped": 616,
       "scorable_pre_blend": 0,
       "tier": "free",
       "pages": 4
@@ -27,8 +27,8 @@
       "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
       "ok": true,
       "skipped": false,
-      "entries": 393,
-      "attaches": 118,
+      "entries": 394,
+      "attaches": 119,
       "log_sample": [
         {
           "code": "arena_multi_candidate",
@@ -73,16 +73,16 @@
     },
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
-      "records": 115,
-      "delta_changed": 0
+      "records": 119,
+      "delta_changed": 13
     },
     {
       "source": "OpenRouter /api/v1/models",
       "ok": true,
       "models": 417,
-      "price_overlays": 36,
+      "price_overlays": 35,
       "modality_overlays": 90,
-      "context_overlays": 151,
+      "context_overlays": 148,
       "authenticated": false
     },
     {
@@ -95,14 +95,14 @@
   "openrouter": {
     "ok": true,
     "models": 417,
-    "price_overlays": 36,
+    "price_overlays": 35,
     "modality_overlays": 90,
-    "context_overlays": 151
+    "context_overlays": 148
   },
   "arena": {
     "ok": true,
-    "entries": 393,
-    "attaches": 118,
+    "entries": 394,
+    "attaches": 119,
     "license": "CC BY 4.0"
   },
   "arena_match_failures": {
@@ -161,16 +161,16 @@
   },
   "or_overlay_telemetry": {
     "note": "Report-only (WS6, M3): overlay attach counts + OpenRouter match-rate histogram over merged rows (production matcher, no behavior change). The unmatched-provider histogram tells us whether context/modality null-coverage is fixable by org-map growth.",
-    "price_overlays": 36,
+    "price_overlays": 35,
     "modality_overlays": 90,
-    "context_overlays": 151,
-    "rows_total": 613,
-    "rows_matched": 153,
-    "rows_unmatched": 460,
+    "context_overlays": 148,
+    "rows_total": 619,
+    "rows_matched": 150,
+    "rows_unmatched": 469,
     "unmatched_by_provider": [
       {
         "provider": "Alibaba",
-        "count": 62
+        "count": 64
       },
       {
         "provider": "Google",
@@ -194,7 +194,7 @@
       },
       {
         "provider": "SpaceXAI",
-        "count": 19
+        "count": 22
       },
       {
         "provider": "NVIDIA",
@@ -209,6 +209,10 @@
         "count": 14
       },
       {
+        "provider": "Liquid AI",
+        "count": 10
+      },
+      {
         "provider": "Allen Institute for AI",
         "count": 9
       },
@@ -217,11 +221,11 @@
         "count": 9
       },
       {
-        "provider": "LG AI Research",
+        "provider": "InclusionAI",
         "count": 9
       },
       {
-        "provider": "Liquid AI",
+        "provider": "LG AI Research",
         "count": 9
       },
       {
@@ -239,10 +243,6 @@
       {
         "provider": "Upstage",
         "count": 7
-      },
-      {
-        "provider": "InclusionAI",
-        "count": 6
       },
       {
         "provider": "Nous Research",
@@ -387,11 +387,23 @@
     ]
   },
   "price_divergences": {
-    "count": 115,
-    "delta_count": 0,
+    "count": 119,
+    "delta_count": 13,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
+      {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_out_per_M",
+        "aa_per_M": 1.32,
+        "or_per_M": 0.11,
+        "ratio": 11.79,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
+        "absent_runs": 0
+      },
       {
         "model": "Ling 2.6 Flash",
         "provider": "InclusionAI",
@@ -400,9 +412,10 @@
         "or_per_M": 0.01,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Ling 2.6 Flash",
@@ -412,9 +425,10 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Ling 2.6 Flash",
@@ -424,9 +438,10 @@
         "or_per_M": 0,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Nex-N2-Pro",
@@ -436,7 +451,7 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -448,7 +463,7 @@
         "or_per_M": 0.03,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -460,7 +475,7 @@
         "or_per_M": 0.12,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -472,19 +487,7 @@
         "or_per_M": 0.01,
         "ratio": 10,
         "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_out_per_M",
-        "aa_per_M": 1.32,
-        "or_per_M": 0.16,
-        "ratio": 8.42,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -496,8 +499,20 @@
         "or_per_M": 0.28,
         "ratio": 8.04,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.44,
+        "or_per_M": 0.06,
+        "ratio": 7.86,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -508,7 +523,7 @@
         "or_per_M": 0.08,
         "ratio": 7.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -520,7 +535,7 @@
         "or_per_M": 0.01,
         "ratio": 7,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -532,31 +547,7 @@
         "or_per_M": 0.07,
         "ratio": 6.43,
         "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.44,
-        "or_per_M": 0.08,
-        "ratio": 5.61,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "gpt-oss-120b (high)",
-        "provider": "OpenAI",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.15,
-        "or_per_M": 0.03,
-        "ratio": 5,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -568,9 +559,10 @@
         "or_per_M": 0.03,
         "ratio": 5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3 Coder Next",
@@ -580,8 +572,20 @@
         "or_per_M": 0.07,
         "ratio": 5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "gpt-oss-120b (high)",
+        "provider": "OpenAI",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.15,
+        "or_per_M": 0.04,
+        "ratio": 4.05,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -592,9 +596,10 @@
         "or_per_M": 0.08,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Ling-2.6-1T",
@@ -604,9 +609,10 @@
         "or_per_M": 0.63,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Reka Flash 3",
@@ -616,7 +622,7 @@
         "or_per_M": 0.2,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -628,9 +634,10 @@
         "or_per_M": 0.08,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Ring-2.6-1T",
@@ -640,8 +647,21 @@
         "or_per_M": 0.63,
         "ratio": 4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 1,
+        "stale": true
+      },
+      {
+        "model": "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_out_per_M",
+        "aa_per_M": 3.96,
+        "or_per_M": 1.04,
+        "ratio": 3.79,
+        "first_seen": "2026-08-24",
+        "age_days": 0,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -652,7 +672,7 @@
         "or_per_M": 0.14,
         "ratio": 3.57,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -664,7 +684,7 @@
         "or_per_M": 0.17,
         "ratio": 3.53,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -676,7 +696,7 @@
         "or_per_M": 0.06,
         "ratio": 3.49,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -688,9 +708,10 @@
         "or_per_M": 0.14,
         "ratio": 3.38,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Ling 3.0 Flash",
@@ -700,8 +721,20 @@
         "or_per_M": 0.02,
         "ratio": 3.33,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "aa_per_M": 30,
+        "or_per_M": 10,
+        "ratio": 3,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -712,7 +745,7 @@
         "or_per_M": 0.18,
         "ratio": 3,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -724,7 +757,7 @@
         "or_per_M": 0.06,
         "ratio": 3,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -736,7 +769,7 @@
         "or_per_M": 0.12,
         "ratio": 2.92,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -748,7 +781,7 @@
         "or_per_M": 0.6,
         "ratio": 2.86,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -760,8 +793,44 @@
         "or_per_M": 0.14,
         "ratio": 2.71,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_in_per_M",
+        "aa_per_M": 1.32,
+        "or_per_M": 0.52,
+        "ratio": 2.53,
+        "first_seen": "2026-08-24",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_in_per_M",
+        "aa_per_M": 5,
+        "or_per_M": 2,
+        "ratio": 2.5,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.5,
+        "or_per_M": 0.2,
+        "ratio": 2.5,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -772,7 +841,7 @@
         "or_per_M": 0.3,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -784,7 +853,7 @@
         "or_per_M": 1,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -796,7 +865,7 @@
         "or_per_M": 0.06,
         "ratio": 2.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -808,7 +877,7 @@
         "or_per_M": 1.2,
         "ratio": 2.46,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -820,7 +889,7 @@
         "or_per_M": 0,
         "ratio": 2.38,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -832,7 +901,7 @@
         "or_per_M": 1,
         "ratio": 2.25,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -844,7 +913,7 @@
         "or_per_M": 0.3,
         "ratio": 2.2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -856,7 +925,7 @@
         "or_per_M": 0.14,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -868,7 +937,7 @@
         "or_per_M": 0.08,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -880,7 +949,7 @@
         "or_per_M": 0.38,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -892,7 +961,7 @@
         "or_per_M": 1.88,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -904,43 +973,7 @@
         "or_per_M": 0.01,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_in_per_M",
-        "aa_per_M": 5,
-        "or_per_M": 2.5,
-        "ratio": 2,
-        "first_seen": "2026-08-20",
-        "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_out_per_M",
-        "aa_per_M": 30,
-        "or_per_M": 15,
-        "ratio": 2,
-        "first_seen": "2026-08-20",
-        "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_cache_per_M",
-        "aa_per_M": 0.5,
-        "or_per_M": 0.25,
-        "ratio": 2,
-        "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -952,7 +985,7 @@
         "or_per_M": 0.03,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -964,9 +997,10 @@
         "or_per_M": 0.06,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Mistral Large (Feb '24)",
@@ -976,7 +1010,7 @@
         "or_per_M": 2,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -988,7 +1022,7 @@
         "or_per_M": 6,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1000,7 +1034,7 @@
         "or_per_M": 0.25,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1012,7 +1046,7 @@
         "or_per_M": 0.1,
         "ratio": 2,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1024,7 +1058,7 @@
         "or_per_M": 0.7,
         "ratio": 1.93,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1036,8 +1070,20 @@
         "or_per_M": 0.21,
         "ratio": 1.9,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.6 27B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.6,
+        "or_per_M": 0.32,
+        "ratio": 1.88,
+        "first_seen": "2026-08-24",
+        "age_days": 0,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1048,7 +1094,7 @@
         "or_per_M": 0.04,
         "ratio": 1.87,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1060,7 +1106,7 @@
         "or_per_M": 0.07,
         "ratio": 1.86,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1072,7 +1118,7 @@
         "or_per_M": 0.1,
         "ratio": 1.8,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1084,9 +1130,10 @@
         "or_per_M": 0.54,
         "ratio": 1.75,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Kimi K2.6",
@@ -1096,9 +1143,10 @@
         "or_per_M": 2.28,
         "ratio": 1.75,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Kimi K2.6",
@@ -1108,9 +1156,10 @@
         "or_per_M": 0.09,
         "ratio": 1.75,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3.7 Max",
@@ -1120,7 +1169,7 @@
         "or_per_M": 1.48,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1132,7 +1181,7 @@
         "or_per_M": 4.43,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1144,7 +1193,7 @@
         "or_per_M": 0.3,
         "ratio": 1.69,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1156,7 +1205,7 @@
         "or_per_M": 0.6,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1168,7 +1217,7 @@
         "or_per_M": 1.92,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1180,7 +1229,7 @@
         "or_per_M": 0.12,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1192,7 +1241,7 @@
         "or_per_M": 0.1,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1204,19 +1253,7 @@
         "or_per_M": 0.01,
         "ratio": 1.67,
         "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Qwen3 Next 80B A3B Instruct",
-        "provider": "Alibaba",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.15,
-        "or_per_M": 0.09,
-        "ratio": 1.67,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1228,7 +1265,7 @@
         "or_per_M": 1.25,
         "ratio": 1.6,
         "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 4,
         "changed": false,
         "absent_runs": 0
       },
@@ -1240,7 +1277,7 @@
         "or_per_M": 0.06,
         "ratio": 1.6,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1252,9 +1289,10 @@
         "or_per_M": 0.02,
         "ratio": 1.57,
         "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 4,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3 Max",
@@ -1264,7 +1302,7 @@
         "or_per_M": 0.78,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1276,7 +1314,7 @@
         "or_per_M": 3.9,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1288,7 +1326,7 @@
         "or_per_M": 0.13,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1300,7 +1338,7 @@
         "or_per_M": 0.52,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1312,7 +1350,7 @@
         "or_per_M": 0.1,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1324,7 +1362,7 @@
         "or_per_M": 0.42,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1336,7 +1374,7 @@
         "or_per_M": 0.12,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1348,7 +1386,7 @@
         "or_per_M": 0.45,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1360,7 +1398,7 @@
         "or_per_M": 0.26,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1372,7 +1410,7 @@
         "or_per_M": 2.08,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1384,7 +1422,7 @@
         "or_per_M": 0.2,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1396,7 +1434,7 @@
         "or_per_M": 1.56,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1408,9 +1446,10 @@
         "or_per_M": 0.39,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3.5 397B A17B (Reasoning)",
@@ -1420,9 +1459,10 @@
         "or_per_M": 2.34,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3.6 Plus",
@@ -1432,7 +1472,7 @@
         "or_per_M": 0.33,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1444,7 +1484,7 @@
         "or_per_M": 1.95,
         "ratio": 1.54,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1456,7 +1496,7 @@
         "or_per_M": 0.4,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1468,7 +1508,7 @@
         "or_per_M": 0.45,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1480,8 +1520,20 @@
         "or_per_M": 0.8,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3 Next 80B A3B Instruct",
+        "provider": "Alibaba",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.15,
+        "or_per_M": 0.1,
+        "ratio": 1.5,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1492,7 +1544,7 @@
         "or_per_M": 0.02,
         "ratio": 1.5,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1504,7 +1556,7 @@
         "or_per_M": 0.13,
         "ratio": 1.46,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1516,7 +1568,7 @@
         "or_per_M": 3.04,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1528,7 +1580,7 @@
         "or_per_M": 0.18,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1540,7 +1592,7 @@
         "or_per_M": 0.97,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1552,7 +1604,7 @@
         "or_per_M": 3.04,
         "ratio": 1.45,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1564,7 +1616,7 @@
         "or_per_M": 0.97,
         "ratio": 1.44,
         "first_seen": "2026-08-15",
-        "age_days": 5,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1576,8 +1628,21 @@
         "or_per_M": 0.07,
         "ratio": 1.43,
         "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 4,
         "changed": false,
+        "absent_runs": 1,
+        "stale": true
+      },
+      {
+        "model": "Kimi K2.7 Code",
+        "provider": "Kimi",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.95,
+        "or_per_M": 0.67,
+        "ratio": 1.42,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1588,7 +1653,7 @@
         "or_per_M": 0.1,
         "ratio": 1.4,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1600,7 +1665,7 @@
         "or_per_M": 0.8,
         "ratio": 1.38,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1612,31 +1677,7 @@
         "or_per_M": 0.19,
         "ratio": 1.35,
         "first_seen": "2026-08-15",
-        "age_days": 5,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Llama 4 Maverick",
-        "provider": "Meta",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.27,
-        "or_per_M": 0.2,
-        "ratio": 1.35,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "Kimi K2.7 Code",
-        "provider": "Kimi",
-        "field": "price_in_per_M",
-        "aa_per_M": 0.95,
-        "or_per_M": 0.71,
-        "ratio": 1.34,
-        "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 9,
         "changed": false,
         "absent_runs": 0
       },
@@ -1648,9 +1689,10 @@
         "or_per_M": 0.45,
         "ratio": 1.33,
         "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 4,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Kimi K2.5 (Reasoning)",
@@ -1660,9 +1702,10 @@
         "or_per_M": 2.25,
         "ratio": 1.33,
         "first_seen": "2026-08-20",
-        "age_days": 0,
+        "age_days": 4,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "MiniMax-M2.5",
@@ -1672,9 +1715,10 @@
         "or_per_M": 0.22,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "MiniMax-M2.5",
@@ -1684,9 +1728,10 @@
         "or_per_M": 0.9,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "Qwen3.5 9B (Reasoning)",
@@ -1696,7 +1741,7 @@
         "or_per_M": 0.15,
         "ratio": 1.33,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1708,8 +1753,20 @@
         "or_per_M": 0.13,
         "ratio": 1.31,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Llama 4 Maverick",
+        "provider": "Meta",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.26,
+        "or_per_M": 0.2,
+        "ratio": 1.3,
+        "first_seen": "2026-08-14",
+        "age_days": 10,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1720,9 +1777,10 @@
         "or_per_M": 0.15,
         "ratio": 1.27,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
-        "absent_runs": 0
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "GLM-4.7 (Reasoning)",
@@ -1732,7 +1790,7 @@
         "or_per_M": 1.75,
         "ratio": 1.26,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1744,7 +1802,7 @@
         "or_per_M": 0.04,
         "ratio": 1.25,
         "first_seen": "2026-08-16",
-        "age_days": 4,
+        "age_days": 8,
         "changed": false,
         "absent_runs": 0
       },
@@ -1756,7 +1814,7 @@
         "or_per_M": 0.32,
         "ratio": 1.25,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
         "absent_runs": 0
       },
@@ -1768,75 +1826,96 @@
         "or_per_M": 1.28,
         "ratio": 1.25,
         "first_seen": "2026-08-14",
-        "age_days": 6,
+        "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "Qwen3.8 27B (xhigh)",
+        "provider": "Alibaba",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.5,
+        "or_per_M": 0.4,
+        "ratio": 1.25,
+        "first_seen": "2026-08-24",
+        "age_days": 0,
+        "changed": true,
         "absent_runs": 0
       }
     ]
   },
   "stale_cost_task": {
-    "count": 0,
-    "entries": [],
+    "count": 1,
+    "entries": [
+      {
+        "model": "Qwen3.6 27B (Reasoning)",
+        "provider": "Alibaba",
+        "field": "blended_price_per_M",
+        "from": 0.5640000000000001,
+        "to": 0.9,
+        "pct": 59.57
+      }
+    ],
     "note": "Rows with non-null cost_per_index_task_usd whose current price side (in/out/blended) moved >25% vs the previous draft's same family+effort spine (spineKey identity: model slug + effort tier). Approximation — measurement-time prices are not stored; first run (no previous draft) flags nothing. Data flag only; UI surfacing deferred to the UI/UX line."
   },
   "intel_consistency": {
     "title": "AA Intelligence Index vs Arena Elo — consistency measurement, not a replacement score",
-    "families": 73,
-    "ranked_pool": 73,
+    "families": 72,
+    "ranked_pool": 72,
     "entries": [
       {
         "family": "Gemini 3 Flash Preview",
         "provider": "Google",
         "index_min": 27.9,
         "index_max": 27.9,
-        "elo_min": 1472.78,
-        "elo_max": 1472.78,
-        "rank_by_index": 44,
+        "elo_min": 1472.79,
+        "elo_max": 1472.79,
+        "rank_by_index": 43,
         "rank_by_elo": 14,
-        "rank_gap": 30
+        "rank_gap": 29
       },
       {
         "family": "Solar Pro 4",
         "provider": "Upstage",
         "index_min": 41.6,
         "index_max": 41.6,
-        "elo_min": 1376.29,
-        "elo_max": 1376.29,
-        "rank_by_index": 27,
-        "rank_by_elo": 55,
-        "rank_gap": 28
-      },
-      {
-        "family": "Claude Opus 4.6",
-        "provider": "Anthropic",
-        "index_min": 38.8,
-        "index_max": 44.9,
-        "elo_min": 1497.36,
-        "elo_max": 1504.58,
+        "elo_min": 1375.69,
+        "elo_max": 1375.69,
         "rank_by_index": 26,
-        "rank_by_elo": 2,
-        "rank_gap": 24
+        "rank_by_elo": 54,
+        "rank_gap": 28
       },
       {
         "family": "MiniMax-M2",
         "provider": "MiniMax",
         "index_min": 28.9,
         "index_max": 28.9,
-        "elo_min": 1345.52,
-        "elo_max": 1345.52,
-        "rank_by_index": 43,
-        "rank_by_elo": 67,
+        "elo_min": 1345.57,
+        "elo_max": 1345.57,
+        "rank_by_index": 42,
+        "rank_by_elo": 66,
         "rank_gap": 24
+      },
+      {
+        "family": "Claude Opus 4.6",
+        "provider": "Anthropic",
+        "index_min": 38.8,
+        "index_max": 44.9,
+        "elo_min": 1497.25,
+        "elo_max": 1504.49,
+        "rank_by_index": 25,
+        "rank_by_elo": 2,
+        "rank_gap": 23
       },
       {
         "family": "Inkling Small",
         "provider": "Thinking Machines",
         "index_min": 41.2,
         "index_max": 41.2,
-        "elo_min": 1405.12,
-        "elo_max": 1405.12,
-        "rank_by_index": 28,
-        "rank_by_elo": 48,
+        "elo_min": 1404.89,
+        "elo_max": 1404.89,
+        "rank_by_index": 27,
+        "rank_by_elo": 47,
         "rank_gap": 20
       },
       {
@@ -1844,21 +1923,21 @@
         "provider": "SpaceXAI",
         "index_min": 60.9,
         "index_max": 60.9,
-        "elo_min": 1461.79,
-        "elo_max": 1461.79,
+        "elo_min": 1461.16,
+        "elo_max": 1461.16,
         "rank_by_index": 3,
-        "rank_by_elo": 22,
-        "rank_gap": 19
+        "rank_by_elo": 21,
+        "rank_gap": 18
       },
       {
         "family": "Qwen3 VL 235B A22B Instruct",
         "provider": "Alibaba",
         "index_min": 14.4,
         "index_max": 14.4,
-        "elo_min": 1414.36,
-        "elo_max": 1414.36,
-        "rank_by_index": 62,
-        "rank_by_elo": 45,
+        "elo_min": 1414.4,
+        "elo_max": 1414.4,
+        "rank_by_index": 61,
+        "rank_by_elo": 44,
         "rank_gap": 17
       },
       {
@@ -1866,10 +1945,10 @@
         "provider": "Google",
         "index_min": 25.9,
         "index_max": 25.9,
-        "elo_min": 1445.24,
-        "elo_max": 1445.24,
-        "rank_by_index": 46,
-        "rank_by_elo": 30,
+        "elo_min": 1445.25,
+        "elo_max": 1445.25,
+        "rank_by_index": 45,
+        "rank_by_elo": 29,
         "rank_gap": 16
       },
       {
@@ -1877,10 +1956,10 @@
         "provider": "Google",
         "index_min": 14.2,
         "index_max": 14.2,
-        "elo_min": 1409.99,
-        "elo_max": 1409.99,
-        "rank_by_index": 63,
-        "rank_by_elo": 47,
+        "elo_min": 1409.96,
+        "elo_max": 1409.96,
+        "rank_by_index": 62,
+        "rank_by_elo": 46,
         "rank_gap": 16
       },
       {
@@ -1888,10 +1967,10 @@
         "provider": "OpenAI",
         "index_min": 43.3,
         "index_max": 43.3,
-        "elo_min": 1435.47,
-        "elo_max": 1435.47,
-        "rank_by_index": 22,
-        "rank_by_elo": 37,
+        "elo_min": 1435.39,
+        "elo_max": 1435.39,
+        "rank_by_index": 21,
+        "rank_by_elo": 36,
         "rank_gap": 15
       },
       {
@@ -1899,10 +1978,10 @@
         "provider": "Alibaba",
         "index_min": 13.8,
         "index_max": 13.8,
-        "elo_min": 1400.7,
-        "elo_max": 1400.7,
-        "rank_by_index": 64,
-        "rank_by_elo": 49,
+        "elo_min": 1400.63,
+        "elo_max": 1400.63,
+        "rank_by_index": 63,
+        "rank_by_elo": 48,
         "rank_gap": 15
       },
       {
@@ -1910,10 +1989,10 @@
         "provider": "OpenAI",
         "index_min": 50.1,
         "index_max": 50.1,
-        "elo_min": 1451.28,
-        "elo_max": 1451.28,
-        "rank_by_index": 15,
-        "rank_by_elo": 29,
+        "elo_min": 1450.8,
+        "elo_max": 1450.8,
+        "rank_by_index": 14,
+        "rank_by_elo": 28,
         "rank_gap": 14
       },
       {
@@ -1921,10 +2000,10 @@
         "provider": "Google",
         "index_min": 29.7,
         "index_max": 29.7,
-        "elo_min": 1451.36,
-        "elo_max": 1451.36,
-        "rank_by_index": 42,
-        "rank_by_elo": 28,
+        "elo_min": 1451.25,
+        "elo_max": 1451.25,
+        "rank_by_index": 41,
+        "rank_by_elo": 27,
         "rank_gap": 14
       },
       {
@@ -1932,10 +2011,10 @@
         "provider": "OpenAI",
         "index_min": 20.1,
         "index_max": 20.1,
-        "elo_min": 1337.41,
-        "elo_max": 1337.41,
-        "rank_by_index": 54,
-        "rank_by_elo": 68,
+        "elo_min": 1337.49,
+        "elo_max": 1337.49,
+        "rank_by_index": 53,
+        "rank_by_elo": 67,
         "rank_gap": 14
       },
       {
@@ -1943,43 +2022,54 @@
         "provider": "Mistral",
         "index_min": 15.9,
         "index_max": 15.9,
-        "elo_min": 1414.05,
-        "elo_max": 1414.05,
-        "rank_by_index": 60,
-        "rank_by_elo": 46,
+        "elo_min": 1414.15,
+        "elo_max": 1414.15,
+        "rank_by_index": 59,
+        "rank_by_elo": 45,
         "rank_gap": 14
-      },
-      {
-        "family": "Claude Opus 4.7",
-        "provider": "Anthropic",
-        "index_min": 43.9,
-        "index_max": 55,
-        "elo_min": 1494.12,
-        "elo_max": 1502.08,
-        "rank_by_index": 16,
-        "rank_by_elo": 3,
-        "rank_gap": 13
       },
       {
         "family": "Qwen3 235B A22B 2507 Instruct",
         "provider": "Alibaba",
         "index_min": 18.4,
         "index_max": 18.4,
-        "elo_min": 1422.74,
-        "elo_max": 1422.74,
-        "rank_by_index": 56,
-        "rank_by_elo": 43,
+        "elo_min": 1422.77,
+        "elo_max": 1422.77,
+        "rank_by_index": 55,
+        "rank_by_elo": 42,
         "rank_gap": 13
+      },
+      {
+        "family": "Claude Opus 4.7",
+        "provider": "Anthropic",
+        "index_min": 43.9,
+        "index_max": 55,
+        "elo_min": 1493.99,
+        "elo_max": 1502.01,
+        "rank_by_index": 15,
+        "rank_by_elo": 3,
+        "rank_gap": 12
       },
       {
         "family": "MiniMax-M3",
         "provider": "MiniMax",
         "index_min": 45.4,
         "index_max": 45.4,
-        "elo_min": 1442.26,
-        "elo_max": 1442.26,
-        "rank_by_index": 20,
-        "rank_by_elo": 32,
+        "elo_min": 1442.65,
+        "elo_max": 1442.65,
+        "rank_by_index": 19,
+        "rank_by_elo": 31,
+        "rank_gap": 12
+      },
+      {
+        "family": "Gemini 3.5 Flash-Lite",
+        "provider": "Google",
+        "index_min": 37.4,
+        "index_max": 37.4,
+        "elo_min": 1457.16,
+        "elo_max": 1457.16,
+        "rank_by_index": 36,
+        "rank_by_elo": 24,
         "rank_gap": 12
       },
       {
@@ -1987,32 +2077,21 @@
         "provider": "OpenAI",
         "index_min": 24.1,
         "index_max": 24.1,
-        "elo_min": 1352.12,
-        "elo_max": 1352.12,
-        "rank_by_index": 50,
-        "rank_by_elo": 62,
+        "elo_min": 1352.18,
+        "elo_max": 1352.18,
+        "rank_by_index": 49,
+        "rank_by_elo": 61,
         "rank_gap": 12
-      },
-      {
-        "family": "Gemini 3.1 Pro Preview",
-        "provider": "Google",
-        "index_min": 47.7,
-        "index_max": 47.7,
-        "elo_min": 1486.18,
-        "elo_max": 1486.18,
-        "rank_by_index": 19,
-        "rank_by_elo": 8,
-        "rank_gap": 11
       },
       {
         "family": "Inkling",
         "provider": "Thinking Machines",
         "index_min": 42.3,
         "index_max": 42.3,
-        "elo_min": 1439.79,
-        "elo_max": 1439.79,
-        "rank_by_index": 24,
-        "rank_by_elo": 35,
+        "elo_min": 1439.98,
+        "elo_max": 1439.98,
+        "rank_by_index": 23,
+        "rank_by_elo": 34,
         "rank_gap": 11
       },
       {
@@ -2020,10 +2099,10 @@
         "provider": "Z AI",
         "index_min": 41,
         "index_max": 41,
-        "elo_min": 1467.67,
-        "elo_max": 1467.67,
-        "rank_by_index": 29,
-        "rank_by_elo": 18,
+        "elo_min": 1467.76,
+        "elo_max": 1467.76,
+        "rank_by_index": 28,
+        "rank_by_elo": 17,
         "rank_gap": 11
       },
       {
@@ -2031,21 +2110,10 @@
         "provider": "MiniMax",
         "index_min": 38.9,
         "index_max": 38.9,
-        "elo_min": 1416.36,
-        "elo_max": 1416.36,
-        "rank_by_index": 33,
-        "rank_by_elo": 44,
-        "rank_gap": 11
-      },
-      {
-        "family": "Gemini 3.5 Flash-Lite",
-        "provider": "Google",
-        "index_min": 37.4,
-        "index_max": 37.4,
-        "elo_min": 1457.38,
-        "elo_max": 1457.38,
-        "rank_by_index": 37,
-        "rank_by_elo": 26,
+        "elo_min": 1416.33,
+        "elo_max": 1416.33,
+        "rank_by_index": 32,
+        "rank_by_elo": 43,
         "rank_gap": 11
       },
       {
@@ -2055,8 +2123,8 @@
         "index_max": 25.7,
         "elo_min": 1360.31,
         "elo_max": 1360.31,
-        "rank_by_index": 48,
-        "rank_by_elo": 59,
+        "rank_by_index": 47,
+        "rank_by_elo": 58,
         "rank_gap": 11
       },
       {
@@ -2064,10 +2132,10 @@
         "provider": "Inception",
         "index_min": 21.9,
         "index_max": 21.9,
-        "elo_min": 1346.74,
-        "elo_max": 1346.74,
-        "rank_by_index": 53,
-        "rank_by_elo": 64,
+        "elo_min": 1346.72,
+        "elo_max": 1346.72,
+        "rank_by_index": 52,
+        "rank_by_elo": 63,
         "rank_gap": 11
       },
       {
@@ -2075,65 +2143,43 @@
         "provider": "Z AI",
         "index_min": 10.9,
         "index_max": 10.9,
-        "elo_min": 1377.11,
-        "elo_max": 1377.11,
-        "rank_by_index": 65,
-        "rank_by_elo": 54,
+        "elo_min": 1377.18,
+        "elo_max": 1377.18,
+        "rank_by_index": 64,
+        "rank_by_elo": 53,
         "rank_gap": 11
+      },
+      {
+        "family": "Gemini 3.1 Pro Preview",
+        "provider": "Google",
+        "index_min": 47.7,
+        "index_max": 47.7,
+        "elo_min": 1486.27,
+        "elo_max": 1486.27,
+        "rank_by_index": 18,
+        "rank_by_elo": 8,
+        "rank_gap": 10
       },
       {
         "family": "MiniMax-M2.5",
         "provider": "MiniMax",
         "index_min": 34.5,
         "index_max": 34.5,
-        "elo_min": 1390.39,
-        "elo_max": 1390.39,
-        "rank_by_index": 41,
-        "rank_by_elo": 51,
+        "elo_min": 1390.44,
+        "elo_max": 1390.44,
+        "rank_by_index": 40,
+        "rank_by_elo": 50,
         "rank_gap": 10
-      },
-      {
-        "family": "Grok 4.5",
-        "provider": "SpaceXAI",
-        "index_min": 55.8,
-        "index_max": 55.8,
-        "elo_min": 1469.71,
-        "elo_max": 1469.71,
-        "rank_by_index": 8,
-        "rank_by_elo": 17,
-        "rank_gap": 9
-      },
-      {
-        "family": "GPT-5.4",
-        "provider": "OpenAI",
-        "index_min": 53.1,
-        "index_max": 53.1,
-        "elo_min": 1465.75,
-        "elo_max": 1465.75,
-        "rank_by_index": 11,
-        "rank_by_elo": 20,
-        "rank_gap": 9
-      },
-      {
-        "family": "GPT-5.6 Terra",
-        "provider": "OpenAI",
-        "index_min": 52.8,
-        "index_max": 52.8,
-        "elo_min": 1464.5,
-        "elo_max": 1464.5,
-        "rank_by_index": 12,
-        "rank_by_elo": 21,
-        "rank_gap": 9
       },
       {
         "family": "Gemini 3.1 Flash-Lite",
         "provider": "Google",
         "index_min": 25.6,
         "index_max": 25.6,
-        "elo_min": 1432.14,
-        "elo_max": 1432.14,
-        "rank_by_index": 49,
-        "rank_by_elo": 40,
+        "elo_min": 1431.92,
+        "elo_max": 1431.92,
+        "rank_by_index": 48,
+        "rank_by_elo": 39,
         "rank_gap": 9
       },
       {
@@ -2141,10 +2187,10 @@
         "provider": "Z AI",
         "index_min": 23.4,
         "index_max": 23.4,
-        "elo_min": 1424.27,
-        "elo_max": 1424.27,
-        "rank_by_index": 51,
-        "rank_by_elo": 42,
+        "elo_min": 1424.25,
+        "elo_max": 1424.25,
+        "rank_by_index": 50,
+        "rank_by_elo": 41,
         "rank_gap": 9
       },
       {
@@ -2152,10 +2198,10 @@
         "provider": "OpenAI",
         "index_min": 15.2,
         "index_max": 15.2,
-        "elo_min": 1317.54,
-        "elo_max": 1317.54,
-        "rank_by_index": 61,
-        "rank_by_elo": 70,
+        "elo_min": 1317.56,
+        "elo_max": 1317.56,
+        "rank_by_index": 60,
+        "rank_by_elo": 69,
         "rank_gap": 9
       },
       {
@@ -2163,21 +2209,54 @@
         "provider": "Z AI",
         "index_min": 6.8,
         "index_max": 6.8,
-        "elo_min": 1353.39,
-        "elo_max": 1353.39,
-        "rank_by_index": 70,
-        "rank_by_elo": 61,
+        "elo_min": 1353.34,
+        "elo_max": 1353.34,
+        "rank_by_index": 69,
+        "rank_by_elo": 60,
         "rank_gap": 9
+      },
+      {
+        "family": "Grok 4.5",
+        "provider": "SpaceXAI",
+        "index_min": 55.8,
+        "index_max": 55.8,
+        "elo_min": 1470.29,
+        "elo_max": 1470.29,
+        "rank_by_index": 8,
+        "rank_by_elo": 16,
+        "rank_gap": 8
+      },
+      {
+        "family": "GPT-5.4",
+        "provider": "OpenAI",
+        "index_min": 53.1,
+        "index_max": 53.1,
+        "elo_min": 1465.74,
+        "elo_max": 1465.74,
+        "rank_by_index": 11,
+        "rank_by_elo": 19,
+        "rank_gap": 8
+      },
+      {
+        "family": "GPT-5.6 Terra",
+        "provider": "OpenAI",
+        "index_min": 52.8,
+        "index_max": 52.8,
+        "elo_min": 1465.37,
+        "elo_max": 1465.37,
+        "rank_by_index": 12,
+        "rank_by_elo": 20,
+        "rank_gap": 8
       },
       {
         "family": "Qwen3.7 Plus",
         "provider": "Alibaba",
         "index_min": 39.4,
         "index_max": 39.4,
-        "elo_min": 1457.84,
-        "elo_max": 1457.84,
-        "rank_by_index": 32,
-        "rank_by_elo": 24,
+        "elo_min": 1457.46,
+        "elo_max": 1457.46,
+        "rank_by_index": 31,
+        "rank_by_elo": 23,
         "rank_gap": 8
       },
       {
@@ -2185,8 +2264,8 @@
         "provider": "Anthropic",
         "index_min": 57.3,
         "index_max": 57.3,
-        "elo_min": 1473.05,
-        "elo_max": 1473.05,
+        "elo_min": 1472.88,
+        "elo_max": 1472.88,
         "rank_by_index": 6,
         "rank_by_elo": 13,
         "rank_gap": 7
@@ -2196,8 +2275,8 @@
         "provider": "Meta",
         "index_min": 53.2,
         "index_max": 53.2,
-        "elo_min": 1491.09,
-        "elo_max": 1491.09,
+        "elo_min": 1490.75,
+        "elo_max": 1490.75,
         "rank_by_index": 10,
         "rank_by_elo": 4,
         "rank_gap": 6
@@ -2207,10 +2286,10 @@
         "provider": "Z AI",
         "index_min": 34.5,
         "index_max": 34.5,
-        "elo_min": 1441.49,
-        "elo_max": 1441.49,
-        "rank_by_index": 40,
-        "rank_by_elo": 34,
+        "elo_min": 1441.55,
+        "elo_max": 1441.55,
+        "rank_by_index": 39,
+        "rank_by_elo": 33,
         "rank_gap": 6
       },
       {
@@ -2220,41 +2299,19 @@
         "index_max": 23.3,
         "elo_min": 1367.27,
         "elo_max": 1367.27,
-        "rank_by_index": 52,
-        "rank_by_elo": 58,
+        "rank_by_index": 51,
+        "rank_by_elo": 57,
         "rank_gap": 6
-      },
-      {
-        "family": "Claude Opus 5",
-        "provider": "Anthropic",
-        "index_min": 61.5,
-        "index_max": 63.1,
-        "elo_min": 1486.8,
-        "elo_max": 1493.49,
-        "rank_by_index": 1,
-        "rank_by_elo": 6,
-        "rank_gap": 5
-      },
-      {
-        "family": "Gemini 3.5 Flash",
-        "provider": "Google",
-        "index_min": 46.7,
-        "index_max": 52,
-        "elo_min": 1475.11,
-        "elo_max": 1478.71,
-        "rank_by_index": 17,
-        "rank_by_elo": 12,
-        "rank_gap": 5
       },
       {
         "family": "MiMo-V2.5",
         "provider": "Xiaomi",
         "index_min": 38,
         "index_max": 38,
-        "elo_min": 1433.6,
-        "elo_max": 1433.6,
-        "rank_by_index": 34,
-        "rank_by_elo": 39,
+        "elo_min": 1433.66,
+        "elo_max": 1433.66,
+        "rank_by_index": 33,
+        "rank_by_elo": 38,
         "rank_gap": 5
       },
       {
@@ -2262,10 +2319,10 @@
         "provider": "StepFun",
         "index_min": 26.5,
         "index_max": 26.5,
-        "elo_min": 1394.49,
-        "elo_max": 1394.49,
-        "rank_by_index": 45,
-        "rank_by_elo": 50,
+        "elo_min": 1394.42,
+        "elo_max": 1394.42,
+        "rank_by_index": 44,
+        "rank_by_elo": 49,
         "rank_gap": 5
       },
       {
@@ -2273,10 +2330,10 @@
         "provider": "OpenAI",
         "index_min": 25.8,
         "index_max": 25.8,
-        "elo_min": 1389.78,
-        "elo_max": 1389.78,
-        "rank_by_index": 47,
-        "rank_by_elo": 52,
+        "elo_min": 1389.73,
+        "elo_max": 1389.73,
+        "rank_by_index": 46,
+        "rank_by_elo": 51,
         "rank_gap": 5
       },
       {
@@ -2286,30 +2343,41 @@
         "index_max": 8.9,
         "elo_min": 1347.48,
         "elo_max": 1347.48,
-        "rank_by_index": 68,
-        "rank_by_elo": 63,
+        "rank_by_index": 67,
+        "rank_by_elo": 62,
         "rank_gap": 5
+      },
+      {
+        "family": "Claude Opus 5",
+        "provider": "Anthropic",
+        "index_min": 61.5,
+        "index_max": 63.1,
+        "elo_min": 1487.46,
+        "elo_max": 1492.59,
+        "rank_by_index": 1,
+        "rank_by_elo": 5,
+        "rank_gap": 4
       },
       {
         "family": "GPT-5.6 Sol",
         "provider": "OpenAI",
         "index_min": 59,
         "index_max": 59,
-        "elo_min": 1481.68,
-        "elo_max": 1481.68,
+        "elo_min": 1482.26,
+        "elo_max": 1482.26,
         "rank_by_index": 5,
         "rank_by_elo": 9,
         "rank_gap": 4
       },
       {
-        "family": "Gemini 3.6 Flash",
+        "family": "Gemini 3.5 Flash",
         "provider": "Google",
-        "index_min": 51.6,
-        "index_max": 51.6,
-        "elo_min": 1480.88,
-        "elo_max": 1480.88,
-        "rank_by_index": 14,
-        "rank_by_elo": 10,
+        "index_min": 46.7,
+        "index_max": 52,
+        "elo_min": 1474.04,
+        "elo_max": 1478.19,
+        "rank_by_index": 16,
+        "rank_by_elo": 12,
         "rank_gap": 4
       },
       {
@@ -2317,10 +2385,21 @@
         "provider": "Xiaomi",
         "index_min": 42.9,
         "index_max": 42.9,
-        "elo_min": 1467.18,
-        "elo_max": 1467.18,
-        "rank_by_index": 23,
-        "rank_by_elo": 19,
+        "elo_min": 1467.69,
+        "elo_max": 1467.69,
+        "rank_by_index": 22,
+        "rank_by_elo": 18,
+        "rank_gap": 4
+      },
+      {
+        "family": "GLM-5",
+        "provider": "Z AI",
+        "index_min": 40.6,
+        "index_max": 40.6,
+        "elo_min": 1456.76,
+        "elo_max": 1456.76,
+        "rank_by_index": 29,
+        "rank_by_elo": 25,
         "rank_gap": 4
       },
       {
@@ -2328,14 +2407,14 @@
         "provider": "Alibaba",
         "index_min": 18.2,
         "index_max": 18.2,
-        "elo_min": 1387.72,
-        "elo_max": 1387.72,
-        "rank_by_index": 57,
-        "rank_by_elo": 53,
+        "elo_min": 1387.79,
+        "elo_max": 1387.79,
+        "rank_by_index": 56,
+        "rank_by_elo": 52,
         "rank_gap": 4
       }
     ],
-    "max_rank_gap": 30,
+    "max_rank_gap": 29,
     "note": "Report-only (W7 / ticket #194): per-family effort spread of AA Intelligence Index vs Arena Elo plus the rank disagreement between the two orderings. Only rows carrying BOTH metrics on the same row qualify; ranks order that shared pool by family mean (rank 1 = highest, family-name tie-break); rank_gap = |rank_by_index − rank_by_elo|. A consistency measurement — not a replacement score: the AA Index remains the product's single intelligence source and this report never feeds admission or scoring. UI surfacing deferred to the UI/UX line."
   },
   "watchlist": [
@@ -2343,7 +2422,7 @@
       "family": "Qwen3.8 27B",
       "provider": "Alibaba",
       "announced_date": "2026-08-03",
-      "days_since_announcement": 17,
+      "days_since_announcement": 21,
       "status": "measured_by_aa",
       "note": "Open weights LIVE on Hugging Face since 2026-08-14 (Apache-2.0, dense vision-language 27B, 262K native context, explicit reasoning mode) — the earlier delay note is superseded. The 27B now has its OWN published benchmarks (GPQA 89.2, SWE-bench Pro 61.7, OSWorld 84.3, Terminal-Bench 2.1 73.0) tracked via data/manual-additions.json row (PRELIMINARY, auto-supersedes when AA measures). Qwen3.8-Max numbers (GPQA 92.6 / TB 2.1 86.6 / SWE Pro 67.7) still belong to Max and must NOT be attributed to the 27B."
     },
@@ -2351,7 +2430,7 @@
       "family": "Seed 2.1 Turbo",
       "provider": "ByteDance Seed",
       "announced_date": "2026-08-10",
-      "days_since_announcement": 10,
+      "days_since_announcement": 14,
       "status": "tracked_via_manual_row",
       "note": "Released 2026-08-10; absent from AA snapshot (only Seed-OSS-36B + Doubao Seed Code exist). Tracked via data/manual-additions.json row (PRELIMINARY OpenRouter list data: $0.50/$2.50 per M, context 262,144, text+vision+video; tps/IQ null) — auto-superseded when AA measures the family. ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD); row visible under ?catalog=all."
     },
@@ -2359,7 +2438,7 @@
       "family": "GLM-5.3",
       "provider": "Z AI",
       "announced_date": "2026-08-14",
-      "days_since_announcement": 6,
+      "days_since_announcement": 10,
       "status": "measured_by_aa",
       "note": "Announced 2026-08-14 (z.ai/blog/glm-5.3); tracked via data/manual-additions.json row (tps=115 AA-cited; IQ/cost null). Watchlist entry doubles as the manual→AA supersede regression case: when AA measures the family, the manual row auto-supersedes and the diff must classify it as a rename."
     }
@@ -2368,7 +2447,7 @@
     "note": "Report-only: merged rows with exactly two of three triple elements, not admitted. Never promoted to the draft. Entries capped per bucket.",
     "entry_cap": 250,
     "missing_tps": {
-      "count": 106,
+      "count": 107,
       "capped": false,
       "entries": [
         {
@@ -2639,7 +2718,7 @@
           "family_id": "G9v3-39A5B",
           "model": "G9v3-39A5B",
           "provider": "AI9Stars",
-          "release_date": "2026-08-03",
+          "release_date": "2026-08-20",
           "missing_axis": "tps",
           "source_url_slug": "g9v3-39a5b"
         },
@@ -2770,6 +2849,22 @@
           "release_date": "2026-03-15",
           "missing_axis": "tps",
           "source_url_slug": "glm-5-turbo"
+        },
+        {
+          "family_id": "GLM-5.2",
+          "model": "GLM-5.2 (max)",
+          "provider": "Z AI",
+          "release_date": "2026-06-16",
+          "missing_axis": "tps",
+          "source_url_slug": "glm-5-2"
+        },
+        {
+          "family_id": "GLM-5.3",
+          "model": "GLM-5.3 (max)",
+          "provider": "Z AI",
+          "release_date": "2026-08-18",
+          "missing_axis": "tps",
+          "source_url_slug": "glm-5-3"
         },
         {
           "family_id": "GPT-3.5 Turbo",
@@ -2916,12 +3011,12 @@
           "source_url_slug": "jamba-1-5-mini"
         },
         {
-          "family_id": "Ling 3.0 Flash",
-          "model": "Ling 3.0 Flash",
-          "provider": "InclusionAI",
+          "family_id": "LFM2.5-2.6B",
+          "model": "LFM2.5-2.6B",
+          "provider": "Liquid AI",
           "release_date": "2026-08-04",
           "missing_axis": "tps",
-          "source_url_slug": "ling-3-0-flash"
+          "source_url_slug": "lfm2-5-2-6b"
         },
         {
           "family_id": "Ling-2.6-1T",
@@ -2954,6 +3049,14 @@
           "release_date": "2024-04-18",
           "missing_axis": "tps",
           "source_url_slug": "llama-3-instruct-8b"
+        },
+        {
+          "family_id": "Magistral Small 1.2",
+          "model": "Magistral Small 1.2",
+          "provider": "Mistral",
+          "release_date": "2025-09-17",
+          "missing_axis": "tps",
+          "source_url_slug": "magistral-small-2509"
         },
         {
           "family_id": "MiMo-V2-Flash",
@@ -3116,14 +3219,6 @@
           "source_url_slug": "qwen3-max-thinking"
         },
         {
-          "family_id": "Qwen3.8 27B",
-          "model": "Qwen3.8 27B",
-          "provider": "Alibaba",
-          "release_date": "2026-08-14",
-          "missing_axis": "tps",
-          "source_url_slug": "qwen3-8-27b"
-        },
-        {
           "family_id": "QwQ 32B",
           "model": "QwQ 32B",
           "provider": "Alibaba",
@@ -3138,14 +3233,6 @@
           "release_date": "2025-03-10",
           "missing_axis": "tps",
           "source_url_slug": "reka-flash-3"
-        },
-        {
-          "family_id": "Ring-2.6-1T",
-          "model": "Ring-2.6-1T",
-          "provider": "InclusionAI",
-          "release_date": "2026-05-08",
-          "missing_axis": "tps",
-          "source_url_slug": "ring-2-6-1t"
         },
         {
           "family_id": "Ring-flash-2.0",
@@ -3222,7 +3309,7 @@
       ]
     },
     "missing_iq": {
-      "count": 5,
+      "count": 4,
       "capped": false,
       "entries": [
         {
@@ -3256,14 +3343,6 @@
           "release_date": "2026-06-30",
           "missing_axis": "iq",
           "source_url_slug": "claude-sonnet-5-xhigh"
-        },
-        {
-          "family_id": "GLM-5.3",
-          "model": "GLM-5.3 (max)",
-          "provider": "Z AI",
-          "release_date": "2026-08-14",
-          "missing_axis": "iq",
-          "source_url_slug": "glm-5.3"
         }
       ]
     },
@@ -3299,7 +3378,7 @@
     "floor": "2026-01-01",
     "recent_floor": "2025-09-01",
     "a1_floor_hidden_all_labs": {
-      "count": 149,
+      "count": 147,
       "notable_names": [
         "Claude 4.5 Haiku (Non-reasoning) (Anthropic)",
         "Claude 4.5 Haiku (Reasoning) (Anthropic)",
@@ -3413,7 +3492,7 @@
       "note": "a2 rows released on/after 2025-09-01 — the recent notable cloud pool D-H4 weighs most."
     },
     "b_held_2026_rows": {
-      "count": 29,
+      "count": 31,
       "notable_names": [
         "Agnes 2.5 Pro Alpha (Sapiens AI)",
         "Celeris-1 (Celeris)",
@@ -3426,6 +3505,7 @@
         "LFM2.5-8B-A1B (Liquid AI)",
         "LFM2.5-VL-1.6B (Liquid AI)",
         "Ling 2.6 Flash (InclusionAI)",
+        "Ling 3.0 Flash (InclusionAI)",
         "Ling 3.0 Tiny (InclusionAI)",
         "LongCat 2.0 (LongCat)",
         "Mercury 2 (Inception)",
@@ -3437,6 +3517,7 @@
         "Mistral Small 4 (Reasoning) (Mistral)",
         "Nex-N2-Pro (Nex AGI)",
         "North Mini Code (Cohere)",
+        "Ring-2.6-1T (InclusionAI)",
         "Seed 2.1 Turbo (ByteDance Seed)",
         "Solar Pro 3 (Upstage)",
         "Solar Pro 4 (Upstage)",
@@ -3583,6 +3664,24 @@
       "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
+      "family": "GLM-5.2",
+      "provider": "Z AI",
+      "expected_tiers": [
+        "none",
+        "max"
+      ],
+      "published_tiers": [
+        "none"
+      ],
+      "missing_tiers": [
+        "max"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "",
+      "partial_tiers": []
+    },
+    {
       "family": "GLM-5.3",
       "provider": "Z AI",
       "expected_tiers": [
@@ -3606,20 +3705,6 @@
           "slug": "glm-5.3"
         }
       ]
-    },
-    {
-      "family": "Qwen3.8 27B",
-      "provider": "Alibaba",
-      "expected_tiers": [],
-      "published_tiers": [
-        "default"
-      ],
-      "missing_tiers": [
-        "(additional efforts may exist at product level)"
-      ],
-      "published_rows": 1,
-      "complete": false,
-      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
     },
     {
       "family": "Seed 2.1 Turbo",
