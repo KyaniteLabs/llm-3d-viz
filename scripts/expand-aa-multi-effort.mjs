@@ -4,6 +4,11 @@
  *
  * Run: node --experimental-strip-types scripts/expand-aa-multi-effort.mjs
  *
+ * Exit-code contract (ticket #203 — catalog-auto-update.sh maps these to
+ * stage labels so failure alerts name the true stage):
+ *   0 success · 2 fetch (upstream HTTP/API) · 4 parse/vet (LOCAL data file)
+ *   5 gate (admission/shrink/provenance) · 6 atomic write · 1 unclassified
+ *
  * Two-layer join (ADR-0001):
  *  1. Enrich: AA Data API free → merge → Arena Elo (HF CC BY 4.0) → OpenRouter prices
  *  2. Admit: assembled speed×cost×intelligence triple (canAdmitPlotTriple)
@@ -20,6 +25,7 @@
  *  SKIP_ARENA=1 — skip Arena Elo overlay
  *  ARENA_HF_FIXTURE — path to JSON fixture of HF rows (tests)
  *  AA_FIXTURE_JSON — path to { data: FreeModelData[] } when offline (no live AA)
+ *  MANUAL_ADDITIONS_PATH — override data/manual-additions.json (tests)
  *
  * Attribution: show AA + OpenRouter + Arena (CC BY) in product UI.
  */
@@ -45,6 +51,7 @@ import {
   loadManualAdditions,
   selectManualAdmissions,
   splitSupersededManualRows,
+  detectSupersedeDrift,
 } from "./lib/manual-additions.mjs";
 import { diffDrafts } from "./lib/draft-diff.mjs";
 import { buildStaleCostTask } from "./lib/stale-cost-task.mjs";
@@ -71,6 +78,36 @@ import {
 import { fetchAaLanguageModelsFree, mapAaApiModel, resolveAaApiKey } from "./lib/aa-api.mjs";
 import { fetchArenaEntriesFromHf } from "./lib/arena-hf.mjs";
 import { fetchOpenRouterModels } from "./lib/openrouter-api.mjs";
+
+// Exit codes (contract above). Named so no site has to repeat a bare int.
+const EXIT_FETCH = 2;
+const EXIT_PARSE_VET = 4;
+const EXIT_GATE = 5;
+const EXIT_WRITE = 6;
+
+/**
+ * #203 backstop: this script uses top-level await, so a throw outside a local
+ * try/catch surfaces as unhandledRejection (not uncaughtException). Classify
+ * JSON/parse breakage as parse-class; everything else stays generic rc=1.
+ * Known local files are caught at their sites with the filename; this exists
+ * so a FUTURE unguarded parse site still exits with the right class.
+ */
+function fatalBackstop(kind) {
+  return (err) => {
+    if (backstopDone) return;
+    backstopDone = true;
+    const isParse = err instanceof SyntaxError || /\bJSON\b|\bparse\b/i.test(String(err?.message ?? ""));
+    const cls = kind === "uncaughtException" && isParse ? "parse_vet" : "unclassified";
+    const rc = cls === "parse_vet" ? EXIT_PARSE_VET : 1;
+    console.error(
+      JSON.stringify({ fatal: true, class: cls, error: String(err?.message ?? err) }, null, 2),
+    );
+    process.exit(rc);
+  };
+}
+let backstopDone = false;
+process.on("unhandledRejection", fatalBackstop("unhandledRejection"));
+process.on("uncaughtException", fatalBackstop("uncaughtException"));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -177,6 +214,7 @@ if (!aa.ok) {
     JSON.stringify(
       {
         fatal: true,
+        class: "fetch",
         error: aa.error,
         hint: "Set AA_API_KEY from https://artificialanalysis.ai/data-api (free). HTML scraping is disabled.",
       },
@@ -184,7 +222,7 @@ if (!aa.ok) {
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_FETCH);
 }
 // D02: Reject empty/unexpected response shapes BEFORE writing.
 if (!aa.models?.length) {
@@ -192,13 +230,14 @@ if (!aa.models?.length) {
     JSON.stringify(
       {
         fatal: true,
+        class: "fetch",
         error: "AA returned 0 models — empty response or schema change. Aborting before write.",
       },
       null,
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_FETCH);
 }
 
 const aaMapped = aa.models.map((m) =>
@@ -215,10 +254,21 @@ let merged = mergeBySpine([], aaMapped);
 // and would either keep a stale manual row (duplicate model ID — GLM-5.3
 // 2026-08-20) or drop a family whose AA row sits in awaiting_measurement
 // (Qwen3.8 27B vanish). The split runs post-blend against `measured` below.
-const manual = loadManualAdditions(
-  path.join(root, "data/manual-additions.json"),
-  [],
-);
+// #203: a malformed local data file is parse-class (rc=4), not a fetch
+// failure — the 2026-08-20 incident (broken manual-additions.json labeled
+// "AA scrape failed"). The catch prints the path so the operator knows which
+// file to fix; aborting (not skipping) keeps the last good draft intact.
+const manualPath =
+  process.env.MANUAL_ADDITIONS_PATH ?? path.join(root, "data/manual-additions.json");
+let manual;
+try {
+  manual = loadManualAdditions(manualPath, []);
+} catch (err) {
+  console.error(
+    JSON.stringify({ fatal: true, class: "parse_vet", error: String(err.message ?? err) }, null, 2),
+  );
+  process.exit(EXIT_PARSE_VET);
+}
 // Stamp manual rows through the curated overlay BEFORE merge: admission
 // re-adds manual rows from this list (they bypass the scorable spine), so the
 // admitted copies must already carry openness provenance (gate-proven fix).
@@ -255,12 +305,12 @@ const arena = await fetchArenaEntriesFromHf({ cacheDir: path.join(root, "data") 
 if (!arena.ok && !arena.skipped) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: `Arena source failed: ${arena.error}. Set SKIP_ARENA=1 to skip.` },
+      { fatal: true, class: "fetch", error: `Arena source failed: ${arena.error}. Set SKIP_ARENA=1 to skip.` },
       null,
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_FETCH);
 }
 let arenaAttaches = 0;
 let arenaLogs = [];
@@ -288,12 +338,12 @@ const or = await fetchOpenRouterModels();
 if (!or.ok) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: `OpenRouter source failed: ${or.error}.` },
+      { fatal: true, class: "fetch", error: `OpenRouter source failed: ${or.error}.` },
       null,
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_FETCH);
 }
 fs.writeFileSync(
   openrouterPath,
@@ -403,12 +453,12 @@ admitted.sort(
 if (!admitted.length) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: "0 admitted rows after join — aborting before write." },
+      { fatal: true, class: "gate", error: "0 admitted rows after join — aborting before write." },
       null,
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_GATE);
 }
 let prevRowCount = 0;
 let prevDraftRows = null;
@@ -428,24 +478,25 @@ if (prevRowCount > 0) {
       JSON.stringify(
         {
           fatal: true,
+          class: "gate",
           error: `admitted rows dropped ${shrinkPct}% (${prevRowCount} → ${admitted.length}) — aborting before write.`,
         },
         null,
         2,
       ),
     );
-    process.exit(1);
+    process.exit(EXIT_GATE);
   }
 }
 if (admitted.length < MIN_ROWS) {
   console.error(
     JSON.stringify(
-      { fatal: true, error: `admitted rows ${admitted.length} < MIN_ROWS=${MIN_ROWS} — aborting before write.` },
+      { fatal: true, class: "gate", error: `admitted rows ${admitted.length} < MIN_ROWS=${MIN_ROWS} — aborting before write.` },
       null,
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_GATE);
 }
 
 // --- 4b. Pre-admission visibility annex (plan WS3): report-only, no admission ---
@@ -461,7 +512,19 @@ const hiddenByScope = buildHiddenByScope(admitted, CLOUD_LABS, {
 // --- 5. Build effort gaps (D17: include partial tiers from rows missing only IQ) ---
 let laddersDoc = { ladders: {} };
 if (fs.existsSync(laddersPath)) {
-  laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
+  // #203: local data file — malformed JSON is parse-class, not fetch.
+  try {
+    laddersDoc = JSON.parse(fs.readFileSync(laddersPath, "utf8"));
+  } catch (err) {
+    console.error(
+      JSON.stringify(
+        { fatal: true, class: "parse_vet", error: `ladders parse failed (${laddersPath}): ${err.message}` },
+        null,
+        2,
+      ),
+    );
+    process.exit(EXIT_PARSE_VET);
+  }
 }
 // D17: partialByFamily from joined rows that have speed+price but are missing IQ.
 const partialByFamily = new Map();
@@ -490,14 +553,35 @@ const gaps = buildEffortGaps(admitted, laddersDoc, partialByFamily);
 const arenaMatchFailures = buildArenaMatchFailures(arenaLogs);
 
 // --- 5b. Watchlist report (plan WS4): announced-but-unmeasured models ---
-const watchlistEntries = loadWatchlistEntries(
-  path.join(root, "data/model-watchlist.json"),
-  fs,
-);
+let watchlistEntries;
+try {
+  watchlistEntries = loadWatchlistEntries(
+    path.join(root, "data/model-watchlist.json"),
+    fs,
+  );
+} catch (err) {
+  console.error(
+    JSON.stringify(
+      { fatal: true, class: "parse_vet", error: `watchlist parse failed (data/model-watchlist.json): ${err.message}` },
+      null,
+      2,
+    ),
+  );
+  process.exit(EXIT_PARSE_VET);
+}
 const watchlist = buildWatchlistReport(watchlistEntries, aaMapped, manualStamped, today);
 
 // --- 5c. Draft diff (plan WS1): previous → admitted, rename-aware ---
 const draftDiff = diffDrafts(prevDraftRows, admitted);
+// #204 supersede-drift guard: declared manual families present in the previous
+// draft but absent from this one (rename pairing preserves the normalized
+// family, so absence is always drift). Persisted into the diff doc; the
+// --evaluate alert path turns entries into manual_family_drift events.
+const supersedeDrift = detectSupersedeDrift({
+  prevRows: prevDraftRows,
+  nextRows: admitted,
+  declaredFamilies: manual.declaredFamilies,
+});
 const diffPath = path.join(root, "data/catalog-diff.generated.json");
 const diffDoc = {
   data_date: today,
@@ -505,6 +589,7 @@ const diffDoc = {
   prev_row_count: prevRowCount,
   next_row_count: admitted.length,
   ...draftDiff,
+  supersede_drift: supersedeDrift,
 };
 
 // --- 5d. Cost-per-task staleness flag (W4 / ticket #190): report-only ---
@@ -587,6 +672,7 @@ if (provenanceViolations.length && process.env.ALLOW_UNSTAMPED_FIELDS !== "1") {
     JSON.stringify(
       {
         fatal: true,
+        class: "gate",
         error: `provenance gate: ${provenanceViolations.length} unstamped non-null fields in admitted rows`,
         violations: provenanceViolations.slice(0, 25),
         hint: "Stamp each field at its ingestion point (see messages), or set ALLOW_UNSTAMPED_FIELDS=1 to bypass once.",
@@ -595,7 +681,7 @@ if (provenanceViolations.length && process.env.ALLOW_UNSTAMPED_FIELDS !== "1") {
       2,
     ),
   );
-  process.exit(1);
+  process.exit(EXIT_GATE);
 }
 
 const draftJson = `${JSON.stringify(admitted, null, 2)}\n`;
@@ -637,9 +723,9 @@ try {
     try { fs.unlinkSync(`${dest}.tmp`); } catch { /* ignore */ }
   }
   console.error(
-    JSON.stringify({ fatal: true, error: `Atomic write failed: ${err}` }, null, 2),
+    JSON.stringify({ fatal: true, class: "write", error: `Atomic write failed: ${err}` }, null, 2),
   );
-  process.exit(1);
+  process.exit(EXIT_WRITE);
 }
 
 const byFamily = new Map();
@@ -670,6 +756,7 @@ console.log(
         b_held_2026_rows: hiddenByScope.b_held_2026_rows.count,
       },
       diff: draftDiff.available ? draftDiff.counts : "unavailable-first-run",
+      supersede_drift: supersedeDrift.length,
       price_divergences: divergenceRecords.length,
       price_divergence_deltas: divergenceDeltaCount,
       stale_cost_task: staleCostTask.count,

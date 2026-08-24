@@ -45,6 +45,21 @@ describe("catalog-alerts — event policy", () => {
     expect(below.map((e) => e.kind)).not.toContain("price_move");
   });
 
+  it("manual family drift fires as its own event kind (#204)", () => {
+    const events = buildAlertEvents({
+      diff: diffFixture({
+        supersede_drift: [{ family: "qwen3-8-27b", model: "Qwen3.8 27B", provider: "Alibaba" }],
+      }),
+      divergences: [],
+    });
+    const drift = events.filter((e) => e.kind === "manual_family_drift");
+    expect(drift).toHaveLength(1);
+    expect(drift[0].key).toBe("manual_drift:qwen3-8-27b");
+    expect(drift[0].line).toContain("manual-additions.json");
+    const clean = buildAlertEvents({ diff: diffFixture({ supersede_drift: [] }), divergences: [] });
+    expect(clean.map((e) => e.kind)).not.toContain("manual_family_drift");
+  });
+
   it("shrink fires above 5% only", () => {
     expect(
       buildAlertEvents({ diff: { removed: [], price_deltas: [] }, prevCount: 100, nextCount: 94, divergences: [] }).map((e) => e.kind),

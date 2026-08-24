@@ -87,6 +87,17 @@ export function buildAlertEvents({ diff, divergences, prevCount, nextCount }) {
       });
     }
   }
+  // #204: a declared manual family that exited the draft with no supersede
+  // (family would remain as the AA row) and no rename (renames preserve the
+  // normalized family) — the silent-vanish class (Seed 2026-08-16,
+  // Qwen3.8 27B 2026-08-20).
+  for (const d of diff?.supersede_drift ?? []) {
+    events.push({
+      kind: "manual_family_drift",
+      key: `manual_drift:${d.family}`,
+      line: `Manual family drifted out of the draft: ${d.model} (${d.provider}) — still declared in data/manual-additions.json, absent from the new draft`,
+    });
+  }
   for (const p of diff?.price_deltas ?? []) {
     if (p.pct >= 25) {
       events.push({

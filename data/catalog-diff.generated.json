@@ -12,5 +12,6 @@
     "removed": 0,
     "renamed": 0,
     "price_deltas": 0
-  }
+  },
+  "supersede_drift": []
 }

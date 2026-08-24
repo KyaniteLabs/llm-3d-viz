@@ -7,6 +7,7 @@ import {
   splitSupersededManualRows,
   selectManualAdmissions,
   loadManualAdditions,
+  detectSupersedeDrift,
 } from "../scripts/lib/manual-additions.mjs";
 import { applyAaDerivedBlend, spineKey } from "../scripts/lib/catalog-join.mjs";
 import { buildWatchlistReport } from "../scripts/lib/model-watchlist.mjs";
@@ -291,5 +292,82 @@ describe("AA-derived blend — C1 cache sentinel (datagaps 2026-08-14)", () => {
       (0.28 * 7 + 0.28 * 2 + 0.42) / 10,
       5,
     );
+  });
+});
+
+describe("detectSupersedeDrift (#204 — manual family vanish guard)", () => {
+  // Normalized forms per normalizeFamily: "Qwen3.8 27B" → qwen3-8-27b, "Seed 2.1 Turbo" → seed-2-1-turbo
+  const declared = ["qwen3-8-27b", "seed-2-1-turbo"];
+  const prev = [
+    { model: "Qwen3.8 27B", provider: "Alibaba", family_id: "Qwen3.8 27B" },
+    { model: "Seed 2.1 Turbo", provider: "ByteDance", family_id: "Seed 2.1 Turbo" },
+    { model: "Unrelated Measured", provider: "OpenAI", family_id: "GPT-5.5" },
+  ];
+
+  it("fires when a declared manual family is in prev but absent from next", () => {
+    const drift = detectSupersedeDrift({
+      prevRows: prev,
+      nextRows: [{ model: "Unrelated Measured", provider: "OpenAI", family_id: "GPT-5.5" }],
+      declaredFamilies: declared,
+    });
+    expect(drift.map((d) => d.family).sort()).toEqual(["qwen3-8-27b", "seed-2-1-turbo"]);
+    expect(drift[0]).toMatchObject({ model: expect.any(String), provider: expect.any(String) });
+  });
+
+  it("does not fire when the family survives via a superseding AA row", () => {
+    const drift = detectSupersedeDrift({
+      prevRows: prev,
+      nextRows: [
+        { model: "Qwen3.8 27B (AA)", provider: "Alibaba", family_id: "Qwen3.8 27B" },
+        { model: "Seed 2.1 Turbo", provider: "ByteDance", family_id: "Seed 2.1 Turbo" },
+      ],
+      declaredFamilies: declared,
+    });
+    expect(drift).toEqual([]);
+  });
+
+  it("does not fire when the operator removed the declaration (not drift)", () => {
+    const drift = detectSupersedeDrift({
+      prevRows: prev,
+      nextRows: [],
+      declaredFamilies: ["qwen3-8-27b"], // Seed row deleted from manual-additions.json
+    });
+    expect(drift.map((d) => d.family)).toEqual(["qwen3-8-27b"]);
+  });
+
+  it("first run (no previous draft) drifts nothing", () => {
+    expect(detectSupersedeDrift({ prevRows: null, nextRows: prev, declaredFamilies: declared })).toEqual([]);
+  });
+
+  it("loadManualAdditions returns declaredFamilies pre-vet (operator intent)", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "drift-"));
+    const manualPath = path.join(dir, "manual.json");
+    writeFileSync(
+      manualPath,
+      JSON.stringify({
+        rows: [
+          { model: "Good Row", provider: "A", family_id: "Good Row" },
+          { model: "Bad Row", provider: "B", family_id: "Bad Row", aa_intelligence_index: 70 },
+        ],
+      }),
+    );
+    try {
+      const out = loadManualAdditions(manualPath, []);
+      expect(out.declaredFamilies.sort()).toEqual(["bad-row", "good-row"]);
+      expect(out.rejected.length).toBe(1); // vet still rejects the AA-only field
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("malformed manual-additions throws with the path for parse-class exit (#203)", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "drift-"));
+    const manualPath = path.join(dir, "manual.json");
+    writeFileSync(manualPath, "{ broken json");
+    try {
+      expect(() => loadManualAdditions(manualPath, [])).toThrow(/manual\.json/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

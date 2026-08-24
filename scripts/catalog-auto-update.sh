@@ -116,10 +116,23 @@ fi
 prev_hash=""
 [[ -f "$HASH_FILE" ]] && prev_hash="$(cat "$HASH_FILE")"
 
-# 1) Scrape Artificial Analysis public leaderboard
-if ! node --experimental-strip-types "$REPO_ROOT/scripts/expand-aa-multi-effort.mjs" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
-  log "ERROR: AA scrape failed"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"scrape\"}" >"$STATUS_FILE"
+# 1) Scrape + build the draft (expand-aa-multi-effort.mjs).
+# #203: the builder exits a stage contract — map rc→stage so the failure alert
+# names the TRUE stage instead of calling every builder abort an AA scrape
+# failure (2026-08-20: broken manual-additions.json labeled "scrape failed").
+#   2 fetch · 4 parse/vet (local data file) · 5 gate · 6 write · other unclassified
+builder_rc=0
+node --experimental-strip-types "$REPO_ROOT/scripts/expand-aa-multi-effort.mjs" >>"$LOG_DIR/catalog-auto-update.log" 2>&1 || builder_rc=$?
+if [[ "$builder_rc" -ne 0 ]]; then
+  case "$builder_rc" in
+    2) stage="fetch"        ; label="AA/upstream fetch failed" ;;
+    4) stage="parse_vet"    ; label="builder parse/vet failed — malformed local data file (see log)" ;;
+    5) stage="builder_gate" ; label="builder gate failed — admission/shrink/provenance (see log)" ;;
+    6) stage="write"        ; label="builder atomic write failed" ;;
+    *) stage="scrape"       ; label="builder failed (unclassified rc=$builder_rc)" ;;
+  esac
+  log "ERROR: $label"
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"$stage\",\"builder_rc\":$builder_rc}" >"$STATUS_FILE"
   exit 2
 fi
 

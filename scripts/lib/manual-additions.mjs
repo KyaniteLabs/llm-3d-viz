@@ -119,17 +119,64 @@ export function selectManualAdmissions(
 }
 
 /**
- * Load + vet + supersede in one call.
+ * Load + vet + supersede in one call. Also returns `declaredFamilies` — the
+ * normalized families of every RAW candidate (pre-vet), i.e. operator intent,
+ * consumed by the supersede-drift guard (#204).
+ * A malformed file throws with the path in the message so the builder can exit
+ * parse-class (rc=4, ticket #203) instead of an anonymous SyntaxError.
  * @param {string} manualPath — data/manual-additions.json ({ rows: [...] } or bare array)
  * @param {object[]} aaRows — AA-mapped rows for the supersede check
  */
 export function loadManualAdditions(manualPath, aaRows) {
   if (!fs.existsSync(manualPath)) {
-    return { active: [], superseded: [], rejected: [] };
+    return { active: [], superseded: [], rejected: [], declaredFamilies: [] };
   }
-  const doc = JSON.parse(fs.readFileSync(manualPath, "utf8"));
+  let doc;
+  try {
+    doc = JSON.parse(fs.readFileSync(manualPath, "utf8"));
+  } catch (err) {
+    throw new Error(`manual-additions parse failed (${manualPath}): ${err.message}`);
+  }
   const candidates = Array.isArray(doc) ? doc : doc.rows ?? [];
+  const declaredFamilies = [
+    ...new Set(
+      candidates
+        .filter((r) => r && typeof r === "object")
+        .map((r) => normalizeFamily(r.family_id || r.model || ""))
+        .filter(Boolean),
+    ),
+  ];
   const { rows, rejected } = vetManualRows(candidates);
   const { active, superseded } = splitSupersededManualRows(rows, aaRows);
-  return { active, superseded, rejected };
+  return { active, superseded, rejected, declaredFamilies };
+}
+
+/**
+ * Supersede-drift guard (ticket #204): manual families that were IN the
+ * previous draft, are still declared in data/manual-additions.json, but are
+ * absent from the next draft. A proper supersede keeps the family present
+ * (the AA row replaces it); a rename pairing in diffDrafts preserves the
+ * normalized family by construction — so family-level absence is always
+ * drift: the 2026-08-16 Seed and 2026-08-20 Qwen3.8 27B vanish class.
+ * An operator deleting the declaration is NOT drift (family leaves
+ * declaredFamilies the same run it leaves the draft).
+ */
+export function detectSupersedeDrift({ prevRows, nextRows, declaredFamilies }) {
+  if (!Array.isArray(prevRows) || !Array.isArray(nextRows)) return [];
+  const declared = new Set(declaredFamilies ?? []);
+  const famOf = (r) => normalizeFamily(r?.family_id || r?.model || "");
+  const prevManual = new Map();
+  for (const r of prevRows) {
+    const fam = famOf(r);
+    if (fam && declared.has(fam)) prevManual.set(fam, r);
+  }
+  const nextFams = new Set(nextRows.map(famOf).filter(Boolean));
+  const drifted = [];
+  for (const [fam, row] of prevManual) {
+    if (!nextFams.has(fam)) {
+      drifted.push({ family: fam, model: row.model, provider: row.provider });
+    }
+  }
+  drifted.sort((a, b) => a.family.localeCompare(b.family));
+  return drifted;
 }
