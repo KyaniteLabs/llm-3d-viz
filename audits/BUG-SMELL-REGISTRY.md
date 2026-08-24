@@ -23,8 +23,8 @@ Standing CEO law (2026-08-18): every bug OR smell gets one line + timestamp + su
 1. [shipped 2026-08-20] Capture gate asserts projections painted before screenshots (Class A, S2).
 2. [shipped 2026-08-20] Routing memory: availability.json is step zero for any lane decision (Class B).
 3. [this commit] Registry + doctrine: any "0 X" verification claim must state the denominator (Class A).
-4. [#203] Builder exit codes: distinct rc for parse/vet failures vs fetch failures so the failure alert names the true stage (Class C).
-5. [#204] Supersede-drift guard: alert when a manual family exits the draft without a rename event in the diff (would have caught the Seed/Qwen vanish within one run) (Class D residual).
+4. [shipped 2026-08-24, f92e78a, #203] Builder exit codes: distinct rc for parse/vet failures vs fetch failures so the failure alert names the true stage (Class C). Drill-verified.
+5. [shipped 2026-08-24, f92e78a, #204] Supersede-drift guard: alert when a manual family exits the draft without a rename event in the diff (would have caught the Seed/Qwen vanish within one run) (Class D residual).
 
 
 - 2026-08-20 ~21:20Z — alerting — the 19:48Z pipeline_failure:build signature recorded but NO Forgejo issue exists: the failure alert delivered via local notification only while the Forgejo post failed silently. Signatures must gate on the Forgejo channel specifically or failures must retry (related: #203).
@@ -32,3 +32,5 @@ Standing CEO law (2026-08-18): every bug OR smell gets one line + timestamp + su
 - 2026-08-24 ~16:55Z — infra — catalog cron dead 8 scheduled runs (Aug 16 21:07Z → Aug 24): the pushing-dispatch canonicalization rewrote the crontab and dropped our block. Zero alerts (watchdog sleeps with the host). Fix: reinstall via install-catalog-cron.sh; recurrence of the class already recorded in memory catalog-cron-fragility.
 - 2026-08-24 ~17:00Z — meta — the cron-fragility memory EXISTED in the loaded index and was not consulted before diagnosis; the failure was re-derived from scratch (~30 min). Rule: when a failure pattern-matches anything in MEMORY.md, read that memory before investigating.
 - 2026-08-24 17:50Z — process — third red-commit escape of the pipe-masked-gate class (vitest | grep); now structurally gated on the runner's own exit code in every chain used today.
+- 2026-08-24 18:20Z — infra (follow-up to the cron kill) — the hourly silence watchdog was itself a crontab entry, so the Aug-16 crontab rewrite killed the watcher with the watched (both silent Aug 16→24). A watchdog that shares the failure mode it monitors is not a watchdog. Fix: launchd LaunchAgent tech.kyanitelabs.llm-3d-viz.silence (bab12b6, #205). Heartbeat check folded into morning reports: gap >1h in logs/catalog-silence-check.log ⇒ agent dead.
+- 2026-08-24 18:43Z — process (near-miss, caught) — the pipe-masked-gate smell re-appeared mid-session as `${PIPESTATUS[0]:-$?}` under zsh: PIPESTATUS is bash-only, the fallback read `tail`'s rc, and a FAILED vitest run printed VITEST_RC=0. zsh spells it `$pipestatus` (lowercase); the durable rule stays "gate on the runner's own exit code, no pipe in between" (here: temp-file redirect).
