@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # catalog-silence-check.sh — independent watchdog (plan WS1 / audit M7).
 #
-# Runs hourly via cron SEPARATE from catalog-auto-update so total death of the
-# main pipeline (crash loop, removed crontab, flock-style stall) still alerts:
-# fires when no successful run (ok:true) appears in the status history for
-# ≥24h. Lock-overlap entries are recorded but do not count as success.
+# Runs hourly via a LaunchAgent (scripts/install-catalog-watchdog.sh) SEPARATE
+# from catalog-auto-update's cron so total death of the main pipeline (crash
+# loop, removed crontab, flock-style stall) still alerts: fires when no
+# successful run (ok:true) appears in the status history for ≥24h.
+# Lock-overlap entries are recorded but do not count as success.
 # Shares the alert dedup store with the pipeline trap path, so a persistent
 # silence condition yields ONE issue, not 24/day. Never exits non-zero — a
 # watchdog must not page about itself.
