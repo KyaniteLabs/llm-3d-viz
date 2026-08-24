@@ -1,12 +1,14 @@
 {
-  "$schema_note": "Provider-announced rows admitted before Artificial Analysis measures them. Only what the provider published — AA-only domains (Intelligence Index, TTFT) must stay null. A row auto-supersedes when a SCORABLE AA row of the same family exists (full triple: IQ + tps + blended price — a listed-but-unmeasured AA row replaces nothing); overlays (OpenRouter prices/context/modality, Arena Elo) enrich these rows like any other.",
-  "updated": "2026-08-20",
+  "$schema_note": "Provider-announced rows admitted before Artificial Analysis measures them. Only what the provider published \u2014 AA-only domains (Intelligence Index, TTFT) must stay null. A row auto-supersedes when a SCORABLE AA row of the same family exists (full triple: IQ + tps + blended price \u2014 a listed-but-unmeasured AA row replaces nothing); overlays (OpenRouter prices/context/modality, Arena Elo) enrich these rows like any other.",
+  "updated": "2026-08-24",
   "rows": [
     {
       "model": "GLM-5.3 (max)",
       "provider": "Z AI",
       "openness": "closed",
-      "modality": ["text"],
+      "modality": [
+        "text"
+      ],
       "reasoning": true,
       "family_id": "GLM-5.3",
       "effort_tier": "max",
@@ -22,27 +24,40 @@
       "cost_per_index_task_usd": null,
       "time_per_index_task_s": null,
       "arena_elo": null,
-      "gpqa": null,
-      "swe_bench": null,
-      "aider_pct": null,
-      "data_date": "2026-08-14",
-      "source": "Z.ai announcement 2026-08-14 (manual addition, PRELIMINARY vendor-reported benchmarks — AA confirmation pending; row auto-supersedes when AA measures the family). Thinking-only; efforts low/high/max, max recommended+default. No PAYG $/M pricing yet — Coding Plan points only (in ×6.9 / cached ×1.7 / out ×24 per 10K tok). Open weights ~2 weeks post-announcement (openness flips when downloadable). tps=115 as cited from Artificial Analysis in the announcement's ExploitGym footnote (effort tier of that figure unstated).",
-      "null_reason": "not_measured",
       "gpqa": 84.8,
       "swe_bench": 80.6,
       "aider_pct": 89.6,
+      "data_date": "2026-08-14",
+      "source": "Z.ai announcement 2026-08-14 (manual addition, PRELIMINARY vendor-reported benchmarks \u2014 AA confirmation pending; row auto-supersedes when AA measures the family). Thinking-only; efforts low/high/max, max recommended+default. No PAYG $/M pricing yet \u2014 Coding Plan points only (in \u00d76.9 / cached \u00d71.7 / out \u00d724 per 10K tok). Open weights ~2 weeks post-announcement (openness flips when downloadable). tps=115 as cited from Artificial Analysis in the announcement's ExploitGym footnote (effort tier of that figure unstated).",
+      "null_reason": "not_measured",
       "sources": {
-        "tps": { "origin": "provider", "kind": "measured" },
-        "gpqa": { "origin": "provider", "kind": "list" },
-        "swe_bench": { "origin": "provider", "kind": "list" },
-        "aider_pct": { "origin": "provider", "kind": "list" }
+        "tps": {
+          "origin": "provider",
+          "kind": "measured"
+        },
+        "gpqa": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "swe_bench": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "aider_pct": {
+          "origin": "provider",
+          "kind": "list"
+        }
       }
     },
     {
       "model": "Seed 2.1 Turbo",
       "provider": "ByteDance Seed",
       "openness": "closed",
-      "modality": ["text", "vision", "video"],
+      "modality": [
+        "text",
+        "vision",
+        "video"
+      ],
       "reasoning": true,
       "family_id": "Seed 2.1 Turbo",
       "effort_tier": "default",
@@ -63,20 +78,36 @@
       "swe_bench": null,
       "aider_pct": null,
       "data_date": "2026-08-14",
-      "source": "OpenRouter listing bytedance-seed/seed-2-1-turbo (manual addition, PRELIMINARY vendor/OpenRouter list data; AA confirmation pending; row auto-superseded when AA measures the family). List prices $0.50 in / $2.50 out per M, context 262,144, input modality text+image+video mirrored as text+vision+video. openness=closed is the conservative default: Turbo ships as an API model with no published weights; the ByteDance Seed lab is mixed-portfolio (Seed-OSS exists), so closed-by-default until an open-weights exception is confirmed. reasoning=true per the OpenRouter reasoning capability (thinking supported, not mandatory). No exact-schema vendor benchmarks confirmed on the listing — gpqa/swe_bench/aider_pct stay null, none invented. tps/ttft/blended/cache null: not measured; blended and cache derive from the OpenRouter overlay on the next pipeline run. ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD); row visible under ?catalog=all.",
+      "source": "OpenRouter listing bytedance-seed/seed-2-1-turbo (manual addition, PRELIMINARY vendor/OpenRouter list data; AA confirmation pending; row auto-superseded when AA measures the family). List prices $0.50 in / $2.50 out per M, context 262,144, input modality text+image+video mirrored as text+vision+video. openness=closed is the conservative default: Turbo ships as an API model with no published weights; the ByteDance Seed lab is mixed-portfolio (Seed-OSS exists), so closed-by-default until an open-weights exception is confirmed. reasoning=true per the OpenRouter reasoning capability (thinking supported, not mandatory). No exact-schema vendor benchmarks confirmed on the listing \u2014 gpqa/swe_bench/aider_pct stay null, none invented. tps/ttft/blended/cache null: not measured; blended and cache derive from the OpenRouter overlay on the next pipeline run. ByteDance Seed is in neither CLOUD_LABS nor HELD_LABS (plan WS4 adds it to HELD); row visible under ?catalog=all.",
       "null_reason": "not_measured",
       "sources": {
-        "price_in_per_M": { "origin": "openrouter", "kind": "list" },
-        "price_out_per_M": { "origin": "openrouter", "kind": "list" },
-        "context_length": { "origin": "openrouter", "kind": "list" },
-        "modality": { "origin": "openrouter", "kind": "list" }
+        "price_in_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "price_out_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "context_length": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "modality": {
+          "origin": "openrouter",
+          "kind": "list"
+        }
       }
     },
     {
       "model": "Qwen3.8 27B",
       "provider": "Alibaba",
       "openness": "open",
-      "modality": ["text", "vision", "video"],
+      "modality": [
+        "text",
+        "vision",
+        "video"
+      ],
       "reasoning": true,
       "family_id": "Qwen3.8 27B",
       "effort_tier": "default",
@@ -97,16 +128,179 @@
       "swe_bench": 61.7,
       "aider_pct": null,
       "data_date": "2026-08-20",
-      "source": "Qwen3.8-27B open weights on Hugging Face 2026-08-14 (Apache-2.0, dense vision-language 27B, native context 262,144 extensible to 1M, explicit reasoning mode). Manual addition, PRELIMINARY provider-published benchmarks — AA confirmation pending; row auto-supersedes when AA measures the family. gpqa 89.2 / swe_bench 61.7 are the 27B's OWN published numbers (Qwen model card via BenchLM 2026-08-20) — swe_bench is SWE-bench Pro 61.7, labelled, not SWE-bench Verified; the Qwen3.8-Max numbers (GPQA 92.6 / TB 2.1 86.6 / SWE Pro 67.7) are NOT attributed here per the standing no-sibling-attribution rule. Agentic set published too (OSWorld-Verified 84.3, Terminal-Bench 2.1 73.0, LiveCodeBench v6 90.3, IFBench 79.5) — no exact-schema slots, kept in this note only. Prices from the OpenRouter listing qwen/qwen3.8-27b ($0.45 in / $3.20 out / $0.05 cache per M); blended derives on the next pipeline run. tps/ttft/IQ/cost null: not measured — never invented. Openness=open: weights downloadable; open-weight lifecycle (D-H4 exempt).",
+      "source": "Qwen3.8-27B open weights on Hugging Face 2026-08-14 (Apache-2.0, dense vision-language 27B, native context 262,144 extensible to 1M, explicit reasoning mode). Manual addition, PRELIMINARY provider-published benchmarks \u2014 AA confirmation pending; row auto-supersedes when AA measures the family. gpqa 89.2 / swe_bench 61.7 are the 27B's OWN published numbers (Qwen model card via BenchLM 2026-08-20) \u2014 swe_bench is SWE-bench Pro 61.7, labelled, not SWE-bench Verified; the Qwen3.8-Max numbers (GPQA 92.6 / TB 2.1 86.6 / SWE Pro 67.7) are NOT attributed here per the standing no-sibling-attribution rule. Agentic set published too (OSWorld-Verified 84.3, Terminal-Bench 2.1 73.0, LiveCodeBench v6 90.3, IFBench 79.5) \u2014 no exact-schema slots, kept in this note only. Prices from the OpenRouter listing qwen/qwen3.8-27b ($0.45 in / $3.20 out / $0.05 cache per M); blended derives on the next pipeline run. tps/ttft/IQ/cost null: not measured \u2014 never invented. Openness=open: weights downloadable; open-weight lifecycle (D-H4 exempt).",
       "null_reason": "not_measured",
       "sources": {
-        "price_in_per_M": { "origin": "openrouter", "kind": "list" },
-        "price_out_per_M": { "origin": "openrouter", "kind": "list" },
-        "price_cache_per_M": { "origin": "openrouter", "kind": "list" },
-        "context_length": { "origin": "openrouter", "kind": "list" },
-        "modality": { "origin": "openrouter", "kind": "list" },
-        "gpqa": { "origin": "provider", "kind": "list" },
-        "swe_bench": { "origin": "provider", "kind": "list" }
+        "price_in_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "price_out_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "price_cache_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "context_length": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "modality": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "gpqa": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "swe_bench": {
+          "origin": "provider",
+          "kind": "list"
+        }
+      }
+    },
+    {
+      "model": "Ornith-1.5-35B-A3B",
+      "provider": "DeepReinforce AI",
+      "openness": "open",
+      "modality": [
+        "text"
+      ],
+      "reasoning": true,
+      "family_id": "Ornith-1.5-35B-A3B",
+      "effort_tier": "default",
+      "context_length": 262144,
+      "release_date": "2026-08-18",
+      "source_url": "https://benchlm.ai/models/ornith-1-5-35b-a3b",
+      "tps": null,
+      "ttft": null,
+      "price_in_per_M": null,
+      "price_out_per_M": null,
+      "blended_price_per_M": null,
+      "price_cache_per_M": null,
+      "aa_intelligence_index": null,
+      "cost_per_index_task_usd": null,
+      "time_per_index_task_s": null,
+      "arena_elo": null,
+      "gpqa": 89.2,
+      "swe_bench": 79.0,
+      "aider_pct": null,
+      "data_date": "2026-08-24",
+      "source": "Ornith 1.5 launch 2026-08-18 (DeepReinforce AI; BenchLM provider-exact snapshot 2026-08-22, results averaged over five runs per the launch page). Manual addition, PRELIMINARY provider-published benchmarks \u2014 AA confirmation pending; row auto-supersedes when AA measures the family. 35B MoE, 3B active; MIT open weights; 262K context; explicit reasoning mode. swe_bench 79.0 is SWE-bench Verified; SWE-bench Pro 59.6, Terminal-Bench 2.1 67.8, SWE Multilingual 71.4, BrowseComp 67.6, MCP Atlas 70.2, HLE 25.6 kept in this note (no exact-schema slots). Self-hosted only \u2014 no first-party API, prices/tps/IQ null, never invented.",
+      "null_reason": "not_measured",
+      "sources": {
+        "gpqa": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "swe_bench": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "context_length": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "modality": {
+          "origin": "provider",
+          "kind": "list"
+        }
+      }
+    },
+    {
+      "model": "Ornith-1.0-35B",
+      "provider": "DeepReinforce AI",
+      "openness": "open",
+      "modality": [
+        "text"
+      ],
+      "reasoning": true,
+      "family_id": "Ornith-1.0-35B",
+      "effort_tier": "default",
+      "context_length": 262144,
+      "release_date": "2026-06-01",
+      "source_url": "https://benchlm.ai/models/ornith-1-0-35b",
+      "tps": null,
+      "ttft": null,
+      "price_in_per_M": null,
+      "price_out_per_M": null,
+      "blended_price_per_M": null,
+      "price_cache_per_M": null,
+      "aa_intelligence_index": null,
+      "cost_per_index_task_usd": null,
+      "time_per_index_task_s": null,
+      "arena_elo": null,
+      "gpqa": null,
+      "swe_bench": 75.6,
+      "aider_pct": null,
+      "data_date": "2026-08-24",
+      "source": "Ornith 1.0 launch June 2026 (DeepReinforce AI; Qwen3.5 RL post-train, agentic coding; BenchLM provider-exact). Manual addition, PRELIMINARY \u2014 previous generation, kept while 1.5 lands; auto-supersedes when AA measures the family. swe_bench 75.6 is SWE-bench Verified; SWE-bench Pro 50.4, Terminal-Bench 2.0 64.2, SWE Multilingual 69.3, Claw-Eval 69.8 in this note. Self-hosted, community GGUF/MTP-APEX quants; prices/tps/IQ/GPQA null \u2014 never invented.",
+      "null_reason": "not_measured",
+      "sources": {
+        "swe_bench": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "context_length": {
+          "origin": "provider",
+          "kind": "list"
+        },
+        "modality": {
+          "origin": "provider",
+          "kind": "list"
+        }
+      }
+    },
+    {
+      "model": "Ox Alpha (stealth)",
+      "provider": "Stealth",
+      "openness": "closed",
+      "modality": [
+        "text",
+        "vision",
+        "video"
+      ],
+      "reasoning": true,
+      "family_id": "Ox Alpha",
+      "effort_tier": "default",
+      "context_length": 1048576,
+      "release_date": "2026-08-20",
+      "source_url": "https://openrouter.ai/stealth/ox-alpha",
+      "tps": null,
+      "ttft": null,
+      "price_in_per_M": 0.0,
+      "price_out_per_M": 0.0,
+      "blended_price_per_M": null,
+      "price_cache_per_M": null,
+      "aa_intelligence_index": null,
+      "cost_per_index_task_usd": null,
+      "time_per_index_task_s": null,
+      "arena_elo": null,
+      "gpqa": null,
+      "swe_bench": null,
+      "aider_pct": null,
+      "data_date": "2026-08-24",
+      "source": "OpenRouter listing stealth/ox-alpha (manual addition, PRELIMINARY; appeared 2026-08-20). Anonymous unattributed 'stealth' lab \u2014 community speculation only (GLM-5 lineage is UNVERIFIED and must not be stated as fact). Reasoning model for coding/agentic workloads; 1M context; text+image+video input. Prices are a PROMOTIONAL $0/$0 per M on OpenRouter (free-for-a-week reports; promo pricing must not be read as a durable price); blended derives on pipeline runs against the epsilon floor. No published benchmarks, no lab, no tps/IQ \u2014 all null, never invented.",
+      "null_reason": "not_measured",
+      "sources": {
+        "price_in_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "price_out_per_M": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "context_length": {
+          "origin": "openrouter",
+          "kind": "list"
+        },
+        "modality": {
+          "origin": "openrouter",
+          "kind": "list"
+        }
       }
     }
   ]

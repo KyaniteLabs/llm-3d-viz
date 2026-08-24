@@ -7717,6 +7717,106 @@
     }
   },
   {
+    "model": "Ornith-1.0-35B",
+    "provider": "DeepReinforce AI",
+    "openness": "open",
+    "modality": [
+      "text"
+    ],
+    "reasoning": true,
+    "family_id": "Ornith-1.0-35B",
+    "effort_tier": "default",
+    "context_length": 262144,
+    "release_date": "2026-06-01",
+    "source_url": "https://benchlm.ai/models/ornith-1-0-35b",
+    "tps": null,
+    "ttft": null,
+    "price_in_per_M": null,
+    "price_out_per_M": null,
+    "blended_price_per_M": null,
+    "price_cache_per_M": null,
+    "aa_intelligence_index": null,
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null,
+    "arena_elo": null,
+    "gpqa": null,
+    "swe_bench": 75.6,
+    "aider_pct": null,
+    "data_date": "2026-08-24",
+    "source": "Ornith 1.0 launch June 2026 (DeepReinforce AI; Qwen3.5 RL post-train, agentic coding; BenchLM provider-exact). Manual addition, PRELIMINARY — previous generation, kept while 1.5 lands; auto-supersedes when AA measures the family. swe_bench 75.6 is SWE-bench Verified; SWE-bench Pro 50.4, Terminal-Bench 2.0 64.2, SWE Multilingual 69.3, Claw-Eval 69.8 in this note. Self-hosted, community GGUF/MTP-APEX quants; prices/tps/IQ/GPQA null — never invented.",
+    "null_reason": "not_measured",
+    "sources": {
+      "swe_bench": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "modality": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "openness": {
+        "origin": "curated",
+        "kind": "list"
+      }
+    }
+  },
+  {
+    "model": "Ornith-1.5-35B-A3B",
+    "provider": "DeepReinforce AI",
+    "openness": "open",
+    "modality": [
+      "text"
+    ],
+    "reasoning": true,
+    "family_id": "Ornith-1.5-35B-A3B",
+    "effort_tier": "default",
+    "context_length": 262144,
+    "release_date": "2026-08-18",
+    "source_url": "https://benchlm.ai/models/ornith-1-5-35b-a3b",
+    "tps": null,
+    "ttft": null,
+    "price_in_per_M": null,
+    "price_out_per_M": null,
+    "blended_price_per_M": null,
+    "price_cache_per_M": null,
+    "aa_intelligence_index": null,
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null,
+    "arena_elo": null,
+    "gpqa": 89.2,
+    "swe_bench": 79,
+    "aider_pct": null,
+    "data_date": "2026-08-24",
+    "source": "Ornith 1.5 launch 2026-08-18 (DeepReinforce AI; BenchLM provider-exact snapshot 2026-08-22, results averaged over five runs per the launch page). Manual addition, PRELIMINARY provider-published benchmarks — AA confirmation pending; row auto-supersedes when AA measures the family. 35B MoE, 3B active; MIT open weights; 262K context; explicit reasoning mode. swe_bench 79.0 is SWE-bench Verified; SWE-bench Pro 59.6, Terminal-Bench 2.1 67.8, SWE Multilingual 71.4, BrowseComp 67.6, MCP Atlas 70.2, HLE 25.6 kept in this note (no exact-schema slots). Self-hosted only — no first-party API, prices/tps/IQ null, never invented.",
+    "null_reason": "not_measured",
+    "sources": {
+      "gpqa": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "swe_bench": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "modality": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "openness": {
+        "origin": "curated",
+        "kind": "list"
+      }
+    }
+  },
+  {
     "model": "DeepSeek R1 Distill Llama 70B",
     "provider": "DeepSeek",
     "openness": "open",
@@ -22548,6 +22648,60 @@
       "blended_price_per_M": {
         "origin": "aa",
         "kind": "derived"
+      }
+    }
+  },
+  {
+    "model": "Ox Alpha (stealth)",
+    "provider": "Stealth",
+    "openness": "closed",
+    "modality": [
+      "text",
+      "vision",
+      "video"
+    ],
+    "reasoning": true,
+    "family_id": "Ox Alpha",
+    "effort_tier": "default",
+    "context_length": 1048576,
+    "release_date": "2026-08-20",
+    "source_url": "https://openrouter.ai/stealth/ox-alpha",
+    "tps": null,
+    "ttft": null,
+    "price_in_per_M": 0,
+    "price_out_per_M": 0,
+    "blended_price_per_M": null,
+    "price_cache_per_M": null,
+    "aa_intelligence_index": null,
+    "cost_per_index_task_usd": null,
+    "time_per_index_task_s": null,
+    "arena_elo": null,
+    "gpqa": null,
+    "swe_bench": null,
+    "aider_pct": null,
+    "data_date": "2026-08-24",
+    "source": "OpenRouter listing stealth/ox-alpha (manual addition, PRELIMINARY; appeared 2026-08-20). Anonymous unattributed 'stealth' lab — community speculation only (GLM-5 lineage is UNVERIFIED and must not be stated as fact). Reasoning model for coding/agentic workloads; 1M context; text+image+video input. Prices are a PROMOTIONAL $0/$0 per M on OpenRouter (free-for-a-week reports; promo pricing must not be read as a durable price); blended derives on pipeline runs against the epsilon floor. No published benchmarks, no lab, no tps/IQ — all null, never invented.",
+    "null_reason": "not_measured",
+    "sources": {
+      "price_in_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "price_out_per_M": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "context_length": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "modality": {
+        "origin": "openrouter",
+        "kind": "list"
+      },
+      "openness": {
+        "origin": "curated",
+        "kind": "list"
       }
     }
   },

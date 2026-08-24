@@ -23,6 +23,18 @@
       "note": "MEASURED BY AA 2026-08-20 (IQ 59.5, tps 84.72); manual row auto-superseded same day \u2014 the documented manual\u2192AA rename regression case, verified in the 2026-08-20 diff.",
       "measured_by_aa": true,
       "measured_date": "2026-08-20"
+    },
+    {
+      "family": "Ox Alpha",
+      "provider": "Stealth",
+      "announced_date": "2026-08-20",
+      "note": "Anonymous stealth model on OpenRouter (1M ctx, multimodal, promo $0 pricing). Identity unverified \u2014 GLM-5 lineage is speculation and must NOT be attributed. Tracked via data/manual-additions.json row; auto-supersede awaits either AA measurement or the lab revealing itself. Promo pricing caveat: $0 is not a durable price."
+    },
+    {
+      "family": "Ornith-1.5-35B-A3B",
+      "provider": "DeepReinforce AI",
+      "announced_date": "2026-08-18",
+      "note": "Open-weight (MIT) 35B-A3B agentic coder, SWE-bench Verified 79.0 / GPQA 89.2 provider-published; absent from AA + OpenRouter (self-hosted distribution). Manual row live; awaiting any pipeline-source measurement to supersede. Siblings: Ornith-1.5-397B, Ornith-1.5-9B."
     }
   ]
 }

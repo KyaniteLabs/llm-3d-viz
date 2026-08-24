@@ -1,121 +1,35 @@
 {
   "data_date": "2026-08-24",
   "available": true,
-  "prev_row_count": 307,
-  "next_row_count": 311,
+  "prev_row_count": 311,
+  "next_row_count": 314,
   "added": [
     {
-      "model": "Qwen3.8 27B (low)",
-      "provider": "Alibaba",
-      "family_id": "Qwen3.8 27B",
-      "release_date": "2026-08-14"
+      "model": "Ornith-1.0-35B",
+      "provider": "DeepReinforce AI",
+      "family_id": "Ornith-1.0-35B",
+      "release_date": "2026-06-01"
     },
     {
-      "model": "Qwen3.8 27B (medium)",
-      "provider": "Alibaba",
-      "family_id": "Qwen3.8 27B",
-      "release_date": "2026-08-14"
+      "model": "Ornith-1.5-35B-A3B",
+      "provider": "DeepReinforce AI",
+      "family_id": "Ornith-1.5-35B-A3B",
+      "release_date": "2026-08-18"
     },
     {
-      "model": "Qwen3.8 27B (xhigh)",
-      "provider": "Alibaba",
-      "family_id": "Qwen3.8 27B",
-      "release_date": "2026-08-14"
-    },
-    {
-      "model": "Ling 3.0 Flash",
-      "provider": "InclusionAI",
-      "family_id": "Ling 3.0 Flash",
-      "release_date": "2026-08-04"
-    },
-    {
-      "model": "Ring-2.6-1T",
-      "provider": "InclusionAI",
-      "family_id": "Ring-2.6-1T",
-      "release_date": "2026-05-08"
-    },
-    {
-      "model": "Grok 4.6 (low)",
-      "provider": "SpaceXAI",
-      "family_id": "Grok 4.6",
-      "release_date": "2026-08-12"
-    },
-    {
-      "model": "Grok 4.6 (medium)",
-      "provider": "SpaceXAI",
-      "family_id": "Grok 4.6",
-      "release_date": "2026-08-12"
-    },
-    {
-      "model": "Grok 4.6 (xhigh)",
-      "provider": "SpaceXAI",
-      "family_id": "Grok 4.6",
-      "release_date": "2026-08-12"
+      "model": "Ox Alpha (stealth)",
+      "provider": "Stealth",
+      "family_id": "Ox Alpha",
+      "release_date": "2026-08-20"
     }
   ],
-  "removed": [
-    {
-      "model": "Qwen3.8 27B",
-      "provider": "Alibaba",
-      "family_id": "Qwen3.8 27B",
-      "release_date": "2026-08-14"
-    },
-    {
-      "model": "Magistral Medium 1.2",
-      "provider": "Mistral",
-      "family_id": "Magistral Medium 1.2",
-      "release_date": "2025-09-18"
-    },
-    {
-      "model": "Magistral Small 1.2",
-      "provider": "Mistral",
-      "family_id": "Magistral Small 1.2",
-      "release_date": "2025-09-17"
-    },
-    {
-      "model": "GLM-5.2 (max)",
-      "provider": "Z AI",
-      "family_id": "GLM-5.2",
-      "release_date": "2026-06-16"
-    }
-  ],
-  "renamed": [
-    {
-      "from": "GLM-5.3 (max)",
-      "to": "GLM-5.3 (max)",
-      "provider": "Z AI"
-    }
-  ],
-  "price_deltas": [
-    {
-      "model": "Qwen3 Next 80B A3B Instruct",
-      "provider": "Alibaba",
-      "field": "blended_price_per_M",
-      "from": 0.255,
-      "to": 0.199,
-      "pct": 22
-    },
-    {
-      "model": "Qwen3.5 397B A17B (Reasoning)",
-      "provider": "Alibaba",
-      "field": "blended_price_per_M",
-      "from": 0.9,
-      "to": 0.6900000000000001,
-      "pct": 23
-    },
-    {
-      "model": "Qwen3.6 27B (Reasoning)",
-      "provider": "Alibaba",
-      "field": "blended_price_per_M",
-      "from": 0.5640000000000001,
-      "to": 0.9,
-      "pct": 60
-    }
-  ],
+  "removed": [],
+  "renamed": [],
+  "price_deltas": [],
   "counts": {
-    "added": 8,
-    "removed": 4,
-    "renamed": 1,
-    "price_deltas": 3
+    "added": 3,
+    "removed": 0,
+    "renamed": 0,
+    "price_deltas": 0
   }
 }
