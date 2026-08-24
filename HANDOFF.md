@@ -1,6 +1,14 @@
 # HANDOFF — llm-3d-viz
 
-## Status: S+ program CLOSED 2026-08-20 — lever applied, zero mechanical defects, catalog live at rows=307, all remotes current
+## Status: 2026-08-24 close — catalog 314 rows, cron restored, launch post live, OSS current
+
+**Addendum 2026-08-24 (on top of the 2026-08-20 close below):**
+- **Cron restored.** The Aug 16-17 pushing-dispatch canonicalization rewrote the crontab and dropped the llm-3d-viz block — pipeline was dead 8 scheduled runs. Reinstalled via `install-catalog-cron.sh`; slots 06:07/14:07/22:07 local.
+- **Catalog 307 → 314:** Qwen3.8 27B AA-measured (low/medium/xhigh — the manual PRELIMINARY row auto-superseded as designed; watchlist flipped). Ornith-1.5-35B-A3B + Ornith-1.0-35B (DeepReinforce AI, MIT open-weight, provider-published benches) and Ox Alpha (`stealth/ox-alpha` — anonymous lab, promo $0 flagged non-durable, lineage speculation never stated as fact) admitted as PRELIMINARY. Scope vocabulary +1 open lab (DeepReinforce, D-H4-exempt) +1 held closed (Stealth). GLM-5.2 (max) retired upstream; ladder round-tripped.
+- **Qwen repricing canary'd:** Next −22%, 3.5 397B −23%, 3.6 27B **+60%** — top weekly-review item.
+- **Launch post live:** `blog/2026-08-24-model-observatory.md`, served at the canonical URL (`public/blog/`, HTTP 200), linked from `llms.txt`; SEO+AIGEO structured; public-safe. Dispatched to COO + CCO via org-bus envelopes MSG-20260824-DISPATCH-002/-003 (OG-image ask with CONTENTOS).
+- **Process hardening:** three red-commit incidents of the same class (pipe-masked test gates) — commits now gate on vitest's own exit code; all three logged in BUG-SMELL-REGISTRY.
+- **Open tickets unchanged:** #203 (builder exit codes), #204 (supersede-drift guard). Today's catalog-event digests stay open as the review queue.
 
 **Where things stand (end of 2026-08-20 session):**
 - **Visual:** quiet-chrome relaxation shipped (ticks 11px @0.85/0.70, secondary text 11px — see DESIGN-SYSTEM Typography note). Four independent critics (kimi-rubric passes: GLM-4.5v, Gemini-via-kilo, codex-terra, plus the original kimi lineage) converge: **zero mechanical defects** on the deployed build (0 overlaps, 0 off-canvas, 0 truncated, projections tick-NMS'd + presence-gated); residual is presentation-philosophy spread only. Full record: `audits/uiux-splus-2026-08-15.md` iterations 1→4c.
