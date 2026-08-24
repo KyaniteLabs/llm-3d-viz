@@ -11,8 +11,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen-turbo",
-    "tps": 105.2,
-    "ttft": 2120,
+    "tps": 105.09,
+    "ttft": 2140,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.2,
     "price_cache_per_M": null,
@@ -28,7 +28,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.88,
+    "time_per_index_task_s": 6.89,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -80,8 +80,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-14b-instruct",
-    "tps": 61.92,
-    "ttft": 2760,
+    "tps": 60.59,
+    "ttft": 2720,
     "price_in_per_M": 0.35,
     "price_out_per_M": 1.4,
     "price_cache_per_M": null,
@@ -97,7 +97,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.83,
+    "time_per_index_task_s": 10.97,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -149,8 +149,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-14b-instruct-reasoning",
-    "tps": 60.34,
-    "ttft": 2750,
+    "tps": 59.61,
+    "ttft": 2710,
     "price_in_per_M": 0.35,
     "price_out_per_M": 4.2,
     "price_cache_per_M": null,
@@ -166,7 +166,7 @@
     "coding_index": 13.8,
     "agentic_index": 1.9,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 44.18,
+    "time_per_index_task_s": 44.65,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -226,7 +226,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-235b-a22b-instruct",
-    "tps": 64.37,
+    "tps": 65.41,
     "ttft": 2680,
     "price_in_per_M": 0.7,
     "price_out_per_M": 2.8,
@@ -243,7 +243,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.45,
+    "time_per_index_task_s": 10.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -295,7 +295,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-235b-a22b-instruct-reasoning",
-    "tps": 61.89,
+    "tps": 62.68,
     "ttft": 2670,
     "price_in_per_M": 0.7,
     "price_out_per_M": 8.4,
@@ -312,7 +312,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 43.06,
+    "time_per_index_task_s": 42.55,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -364,8 +364,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-235b-a22b-instruct-2507-reasoning",
-    "tps": 69.24,
-    "ttft": 2660,
+    "tps": 69.56,
+    "ttft": 2670,
     "price_in_per_M": 0.23,
     "price_out_per_M": 2.3,
     "price_cache_per_M": null,
@@ -381,7 +381,7 @@
     "coding_index": 22.1,
     "agentic_index": 3.8,
     "cost_per_index_task_usd": 0.0637,
-    "time_per_index_task_s": 38.76,
+    "time_per_index_task_s": 38.61,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -445,8 +445,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-235b-a22b-instruct-2507",
-    "tps": 60.86,
-    "ttft": 2160,
+    "tps": 61.8,
+    "ttft": 2000,
     "price_in_per_M": 0.23,
     "price_out_per_M": 0.92,
     "price_cache_per_M": null,
@@ -462,7 +462,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.38,
+    "time_per_index_task_s": 10.09,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -518,8 +518,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-30b-a3b-instruct",
-    "tps": 108.18,
-    "ttft": 2130,
+    "tps": 108.15,
+    "ttft": 2140,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.8,
     "price_cache_per_M": null,
@@ -535,7 +535,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.75,
+    "time_per_index_task_s": 6.77,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -587,8 +587,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-30b-a3b-instruct-reasoning",
-    "tps": 105.38,
-    "ttft": 2140,
+    "tps": 106.2,
+    "ttft": 2130,
     "price_in_per_M": 0.2,
     "price_out_per_M": 2.4,
     "price_cache_per_M": null,
@@ -604,7 +604,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 25.86,
+    "time_per_index_task_s": 25.67,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -656,8 +656,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-30b-a3b-2507-reasoning",
-    "tps": 156.41,
-    "ttft": 2300,
+    "tps": 166.92,
+    "ttft": 2320,
     "price_in_per_M": 0.2,
     "price_out_per_M": 2.4,
     "price_cache_per_M": null,
@@ -673,7 +673,7 @@
     "coding_index": 12.1,
     "agentic_index": 1.8,
     "cost_per_index_task_usd": 0.0787,
-    "time_per_index_task_s": 18.28,
+    "time_per_index_task_s": 17.3,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -806,7 +806,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-32b-instruct",
-    "tps": 105.32,
+    "tps": 105.65,
     "ttft": 2450,
     "price_in_per_M": 0.16,
     "price_out_per_M": 0.64,
@@ -823,7 +823,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 7.19,
+    "time_per_index_task_s": 7.18,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -876,7 +876,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-32b-instruct-reasoning",
     "tps": 104.37,
-    "ttft": 2410,
+    "ttft": 2420,
     "price_in_per_M": 0.16,
     "price_out_per_M": 0.64,
     "price_cache_per_M": null,
@@ -892,7 +892,7 @@
     "coding_index": 15.3,
     "agentic_index": 1.8,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 26.36,
+    "time_per_index_task_s": 26.37,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -953,7 +953,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8b-instruct",
     "tps": 40.39,
-    "ttft": 3870,
+    "ttft": 3810,
     "price_in_per_M": 0.18,
     "price_out_per_M": 0.7,
     "price_cache_per_M": null,
@@ -969,7 +969,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 16.25,
+    "time_per_index_task_s": 16.19,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1021,8 +1021,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8b-instruct-reasoning",
-    "tps": 40.47,
-    "ttft": 3730,
+    "tps": 40.77,
+    "ttft": 3710,
     "price_in_per_M": 0.18,
     "price_out_per_M": 2.1,
     "price_cache_per_M": null,
@@ -1038,7 +1038,7 @@
     "coding_index": 9,
     "agentic_index": 1.6,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 65.5,
+    "time_per_index_task_s": 65.02,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1098,8 +1098,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-coder-30b-a3b-instruct",
-    "tps": 97.45,
-    "ttft": 2550,
+    "tps": 95.82,
+    "ttft": 2590,
     "price_in_per_M": 0.45,
     "price_out_per_M": 2.25,
     "price_cache_per_M": null,
@@ -1115,7 +1115,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 7.68,
+    "time_per_index_task_s": 7.81,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1171,8 +1171,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-coder-480b-a35b-instruct",
-    "tps": 71.38,
-    "ttft": 2940,
+    "tps": 71.55,
+    "ttft": 2910,
     "price_in_per_M": 1.5,
     "price_out_per_M": 7.5,
     "price_cache_per_M": null,
@@ -1188,7 +1188,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.95,
+    "time_per_index_task_s": 9.89,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1245,7 +1245,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-coder-next",
     "tps": 145.75,
-    "ttft": 1010,
+    "ttft": 990,
     "price_in_per_M": 0.35,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.35,
@@ -1261,7 +1261,7 @@
     "coding_index": 36.2,
     "agentic_index": 8.9,
     "cost_per_index_task_usd": 0.3371,
-    "time_per_index_task_s": 4.44,
+    "time_per_index_task_s": 4.42,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1333,8 +1333,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3-max)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-max",
-    "tps": 58.73,
-    "ttft": 2260,
+    "tps": 57.8,
+    "ttft": 2290,
     "price_in_per_M": 1.2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.156,
@@ -1350,7 +1350,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.78,
+    "time_per_index_task_s": 10.94,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1410,8 +1410,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-max-preview",
-    "tps": 61.79,
-    "ttft": 4010,
+    "tps": 60.42,
+    "ttft": 4050,
     "price_in_per_M": 1.2,
     "price_out_per_M": 6,
     "price_cache_per_M": null,
@@ -1427,7 +1427,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.1,
+    "time_per_index_task_s": 12.32,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1479,8 +1479,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-max-thinking-preview",
-    "tps": 58.34,
-    "ttft": 3990,
+    "tps": 58.73,
+    "ttft": 4010,
     "price_in_per_M": 1.2,
     "price_out_per_M": 6,
     "price_cache_per_M": null,
@@ -1496,7 +1496,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 46.84,
+    "time_per_index_task_s": 46.58,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1549,7 +1549,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-next-80b-a3b-reasoning",
     "tps": 202.77,
-    "ttft": 2230,
+    "ttft": 2240,
     "price_in_per_M": 0.15,
     "price_out_per_M": 1.2,
     "price_cache_per_M": null,
@@ -1565,7 +1565,7 @@
     "coding_index": 17.4,
     "agentic_index": 2.1,
     "cost_per_index_task_usd": 0.0419,
-    "time_per_index_task_s": 14.56,
+    "time_per_index_task_s": 14.57,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1780,7 +1780,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-omni-30b-a3b-instruct",
     "tps": 94.85,
-    "ttft": 1850,
+    "ttft": 1860,
     "price_in_per_M": 0.25,
     "price_out_per_M": 0.97,
     "price_cache_per_M": null,
@@ -1849,7 +1849,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-235b-a22b-reasoning",
     "tps": 57.84,
-    "ttft": 2740,
+    "ttft": 2760,
     "price_in_per_M": 0.4,
     "price_out_per_M": 4,
     "price_cache_per_M": null,
@@ -1865,7 +1865,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 45.96,
+    "time_per_index_task_s": 45.98,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1918,8 +1918,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3-vl-235b-a22b-instruct)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-235b-a22b-instruct",
-    "tps": 51.22,
-    "ttft": 2810,
+    "tps": 50.04,
+    "ttft": 2730,
     "price_in_per_M": 0.4,
     "price_out_per_M": 1.6,
     "price_cache_per_M": 0.09999999999999999,
@@ -1935,7 +1935,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.57,
+    "time_per_index_task_s": 12.72,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -1999,8 +1999,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-30b-a3b-reasoning",
-    "tps": 110.1,
-    "ttft": 2160,
+    "tps": 110.43,
+    "ttft": 2180,
     "price_in_per_M": 0.2,
     "price_out_per_M": 2.4,
     "price_cache_per_M": null,
@@ -2016,7 +2016,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 24.87,
+    "time_per_index_task_s": 24.82,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2069,8 +2069,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-30b-a3b-instruct",
-    "tps": 109.35,
-    "ttft": 2130,
+    "tps": 110.95,
+    "ttft": 2150,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.8,
     "price_cache_per_M": null,
@@ -2086,7 +2086,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.7,
+    "time_per_index_task_s": 6.66,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2142,8 +2142,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-32b-reasoning",
-    "tps": 88.4,
-    "ttft": 2490,
+    "tps": 88.97,
+    "ttft": 2500,
     "price_in_per_M": 0.16,
     "price_out_per_M": 0.64,
     "price_cache_per_M": null,
@@ -2159,7 +2159,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.77,
+    "time_per_index_task_s": 30.59,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2212,8 +2212,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-32b-instruct",
-    "tps": 63.59,
-    "ttft": 2710,
+    "tps": 64.05,
+    "ttft": 2650,
     "price_in_per_M": 0.16,
     "price_out_per_M": 0.64,
     "price_cache_per_M": null,
@@ -2229,7 +2229,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.58,
+    "time_per_index_task_s": 10.46,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2285,8 +2285,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-8b-reasoning",
-    "tps": 114.5,
-    "ttft": 2300,
+    "tps": 114.4,
+    "ttft": 2280,
     "price_in_per_M": 0.18,
     "price_out_per_M": 2.1,
     "price_cache_per_M": null,
@@ -2355,8 +2355,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-vl-8b-instruct",
-    "tps": 114.76,
-    "ttft": 2180,
+    "tps": 115.57,
+    "ttft": 2170,
     "price_in_per_M": 0.18,
     "price_out_per_M": 0.7,
     "price_cache_per_M": null,
@@ -2372,7 +2372,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.54,
+    "time_per_index_task_s": 6.5,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2428,8 +2428,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b-non-reasoning",
-    "tps": 148.78,
-    "ttft": 2380,
+    "tps": 148.23,
+    "ttft": 2330,
     "price_in_per_M": 0.4,
     "price_out_per_M": 3.2,
     "price_cache_per_M": null,
@@ -2445,7 +2445,7 @@
     "coding_index": 43.3,
     "agentic_index": 16.2,
     "cost_per_index_task_usd": 0.1953,
-    "time_per_index_task_s": 5.74,
+    "time_per_index_task_s": 5.7,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2512,7 +2512,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-122b-a10b",
     "tps": 128.75,
-    "ttft": 2310,
+    "ttft": 2330,
     "price_in_per_M": 0.4,
     "price_out_per_M": 3.2,
     "price_cache_per_M": null,
@@ -2528,7 +2528,7 @@
     "coding_index": 45.7,
     "agentic_index": 21.3,
     "cost_per_index_task_usd": 0.2527,
-    "time_per_index_task_s": 21.72,
+    "time_per_index_task_s": 21.75,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2596,8 +2596,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-27b-non-reasoning",
-    "tps": 83.41,
-    "ttft": 5570,
+    "tps": 82.2,
+    "ttft": 5610,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.4,
     "price_cache_per_M": null,
@@ -2613,7 +2613,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.57,
+    "time_per_index_task_s": 11.69,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2667,7 +2667,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-27b",
-    "tps": 76.99,
+    "tps": 76.52,
     "ttft": 5590,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.4,
@@ -2684,7 +2684,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 38.06,
+    "time_per_index_task_s": 38.26,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2741,7 +2741,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-35b-a3b-non-reasoning",
     "tps": 168.84,
-    "ttft": 2029.9999999999998,
+    "ttft": 2040,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
     "price_cache_per_M": null,
@@ -2757,7 +2757,7 @@
     "coding_index": 37,
     "agentic_index": 11.8,
     "cost_per_index_task_usd": 0.2411,
-    "time_per_index_task_s": 4.99,
+    "time_per_index_task_s": 5,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2823,8 +2823,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.5-35b-a3b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-35b-a3b",
-    "tps": 148.64,
-    "ttft": 2080,
+    "tps": 150.37,
+    "ttft": 2040,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
     "price_cache_per_M": 0.25,
@@ -2840,7 +2840,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 18.9,
+    "time_per_index_task_s": 18.67,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2900,8 +2900,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b-non-reasoning",
-    "tps": 78.7,
-    "ttft": 2080,
+    "tps": 77.02,
+    "ttft": 2100,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
     "price_cache_per_M": null,
@@ -2917,7 +2917,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.43,
+    "time_per_index_task_s": 8.6,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -2972,7 +2972,7 @@
     "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.5-397b-a17b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-397b-a17b",
     "tps": 78.92,
-    "ttft": 2190,
+    "ttft": 2140,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
     "price_cache_per_M": 0.3,
@@ -2988,7 +2988,7 @@
     "coding_index": 48.2,
     "agentic_index": 19.8,
     "cost_per_index_task_usd": 0.3574,
-    "time_per_index_task_s": 48.89,
+    "time_per_index_task_s": 48.85,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3060,8 +3060,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-4b-non-reasoning",
-    "tps": 16.66,
-    "ttft": 940,
+    "tps": 16.09,
+    "ttft": 870,
     "price_in_per_M": 0.03,
     "price_out_per_M": 0.15,
     "price_cache_per_M": null,
@@ -3077,7 +3077,7 @@
     "coding_index": 20.3,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.94,
+    "time_per_index_task_s": 31.94,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3133,8 +3133,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-4b",
-    "tps": 24.26,
-    "ttft": 840,
+    "tps": 18.06,
+    "ttft": 830,
     "price_in_per_M": 0.03,
     "price_out_per_M": 0.15,
     "price_cache_per_M": null,
@@ -3150,7 +3150,7 @@
     "coding_index": 22.6,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 103.9,
+    "time_per_index_task_s": 139.26,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3206,7 +3206,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-9b-non-reasoning",
-    "tps": 85.12,
+    "tps": 86.25,
     "ttft": 780,
     "price_in_per_M": 0.17,
     "price_out_per_M": 0.25,
@@ -3223,7 +3223,7 @@
     "coding_index": 23.5,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.66,
+    "time_per_index_task_s": 6.58,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3281,7 +3281,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-9b",
-    "tps": 80.79,
+    "tps": 77.61,
     "ttft": 1820,
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.2,
@@ -3298,7 +3298,7 @@
     "coding_index": 28.7,
     "agentic_index": 7,
     "cost_per_index_task_usd": 0.2416,
-    "time_per_index_task_s": 32.77,
+    "time_per_index_task_s": 34.04,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3367,7 +3367,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-omni-flash",
     "tps": 246.27,
-    "ttft": 1810,
+    "ttft": 1800,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.8,
     "price_cache_per_M": null,
@@ -3383,7 +3383,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.84,
+    "time_per_index_task_s": 3.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3435,8 +3435,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-5-omni-plus",
-    "tps": 47.03,
-    "ttft": 2380,
+    "tps": 47.16,
+    "ttft": 2410,
     "price_in_per_M": 0.4,
     "price_out_per_M": 4.8,
     "price_cache_per_M": null,
@@ -3504,8 +3504,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-27b-non-reasoning",
-    "tps": 56.97,
-    "ttft": 3780,
+    "tps": 56.83,
+    "ttft": 3810,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
     "price_cache_per_M": null,
@@ -3521,7 +3521,7 @@
     "coding_index": 46.6,
     "agentic_index": 23.6,
     "cost_per_index_task_usd": 0.3982,
-    "time_per_index_task_s": 12.55,
+    "time_per_index_task_s": 12.61,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3587,8 +3587,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-27b",
-    "tps": 57.79,
-    "ttft": 3680,
+    "tps": 57.78,
+    "ttft": 3670,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
     "price_cache_per_M": null,
@@ -3672,8 +3672,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b-non-reasoning",
-    "tps": 138.82,
-    "ttft": 2000,
+    "tps": 144.46,
+    "ttft": 1990,
     "price_in_per_M": 0.38,
     "price_out_per_M": 2.25,
     "price_cache_per_M": null,
@@ -3689,7 +3689,7 @@
     "coding_index": 28.1,
     "agentic_index": 19.2,
     "cost_per_index_task_usd": 0.63,
-    "time_per_index_task_s": 5.6,
+    "time_per_index_task_s": 5.45,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3755,7 +3755,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.6-35b-a3b)",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-35b-a3b",
-    "tps": 118.67,
+    "tps": 120.52,
     "ttft": 2060,
     "price_in_per_M": 0.38,
     "price_out_per_M": 2.25,
@@ -3772,7 +3772,7 @@
     "coding_index": 41.9,
     "agentic_index": 21.6,
     "cost_per_index_task_usd": 0.2944,
-    "time_per_index_task_s": 51.74,
+    "time_per_index_task_s": 50.98,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3844,7 +3844,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-max",
-    "tps": 57.97,
+    "tps": 56.87,
     "ttft": 3000,
     "price_in_per_M": 1.3,
     "price_out_per_M": 7.8,
@@ -3861,7 +3861,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 46.13,
+    "time_per_index_task_s": 46.97,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -3919,7 +3919,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-plus",
-    "tps": 55.39,
+    "tps": 55.28,
     "ttft": 2040,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
@@ -3936,7 +3936,7 @@
     "coding_index": 54.5,
     "agentic_index": 29,
     "cost_per_index_task_usd": 0.3569,
-    "time_per_index_task_s": 111.28,
+    "time_per_index_task_s": 111.49,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4012,8 +4012,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-7-max",
-    "tps": 206.62,
-    "ttft": 2220,
+    "tps": 205.7,
+    "ttft": 2240,
     "price_in_per_M": 2.5,
     "price_out_per_M": 7.5,
     "price_cache_per_M": 0.5,
@@ -4029,7 +4029,7 @@
     "coding_index": 66,
     "agentic_index": 30.9,
     "cost_per_index_task_usd": 0.5413,
-    "time_per_index_task_s": 16.3,
+    "time_per_index_task_s": 16.38,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4102,7 +4102,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-7-plus",
-    "tps": 56.05,
+    "tps": 55.53,
     "ttft": 2120,
     "price_in_per_M": 0.4,
     "price_out_per_M": 1.6,
@@ -4119,7 +4119,7 @@
     "coding_index": 55.9,
     "agentic_index": 20.7,
     "cost_per_index_task_usd": 0.2424,
-    "time_per_index_task_s": 46.73,
+    "time_per_index_task_s": 47.14,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4184,95 +4184,6 @@
     }
   },
   {
-    "model": "Qwen3.8 2.4T A95B",
-    "provider": "Alibaba",
-    "openness": "open",
-    "modality": [
-      "text"
-    ],
-    "context_length": 1048576,
-    "release_date": "2026-08-12",
-    "data_date": "2026-08-24",
-    "source": "AA Data API free",
-    "source_url": "https://artificialanalysis.ai/models/qwen3-8-2-4t-a95b",
-    "tps": 52.54,
-    "ttft": 2620,
-    "price_in_per_M": 2,
-    "price_out_per_M": 6,
-    "price_cache_per_M": 0.25,
-    "blended_price_per_M": 1.175,
-    "aa_intelligence_index": 57.7,
-    "arena_elo": null,
-    "swe_bench": null,
-    "aider_pct": null,
-    "gpqa": null,
-    "reasoning": false,
-    "family_id": "Qwen3.8 2.4T A95B",
-    "effort_tier": "none",
-    "coding_index": 71.9,
-    "agentic_index": 57.1,
-    "cost_per_index_task_usd": 1.0919,
-    "time_per_index_task_s": 50.2,
-    "sources": {
-      "aa_intelligence_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "coding_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "agentic_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "time_per_index_task_s": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "tps": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "ttft": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_in_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_out_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "modality": {
-        "origin": "aa-api",
-        "kind": "list"
-      },
-      "price_cache_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "cost_per_index_task_usd": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "openness": {
-        "origin": "curated",
-        "kind": "list"
-      },
-      "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
-      },
-      "context_length": {
-        "origin": "openrouter",
-        "kind": "list"
-      }
-    }
-  },
-  {
     "model": "Qwen3.8 27B (low)",
     "provider": "Alibaba",
     "openness": "closed",
@@ -4284,7 +4195,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8-27b-low",
-    "tps": 64.46,
+    "tps": 63.57,
     "ttft": 2990,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
@@ -4301,7 +4212,7 @@
     "coding_index": 58.2,
     "agentic_index": 43.7,
     "cost_per_index_task_usd": 0.1658,
-    "time_per_index_task_s": 41.77,
+    "time_per_index_task_s": 42.32,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4369,8 +4280,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8-27b-medium",
-    "tps": 64.02,
-    "ttft": 3010,
+    "tps": 61.3,
+    "ttft": 3030,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
     "price_cache_per_M": 0.05,
@@ -4386,7 +4297,7 @@
     "coding_index": 56.1,
     "agentic_index": 49.8,
     "cost_per_index_task_usd": 0.1878,
-    "time_per_index_task_s": 42.06,
+    "time_per_index_task_s": 43.82,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4456,8 +4367,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8-27b",
-    "tps": 52.92,
-    "ttft": 2980,
+    "tps": 52.16,
+    "ttft": 3000,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
     "price_cache_per_M": 0.05,
@@ -4473,7 +4384,7 @@
     "coding_index": 68.1,
     "agentic_index": 50.9,
     "cost_per_index_task_usd": 0.2534,
-    "time_per_index_task_s": 50.22,
+    "time_per_index_task_s": 50.93,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4547,8 +4458,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-8-max",
-    "tps": 54.4,
-    "ttft": 2560,
+    "tps": 27.93,
+    "ttft": 6130,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.25,
@@ -4564,7 +4475,7 @@
     "coding_index": 71.8,
     "agentic_index": 58.4,
     "cost_per_index_task_usd": 1.132,
-    "time_per_index_task_s": 48.52,
+    "time_per_index_task_s": 95.62,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4636,8 +4547,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning",
-    "tps": 178.06,
-    "ttft": 15760,
+    "tps": 179.14,
+    "ttft": 15420,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": null,
@@ -4653,7 +4564,7 @@
     "coding_index": 23,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 29.8,
+    "time_per_index_task_s": 29.38,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4709,8 +4620,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-low",
-    "tps": 169.94,
-    "ttft": 8910,
+    "tps": 180.66,
+    "ttft": 9160,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": null,
@@ -4726,7 +4637,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 23.62,
+    "time_per_index_task_s": 23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4778,8 +4689,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-lite-reasoning-medium",
-    "tps": 188.3,
-    "ttft": 17680,
+    "tps": 192.89,
+    "ttft": 17890,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": null,
@@ -4795,7 +4706,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.96,
+    "time_per_index_task_s": 30.85,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4847,8 +4758,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-lite",
-    "tps": 181.17,
-    "ttft": 1010,
+    "tps": 185.26,
+    "ttft": 1030,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": null,
@@ -4864,7 +4775,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.77,
+    "time_per_index_task_s": 3.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4916,8 +4827,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-low",
-    "tps": 129.23,
-    "ttft": 11160,
+    "tps": 130.43,
+    "ttft": 11700,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": null,
@@ -4933,7 +4844,7 @@
     "coding_index": 25.9,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.5,
+    "time_per_index_task_s": 30.87,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -4989,7 +4900,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-pro-reasoning-medium",
-    "tps": 123.13,
+    "tps": 124.27,
     "ttft": 15370,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
@@ -5006,7 +4917,7 @@
     "coding_index": 34,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 35.68,
+    "time_per_index_task_s": 35.49,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5066,8 +4977,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-2-0-pro",
-    "tps": 115.32,
-    "ttft": 1070,
+    "tps": 117.11,
+    "ttft": 1110,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": null,
@@ -5083,7 +4994,7 @@
     "coding_index": 20.9,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.41,
+    "time_per_index_task_s": 5.38,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5139,7 +5050,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-lite",
-    "tps": 157.17,
+    "tps": 158.51,
     "ttft": 920,
     "price_in_per_M": 0.06,
     "price_out_per_M": 0.24,
@@ -5156,7 +5067,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.1,
+    "time_per_index_task_s": 4.08,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5212,7 +5123,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-micro",
-    "tps": 281.27,
+    "tps": 295.78,
     "ttft": 860,
     "price_in_per_M": 0.04,
     "price_out_per_M": 0.14,
@@ -5229,7 +5140,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 2.64,
+    "time_per_index_task_s": 2.55,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5285,8 +5196,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nova-premier",
-    "tps": 33.23,
-    "ttft": 2900,
+    "tps": 33.06,
+    "ttft": 2880,
     "price_in_per_M": 2.5,
     "price_out_per_M": 12.5,
     "price_cache_per_M": 0.63,
@@ -5302,7 +5213,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 17.95,
+    "time_per_index_task_s": 18,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5358,8 +5269,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-4-5-haiku",
-    "tps": 93.1,
-    "ttft": 800,
+    "tps": 94.22,
+    "ttft": 780,
     "price_in_per_M": 1,
     "price_out_per_M": 5,
     "price_cache_per_M": 0.1,
@@ -5375,7 +5286,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.17,
+    "time_per_index_task_s": 6.08,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5431,8 +5342,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-4-5-haiku-reasoning",
-    "tps": 110.21,
-    "ttft": 23780,
+    "tps": 118.12,
+    "ttft": 24290,
     "price_in_per_M": 1,
     "price_out_per_M": 5,
     "price_cache_per_M": 0.1,
@@ -5448,7 +5359,7 @@
     "coding_index": 43.9,
     "agentic_index": 16.5,
     "cost_per_index_task_usd": 0.2174,
-    "time_per_index_task_s": 28.31,
+    "time_per_index_task_s": 28.52,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5516,8 +5427,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-4-5-sonnet",
-    "tps": 42.11,
-    "ttft": 1290,
+    "tps": 44.63,
+    "ttft": 1300,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -5533,7 +5444,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 13.16,
+    "time_per_index_task_s": 12.5,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5589,8 +5500,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-4-5-sonnet-thinking",
-    "tps": 49.04,
-    "ttft": 10280,
+    "tps": 52.83,
+    "ttft": 11510,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -5606,7 +5517,7 @@
     "coding_index": 52.1,
     "agentic_index": 26.4,
     "cost_per_index_task_usd": 0.4643,
-    "time_per_index_task_s": 20.48,
+    "time_per_index_task_s": 20.98,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5675,8 +5586,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-fable-5",
-    "tps": 69.91,
-    "ttft": 111360,
+    "tps": 70.72,
+    "ttft": 132670,
     "price_in_per_M": 10,
     "price_out_per_M": 50,
     "price_cache_per_M": 1,
@@ -5692,7 +5603,7 @@
     "coding_index": 76.5,
     "agentic_index": 56.6,
     "cost_per_index_task_usd": 3.1396,
-    "time_per_index_task_s": 118.51,
+    "time_per_index_task_s": 139.74,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5769,7 +5680,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-5",
-    "tps": 49.94,
+    "tps": 50.4,
     "ttft": 1040,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
@@ -5786,7 +5697,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.05,
+    "time_per_index_task_s": 10.96,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5846,8 +5757,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-5-thinking",
-    "tps": 53.94,
-    "ttft": 14320,
+    "tps": 57.16,
+    "ttft": 15890,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -5863,7 +5774,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 23.59,
+    "time_per_index_task_s": 24.64,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5919,8 +5830,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-6-adaptive",
-    "tps": 46.11,
-    "ttft": 22540,
+    "tps": 46.31,
+    "ttft": 21320,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -5936,7 +5847,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 33.38,
+    "time_per_index_task_s": 32.11,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -5997,7 +5908,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-6",
-    "tps": 41.67,
+    "tps": 42.21,
     "ttft": 1950,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
@@ -6014,7 +5925,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 13.95,
+    "time_per_index_task_s": 13.79,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6079,8 +5990,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-7",
-    "tps": 52.22,
-    "ttft": 15320,
+    "tps": 52.81,
+    "ttft": 16059.999999999998,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6096,7 +6007,7 @@
     "coding_index": 73.6,
     "agentic_index": 46.3,
     "cost_per_index_task_usd": 2.2285,
-    "time_per_index_task_s": 24.9,
+    "time_per_index_task_s": 25.53,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6172,8 +6083,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-7-non-reasoning",
-    "tps": 48.81,
-    "ttft": 1400,
+    "tps": 50.67,
+    "ttft": 1310,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6189,7 +6100,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.64,
+    "time_per_index_task_s": 11.18,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6250,8 +6161,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-4-8",
-    "tps": 59.51,
-    "ttft": 24310,
+    "tps": 61.14,
+    "ttft": 33430,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6267,7 +6178,7 @@
     "coding_index": 74.3,
     "agentic_index": 49.4,
     "cost_per_index_task_usd": 2.0315,
-    "time_per_index_task_s": 32.71,
+    "time_per_index_task_s": 41.61,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6343,8 +6254,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-5-high",
-    "tps": 53.91,
-    "ttft": 19950,
+    "tps": 56.71,
+    "ttft": 21400,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6360,7 +6271,7 @@
     "coding_index": 76.5,
     "agentic_index": 56.1,
     "cost_per_index_task_usd": 1.2268,
-    "time_per_index_task_s": 29.22,
+    "time_per_index_task_s": 30.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6432,7 +6343,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-5-low",
-    "tps": 54.73,
+    "tps": 56.27,
     "ttft": 3550,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
@@ -6449,7 +6360,7 @@
     "coding_index": 66.9,
     "agentic_index": 42.1,
     "cost_per_index_task_usd": 0.4252,
-    "time_per_index_task_s": 12.68,
+    "time_per_index_task_s": 12.43,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6518,8 +6429,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-5",
-    "tps": 57.68,
-    "ttft": 47830,
+    "tps": 58.82,
+    "ttft": 54310,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6535,7 +6446,7 @@
     "coding_index": 78,
     "agentic_index": 59.2,
     "cost_per_index_task_usd": 2.3369,
-    "time_per_index_task_s": 56.5,
+    "time_per_index_task_s": 62.81,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6611,8 +6522,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-5-medium",
-    "tps": 53.27,
-    "ttft": 5270,
+    "tps": 54.46,
+    "ttft": 5840,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6628,7 +6539,7 @@
     "coding_index": 74.3,
     "agentic_index": 50.4,
     "cost_per_index_task_usd": 0.7243,
-    "time_per_index_task_s": 14.66,
+    "time_per_index_task_s": 15.02,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6696,8 +6607,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-opus-5-xhigh",
-    "tps": 53.47,
-    "ttft": 35300,
+    "tps": 55.44,
+    "ttft": 37410,
     "price_in_per_M": 5,
     "price_out_per_M": 25,
     "price_cache_per_M": 0.5,
@@ -6713,7 +6624,7 @@
     "coding_index": 77,
     "agentic_index": 58.4,
     "cost_per_index_task_usd": 1.8012,
-    "time_per_index_task_s": 44.65,
+    "time_per_index_task_s": 46.43,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6781,8 +6692,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-sonnet-4-6-adaptive",
-    "tps": 55.24,
-    "ttft": 119510,
+    "tps": 55.91,
+    "ttft": 123290,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -6798,7 +6709,7 @@
     "coding_index": 63,
     "agentic_index": 42.1,
     "cost_per_index_task_usd": 1.2182,
-    "time_per_index_task_s": 128.57,
+    "time_per_index_task_s": 132.23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6871,7 +6782,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-sonnet-4-6",
-    "tps": 46.55,
+    "tps": 46.66,
     "ttft": 1520,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
@@ -6888,7 +6799,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.26,
+    "time_per_index_task_s": 12.23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -6948,8 +6859,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-sonnet-4-6-non-reasoning-low-effort",
-    "tps": 45.52,
-    "ttft": 1540,
+    "tps": 47.56,
+    "ttft": 1550,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -6965,7 +6876,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.52,
+    "time_per_index_task_s": 12.07,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7111,8 +7022,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/claude-sonnet-5-non-reasoning",
-    "tps": 69.04,
-    "ttft": 1830,
+    "tps": 69.82,
+    "ttft": 1770,
     "price_in_per_M": 2,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.2,
@@ -7128,7 +7039,7 @@
     "coding_index": 66.4,
     "agentic_index": 34.2,
     "cost_per_index_task_usd": 0.4169,
-    "time_per_index_task_s": 9.07,
+    "time_per_index_task_s": 8.93,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7196,7 +7107,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/trinity-large-thinking",
-    "tps": 192.96,
+    "tps": 187.44,
     "ttft": 1050,
     "price_in_per_M": 0.23,
     "price_out_per_M": 0.88,
@@ -7213,7 +7124,7 @@
     "coding_index": 25.8,
     "agentic_index": 3.7,
     "cost_per_index_task_usd": 0.164,
-    "time_per_index_task_s": 14.01,
+    "time_per_index_task_s": 14.39,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7343,8 +7254,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/seed-oss-36b-instruct",
-    "tps": 29.69,
-    "ttft": 2910,
+    "tps": 32.26,
+    "ttft": 2830,
     "price_in_per_M": 0.21,
     "price_out_per_M": 0.57,
     "price_cache_per_M": null,
@@ -7360,7 +7271,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 87.11,
+    "time_per_index_task_s": 80.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7412,8 +7323,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/celeris-1",
-    "tps": 1541.1,
-    "ttft": 580,
+    "tps": 1572.82,
+    "ttft": 560,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.7,
     "price_cache_per_M": null,
@@ -7429,7 +7340,7 @@
     "coding_index": 14.4,
     "agentic_index": 2.4,
     "cost_per_index_task_usd": 0.2582,
-    "time_per_index_task_s": 0.91,
+    "time_per_index_task_s": 0.88,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7493,7 +7404,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/command-a",
-    "tps": 74.16,
+    "tps": 72.71,
     "ttft": 1580,
     "price_in_per_M": 2.5,
     "price_out_per_M": 10,
@@ -7510,7 +7421,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.32,
+    "time_per_index_task_s": 8.46,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7566,8 +7477,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/command-a-plus",
-    "tps": 236.83,
-    "ttft": 410,
+    "tps": 245.31,
+    "ttft": 400,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
     "price_cache_per_M": null,
@@ -7583,7 +7494,7 @@
     "coding_index": 27.8,
     "agentic_index": 9.2,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 10.97,
+    "time_per_index_task_s": 10.59,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7647,8 +7558,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/north-mini-code",
-    "tps": 26.89,
-    "ttft": 490,
+    "tps": 26.97,
+    "ttft": 480,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
     "price_cache_per_M": null,
@@ -7664,7 +7575,7 @@
     "coding_index": 36.5,
     "agentic_index": 3.1,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 93.47,
+    "time_per_index_task_s": 93.19,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7828,8 +7739,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-r1-distill-llama-70b",
-    "tps": 26.62,
-    "ttft": 800,
+    "tps": 29.97,
+    "ttft": 780,
     "price_in_per_M": 0.7,
     "price_out_per_M": 1.1,
     "price_cache_per_M": null,
@@ -7845,7 +7756,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 94.71,
+    "time_per_index_task_s": 84.21,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7901,8 +7812,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-flash",
-    "tps": 123.45,
-    "ttft": 1130,
+    "tps": 121.66,
+    "ttft": 1100,
     "price_in_per_M": 0.44,
     "price_out_per_M": 1.32,
     "price_cache_per_M": 0.01,
@@ -7918,7 +7829,7 @@
     "coding_index": 69.1,
     "agentic_index": 48.4,
     "cost_per_index_task_usd": 0.1122,
-    "time_per_index_task_s": 21.38,
+    "time_per_index_task_s": 21.65,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -7991,7 +7902,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-pro-0424-non-reasoning",
     "tps": 72.91,
-    "ttft": 1830,
+    "ttft": 1860,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
@@ -8007,7 +7918,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.68,
+    "time_per_index_task_s": 8.72,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8063,8 +7974,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-pro-0424-high",
-    "tps": 73.33,
-    "ttft": 1660,
+    "tps": 71.92,
+    "ttft": 1680,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
@@ -8080,7 +7991,7 @@
     "coding_index": 58.7,
     "agentic_index": 35.3,
     "cost_per_index_task_usd": 0.0432,
-    "time_per_index_task_s": 35.64,
+    "time_per_index_task_s": 36.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8148,8 +8059,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-pro-0424",
-    "tps": 74.84,
-    "ttft": 1650,
+    "tps": 73.74,
+    "ttft": 1760,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
@@ -8165,7 +8076,7 @@
     "coding_index": 59.4,
     "agentic_index": 37.8,
     "cost_per_index_task_usd": 0.0474,
-    "time_per_index_task_s": 66.79,
+    "time_per_index_task_s": 67.87,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8233,7 +8144,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/deepseek-v4-pro",
-    "tps": 71.73,
+    "tps": 69.79,
     "ttft": 1810,
     "price_in_per_M": 1.32,
     "price_out_per_M": 3.96,
@@ -8250,7 +8161,7 @@
     "coding_index": 68.8,
     "agentic_index": 49.6,
     "cost_per_index_task_usd": 0.2521,
-    "time_per_index_task_s": 36.66,
+    "time_per_index_task_s": 37.63,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8325,7 +8236,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-2-5-flash",
-    "tps": 221.5,
+    "tps": 216.53,
     "ttft": 430,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
@@ -8342,7 +8253,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 2.69,
+    "time_per_index_task_s": 2.74,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8407,7 +8318,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-2-5-flash-reasoning",
     "tps": 228.57,
-    "ttft": 18680,
+    "ttft": 17950,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.03,
@@ -8423,7 +8334,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 20.87,
+    "time_per_index_task_s": 20.14,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8482,8 +8393,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-2-5-flash-lite",
-    "tps": 326.53,
-    "ttft": 280,
+    "tps": 341.44,
+    "ttft": 290,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.01,
@@ -8499,7 +8410,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 1.81,
+    "time_per_index_task_s": 1.75,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8559,7 +8470,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-2-5-flash-lite-reasoning",
-    "tps": 418.59,
+    "tps": 439.43,
     "ttft": 21660,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.4,
@@ -8576,7 +8487,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 22.85,
+    "time_per_index_task_s": 22.8,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8635,8 +8546,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-2-5-pro",
-    "tps": 140.65,
-    "ttft": 20290,
+    "tps": 136.68,
+    "ttft": 19750,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -8652,7 +8563,7 @@
     "coding_index": 33.3,
     "agentic_index": 7.2,
     "cost_per_index_task_usd": 0.2164,
-    "time_per_index_task_s": 23.84,
+    "time_per_index_task_s": 23.41,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8728,7 +8639,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-flash",
-    "tps": 195.74,
+    "tps": 194.67,
     "ttft": 720,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
@@ -8745,7 +8656,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.28,
+    "time_per_index_task_s": 3.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8805,8 +8716,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-flash-reasoning",
-    "tps": 189.07,
-    "ttft": 7030,
+    "tps": 192.22,
+    "ttft": 7340,
     "price_in_per_M": 0.5,
     "price_out_per_M": 3,
     "price_cache_per_M": 0.05,
@@ -8822,7 +8733,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.67,
+    "time_per_index_task_s": 9.94,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8882,7 +8793,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-1-flash-lite-preview",
     "tps": 334.48,
-    "ttft": 5320,
+    "ttft": 5490,
     "price_in_per_M": 0.25,
     "price_out_per_M": 1.5,
     "price_cache_per_M": 0.03,
@@ -8898,7 +8809,7 @@
     "coding_index": 34.7,
     "agentic_index": 6.5,
     "cost_per_index_task_usd": 0.0432,
-    "time_per_index_task_s": 6.81,
+    "time_per_index_task_s": 6.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -8977,7 +8888,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-1-pro-preview",
-    "tps": 124.08,
+    "tps": 119.49,
     "ttft": 28630,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
@@ -8994,7 +8905,7 @@
     "coding_index": 68.8,
     "agentic_index": 23,
     "cost_per_index_task_usd": 0.3346,
-    "time_per_index_task_s": 32.66,
+    "time_per_index_task_s": 32.81,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9073,8 +8984,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-5-flash",
-    "tps": 206.58,
-    "ttft": 16420,
+    "tps": 204.6,
+    "ttft": 16930,
     "price_in_per_M": 1.5,
     "price_out_per_M": 9,
     "price_cache_per_M": 0.15,
@@ -9090,7 +9001,7 @@
     "coding_index": 70.1,
     "agentic_index": 39.7,
     "cost_per_index_task_usd": 0.6934,
-    "time_per_index_task_s": 18.84,
+    "time_per_index_task_s": 19.37,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9166,8 +9077,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-5-flash-medium",
-    "tps": 217.42,
-    "ttft": 15310,
+    "tps": 212.13,
+    "ttft": 14930,
     "price_in_per_M": 1.5,
     "price_out_per_M": 9,
     "price_cache_per_M": 0.15,
@@ -9183,7 +9094,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 17.61,
+    "time_per_index_task_s": 17.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9244,7 +9155,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-5-flash-minimal",
     "tps": 184.74,
-    "ttft": 810,
+    "ttft": 790,
     "price_in_per_M": 1.5,
     "price_out_per_M": 9,
     "price_cache_per_M": 0.15,
@@ -9260,7 +9171,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.52,
+    "time_per_index_task_s": 3.49,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9319,7 +9230,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-5-flash-lite",
-    "tps": 370.13,
+    "tps": 373.26,
     "ttft": 8700,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
@@ -9336,7 +9247,7 @@
     "coding_index": 49.3,
     "agentic_index": 27.2,
     "cost_per_index_task_usd": 0.0965,
-    "time_per_index_task_s": 10.05,
+    "time_per_index_task_s": 10.04,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9415,8 +9326,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-6-flash",
-    "tps": 209.11,
-    "ttft": 15800,
+    "tps": 207.77,
+    "ttft": 14700,
     "price_in_per_M": 0.75,
     "price_out_per_M": 3.75,
     "price_cache_per_M": 0.15,
@@ -9432,7 +9343,7 @@
     "coding_index": 69.2,
     "agentic_index": 40.5,
     "cost_per_index_task_usd": 0.3442,
-    "time_per_index_task_s": 18.19,
+    "time_per_index_task_s": 17.11,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9511,8 +9422,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-7-flash",
-    "tps": 340.13,
-    "ttft": 11810,
+    "tps": 347.94,
+    "ttft": 12290,
     "price_in_per_M": 0.75,
     "price_out_per_M": 3.75,
     "price_cache_per_M": 0.07,
@@ -9528,7 +9439,7 @@
     "coding_index": 76.1,
     "agentic_index": 45.1,
     "cost_per_index_task_usd": 0.4022,
-    "time_per_index_task_s": 13.28,
+    "time_per_index_task_s": 13.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9604,8 +9515,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-7-flash-low",
-    "tps": 314.42,
-    "ttft": 1000,
+    "tps": 342.53,
+    "ttft": 980,
     "price_in_per_M": 0.75,
     "price_out_per_M": 3.75,
     "price_cache_per_M": 0.07,
@@ -9621,7 +9532,7 @@
     "coding_index": 71,
     "agentic_index": 41.6,
     "cost_per_index_task_usd": 0.1648,
-    "time_per_index_task_s": 2.59,
+    "time_per_index_task_s": 2.44,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9689,8 +9600,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemini-3-7-flash-medium",
-    "tps": 347.8,
-    "ttft": 4740,
+    "tps": 364.03,
+    "ttft": 4450,
     "price_in_per_M": 0.75,
     "price_out_per_M": 3.75,
     "price_cache_per_M": 0.07,
@@ -9706,7 +9617,7 @@
     "coding_index": 71.5,
     "agentic_index": 45.1,
     "cost_per_index_task_usd": 0.2629,
-    "time_per_index_task_s": 6.18,
+    "time_per_index_task_s": 5.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9775,7 +9686,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-3n-e4b",
     "tps": 57.02,
-    "ttft": 1220,
+    "ttft": 1240,
     "price_in_per_M": 0.06,
     "price_out_per_M": 0.12,
     "price_cache_per_M": null,
@@ -9791,7 +9702,7 @@
     "coding_index": 3.2,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.99,
+    "time_per_index_task_s": 10.01,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9848,7 +9759,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-12b-non-reasoning",
     "tps": 114.32,
-    "ttft": 2300,
+    "ttft": 2290,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -9864,7 +9775,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.67,
+    "time_per_index_task_s": 6.66,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9917,7 +9828,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-12b",
     "tps": 112.25,
-    "ttft": 2260,
+    "ttft": 2280,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -9933,7 +9844,7 @@
     "coding_index": 31,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 24.53,
+    "time_per_index_task_s": 24.55,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -9989,8 +9900,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-26b-a4b-non-reasoning",
-    "tps": 72.49,
-    "ttft": 1160,
+    "tps": 77.48,
+    "ttft": 1090,
     "price_in_per_M": 0.13,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.13,
@@ -10006,7 +9917,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.05,
+    "time_per_index_task_s": 7.54,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10062,8 +9973,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-31b-non-reasoning",
-    "tps": 88.99,
-    "ttft": 1250,
+    "tps": 91.22,
+    "ttft": 1280,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.14,
@@ -10079,7 +9990,7 @@
     "coding_index": 33.2,
     "agentic_index": 11.1,
     "cost_per_index_task_usd": 0.0438,
-    "time_per_index_task_s": 6.87,
+    "time_per_index_task_s": 6.76,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10147,7 +10058,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-31b",
-    "tps": 35.2,
+    "tps": 35.11,
     "ttft": 1060,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
@@ -10164,7 +10075,7 @@
     "coding_index": 43.4,
     "agentic_index": 14.4,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 64.58,
+    "time_per_index_task_s": 64.75,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10232,8 +10143,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-e4b-non-reasoning",
-    "tps": 47.05,
-    "ttft": 730,
+    "tps": 46.82,
+    "ttft": 740,
     "price_in_per_M": 0.02,
     "price_out_per_M": 0.1,
     "price_cache_per_M": null,
@@ -10249,7 +10160,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.36,
+    "time_per_index_task_s": 11.42,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10302,7 +10213,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gemma-4-e4b",
     "tps": 46.45,
-    "ttft": 770,
+    "ttft": 780,
     "price_in_per_M": 0.02,
     "price_out_per_M": 0.1,
     "price_cache_per_M": null,
@@ -10318,7 +10229,7 @@
     "coding_index": 9.4,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 54.59,
+    "time_per_index_task_s": 54.6,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10374,8 +10285,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/granite-3-3-8b-instruct",
-    "tps": 14.63,
-    "ttft": 28150,
+    "tps": 14.84,
+    "ttft": 28260,
     "price_in_per_M": 0.03,
     "price_out_per_M": 0.25,
     "price_cache_per_M": null,
@@ -10391,7 +10302,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 62.32,
+    "time_per_index_task_s": 61.96,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10443,8 +10354,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/granite-4-0-h-small",
-    "tps": 13.54,
-    "ttft": 37450,
+    "tps": 21.04,
+    "ttft": 24330,
     "price_in_per_M": 0.06,
     "price_out_per_M": 0.25,
     "price_cache_per_M": null,
@@ -10460,7 +10371,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 74.38,
+    "time_per_index_task_s": 48.09,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10512,8 +10423,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (ibm-granite/granite-4.1-8b)",
     "source_url": "https://artificialanalysis.ai/models/granite-4-1-8b",
-    "tps": 124.09,
-    "ttft": 750,
+    "tps": 124.13,
+    "ttft": 760,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.1,
     "price_cache_per_M": 0.049999999999999996,
@@ -10529,7 +10440,7 @@
     "coding_index": 9.5,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.78,
+    "time_per_index_task_s": 4.79,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10597,8 +10508,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mercury-2",
-    "tps": 931.64,
-    "ttft": 3850,
+    "tps": 936.48,
+    "ttft": 3950,
     "price_in_per_M": 0.25,
     "price_out_per_M": 0.75,
     "price_cache_per_M": 0.03,
@@ -10614,7 +10525,7 @@
     "coding_index": 31.1,
     "agentic_index": 9.5,
     "cost_per_index_task_usd": 0.0798,
-    "time_per_index_task_s": 4.39,
+    "time_per_index_task_s": 4.49,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10679,87 +10590,6 @@
     }
   },
   {
-    "model": "Ling 2.6 Flash",
-    "provider": "InclusionAI",
-    "openness": "closed",
-    "modality": [
-      "text"
-    ],
-    "context_length": null,
-    "release_date": "2026-04-21",
-    "data_date": "2026-08-24",
-    "source": "AA Data API free",
-    "source_url": "https://artificialanalysis.ai/models/ling-2-6-flash",
-    "tps": 108.2,
-    "ttft": 1070,
-    "price_in_per_M": 0.1,
-    "price_out_per_M": 0.3,
-    "price_cache_per_M": 0.02,
-    "blended_price_per_M": 0.064,
-    "aa_intelligence_index": 14.2,
-    "arena_elo": null,
-    "swe_bench": null,
-    "aider_pct": null,
-    "gpqa": null,
-    "reasoning": false,
-    "family_id": "Ling 2.6 Flash",
-    "effort_tier": "none",
-    "coding_index": 25.3,
-    "agentic_index": 2.3,
-    "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.7,
-    "sources": {
-      "aa_intelligence_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "coding_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "agentic_index": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "time_per_index_task_s": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "tps": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "ttft": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_in_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "price_out_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "modality": {
-        "origin": "aa-api",
-        "kind": "list"
-      },
-      "price_cache_per_M": {
-        "origin": "aa-api",
-        "kind": "measured"
-      },
-      "openness": {
-        "origin": "curated",
-        "kind": "list"
-      },
-      "blended_price_per_M": {
-        "origin": "aa",
-        "kind": "derived"
-      }
-    }
-  },
-  {
     "model": "Ling 3.0 Flash",
     "provider": "InclusionAI",
     "openness": "closed",
@@ -10771,8 +10601,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ling-3-0-flash",
-    "tps": 399.12,
-    "ttft": 2540,
+    "tps": 389.29,
+    "ttft": 2440,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.22,
     "price_cache_per_M": 0.01,
@@ -10788,7 +10618,7 @@
     "coding_index": 50.6,
     "agentic_index": 29.3,
     "cost_per_index_task_usd": 0.0377,
-    "time_per_index_task_s": 8.81,
+    "time_per_index_task_s": 8.86,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10860,8 +10690,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ling-3-0-tiny",
-    "tps": 169.29,
-    "ttft": 2570,
+    "tps": 162.19,
+    "ttft": 2850,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
     "price_cache_per_M": null,
@@ -10877,7 +10707,7 @@
     "coding_index": 26.5,
     "agentic_index": 16,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 17.33,
+    "time_per_index_task_s": 18.27,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -10941,8 +10771,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ling-flash-2-0",
-    "tps": 57.34,
-    "ttft": 2580,
+    "tps": 56.98,
+    "ttft": 2610,
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.57,
     "price_cache_per_M": null,
@@ -10958,7 +10788,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.3,
+    "time_per_index_task_s": 11.39,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11014,8 +10844,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ring-2-6-1t",
-    "tps": 127.3,
-    "ttft": 4240,
+    "tps": 129.87,
+    "ttft": 4140,
     "price_in_per_M": 0.3,
     "price_out_per_M": 2.5,
     "price_cache_per_M": null,
@@ -11031,7 +10861,7 @@
     "coding_index": 42.8,
     "agentic_index": 20.1,
     "cost_per_index_task_usd": 0.3601,
-    "time_per_index_task_s": 23.88,
+    "time_per_index_task_s": 23.39,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11096,7 +10926,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2",
     "tps": 41.1,
-    "ttft": 1310,
+    "ttft": 1270,
     "price_in_per_M": 0.57,
     "price_out_per_M": 2.3,
     "price_cache_per_M": null,
@@ -11112,7 +10942,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 13.48,
+    "time_per_index_task_s": 13.44,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11241,7 +11071,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (moonshotai/kimi-k2-thinking)",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-thinking",
-    "tps": 115.52,
+    "tps": 115.49,
     "ttft": 1420,
     "price_in_per_M": 0.6,
     "price_out_per_M": 2.5,
@@ -11258,7 +11088,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 23.06,
+    "time_per_index_task_s": 23.07,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11318,8 +11148,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-5-non-reasoning",
-    "tps": 65.81,
-    "ttft": 2790,
+    "tps": 66.94,
+    "ttft": 2780,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3,
     "price_cache_per_M": 0.1,
@@ -11335,7 +11165,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.39,
+    "time_per_index_task_s": 10.25,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11392,7 +11222,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-5",
-    "tps": 60.54,
+    "tps": 61.41,
     "ttft": 2770,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3,
@@ -11409,7 +11239,7 @@
     "coding_index": 46.8,
     "agentic_index": 21.7,
     "cost_per_index_task_usd": 0.0964,
-    "time_per_index_task_s": 60.06,
+    "time_per_index_task_s": 59.24,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11482,8 +11312,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-6",
-    "tps": 49.04,
-    "ttft": 2780,
+    "tps": 47.62,
+    "ttft": 2810,
     "price_in_per_M": 0.95,
     "price_out_per_M": 4,
     "price_cache_per_M": 0.16,
@@ -11499,7 +11329,7 @@
     "coding_index": 61.8,
     "agentic_index": 31.2,
     "cost_per_index_task_usd": 0.3653,
-    "time_per_index_task_s": 103.75,
+    "time_per_index_task_s": 106.77,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11576,7 +11406,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-6-non-reasoning",
     "tps": 45.86,
-    "ttft": 2650,
+    "ttft": 2460,
     "price_in_per_M": 0.95,
     "price_out_per_M": 4,
     "price_cache_per_M": 0.16,
@@ -11592,7 +11422,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 13.56,
+    "time_per_index_task_s": 13.37,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11649,8 +11479,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k2-7-code",
-    "tps": 49.29,
-    "ttft": 2900,
+    "tps": 49.52,
+    "ttft": 2890,
     "price_in_per_M": 0.95,
     "price_out_per_M": 4,
     "price_cache_per_M": 0.19,
@@ -11666,7 +11496,7 @@
     "coding_index": 60.8,
     "agentic_index": 30.3,
     "cost_per_index_task_usd": 0.222,
-    "time_per_index_task_s": 58.26,
+    "time_per_index_task_s": 58,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11738,8 +11568,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k3-low",
-    "tps": 34.86,
-    "ttft": 3830,
+    "tps": 34.61,
+    "ttft": 3900,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -11755,7 +11585,7 @@
     "coding_index": 72,
     "agentic_index": 39.6,
     "cost_per_index_task_usd": 0.2419,
-    "time_per_index_task_s": 75.53,
+    "time_per_index_task_s": 76.13,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11825,8 +11655,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kimi-k3",
-    "tps": 34.75,
-    "ttft": 3260,
+    "tps": 34.31,
+    "ttft": 3760,
     "price_in_per_M": 3,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.3,
@@ -11842,7 +11672,7 @@
     "coding_index": 76.2,
     "agentic_index": 54.3,
     "cost_per_index_task_usd": 0.8375,
-    "time_per_index_task_s": 75.19,
+    "time_per_index_task_s": 76.62,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -11918,8 +11748,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/kat-coder-pro-v2",
-    "tps": 104.93,
-    "ttft": 1420,
+    "tps": 103.63,
+    "ttft": 1400,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.06,
@@ -11935,7 +11765,7 @@
     "coding_index": 59.5,
     "agentic_index": 15.1,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.19,
+    "time_per_index_task_s": 6.23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12003,7 +11833,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/lfm2-5-8b-a1b",
-    "tps": 338.45,
+    "tps": 339.07,
     "ttft": 1820,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
@@ -12020,7 +11850,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.21,
+    "time_per_index_task_s": 9.2,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12073,7 +11903,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/lfm2-5-vl-1-6b",
     "tps": 351.72,
-    "ttft": 1200,
+    "ttft": 1230,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
     "price_cache_per_M": null,
@@ -12089,7 +11919,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 2.62,
+    "time_per_index_task_s": 2.65,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12141,8 +11971,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/longcat-2-0",
-    "tps": 45.41,
-    "ttft": 2650,
+    "tps": 44.58,
+    "ttft": 2800,
     "price_in_per_M": 0.75,
     "price_out_per_M": 2.95,
     "price_cache_per_M": 0.01,
@@ -12158,7 +11988,7 @@
     "coding_index": 45.3,
     "agentic_index": 22,
     "cost_per_index_task_usd": 0.1213,
-    "time_per_index_task_s": 57.7,
+    "time_per_index_task_s": 58.88,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12230,8 +12060,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-1-instruct-70b",
-    "tps": 58.56,
-    "ttft": 1310,
+    "tps": 59.45,
+    "ttft": 1320,
     "price_in_per_M": 0.56,
     "price_out_per_M": 0.56,
     "price_cache_per_M": null,
@@ -12247,7 +12077,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.85,
+    "time_per_index_task_s": 9.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12299,7 +12129,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-1-instruct-8b",
-    "tps": 139.58,
+    "tps": 139.35,
     "ttft": 920,
     "price_in_per_M": 0.02,
     "price_out_per_M": 0.05,
@@ -12372,8 +12202,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b-vision",
-    "tps": 64.54,
-    "ttft": 1030,
+    "tps": 65.24,
+    "ttft": 1010,
     "price_in_per_M": 0.34,
     "price_out_per_M": 0.34,
     "price_cache_per_M": null,
@@ -12389,7 +12219,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.78,
+    "time_per_index_task_s": 8.67,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12441,8 +12271,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b",
-    "tps": 88.14,
-    "ttft": 1600,
+    "tps": 88.78,
+    "ttft": 1640,
     "price_in_per_M": 0.66,
     "price_out_per_M": 0.72,
     "price_cache_per_M": 0.66,
@@ -12519,8 +12349,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-4-maverick",
-    "tps": 100.31,
-    "ttft": 900,
+    "tps": 99.09,
+    "ttft": 920,
     "price_in_per_M": 0.26,
     "price_out_per_M": 0.91,
     "price_cache_per_M": 0.24,
@@ -12536,7 +12366,7 @@
     "coding_index": 16.3,
     "agentic_index": 1.2,
     "cost_per_index_task_usd": 0.0346,
-    "time_per_index_task_s": 5.89,
+    "time_per_index_task_s": 5.97,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12609,8 +12439,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-4-scout",
-    "tps": 133.65,
-    "ttft": 760,
+    "tps": 134.03,
+    "ttft": 750,
     "price_in_per_M": 0.18,
     "price_out_per_M": 0.66,
     "price_cache_per_M": null,
@@ -12626,7 +12456,7 @@
     "coding_index": 8.2,
     "agentic_index": 1.1,
     "cost_per_index_task_usd": 0.0106,
-    "time_per_index_task_s": 4.5,
+    "time_per_index_task_s": 4.48,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12694,7 +12524,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/muse-glimmer",
-    "tps": 101.11,
+    "tps": 104.48,
     "ttft": 800,
     "price_in_per_M": 0.32,
     "price_out_per_M": 1.35,
@@ -12711,7 +12541,7 @@
     "coding_index": 49,
     "agentic_index": 22.9,
     "cost_per_index_task_usd": 0.0732,
-    "time_per_index_task_s": 25.53,
+    "time_per_index_task_s": 24.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12786,8 +12616,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/muse-spark-1-1",
-    "tps": 195.98,
-    "ttft": 1590,
+    "tps": 195.93,
+    "ttft": 1580,
     "price_in_per_M": 1.25,
     "price_out_per_M": 4.25,
     "price_cache_per_M": 0.15,
@@ -12879,7 +12709,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/phi-4",
-    "tps": 42.02,
+    "tps": 41.89,
     "ttft": 2450,
     "price_in_per_M": 0.13,
     "price_out_per_M": 0.5,
@@ -12896,7 +12726,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 14.35,
+    "time_per_index_task_s": 14.39,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -12956,7 +12786,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/phi-4-mini",
-    "tps": 43.08,
+    "tps": 43.09,
     "ttft": 820,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
@@ -13029,7 +12859,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/phi-4-multimodal",
-    "tps": 17.59,
+    "tps": 17.61,
     "ttft": 820,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
@@ -13046,7 +12876,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 29.23,
+    "time_per_index_task_s": 29.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13099,7 +12929,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/minimax-m2",
     "tps": 93.09,
-    "ttft": 1620,
+    "ttft": 1660,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": null,
@@ -13115,7 +12945,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 28.48,
+    "time_per_index_task_s": 28.52,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13175,8 +13005,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (minimax/minimax-m2.1)",
     "source_url": "https://artificialanalysis.ai/models/minimax-m2-1",
-    "tps": 99.67,
-    "ttft": 1680,
+    "tps": 98.81,
+    "ttft": 1690,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.03,
@@ -13192,7 +13022,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 26.76,
+    "time_per_index_task_s": 26.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13252,7 +13082,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/minimax-m2-5",
-    "tps": 99.42,
+    "tps": 101.67,
     "ttft": 1680,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
@@ -13269,7 +13099,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 26.82,
+    "time_per_index_task_s": 26.27,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13333,8 +13163,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/minimax-m2-7",
-    "tps": 63.39,
-    "ttft": 1590,
+    "tps": 61.99,
+    "ttft": 1740,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.06,
@@ -13350,7 +13180,7 @@
     "coding_index": 52.6,
     "agentic_index": 25.9,
     "cost_per_index_task_usd": 0.0777,
-    "time_per_index_task_s": 48.31,
+    "time_per_index_task_s": 49.53,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13428,8 +13258,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/minimax-m3",
-    "tps": 102.99,
-    "ttft": 1310,
+    "tps": 95.98,
+    "ttft": 1380,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.06,
@@ -13445,7 +13275,7 @@
     "coding_index": 58.6,
     "agentic_index": 36.1,
     "cost_per_index_task_usd": 0.1387,
-    "time_per_index_task_s": 25.58,
+    "time_per_index_task_s": 27.43,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13521,7 +13351,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/devstral-2",
-    "tps": 46.62,
+    "tps": 48.47,
     "ttft": 1470,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
@@ -13538,7 +13368,7 @@
     "coding_index": 31.3,
     "agentic_index": 10.6,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 12.2,
+    "time_per_index_task_s": 11.79,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13602,8 +13432,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/devstral-small-2",
-    "tps": 140.64,
-    "ttft": 2220,
+    "tps": 137.28,
+    "ttft": 2240,
     "price_in_per_M": 0,
     "price_out_per_M": 0,
     "price_cache_per_M": null,
@@ -13619,7 +13449,7 @@
     "coding_index": 29.3,
     "agentic_index": 10.8,
     "cost_per_index_task_usd": 0,
-    "time_per_index_task_s": 5.78,
+    "time_per_index_task_s": 5.88,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13683,8 +13513,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ministral-3-14b",
-    "tps": 98.83,
-    "ttft": 930,
+    "tps": 98.95,
+    "ttft": 960,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.2,
     "price_cache_per_M": null,
@@ -13700,7 +13530,7 @@
     "coding_index": 14.4,
     "agentic_index": 2.2,
     "cost_per_index_task_usd": 0.1584,
-    "time_per_index_task_s": 5.99,
+    "time_per_index_task_s": 6.02,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13764,7 +13594,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ministral-3-3b",
-    "tps": 207.7,
+    "tps": 209.15,
     "ttft": 600,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.1,
@@ -13781,7 +13611,7 @@
     "coding_index": 4.8,
     "agentic_index": 1.6,
     "cost_per_index_task_usd": 0.1297,
-    "time_per_index_task_s": 3.01,
+    "time_per_index_task_s": 2.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13846,7 +13676,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/ministral-3-8b",
     "tps": 123.26,
-    "ttft": 830,
+    "ttft": 800,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.15,
     "price_cache_per_M": null,
@@ -13862,7 +13692,7 @@
     "coding_index": 9.7,
     "agentic_index": 1.2,
     "cost_per_index_task_usd": 0.1846,
-    "time_per_index_task_s": 4.89,
+    "time_per_index_task_s": 4.85,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13926,8 +13756,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-7b-instruct",
-    "tps": 125.25,
-    "ttft": 740,
+    "tps": 120.22,
+    "ttft": 750,
     "price_in_per_M": 0.25,
     "price_out_per_M": 0.25,
     "price_cache_per_M": null,
@@ -13943,7 +13773,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.73,
+    "time_per_index_task_s": 4.91,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -13999,8 +13829,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-large-3",
-    "tps": 45.3,
-    "ttft": 1180,
+    "tps": 46.4,
+    "ttft": 1190,
     "price_in_per_M": 0.5,
     "price_out_per_M": 1.5,
     "price_cache_per_M": null,
@@ -14016,7 +13846,7 @@
     "coding_index": 20.1,
     "agentic_index": 5.5,
     "cost_per_index_task_usd": 0.0806,
-    "time_per_index_task_s": 12.21,
+    "time_per_index_task_s": 11.97,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14084,7 +13914,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium",
-    "tps": 131.79,
+    "tps": 132.13,
     "ttft": 2240,
     "price_in_per_M": 1.5,
     "price_out_per_M": 7.5,
@@ -14101,7 +13931,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.04,
+    "time_per_index_task_s": 6.02,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14154,7 +13984,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (mistralai/mistral-medium-3)",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium-3",
-    "tps": 55.11,
+    "tps": 54.59,
     "ttft": 1440,
     "price_in_per_M": 0.4,
     "price_out_per_M": 2,
@@ -14171,7 +14001,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.52,
+    "time_per_index_task_s": 10.6,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14233,7 +14063,7 @@
     "source": "AA Data API free; OpenRouter pricing overlay (mistralai/mistral-medium-3.1)",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium-3-1",
     "tps": 110.1,
-    "ttft": 1450,
+    "ttft": 1460,
     "price_in_per_M": 0.4,
     "price_out_per_M": 2,
     "price_cache_per_M": 0.04,
@@ -14249,7 +14079,7 @@
     "coding_index": 20.5,
     "agentic_index": 6.1,
     "cost_per_index_task_usd": 0.1665,
-    "time_per_index_task_s": 5.99,
+    "time_per_index_task_s": 6,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14322,8 +14152,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-medium-3-5",
-    "tps": 148.32,
-    "ttft": 2230,
+    "tps": 147.25,
+    "ttft": 2260,
     "price_in_per_M": 1.5,
     "price_out_per_M": 7.5,
     "price_cache_per_M": 0.15,
@@ -14339,7 +14169,7 @@
     "coding_index": 46.9,
     "agentic_index": 19.2,
     "cost_per_index_task_usd": 0.4637,
-    "time_per_index_task_s": 19.09,
+    "time_per_index_task_s": 19.24,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14411,7 +14241,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-2402",
-    "tps": 150.02,
+    "tps": 150.96,
     "ttft": 800,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
@@ -14428,7 +14258,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.14,
+    "time_per_index_task_s": 4.12,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14480,8 +14310,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small",
-    "tps": 153.29,
-    "ttft": 810,
+    "tps": 159.49,
+    "ttft": 850,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.6,
     "price_cache_per_M": null,
@@ -14497,7 +14327,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.08,
+    "time_per_index_task_s": 3.98,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14549,8 +14379,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-3",
-    "tps": 154.53,
-    "ttft": 840,
+    "tps": 159.45,
+    "ttft": 880,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -14566,7 +14396,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.08,
+    "time_per_index_task_s": 4.01,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14618,8 +14448,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-3-1",
-    "tps": 146.75,
-    "ttft": 770,
+    "tps": 149.7,
+    "ttft": 820,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -14635,7 +14465,7 @@
     "coding_index": 26.3,
     "agentic_index": 5.3,
     "cost_per_index_task_usd": 0.0443,
-    "time_per_index_task_s": 4.18,
+    "time_per_index_task_s": 4.16,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14699,8 +14529,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-3-2",
-    "tps": 162.34,
-    "ttft": 860,
+    "tps": 163.02,
+    "ttft": 840,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -14716,7 +14546,7 @@
     "coding_index": 12.5,
     "agentic_index": 2.1,
     "cost_per_index_task_usd": 0.1403,
-    "time_per_index_task_s": 3.94,
+    "time_per_index_task_s": 3.91,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14780,8 +14610,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-4-non-reasoning",
-    "tps": 169.36,
-    "ttft": 790,
+    "tps": 169.68,
+    "ttft": 820,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
     "price_cache_per_M": null,
@@ -14797,7 +14627,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.74,
+    "time_per_index_task_s": 3.77,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14849,8 +14679,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mistral-small-4",
-    "tps": 178.76,
-    "ttft": 750,
+    "tps": 175.4,
+    "ttft": 740,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
     "price_cache_per_M": null,
@@ -14866,7 +14696,7 @@
     "coding_index": 26.6,
     "agentic_index": 4.6,
     "cost_per_index_task_usd": 0.1003,
-    "time_per_index_task_s": 14.73,
+    "time_per_index_task_s": 14.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -14932,7 +14762,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nex-n2-pro",
     "tps": 134.17,
-    "ttft": 1590,
+    "ttft": 1600,
     "price_in_per_M": 0.5,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.25,
@@ -14948,7 +14778,7 @@
     "coding_index": 59.1,
     "agentic_index": 31.2,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 20.22,
+    "time_per_index_task_s": 20.23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15016,8 +14846,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hermes-3-llama-3-1-70b",
-    "tps": 34.88,
-    "ttft": 1950,
+    "tps": 35.5,
+    "ttft": 2000,
     "price_in_per_M": 0.7,
     "price_out_per_M": 0.7,
     "price_cache_per_M": null,
@@ -15033,7 +14863,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 16.29,
+    "time_per_index_task_s": 16.09,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15089,8 +14919,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b",
-    "tps": 34.48,
-    "ttft": 2450,
+    "tps": 35.66,
+    "ttft": 2430,
     "price_in_per_M": 1,
     "price_out_per_M": 3,
     "price_cache_per_M": null,
@@ -15106,7 +14936,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 16.95,
+    "time_per_index_task_s": 16.45,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15158,8 +14988,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-405b-reasoning",
-    "tps": 34.69,
-    "ttft": 2760,
+    "tps": 36.29,
+    "ttft": 2540,
     "price_in_per_M": 1,
     "price_out_per_M": 3,
     "price_cache_per_M": null,
@@ -15175,7 +15005,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 74.82,
+    "time_per_index_task_s": 71.44,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15228,7 +15058,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b",
     "tps": 85.13,
-    "ttft": 1400,
+    "ttft": 1380,
     "price_in_per_M": 0.13,
     "price_out_per_M": 0.4,
     "price_cache_per_M": null,
@@ -15244,7 +15074,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 7.27,
+    "time_per_index_task_s": 7.25,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15296,8 +15126,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hermes-4-llama-3-1-70b-reasoning",
-    "tps": 86.76,
-    "ttft": 1420,
+    "tps": 88.17,
+    "ttft": 1430,
     "price_in_per_M": 0.13,
     "price_out_per_M": 0.4,
     "price_cache_per_M": null,
@@ -15313,7 +15143,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.23,
+    "time_per_index_task_s": 29.79,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15366,7 +15196,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-1-nemotron-instruct-70b",
     "tps": 99.56,
-    "ttft": 3860,
+    "ttft": 5280,
     "price_in_per_M": 1.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": null,
@@ -15382,7 +15212,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.88,
+    "time_per_index_task_s": 10.3,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15434,7 +15264,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-3-1-nemotron-ultra-253b-v1-reasoning",
-    "tps": 52.46,
+    "tps": 52.45,
     "ttft": 2400,
     "price_in_per_M": 0.6,
     "price_out_per_M": 1.8,
@@ -15451,7 +15281,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 50.05,
+    "time_per_index_task_s": 50.06,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15507,8 +15337,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-nemotron-super-49b-v1-5",
-    "tps": 77.06,
-    "ttft": 6360,
+    "tps": 88.65,
+    "ttft": 8440,
     "price_in_per_M": 0.4,
     "price_out_per_M": 0.4,
     "price_cache_per_M": null,
@@ -15524,7 +15354,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.84,
+    "time_per_index_task_s": 14.08,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15576,8 +15406,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/llama-nemotron-super-49b-v1-5-reasoning",
-    "tps": 101.8,
-    "ttft": 8510,
+    "tps": 72.52,
+    "ttft": 14220,
     "price_in_per_M": 0.4,
     "price_out_per_M": 0.4,
     "price_cache_per_M": null,
@@ -15593,7 +15423,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 33.06,
+    "time_per_index_task_s": 48.69,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15645,8 +15475,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nemotron-3-nano-omni-30b-a3b",
-    "tps": 322.87,
-    "ttft": 1020,
+    "tps": 322.63,
+    "ttft": 1000,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -15662,7 +15492,7 @@
     "coding_index": 13.8,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 8.76,
+    "time_per_index_task_s": 8.74,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15719,7 +15549,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-3-super-120b-a12b",
     "tps": 142.29,
-    "ttft": 1750,
+    "ttft": 1810,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.8,
     "price_cache_per_M": null,
@@ -15735,7 +15565,7 @@
     "coding_index": 37.7,
     "agentic_index": 8.8,
     "cost_per_index_task_usd": 0.2286,
-    "time_per_index_task_s": 19.32,
+    "time_per_index_task_s": 19.38,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15803,7 +15633,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-3-ultra-550b-a55b",
-    "tps": 160.77,
+    "tps": 166.97,
     "ttft": 1570,
     "price_in_per_M": 0.6,
     "price_out_per_M": 2.75,
@@ -15820,7 +15650,7 @@
     "coding_index": 49.3,
     "agentic_index": 27.5,
     "cost_per_index_task_usd": 0.3827,
-    "time_per_index_task_s": 18.83,
+    "time_per_index_task_s": 18.19,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15888,8 +15718,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nemotron-3-5-lightning",
-    "tps": 317.43,
-    "ttft": 1410,
+    "tps": 314.35,
+    "ttft": 1560,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.22,
     "price_cache_per_M": 0.05,
@@ -15905,7 +15735,7 @@
     "coding_index": 26.8,
     "agentic_index": 13.8,
     "cost_per_index_task_usd": 0.0764,
-    "time_per_index_task_s": 9.29,
+    "time_per_index_task_s": 9.52,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -15977,8 +15807,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b",
-    "tps": 262.53,
-    "ttft": 860,
+    "tps": 263.21,
+    "ttft": 880,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.2,
     "price_cache_per_M": null,
@@ -15994,7 +15824,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 2.77,
+    "time_per_index_task_s": 2.78,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16046,8 +15876,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-3-nano-30b-a3b-reasoning",
-    "tps": 270.8,
-    "ttft": 1110,
+    "tps": 272,
+    "ttft": 1100,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.2,
     "price_cache_per_M": null,
@@ -16063,7 +15893,7 @@
     "coding_index": 14.4,
     "agentic_index": 2,
     "cost_per_index_task_usd": 0.0249,
-    "time_per_index_task_s": 10.34,
+    "time_per_index_task_s": 10.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16128,7 +15958,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl",
     "tps": 157.16,
-    "ttft": 1840,
+    "ttft": 1700,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.6,
     "price_cache_per_M": null,
@@ -16144,7 +15974,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.02,
+    "time_per_index_task_s": 4.88,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16196,8 +16026,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-12b-v2-vl-reasoning",
-    "tps": 132.99,
-    "ttft": 4310,
+    "tps": 115.07,
+    "ttft": 4890,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.6,
     "price_cache_per_M": null,
@@ -16213,7 +16043,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 23.1,
+    "time_per_index_task_s": 26.62,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16265,7 +16095,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2",
-    "tps": 171.44,
+    "tps": 169.98,
     "ttft": 1250,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.2,
@@ -16282,7 +16112,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 4.17,
+    "time_per_index_task_s": 4.19,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16334,8 +16164,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/nvidia-nemotron-nano-9b-v2-reasoning",
-    "tps": 214.28,
-    "ttft": 2930,
+    "tps": 217.63,
+    "ttft": 3930,
     "price_in_per_M": 0.04,
     "price_out_per_M": 0.16,
     "price_cache_per_M": null,
@@ -16351,7 +16181,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 14.6,
+    "time_per_index_task_s": 15.42,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16404,7 +16234,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4-turbo",
-    "tps": 32.07,
+    "tps": 32.2,
     "ttft": 3710,
     "price_in_per_M": 10,
     "price_out_per_M": 30,
@@ -16421,7 +16251,7 @@
     "coding_index": 21.5,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 19.3,
+    "time_per_index_task_s": 19.24,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16482,8 +16312,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4-1",
-    "tps": 165.6,
-    "ttft": 880,
+    "tps": 165.26,
+    "ttft": 870,
     "price_in_per_M": 2,
     "price_out_per_M": 8,
     "price_cache_per_M": 0.5,
@@ -16561,7 +16391,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4-1-mini",
     "tps": 96.97,
-    "ttft": 880,
+    "ttft": 850,
     "price_in_per_M": 0.4,
     "price_out_per_M": 1.6,
     "price_cache_per_M": 0.1,
@@ -16577,7 +16407,7 @@
     "coding_index": 20.2,
     "agentic_index": 1.8,
     "cost_per_index_task_usd": 0.0638,
-    "time_per_index_task_s": 6.04,
+    "time_per_index_task_s": 6.01,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16650,8 +16480,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4-1-nano",
-    "tps": 164.26,
-    "ttft": 820,
+    "tps": 161.35,
+    "ttft": 860,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.03,
@@ -16667,7 +16497,7 @@
     "coding_index": 11.1,
     "agentic_index": 1.2,
     "cost_per_index_task_usd": 0.0349,
-    "time_per_index_task_s": 3.87,
+    "time_per_index_task_s": 3.95,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16740,8 +16570,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4o-2024-08-06",
-    "tps": 111.87,
-    "ttft": 1120,
+    "tps": 109.18,
+    "ttft": 1070,
     "price_in_per_M": 2.5,
     "price_out_per_M": 10,
     "price_cache_per_M": 1.25,
@@ -16757,7 +16587,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.59,
+    "time_per_index_task_s": 5.65,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16822,8 +16652,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4o-2024-05-13",
-    "tps": 111.31,
-    "ttft": 1150,
+    "tps": 106.76,
+    "ttft": 1120,
     "price_in_per_M": 5,
     "price_out_per_M": 15,
     "price_cache_per_M": null,
@@ -16839,7 +16669,7 @@
     "coding_index": 24.2,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.64,
+    "time_per_index_task_s": 5.8,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16904,8 +16734,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4o",
-    "tps": 169.55,
-    "ttft": 990,
+    "tps": 179.56,
+    "ttft": 940,
     "price_in_per_M": 2.5,
     "price_out_per_M": 10,
     "price_cache_per_M": 1.5,
@@ -16921,7 +16751,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.94,
+    "time_per_index_task_s": 3.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -16982,8 +16812,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-4o-mini",
-    "tps": 103.13,
-    "ttft": 840,
+    "tps": 98.43,
+    "ttft": 910,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
     "price_cache_per_M": 0.07,
@@ -16999,7 +16829,7 @@
     "coding_index": 11.4,
     "agentic_index": 1,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.68,
+    "time_per_index_task_s": 5.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17068,8 +16898,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5",
-    "tps": 108.15,
-    "ttft": 62940,
+    "tps": 107,
+    "ttft": 68260,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -17085,7 +16915,7 @@
     "coding_index": 37.8,
     "agentic_index": 26.5,
     "cost_per_index_task_usd": 0.2572,
-    "time_per_index_task_s": 67.56,
+    "time_per_index_task_s": 72.93,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17161,8 +16991,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-low",
-    "tps": 97.66,
-    "ttft": 6100,
+    "tps": 96.69,
+    "ttft": 6260,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -17178,7 +17008,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.22,
+    "time_per_index_task_s": 11.43,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17234,7 +17064,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-medium",
-    "tps": 103.65,
+    "tps": 108.51,
     "ttft": 27490,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
@@ -17251,7 +17081,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 32.31,
+    "time_per_index_task_s": 32.1,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17307,8 +17137,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-minimal",
-    "tps": 97.52,
-    "ttft": 1130,
+    "tps": 100.96,
+    "ttft": 1150,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -17324,7 +17154,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.26,
+    "time_per_index_task_s": 6.1,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17381,7 +17211,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-mini",
-    "tps": 102.47,
+    "tps": 109.47,
     "ttft": 81380,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
@@ -17398,7 +17228,7 @@
     "coding_index": 15.6,
     "agentic_index": 19.6,
     "cost_per_index_task_usd": 0.036,
-    "time_per_index_task_s": 86.26,
+    "time_per_index_task_s": 85.95,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17475,7 +17305,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-mini-medium",
     "tps": 118.22,
-    "ttft": 15580,
+    "ttft": 14670,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
     "price_cache_per_M": 0.03,
@@ -17491,7 +17321,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 19.81,
+    "time_per_index_task_s": 18.9,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17547,7 +17377,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-mini-minimal",
-    "tps": 103.49,
+    "tps": 109.23,
     "ttft": 890,
     "price_in_per_M": 0.25,
     "price_out_per_M": 2,
@@ -17564,7 +17394,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.72,
+    "time_per_index_task_s": 5.46,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17621,7 +17451,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-nano",
-    "tps": 201.04,
+    "tps": 206.02,
     "ttft": 63620,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.4,
@@ -17638,7 +17468,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 66.11,
+    "time_per_index_task_s": 66.05,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17702,8 +17532,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-nano-medium",
-    "tps": 208.66,
-    "ttft": 29370,
+    "tps": 211.24,
+    "ttft": 26390,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.01,
@@ -17719,7 +17549,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 31.77,
+    "time_per_index_task_s": 28.76,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17775,8 +17605,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-nano-minimal",
-    "tps": 206.74,
-    "ttft": 820,
+    "tps": 207.41,
+    "ttft": 810,
     "price_in_per_M": 0.05,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.01,
@@ -17792,7 +17622,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.24,
+    "time_per_index_task_s": 3.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17849,8 +17679,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-1",
-    "tps": 114.16,
-    "ttft": 35380,
+    "tps": 120.36,
+    "ttft": 39290,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -17866,7 +17696,7 @@
     "coding_index": 49.4,
     "agentic_index": 21.6,
     "cost_per_index_task_usd": 0.304,
-    "time_per_index_task_s": 39.76,
+    "time_per_index_task_s": 43.44,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -17942,8 +17772,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-1-non-reasoning",
-    "tps": 121.65,
-    "ttft": 1060,
+    "tps": 127.12,
+    "ttft": 1080,
     "price_in_per_M": 1.25,
     "price_out_per_M": 10,
     "price_cache_per_M": 0.13,
@@ -17959,7 +17789,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.17,
+    "time_per_index_task_s": 5.01,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18015,8 +17845,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-2-non-reasoning",
-    "tps": 75.51,
-    "ttft": 1060,
+    "tps": 74.33,
+    "ttft": 980,
     "price_in_per_M": 1.75,
     "price_out_per_M": 14,
     "price_cache_per_M": 0.17,
@@ -18032,7 +17862,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 7.68,
+    "time_per_index_task_s": 7.71,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18089,8 +17919,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-2",
-    "tps": 82.53,
-    "ttft": 123290,
+    "tps": 82.01,
+    "ttft": 155210,
     "price_in_per_M": 1.75,
     "price_out_per_M": 14,
     "price_cache_per_M": 0.17,
@@ -18106,7 +17936,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 129.34,
+    "time_per_index_task_s": 161.31,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18172,7 +18002,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-3-codex",
     "tps": 142.95,
-    "ttft": 59290,
+    "ttft": 61830,
     "price_in_per_M": 1.75,
     "price_out_per_M": 14,
     "price_cache_per_M": 0.17,
@@ -18188,7 +18018,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 62.79,
+    "time_per_index_task_s": 65.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18248,8 +18078,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-low",
-    "tps": 102.33,
-    "ttft": 1960,
+    "tps": 107.94,
+    "ttft": 1990,
     "price_in_per_M": 2.5,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.25,
@@ -18265,7 +18095,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.85,
+    "time_per_index_task_s": 6.62,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18321,8 +18151,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-non-reasoning",
-    "tps": 92.6,
-    "ttft": 900,
+    "tps": 98.61,
+    "ttft": 860,
     "price_in_per_M": 2.5,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.25,
@@ -18338,7 +18168,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.3,
+    "time_per_index_task_s": 5.93,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18395,8 +18225,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4",
-    "tps": 128.2,
-    "ttft": 133670,
+    "tps": 125.77,
+    "ttft": 140330,
     "price_in_per_M": 2.5,
     "price_out_per_M": 15,
     "price_cache_per_M": 0.25,
@@ -18412,7 +18242,7 @@
     "coding_index": 71.1,
     "agentic_index": 44.2,
     "cost_per_index_task_usd": 1.1038,
-    "time_per_index_task_s": 137.57,
+    "time_per_index_task_s": 144.31,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18488,8 +18318,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-mini-medium",
-    "tps": 182.12,
-    "ttft": 6590,
+    "tps": 179.98,
+    "ttft": 10050,
     "price_in_per_M": 0.75,
     "price_out_per_M": 4.5,
     "price_cache_per_M": 0.07,
@@ -18505,7 +18335,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.34,
+    "time_per_index_task_s": 12.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18561,8 +18391,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-mini-non-reasoning",
-    "tps": 163.64,
-    "ttft": 730,
+    "tps": 161.2,
+    "ttft": 710,
     "price_in_per_M": 0.75,
     "price_out_per_M": 4.5,
     "price_cache_per_M": 0.07,
@@ -18578,7 +18408,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.78,
+    "time_per_index_task_s": 3.81,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18635,8 +18465,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-mini",
-    "tps": 193.87,
-    "ttft": 8430,
+    "tps": 186.72,
+    "ttft": 8540,
     "price_in_per_M": 0.75,
     "price_out_per_M": 4.5,
     "price_cache_per_M": 0.07,
@@ -18652,7 +18482,7 @@
     "coding_index": 56.1,
     "agentic_index": 31.5,
     "cost_per_index_task_usd": 0.4948,
-    "time_per_index_task_s": 11.01,
+    "time_per_index_task_s": 11.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18724,8 +18554,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-nano-medium",
-    "tps": 176.52,
-    "ttft": 3520,
+    "tps": 175.17,
+    "ttft": 4200,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.25,
     "price_cache_per_M": 0.02,
@@ -18741,7 +18571,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.36,
+    "time_per_index_task_s": 7.05,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18797,8 +18627,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-nano-non-reasoning",
-    "tps": 184.88,
-    "ttft": 580,
+    "tps": 180.33,
+    "ttft": 570,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.25,
     "price_cache_per_M": 0.02,
@@ -18814,7 +18644,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 3.29,
+    "time_per_index_task_s": 3.34,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18871,8 +18701,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-4-nano",
-    "tps": 183.95,
-    "ttft": 3410,
+    "tps": 177.73,
+    "ttft": 3650,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.25,
     "price_cache_per_M": 0.02,
@@ -18888,7 +18718,7 @@
     "coding_index": 56.1,
     "agentic_index": 29.7,
     "cost_per_index_task_usd": 0.1493,
-    "time_per_index_task_s": 6.12,
+    "time_per_index_task_s": 6.47,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -18960,8 +18790,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5-high",
-    "tps": 85.25,
-    "ttft": 14640,
+    "tps": 83.98,
+    "ttft": 17050,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
     "price_cache_per_M": 0.5,
@@ -18977,7 +18807,7 @@
     "coding_index": 71.6,
     "agentic_index": 45.9,
     "cost_per_index_task_usd": 0.8033,
-    "time_per_index_task_s": 20.5,
+    "time_per_index_task_s": 23,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19049,8 +18879,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5-low",
-    "tps": 86.03,
-    "ttft": 1590,
+    "tps": 86.61,
+    "ttft": 1640,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
     "price_cache_per_M": 0.5,
@@ -19066,7 +18896,7 @@
     "coding_index": 60.9,
     "agentic_index": 31.7,
     "cost_per_index_task_usd": 0.2589,
-    "time_per_index_task_s": 7.4,
+    "time_per_index_task_s": 7.42,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19134,8 +18964,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5-medium",
-    "tps": 81.81,
-    "ttft": 7520,
+    "tps": 77.74,
+    "ttft": 10390,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
     "price_cache_per_M": 0.5,
@@ -19151,7 +18981,7 @@
     "coding_index": 71.5,
     "agentic_index": 39.2,
     "cost_per_index_task_usd": 0.5002,
-    "time_per_index_task_s": 13.64,
+    "time_per_index_task_s": 16.82,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19219,7 +19049,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5-non-reasoning",
-    "tps": 81.96,
+    "tps": 79.59,
     "ttft": 870,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
@@ -19236,7 +19066,7 @@
     "coding_index": 56.5,
     "agentic_index": 26.1,
     "cost_per_index_task_usd": 0.2083,
-    "time_per_index_task_s": 6.97,
+    "time_per_index_task_s": 7.15,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19305,8 +19135,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5",
-    "tps": 87.92,
-    "ttft": 65040.00000000001,
+    "tps": 92.84,
+    "ttft": 61390,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
     "price_cache_per_M": 0.5,
@@ -19322,7 +19152,7 @@
     "coding_index": 74.9,
     "agentic_index": 47.4,
     "cost_per_index_task_usd": 1.1747,
-    "time_per_index_task_s": 70.73,
+    "time_per_index_task_s": 66.78,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19398,8 +19228,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-5-instant-06-26",
-    "tps": 141.28,
-    "ttft": 1010,
+    "tps": 145.1,
+    "ttft": 1020,
     "price_in_per_M": 5,
     "price_out_per_M": 30,
     "price_cache_per_M": 0.5,
@@ -19415,7 +19245,7 @@
     "coding_index": 39.4,
     "agentic_index": 11.1,
     "cost_per_index_task_usd": 0.5364,
-    "time_per_index_task_s": 18.71,
+    "time_per_index_task_s": 18.25,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19483,8 +19313,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna-high",
-    "tps": 141.03,
-    "ttft": 12840,
+    "tps": 132.43,
+    "ttft": 12920,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.02,
@@ -19500,7 +19330,7 @@
     "coding_index": 63.3,
     "agentic_index": 41,
     "cost_per_index_task_usd": 0.0216,
-    "time_per_index_task_s": 16.38,
+    "time_per_index_task_s": 16.69,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19568,8 +19398,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna-low",
-    "tps": 136.63,
-    "ttft": 1610,
+    "tps": 132.14,
+    "ttft": 1600,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.02,
@@ -19585,7 +19415,7 @@
     "coding_index": 44.2,
     "agentic_index": 25.7,
     "cost_per_index_task_usd": 0.0088,
-    "time_per_index_task_s": 5.27,
+    "time_per_index_task_s": 5.38,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19653,8 +19483,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna-medium",
-    "tps": 137.49,
-    "ttft": 2110,
+    "tps": 133.76,
+    "ttft": 2220,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.02,
@@ -19670,7 +19500,7 @@
     "coding_index": 50.7,
     "agentic_index": 31.8,
     "cost_per_index_task_usd": 0.0113,
-    "time_per_index_task_s": 5.74,
+    "time_per_index_task_s": 5.96,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19738,8 +19568,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna-non-reasoning",
-    "tps": 136.31,
-    "ttft": 720,
+    "tps": 131.13,
+    "ttft": 670,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.02,
@@ -19755,7 +19585,7 @@
     "coding_index": 39.3,
     "agentic_index": 22.2,
     "cost_per_index_task_usd": 0.0117,
-    "time_per_index_task_s": 4.39,
+    "time_per_index_task_s": 4.48,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19823,8 +19653,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-luna-xhigh",
-    "tps": 135.27,
-    "ttft": 58900,
+    "tps": 133.48,
+    "ttft": 58210,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.02,
@@ -19840,7 +19670,7 @@
     "coding_index": 68.6,
     "agentic_index": 44.4,
     "cost_per_index_task_usd": 0.0316,
-    "time_per_index_task_s": 62.6,
+    "time_per_index_task_s": 61.95,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19913,11 +19743,11 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol-high",
     "tps": 67.16,
-    "ttft": 11150,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "price_cache_per_M": 0.5,
-    "blended_price_per_M": 4.35,
+    "ttft": 11480,
+    "price_in_per_M": 4,
+    "price_out_per_M": 20,
+    "price_cache_per_M": 0.4,
+    "blended_price_per_M": 3.08,
     "aa_intelligence_index": 57.3,
     "arena_elo": null,
     "swe_bench": null,
@@ -19928,8 +19758,8 @@
     "effort_tier": "high",
     "coding_index": 77.2,
     "agentic_index": 50.6,
-    "cost_per_index_task_usd": 0.5477,
-    "time_per_index_task_s": 18.59,
+    "cost_per_index_task_usd": 0.432,
+    "time_per_index_task_s": 18.92,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -19998,11 +19828,11 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol-low",
     "tps": 67.65,
-    "ttft": 2830,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "price_cache_per_M": 0.5,
-    "blended_price_per_M": 4.35,
+    "ttft": 2810,
+    "price_in_per_M": 4,
+    "price_out_per_M": 20,
+    "price_cache_per_M": 0.4,
+    "blended_price_per_M": 3.08,
     "aa_intelligence_index": 50.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -20013,8 +19843,8 @@
     "effort_tier": "low",
     "coding_index": 69.7,
     "agentic_index": 41.6,
-    "cost_per_index_task_usd": 0.2311,
-    "time_per_index_task_s": 10.22,
+    "cost_per_index_task_usd": 0.1867,
+    "time_per_index_task_s": 10.2,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20083,11 +19913,11 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol-medium",
     "tps": 68.67,
-    "ttft": 4610,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "price_cache_per_M": 0.5,
-    "blended_price_per_M": 4.35,
+    "ttft": 4890,
+    "price_in_per_M": 4,
+    "price_out_per_M": 20,
+    "price_cache_per_M": 0.4,
+    "blended_price_per_M": 3.08,
     "aa_intelligence_index": 55.6,
     "arena_elo": null,
     "swe_bench": null,
@@ -20098,8 +19928,8 @@
     "effort_tier": "medium",
     "coding_index": 76.3,
     "agentic_index": 47.9,
-    "cost_per_index_task_usd": 0.3717,
-    "time_per_index_task_s": 11.89,
+    "cost_per_index_task_usd": 0.2985,
+    "time_per_index_task_s": 12.17,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20168,11 +19998,11 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol-non-reasoning",
     "tps": 62.07,
-    "ttft": 1320,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "price_cache_per_M": 0.5,
-    "blended_price_per_M": 4.35,
+    "ttft": 1410,
+    "price_in_per_M": 4,
+    "price_out_per_M": 20,
+    "price_cache_per_M": 0.4,
+    "blended_price_per_M": 3.08,
     "aa_intelligence_index": 41.9,
     "arena_elo": null,
     "swe_bench": null,
@@ -20183,8 +20013,8 @@
     "effort_tier": "none",
     "coding_index": 65.1,
     "agentic_index": 36,
-    "cost_per_index_task_usd": 0.2366,
-    "time_per_index_task_s": 9.37,
+    "cost_per_index_task_usd": 0.195,
+    "time_per_index_task_s": 9.46,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20252,12 +20082,12 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-sol-xhigh",
-    "tps": 67.58,
-    "ttft": 35870,
-    "price_in_per_M": 5,
-    "price_out_per_M": 30,
-    "price_cache_per_M": 0.5,
-    "blended_price_per_M": 4.35,
+    "tps": 67.59,
+    "ttft": 48900,
+    "price_in_per_M": 4,
+    "price_out_per_M": 20,
+    "price_cache_per_M": 0.4,
+    "blended_price_per_M": 3.08,
     "aa_intelligence_index": 59,
     "arena_elo": 1482.2602278416987,
     "swe_bench": null,
@@ -20268,8 +20098,8 @@
     "effort_tier": "xhigh",
     "coding_index": 78.3,
     "agentic_index": 53.6,
-    "cost_per_index_task_usd": 0.8072,
-    "time_per_index_task_s": 43.27,
+    "cost_per_index_task_usd": 0.6373,
+    "time_per_index_task_s": 56.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20341,8 +20171,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra-high",
-    "tps": 113.29,
-    "ttft": 2340,
+    "tps": 117.36,
+    "ttft": 2720,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
     "price_cache_per_M": 0.2,
@@ -20358,7 +20188,7 @@
     "coding_index": 67.1,
     "agentic_index": 43.5,
     "cost_per_index_task_usd": 0.2183,
-    "time_per_index_task_s": 6.75,
+    "time_per_index_task_s": 6.98,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20426,8 +20256,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra-low",
-    "tps": 105.73,
-    "ttft": 1290,
+    "tps": 113.05,
+    "ttft": 1410,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
     "price_cache_per_M": 0.2,
@@ -20443,7 +20273,7 @@
     "coding_index": 58.1,
     "agentic_index": 31.5,
     "cost_per_index_task_usd": 0.0939,
-    "time_per_index_task_s": 6.02,
+    "time_per_index_task_s": 5.84,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20511,8 +20341,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra-medium",
-    "tps": 106.73,
-    "ttft": 1780,
+    "tps": 110.45,
+    "ttft": 1860,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
     "price_cache_per_M": 0.2,
@@ -20528,7 +20358,7 @@
     "coding_index": 64.7,
     "agentic_index": 39.1,
     "cost_per_index_task_usd": 0.119,
-    "time_per_index_task_s": 6.46,
+    "time_per_index_task_s": 6.39,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20597,7 +20427,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra-non-reasoning",
     "tps": 102.1,
-    "ttft": 790,
+    "ttft": 780,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
     "price_cache_per_M": 0.2,
@@ -20613,7 +20443,7 @@
     "coding_index": 52.3,
     "agentic_index": 30.1,
     "cost_per_index_task_usd": 0.1025,
-    "time_per_index_task_s": 5.69,
+    "time_per_index_task_s": 5.68,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20681,8 +20511,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-5-6-terra-xhigh",
-    "tps": 110.84,
-    "ttft": 26380,
+    "tps": 112.03,
+    "ttft": 31370,
     "price_in_per_M": 2,
     "price_out_per_M": 12,
     "price_cache_per_M": 0.2,
@@ -20698,7 +20528,7 @@
     "coding_index": 70.6,
     "agentic_index": 46.5,
     "cost_per_index_task_usd": 0.305,
-    "time_per_index_task_s": 30.89,
+    "time_per_index_task_s": 35.84,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20770,8 +20600,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-oss-120b",
-    "tps": 187.21,
-    "ttft": 830,
+    "tps": 183.64,
+    "ttft": 810,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
     "price_cache_per_M": 0.15,
@@ -20787,7 +20617,7 @@
     "coding_index": 30.4,
     "agentic_index": 13.4,
     "cost_per_index_task_usd": 0.0727,
-    "time_per_index_task_s": 14.18,
+    "time_per_index_task_s": 14.42,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20863,8 +20693,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-oss-120b-low",
-    "tps": 228.24,
-    "ttft": 840,
+    "tps": 245.32,
+    "ttft": 830,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.59,
     "price_cache_per_M": 0.15,
@@ -20880,7 +20710,7 @@
     "coding_index": 21.2,
     "agentic_index": 1,
     "cost_per_index_task_usd": 0.0202,
-    "time_per_index_task_s": 11.8,
+    "time_per_index_task_s": 11.02,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -20948,8 +20778,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (openai/gpt-oss-20b)",
     "source_url": "https://artificialanalysis.ai/models/gpt-oss-20b",
-    "tps": 111.56,
-    "ttft": 990,
+    "tps": 115.74,
+    "ttft": 1000,
     "price_in_per_M": 0.06,
     "price_out_per_M": 0.19,
     "price_cache_per_M": 0.03,
@@ -20965,7 +20795,7 @@
     "coding_index": 20.7,
     "agentic_index": 3.1,
     "cost_per_index_task_usd": 0.025,
-    "time_per_index_task_s": 23.4,
+    "time_per_index_task_s": 22.6,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21041,8 +20871,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/gpt-oss-20b-low",
-    "tps": 109.14,
-    "ttft": 1120,
+    "tps": 111.53,
+    "ttft": 1110,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.2,
     "price_cache_per_M": null,
@@ -21058,7 +20888,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 24.03,
+    "time_per_index_task_s": 23.52,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21111,7 +20941,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/o3",
-    "tps": 150.22,
+    "tps": 161.27,
     "ttft": 6430,
     "price_in_per_M": 2,
     "price_out_per_M": 8,
@@ -21128,7 +20958,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.76,
+    "time_per_index_task_s": 9.53,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21269,8 +21099,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/o3-mini-high",
-    "tps": 238.24,
-    "ttft": 17260,
+    "tps": 239.71,
+    "ttft": 17140,
     "price_in_per_M": 1.1,
     "price_out_per_M": 4.4,
     "price_cache_per_M": 0.55,
@@ -21286,7 +21116,7 @@
     "coding_index": 16.3,
     "agentic_index": 1.7,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 19.36,
+    "time_per_index_task_s": 19.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21360,7 +21190,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/o4-mini",
     "tps": 175,
-    "ttft": 27960,
+    "ttft": 27430,
     "price_in_per_M": 1.1,
     "price_out_per_M": 4.4,
     "price_cache_per_M": 0.28,
@@ -21376,7 +21206,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.81,
+    "time_per_index_task_s": 30.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21436,8 +21266,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/reka-flash",
-    "tps": 56.57,
-    "ttft": 1960,
+    "tps": 56.31,
+    "ttft": 1990,
     "price_in_per_M": 0.2,
     "price_out_per_M": 0.8,
     "price_cache_per_M": null,
@@ -21453,7 +21283,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.8,
+    "time_per_index_task_s": 10.87,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21505,8 +21335,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/agnes-2-5-pro-alpha",
-    "tps": 129.74,
-    "ttft": 2050,
+    "tps": 129.46,
+    "ttft": 2029.9999999999998,
     "price_in_per_M": 0.45,
     "price_out_per_M": 0.9,
     "price_cache_per_M": 0,
@@ -21522,7 +21352,7 @@
     "coding_index": 58.8,
     "agentic_index": 25.4,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 21.32,
+    "time_per_index_task_s": 21.34,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21586,8 +21416,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-3-mini-reasoning",
-    "tps": 86.48,
-    "ttft": 710,
+    "tps": 74.62,
+    "ttft": 720,
     "price_in_per_M": 0.3,
     "price_out_per_M": 0.5,
     "price_cache_per_M": 0.07,
@@ -21603,7 +21433,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 29.62,
+    "time_per_index_task_s": 34.22,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21660,7 +21490,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-20-non-reasoning",
     "tps": 104.15,
-    "ttft": 620,
+    "ttft": 630,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.2,
@@ -21676,7 +21506,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 5.42,
+    "time_per_index_task_s": 5.43,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21733,8 +21563,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-20",
-    "tps": 106.48,
-    "ttft": 25460,
+    "tps": 103.15,
+    "ttft": 28990,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.2,
@@ -21750,7 +21580,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 30.15,
+    "time_per_index_task_s": 33.84,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21811,8 +21641,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-3",
-    "tps": 148.05,
-    "ttft": 20470,
+    "tps": 147.18,
+    "ttft": 17950,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.2,
@@ -21828,7 +21658,7 @@
     "coding_index": 42.2,
     "agentic_index": 24.2,
     "cost_per_index_task_usd": 0.1454,
-    "time_per_index_task_s": 23.85,
+    "time_per_index_task_s": 21.35,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21904,8 +21734,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-3-low",
-    "tps": 119.67,
-    "ttft": 5520,
+    "tps": 130.19,
+    "ttft": 5370,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
     "price_cache_per_M": 0.2,
@@ -21921,7 +21751,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.69,
+    "time_per_index_task_s": 9.21,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -21977,7 +21807,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-3-medium",
-    "tps": 132.26,
+    "tps": 146.49,
     "ttft": 11880,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
@@ -21994,7 +21824,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 15.66,
+    "time_per_index_task_s": 15.29,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22050,7 +21880,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-3-non-reasoning",
-    "tps": 127.93,
+    "tps": 136.36,
     "ttft": 730,
     "price_in_per_M": 1.25,
     "price_out_per_M": 2.5,
@@ -22067,7 +21897,7 @@
     "coding_index": 35.2,
     "agentic_index": 23,
     "cost_per_index_task_usd": 0.2947,
-    "time_per_index_task_s": 4.64,
+    "time_per_index_task_s": 4.4,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22136,8 +21966,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-5",
-    "tps": 66.21,
-    "ttft": 7540,
+    "tps": 63.86,
+    "ttft": 10010,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.3,
@@ -22153,7 +21983,7 @@
     "coding_index": 72.4,
     "agentic_index": 48.9,
     "cost_per_index_task_usd": 0.3601,
-    "time_per_index_task_s": 15.09,
+    "time_per_index_task_s": 17.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22230,8 +22060,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-6",
-    "tps": 65.76,
-    "ttft": 41870,
+    "tps": 61.92,
+    "ttft": 43660,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.5,
@@ -22247,7 +22077,7 @@
     "coding_index": 76.8,
     "agentic_index": 58.7,
     "cost_per_index_task_usd": 0.8367,
-    "time_per_index_task_s": 49.47,
+    "time_per_index_task_s": 51.73,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22323,7 +22153,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-6-low",
-    "tps": 62.26,
+    "tps": 61.04,
     "ttft": 6640,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
@@ -22340,7 +22170,7 @@
     "coding_index": 66.3,
     "agentic_index": 47.8,
     "cost_per_index_task_usd": 0.2207,
-    "time_per_index_task_s": 14.67,
+    "time_per_index_task_s": 14.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22408,8 +22238,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-6-medium",
-    "tps": 61.21,
-    "ttft": 26990,
+    "tps": 64.42,
+    "ttft": 29700,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.5,
@@ -22425,7 +22255,7 @@
     "coding_index": 74.4,
     "agentic_index": 56.3,
     "cost_per_index_task_usd": 0.6679,
-    "time_per_index_task_s": 35.16,
+    "time_per_index_task_s": 37.47,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22493,8 +22323,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-4-6-xhigh",
-    "tps": 62.35,
-    "ttft": 46080,
+    "tps": 62.91,
+    "ttft": 46810,
     "price_in_per_M": 2,
     "price_out_per_M": 6,
     "price_cache_per_M": 0.5,
@@ -22510,7 +22340,7 @@
     "coding_index": 75.9,
     "agentic_index": 56.6,
     "cost_per_index_task_usd": 1.0412,
-    "time_per_index_task_s": 54.1,
+    "time_per_index_task_s": 54.76,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22578,8 +22408,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/grok-build-0-1-06-16",
-    "tps": 60.38,
-    "ttft": 580,
+    "tps": 57.61,
+    "ttft": 540,
     "price_in_per_M": 1,
     "price_out_per_M": 2,
     "price_cache_per_M": 0.2,
@@ -22595,7 +22425,7 @@
     "coding_index": 51.5,
     "agentic_index": 28.9,
     "cost_per_index_task_usd": 0.2252,
-    "time_per_index_task_s": 41.99,
+    "time_per_index_task_s": 43.94,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22717,8 +22547,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/step-3-5-flash-0202",
-    "tps": 248.36,
-    "ttft": 1020,
+    "tps": 246.8,
+    "ttft": 1050,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
     "price_cache_per_M": null,
@@ -22734,7 +22564,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.09,
+    "time_per_index_task_s": 11.18,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22786,7 +22616,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/step-3-5-flash",
-    "tps": 233.33,
+    "tps": 229.91,
     "ttft": 1120,
     "price_in_per_M": 0.1,
     "price_out_per_M": 0.3,
@@ -22803,7 +22633,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.83,
+    "time_per_index_task_s": 11.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22869,8 +22699,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/step-3-7-flash",
-    "tps": 136.61,
-    "ttft": 2730,
+    "tps": 131.38,
+    "ttft": 2710,
     "price_in_per_M": 0.2,
     "price_out_per_M": 1.15,
     "price_cache_per_M": 0.04,
@@ -22886,7 +22716,7 @@
     "coding_index": 39.6,
     "agentic_index": 21.7,
     "cost_per_index_task_usd": 0.0913,
-    "time_per_index_task_s": 21.03,
+    "time_per_index_task_s": 21.74,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -22958,8 +22788,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/hy3",
-    "tps": 73.11,
-    "ttft": 2910,
+    "tps": 79.53,
+    "ttft": 2900,
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.55,
     "price_cache_per_M": 0.03,
@@ -22975,7 +22805,7 @@
     "coding_index": 58.8,
     "agentic_index": 31.4,
     "cost_per_index_task_usd": 0.0357,
-    "time_per_index_task_s": 37.11,
+    "time_per_index_task_s": 34.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23053,8 +22883,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/inkling",
-    "tps": 56.22,
-    "ttft": 2640,
+    "tps": 50.65,
+    "ttft": 2750,
     "price_in_per_M": 1,
     "price_out_per_M": 4.05,
     "price_cache_per_M": 0.17,
@@ -23070,7 +22900,7 @@
     "coding_index": 52.1,
     "agentic_index": 34.1,
     "cost_per_index_task_usd": 0.3389,
-    "time_per_index_task_s": 47.1,
+    "time_per_index_task_s": 52.1,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23148,8 +22978,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/inkling-small",
-    "tps": 129.54,
-    "ttft": 2000,
+    "tps": 134.46,
+    "ttft": 2040,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.06,
@@ -23165,7 +22995,7 @@
     "coding_index": 52.9,
     "agentic_index": 31.9,
     "cost_per_index_task_usd": 0.0735,
-    "time_per_index_task_s": 21.3,
+    "time_per_index_task_s": 20.64,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23241,8 +23071,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/solar-pro-3",
-    "tps": 143.76,
-    "ttft": 2300,
+    "tps": 148.18,
+    "ttft": 2450,
     "price_in_per_M": 0.15,
     "price_out_per_M": 0.6,
     "price_cache_per_M": 0.01,
@@ -23258,7 +23088,7 @@
     "coding_index": 16.2,
     "agentic_index": 2.9,
     "cost_per_index_task_usd": 0.1457,
-    "time_per_index_task_s": 19.69,
+    "time_per_index_task_s": 19.32,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23331,7 +23161,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/solar-pro4",
     "tps": 58.94,
-    "ttft": 2300,
+    "ttft": 2430,
     "price_in_per_M": 0.3,
     "price_out_per_M": 1.2,
     "price_cache_per_M": 0.06,
@@ -23347,7 +23177,7 @@
     "coding_index": 52.7,
     "agentic_index": 33.6,
     "cost_per_index_task_usd": 0.2231,
-    "time_per_index_task_s": 44.72,
+    "time_per_index_task_s": 44.85,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23423,8 +23253,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mimo-v2-5-0424",
-    "tps": 66.33,
-    "ttft": 4440,
+    "tps": 67.46,
+    "ttft": 4220,
     "price_in_per_M": 0.14,
     "price_out_per_M": 0.28,
     "price_cache_per_M": 0,
@@ -23440,7 +23270,7 @@
     "coding_index": 56.8,
     "agentic_index": 24.4,
     "cost_per_index_task_usd": 0.0104,
-    "time_per_index_task_s": 42.13,
+    "time_per_index_task_s": 41.28,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23512,7 +23342,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (xiaomi/mimo-v2.5-pro)",
     "source_url": "https://artificialanalysis.ai/models/mimo-v2-5-pro",
-    "tps": 51.4,
+    "tps": 52.23,
     "ttft": 3120,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
@@ -23529,7 +23359,7 @@
     "coding_index": 60.2,
     "agentic_index": 29.5,
     "cost_per_index_task_usd": 0.0339,
-    "time_per_index_task_s": 51.76,
+    "time_per_index_task_s": 50.99,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23605,8 +23435,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/mimo-v2-5-pro-non-reasoning",
-    "tps": 46.67,
-    "ttft": 3540,
+    "tps": 47.69,
+    "ttft": 3970,
     "price_in_per_M": 0.43,
     "price_out_per_M": 0.87,
     "price_cache_per_M": 0,
@@ -23622,7 +23452,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 14.25,
+    "time_per_index_task_s": 14.46,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23678,8 +23508,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.5-air)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-5-air",
-    "tps": 40.56,
-    "ttft": 2920,
+    "tps": 46.11,
+    "ttft": 2870,
     "price_in_per_M": 0.17,
     "price_out_per_M": 0.98,
     "price_cache_per_M": 0.024999999999999998,
@@ -23695,7 +23525,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 64.56,
+    "time_per_index_task_s": 57.09,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23760,8 +23590,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.5v)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-5v",
-    "tps": 87.47,
-    "ttft": 1860,
+    "tps": 89.04,
+    "ttft": 1900,
     "price_in_per_M": 0.6,
     "price_out_per_M": 1.8,
     "price_cache_per_M": 0.11,
@@ -23777,7 +23607,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 7.58,
+    "time_per_index_task_s": 7.52,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23842,7 +23672,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-5v-reasoning",
     "tps": 90.33,
-    "ttft": 1710,
+    "ttft": 1650,
     "price_in_per_M": 0.6,
     "price_out_per_M": 1.8,
     "price_cache_per_M": null,
@@ -23858,7 +23688,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 29.39,
+    "time_per_index_task_s": 29.33,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23910,8 +23740,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.6)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6",
-    "tps": 56.59,
-    "ttft": 2600,
+    "tps": 61.76,
+    "ttft": 2580,
     "price_in_per_M": 0.57,
     "price_out_per_M": 2.2,
     "price_cache_per_M": 0.09999999999999999,
@@ -23927,7 +23757,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 11.44,
+    "time_per_index_task_s": 10.68,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -23991,8 +23821,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6-reasoning",
-    "tps": 51.77,
-    "ttft": 2360,
+    "tps": 48.76,
+    "ttft": 2380,
     "price_in_per_M": 0.55,
     "price_out_per_M": 2.2,
     "price_cache_per_M": 0.55,
@@ -24008,7 +23838,7 @@
     "coding_index": 45.8,
     "agentic_index": 18.6,
     "cost_per_index_task_usd": 0.3046,
-    "time_per_index_task_s": 50.65,
+    "time_per_index_task_s": 53.66,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24078,8 +23908,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free; OpenRouter pricing overlay (z-ai/glm-4.6v)",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6v",
-    "tps": 58.86,
-    "ttft": 3910,
+    "tps": 56.81,
+    "ttft": 4030.0000000000005,
     "price_in_per_M": 0.3,
     "price_out_per_M": 0.9,
     "price_cache_per_M": 0.055,
@@ -24095,7 +23925,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 12.4,
+    "time_per_index_task_s": 12.83,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24159,8 +23989,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-6v-reasoning",
-    "tps": 52.78,
-    "ttft": 4110,
+    "tps": 57.65,
+    "ttft": 3820,
     "price_in_per_M": 0.3,
     "price_out_per_M": 0.9,
     "price_cache_per_M": null,
@@ -24176,7 +24006,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 51.47,
+    "time_per_index_task_s": 47.18,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24228,8 +24058,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-7-non-reasoning",
-    "tps": 102.08,
-    "ttft": 1150,
+    "tps": 101.71,
+    "ttft": 1110,
     "price_in_per_M": 0.6,
     "price_out_per_M": 2.2,
     "price_cache_per_M": 0.53,
@@ -24245,7 +24075,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.04,
+    "time_per_index_task_s": 6.03,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24301,7 +24131,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-7",
-    "tps": 98.05,
+    "tps": 96.54,
     "ttft": 1150,
     "price_in_per_M": 0.6,
     "price_out_per_M": 2.2,
@@ -24318,7 +24148,7 @@
     "coding_index": 45.3,
     "agentic_index": 26.2,
     "cost_per_index_task_usd": 0.3586,
-    "time_per_index_task_s": 26.65,
+    "time_per_index_task_s": 27.05,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24395,7 +24225,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-7-flash-non-reasoning",
     "tps": 104.2,
-    "ttft": 1470,
+    "ttft": 1530,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.4,
     "price_cache_per_M": null,
@@ -24411,7 +24241,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.27,
+    "time_per_index_task_s": 6.32,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24464,7 +24294,7 @@
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-4-7-flash",
     "tps": 93.99,
-    "ttft": 1210,
+    "ttft": 1230,
     "price_in_per_M": 0.07,
     "price_out_per_M": 0.4,
     "price_cache_per_M": 0.07,
@@ -24480,7 +24310,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 27.81,
+    "time_per_index_task_s": 27.82,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24544,8 +24374,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-5-non-reasoning",
-    "tps": 62.62,
-    "ttft": 1380,
+    "tps": 66.2,
+    "ttft": 1390,
     "price_in_per_M": 1,
     "price_out_per_M": 3.2,
     "price_cache_per_M": 0.2,
@@ -24561,7 +24391,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 9.36,
+    "time_per_index_task_s": 8.94,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24617,8 +24447,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-5",
-    "tps": 75.71,
-    "ttft": 1260,
+    "tps": 75.02,
+    "ttft": 1300,
     "price_in_per_M": 1,
     "price_out_per_M": 3.2,
     "price_cache_per_M": 0.2,
@@ -24634,7 +24464,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 48.87,
+    "time_per_index_task_s": 49.35,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24698,8 +24528,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-5-1-non-reasoning",
-    "tps": 57.52,
-    "ttft": 1580,
+    "tps": 56.14,
+    "ttft": 1610,
     "price_in_per_M": 1.39,
     "price_out_per_M": 4.4,
     "price_cache_per_M": 0.26,
@@ -24715,7 +24545,7 @@
     "coding_index": null,
     "agentic_index": null,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 10.27,
+    "time_per_index_task_s": 10.51,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24771,7 +24601,7 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-5-1",
-    "tps": 81.53,
+    "tps": 81.43,
     "ttft": 1390,
     "price_in_per_M": 1.39,
     "price_out_per_M": 4.4,
@@ -24788,7 +24618,7 @@
     "coding_index": 55.8,
     "agentic_index": 30.6,
     "cost_per_index_task_usd": 0.3042,
-    "time_per_index_task_s": 54.02,
+    "time_per_index_task_s": 54.08,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",
@@ -24864,8 +24694,8 @@
     "data_date": "2026-08-24",
     "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/glm-5-2-non-reasoning",
-    "tps": 110.11,
-    "ttft": 1910,
+    "tps": 120.66,
+    "ttft": 1890,
     "price_in_per_M": 1.4,
     "price_out_per_M": 4.4,
     "price_cache_per_M": 0.26,
@@ -24881,7 +24711,7 @@
     "coding_index": 46.5,
     "agentic_index": 35.1,
     "cost_per_index_task_usd": null,
-    "time_per_index_task_s": 6.45,
+    "time_per_index_task_s": 6.03,
     "sources": {
       "aa_intelligence_index": {
         "origin": "aa-api",

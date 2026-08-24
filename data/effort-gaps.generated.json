@@ -12,7 +12,7 @@
       "stamped": 622,
       "flips": 150,
       "note": "Precedence: manual-row value while alive, then per-family exception (survives supersede), then lab class (mixed/unknown → closed). Flip count = rows whose openness value changed vs the pre-overlay value.",
-      "scorable_after_blend": 312
+      "scorable_after_blend": 310
     },
     {
       "source": "AA Data API /language/models/free",
@@ -74,7 +74,7 @@
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
       "records": 97,
-      "delta_changed": 0
+      "delta_changed": 3
     },
     {
       "source": "OpenRouter /api/v1/models",
@@ -392,7 +392,7 @@
   },
   "price_divergences": {
     "count": 97,
-    "delta_count": 0,
+    "delta_count": 3,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
@@ -613,18 +613,6 @@
         "absent_runs": 0
       },
       {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_out_per_M",
-        "aa_per_M": 30,
-        "or_per_M": 10,
-        "ratio": 3,
-        "first_seen": "2026-08-20",
-        "age_days": 4,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
         "model": "Hy3-preview (Reasoning)",
         "provider": "Tencent",
         "field": "price_in_per_M",
@@ -693,30 +681,6 @@
         "ratio": 2.53,
         "first_seen": "2026-08-24",
         "age_days": 0,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_in_per_M",
-        "aa_per_M": 5,
-        "or_per_M": 2,
-        "ratio": 2.5,
-        "first_seen": "2026-08-20",
-        "age_days": 4,
-        "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "GPT-5.6 Sol (max)",
-        "provider": "OpenAI",
-        "field": "price_cache_per_M",
-        "aa_per_M": 0.5,
-        "or_per_M": 0.2,
-        "ratio": 2.5,
-        "first_seen": "2026-08-20",
-        "age_days": 4,
         "changed": false,
         "absent_runs": 0
       },
@@ -862,6 +826,42 @@
         "first_seen": "2026-08-14",
         "age_days": 10,
         "changed": false,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_in_per_M",
+        "aa_per_M": 4,
+        "or_per_M": 2,
+        "ratio": 2,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "aa_per_M": 20,
+        "or_per_M": 10,
+        "ratio": 2,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
+        "model": "GPT-5.6 Sol (max)",
+        "provider": "OpenAI",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.4,
+        "or_per_M": 0.2,
+        "ratio": 2,
+        "first_seen": "2026-08-20",
+        "age_days": 4,
+        "changed": true,
         "absent_runs": 0
       },
       {
@@ -1563,8 +1563,89 @@
     ]
   },
   "stale_cost_task": {
-    "count": 0,
-    "entries": [],
+    "count": 10,
+    "entries": [
+      {
+        "model": "GPT-5.6 Sol (high)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "from": 30,
+        "to": 20,
+        "pct": -33.33
+      },
+      {
+        "model": "GPT-5.6 Sol (high)",
+        "provider": "OpenAI",
+        "field": "blended_price_per_M",
+        "from": 4.35,
+        "to": 3.08,
+        "pct": -29.2
+      },
+      {
+        "model": "GPT-5.6 Sol (low)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "from": 30,
+        "to": 20,
+        "pct": -33.33
+      },
+      {
+        "model": "GPT-5.6 Sol (low)",
+        "provider": "OpenAI",
+        "field": "blended_price_per_M",
+        "from": 4.35,
+        "to": 3.08,
+        "pct": -29.2
+      },
+      {
+        "model": "GPT-5.6 Sol (medium)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "from": 30,
+        "to": 20,
+        "pct": -33.33
+      },
+      {
+        "model": "GPT-5.6 Sol (medium)",
+        "provider": "OpenAI",
+        "field": "blended_price_per_M",
+        "from": 4.35,
+        "to": 3.08,
+        "pct": -29.2
+      },
+      {
+        "model": "GPT-5.6 Sol (Non-reasoning)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "from": 30,
+        "to": 20,
+        "pct": -33.33
+      },
+      {
+        "model": "GPT-5.6 Sol (Non-reasoning)",
+        "provider": "OpenAI",
+        "field": "blended_price_per_M",
+        "from": 4.35,
+        "to": 3.08,
+        "pct": -29.2
+      },
+      {
+        "model": "GPT-5.6 Sol (xhigh)",
+        "provider": "OpenAI",
+        "field": "price_out_per_M",
+        "from": 30,
+        "to": 20,
+        "pct": -33.33
+      },
+      {
+        "model": "GPT-5.6 Sol (xhigh)",
+        "provider": "OpenAI",
+        "field": "blended_price_per_M",
+        "from": 4.35,
+        "to": 3.08,
+        "pct": -29.2
+      }
+    ],
     "note": "Rows with non-null cost_per_index_task_usd whose current price side (in/out/blended) moved >25% vs the previous draft's same family+effort spine (spineKey identity: model slug + effort tier). Approximation — measurement-time prices are not stored; first run (no previous draft) flags nothing. Data flag only; UI surfacing deferred to the UI/UX line."
   },
   "intel_consistency": {
@@ -2172,7 +2253,7 @@
     "note": "Report-only: merged rows with exactly two of three triple elements, not admitted. Never promoted to the draft. Entries capped per bucket.",
     "entry_cap": 250,
     "missing_tps": {
-      "count": 107,
+      "count": 108,
       "capped": false,
       "entries": [
         {
@@ -2944,6 +3025,14 @@
           "source_url_slug": "qwen3-max-thinking"
         },
         {
+          "family_id": "Qwen3.8 2.4T A95B",
+          "model": "Qwen3.8 2.4T A95B",
+          "provider": "Alibaba",
+          "release_date": "2026-08-12",
+          "missing_axis": "tps",
+          "source_url_slug": "qwen3-8-2-4t-a95b"
+        },
+        {
           "family_id": "QwQ 32B",
           "model": "QwQ 32B",
           "provider": "Alibaba",
@@ -3217,7 +3306,7 @@
       "note": "a2 rows released on/after 2025-09-01 — the recent notable cloud pool D-H4 weighs most."
     },
     "b_held_2026_rows": {
-      "count": 34,
+      "count": 33,
       "notable_names": [
         "Agnes 2.5 Pro Alpha (Sapiens AI)",
         "Celeris-1 (Celeris)",
@@ -3229,7 +3318,6 @@
         "KAT Coder Pro V2 (KwaiKAT)",
         "LFM2.5-8B-A1B (Liquid AI)",
         "LFM2.5-VL-1.6B (Liquid AI)",
-        "Ling 2.6 Flash (InclusionAI)",
         "Ling 3.0 Flash (InclusionAI)",
         "Ling 3.0 Tiny (InclusionAI)",
         "LongCat 2.0 (LongCat)",
