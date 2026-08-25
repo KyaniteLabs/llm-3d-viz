@@ -2,7 +2,7 @@
 
 *Published 2026-08-24 · Kyanite Labs · 6-minute read*
 
-**TL;DR:** The Model Observatory is a free, open-source interactive 3D visualization that plots 314 large language models on three axes — output speed (tokens/second), blended price ($/M tokens), and intelligence (Artificial Analysis Index) — so you can see the entire Pareto frontier at a glance instead of reading fifty benchmark tables. It updates itself three times a day from public data, never invents a number, and ships with a 573-test suite that makes lying structurally difficult. This post explains what it is, how the data pipeline enforces honesty, and what four independent AI vision critics taught us about shipping presentation-grade data visualization.
+**TL;DR:** The Model Observatory is a free, open-source interactive 3D visualization that plots 312 large language models on three axes — output speed (tokens/second), blended price ($/M tokens), and intelligence (Artificial Analysis Index) — so you can see the entire Pareto frontier at a glance instead of reading fifty benchmark tables. It updates itself three times a day from public data, never invents a number, and ships with a 587-test suite that makes lying structurally difficult. This post explains what it is, how the data pipeline enforces honesty, and what four independent AI vision critics taught us about shipping presentation-grade data visualization.
 
 **Try it:** [viz.kyanitelabs.tech](https://viz.kyanitelabs.tech/) · **Fork it:** [github.com/KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) (MIT)
 
@@ -34,7 +34,7 @@ Most comparison sites fail quietly: a missing benchmark becomes a zero, a stale 
 - **Preliminary data, labeled as preliminary.** When a lab announces a model before anyone measures it (GLM-5.3, Seed 2.1 Turbo, Ornith 1.5, the anonymous "Ox Alpha"), a curated row can carry the *provider-published* numbers with PRELIMINARY provenance — and auto-supersedes the moment an independent measurement exists. Vendor numbers are never mixed into measured columns.
 - **Prices are real API prices.** Free promotional pricing (like Ox Alpha's launch-week $0) is flagged as non-durable, and a canary watches for price divergence between sources so repricing (three Qwen models repriced 22–60% in one August weekend) surfaces as an alert, not a silent drift.
 
-The pipeline runs three times daily, rebuilds the dataset from scratch, records a spine-keyed diff (rename-aware, so a superseded manual row pairing with its measured successor counts as a rename, not a churn event), and deploys. 573 tests gate it. The failure modes we cared about — families silently vanishing, duplicate rows, un-gated data commits — each have a regression test named after the day they happened.
+The pipeline runs three times daily, rebuilds the dataset from scratch, records a spine-keyed diff (rename-aware, so a superseded manual row pairing with its measured successor counts as a rename, not a churn event), and deploys. 587 tests gate it. The failure modes we cared about — families silently vanishing, duplicate rows, un-gated data commits — each have a regression test named after the day they happened.
 
 ## What four AI vision critics taught us about visual QA
 

@@ -35,7 +35,10 @@ npm test
 ```
 
 4. Confirm `dist/` has `index.html`, `favicon.svg`, `assets/*`, and **`_headers`** (copied from `public/`).
-5. Confirm `rg '__viz' dist/` is empty.
+5. `rg '__viz' dist/` — the read-only debug/capture hook (`window.__viz`) IS expected in
+   the shipped bundles since the S+ capture-gate program (capture scripts assert against
+   the deployed build through it). Confirm it appears only in app assets, never leaks a
+   secret, and that no OTHER debug globals shipped.
 
 ## One-shot publish (run only after gate)
 

@@ -3,7 +3,7 @@
 > Interactive 3D LLM benchmark observatory: **speed × cost × intelligence**.
 
 - Canonical site: https://viz.kyanitelabs.tech/
-- Launch post (Aug 2026): https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory (also in-repo `blog/2026-08-24-model-observatory.md`)
+- Launch post (Aug 2026): https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory/ (also in-repo `blog/2026-08-24-model-observatory.md`)
 - Full agent brief: https://viz.kyanitelabs.tech/llms-full.txt
 - Product Markdown: https://viz.kyanitelabs.tech/about.md
 - Open source (MIT): https://github.com/KyaniteLabs/llm-3d-viz

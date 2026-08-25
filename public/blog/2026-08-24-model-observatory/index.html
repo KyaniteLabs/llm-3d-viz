@@ -1,0 +1,175 @@
+<!doctype html>
+<!-- Rendered by hand from ../2026-08-24-model-observatory.md (source of truth for the copy).
+     If the .md changes, update this page to match — the md is not served to browsers. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070C0B" />
+  <meta name="color-scheme" content="dark" />
+  <title>We Built an Open-Source Model Observatory: Every LLM, Compared on Speed, Cost, and Intelligence in One 3D Chart</title>
+  <meta name="description" content="A free, open-source interactive 3D visualization plotting 312 large language models on speed (tokens/second), blended price ($/M tokens), and intelligence (Artificial Analysis Index) — the whole Pareto frontier at a glance, updated three times daily, never inventing a number." />
+  <link rel="canonical" href="https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Model Observatory" />
+  <meta property="og:title" content="We Built an Open-Source Model Observatory: Every LLM, Compared on Speed, Cost, and Intelligence in One 3D Chart" />
+  <meta property="og:description" content="312 LLMs on three axes — speed × cost × intelligence — with the Pareto frontier visible at a glance. Updated 3×/day from public data; a 587-test suite makes lying structurally difficult." />
+  <meta property="og:url" content="https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory/" />
+  <meta property="og:image" content="https://viz.kyanitelabs.tech/og-image.png" />
+  <meta property="article:published_time" content="2026-08-24T00:00:00Z" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="We Built an Open-Source Model Observatory" />
+  <meta name="twitter:description" content="312 LLMs on three axes — speed × cost × intelligence — the Pareto frontier at a glance. Never invents a number." />
+  <meta name="twitter:image" content="https://viz.kyanitelabs.tech/og-image.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "We Built an Open-Source Model Observatory: Every LLM, Compared on Speed, Cost, and Intelligence in One 3D Chart",
+    "description": "A free, open-source interactive 3D visualization plotting 312 large language models on speed, blended price, and intelligence — the whole Pareto frontier at a glance.",
+    "url": "https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory/",
+    "mainEntityOfPage": "https://viz.kyanitelabs.tech/blog/2026-08-24-model-observatory/",
+    "image": "https://viz.kyanitelabs.tech/og-image.png",
+    "datePublished": "2026-08-24T00:00:00Z",
+    "dateModified": "2026-08-24T00:00:00Z",
+    "author": { "@type": "Organization", "name": "Kyanite Labs", "url": "https://kyanitelabs.tech" },
+    "publisher": { "@type": "Organization", "name": "Kyanite Labs", "url": "https://kyanitelabs.tech" },
+    "keywords": "LLM comparison, LLM benchmarks, model comparison tool, AI cost comparison, tokens per second, Pareto frontier, Artificial Analysis Index, open source data visualization"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Is the Model Observatory free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. No account, no paywall. The code is MIT open source." } },
+      { "@type": "Question", "name": "How current is the data?", "acceptedAnswer": { "@type": "Answer", "text": "The catalog rebuilds three times daily from source APIs, plus on-demand refreshes when new models are announced. Each model row shows its data date and per-field sources." } },
+      { "@type": "Question", "name": "Why do open-weight models show prices?", "acceptedAnswer": { "@type": "Answer", "text": "The cost axis prices using a model through an API — the comparable number across all models. Weights being downloadable doesn't make hosted tokens free, and conflating the two is how comparisons go wrong." } },
+      { "@type": "Question", "name": "What is the Artificial Analysis Index?", "acceptedAnswer": { "@type": "Answer", "text": "A cross-benchmark intelligence score published by Artificial Analysis, blending expert-domain evaluations. It is one consistent methodology across all models, and no other source can write that field in the observatory." } },
+      { "@type": "Question", "name": "Can I use my own benchmarks?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — fork the repo and point the catalog pipeline at your data. The provenance system expects you to stamp origins; it will refuse unlabeled fields." } },
+      { "@type": "Question", "name": "Does it work on mobile?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — a compact decode layer (compact axis titles, a collapsible stage key, a scrollable ranked list) ships at 390px, verified by the same screenshot-critic program as desktop." } }
+    ]
+  }
+  </script>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html { background: #070C0B; }
+    body {
+      margin: 0; background: #070C0B; color: #D7E2DE;
+      font: 400 17px/1.7 -apple-system, BlinkMacSystemFont, "Inter Tight", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    article { max-width: 720px; margin: 0 auto; padding: 48px 22px 96px; }
+    .eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7FA89C; margin-bottom: 14px; }
+    .eyebrow a { color: #9ED0BF; text-decoration: none; }
+    .eyebrow a:hover { text-decoration: underline; }
+    h1 { font-size: 33px; line-height: 1.22; letter-spacing: -0.01em; color: #F2F7F5; margin: 0 0 10px; font-weight: 600; }
+    .byline { font-size: 14px; color: #8AA69B; margin: 0 0 30px; }
+    h2 { font-size: 23px; color: #EAF3EF; margin: 44px 0 12px; font-weight: 600; letter-spacing: -0.005em; }
+    p { margin: 0 0 18px; }
+    a { color: #8FD9C4; }
+    strong { color: #EDF5F1; }
+    em { color: #C4D6CF; }
+    hr { border: 0; border-top: 1px solid #1C2A26; margin: 34px 0; }
+    ul, ol { padding-left: 24px; margin: 0 0 18px; }
+    li { margin-bottom: 10px; }
+    .tldr { border-left: 3px solid #2E6B58; background: #0B1512; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 26px; }
+    .tldr p { margin: 0; }
+    .cta { font-size: 15px; }
+    .faq dt { color: #F2F7F5; font-weight: 600; margin-top: 22px; }
+    .faq dd { margin: 6px 0 0 0; }
+    code, .mono { font-family: ui-monospace, "IBM Plex Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; color: #A8E6D2; }
+    footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid #1C2A26; font-size: 14px; color: #8AA69B; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="eyebrow"><a href="https://viz.kyanitelabs.tech/">Model Observatory</a> · Kyanite Labs blog</p>
+  <h1>We Built an Open-Source Model Observatory: Every LLM, Compared on Speed, Cost, and Intelligence in One 3D Chart</h1>
+  <p class="byline">Published 2026-08-24 · Kyanite Labs · 6-minute read</p>
+
+  <div class="tldr">
+    <p><strong>TL;DR:</strong> The Model Observatory is a free, open-source interactive 3D visualization that plots 312 large language models on three axes — output speed (tokens/second), blended price ($/M tokens), and intelligence (Artificial Analysis Index) — so you can see the entire Pareto frontier at a glance instead of reading fifty benchmark tables. It updates itself three times a day from public data, never invents a number, and ships with a 587-test suite that makes lying structurally difficult. This post explains what it is, how the data pipeline enforces honesty, and what four independent AI vision critics taught us about shipping presentation-grade data visualization.</p>
+  </div>
+
+  <p class="cta"><strong>Try it:</strong> <a href="https://viz.kyanitelabs.tech/">viz.kyanitelabs.tech</a> · <strong>Fork it:</strong> <a href="https://github.com/KyaniteLabs/llm-3d-viz">github.com/KyaniteLabs/llm-3d-viz</a> (MIT)</p>
+
+  <hr />
+
+  <h2>What is the Model Observatory?</h2>
+  <p>The Model Observatory is an <strong>interactive 3D LLM benchmark comparison tool</strong>. Every model is a point in a three-dimensional space:</p>
+  <ul>
+    <li><strong>X — Cost:</strong> blended price per million tokens (input/output weighted by real task mixes, from Artificial Analysis and OpenRouter list prices)</li>
+    <li><strong>Y — Intelligence:</strong> the Artificial Analysis Index (AA's cross-benchmark intelligence score)</li>
+    <li><strong>Z — Speed:</strong> output tokens per second</li>
+  </ul>
+  <p>The white "filament" burning through the cloud of points is the <strong>Pareto frontier</strong> — the set of models where no other model is simultaneously cheaper, faster, <em>and</em> smarter. That ridge is the whole point of the visualization. Reading benchmark tables, you reconstruct that frontier in your head, badly. Here you see it: which models are on it, how crowded it has become, and which marketing claims fall off it the moment you plot them.</p>
+  <p>Three questions the observatory answers in seconds:</p>
+  <ol>
+    <li><strong>"What's the cheapest model that's still smart enough for my task?"</strong> — Set an intelligence floor in Decide mode; the panel shortlists eligible models ranked by cost, speed, or balance.</li>
+    <li><strong>"Is the new model actually better, or just newer?"</strong> — Multi-effort tiers (low/medium/high reasoning) plot as labeled clusters per family, so you see what you're really buying per tier.</li>
+    <li><strong>"Open weights or closed API — what does each really cost to <em>use</em>?"</strong> — Open-weight models appear at their hosted API prices. Open ≠ free to use, and the cost axis makes that visible instead of implied.</li>
+  </ol>
+
+  <h2>The data honesty core: never invent a number</h2>
+  <p>Most comparison sites fail quietly: a missing benchmark becomes a zero, a stale price becomes today's price, a vendor's claimed score gets copied into a column that implies independent measurement. The observatory is built around the opposite contract:</p>
+  <ul>
+    <li><strong>One authoritative spine.</strong> The AA Intelligence Index, tokens/second, and time-to-first-token come from exactly one source (Artificial Analysis). No other data producer can write those fields. Ever.</li>
+    <li><strong>Nulls are data.</strong> If a model's speed hasn't been measured, the row shows null with a reason code — it joins an <em>awaiting measurement</em> annex instead of polluting the chart. When Artificial Analysis briefly un-measured Gemini 3.7 Flash's speed in August 2026, the model correctly left the main view for four days and returned when the measurement returned.</li>
+    <li><strong>Per-field provenance stamps.</strong> Every populated field carries its origin (<code>aa</code>, <code>aa-api</code>, <code>openrouter</code>, <code>provider</code>, <code>curated</code>) and kind (<code>measured</code> vs <code>list</code>). A meta-assertion in the test suite fails the build if any field lacks a stamp.</li>
+    <li><strong>Preliminary data, labeled as preliminary.</strong> When a lab announces a model before anyone measures it (GLM-5.3, Seed 2.1 Turbo, Ornith 1.5, the anonymous "Ox Alpha"), a curated row can carry the <em>provider-published</em> numbers with PRELIMINARY provenance — and auto-supersedes the moment an independent measurement exists. Vendor numbers are never mixed into measured columns.</li>
+    <li><strong>Prices are real API prices.</strong> Free promotional pricing (like Ox Alpha's launch-week $0) is flagged as non-durable, and a canary watches for price divergence between sources so repricing (three Qwen models repriced 22–60% in one August weekend) surfaces as an alert, not a silent drift.</li>
+  </ul>
+  <p>The pipeline runs three times daily, rebuilds the dataset from scratch, records a spine-keyed diff (rename-aware, so a superseded manual row pairing with its measured successor counts as a rename, not a churn event), and deploys. 587 tests gate it. The failure modes we cared about — families silently vanishing, duplicate rows, un-gated data commits — each have a regression test named after the day they happened.</p>
+
+  <h2>What four AI vision critics taught us about visual QA</h2>
+  <p>Getting a 3D scatter plot to presentation grade is mostly about collisions: labels overlapping ticks, ticks overlapping titles, callouts slicing through the legend. We ran an iterative fix-and-verify program where <strong>four independent vision models</strong> (from different vendors, one rubric) reviewed screenshots of the four key UI states, and every claim they made was adjudicated against DOM geometry measurements — the actual bounding boxes of every rendered label.</p>
+  <p>Findings from that program:</p>
+  <ul>
+    <li><strong>Harsh critics hallucinate plausibly.</strong> Critics repeatedly "read" label collisions that the geometry proved impossible, and cited model names that weren't on screen. Roughly 40% of vision claims were refuted by measurement. Automated visual QA needs a ground-truth adjudicator, not a vote.</li>
+    <li><strong>Your verifier can be vacuously true.</strong> Our "zero tick collisions" check passed on panels that were empty — no ticks, no collisions. Every "zero X" assertion needs a denominator.</li>
+    <li><strong>The ceiling is philosophy, not defects.</strong> After every mechanical defect was fixed (verified: zero overlapping elements, zero truncated labels, zero off-canvas, across desktop, Decide, Cinema, and 390px mobile), the four critics still spread 15+ points on the same screenshots — the strictest grader wants a dashboard, the design wants an observatory. At that point more critics don't converge the score; the design owner makes one call (we raised secondary text one step, from 10px/55% opacity to 11px/70–85%) and the residual disagreement is taste, not truth.</li>
+  </ul>
+  <p>That last point is why the project is open source: the argument "is this presentation-grade?" is only worth having when the mechanical bar is provably cleared.</p>
+
+  <h2>Decide mode: from chart to shortlist</h2>
+  <p>The 3D stage is for orientation; <strong>Decide mode</strong> is for action. Set an intelligence floor (e.g., "AA Index ≥ 50"), and the panel:</p>
+  <ol>
+    <li>filters to models that clear the floor with complete measurements,</li>
+    <li>ranks the survivors by your objective — minimum cost, maximum speed, or balanced,</li>
+    <li>names a shortlist with the exact trade (e.g., "GPT-5.6 Luna: Index 50.1 · $0.17/M · 169 tok/s"), and</li>
+    <li>syncs the whole state to the URL, so a shortlist is a link you can send.</li>
+  </ol>
+  <p>The floor and filters also drive the stage: models below the floor dim to near-invisibility — the chart shows you what you're excluding while the panel counts exactly what you're including, and the two numbers must agree (a consistency check verifies the copy against the DOM every build).</p>
+
+  <h2>Fork-friendly by design</h2>
+  <p>The repository is MIT-licensed and built to be adapted: swap the catalog source for your own data, change the axis metrics (the axis system is metric-mapped, not hard-coded), or re-theme the whole observatory from one token file. A forkers' guide covers the seams. The data layer is plain JSON with a documented schema and per-field provenance — if you run your own evaluation harness, you can feed it.</p>
+  <ul>
+    <li><strong>Live:</strong> <a href="https://viz.kyanitelabs.tech/">viz.kyanitelabs.tech</a></li>
+    <li><strong>Source:</strong> <a href="https://github.com/KyaniteLabs/llm-3d-viz">github.com/KyaniteLabs/llm-3d-viz</a></li>
+    <li><strong>Data sources:</strong> <a href="https://artificialanalysis.ai">Artificial Analysis</a> (API) · <a href="https://openrouter.ai">OpenRouter</a> (list prices) · LMArena (Elo, CC BY 4.0)</li>
+  </ul>
+
+  <h2>FAQ</h2>
+  <dl class="faq">
+    <dt>Is the Model Observatory free?</dt>
+    <dd>Yes. No account, no paywall. The code is MIT open source.</dd>
+    <dt>How current is the data?</dt>
+    <dd>The catalog rebuilds three times daily from source APIs, plus on-demand refreshes when new models are announced. Each model row shows its data date and per-field sources.</dd>
+    <dt>Why do open-weight models show prices?</dt>
+    <dd>The cost axis prices <em>using</em> a model through an API — the comparable number across all models. Weights being downloadable doesn't make hosted tokens free, and conflating the two is how comparisons go wrong.</dd>
+    <dt>What is the Artificial Analysis Index?</dt>
+    <dd>A cross-benchmark intelligence score published by Artificial Analysis, blending expert-domain evaluations. We use it as the single authoritative intelligence axis precisely because it is one consistent methodology across all models — and we never let any other source write that field.</dd>
+    <dt>Can I use my own benchmarks?</dt>
+    <dd>Yes — fork the repo and point the catalog pipeline at your data. The provenance system expects you to stamp origins; it will refuse unlabeled fields.</dd>
+    <dt>Does it work on mobile?</dt>
+    <dd>Yes — a compact decode layer (compact axis titles, a collapsible stage key, a scrollable ranked list) ships at 390px, verified by the same screenshot-critic program as desktop.</dd>
+  </dl>
+
+  <footer>
+    <p><a href="https://viz.kyanitelabs.tech/">← Open the Model Observatory</a> · <a href="https://viz.kyanitelabs.tech/llms.txt">llms.txt</a></p>
+  </footer>
+</article>
+</body>
+</html>
