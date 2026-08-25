@@ -1,151 +1,17 @@
 {
-  "data_date": "2026-08-24",
+  "data_date": "2026-08-25",
   "available": true,
-  "prev_row_count": 314,
+  "prev_row_count": 312,
   "next_row_count": 312,
   "added": [],
-  "removed": [
-    {
-      "model": "Qwen3.8 2.4T A95B",
-      "provider": "Alibaba",
-      "family_id": "Qwen3.8 2.4T A95B",
-      "release_date": "2026-08-12"
-    },
-    {
-      "model": "Ling 2.6 Flash",
-      "provider": "InclusionAI",
-      "family_id": "Ling 2.6 Flash",
-      "release_date": "2026-04-21"
-    }
-  ],
+  "removed": [],
   "renamed": [],
-  "price_deltas": [
-    {
-      "model": "GPT-5.6 Sol (high)",
-      "provider": "OpenAI",
-      "field": "price_in_per_M",
-      "from": 5,
-      "to": 4,
-      "pct": 20
-    },
-    {
-      "model": "GPT-5.6 Sol (high)",
-      "provider": "OpenAI",
-      "field": "price_out_per_M",
-      "from": 30,
-      "to": 20,
-      "pct": 33
-    },
-    {
-      "model": "GPT-5.6 Sol (high)",
-      "provider": "OpenAI",
-      "field": "blended_price_per_M",
-      "from": 4.35,
-      "to": 3.08,
-      "pct": 29
-    },
-    {
-      "model": "GPT-5.6 Sol (low)",
-      "provider": "OpenAI",
-      "field": "price_in_per_M",
-      "from": 5,
-      "to": 4,
-      "pct": 20
-    },
-    {
-      "model": "GPT-5.6 Sol (low)",
-      "provider": "OpenAI",
-      "field": "price_out_per_M",
-      "from": 30,
-      "to": 20,
-      "pct": 33
-    },
-    {
-      "model": "GPT-5.6 Sol (low)",
-      "provider": "OpenAI",
-      "field": "blended_price_per_M",
-      "from": 4.35,
-      "to": 3.08,
-      "pct": 29
-    },
-    {
-      "model": "GPT-5.6 Sol (medium)",
-      "provider": "OpenAI",
-      "field": "price_in_per_M",
-      "from": 5,
-      "to": 4,
-      "pct": 20
-    },
-    {
-      "model": "GPT-5.6 Sol (medium)",
-      "provider": "OpenAI",
-      "field": "price_out_per_M",
-      "from": 30,
-      "to": 20,
-      "pct": 33
-    },
-    {
-      "model": "GPT-5.6 Sol (medium)",
-      "provider": "OpenAI",
-      "field": "blended_price_per_M",
-      "from": 4.35,
-      "to": 3.08,
-      "pct": 29
-    },
-    {
-      "model": "GPT-5.6 Sol (Non-reasoning)",
-      "provider": "OpenAI",
-      "field": "price_in_per_M",
-      "from": 5,
-      "to": 4,
-      "pct": 20
-    },
-    {
-      "model": "GPT-5.6 Sol (Non-reasoning)",
-      "provider": "OpenAI",
-      "field": "price_out_per_M",
-      "from": 30,
-      "to": 20,
-      "pct": 33
-    },
-    {
-      "model": "GPT-5.6 Sol (Non-reasoning)",
-      "provider": "OpenAI",
-      "field": "blended_price_per_M",
-      "from": 4.35,
-      "to": 3.08,
-      "pct": 29
-    },
-    {
-      "model": "GPT-5.6 Sol (xhigh)",
-      "provider": "OpenAI",
-      "field": "price_in_per_M",
-      "from": 5,
-      "to": 4,
-      "pct": 20
-    },
-    {
-      "model": "GPT-5.6 Sol (xhigh)",
-      "provider": "OpenAI",
-      "field": "price_out_per_M",
-      "from": 30,
-      "to": 20,
-      "pct": 33
-    },
-    {
-      "model": "GPT-5.6 Sol (xhigh)",
-      "provider": "OpenAI",
-      "field": "blended_price_per_M",
-      "from": 4.35,
-      "to": 3.08,
-      "pct": 29
-    }
-  ],
+  "price_deltas": [],
   "counts": {
     "added": 0,
-    "removed": 2,
+    "removed": 0,
     "renamed": 0,
-    "price_deltas": 15
+    "price_deltas": 0
   },
   "supersede_drift": []
 }
