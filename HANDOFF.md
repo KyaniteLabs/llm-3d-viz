@@ -1,6 +1,6 @@
 # HANDOFF — llm-3d-viz
 
-## Status: 2026-08-24 close — alert-truthfulness shipped (#203/#204/#205), catalog 314 rows, watchdog on launchd
+## Status: 2026-08-26 — drift-watch shipped (#206); catalog 317 rows; Ox Alpha operator-identified; public == private
 
 **Addendum 2026-08-24 afternoon (f92e78a + bab12b6):**
 - **#203 closed — builder exit-code contract.** Builder exits `2 fetch · 4 parse/vet (local file) · 5 gate · 6 write · 1 unclassified`, each fatal JSON carries a `class`; `catalog-auto-update.sh` maps rc→stage (`fetch`/`parse_vet`/`builder_gate`/`write`). Local parses named at site (manual-additions, ladders, watchlist) + top-level SyntaxError backstop. Drill-verified: broken manual-additions now alerts `stage=parse_vet` (was the 08-20 `AA scrape failed` mislabel). Hermetic regression tests spawn the real builder (`tests/builder-exit-codes.test.ts`).
