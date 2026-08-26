@@ -1,6 +1,6 @@
 {
   "$schema_note": "Announced-but-unmeasured models the operator expects to appear (plan WS4 / audit H2). Reporting only — never admits rows, never carries metrics. Status + aging surface in effort-gaps.generated.json (watchlist section); the moment AA measures a family the entry flips to measured_by_aa and any manual-additions row auto-supersedes. NEVER attribute sibling-model benchmark numbers to a watchlist entry.",
-  "updated": "2026-08-24",
+  "updated": "2026-08-26",
   "entries": [
     {
       "family": "Qwen3.8 27B",
@@ -20,8 +20,8 @@
       "family": "GLM-5.3",
       "provider": "Z AI",
       "announced_date": "2026-08-14",
-      "note": "MEASURED BY AA 2026-08-20 (IQ 59.5, tps 84.72); manual row auto-superseded same day — the documented manual→AA rename regression case, verified in the 2026-08-20 diff.",
-      "measured_by_aa": true,
+      "note": "ROUND-TRIP: AA measured 2026-08-20 (IQ 59.5, tps 84.72 — manual row superseded same day, the documented rename regression case), then AA UN-MEASURED the speed (current snapshot tps null → awaiting_measurement annex); the manual GLM-5.3 (max) row is the live catalog row again (provider numbers, AA-only fields null). Supersede re-fires the moment AA republishes the full triple. Operator-adjacent note: the family's Flash variant is the operator-identified Ox Alpha (see that row).",
+      "measured_by_aa": false,
       "measured_date": "2026-08-20"
     },
     {

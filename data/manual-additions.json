@@ -1,6 +1,6 @@
 {
-  "$schema_note": "Provider-announced rows admitted before Artificial Analysis measures them. Only what the provider published — AA-only domains (Intelligence Index, TTFT) must stay null. A row auto-supersedes when a SCORABLE AA row of the same family exists (full triple: IQ + tps + blended price — a listed-but-unmeasured AA row replaces nothing); overlays (OpenRouter prices/context/modality, Arena Elo) enrich these rows like any other.",
-  "updated": "2026-08-24",
+  "$schema_note": "A row auto-supersedes when a SCORABLE AA row of the same family exists. Once superseded the row is PRUNED from this file in the same work block (no stale 'pending' text ships) — data/model-watchlist.json is the keeper of the supersede record. If AA later un-measures the family (speed pulled), re-add the manual row: the family exits the draft silently otherwise (GLM-5.3 is the live example of re-activation).",
+  "updated": "2026-08-26",
   "rows": [
     {
       "model": "GLM-5.3 (max)",
@@ -95,68 +95,6 @@
         },
         "modality": {
           "origin": "openrouter",
-          "kind": "list"
-        }
-      }
-    },
-    {
-      "model": "Qwen3.8 27B",
-      "provider": "Alibaba",
-      "openness": "open",
-      "modality": [
-        "text",
-        "vision",
-        "video"
-      ],
-      "reasoning": true,
-      "family_id": "Qwen3.8 27B",
-      "effort_tier": "default",
-      "context_length": 262144,
-      "release_date": "2026-08-14",
-      "source_url": "https://huggingface.co/Qwen/Qwen3.8-27B",
-      "tps": null,
-      "ttft": null,
-      "price_in_per_M": 0.45,
-      "price_out_per_M": 3.2,
-      "blended_price_per_M": null,
-      "price_cache_per_M": 0.05,
-      "aa_intelligence_index": null,
-      "cost_per_index_task_usd": null,
-      "time_per_index_task_s": null,
-      "arena_elo": null,
-      "gpqa": 89.2,
-      "swe_bench": 61.7,
-      "aider_pct": null,
-      "data_date": "2026-08-20",
-      "source": "Qwen3.8-27B open weights on Hugging Face 2026-08-14 (Apache-2.0, dense vision-language 27B, native context 262,144 extensible to 1M, explicit reasoning mode). Manual addition, PRELIMINARY provider-published benchmarks — AA confirmation pending; row auto-supersedes when AA measures the family. gpqa 89.2 / swe_bench 61.7 are the 27B's OWN published numbers (Qwen model card via BenchLM 2026-08-20) — swe_bench is SWE-bench Pro 61.7, labelled, not SWE-bench Verified; the Qwen3.8-Max numbers (GPQA 92.6 / TB 2.1 86.6 / SWE Pro 67.7) are NOT attributed here per the standing no-sibling-attribution rule. Agentic set published too (OSWorld-Verified 84.3, Terminal-Bench 2.1 73.0, LiveCodeBench v6 90.3, IFBench 79.5) — no exact-schema slots, kept in this note only. Prices from the OpenRouter listing qwen/qwen3.8-27b ($0.45 in / $3.20 out / $0.05 cache per M); blended derives on the next pipeline run. tps/ttft/IQ/cost null: not measured — never invented. Openness=open: weights downloadable; open-weight lifecycle (D-H4 exempt).",
-      "null_reason": "not_measured",
-      "sources": {
-        "price_in_per_M": {
-          "origin": "openrouter",
-          "kind": "list"
-        },
-        "price_out_per_M": {
-          "origin": "openrouter",
-          "kind": "list"
-        },
-        "price_cache_per_M": {
-          "origin": "openrouter",
-          "kind": "list"
-        },
-        "context_length": {
-          "origin": "openrouter",
-          "kind": "list"
-        },
-        "modality": {
-          "origin": "openrouter",
-          "kind": "list"
-        },
-        "gpqa": {
-          "origin": "provider",
-          "kind": "list"
-        },
-        "swe_bench": {
-          "origin": "provider",
           "kind": "list"
         }
       }
