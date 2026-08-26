@@ -121,6 +121,28 @@ describe("catalog-alerts — aggregated payload + dedup", () => {
     expect(third.fired).toBe(true);
   });
 
+  it("public_deploy_drift (#206): kind-deduped across runs — hourly checks yield ONE issue per epoch", async () => {
+    // The drift event must dedup by KIND (not by key): the observed asset pair
+    // changes every build, so key-dedup would re-fire on every pipeline run.
+    // Identical semantics to the pipeline_silence watchdog event.
+    const deliver = vi.fn().mockResolvedValue({ ok: true, recordable: true, channels: { forgejo: "posted", localNotification: "notified" } });
+    const storePath = path.join(dir, "drift-dedup.json");
+    const mk = (pair) => [
+      {
+        kind: "public_deploy_drift",
+        key: "public_deploy_drift:entry-asset-mismatch",
+        line: `Public site serves a different build than the private instance (${pair}) — redeploy via docs/deploy/cloudflare-pages.md gate when intended`,
+      },
+    ];
+    const first = await fireAlert(mk("public=a1 private=b1"), { storePath, deliver, dedupByKind: true });
+    expect(first.fired).toBe(true);
+    // Different observed pair, same kind — still deduped (no second issue)
+    const second = await fireAlert(mk("public=a2 private=b2"), { storePath, deliver, dedupByKind: true });
+    expect(second.fired).toBe(false);
+    expect(second.reason).toBe("all_deduped");
+    expect(deliver).toHaveBeenCalledTimes(1);
+  });
+
   it("failed delivery records NO signatures — events retry next run", async () => {
     const deliver = vi.fn().mockResolvedValue({ ok: false, recordable: false, channels: { forgejo: "no_token", localNotification: "error" } });
     const storePath = path.join(dir, "dedup.json");

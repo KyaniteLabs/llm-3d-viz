@@ -285,6 +285,25 @@ async function main() {
     return;
   }
 
+  // #206: public Pages deploy drift. The public site is approval-gated by
+  // design, so drift is expected between approvals — the alert fires ONCE per
+  // dedup TTL (kind-deduped like --silence), not per run, making staleness
+  // loud without nagging every hourly check. `arg` carries the observed pair
+  // (public vs private entry asset) for the issue body.
+  if (mode === "--drift") {
+    await fireAlert(
+      [
+        {
+          kind: "public_deploy_drift",
+          key: "public_deploy_drift:entry-asset-mismatch",
+          line: `Public site serves a different build than the private instance (${arg ?? "details unknown"}) — redeploy via docs/deploy/cloudflare-pages.md gate when intended`,
+        },
+      ],
+      { prefix: "catalog", dedupByKind: true },
+    );
+    return;
+  }
+
   if (mode === "--evaluate") {
     const events = buildAlertEvents({
       diff: diffDoc ?? {},
@@ -296,7 +315,7 @@ async function main() {
     return;
   }
 
-  console.error("usage: catalog-alerts.mjs --evaluate | --failure <stage> | --silence");
+  console.error("usage: catalog-alerts.mjs --evaluate | --failure <stage> | --silence | --drift <detail>");
   process.exit(2);
 }
 

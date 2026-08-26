@@ -57,4 +57,9 @@ else
 fi
 
 node "$REPO_ROOT/scripts/lib/catalog-alerts.mjs" --silence >>"$LOG_DIR/catalog-silence-check.log" 2>&1 || true
+
+# #206: public-vs-private drift check rides the same hourly heartbeat. Skips
+# silently when PRIVATE_ORIGIN is unset or either side is unreachable; fires a
+# kind-deduped alert (one issue per epoch) when the entry assets diverge.
+bash "$REPO_ROOT/scripts/public-drift-check.sh" >>"$LOG_DIR/catalog-silence-check.log" 2>&1 || true
 exit 0

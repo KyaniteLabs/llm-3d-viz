@@ -67,6 +67,15 @@ After first deploy, note the `*.pages.dev` URL from wrangler output and smoke it
 
 ## Post-deploy smoke (must pass)
 
+Run the content-asserted helper (asserts page CONTENT — title, entry-asset
+vocabulary, blog page vs SPA shell, llms.txt, sitemap — never status-only):
+
+```bash
+SMOKE_MODEL="Grok 4.6" bash scripts/public-smoke.sh
+```
+
+Manual equivalents (legacy table — the script covers these):
+
 | Check | Expect |
 |-------|--------|
 | `https://llm-3d-viz.pages.dev/` (or project URL) | 200, dark observatory chrome |
