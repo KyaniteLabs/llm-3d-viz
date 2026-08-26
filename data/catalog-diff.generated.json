@@ -1,17 +1,26 @@
 {
-  "data_date": "2026-08-25",
+  "data_date": "2026-08-26",
   "available": true,
-  "prev_row_count": 312,
-  "next_row_count": 312,
+  "prev_row_count": 317,
+  "next_row_count": 317,
   "added": [],
   "removed": [],
   "renamed": [],
-  "price_deltas": [],
+  "price_deltas": [
+    {
+      "model": "Qwen3.6 27B (Reasoning)",
+      "provider": "Alibaba",
+      "field": "blended_price_per_M",
+      "from": 0.9,
+      "to": 0.5640000000000001,
+      "pct": 37
+    }
+  ],
   "counts": {
     "added": 0,
     "removed": 0,
     "renamed": 0,
-    "price_deltas": 0
+    "price_deltas": 1
   },
   "supersede_drift": []
 }
