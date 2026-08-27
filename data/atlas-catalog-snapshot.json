@@ -3581,14 +3581,14 @@
     "context_length": 262144,
     "release_date": "2026-04-22",
     "data_date": "2026-08-26",
-    "source": "AA Data API free; OpenRouter pricing overlay (qwen/qwen3.6-27b)",
+    "source": "AA Data API free",
     "source_url": "https://artificialanalysis.ai/models/qwen3-6-27b",
     "tps": 54.77,
     "ttft": 3760,
     "price_in_per_M": 0.6,
     "price_out_per_M": 3.6,
-    "price_cache_per_M": 0.12,
-    "blended_price_per_M": 0.5640000000000001,
+    "price_cache_per_M": null,
+    "blended_price_per_M": 0.9,
     "aa_intelligence_index": 37.7,
     "arena_elo": null,
     "swe_bench": null,
@@ -3638,10 +3638,6 @@
         "origin": "openrouter",
         "kind": "list"
       },
-      "price_cache_per_M": {
-        "origin": "openrouter",
-        "kind": "list"
-      },
       "cost_per_index_task_usd": {
         "origin": "aa-api",
         "kind": "measured"
@@ -3651,8 +3647,8 @@
         "kind": "list"
       },
       "blended_price_per_M": {
-        "origin": "openrouter",
-        "kind": "derived_list_blend"
+        "origin": "aa",
+        "kind": "derived"
       },
       "context_length": {
         "origin": "openrouter",
@@ -4275,7 +4271,7 @@
   {
     "model": "Qwen3.8 27B (low)",
     "provider": "Alibaba",
-    "openness": "closed",
+    "openness": "open",
     "modality": [
       "text"
     ],
@@ -4360,7 +4356,7 @@
   {
     "model": "Qwen3.8 27B (medium)",
     "provider": "Alibaba",
-    "openness": "closed",
+    "openness": "open",
     "modality": [
       "text"
     ],
@@ -4445,7 +4441,7 @@
   {
     "model": "Qwen3.8 27B (Non-reasoning)",
     "provider": "Alibaba",
-    "openness": "closed",
+    "openness": "open",
     "modality": [
       "text"
     ],
@@ -4530,7 +4526,7 @@
   {
     "model": "Qwen3.8 27B (xhigh)",
     "provider": "Alibaba",
-    "openness": "closed",
+    "openness": "open",
     "modality": [
       "text",
       "vision",
@@ -22854,7 +22850,7 @@
     "swe_bench": null,
     "aider_pct": null,
     "data_date": "2026-08-24",
-    "source": "OpenRouter listing stealth/ox-alpha (manual addition, PRELIMINARY; appeared 2026-08-20). Anonymous unattributed 'stealth' lab — community speculation only (GLM-5 lineage is UNVERIFIED and must not be stated as fact). Reasoning model for coding/agentic workloads; 1M context; text+image+video input. Prices are a PROMOTIONAL $0/$0 per M on OpenRouter (free-for-a-week reports; promo pricing must not be read as a durable price); blended derives on pipeline runs against the epsilon floor. No published benchmarks, no lab, no tps/IQ — all null, never invented.",
+    "source": "OpenRouter listing stealth/ox-alpha (manual addition, PRELIMINARY; appeared 2026-08-20). IDENTIFIED 2026-08-25 by operator (Simon): Ox Alpha is GLM-5.3 Flash (Z AI). Not vendor-confirmed — lineage carries operator provenance only; if Z AI confirms or denies, update here. Model/family identity stays 'Ox Alpha' so OpenRouter slug matching and the eventual AA-row supersede behave identically under either listing. Reasoning model for coding/agentic workloads; 1M context; text+image+video input. Prices are a PROMOTIONAL $0/$0 per M on OpenRouter (free-for-a-week reports; promo pricing must not be read as a durable price); blended derives on pipeline runs against the epsilon floor. No published benchmarks, no lab, no tps/IQ — all null, never invented.",
     "null_reason": "not_measured",
     "sources": {
       "price_in_per_M": {
