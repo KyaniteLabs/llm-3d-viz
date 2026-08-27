@@ -1,0 +1,76 @@
+{
+ "as_of": "2026-08-27T04:27:01.390Z",
+ "frontier": [
+  {
+   "model": "Gemma 4 31B (Reasoning)",
+   "provider": "Google",
+   "price": 0,
+   "ii": 29.7,
+   "tps": 35.32
+  },
+  {
+   "model": "Ling 3.0 Flash",
+   "provider": "InclusionAI",
+   "price": 0.043000000000000003,
+   "ii": 37.8,
+   "tps": 389.54
+  },
+  {
+   "model": "Hy3",
+   "provider": "Tencent",
+   "price": 0.10400000000000001,
+   "ii": 42.2,
+   "tps": 77.66
+  },
+  {
+   "model": "GPT-5.6 Luna (xhigh)",
+   "provider": "OpenAI",
+   "price": 0.174,
+   "ii": 50.1,
+   "tps": 128.09
+  },
+  {
+   "model": "DeepSeek V4 Flash 0731 (Reasoning, Max Effort)",
+   "provider": "DeepSeek",
+   "price": 0.227,
+   "ii": 51.8,
+   "tps": 123.1
+  },
+  {
+   "model": "Qwen3.8 27B (xhigh)",
+   "provider": "Alibaba",
+   "price": 0.43499999999999994,
+   "ii": 52,
+   "tps": 53.75
+  },
+  {
+   "model": "Gemini 3.7 Flash (high)",
+   "provider": "Google",
+   "price": 0.5740000000000001,
+   "ii": 56,
+   "tps": 379.77
+  },
+  {
+   "model": "GLM-5.3 (max)",
+   "provider": "Z AI",
+   "price": 0.9019999999999999,
+   "ii": 59.5,
+   "tps": 89.95
+  },
+  {
+   "model": "Grok 4.6 (high)",
+   "provider": "SpaceXAI",
+   "price": 1.35,
+   "ii": 60.9,
+   "tps": 57.87
+  },
+  {
+   "model": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+   "provider": "Anthropic",
+   "price": 3.85,
+   "ii": 63.1,
+   "tps": 59.68
+  }
+ ],
+ "events": []
+}

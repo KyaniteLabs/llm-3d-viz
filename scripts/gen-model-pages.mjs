@@ -96,3 +96,20 @@ for (const r of rows) {
 index.push('</div></body></html>');
 writeFileSync(join(ROOT, 'public/m/index.html'), index.join('\n'));
 console.log(`gen-model-pages: ${n} model pages + ${n} embed cards + index -> public/m, public/embed (catalog ${DATA_DATE})`);
+
+// ---- sitemap: /m/ index + every model card (SEO long tail; consult move #1) ----
+const SM = join(ROOT, 'public/sitemap.xml');
+let base = ['https://viz.kyanitelabs.tech/'];
+try {
+  base = [...readFileSync(SM, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
+    .filter(u => !u.includes('/m/') && !u.includes('/embed/'));
+} catch { /* first run: keep default */ }
+const sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+for (const u of base) sm.push('  <url>', `    <loc>${u}</loc>`, '    <changefreq>weekly</changefreq>', '    <priority>1.0</priority>', '  </url>');
+sm.push('  <url>', '    <loc>https://viz.kyanitelabs.tech/m/</loc>', '    <changefreq>daily</changefreq>', '    <priority>0.8</priority>', '  </url>');
+sm.push('  <url>', '    <loc>https://viz.kyanitelabs.tech/frontier-watch.md</loc>', '    <changefreq>daily</changefreq>', '    <priority>0.8</priority>', '  </url>');
+for (const r of rows) { const s = slug(r.model); if (!s) continue;
+  sm.push('  <url>', `    <loc>https://viz.kyanitelabs.tech/m/${s}/</loc>`, '    <changefreq>daily</changefreq>', '    <priority>0.6</priority>', '  </url>'); }
+sm.push('</urlset>');
+writeFileSync(SM, sm.join('\n') + '\n');
+console.log(`sitemap: ${base.length} base + model cards`);
