@@ -11,9 +11,9 @@
       "model": "Qwen3.6 27B (Reasoning)",
       "provider": "Alibaba",
       "field": "blended_price_per_M",
-      "from": 0.9,
-      "to": 0.5640000000000001,
-      "pct": 37
+      "from": 0.5640000000000001,
+      "to": 0.9,
+      "pct": 60
     }
   ],
   "counts": {
