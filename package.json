@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/gen-model-pages.mjs && vite build",
     "preview": "node scripts/preview.mjs",
     "test": "vitest run",
     "test:render": "playwright test",
