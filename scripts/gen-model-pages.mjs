@@ -56,7 +56,7 @@ const kpi = ([label, val, p]) => `<div class=kpi><b>${esc(val)}</b><span>${esc(l
 function page(r) {
   const s = slug(r.model);
   const chips = [r.provider, r.openness, ...(r.modality || [])].filter(Boolean).map(c => `<span class="chip ${c === 'open' ? 'open' : ''}">${esc(c)}</span>`).join('');
-  const embed = `&lt;iframe src="https://viz.kyanitelabs.tech/embed/${s}.html" width="100%" height="150" style="border:1px solid #e3e8ef;border-radius:10px" title="${esc(r.model)} — Kyanite Labs model card"&gt;&lt;/iframe&gt;`;
+  const embed = `&lt;iframe src="https://viz.kyanitelabs.tech/embed/${s}" width="100%" height="150" style="border:1px solid #e3e8ef;border-radius:10px" title="${esc(r.model)} — Kyanite Labs model card"&gt;&lt;/iframe&gt;`;
   return `<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>${esc(r.model)} — measured model card | Kyanite Labs</title>
 <meta name=description content="${esc(r.model)} by ${esc(r.provider)}: ${num(r.tps, 1)} tok/s, ${money(r.blended_price_per_M)}/M blended, intelligence index ${r.aa_intelligence_index ?? '—'}. Catalog ${DATA_DATE}.">
