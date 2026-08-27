@@ -10,7 +10,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const rows = JSON.parse(readFileSync(join(ROOT, 'data/atlas-catalog-snapshot.json'), 'utf8'));
+const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
+// same catalog the site builds from (src/data/models.ts) — pages regenerate on every refresh
 const DATA_DATE = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
 
 const slug = m => m.toLowerCase().replace(/\+/g, 'plus').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); // '+' -> 'plus' first: Command A vs Command A+ must not collide
