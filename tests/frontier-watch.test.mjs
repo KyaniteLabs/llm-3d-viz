@@ -4,7 +4,8 @@ import { computeFrontier } from '../scripts/frontier-watch.mjs';
 describe('computeFrontier (price × intelligence Pareto)', () => {
   const row = (model, price, ii) => ({ model, provider: 'x', blended_price_per_M: price, aa_intelligence_index: ii, tps: 1 });
   it('keeps non-dominated models and drops dominated ones', () => {
-    const f = computeFrontier([row('cheap-dumb', 1, 50), row('mid', 5, 70), row('dominated', 5, 60)  // strictly dominated by mid (5,70): equal price, higher ii, row('dear-smart', 20, 90)]);
+    // 'dominated' (5,60) is strictly dominated by 'mid' (5,70): equal price, higher ii
+    const f = computeFrontier([row('cheap-dumb', 1, 50), row('mid', 5, 70), row('dominated', 5, 60), row('dear-smart', 20, 90)]);
     expect(f.map(m => m.model)).toEqual(['cheap-dumb', 'mid', 'dear-smart']);
   });
   it('ignores rows missing either metric', () => {
