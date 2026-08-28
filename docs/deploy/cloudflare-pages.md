@@ -1,15 +1,15 @@
 # Deploy — Cloudflare Pages (`viz.kyanitelabs.tech`)
 
-**Status:** prep only. Live publish is **approval-gated** (Simon must say so in-session).
+**Status:** LIVE at https://viz.kyanitelabs.tech/ (first publish 2026-08-24, per-model pages + embeds 2026-08-26). Re-publishing remains **approval-gated** (Simon must say so in-session).
 
 **Target:** static `dist/` → Cloudflare Pages → custom domain `viz.kyanitelabs.tech`.
 
-## Preconditions (verified 2026-08-03)
+## Preconditions (verified 2026-08-03; re-verified at the 2026-08-26 pages deploy)
 
 | Check | State |
 |-------|--------|
 | App | v0.1 complete on `main`; axis lock x=cost, y=intelligence, z=speed |
-| Suites | `npm run build` + `tsc --noEmit` + 44 vitest green (re-run before ship) |
+| Suites | `npm run build` + `tsc --noEmit` + 587–590 vitest green (590 at HEAD run fd2b46d; re-run before ship) |
 | Auth | Cloudflare account with Pages write (`npx wrangler whoami`) |
 | Pages scope | OAuth / API token with `pages (write)` |
 | DNS | Optional custom domain on your zone (example product host: `viz.kyanitelabs.tech`) |
@@ -17,7 +17,7 @@
 
 ## What ships
 
-- Single-page app (no path router). Query only: `?heat=0` opt-out for class-bounded heat encoding.
+- Multi-surface static site: the 3D observatory SPA at `/` (query-driven state; `?heat=1` opts in to the diagnostic heat encoding, default off), generated per-model pages `/m/<slug>/` + all-models `/m/` index, embeddable cards `/embed/<slug>.html`, the blog post `/blog/2026-08-24-model-observatory/`, and the `/frontier-watch.md` movement log.
 - Self-hosted fonts (Inter Tight + IBM Plex Mono woff2 under `/assets/`).
 - Plotly bundle (~4.9 MB JS / ~1.5 MB gzip) — acceptable for Pages; first load is the cost.
 
@@ -34,7 +34,7 @@ npm test
 # optional, slower: npm run test:render
 ```
 
-4. Confirm `dist/` has `index.html`, `favicon.svg`, `assets/*`, and **`_headers`** (copied from `public/`).
+4. Confirm `dist/` has `index.html`, `favicon.svg`, `assets/*`, **`_headers`** (copied from `public/`), the generated surfaces (`m/`, `embed/`, `blog/`, `frontier-watch.md`), and `sitemap.xml` + `llms.txt` + `robots.txt`.
 5. `rg '__viz' dist/` — the read-only debug/capture hook (`window.__viz`) IS expected in
    the shipped bundles since the S+ capture-gate program (capture scripts assert against
    the deployed build through it). Confirm it appears only in app assets, never leaks a
@@ -81,7 +81,7 @@ Manual equivalents (legacy table — the script covers these):
 | `https://llm-3d-viz.pages.dev/` (or project URL) | 200, dark observatory chrome |
 | `https://viz.kyanitelabs.tech/` | 200 once DNS is attached |
 | Console | no uncaught errors on load + one rotate + one slider move |
-| `?heat=0` | heat encoding off |
+| `?heat=1` | diagnostic heat encoding on (default is off) |
 | Cinema (`C`) | enters cinema mode; fonts still self-hosted (no fonts.googleapis.com) |
 | Network | no third-party font/CDN leaks for type |
 
