@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Per-model pages + embeddable cards — MVP (council pick 2026-08-26; consult move #1).
-// Reads data/atlas-catalog-snapshot.json -> writes static, self-contained (zero JS,
+// Reads data/models.v0.draft.json (site source of truth, since 3479ef0) -> writes static, self-contained (zero JS,
 // zero external assets) pages under public/m/<slug>/ and public/embed/<slug>.html,
 // plus public/m/index.html (all-models index). Regenerated with every catalog refresh
 // (catalog-auto-update.sh can chain it); pages carry per-field provenance chips and
@@ -98,18 +98,27 @@ writeFileSync(join(ROOT, 'public/m/index.html'), index.join('\n'));
 console.log(`gen-model-pages: ${n} model pages + ${n} embed cards + index -> public/m, public/embed (catalog ${DATA_DATE})`);
 
 // ---- sitemap: /m/ index + every model card (SEO long tail; consult move #1) ----
+// URLs accumulate through a Set: /m/*, /embed/* and frontier-watch.md are re-emitted
+// below, so they must never ride in from the previous sitemap (frontier-watch.md used
+// to gain one duplicate <loc> per catalog refresh — audits/BUG-SMELL-REGISTRY.md).
 const SM = join(ROOT, 'public/sitemap.xml');
 let base = ['https://viz.kyanitelabs.tech/'];
 try {
   base = [...readFileSync(SM, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-    .filter(u => !u.includes('/m/') && !u.includes('/embed/'));
+    .filter(u => !u.includes('/m/') && !u.includes('/embed/') && !u.endsWith('/frontier-watch.md'));
 } catch { /* first run: keep default */ }
-const sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
-for (const u of base) sm.push('  <url>', `    <loc>${u}</loc>`, '    <changefreq>weekly</changefreq>', '    <priority>1.0</priority>', '  </url>');
-sm.push('  <url>', '    <loc>https://viz.kyanitelabs.tech/m/</loc>', '    <changefreq>daily</changefreq>', '    <priority>0.8</priority>', '  </url>');
-sm.push('  <url>', '    <loc>https://viz.kyanitelabs.tech/frontier-watch.md</loc>', '    <changefreq>daily</changefreq>', '    <priority>0.8</priority>', '  </url>');
+const seen = new Set();
+const urlEntries = [];
+const addUrl = (loc, changefreq, priority) => {
+  if (seen.has(loc)) return;
+  seen.add(loc);
+  urlEntries.push('  <url>', `    <loc>${loc}</loc>`, `    <changefreq>${changefreq}</changefreq>`, `    <priority>${priority}</priority>`, '  </url>');
+};
+for (const u of base) addUrl(u, 'weekly', '1.0');
+addUrl('https://viz.kyanitelabs.tech/m/', 'daily', '0.8');
+addUrl('https://viz.kyanitelabs.tech/frontier-watch.md', 'daily', '0.8');
 for (const r of rows) { const s = slug(r.model); if (!s) continue;
-  sm.push('  <url>', `    <loc>https://viz.kyanitelabs.tech/m/${s}/</loc>`, '    <changefreq>daily</changefreq>', '    <priority>0.6</priority>', '  </url>'); }
-sm.push('</urlset>');
+  addUrl(`https://viz.kyanitelabs.tech/m/${s}/`, 'daily', '0.6'); }
+const sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', ...urlEntries, '</urlset>'];
 writeFileSync(SM, sm.join('\n') + '\n');
 console.log(`sitemap: ${base.length} base + model cards`);
