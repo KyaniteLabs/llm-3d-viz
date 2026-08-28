@@ -37,6 +37,10 @@ Primary sources (with attribution in the app footer):
 - [OpenRouter](https://openrouter.ai) list prices  
 - [LMSYS Arena dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (CC BY 4.0) where used  
 
+## Static model pages and embeds
+
+Every catalog model also gets a **static page** at `/m/<slug>/` (measured speed, blended cost, intelligence index, percentile context, provenance labels) and an **iframe-embeddable card** at `/embed/<slug>.html`, plus an all-models index at `/m/`. These pages are self-contained, need no JavaScript, and regenerate on every catalog refresh. `/frontier-watch.md` tracks the measured Pareto frontier (price × intelligence) as a dated movement log, and `/blog/2026-08-24-model-observatory/` is the launch post.
+
 ## Atlas
 
 In-app **Atlas** agent dock: tool-using navigator over the catalog (floor, eligible, compare, filters). Default path is offline tools; optional BYOK OpenAI- or Anthropic-compatible LLM endpoints.

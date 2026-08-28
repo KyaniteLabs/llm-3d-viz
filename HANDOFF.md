@@ -92,4 +92,5 @@ The codex table below is the older 2026-08-09 pass, kept for history.
 - scripts/gen-model-pages.mjs (wired into npm build) -> 317 /m/<slug> cards + 317 /embed/<slug> + /m/ index; zero JS/external assets; provenance-labeled; '+' slug collision fixed (command-a vs command-aplus)
 - Gate receipts: build+tsc clean, 587 tests pass, _headers in dist; Cloudflare Pages deployed (canonical /embed/<slug> — Pages 308-strips .html); LIVE on viz.kyanitelabs.tech, vision-verified
 - Stamped by CEO 'Finish everything' 2026-08-26; product main pushed to Forgejo origin (5cc7932+)
-- Next candidates: frontier-watch alerts (FW-5, staged in takeout DECISIONS.md); sitemap/llms.txt inclusion of /m/ pages
+- **Suite count current:** **590 green at HEAD fd2b46d** ("test: fix corrupted fixture line (comment swallowed array tail); suite 590 green") — supersedes the 586/587 and 587+1skip receipts above; README Status updated to match (2026-08-27).
+- Next candidates: frontier-watch alerts (FW-5, staged in takeout DECISIONS.md); sitemap/llms.txt inclusion of /m/ pages (sitemap done b89693f; llms.txt/llms-full/about/README updated 2026-08-27)
