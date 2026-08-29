@@ -26,7 +26,7 @@ OSS_EDITION_COMMIT="${OSS_EDITION_COMMIT:-68f92f3}"
 # code — e.g. catalog-alerts.mjs reading ~/.git-credentials — are benign and
 # shipped in every prior publish; this script is exempt because it carries the
 # patterns themselves.)
-SWEEP_PATTERNS='100\.92\.|srv1542844|pushing-dispatch'
+SWEEP_PATTERNS='100\.92\.|srv1542844|pushing-dispatch|"origin":"aa-api"'
 
 # Internal-only paths removed from the OSS tree (oss-publish-2026-08-14/-20
 # precedent). Globs expand INSIDE internal_paths_existing() — against the
@@ -71,6 +71,24 @@ if [ ${#EXISTING[@]} -gt 0 ]; then
   git rm -rq "${EXISTING[@]}"
 fi
 git commit -qm "chore(oss): curation for $(date +%Y-%m-%d) publish (publish-oss.sh)" || true
+
+# Path C (2026-08-29, GC-007): OSS is a PUBLIC surface — it must never carry
+# AA/OpenRouter-derived values. Swap the catalog to the public plane and drop
+# the AA-fed data files that have no public equivalent (the private frontier
+# history's event text carries AA-derived prices/indices; only the .public
+# history ships).
+echo "[oss-publish] Path C: swap catalog to the public plane"
+if [ ! -f data/generated/public-catalog.json ]; then
+  echo "ERROR: data/generated/public-catalog.json missing — run node scripts/gen-public-catalog.mjs first." >&2
+  git checkout -q main
+  exit 4
+fi
+cp data/generated/public-catalog.json data/models.v0.draft.json
+git rm -q data/atlas-catalog-snapshot.json data/atlas-catalog-meta.json \
+  data/catalog-diff.generated.json data/effort-gaps.generated.json \
+  data/frontier-events.generated.json 2>/dev/null || true
+git add data/models.v0.draft.json
+git commit -qm "chore(oss): public-plane data only (Path C 2026-08-29) — AA/OpenRouter-derived values never ship to OSS" || true
 
 echo "[oss-publish] cherry-picking OSS-edition commit $OSS_EDITION_COMMIT"
 if git cherry "$OSS_BRANCH" "$OSS_EDITION_COMMIT" 2>/dev/null | grep -q '^+' \
