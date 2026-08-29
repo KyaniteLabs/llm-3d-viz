@@ -1,10 +1,10 @@
 {
   "schema_version": "1.1",
-  "exported_at": "2026-08-26T21:07:11.481Z",
-  "model_count": 317,
+  "exported_at": "2026-08-29T13:07:05.577Z",
+  "model_count": 323,
   "source": "data/models.v0.draft.json",
   "snapshot_file": "data/atlas-catalog-snapshot.json",
-  "source_sha256": "ab1202c5df3bc7412fb2917c55c8d8a00f5fa3d39e6d2a5c3c68df4e37fc7c03",
-  "data_date": "2026-08-26",
+  "source_sha256": "9fd4929a016adbf2ab68c5bfcdfb5c99109d6fda73134b2f7d0e1be853f87dd3",
+  "data_date": "2026-08-29",
   "note": "Null metrics preserved. Never invent Index/tok/s/price client-side. Snapshot duplicates data/models.v0.draft.json byte-for-byte; dedupe is leader-gated (WS7/L2)."
 }
