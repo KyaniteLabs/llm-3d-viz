@@ -26,11 +26,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://viz.kyanitelabs.tech/frontier-watch.md</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
     <loc>https://viz.kyanitelabs.tech/m/</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -342,6 +337,11 @@
   </url>
   <url>
     <loc>https://viz.kyanitelabs.tech/m/qwen3-8-max/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://viz.kyanitelabs.tech/m/qwen3-8-flash-next/</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -722,6 +722,21 @@
   </url>
   <url>
     <loc>https://viz.kyanitelabs.tech/m/granite-4-1-8b/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://viz.kyanitelabs.tech/m/granite-4-2-30b/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://viz.kyanitelabs.tech/m/granite-4-2-3b/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://viz.kyanitelabs.tech/m/granite-4-2-8b/</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1411,6 +1426,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://viz.kyanitelabs.tech/m/agnes-2-5-pro-beta/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://viz.kyanitelabs.tech/m/grok-3-mini-reasoning-high/</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1622,6 +1642,11 @@
   </url>
   <url>
     <loc>https://viz.kyanitelabs.tech/m/glm-5-3-max/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://viz.kyanitelabs.tech/m/glm-5-3-flash/</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
