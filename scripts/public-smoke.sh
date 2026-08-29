@@ -55,8 +55,7 @@ fi
 #    SMOKE_SLUG selects the card (default: first entry from the sitemap).
 smoke_slug="${SMOKE_SLUG:-}"
 if [[ -z "$smoke_slug" ]]; then
-  smoke_slug="$(printf '%s' "$sitemap" | grep -oE '/m/[a-z0-9-]+/' | head -1 | tr -d '/')"
-  smoke_slug="${smoke_slug#m/}"
+  smoke_slug="$(printf '%s' "$sitemap" | grep -oE '/m/[a-z0-9-]+/' | head -1 | sed 's|^/m/||; s|/$||')"
 fi
 if [[ -n "$smoke_slug" ]]; then
   card="$(fetch "$PUBLIC_ORIGIN/m/$smoke_slug/")"
