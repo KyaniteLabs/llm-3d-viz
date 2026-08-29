@@ -97,7 +97,7 @@ Atlas CLI and MCP run against the local repository/catalog. They are not hosted 
 
 ### What does llm-3d-viz measure?
 
-It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. Intelligence uses the Artificial Analysis Intelligence Index where available; price and speed come from the catalog's documented source joins.
+It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. This repository ships the PUBLIC data plane: publicly displayed measurements come only from the Arena leaderboard (CC BY 4.0), vendor-published launch figures, first-party provider pricing pages, and the project's own measurements — see `/sources/` on the live site. Fields whose provenance would require a third-party measurement license are nulled rather than republished (`scripts/gen-public-catalog.mjs`); operators running the private pipeline with their own API keys fill them for internal use.
 
 ### How does Decide mode choose a model?
 
@@ -117,7 +117,7 @@ Yes. It is an MIT-licensed build, and [docs/forkers/README.md](docs/forkers/READ
 
 ## Status
 
-The live product is **https://viz.kyanitelabs.tech/**. The repository currently has **625 unit tests green + 1 skip** (per HEAD run, 2026-08-29), with the data pipeline (Artificial Analysis + OpenRouter + Arena, honesty-core nulls, provenance stamps, canary/alerting with stage-truthful failure codes and supersede-drift alerts) and the full S+ visual program (four independent vision critics, zero mechanical defects) landed through 2026-08-26; the distribution-surface phase 0+1 (embed framing lane, per-card canonical/og/JSON-LD, provenance chips, shared slug lib + alias registry) landed 2026-08-29. The build is fork-friendly; production deploy configuration is operator-specific and is not required to run or fork the project.
+The live product is **https://viz.kyanitelabs.tech/**. The repository currently has **633 unit tests green + 1 skip** (per HEAD run, 2026-08-29), with the data pipeline (Artificial Analysis + OpenRouter + Arena, honesty-core nulls, provenance stamps, canary/alerting with stage-truthful failure codes and supersede-drift alerts) and the full S+ visual program (four independent vision critics, zero mechanical defects) landed through 2026-08-26; the distribution-surface phase 0+1 (embed framing lane, per-card canonical/og/JSON-LD, provenance chips, shared slug lib + alias registry) landed 2026-08-29; the Path C public/private data plane (AA-derived values stripped from every public surface + hygiene set) landed same day. The build is fork-friendly; production deploy configuration is operator-specific and is not required to run or fork the project.
 
 ## Source (two repos, not one mirror)
 

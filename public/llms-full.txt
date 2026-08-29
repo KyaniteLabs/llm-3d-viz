@@ -5,7 +5,7 @@ Updated: 2026-08-27
 
 ## One-sentence pitch
 
-Model Observatory is a free, MIT-licensed **3D LLM benchmark instrument** that maps models on **intelligence (AA Index) × cost (blended $/M) × speed (tok/s)** and supports **Decide mode**: intelligence floor → cost/speed shortlist with shareable URLs.
+Model Observatory is a free, MIT-licensed **3D LLM benchmark instrument** that maps models on **intelligence × cost (blended $/M) × speed (tok/s)** and supports **Decide mode**: intelligence floor → cost/speed shortlist with shareable URLs.
 
 ## Product surface (human UI)
 
@@ -37,7 +37,7 @@ Per-model numbers on these pages are catalog-sourced and labeled as such; lab-me
 
 - Catalog is **curated static/refresh pipeline**, not live free-form scraping in the browser.
 - **Nulls are honest** — unmeasured Index/cost/speed never fabricated.
-- Sources disclosed in UI footer: Artificial Analysis, OpenRouter, Arena (CC BY 4.0).
+- Sources disclosed in UI footer + /sources/: Arena (CC BY 4.0), vendor-published figures, first-party pricing. Third-party measurement services are not republished here (license).
 
 ## Atlas agent tools (in-app, not public HTTP API yet)
 

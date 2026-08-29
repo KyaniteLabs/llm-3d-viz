@@ -15,9 +15,9 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 | Axis | Metric | Source class |
 |------|--------|--------------|
-| Cost (X default) | Blended $/M tokens | List prices (e.g. OpenRouter) + AA-aligned blend |
-| Intelligence (Y) | Artificial Analysis Intelligence Index | Artificial Analysis |
-| Speed (Z default) | Tokens per second | Artificial Analysis / catalog |
+| Cost (X default) | Blended $/M tokens | First-party provider pricing pages |
+| Intelligence (Y) | Intelligence index | Arena Elo + vendor-published figures + own measurements (where measured) |
+| Speed (Z default) | Tokens per second | Own measurements (where measured) |
 
 **Decide mode:** set an intelligence **floor**, then shortlist eligible models by **cheapest**, **fastest**, or **balanced** cost/speed bias. Shareable URL encodes floor, bias, filters, axes.
 
@@ -44,7 +44,7 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 - Product name: **Model Observatory** (repo: llm-3d-viz)
 - Free, MIT, no account required for the viz
-- Data: Artificial Analysis + OpenRouter list prices + Arena dataset (CC BY 4.0) where used
+- Data: Arena dataset (CC BY 4.0) + vendor-published figures + first-party pricing; some third-party measurement data is not republished here for licensing reasons — see /sources/
 - Live stage requires JavaScript + WebGL
 
 ## For agents / crawlers

@@ -46,13 +46,17 @@ npm test
 cd ~/workspaces/llm-3d-viz
 git checkout main && git pull --ff-only
 
-npm run build
+# PATH C (2026-08-29): the PUBLIC deploy builds the PUBLIC plane — AA/OpenRouter-derived
+# values are stripped from every surface (legal, GC-007). The private instance builds
+# with plain `npm run build` (full data, internal use is license-permitted).
+npm run build:public
 npx tsc --noEmit && npm test
 
 # Create project once (idempotent fail if exists):
 npx wrangler pages project create llm-3d-viz --production-branch main
 
 # Deploy production build:
+# (dist/ here is the build:public output)
 npx wrangler pages deploy dist \
   --project-name=llm-3d-viz \
   --branch=main \
@@ -71,7 +75,7 @@ Run the content-asserted helper (asserts page CONTENT — title, entry-asset
 vocabulary, blog page vs SPA shell, llms.txt, sitemap — never status-only):
 
 ```bash
-SMOKE_MODEL="Grok 4.6" bash scripts/public-smoke.sh
+VIZ_DATA_PLANE=public SMOKE_MODEL="Qwen3.8 27B (xhigh)" bash scripts/public-smoke.sh
 ```
 
 Manual equivalents (legacy table — the script covers these):
