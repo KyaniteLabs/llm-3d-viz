@@ -50,5 +50,32 @@ if [[ -n "${SMOKE_MODEL:-}" ]]; then
   [[ "$bundle" == *"$SMOKE_MODEL"* ]] || fail "model '$SMOKE_MODEL' missing from the served bundle"
 fi
 
-echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap)"
+# 7) Model card serves a REAL generated page with phase-1 SEO surface
+#    (canonical + JSON-LD + provenance chips), not the SPA shell.
+#    SMOKE_SLUG selects the card (default: first entry from the sitemap).
+smoke_slug="${SMOKE_SLUG:-}"
+if [[ -z "$smoke_slug" ]]; then
+  smoke_slug="$(printf '%s' "$sitemap" | grep -oE '/m/[a-z0-9-]+/' | head -1 | tr -d '/')"
+  smoke_slug="${smoke_slug#m/}"
+fi
+if [[ -n "$smoke_slug" ]]; then
+  card="$(fetch "$PUBLIC_ORIGIN/m/$smoke_slug/")"
+  [[ "$card" == *"measured model card"* ]] || fail "/m/$smoke_slug/ is not a generated card (SPA shell?)"
+  [[ "$card" == *'rel=canonical'* ]] || fail "/m/$smoke_slug/ lacks canonical link"
+  [[ "$card" == *'application/ld+json'* ]] || fail "/m/$smoke_slug/ lacks JSON-LD"
+  [[ "$card" == *"Generated page"* ]] || fail "/m/$smoke_slug/ lacks generator provenance note"
+fi
+
+# 8) Embed lane: card content AND the frame-ancestors header that makes the
+#    advertised iframe snippet actually work (plan 2026-08-29 phase 0 — the
+#    global X-Frame-Options: DENY used to kill every embed on this origin).
+if [[ -n "$smoke_slug" ]]; then
+  embed="$(fetch "$PUBLIC_ORIGIN/embed/$smoke_slug")"
+  [[ "$embed" == *"model card"* ]] || fail "/embed/$smoke_slug is not a generated embed card"
+  # Pages 308-strips .html; follow redirects so we assert the header on the final URL.
+  embed_headers="$(curl -sSLI --max-time 20 "$PUBLIC_ORIGIN/embed/$smoke_slug" 2>/dev/null || true)"
+  [[ "$embed_headers" == *"frame-ancestors"* ]] || fail "embed lane missing Content-Security-Policy frame-ancestors (embeds dead under XFO DENY)"
+fi
+
+echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap, model card, embed lane)"
 exit 0

@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fireAlert } from './lib/catalog-alerts.mjs';
+import { slug } from './lib/slug.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const STATE = join(ROOT, '.cache/frontier-watch/last.json');
@@ -54,7 +55,7 @@ if (prev) {
 
 writeFileSync(OUT_JSON, JSON.stringify({ as_of: now.toISOString(), frontier, events }, null, 1));
 let md = `# Frontier Watch — the measured Pareto frontier (price × intelligence)\n\nComputed ${now.toISOString()} from the live catalog (${rows.length} models; frontier = ${frontier.length}). This page regenerates on every catalog refresh (3×/day). Alerts fire on movement.\n\n## Current frontier (cheapest first)\n\n| model | provider | $/M blended | intelligence | tok/s |\n|---|---|---|---|---|\n`;
-for (const m of frontier) md += `| [${m.model}](/m/${m.model.toLowerCase().replace(/\+/g, 'plus').replace(/[^a-z0-9]+/g, '-')}/) | ${m.provider} | $${m.price.toFixed(2)} | ${m.ii} | ${m.tps != null ? m.tps.toFixed(0) : '—'} |\n`;
+for (const m of frontier) md += `| [${m.model}](/m/${slug(m.model)}/) | ${m.provider} | $${m.price.toFixed(2)} | ${m.ii} | ${m.tps != null ? m.tps.toFixed(0) : '—'} |\n`;
 md += `\n## Movement log\n\n`;
 md += events.length ? events.map(e => `- **${now.toISOString().slice(0, 10)}** ${e.text}`).join('\n') + '\n' : `- ${now.toISOString().slice(0, 10)} no movement this refresh\n`;
 if (prev?.log?.length) md += prev.log.slice(0, 30).join('\n') + '\n';

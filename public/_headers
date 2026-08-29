@@ -42,3 +42,10 @@
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Link: </llms.txt>; rel="alternate"; type="text/plain"; title="llms.txt", </llms-full.txt>; rel="alternate"; type="text/plain"; title="llms-full.txt", </about.md>; rel="alternate"; type="text/markdown"; title="About", </sitemap.xml>; rel="sitemap"
+
+# Embed cards are MEANT to be framed (every /m/ page ships the iframe snippet).
+# XFO cannot be unset by a more-specific rule; CSP frame-ancestors takes
+# precedence over XFO in frame-supporting browsers (plan 2026-08-29 phase 0 —
+# the shipped embed feature was dead on the public origin under global DENY).
+/embed/*
+  Content-Security-Policy: frame-ancestors *
