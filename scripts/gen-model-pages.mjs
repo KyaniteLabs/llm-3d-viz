@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { slug } from './lib/slug.mjs';
+import { selectComparePairsDetailed } from './lib/compare-pairs.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGIN = 'https://viz.kyanitelabs.tech';
@@ -44,7 +45,7 @@ h1{font-size:24px;margin:0 0 2px}.sub{color:#6b7686;margin:0 0 12px;font-size:13
 pre{background:#f5f7fa;border:1px solid #e3e8ef;border-radius:8px;padding:10px;font-size:12px;overflow:auto}`;
 
 // ---- pure template factory (exported for tests) ----
-export function createTemplates(rows, dataDate) {
+export function createTemplates(rows, dataDate, compareBySlug = {}) {
   const TPS = rows.map(r => r.tps), PRICE = rows.map(r => r.blended_price_per_M), II = rows.map(r => r.aa_intelligence_index);
 
   // per-field provenance: catalog rows carry sources.<field>.kind = measured|derived|list
@@ -96,6 +97,7 @@ export function createTemplates(rows, dataDate) {
 <div class=grid>${metrics(r).map(kpi).join('')}</div>
 <p><b>Embed this card</b> (static and self-contained; updates when the site deploys — public deploys are approval-gated):</p>
 <pre>${embed}</pre>
+${compareBySlug[s]?.length ? `<p><b>Comparisons</b> (measured vs nearest neighbors): ${compareBySlug[s].map(o => `<a href="${o.path}">${esc(o.other)}</a>`).join(' · ')}</p>` : ''}
 <p class=note>Released ${esc(r.release_date ?? '—')} · catalog data ${esc(dataDate)} · field-level provenance shown per metric above
 (measured / derived / list, from the catalog <code>sources</code> map); percentiles computed across the ${rows.length}-model catalog at generation time.
 Numbers are catalog-sourced and labeled as such — lab-measured lanes stay separate by design. Generated page — do not hand-edit.</p>
@@ -132,8 +134,8 @@ ${items}
   return { page, embedCard, indexPage, metrics };
 }
 
-// ---- sitemap (pure; single owner for /m/ + base URLs) ----
-export function buildSitemap(prevBaseUrls, slugs) {
+// ---- sitemap (pure; single owner for /m/ + /compare/ + base URLs) ----
+export function buildSitemap(prevBaseUrls, slugs, comparePaths = []) {
   const seen = new Set();
   const urlEntries = [];
   const addUrl = (loc, changefreq, priority) => {
@@ -145,6 +147,7 @@ export function buildSitemap(prevBaseUrls, slugs) {
   addUrl(`${ORIGIN}/m/`, 'daily', '0.8');
   addUrl(`${ORIGIN}/frontier-watch.md`, 'daily', '0.8');
   for (const s of slugs) addUrl(`${ORIGIN}/m/${s}/`, 'daily', '0.6');
+  for (const p of comparePaths) addUrl(ORIGIN + p, 'daily', '0.5');
   return ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', ...urlEntries, '</urlset>'].join('\n') + '\n';
 }
 
@@ -162,7 +165,13 @@ function main() {
   const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
   // same catalog the site builds from (src/data/models.ts) — pages regenerate on every refresh
   const dataDate = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
-  const { page, embedCard, indexPage } = createTemplates(rows, dataDate);
+  const comparePairs = selectComparePairsDetailed(rows);
+  const compareBySlug = {};
+  for (const { path, a, b } of comparePairs) {
+    (compareBySlug[slug(a)] ??= []).push({ path, other: b });
+    (compareBySlug[slug(b)] ??= []).push({ path, other: a });
+  }
+  const { page, embedCard, indexPage } = createTemplates(rows, dataDate, compareBySlug);
 
   let n = 0;
   const slugs = [];
@@ -179,17 +188,17 @@ function main() {
   writeFileSync(join(ROOT, 'public/m/index.html'), indexPage());
   console.log(`gen-model-pages: ${n} model pages + ${n} embed cards + index -> public/m, public/embed (catalog ${dataDate})`);
 
-  // sitemap: base URLs ride in from the previous file; /m/*, /embed/* and
-  // frontier-watch.md are re-emitted here, so they must never ride in
-  // (frontier-watch.md used to gain one duplicate <loc> per refresh — BUG-SMELL-REGISTRY).
+  // sitemap: base URLs ride in from the previous file; /m/*, /compare/*,
+  // /embed/* and frontier-watch.md are re-emitted here, so they must never
+  // ride in (frontier-watch.md used to gain one duplicate <loc> per refresh — BUG-SMELL-REGISTRY).
   const SM = join(ROOT, 'public/sitemap.xml');
   let base = [ORIGIN + '/'];
   try {
     base = [...readFileSync(SM, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
-      .filter(u => !u.includes('/m/') && !u.includes('/embed/') && !u.endsWith('/frontier-watch.md'));
+      .filter(u => !u.includes('/m/') && !u.includes('/embed/') && !u.includes('/compare/') && !u.endsWith('/frontier-watch.md'));
   } catch { /* first run: keep default */ }
-  writeFileSync(SM, buildSitemap(base, slugs));
-  console.log(`sitemap: ${base.length} base + ${slugs.length} model cards`);
+  writeFileSync(SM, buildSitemap(base, slugs, comparePairs.map(p => p.path)));
+  console.log(`sitemap: ${base.length} base + ${slugs.length} model cards + ${comparePairs.length} compare pages`);
 
   // alias registry -> public/_redirects (stale targets fail the build — never ship a dead redirect)
   const aliases = existsSync(join(ROOT, 'data/slug-aliases.json'))

@@ -11,29 +11,15 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fireAlert } from './lib/catalog-alerts.mjs';
 import { slug } from './lib/slug.mjs';
+import { computeFrontier } from './lib/frontier.mjs';
+// kernel re-export moved to scripts/lib/frontier.mjs (plan 2026-08-29 phase 2);
+// kept here so existing imports (tests) stay stable.
+export { computeFrontier };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const STATE = join(ROOT, '.cache/frontier-watch/last.json');
 const OUT_JSON = join(ROOT, 'public/frontier-watch.json');
 const OUT_MD = join(ROOT, 'public/frontier-watch.md');
-
-export function computeFrontier(rows) {
-  const cands = rows.filter(r => r.blended_price_per_M != null && r.aa_intelligence_index != null);
-  const dominated = new Set();
-  for (const a of cands) {
-    for (const b of cands) {
-      if (a === b) continue;
-      // b dominates a: cheaper-or-equal AND smarter, at least one strict
-      if (b.blended_price_per_M <= a.blended_price_per_M && b.aa_intelligence_index >= a.aa_intelligence_index &&
-          (b.blended_price_per_M < a.blended_price_per_M || b.aa_intelligence_index > a.aa_intelligence_index)) {
-        dominated.add(a.model); break;
-      }
-    }
-  }
-  return cands.filter(r => !dominated.has(r.model))
-    .sort((x, y) => x.blended_price_per_M - y.blended_price_per_M)
-    .map(r => ({ model: r.model, provider: r.provider, price: r.blended_price_per_M, ii: r.aa_intelligence_index, tps: r.tps }));
-}
 
 const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
 const frontier = computeFrontier(rows);
