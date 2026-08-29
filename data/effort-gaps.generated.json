@@ -73,8 +73,8 @@
     },
     {
       "source": "price-divergence canary (AA vs OpenRouter)",
-      "records": 96,
-      "delta_changed": 6
+      "records": 99,
+      "delta_changed": 5
     },
     {
       "source": "OpenRouter /api/v1/models",
@@ -395,8 +395,8 @@
     ]
   },
   "price_divergences": {
-    "count": 96,
-    "delta_count": 6,
+    "count": 99,
+    "delta_count": 5,
     "record_ratio_threshold": 1.25,
     "note": "Level records with aging (first_seen/age_days) + one-run flap grace. Alert on delta only — see scripts/lib/catalog-alerts.mjs. Weekly operator review while any age_days > 7.",
     "records": [
@@ -466,10 +466,10 @@
         "field": "price_out_per_M",
         "aa_per_M": 1.32,
         "or_per_M": 0.17,
-        "ratio": 7.94,
+        "ratio": 7.96,
         "first_seen": "2026-08-14",
         "age_days": 15,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -514,10 +514,10 @@
         "field": "price_in_per_M",
         "aa_per_M": 0.44,
         "or_per_M": 0.08,
-        "ratio": 5.29,
+        "ratio": 5.31,
         "first_seen": "2026-08-14",
         "age_days": 15,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -605,6 +605,18 @@
         "absent_runs": 0
       },
       {
+        "model": "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
+        "provider": "DeepSeek",
+        "field": "price_out_per_M",
+        "aa_per_M": 3.96,
+        "or_per_M": 1.14,
+        "ratio": 3.48,
+        "first_seen": "2026-08-24",
+        "age_days": 5,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
         "model": "Ling 3.0 Flash",
         "provider": "InclusionAI",
         "field": "price_in_per_M",
@@ -614,18 +626,6 @@
         "first_seen": "2026-08-14",
         "age_days": 15,
         "changed": false,
-        "absent_runs": 0
-      },
-      {
-        "model": "DeepSeek V4 Pro 0813 (Reasoning, Max Effort)",
-        "provider": "DeepSeek",
-        "field": "price_out_per_M",
-        "aa_per_M": 3.96,
-        "or_per_M": 1.22,
-        "ratio": 3.25,
-        "first_seen": "2026-08-24",
-        "age_days": 5,
-        "changed": true,
         "absent_runs": 0
       },
       {
@@ -753,8 +753,8 @@
         "provider": "DeepSeek",
         "field": "price_in_per_M",
         "aa_per_M": 1.32,
-        "or_per_M": 0.61,
-        "ratio": 2.16,
+        "or_per_M": 0.57,
+        "ratio": 2.32,
         "first_seen": "2026-08-24",
         "age_days": 5,
         "changed": true,
@@ -977,6 +977,18 @@
         "absent_runs": 0
       },
       {
+        "model": "Hy3",
+        "provider": "Tencent",
+        "field": "price_in_per_M",
+        "aa_per_M": 0.14,
+        "or_per_M": 0.08,
+        "ratio": 1.7,
+        "first_seen": "2026-08-29",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
         "model": "Qwen3.8 27B (xhigh)",
         "provider": "Alibaba",
         "field": "price_cache_per_M",
@@ -1061,6 +1073,18 @@
         "absent_runs": 0
       },
       {
+        "model": "Hy3",
+        "provider": "Tencent",
+        "field": "price_out_per_M",
+        "aa_per_M": 0.55,
+        "or_per_M": 0.33,
+        "ratio": 1.67,
+        "first_seen": "2026-08-29",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
         "model": "Inkling Small",
         "provider": "Thinking Machines",
         "field": "price_cache_per_M",
@@ -1093,7 +1117,7 @@
         "ratio": 1.66,
         "first_seen": "2026-08-25",
         "age_days": 4,
-        "changed": true,
+        "changed": false,
         "absent_runs": 0
       },
       {
@@ -1349,6 +1373,18 @@
         "absent_runs": 0
       },
       {
+        "model": "Hy3",
+        "provider": "Tencent",
+        "field": "price_cache_per_M",
+        "aa_per_M": 0.03,
+        "or_per_M": 0.02,
+        "ratio": 1.45,
+        "first_seen": "2026-08-29",
+        "age_days": 0,
+        "changed": true,
+        "absent_runs": 0
+      },
+      {
         "model": "Kimi K2.7 Code",
         "provider": "Kimi",
         "field": "price_in_per_M",
@@ -1489,8 +1525,9 @@
         "ratio": 1.27,
         "first_seen": "2026-08-26",
         "age_days": 3,
-        "changed": true,
-        "absent_runs": 0
+        "changed": false,
+        "absent_runs": 1,
+        "stale": true
       },
       {
         "model": "GLM-4.6 (Non-reasoning)",
