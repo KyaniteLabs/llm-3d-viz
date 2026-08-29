@@ -40,7 +40,7 @@ Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[do
 - **Cinema mode:** A focused presentation/export view that emphasizes the frontier, selected models, Decide shortlist, and solo-family members instead of rendering the full catalog at equal visual weight.
 - **Provenance and coverage:** The curated catalog keeps per-axis source information where available and reports measured versus missing fields. Missing Index, tokens-per-second, or price values remain missing; the client does not invent metrics.
 - **Atlas:** The in-app Atlas dock can navigate catalog and app state with offline tools, with optional BYOK OpenAI-compatible or Anthropic-compatible LLM configuration. Atlas CLI and MCP are local developer surfaces, not hosted public endpoints.
-- **Per-model pages and embed cards:** every catalog model gets a static, self-contained card at `/m/<slug>/` plus an iframe-embeddable card at `/embed/<slug>.html`, with an all-models index at `/m/` — all regenerated from the catalog on every build with per-field provenance and catalog-date stamps.
+- **Per-model pages and embed cards:** every catalog model gets a static, self-contained card at `/m/<slug>/` plus an iframe-embeddable card at `/embed/<slug>`, with an all-models index at `/m/` — all regenerated from the catalog on every build with per-field provenance and catalog-date stamps.
 - **SEO and agent assets:** `public/` ships `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `about.md`, the per-model `/m/<slug>/` pages + `/embed/<slug>` cards, the `/blog/2026-08-24-model-observatory/` launch post, the `/frontier-watch.md` movement log, and the `index.html` meta/JSON-LD surface for crawlers and agents.
 
 ## Docs
@@ -60,12 +60,12 @@ Static discovery files ship from `public/` and are served at the site root:
 | Path | Purpose |
 |------|---------|
 | `/robots.txt` | Crawl rules, AI bot allows, and sitemap |
-| `/sitemap.xml` | URL inventory (`/`, `/m/*`, `/frontier-watch.md`) |
+| `/sitemap.xml` | URL inventory (`/`, `/m/*`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, `/llms.txt`, `/llms-full.txt`) |
 | `/llms.txt` | Short agent brief |
 | `/llms-full.txt` | Full agent brief |
 | `/about.md` | Human/agent Markdown product page |
 | `/m/<slug>/` | Static per-model cards (zero JS, provenance-labeled) + `/m/` index |
-| `/embed/<slug>.html` | Iframe-embeddable per-model cards |
+| `/embed/<slug>` | Iframe-embeddable per-model cards (legacy `/embed/<slug>.html` links 308-redirect to the canonical path) |
 | `/blog/2026-08-24-model-observatory/` | Launch post (SEO + AIGEO structured) |
 | `/frontier-watch.md` | Pareto-frontier movement log (price × intelligence) |
 | `index.html` meta + JSON-LD | Classic SEO, social, and schema.org metadata |

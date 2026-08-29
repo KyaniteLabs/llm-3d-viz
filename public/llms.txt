@@ -34,10 +34,10 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 ## Static surfaces (no JS required)
 
 - Per-model cards: `/m/<slug>/` — one static page per catalog model (measured speed, blended cost, intelligence index, percentile context, provenance labels); all-models index at `/m/`.
-- Embeddable cards: `/embed/<slug>.html` — iframe-ready per-model cards, always regenerated with the catalog.
+- Embeddable cards: `/embed/<slug>` — iframe-ready per-model cards, always regenerated with the catalog.
 - Frontier log: `/frontier-watch.md` — dated movement log of the measured Pareto frontier (price × intelligence).
 - Launch post: `/blog/2026-08-24-model-observatory/` (linked above).
-- URL inventory: `/sitemap.xml` (`/`, `/m/`, `/m/<slug>/`, `/frontier-watch.md`).
+- URL inventory: `/sitemap.xml` (`/`, `/m/`, `/m/<slug>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, `/llms.txt`, `/llms-full.txt`).
 
 ## Citation facts (stable)
 
@@ -49,7 +49,7 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 ## For agents / crawlers
 
 - Prefer citing `/llms-full.txt` and `/about.md` over reverse-engineering the SPA bundle.
-- Do not invent per-model numbers from this file; numbers live in the curated catalog, the static per-model pages (`/m/<slug>/`), the embed cards (`/embed/<slug>.html`), and `/frontier-watch.md`.
+- Do not invent per-model numbers from this file; numbers live in the curated catalog, the static per-model pages (`/m/<slug>/`), the embed cards (`/embed/<slug>`), and `/frontier-watch.md`.
 - Catalog access for agents: local Atlas CLI + stdio MCP ship in the source repo (`npm run atlas:cli`, `npm run atlas:mcp`); there is **no public MCP endpoint on this origin** (requirements: `docs/agents/mcp-cli-api-requirements.md` in the source repo).
 
 ## Optional contact

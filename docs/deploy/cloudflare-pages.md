@@ -17,7 +17,7 @@
 
 ## What ships
 
-- Multi-surface static site: the 3D observatory SPA at `/` (query-driven state; `?heat=1` opts in to the diagnostic heat encoding, default off), generated per-model pages `/m/<slug>/` + all-models `/m/` index, embeddable cards `/embed/<slug>.html`, the blog post `/blog/2026-08-24-model-observatory/`, and the `/frontier-watch.md` movement log.
+- Multi-surface static site: the 3D observatory SPA at `/` (query-driven state; `?heat=1` opts in to the diagnostic heat encoding, default off), generated per-model pages `/m/<slug>/` + all-models `/m/` index, embeddable cards `/embed/<slug>`, the blog post `/blog/2026-08-24-model-observatory/`, and the `/frontier-watch.md` movement log.
 - Self-hosted fonts (Inter Tight + IBM Plex Mono woff2 under `/assets/`).
 - Plotly bundle (~4.9 MB JS / ~1.5 MB gzip) — acceptable for Pages; first load is the cost.
 

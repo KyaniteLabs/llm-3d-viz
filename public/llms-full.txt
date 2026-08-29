@@ -26,10 +26,10 @@ Query params (subset): `decide=1`, `floor=`, `bias=`, `anchor=`, `providers=`, `
 Generated from the catalog on every build (zero JS, self-contained):
 
 - `/m/<slug>/` — one static card per catalog model: measured tok/s, blended $/M, intelligence index (+ coding/agentic indexes where measured), percentile context across the catalog, per-field provenance labels, catalog-date stamp. All-models index: `/m/`.
-- `/embed/<slug>.html` — iframe-embeddable per-model cards, regenerated with every catalog refresh.
+- `/embed/<slug>` — iframe-embeddable per-model cards, regenerated with every catalog refresh.
 - `/frontier-watch.md` — dated movement log of the measured Pareto frontier (blended price ↓ × intelligence index ↑); `/frontier-watch.json` carries the machine-readable diff.
 - `/blog/2026-08-24-model-observatory/` — launch post (SEO + AIGEO structured).
-- `/sitemap.xml` — `/`, `/m/`, every `/m/<slug>/`, and `/frontier-watch.md`.
+- `/sitemap.xml` — `/`, `/m/`, every `/m/<slug>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, and self-listings for `/llms.txt` and `/llms-full.txt`.
 
 Per-model numbers on these pages are catalog-sourced and labeled as such; lab-measured lanes stay separate by design.
 
