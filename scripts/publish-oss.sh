@@ -110,8 +110,11 @@ fi
 echo "[oss-publish] sweep clean"
 
 echo "[oss-publish] gate: tsc + build"
-npx tsc --noEmit
-npx vite build >/dev/null
+# Failure here must ALSO restore main (2026-08-29: a tsc failure stranded the
+# session on the publish branch and silently swallowed a follow-up commit —
+# same class as the dry-run restoration bug).
+npx tsc --noEmit || { git checkout -q main; exit 5; }
+npx vite build >/dev/null || { git checkout -q main; exit 5; }
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[oss-publish] DRY RUN — stopping before push."
