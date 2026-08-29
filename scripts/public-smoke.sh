@@ -88,5 +88,13 @@ else
   fail "sitemap lists no /compare/ URLs — staged compare surface missing"
 fi
 
-echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap, model card, embed lane, compare lane)"
+# 8c) Feed lane: frontier-watch.xml serves real Atom with entries + the right
+#     content-type (phase 4).
+feed="$(fetch "$PUBLIC_ORIGIN/frontier-watch.xml")"
+[[ "$feed" == *"<feed xmlns=\"http://www.w3.org/2005/Atom\">"* ]] || fail "frontier-watch.xml is not an Atom feed"
+[[ "$feed" == *"<entry>"* ]] || fail "frontier-watch.xml has no entries"
+feed_headers="$(curl -sSLI --max-time 20 "$PUBLIC_ORIGIN/frontier-watch.xml" 2>/dev/null || true)"
+[[ "$feed_headers" == *"atom+xml"* ]] || fail "frontier-watch.xml lacks application/atom+xml content-type"
+
+echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap, model card, embed lane, compare lane, feed lane)"
 exit 0
