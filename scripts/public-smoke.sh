@@ -76,5 +76,17 @@ if [[ -n "$smoke_slug" ]]; then
   [[ "$embed_headers" == *"frame-ancestors"* ]] || fail "embed lane missing Content-Security-Policy frame-ancestors (embeds dead under XFO DENY)"
 fi
 
-echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap, model card, embed lane)"
+# 8b) Compare lane: at least one staged compare page serves REAL generated
+#     content (verdict block + canonical), not the SPA shell.
+compare_slug="$(printf '%s' "$sitemap" | grep -oE '/compare/[a-z0-9-]+-vs-[a-z0-9-]+/' | head -1)"
+if [[ -n "$compare_slug" ]]; then
+  cmp_page="$(fetch "$PUBLIC_ORIGIN$compare_slug")"
+  [[ "$cmp_page" == *"measured comparison"* ]] || fail "compare page $compare_slug is not generated (SPA shell?)"
+  [[ "$cmp_page" == *'class="verdict'* ]] || fail "compare page $compare_slug lacks its verdict block"
+  [[ "$cmp_page" == *'rel=canonical'* ]] || fail "compare page $compare_slug lacks canonical"
+else
+  fail "sitemap lists no /compare/ URLs — staged compare surface missing"
+fi
+
+echo "[smoke] all content assertions passed (index, entry asset, blog, llms.txt, sitemap, model card, embed lane, compare lane)"
 exit 0
