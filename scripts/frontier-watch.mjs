@@ -13,16 +13,22 @@ import { fireAlert } from './lib/catalog-alerts.mjs';
 import { slug } from './lib/slug.mjs';
 import { computeFrontier } from './lib/frontier.mjs';
 import { seedFromLogLines, mergeEvents, buildAtom } from './lib/atom.mjs';
+import { loadCatalog, DATA_PLANE } from './lib/catalog-loader.mjs';
 // kernel re-export moved to scripts/lib/frontier.mjs (plan 2026-08-29 phase 2);
 // kept here so existing imports (tests) stay stable.
 export { computeFrontier };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const STATE = join(ROOT, '.cache/frontier-watch/last.json');
+// Path C (2026-08-29): state + durable history are PLANE-KEYED — a public
+// build (trimmed catalog) must never emit "model LEFT frontier" events into
+// the private plane's history or vice versa. The public output filenames
+// stay the same; only the side-state diverges.
+const PLANE = DATA_PLANE; // 'public' | 'private' (from catalog-loader)
+const STATE = join(ROOT, `.cache/frontier-watch/last${PLANE === 'public' ? '.public' : ''}.json`);
 const OUT_JSON = join(ROOT, 'public/frontier-watch.json');
 const OUT_MD = join(ROOT, 'public/frontier-watch.md');
 
-const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
+const rows = loadCatalog();
 const frontier = computeFrontier(rows);
 const now = new Date();
 const prev = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : null;
@@ -55,7 +61,7 @@ writeFileSync(STATE, JSON.stringify({ as_of: now.toISOString(), frontier, log },
 // Phase 4 (plan 2026-08-29): durable committed event history + Atom feed.
 // The feed source is data/frontier-events.generated.json (committed, unbounded
 // history) — NOT .cache (gitignored + capped at 30, empty on fresh clones).
-const DURABLE = join(ROOT, 'data/frontier-events.generated.json');
+const DURABLE = join(ROOT, `data/frontier-events${PLANE === 'public' ? '.public' : ''}.generated.json`);
 let history = existsSync(DURABLE) ? JSON.parse(readFileSync(DURABLE, 'utf8')) : seedFromLogLines(prev?.log);
 history = mergeEvents(history, events.map(e => ({ date: now.toISOString().slice(0, 10), text: e.text })));
 writeFileSync(DURABLE, JSON.stringify(history, null, 1));

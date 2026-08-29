@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import { allModels, validateModels } from "./src/data/models";
@@ -17,6 +17,32 @@ function validateDataset(): Plugin {
     name: "validate-model-dataset",
     buildStart() {
       validateModels(allModels);
+    },
+  };
+}
+
+/**
+ * Path C data plane (docs/plans/2026-08-29-path-c-data-plane.md): when
+ * VIZ_DATA_PLANE=public, serve the trimmed catalog in place of the full
+ * draft inside the SPA build, so AA/OpenRouter-derived values never enter
+ * the public bundle. The config-side import above still validates the full
+ * draft (D18) regardless of plane.
+ */
+function publicDataPlane(): Plugin {
+  if (process.env.VIZ_DATA_PLANE !== "public") {
+    return { name: "path-c-public-plane", enforce: "pre" };
+  }
+  const fullId = resolve(process.cwd(), "data/models.v0.draft.json");
+  const trimmed = readFileSync(
+    resolve(process.cwd(), "data/generated/public-catalog.json"),
+    "utf8",
+  );
+  return {
+    name: "path-c-public-plane",
+    enforce: "pre",
+    load(id) {
+      if (id === fullId) return trimmed;
+      return null;
     },
   };
 }
@@ -223,7 +249,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    plugins: [validateDataset(), atlasUnslothProxyPlugin(env)],
+    plugins: [publicDataPlane(), validateDataset(), atlasUnslothProxyPlugin(env)],
     // Kokoro / transformers.js: keep ONNX WASM + dynamic import out of the main bundle.
     optimizeDeps: {
       exclude: ["kokoro-js", "@huggingface/transformers"],

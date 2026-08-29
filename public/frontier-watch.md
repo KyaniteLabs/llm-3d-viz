@@ -1,6 +1,6 @@
 # Frontier Watch — the measured Pareto frontier (price × intelligence)
 
-Computed 2026-08-29T16:26:17.039Z from the live catalog (323 models; frontier = 8). Regenerated on every catalog refresh (3×/day); the public site deploys on approval, so the public copy updates when the site deploys. Alerts fire on movement.
+Computed 2026-08-29T18:45:26.767Z from the live catalog (323 models; frontier = 8). Regenerated on every catalog refresh (3×/day); the public site deploys on approval, so the public copy updates when the site deploys. Alerts fire on movement.
 
 ## Current frontier (cheapest first)
 
@@ -18,5 +18,3 @@ Computed 2026-08-29T16:26:17.039Z from the live catalog (323 models; frontier = 
 ## Movement log
 
 - 2026-08-29 no movement this refresh
-- **2026-08-28** NEW on frontier: Agnes 2.5 Pro Beta (Sapiens AI) — $0.06/M at intelligence 49.1,- **2026-08-28** NEW on frontier: Qwen3.8-Flash-Next (Alibaba) — $0.09/M at intelligence 55.8
-- **2026-08-27** NEW on frontier: GLM-5.3-Flash (Z AI) — $0.10/M at intelligence 57.5,- **2026-08-27** LEFT frontier: Hy3 (dominated or delisted),- **2026-08-27** LEFT frontier: GPT-5.6 Luna (xhigh) (dominated or delisted),- **2026-08-27** LEFT frontier: DeepSeek V4 Flash 0731 (Reasoning, Max Effort) (dominated or delisted),- **2026-08-27** LEFT frontier: Qwen3.8 27B (xhigh) (dominated or delisted),- **2026-08-27** LEFT frontier: Gemini 3.7 Flash (high) (dominated or delisted)

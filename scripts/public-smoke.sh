@@ -78,21 +78,31 @@ fi
 
 # 8b) Compare lane: at least one staged compare page serves REAL generated
 #     content (verdict block + canonical), not the SPA shell.
+#     Path C (2026-08-29): the PUBLIC plane strips AA-derived fields, so the
+#     compare selector legitimately emits ZERO pages (no pair has both sides
+#     measured). Empty is a pass on the public plane; the private instance
+#     smoke keeps expecting pages.
 compare_slug="$(printf '%s' "$sitemap" | grep -oE '/compare/[a-z0-9-]+-vs-[a-z0-9-]+/' | head -1)"
 if [[ -n "$compare_slug" ]]; then
   cmp_page="$(fetch "$PUBLIC_ORIGIN$compare_slug")"
   [[ "$cmp_page" == *"measured comparison"* ]] || fail "compare page $compare_slug is not generated (SPA shell?)"
   [[ "$cmp_page" == *'class="verdict'* ]] || fail "compare page $compare_slug lacks its verdict block"
   [[ "$cmp_page" == *'rel=canonical'* ]] || fail "compare page $compare_slug lacks canonical"
+elif [[ "${VIZ_DATA_PLANE:-private}" == "public" ]]; then
+  echo "  compare: none in sitemap — expected on the public plane (no pair measured-both)"
 else
   fail "sitemap lists no /compare/ URLs — staged compare surface missing"
 fi
 
 # 8c) Feed lane: frontier-watch.xml serves real Atom with entries + the right
-#     content-type (phase 4).
+#     content-type (phase 4). Path C: the PUBLIC plane's durable history
+#     starts empty (events are plane-keyed) — an entryless feed is a valid
+#     public state until movement happens there.
 feed="$(fetch "$PUBLIC_ORIGIN/frontier-watch.xml")"
 [[ "$feed" == *"<feed xmlns=\"http://www.w3.org/2005/Atom\">"* ]] || fail "frontier-watch.xml is not an Atom feed"
-[[ "$feed" == *"<entry>"* ]] || fail "frontier-watch.xml has no entries"
+if [[ "$feed" != *"<entry>"* && "${VIZ_DATA_PLANE:-private}" != "public" ]]; then
+  fail "frontier-watch.xml has no entries"
+fi
 feed_headers="$(curl -sSLI --max-time 20 "$PUBLIC_ORIGIN/frontier-watch.xml" 2>/dev/null || true)"
 [[ "$feed_headers" == *"atom+xml"* ]] || fail "frontier-watch.xml lacks application/atom+xml content-type"
 

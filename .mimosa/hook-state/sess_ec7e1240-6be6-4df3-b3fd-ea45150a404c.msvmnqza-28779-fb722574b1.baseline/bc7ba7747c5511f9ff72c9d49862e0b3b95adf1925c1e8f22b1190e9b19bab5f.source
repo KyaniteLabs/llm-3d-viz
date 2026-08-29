@@ -1,0 +1,229 @@
+import type { Model } from "../data/models";
+import { frontier } from "../lib/pareto";
+import { normalizedScores, weightedOptimum } from "../lib/score";
+import { displayName } from "../lib/display-name";
+import { INTELLIGENCE_TASK_ANCHORS } from "../lib/intelligence-task-anchors";
+import type { AppState, AppStore } from "../state";
+import { legendEntries, labLegendEntries, type PresentationMode } from "../viz/palette";
+import { MARK_GLYPH_LEGEND } from "../viz/mark-encoding";
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  })[character] ?? character);
+}
+
+/**
+ * HTML comprehension rail for the Plotly stage. Frontier names are kept in a
+ * stable DOM list rather than positioned over 3D coordinates: Plotly v0 does
+ * not expose a supported 3D-to-pixel projection for camera-following labels.
+ */
+export class StageGuide {
+  private readonly root: HTMLElement;
+  private readonly store: AppStore;
+  private models: readonly Model[];
+  private readonly heatEncoding: boolean;
+  private readonly presentationMode: PresentationMode;
+  /** User-controlled open state; null until first paint (then defaults apply). */
+  private stageKeyOpen: boolean | null = null;
+  private glyphOpen: boolean | null = null;
+
+  constructor(
+    root: HTMLElement,
+    store: AppStore,
+    models: readonly Model[],
+    heatEncoding = true,
+    presentationMode: PresentationMode = "curve",
+  ) {
+    this.root = root;
+    this.store = store;
+    this.models = models;
+    this.heatEncoding = heatEncoding;
+    this.presentationMode = presentationMode;
+    this.store.subscribe((state) => this.render(state));
+  }
+
+  /** Replace catalog with the current visible set (score/frontier must match stage). */
+  setModels(models: readonly Model[]) {
+    this.models = models;
+    this.render(this.store.getState());
+  }
+
+  private captureDisclosureState() {
+    const stage = this.root.querySelector<HTMLDetailsElement>(".stage-guide-disclosure");
+    const glyph = this.root.querySelector<HTMLDetailsElement>(".glyph-disclosure");
+    if (stage) this.stageKeyOpen = stage.open;
+    if (glyph) this.glyphOpen = glyph.open;
+  }
+
+  private defaultOpen(isCompact: boolean): { stage: boolean; glyph: boolean } {
+    // Desktop: STAGE KEY open so encoding is glanceable.
+    // Mobile: closed by default — open HUD eats the stage (see mobile shot).
+    // User open state is sticky after first toggle.
+    return {
+      stage: this.stageKeyOpen ?? !isCompact,
+      glyph: this.glyphOpen ?? !isCompact,
+    };
+  }
+
+  private render(state: Readonly<AppState>) {
+    this.captureDisclosureState();
+    const frontierModels = frontier(this.models).sort((a, b) => a.model.localeCompare(b.model));
+    // Decide mode: no value-score optimum (B′ single ranking authority).
+    const optimum = state.decideMode
+      ? undefined
+      : weightedOptimum(normalizedScores(this.models, state.weights, this.models))?.model;
+    const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches;
+    const open = this.defaultOpen(isCompact);
+
+    this.root.innerHTML = `
+      <details class="stage-guide-disclosure"${open.stage ? " open" : ""}>
+        <summary><span>STAGE KEY</span><span class="stage-guide-count">${frontierModels.length} FRONTIER</span></summary>
+        <div class="stage-guide-body">
+          <section class="stage-legend" aria-label="Stage legend">
+            <p class="stage-guide-heading">ENCODING</p>
+            <ul class="semantic-key">
+              ${legendEntries(this.presentationMode, this.heatEncoding)
+                .filter((e) => e.id !== "heat-note")
+                .map(
+                  (e) =>
+                    `<li data-legend-entry="${e.id}"><span class="key-mark key-mark--${e.id}" aria-hidden="true"></span><span><strong>${e.title}</strong><small>${e.detail}</small></span></li>`,
+                )
+                .join("")}
+            </ul>
+            ${
+              this.heatEncoding
+                ? '<p class="heat-encoding-note" data-heat-encoding="true">HEAT ON · copper→filament by value score (diagnostic ?heat=1).</p>'
+                : this.presentationMode === "curve"
+                  ? '<p class="heat-encoding-note" data-heat-encoding="false">Lab = color · ring/core on focus · shape = open/closed wire · size = score. Ridge is loudest line.</p>'
+                  : '<p class="heat-encoding-note" data-heat-encoding="false">OPENNESS MODE · blue/slate fill primary. Glyphs = open/closed wire only.</p>'
+            }
+          </section>
+
+          <details class="lab-disclosure" open>
+            <summary class="stage-guide-heading">LAB COLORS · ${labLegendEntries(
+              this.models.map((m) => m.provider),
+              this.models.map((m) => ({ provider: m.provider, model: m.model })),
+            ).length}</summary>
+            <section class="lab-key" aria-label="Lab color key">
+              <ul class="lab-color-list">
+                ${labLegendEntries(
+                  this.models.map((m) => m.provider),
+                  this.models.map((m) => ({ provider: m.provider, model: m.model })),
+                )
+                  .map(({ provider, colors }) => {
+                    const shown = colors.slice(0, Math.max(3, Math.min(5, colors.length)));
+                    const hexLine = shown.map((c) => escapeHtml(c)).join(" · ");
+                    const chips = shown
+                      .map(
+                        (c, i) =>
+                          `<span class="lab-swatch lab-swatch--n${i}" style="background:${escapeHtml(c)}; box-shadow: inset 0 0 0 1px rgba(231,226,216,0.2)"></span>`,
+                      )
+                      .join("");
+                    return `<li data-lab="${escapeHtml(provider)}">
+                        <span class="lab-swatch-strip" aria-hidden="true">${chips}</span>
+                        <span>${escapeHtml(provider)} <small class="lab-hex">${hexLine}</small></span>
+                      </li>`;
+                  })
+                  .join("")}
+              </ul>
+              <p class="stage-guide-note">Color = lab brand fill always (glanceable). Outer ring + core only on focus (solo / selected / full-brand / cinema focus) — not always-on. Qwen is violet (not Alibaba orange). Family shades the primary.</p>
+            </section>
+          </details>
+
+          <details class="glyph-disclosure"${open.glyph ? " open" : ""}>
+            <summary class="stage-guide-heading">GLYPHS · OPEN VS CLOSED (ALL WIRE)</summary>
+            <section class="provider-key glyph-key" aria-label="Glyph encoding key">
+              <ul class="provider-shape-list">
+                ${MARK_GLYPH_LEGEND.map(
+                  (row) => `<li data-glyph-key="${escapeHtml(row.id)}" data-provider-shape="${escapeHtml(row.plotlySymbol)}">
+                  <span class="provider-glyph provider-glyph--${escapeHtml(row.plotlySymbol)}" aria-label="${escapeHtml(row.title)}" role="img"></span>
+                  <span><strong>${escapeHtml(row.title)}</strong><small> · ${escapeHtml(row.detail)}</small></span>
+                </li>`,
+                ).join("")}
+              </ul>
+              <p class="stage-guide-note">Wire sphere = closed weights · wire octa = open weights. All marks wireframe. Reasoning is not a shape (inspector only). Lab is never shape.</p>
+            </section>
+          </details>
+
+          <section class="intel-task-anchors" aria-label="Intelligence Index task frames of reference">
+            <p class="stage-guide-heading">INTELLIGENCE · WHAT WORK LOOKS LIKE</p>
+            <ol class="intel-task-list">
+              ${INTELLIGENCE_TASK_ANCHORS.map(
+                (a) =>
+                  `<li data-intel-anchor="${a.index}" title="${escapeHtml(a.sources)}">
+                    <span class="intel-task-index">~${Math.round(a.index)}</span>
+                    <span>
+                      <strong>${escapeHtml(a.short)}</strong>
+                      <small>${escapeHtml(a.example)}</small>
+                    </span>
+                  </li>`,
+              ).join("")}
+            </ol>
+            <p class="stage-guide-note">
+              Callouts sit outside the cube on the intelligence axis — orientation only, not hard floors.
+              Decide floor stays yours.
+            </p>
+          </section>
+
+          <section class="frontier-labels" aria-label="Frontier model labels">
+            <p class="stage-guide-heading">FRONTIER MODELS</p>
+            <ol class="frontier-model-list">
+              ${frontierModels.map((model) => {
+                const isOptimum = model.model === optimum?.model;
+                return `<li data-frontier-model="${escapeHtml(model.model)}"${isOptimum ? ' data-optimum="true"' : ""}>
+                  <span class="frontier-model-status">${isOptimum ? "OPTIMUM" : "FRONTIER"}</span>
+                  <strong>${escapeHtml(displayName(model.model))}</strong>
+                  <small>${escapeHtml(model.provider)}</small>
+                </li>`;
+              }).join("")}
+            </ol>
+            <p class="stage-guide-note" id="frontier-label-note">Names stay in this HTML rail so they remain legible through camera moves; Plotly v0 has no 3D-to-pixel label API.</p>
+          </section>
+        </div>
+        <!-- H2: overlay affordance pinned over the scroll region's bottom edge -->
+        <p class="stage-guide-more" data-stage-guide-more hidden aria-hidden="true"></p>
+      </details>`;
+
+    // Persist toggles from user interaction without waiting for the next store tick.
+    this.root.querySelector(".stage-guide-disclosure")?.addEventListener("toggle", (event) => {
+      this.stageKeyOpen = (event.currentTarget as HTMLDetailsElement).open;
+      requestAnimationFrame(() => this.updateOverflowAffordance());
+    });
+    this.root.querySelector(".glyph-disclosure")?.addEventListener("toggle", (event) => {
+      this.glyphOpen = (event.currentTarget as HTMLDetailsElement).open;
+    });
+    this.root
+      .querySelector(".stage-guide-body")
+      ?.addEventListener("scroll", () => this.updateOverflowAffordance(), { passive: true });
+    requestAnimationFrame(() => this.updateOverflowAffordance());
+  }
+
+  /**
+   * H2 (uiux 2026-08-15): the open STAGE KEY is a contained, visibly scrollable
+   * region — never a silent cut. When entries (labs, glyphs, frontier models)
+   * sit below the fold, a sticky fade + "+N more" count appears at the bottom
+   * edge; it clears once the user reaches the end.
+   */
+  private updateOverflowAffordance() {
+    const body = this.root.querySelector<HTMLElement>(".stage-guide-body");
+    const hint = this.root.querySelector<HTMLElement>("[data-stage-guide-more]");
+    if (!body || !hint) return;
+    const more = body.scrollHeight - body.clientHeight > 8;
+    if (!more) {
+      hint.hidden = true;
+      return;
+    }
+    const fold = body.getBoundingClientRect().bottom - 4;
+    let below = 0;
+    for (const li of body.querySelectorAll<HTMLElement>("li")) {
+      if (li.getBoundingClientRect().top >= fold) below++;
+    }
+    hint.hidden = below === 0;
+    if (below > 0) hint.textContent = `+${below} more below · scroll`;
+  }
+}

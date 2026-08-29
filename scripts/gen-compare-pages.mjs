@@ -13,6 +13,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { slug } from './lib/slug.mjs';
 import { selectComparePairs, comparePath } from './lib/compare-pairs.mjs';
+import { loadCatalog } from './lib/catalog-loader.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGIN = 'https://viz.kyanitelabs.tech';
@@ -125,7 +126,7 @@ export function pairsFromPaths(paths, bySlug) {
 }
 
 function main() {
-  const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
+  const rows = loadCatalog();
   const dataDate = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
   const { page, bySlug } = createCompareTemplates(rows, dataDate);
   const paths = selectComparePairs(rows, { cap: CAP });

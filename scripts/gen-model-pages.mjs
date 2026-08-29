@@ -17,6 +17,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { slug } from './lib/slug.mjs';
 import { selectComparePairsDetailed } from './lib/compare-pairs.mjs';
+import { loadCatalog } from './lib/catalog-loader.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGIN = 'https://viz.kyanitelabs.tech';
@@ -43,6 +44,9 @@ h1{font-size:24px;margin:0 0 2px}.sub{color:#6b7686;margin:0 0 12px;font-size:13
 .bar i{display:block;height:4px;border-radius:2px;background:#0b62d6}
 .note{border-top:1px solid #e3e8ef;margin-top:18px;padding-top:10px;font-size:12px;color:#6b7686}
 pre{background:#f5f7fa;border:1px solid #e3e8ef;border-radius:8px;padding:10px;font-size:12px;overflow:auto}`;
+// Path C hygiene (2026-08-29): every generated surface carries the
+// non-affiliation line + the attribution/takedown page link.
+const FOOTER = `<p class=note>Model names are trademarks of their respective owners. Not affiliated with, endorsed by, or sponsored by any provider or measurement service. <a href="${ORIGIN}/sources/">Sources, attribution &amp; corrections</a>.</p>`;
 
 // ---- pure template factory (exported for tests) ----
 export function createTemplates(rows, dataDate, compareBySlug = {}) {
@@ -101,6 +105,7 @@ ${compareBySlug[s]?.length ? `<p><b>Comparisons</b> (measured vs nearest neighbo
 <p class=note>Released ${esc(r.release_date ?? '—')} · catalog data ${esc(dataDate)} · field-level provenance shown per metric above
 (measured / derived / list, from the catalog <code>sources</code> map); percentiles computed across the ${rows.length}-model catalog at generation time.
 Numbers are catalog-sourced and labeled as such — lab-measured lanes stay separate by design. Generated page — do not hand-edit.</p>
+${FOOTER}
 </div></body></html>`;
   }
 
@@ -109,7 +114,7 @@ Numbers are catalog-sourced and labeled as such — lab-measured lanes stay sepa
 <title>${esc(r.model)} — model card</title><style>${CSS}body{background:transparent}</style></head><body><div class=w style="max-width:640px;padding:10px">
 <h1 style="font-size:16px">${esc(r.model)} <span class=prov>${esc(r.provider)}</span></h1>
 <div class=grid style="margin:6px 0;gap:6px">${metrics(r).slice(0, 3).map(([l, v]) => `<div class=kpi style=padding:6px 8px><b style="font-size:15px">${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>
-<p class=prov>catalog ${esc(dataDate)} · <a href="${ORIGIN}/m/${slug(r.model)}/">full card →</a></p>
+<p class=prov>catalog ${esc(dataDate)} · <a href="${ORIGIN}/m/${slug(r.model)}/">full card →</a> · <a href="${ORIGIN}/sources/">sources</a></p>
 </div></body></html>`;
   }
 
@@ -129,6 +134,7 @@ Numbers are catalog-sourced and labeled as such — lab-measured lanes stay sepa
 <style>${CSS}</style></head><body><div class=w>
 <h1>Model cards</h1><p class=sub>${rows.length} models · catalog ${dataDate} · each card self-contained and embeddable</p>
 ${items}
+${FOOTER}
 </div></body></html>`;
   }
   return { page, embedCard, indexPage, metrics };
@@ -162,7 +168,7 @@ export function buildRedirects(aliases, currentSlugs) {
 }
 
 function main() {
-  const rows = JSON.parse(readFileSync(join(ROOT, 'data/models.v0.draft.json'), 'utf8'));
+  const rows = loadCatalog();
   // same catalog the site builds from (src/data/models.ts) — pages regenerate on every refresh
   const dataDate = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
   const comparePairs = selectComparePairsDetailed(rows);
@@ -197,6 +203,8 @@ function main() {
     base = [...readFileSync(SM, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
       .filter(u => !u.includes('/m/') && !u.includes('/embed/') && !u.includes('/compare/') && !u.endsWith('/frontier-watch.md'));
   } catch { /* first run: keep default */ }
+  // Path C hygiene surface (2026-08-29): the sources/attribution page is a permanent base URL.
+  if (!base.includes(ORIGIN + '/sources/')) base.push(ORIGIN + '/sources/');
   writeFileSync(SM, buildSitemap(base, slugs, comparePairs.map(p => p.path)));
   console.log(`sitemap: ${base.length} base + ${slugs.length} model cards + ${comparePairs.length} compare pages`);
 

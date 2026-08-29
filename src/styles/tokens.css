@@ -1653,6 +1653,18 @@ html.is-cinema .cinema-exit-fab {
   text-underline-offset: 2px;
 }
 
+/* Path C hygiene (2026-08-29): non-affiliation line rides the status bar. */
+.trademark-note {
+  flex: 0 1 auto;
+  opacity: 0.72;
+  letter-spacing: 0.02em;
+  font-size: 0.625rem; /* L8 micro-type floor: 10px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-shell.is-cinema .trademark-note { display: none !important; }
+
 .table-pane {
   min-height: 0;
   overflow: hidden;

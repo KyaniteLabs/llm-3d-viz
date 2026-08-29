@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/gen-model-pages.mjs && node scripts/gen-compare-pages.mjs && node scripts/frontier-watch.mjs && vite build",
+    "build:public": "node scripts/gen-public-catalog.mjs && VIZ_DATA_PLANE=public npm run build",
     "preview": "node scripts/preview.mjs",
     "test": "vitest run",
     "test:render": "playwright test",
