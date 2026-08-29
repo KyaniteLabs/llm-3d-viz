@@ -85,7 +85,7 @@ if [ ! -f data/generated/public-catalog.json ]; then
 fi
 cp data/generated/public-catalog.json data/models.v0.draft.json
 git rm -q data/atlas-catalog-snapshot.json data/atlas-catalog-meta.json \
-  data/catalog-diff.generated.json data/effort-gaps.generated.json \
+  data/catalog-diff.generated.json \
   data/frontier-events.generated.json 2>/dev/null || true
 git add data/models.v0.draft.json
 git commit -qm "chore(oss): public-plane data only (Path C 2026-08-29) — AA/OpenRouter-derived values never ship to OSS" || true
