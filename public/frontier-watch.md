@@ -1,6 +1,6 @@
 # Frontier Watch — the measured Pareto frontier (price × intelligence)
 
-Computed 2026-08-29T15:14:04.045Z from the live catalog (323 models; frontier = 8). This page regenerates on every catalog refresh (3×/day). Alerts fire on movement.
+Computed 2026-08-29T15:47:44.144Z from the live catalog (323 models; frontier = 8). Regenerated on every catalog refresh (3×/day); the public site deploys on approval, so the public copy updates when the site deploys. Alerts fire on movement.
 
 ## Current frontier (cheapest first)
 
