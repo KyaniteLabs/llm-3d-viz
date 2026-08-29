@@ -1,0 +1,3 @@
+# BUG-SMELL-REGISTRY — llm-3d-viz (PM seat)
+
+- 2026-08-29T18:00:25Z | session-memory continuity loss → false claims | surfaces: PM session summary + CS queue builds | PM told CEO "we never tested Ornith-1.5-35B" (desk had run it: CS-032/033 battery vs champion) and "nothing Ornith running" (CRACK-Ornith was resident floor per 08-26 CEO word, window-displaced); same class hit CS-145/146 (queued already-benched models without joining CS-032/033 + RUNBOOK floor revisions) | prevention: memory catalog-vs-desk-measurement.md + CS-147 systemic note #5 (queue builds sweep prior KILL/RETRACT + floor revisions first)
