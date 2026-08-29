@@ -117,7 +117,7 @@ Yes. It is an MIT-licensed build, and [docs/forkers/README.md](docs/forkers/READ
 
 ## Status
 
-The live product is **https://viz.kyanitelabs.tech/**. The repository currently has **606 unit tests green + 1 skip** (per HEAD run, 2026-08-29), with the data pipeline (Artificial Analysis + OpenRouter + Arena, honesty-core nulls, provenance stamps, canary/alerting with stage-truthful failure codes and supersede-drift alerts) and the full S+ visual program (four independent vision critics, zero mechanical defects) landed through 2026-08-26; the distribution-surface phase 0+1 (embed framing lane, per-card canonical/og/JSON-LD, provenance chips, shared slug lib + alias registry) landed 2026-08-29. The build is fork-friendly; production deploy configuration is operator-specific and is not required to run or fork the project.
+The live product is **https://viz.kyanitelabs.tech/**. The repository currently has **616 unit tests green + 1 skip** (per HEAD run, 2026-08-29), with the data pipeline (Artificial Analysis + OpenRouter + Arena, honesty-core nulls, provenance stamps, canary/alerting with stage-truthful failure codes and supersede-drift alerts) and the full S+ visual program (four independent vision critics, zero mechanical defects) landed through 2026-08-26; the distribution-surface phase 0+1 (embed framing lane, per-card canonical/og/JSON-LD, provenance chips, shared slug lib + alias registry) landed 2026-08-29. The build is fork-friendly; production deploy configuration is operator-specific and is not required to run or fork the project.
 
 ## Source (two repos, not one mirror)
 
