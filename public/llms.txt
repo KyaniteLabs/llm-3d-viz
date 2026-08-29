@@ -35,9 +35,10 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 - Per-model cards: `/m/<slug>/` — one static page per catalog model (measured speed, blended cost, intelligence index, percentile context, provenance labels); all-models index at `/m/`.
 - Embeddable cards: `/embed/<slug>` — iframe-ready per-model cards, always regenerated with the catalog.
-- Frontier log: `/frontier-watch.md` — dated movement log of the measured Pareto frontier (price × intelligence).
+- Frontier log: `/frontier-watch.md` — dated movement log of the measured Pareto frontier (price × intelligence); machine-readable copy at `/frontier-watch.json`.
+- Head-to-head comparisons: `/compare/<a>-vs-<b>/` — static measured comparison pages (staged set; dominance-gated verdicts, null-honest); every model card links its comparisons.
 - Launch post: `/blog/2026-08-24-model-observatory/` (linked above).
-- URL inventory: `/sitemap.xml` (`/`, `/m/`, `/m/<slug>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, `/llms.txt`, `/llms-full.txt`).
+- URL inventory: `/sitemap.xml` (`/`, `/m/`, `/m/<slug>/`, `/compare/<a>-vs-<b>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, `/llms.txt`, `/llms-full.txt`).
 
 ## Citation facts (stable)
 

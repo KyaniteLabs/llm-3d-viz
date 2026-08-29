@@ -40,7 +40,7 @@ if (prev) {
 }
 
 writeFileSync(OUT_JSON, JSON.stringify({ as_of: now.toISOString(), frontier, events }, null, 1));
-let md = `# Frontier Watch — the measured Pareto frontier (price × intelligence)\n\nComputed ${now.toISOString()} from the live catalog (${rows.length} models; frontier = ${frontier.length}). This page regenerates on every catalog refresh (3×/day). Alerts fire on movement.\n\n## Current frontier (cheapest first)\n\n| model | provider | $/M blended | intelligence | tok/s |\n|---|---|---|---|---|\n`;
+let md = `# Frontier Watch — the measured Pareto frontier (price × intelligence)\n\nComputed ${now.toISOString()} from the live catalog (${rows.length} models; frontier = ${frontier.length}). Regenerated on every catalog refresh (3×/day); the public site deploys on approval, so the public copy updates when the site deploys. Alerts fire on movement.\n\n## Current frontier (cheapest first)\n\n| model | provider | $/M blended | intelligence | tok/s |\n|---|---|---|---|---|\n`;
 for (const m of frontier) md += `| [${m.model}](/m/${slug(m.model)}/) | ${m.provider} | $${m.price.toFixed(2)} | ${m.ii} | ${m.tps != null ? m.tps.toFixed(0) : '—'} |\n`;
 md += `\n## Movement log\n\n`;
 md += events.length ? events.map(e => `- **${now.toISOString().slice(0, 10)}** ${e.text}`).join('\n') + '\n' : `- ${now.toISOString().slice(0, 10)} no movement this refresh\n`;
