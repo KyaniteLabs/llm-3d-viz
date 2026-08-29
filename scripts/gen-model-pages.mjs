@@ -51,9 +51,13 @@ export function createTemplates(rows, dataDate) {
   const provKind = (r, field) => r.sources?.[field]?.kind ?? null;
 
   function metrics(r) {
+    // price percentile inverts (cheaper = higher); null price must stay null —
+    // `?? 0` here fabricated P100 "cheapest" bars for unmeasured prices (found
+    // in review 2026-08-29; shipped on seed-2-1-turbo / ox-alpha-stealth).
+    const pricePct = pct(r.blended_price_per_M, PRICE);
     const m = [
       ['Speed (tok/s)', num(r.tps, 1), pct(r.tps, TPS), provKind(r, 'tps')],
-      ['Blended $/M tok', money(r.blended_price_per_M), 100 - (pct(r.blended_price_per_M, PRICE) ?? 0), provKind(r, 'blended_price_per_M')],
+      ['Blended $/M tok', money(r.blended_price_per_M), pricePct == null ? null : 100 - pricePct, provKind(r, 'blended_price_per_M')],
       ['Intelligence index', r.aa_intelligence_index ?? '—', pct(r.aa_intelligence_index, II), provKind(r, 'aa_intelligence_index')],
       ['TTFT', r.ttft != null ? num(r.ttft, 0) + ' ms' : '—', null, provKind(r, 'ttft')],
       ['Context', r.context_length != null ? Math.round(r.context_length / 1000) + 'k' : '—', null, provKind(r, 'context_length')],
@@ -148,6 +152,9 @@ export function buildSitemap(prevBaseUrls, slugs) {
 export function buildRedirects(aliases, currentSlugs) {
   const stale = Object.entries(aliases).filter(([, target]) => !currentSlugs.has(target)).map(([, t]) => t);
   if (stale.length) throw new Error(`slug-aliases: target slug(s) missing from catalog: ${stale.join(', ')} — fix data/slug-aliases.json (rename? add the new entry)`);
+  // an alias SOURCE colliding with a live slug would 301-shadow a real page
+  const shadow = Object.keys(aliases).filter(from => currentSlugs.has(from));
+  if (shadow.length) throw new Error(`slug-aliases: source slug(s) still live in catalog: ${shadow.join(', ')} — a redirect would shadow those pages`);
   return Object.entries(aliases).map(([from, to]) => `/m/${from}/ /m/${to}/ 301`).join('\n') + (Object.keys(aliases).length ? '\n' : '');
 }
 

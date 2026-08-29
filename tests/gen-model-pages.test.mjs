@@ -51,6 +51,20 @@ describe('model page (createTemplates.page)', () => {
     expect(nullHtml).toContain('>—</b>');
     expect(nullHtml).not.toContain('NaN');
   });
+  it('NEVER fabricates a percentile for an unmeasured value (P100 honesty bug, review 2026-08-29)', () => {
+    const nullHtml = T.page(ROWS[1]);
+    expect(nullHtml).not.toContain('P100');
+    expect(nullHtml).not.toContain('P0<');
+    expect(nullHtml).not.toContain('width:100%');
+    expect(nullHtml).not.toContain('width:3%');
+  });
+  it('escapes hostile model names in attributes and keeps JSON-LD parseable', () => {
+    const hostile = { ...ROWS[0], model: 'Evil "Quote" & <Angle> Model' };
+    const html = T.page(hostile);
+    expect(html).not.toMatch(/title="[^"]*"[^>]*"[^>]*>/); // no raw quote breaks out of the first attr
+    expect(() => ldJson(html)).not.toThrow();
+    expect(ldJson(html).name).toContain('Evil "Quote" & <Angle> Model');
+  });
 });
 
 describe('index page', () => {
@@ -87,6 +101,9 @@ describe('slug alias registry -> _redirects', () => {
   });
   it('fails the build on a stale target (never ship a dead redirect)', () => {
     expect(() => buildRedirects({ 'old': 'renamed-away' }, new Set(['current']))).toThrow(/missing from catalog/);
+  });
+  it('fails the build when an alias source is still a live slug (redirect would shadow a real page)', () => {
+    expect(() => buildRedirects({ 'live-page': 'elsewhere' }, new Set(['live-page', 'elsewhere']))).toThrow(/still live/);
   });
   it('emits an empty file for an empty registry', () => {
     expect(buildRedirects({}, new Set(['x']))).toBe('');
