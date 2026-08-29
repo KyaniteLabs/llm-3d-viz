@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { fireAlert } from './lib/catalog-alerts.mjs';
 import { slug } from './lib/slug.mjs';
 import { computeFrontier } from './lib/frontier.mjs';
+import { seedFromLogLines, mergeEvents, buildAtom } from './lib/atom.mjs';
 // kernel re-export moved to scripts/lib/frontier.mjs (plan 2026-08-29 phase 2);
 // kept here so existing imports (tests) stay stable.
 export { computeFrontier };
@@ -50,6 +51,16 @@ writeFileSync(OUT_MD, md);
 mkdirSync(dirname(STATE), { recursive: true });
 const log = [...(events.length ? [events.map(e => `- **${now.toISOString().slice(0, 10)}** ${e.text}`)] : []), ...(prev?.log || [])].slice(0, 30);
 writeFileSync(STATE, JSON.stringify({ as_of: now.toISOString(), frontier, log }, null, 1));
+
+// Phase 4 (plan 2026-08-29): durable committed event history + Atom feed.
+// The feed source is data/frontier-events.generated.json (committed, unbounded
+// history) — NOT .cache (gitignored + capped at 30, empty on fresh clones).
+const DURABLE = join(ROOT, 'data/frontier-events.generated.json');
+let history = existsSync(DURABLE) ? JSON.parse(readFileSync(DURABLE, 'utf8')) : seedFromLogLines(prev?.log);
+history = mergeEvents(history, events.map(e => ({ date: now.toISOString().slice(0, 10), text: e.text })));
+writeFileSync(DURABLE, JSON.stringify(history, null, 1));
+writeFileSync(join(ROOT, 'public/frontier-watch.xml'), buildAtom(history));
+console.log(`frontier-feed: ${history.length} events in durable history -> public/frontier-watch.xml`);
 
 if (events.length && prev) {
   try {
