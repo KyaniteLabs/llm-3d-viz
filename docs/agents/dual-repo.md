@@ -23,7 +23,7 @@
 
 ## Publish OSS (operator)
 
-**Use the script (2026-08-20):** `scripts/publish-oss.sh [--dry-run]` — codifies the whole procedure: curation branch, internal-only removal (per the oss-publish precedents), hard-fail scrub sweep (private IPs / VPS hostname / fleet paths), Liani OSS-edition cherry-pick, tsc+build gate, force-with-lease push.
+**Use the script (2026-08-20):** `scripts/publish-oss.sh [--dry-run]` — codifies the whole procedure: curation branch, internal-only removal (per the oss-publish precedents), hard-fail scrub sweep (private IPs / VPS hostname / fleet paths / AA-origin provenance strings), Path C public-plane catalog swap (2026-08-29: OSS never ships AA/OpenRouter-derived values — the swap + red-line live in the script), Liani OSS-edition cherry-pick, tsc+build gate (failures restore main), force-with-lease push.
 
 Manual equivalent, if ever needed:
 

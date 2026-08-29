@@ -7,7 +7,7 @@
 
 Model Observatory is an interactive **3D data visualization** for comparing large language models on three axes:
 
-1. **Intelligence** — Artificial Analysis Intelligence Index  
+1. **Intelligence** — intelligence index (Arena Elo, vendor-published figures, and this project's own measurements, where measured)  
 2. **Cost** — blended price per million tokens (default)  
 3. **Speed** — tokens per second (default)
 
@@ -31,11 +31,13 @@ It is designed for product and engineering decisions: “smart enough, then chea
 
 Metrics come from a **curated catalog**. If Index, tok/s, or price is missing, the UI shows unmeasured — it does **not** invent numbers.
 
-Primary sources (with attribution in the app footer):
+Primary sources (with attribution in the app footer and the [sources page](/sources/)):
 
-- [Artificial Analysis](https://artificialanalysis.ai)  
-- [OpenRouter](https://openrouter.ai) list prices  
-- [LMSYS Arena dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (CC BY 4.0) where used  
+- [LMSYS Arena dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (CC BY 4.0)  
+- Vendor-published launch figures (linked per card)  
+- First-party provider pricing pages  
+
+Some third-party measurement services are intentionally not republished here under their data licenses; unmeasured values display as "—" rather than being approximated.  
 
 ## Static model pages and embeds
 
