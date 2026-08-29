@@ -32,6 +32,8 @@ npm run build
 ```bash
 # optional local install
 bash scripts/install-catalog-cron.sh
+# hourly silence watchdog via launchd (heartbeat log + public-drift check)
+bash scripts/install-catalog-watchdog.sh   # LaunchAgent tech.kyanitelabs.llm-3d-viz.silence
 
 # full pipeline (scrape → build → optional deploy)
 SKIP_DEPLOY=1 bash scripts/catalog-auto-update.sh   # scrape+build only

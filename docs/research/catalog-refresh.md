@@ -29,6 +29,7 @@ Two-layer join (see `docs/adr/0001-multi-source-catalog-join.md`):
 |----------|------|
 | `AA_API_KEY` or `ARTIFICIAL_ANALYSIS_API_KEY` | **Required** for live AA refresh (free key at https://artificialanalysis.ai/data-api ). **No key on agent hosts = no live expand** — keep committed catalog until operator sets key. |
 | `OPENROUTER_API_KEY` | Optional |
+| `MANUAL_ADDITIONS_PATH` | Override path to the manual-additions file (default `data/manual-additions.json`; used by tests) |
 | `SKIP_ARENA=1` | Skip Arena Elo overlay |
 | `AA_FIXTURE_JSON` | Offline AA Free-shape JSON (tests) |
 | `ARENA_HF_FIXTURE` | Offline HF-row JSON (tests) |
@@ -73,6 +74,23 @@ bash scripts/install-catalog-cron.sh
 
 Default schedule (**local time**): **06:07, 14:07, 22:07** (three checks every day).
 
+Silence watchdog — install alongside the cron:
+
+```bash
+bash scripts/install-catalog-watchdog.sh
+```
+
+Installs the LaunchAgent `tech.kyanitelabs.llm-3d-viz.silence` (in
+`~/Library/LaunchAgents`), hourly with `RunAtLoad`. The agent runs
+`scripts/catalog-silence-check.sh`, which writes an hourly heartbeat to
+`logs/catalog-silence-check.log` — a heartbeat gap longer than one hour means the
+pipeline itself is dead. The same heartbeat runs `scripts/public-drift-check.sh`,
+which compares the public Pages deploy against the private origin
+(`PRIVATE_ORIGIN` in `.env`; the origin is never committed) and fires a deduped
+`public_deploy_drift` alert when the public build diverges. The watchdog lives in
+launchd rather than the crontab because it must survive crontab rewrites — the
+2026-08-16 cron kill took the pipeline and its watchdog down together.
+
 Manual run:
 
 ```bash
@@ -89,7 +107,7 @@ FORCE=1 bash scripts/catalog-auto-update.sh
 |------|---------|
 | `logs/catalog-auto-update.log` | Structured run log |
 | `logs/catalog-cron.stdout` | Cron wrapper stdout/stderr |
-| `.cache/catalog-sync/last-status.json` | Last result (`ok`, `changed`, `rows`, `hash`) |
+| `.cache/catalog-sync/last-status.json` | Last result (`ok`, `changed`, `rows`, `hash`; on builder failure also `builder_rc` with `stage` = `fetch` / `parse_vet` / `builder_gate` / `write`) |
 | `.cache/catalog-sync/last-data.sha256` | Last successful data hash |
 
 ```bash
