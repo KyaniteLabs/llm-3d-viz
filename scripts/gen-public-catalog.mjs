@@ -14,8 +14,10 @@ export const PUBLIC_PATH = join(ROOT, "data", "generated", "public-catalog.json"
 
 const STRIP_ORIGINS = new Set(["aa-api", "aa", "openrouter"]);
 const RESOURCE_FIELDS = new Map([
-  ["modality", { origin: "curated", kind: "public-spec" }],
-  ["context_length", { origin: "provider", kind: "public-spec" }],
+  // kinds stay inside the catalog's provenance vocabulary ("list" = a
+  // publicly listed spec fact, not a measurement).
+  ["modality", { origin: "curated", kind: "list" }],
+  ["context_length", { origin: "provider", kind: "list" }],
 ]);
 
 export function buildPublicCatalog(rows) {

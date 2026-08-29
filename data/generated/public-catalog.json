@@ -32,7 +32,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -74,7 +74,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -116,7 +116,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -158,7 +158,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -200,7 +200,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -242,7 +242,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -284,7 +284,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -330,7 +330,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -372,7 +372,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -414,7 +414,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -456,7 +456,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -498,7 +498,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -540,7 +540,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -582,7 +582,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -624,7 +624,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -666,7 +666,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -674,7 +674,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -712,7 +712,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -758,7 +758,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -766,7 +766,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -804,7 +804,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -812,7 +812,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -850,7 +850,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -892,7 +892,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -934,7 +934,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -976,7 +976,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -988,7 +988,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1026,7 +1026,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1068,7 +1068,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1110,7 +1110,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1153,7 +1153,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1165,7 +1165,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1203,7 +1203,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1246,7 +1246,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1254,7 +1254,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1292,7 +1292,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1335,7 +1335,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1343,7 +1343,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1381,7 +1381,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1424,7 +1424,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1432,7 +1432,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1470,7 +1470,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1514,7 +1514,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1522,7 +1522,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1560,7 +1560,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1604,7 +1604,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1612,7 +1612,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1650,7 +1650,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1694,7 +1694,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1702,7 +1702,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1740,7 +1740,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1784,7 +1784,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1792,7 +1792,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -1830,7 +1830,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1872,7 +1872,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1914,7 +1914,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1958,7 +1958,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -1966,7 +1966,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2004,7 +2004,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2046,7 +2046,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2088,7 +2088,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2132,7 +2132,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2140,7 +2140,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2178,7 +2178,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2222,7 +2222,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2230,7 +2230,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2268,7 +2268,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2312,7 +2312,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2324,7 +2324,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2362,7 +2362,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2370,7 +2370,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2409,7 +2409,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2421,7 +2421,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2459,7 +2459,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2467,7 +2467,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2505,7 +2505,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2547,7 +2547,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2589,7 +2589,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2633,7 +2633,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2641,7 +2641,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2681,7 +2681,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2689,7 +2689,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -2727,7 +2727,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2769,7 +2769,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2811,7 +2811,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2853,7 +2853,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2895,7 +2895,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2937,7 +2937,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -2979,7 +2979,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3021,7 +3021,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3063,7 +3063,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3105,7 +3105,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3147,7 +3147,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3189,7 +3189,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3231,7 +3231,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3273,7 +3273,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3315,7 +3315,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3358,7 +3358,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3370,7 +3370,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3409,7 +3409,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3417,7 +3417,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3455,7 +3455,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3497,7 +3497,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3544,7 +3544,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3556,7 +3556,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3595,7 +3595,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3607,7 +3607,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3645,7 +3645,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3692,7 +3692,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3704,7 +3704,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3742,7 +3742,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3788,7 +3788,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3831,7 +3831,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3843,7 +3843,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -3881,7 +3881,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3923,7 +3923,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -3965,7 +3965,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4012,7 +4012,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4020,7 +4020,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4058,7 +4058,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4101,7 +4101,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4109,7 +4109,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4147,7 +4147,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4189,7 +4189,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4201,7 +4201,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4240,11 +4240,11 @@
     "sources": {
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4285,7 +4285,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4327,7 +4327,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4369,7 +4369,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4377,7 +4377,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4415,7 +4415,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4457,7 +4457,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4599,7 +4599,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4607,7 +4607,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4645,7 +4645,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4653,7 +4653,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4691,7 +4691,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4733,7 +4733,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4775,7 +4775,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4817,7 +4817,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4859,7 +4859,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4867,7 +4867,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4908,7 +4908,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -4920,7 +4920,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -4958,7 +4958,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5003,7 +5003,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5011,7 +5011,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5049,7 +5049,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5094,7 +5094,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5106,7 +5106,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5144,7 +5144,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5190,7 +5190,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5235,7 +5235,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5247,7 +5247,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5288,7 +5288,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5300,7 +5300,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5341,7 +5341,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5353,7 +5353,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5391,7 +5391,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5437,7 +5437,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5482,7 +5482,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5494,7 +5494,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5535,7 +5535,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5547,7 +5547,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5588,7 +5588,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5600,7 +5600,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -5638,7 +5638,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5680,7 +5680,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5722,7 +5722,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5764,7 +5764,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5806,7 +5806,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5848,7 +5848,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5890,7 +5890,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5932,7 +5932,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -5978,7 +5978,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6020,7 +6020,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6062,7 +6062,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6104,7 +6104,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6146,7 +6146,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6158,7 +6158,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6196,7 +6196,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6238,7 +6238,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6280,7 +6280,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6322,7 +6322,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6334,7 +6334,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6372,7 +6372,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6380,7 +6380,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6418,7 +6418,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6460,7 +6460,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6506,7 +6506,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6548,7 +6548,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6556,7 +6556,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6594,7 +6594,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6602,7 +6602,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6640,7 +6640,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6648,7 +6648,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6686,7 +6686,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6729,7 +6729,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6737,7 +6737,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6776,7 +6776,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6788,7 +6788,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6826,7 +6826,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6869,7 +6869,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6877,7 +6877,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -6915,7 +6915,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6959,7 +6959,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -6971,7 +6971,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7009,7 +7009,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7017,7 +7017,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7055,7 +7055,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7097,7 +7097,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7139,7 +7139,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7147,7 +7147,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7185,7 +7185,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7227,7 +7227,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7269,7 +7269,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7311,7 +7311,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7354,7 +7354,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7362,7 +7362,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7401,7 +7401,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7409,7 +7409,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7447,7 +7447,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7496,7 +7496,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7508,7 +7508,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7546,7 +7546,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7558,7 +7558,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7596,7 +7596,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7638,7 +7638,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7680,7 +7680,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7692,7 +7692,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7730,7 +7730,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7738,7 +7738,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7776,7 +7776,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7788,7 +7788,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7826,7 +7826,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7838,7 +7838,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7878,7 +7878,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7890,7 +7890,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -7928,7 +7928,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -7970,7 +7970,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8012,7 +8012,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8054,7 +8054,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8096,7 +8096,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8138,7 +8138,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8184,7 +8184,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8230,7 +8230,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8273,7 +8273,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8281,7 +8281,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -8320,7 +8320,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8328,7 +8328,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -8367,7 +8367,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8375,7 +8375,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -8413,7 +8413,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8455,7 +8455,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8497,7 +8497,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8539,7 +8539,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8581,7 +8581,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8623,7 +8623,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8665,7 +8665,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8707,7 +8707,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8750,7 +8750,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8758,7 +8758,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -8796,7 +8796,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8804,7 +8804,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -8842,7 +8842,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8884,7 +8884,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8926,7 +8926,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -8968,7 +8968,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9010,7 +9010,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9052,7 +9052,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9098,7 +9098,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9140,7 +9140,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9182,7 +9182,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9224,7 +9224,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9270,7 +9270,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9312,7 +9312,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9320,7 +9320,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9358,7 +9358,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9400,7 +9400,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9442,7 +9442,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9484,7 +9484,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9526,7 +9526,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9568,7 +9568,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9611,7 +9611,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9619,7 +9619,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9658,7 +9658,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9666,7 +9666,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9705,7 +9705,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9713,7 +9713,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9752,7 +9752,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9760,7 +9760,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9799,7 +9799,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9811,7 +9811,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9850,7 +9850,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9862,7 +9862,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9901,7 +9901,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9909,7 +9909,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9948,7 +9948,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -9956,7 +9956,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -9995,7 +9995,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10007,7 +10007,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10045,7 +10045,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10087,7 +10087,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10129,7 +10129,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10172,7 +10172,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10184,7 +10184,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10222,7 +10222,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10264,7 +10264,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10307,7 +10307,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10319,7 +10319,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10357,7 +10357,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10399,7 +10399,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10442,7 +10442,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10454,7 +10454,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10492,7 +10492,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10534,7 +10534,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10577,7 +10577,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10589,7 +10589,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10628,7 +10628,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10636,7 +10636,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10674,7 +10674,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10716,7 +10716,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10759,7 +10759,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10771,7 +10771,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10809,7 +10809,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10851,7 +10851,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10894,7 +10894,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10902,7 +10902,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -10940,7 +10940,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -10982,7 +10982,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11025,7 +11025,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11033,7 +11033,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -11071,7 +11071,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11117,7 +11117,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11159,7 +11159,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11201,7 +11201,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11244,7 +11244,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11256,7 +11256,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -11294,7 +11294,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11336,7 +11336,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11378,7 +11378,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11420,7 +11420,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11462,7 +11462,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11504,7 +11504,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11550,7 +11550,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11592,7 +11592,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11634,7 +11634,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11676,7 +11676,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11718,7 +11718,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11764,7 +11764,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11806,7 +11806,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11848,7 +11848,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11890,7 +11890,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11932,7 +11932,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11978,7 +11978,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -11990,7 +11990,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12028,7 +12028,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12070,7 +12070,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12082,7 +12082,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12120,7 +12120,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12163,7 +12163,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12171,7 +12171,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12209,7 +12209,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12221,7 +12221,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12259,7 +12259,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12271,7 +12271,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12310,7 +12310,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12318,7 +12318,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12356,7 +12356,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12398,7 +12398,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12440,7 +12440,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12482,7 +12482,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12524,7 +12524,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12567,7 +12567,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12575,7 +12575,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12614,7 +12614,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12626,7 +12626,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12664,7 +12664,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12706,7 +12706,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12748,7 +12748,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12791,7 +12791,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12803,7 +12803,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12842,7 +12842,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12854,7 +12854,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -12892,7 +12892,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12934,7 +12934,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -12976,7 +12976,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13018,7 +13018,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13061,11 +13061,11 @@
     "sources": {
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13106,7 +13106,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13148,7 +13148,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13160,7 +13160,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13200,7 +13200,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13208,7 +13208,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13246,7 +13246,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13258,7 +13258,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13298,7 +13298,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13310,7 +13310,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13350,7 +13350,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13362,7 +13362,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13400,7 +13400,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13408,7 +13408,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13446,7 +13446,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13458,7 +13458,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13496,7 +13496,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13542,7 +13542,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13554,7 +13554,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13592,7 +13592,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13634,7 +13634,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13646,7 +13646,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13685,7 +13685,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13697,7 +13697,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13735,7 +13735,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13777,7 +13777,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13789,7 +13789,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13827,7 +13827,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13871,7 +13871,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13883,7 +13883,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -13921,7 +13921,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -13963,7 +13963,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14005,7 +14005,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14017,7 +14017,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14055,7 +14055,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14097,7 +14097,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14109,7 +14109,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14147,7 +14147,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14189,7 +14189,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14201,7 +14201,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14239,7 +14239,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14281,7 +14281,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14293,7 +14293,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14331,7 +14331,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14343,7 +14343,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14381,7 +14381,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14423,7 +14423,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14431,7 +14431,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"
@@ -14471,7 +14471,7 @@
     "sources": {
       "modality": {
         "origin": "curated",
-        "kind": "public-spec"
+        "kind": "list"
       },
       "openness": {
         "origin": "curated",
@@ -14483,7 +14483,7 @@
       },
       "context_length": {
         "origin": "provider",
-        "kind": "public-spec"
+        "kind": "list"
       }
     },
     "null_reason": "public plane: not republished (source license)"

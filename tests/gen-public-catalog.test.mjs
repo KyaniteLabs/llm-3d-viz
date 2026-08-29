@@ -52,8 +52,8 @@ describe("gen-public-catalog transform", () => {
     const [out] = buildPublicCatalog([r]);
     expect(out.modality).toBe("text");
     expect(out.context_length).toBe(131072);
-    expect(out.sources.modality).toEqual({ origin: "curated", kind: "public-spec" });
-    expect(out.sources.context_length).toEqual({ origin: "provider", kind: "public-spec" });
+    expect(out.sources.modality).toEqual({ origin: "curated", kind: "list" });
+    expect(out.sources.context_length).toEqual({ origin: "provider", kind: "list" });
   });
 
   it("keeps arena/provider/curated origins untouched", () => {
@@ -86,7 +86,7 @@ describe("gen-public-catalog transform", () => {
     expect(() => assertPublicCatalogClean(buildPublicCatalog([row()]))).not.toThrow();
   });
 
-  it("real catalog: output carries zero aa/openrouter origins (when draft exists)", async () => {
+  it("real catalog: output carries zero aa/openrouter origins AND passes validateModels (when draft exists)", async () => {
     if (!existsSync(FULL_PATH)) return;
     const { readFileSync } = await import("node:fs");
     const rows = JSON.parse(readFileSync(FULL_PATH, "utf8"));
@@ -97,5 +97,7 @@ describe("gen-public-catalog transform", () => {
     const aaOrigin = '"origin":"' + "aa-api" + '"';
     expect(serialized).not.toContain(aaOrigin);
     expect(serialized).not.toContain('"origin":"openrouter"');
+    const { validateModels } = await import("../src/data/models");
+    expect(() => validateModels(pub)).not.toThrow();
   });
 });
