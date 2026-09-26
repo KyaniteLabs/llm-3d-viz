@@ -29,7 +29,7 @@ import {
   normalizeAtlasLlmConfig,
   isAtlasLlmReady,
   applyAtlasLlmPreset,
-  ATLAS_PRESET_NUCBOX_UNSLOTH,
+  ATLAS_PRESET_GPU-HOST_UNSLOTH,
 } from "../lib/atlas-agent";
 import { displayName } from "../lib/display-name";
 import type { AppState } from "../state";
@@ -106,7 +106,7 @@ export class AtlasAgentPanel {
           <span class="atlas-sub">decision agent · navigate · talk</span>
         </summary>
         <div class="atlas-body">
-          <p class="atlas-hint">Decision surface: <em>floor 50</em> · <em>cheapest eligible</em> · <em>cinema on</em> · <em>pin Claude</em> · <em>open weights only</em> · <em>task economy</em> · <em>reset scope</em>. Navigation auto-applies; floor/filters need Apply. Optional BYOK LLM / NUCBox (local Vite). Voice: <strong>Kokoro</strong>. <span data-atlas-voice-name></span></p>
+          <p class="atlas-hint">Decision surface: <em>floor 50</em> · <em>cheapest eligible</em> · <em>cinema on</em> · <em>pin Claude</em> · <em>open weights only</em> · <em>task economy</em> · <em>reset scope</em>. Navigation auto-applies; floor/filters need Apply. Optional BYOK LLM / GPU-Host (local Vite). Voice: <strong>Kokoro</strong>. <span data-atlas-voice-name></span></p>
           <p class="atlas-llm-status" data-atlas-llm-status>${esc(describeAtlasLlmConfig(llm))}</p>
           <div class="atlas-row">
             <input type="text" class="atlas-input" data-atlas-input placeholder="Ask Atlas…" autocomplete="off" aria-label="Atlas command" />
@@ -115,10 +115,10 @@ export class AtlasAgentPanel {
             <button type="button" class="atlas-btn atlas-speak" data-atlas-mute title="Toggle male voice replies" aria-pressed="${isAtlasVoiceMuted() ? "true" : "false"}">${tts ? (isAtlasVoiceMuted() ? "Muted" : "Talk") : "No TTS"}</button>
           </div>
           <details class="atlas-llm-details">
-            <summary class="atlas-llm-summary">LLM endpoint (BYOK / NUCBox)</summary>
+            <summary class="atlas-llm-summary">LLM endpoint (BYOK / GPU-Host)</summary>
             <div class="atlas-llm-form">
               <div class="atlas-actions">
-                <button type="button" class="atlas-btn primary" data-atlas-llm-nucbox title="Same-origin proxy → NUCBox Unsloth Ornith">NUCBox Unsloth</button>
+                <button type="button" class="atlas-btn primary" data-atlas-llm-gpu-host title="Same-origin proxy → GPU-Host Unsloth Ornith">GPU-Host Unsloth</button>
               </div>
               <label class="atlas-field">
                 <span>Use LLM</span>
@@ -143,7 +143,7 @@ export class AtlasAgentPanel {
                 <span>API key</span>
                 <input type="password" class="atlas-input atlas-input-full" data-atlas-llm-key placeholder="proxy (Vite) or your key" value="${esc(llm.apiKey)}" autocomplete="off" spellcheck="false" />
               </label>
-              <p class="atlas-llm-help">NUCBox Unsloth uses same-origin <code>/api/atlas/llm/v1</code> (Vite injects the agent key from <code>.env.local</code> — run <code>node scripts/wire-atlas-nucbox.mjs</code> once). Direct browser→:8890 is blocked (no CORS). Any other OpenAI/Anthropic-compatible host still works with BYOK.</p>
+              <p class="atlas-llm-help">GPU-Host Unsloth uses same-origin <code>/api/atlas/llm/v1</code> (Vite injects the agent key from <code>.env.local</code> — run <code>node scripts/wire-atlas-gpu-host.mjs</code> once). Direct browser→:8890 is blocked (no CORS). Any other OpenAI/Anthropic-compatible host still works with BYOK.</p>
               <div class="atlas-actions">
                 <button type="button" class="atlas-btn primary" data-atlas-llm-save>Save</button>
                 <button type="button" class="atlas-btn" data-atlas-llm-clear>Clear</button>
@@ -165,7 +165,7 @@ export class AtlasAgentPanel {
     const mute = this.root.querySelector<HTMLButtonElement>("[data-atlas-mute]");
     const saveLlm = this.root.querySelector("[data-atlas-llm-save]");
     const clearLlm = this.root.querySelector("[data-atlas-llm-clear]");
-    const nucbox = this.root.querySelector("[data-atlas-llm-nucbox]");
+    const gpu-host = this.root.querySelector("[data-atlas-llm-gpu-host]");
 
     run?.addEventListener("click", () => void this.submit(input?.value ?? ""));
     input?.addEventListener("keydown", (e) => {
@@ -189,14 +189,14 @@ export class AtlasAgentPanel {
       this.renderShell();
       void loadAtlasVoices().then(() => this.refreshVoiceLabel());
     });
-    nucbox?.addEventListener("click", () => {
-      applyAtlasLlmPreset("nucbox-unsloth");
+    gpu-host?.addEventListener("click", () => {
+      applyAtlasLlmPreset("gpu-host-unsloth");
       // Re-render so form fields show preset (apiKey stays "proxy").
       this.renderShell();
       void loadAtlasVoices().then(() => this.refreshVoiceLabel());
       const status = this.root.querySelector("[data-atlas-llm-status]");
       if (status) {
-        status.textContent = `Saved · ${describeAtlasLlmConfig(ATLAS_PRESET_NUCBOX_UNSLOTH)}`;
+        status.textContent = `Saved · ${describeAtlasLlmConfig(ATLAS_PRESET_GPU-HOST_UNSLOTH)}`;
       }
     });
 

@@ -26,7 +26,7 @@ export interface AtlasTurnOptions {
 
 /**
  * After an LLM failure, skip re-attempting the endpoint for this window so a
- * persistently-down host (e.g. NUCBox Unsloth offline) doesn't penalize every
+ * persistently-down host (e.g. GPU-Host Unsloth offline) doesn't penalize every
  * turn with a timeout. The offline router (Phase-1 smart) answers meanwhile.
  */
 const LLM_BACKOFF_MS = 60_000;

@@ -4,7 +4,7 @@ import {
   isAtlasLlmReady,
   normalizeAtlasLlmConfig,
   describeAtlasLlmConfig,
-  ATLAS_PRESET_NUCBOX_UNSLOTH,
+  ATLAS_PRESET_GPU-HOST_UNSLOTH,
   usesProxyAuth,
 } from "../src/lib/atlas-agent/llm-config";
 import { anthropicMessagesUrl, runLlmAtlas } from "../src/lib/atlas-agent/llm-loop";
@@ -103,12 +103,12 @@ describe("atlas llm config", () => {
     ).toBe(false);
   });
 
-  it("NUCBox Unsloth preset is ready via same-origin proxy auth", () => {
-    expect(usesProxyAuth(ATLAS_PRESET_NUCBOX_UNSLOTH)).toBe(true);
-    expect(isAtlasLlmReady(ATLAS_PRESET_NUCBOX_UNSLOTH)).toBe(true);
-    expect(ATLAS_PRESET_NUCBOX_UNSLOTH.baseUrl).toBe("/api/atlas/llm/v1");
-    expect(ATLAS_PRESET_NUCBOX_UNSLOTH.protocol).toBe("openai");
-    expect(ATLAS_PRESET_NUCBOX_UNSLOTH.model).toMatch(/Ornith/);
+  it("GPU-Host Unsloth preset is ready via same-origin proxy auth", () => {
+    expect(usesProxyAuth(ATLAS_PRESET_GPU-HOST_UNSLOTH)).toBe(true);
+    expect(isAtlasLlmReady(ATLAS_PRESET_GPU-HOST_UNSLOTH)).toBe(true);
+    expect(ATLAS_PRESET_GPU-HOST_UNSLOTH.baseUrl).toBe("/api/atlas/llm/v1");
+    expect(ATLAS_PRESET_GPU-HOST_UNSLOTH.protocol).toBe("openai");
+    expect(ATLAS_PRESET_GPU-HOST_UNSLOTH.model).toMatch(/Ornith/);
   });
 });
 

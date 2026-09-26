@@ -2,7 +2,7 @@
  * Atlas LLM endpoint config — BYOK / same-origin proxy, browser localStorage.
  * Protocol is the wire format, not the vendor: any host that speaks
  * OpenAI Chat Completions or Anthropic Messages works (OpenRouter,
- * Ollama, Groq, DeepSeek, vLLM, LiteLLM, Claude official, NUCBox Unsloth, etc.).
+ * Ollama, Groq, DeepSeek, vLLM, LiteLLM, Claude official, GPU-Host Unsloth, etc.).
  */
 
 export type AtlasLlmProtocol = "openai" | "anthropic";
@@ -41,11 +41,11 @@ export const DEFAULT_ATLAS_LLM_CONFIG: AtlasLlmConfig = {
 };
 
 /**
- * Simon's NUCBox Unsloth Studio OpenAI proxy (Ornith sticky workhorse).
+ * Simon's GPU-Host Unsloth Studio OpenAI proxy (Ornith sticky workhorse).
  * Browser talks same-origin `/api/atlas/llm/*` so CORS is not required;
  * Vite (or a local reverse proxy) forwards to Tailscale :8890 and injects the agent key.
  */
-export const ATLAS_PRESET_NUCBOX_UNSLOTH: AtlasLlmConfig = {
+export const ATLAS_PRESET_GPU-HOST_UNSLOTH: AtlasLlmConfig = {
   enabled: true,
   protocol: "openai",
   baseUrl: "/api/atlas/llm/v1",
@@ -56,7 +56,7 @@ export const ATLAS_PRESET_NUCBOX_UNSLOTH: AtlasLlmConfig = {
 
 
 export const ATLAS_LLM_PRESETS = {
-  "nucbox-unsloth": ATLAS_PRESET_NUCBOX_UNSLOTH,
+  "gpu-host-unsloth": ATLAS_PRESET_GPU-HOST_UNSLOTH,
 } as const;
 
 export type AtlasLlmPresetId = keyof typeof ATLAS_LLM_PRESETS;
@@ -86,7 +86,7 @@ export function isAtlasLlmReady(cfg: AtlasLlmConfig): boolean {
 export function loadAtlasLlmConfig(): AtlasLlmConfig {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...ATLAS_PRESET_NUCBOX_UNSLOTH }; // default: LLM always on (NUCBox Unsloth)
+    if (!raw) return { ...ATLAS_PRESET_GPU-HOST_UNSLOTH }; // default: LLM always on (GPU-Host Unsloth)
     const parsed = JSON.parse(raw) as Partial<AtlasLlmConfig>;
     return normalizeAtlasLlmConfig(parsed);
   } catch {

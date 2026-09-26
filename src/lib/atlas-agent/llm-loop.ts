@@ -97,7 +97,7 @@ export async function runLlmAtlas(
   deps: LlmLoopDeps = {},
 ): Promise<AtlasProposal> {
   // Wrap the fetch with a per-request timeout so a dead/unreachable endpoint
-  // (e.g. NUCBox Unsloth offline) fails fast instead of hanging the turn — the
+  // (e.g. GPU-Host Unsloth offline) fails fast instead of hanging the turn — the
   // controller then falls back to the offline router.
   const baseFetch = deps.fetchImpl ?? fetch;
   const timedFetch: typeof fetch = (input, init) => {

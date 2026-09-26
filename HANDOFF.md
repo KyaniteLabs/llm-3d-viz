@@ -22,7 +22,7 @@ Interactive **3D LLM benchmark visualization** (speed × cost × intelligence). 
 |--------|---------|
 | `c595528` | Pareto frontier membrane + skirt — true 2-objective surface (zero-dep Delaunay) |
 | `149c965` | Atlas compositional constraint queries (filter+rank over 15+ axes) |
-| `c2a66ac` | LLM always-on via NUCBox Unsloth (Ornith 35B) + fail-fast resilience |
+| `c2a66ac` | LLM always-on via GPU-Host Unsloth (Ornith 35B) + fail-fast resilience |
 | `dbac442` | Modality data gap fill from OpenRouter (91 vision / 23 video / 12 audio) |
 | `1ae11ef` | Filter-control parity (solo family, only/hide provider) |
 | `76960e6` | UI-action bus — agent parity for view-local controls (reset_view etc.) |
@@ -47,7 +47,7 @@ The 3-objective Pareto front is genuinely 2D. Delaunay triangulation over (cost,
 15+ filter/rank axes: objective (min_cost/max_speed/max_intelligence), floor, openness, maxPrice, minTps, modality, minContext, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider, family. Honest data-gap handling (`unsupportedDataAxes`/`dropUnsupportedData`). Wired into `offline-router.ts` (fires on ≥2 axes) + `tool-dispatch.ts` (`query_catalog` LLM tool).
 
 ### LLM always-on (`llm-config.ts` + `llm-loop.ts` + `controller.ts`)
-Default preset: NUCBox Unsloth (Ornith 35B, same-origin `/api/atlas/llm/v1`, apiKey "proxy"). 45s timeout (35B + tool-calling needs budget). 60s failure backoff (skips dead endpoints). Headless/no-localStorage stays disabled (tests stay offline).
+Default preset: GPU-Host Unsloth (Ornith 35B, same-origin `/api/atlas/llm/v1`, apiKey "proxy"). 45s timeout (35B + tool-calling needs budget). 60s failure backoff (skips dead endpoints). Headless/no-localStorage stays disabled (tests stay offline).
 
 ### UI-action bus (`src/lib/atlas-agent/ui-actions.ts`)
 `registerUiAction`/`dispatchUiAction` allow-listed bus for view-local controls. `reset_view` registered in `main.ts` (recenter camera + clear pin). Extensible: leaderboard expand, effort-step nav, etc.
@@ -56,7 +56,7 @@ Default preset: NUCBox Unsloth (Ornith 35B, same-origin `/api/atlas/llm/v1`, api
 
 | Item | Notes |
 |------|-------|
-| **Public-site always-on LLM** | Does `viz-kyanitelabs-proxy` Worker forward `/api/atlas/llm` → NUCBox? If not, public site gracefully falls back to offline (current behavior). Needs Worker inspection. |
+| **Public-site always-on LLM** | Does `viz-kyanitelabs-proxy` Worker forward `/api/atlas/llm` → GPU-Host? If not, public site gracefully falls back to offline (current behavior). Needs Worker inspection. |
 | **SWE-bench / GPQA data** | Still null (0/302). Need confirmed legal source (AA Pro? official leaderboards?). Filter code is forward-compatible — lights up when data lands. |
 | **`v1.1.0` tag + releases** | Membrane + Atlas + modality are notable enough for a minor bump. Ready to cut on request. Forgejo API release + `gh release create`. |
 | **Cosmetic UI actions** | Leaderboard `<details>` expand, console effort-step nav — one `registerUiAction` each. |
@@ -80,12 +80,12 @@ CAPTURE_URL="https://viz.kyanitelabs.tech/" node scripts/verify-membrane.mjs
 # deploy (operator): npx wrangler pages deploy dist --project-name=llm-3d-viz --branch=main --commit-dirty=true
 ```
 
-### NUCBox Atlas LLM (local only)
+### GPU-Host Atlas LLM (local only)
 
 ```bash
-node scripts/wire-atlas-nucbox.mjs   # writes .env.local (gitignored)
-npm run dev                          # proxy /api/atlas/llm → NUCBox:8890
-# UI: Atlas → NUCBox Unsloth (default preset)
+node scripts/wire-atlas-gpu-host.mjs   # writes .env.local (gitignored)
+npm run dev                          # proxy /api/atlas/llm → GPU-Host:8890
+# UI: Atlas → GPU-Host Unsloth (default preset)
 ```
 
 ## Dual-repo model

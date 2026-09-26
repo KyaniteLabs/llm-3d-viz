@@ -14,7 +14,7 @@ Model Observatory is a free, MIT-licensed **3D LLM benchmark instrument** that m
 3. **Table** — membership list of the visible set.
 4. **Filter shelf** — age, multi-effort, providers, families, openness, VRAM tiers, non-reasoning exclusion.
 5. **Decide panel** — floor slider, cost/speed bias, eligible shortlist.
-6. **Atlas dock** — natural language / voice over **catalog tools** (offline grammar by default; optional OpenAI- or Anthropic-compatible endpoint, including NUCBox Unsloth BYOK via local Vite proxy).
+6. **Atlas dock** — natural language / voice over **catalog tools** (offline grammar by default; optional OpenAI- or Anthropic-compatible endpoint, including GPU-Host Unsloth BYOK via local Vite proxy).
 7. **Cinema mode** — stage-first presentation chrome.
 
 ## URL state (shareable)
@@ -56,7 +56,7 @@ Do not invent a public MCP URL until M5 ships.
 - Not an LLM API marketplace checkout.
 - Not a substitute for Artificial Analysis official rankings without attribution.
 - Not offline-capable for full WebGL without a modern browser.
-- Public site does not host private NUCBox / Unsloth endpoints.
+- Public site does not host private GPU-Host / Unsloth endpoints.
 
 ## Repos
 

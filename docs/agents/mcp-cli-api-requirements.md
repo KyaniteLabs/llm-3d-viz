@@ -21,7 +21,7 @@ Expose **the same ground-truth catalog tools** Atlas already uses in the browser
 | Offline NL router / BYOK LLM | Host model (Claude/Codex/etc.) | MCP server is not the LLM |
 | Voice TTS/STT | Out of scope for MCP v1 | Browser-only |
 
-**Not the goal (v1):** remote control of a stranger's open browser tab, scraping the SPA, or shipping private NUCBox keys.
+**Not the goal (v1):** remote control of a stranger's open browser tab, scraping the SPA, or shipping private GPU-Host keys.
 
 ---
 
@@ -134,7 +134,7 @@ CLI can call the same library as MCP (one codebase, two front-doors).
 |------|------------|
 | Invented benchmarks | Tools only return catalog fields |
 | Open write API | Default **read-only**; mutation OAuth-gated or local-only |
-| NUCBox Unsloth keys | Never embed in MCP server; LLM stays on client host |
+| GPU-Host Unsloth keys | Never embed in MCP server; LLM stays on client host |
 | Public MCP abuse | Rate limit, optional auth |
 | CORS / browser MCP | Separate WebMCP story; not required for CLI stdio |
 
@@ -183,7 +183,7 @@ Until then, public site correctly says **planned**.
 | Surface | Status |
 |---------|--------|
 | In-app Atlas tools (full-app) | **Live** — navigate filters/cinema/decide/axes/pin + confirm apply |
-| Optional BYOK LLM tool loop | **Live** (local; NUCBox via Vite proxy) |
+| Optional BYOK LLM tool loop | **Live** (local; GPU-Host via Vite proxy) |
 | Public SEO/GEO crawl files | **In source** (deploy with static build) |
 | CLI | **Live** — `npm run atlas:cli -- <cmd>` |
 | MCP stdio server | **Live** — `npm run atlas:mcp` (JSON-RPC; catalog tools) |

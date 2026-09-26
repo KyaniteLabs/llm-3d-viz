@@ -30,7 +30,7 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
 }
 
 /**
- * Same-origin reverse proxy → NUCBox Unsloth OpenAI API (:8890) via curl.
+ * Same-origin reverse proxy → GPU-Host Unsloth OpenAI API (:8890) via curl.
  *
  * Why curl (not Node http / http-proxy):
  * Unsloth Studio's BaseHTTP often emits Duplicate Content-Length. Node's
@@ -40,7 +40,7 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
  */
 function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
   const target =
-    env.ATLAS_UNSLOTH_TARGET?.trim() || "http://YOUR_NUCBOX_TAILSCALE_IP:8890";
+    env.ATLAS_UNSLOTH_TARGET?.trim() || "http://YOUR_GPU_HOST_IP:8890";
   const apiKey = env.ATLAS_UNSLOTH_API_KEY?.trim() || "";
   const prefix = "/api/atlas/llm";
 
@@ -171,7 +171,7 @@ function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
               JSON.stringify({
                 error: "atlas_unsloth_proxy_error",
                 message,
-                hint: "Is NUCBox Unsloth :8890 up? ssh nucbox '~/unsloth-ops/bin/ornith-workhorse-verify.sh'",
+                hint: "Is GPU-Host Unsloth :8890 up? ssh gpu-host '~/unsloth-ops/bin/ornith-workhorse-verify.sh'",
               }),
             );
           }
@@ -200,7 +200,7 @@ function atlasUnslothProxyPlugin(env: Record<string, string>): Plugin {
       server.httpServer?.once("listening", () => {
         const status = apiKey
           ? `key loaded (len ${apiKey.length})`
-          : "NO KEY — run: node scripts/wire-atlas-nucbox.mjs";
+          : "NO KEY — run: node scripts/wire-atlas-gpu-host.mjs";
         console.info(`[atlas-llm] proxy ${prefix} → ${target} (${status}, curl)`);
       });
       mount(server.middlewares, "dev");
