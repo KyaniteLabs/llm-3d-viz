@@ -1,0 +1,275 @@
+{
+  "data_date": "2026-08-07",
+  "ingestion": "official-api-only",
+  "attribution": {
+    "artificial_analysis": "https://artificialanalysis.ai (Data API)",
+    "openrouter": "https://openrouter.ai (models list prices)",
+    "arena": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset (CC BY 4.0)"
+  },
+  "source_stats": [
+    {
+      "source": "AA Data API /language/models/free",
+      "ok": true,
+      "raw": 595,
+      "mapped": 595,
+      "scorable_pre_blend": 0,
+      "tier": "free",
+      "pages": 3,
+      "scorable_after_blend": 302
+    },
+    {
+      "source": "Arena HF leaderboard-dataset text_style_control (CC BY 4.0)",
+      "ok": true,
+      "skipped": false,
+      "entries": 383,
+      "attaches": 88,
+      "log_sample": [
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-6-thinking",
+          "slug": "claude-opus-4-6-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-7-thinking",
+          "slug": "claude-opus-4-7-thinking"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "claude-opus-4-8-thinking",
+          "slug": "claude-opus-4-8-thinking"
+        },
+        {
+          "code": "arena_no_tier_match",
+          "key": "gpt-5.4-high",
+          "tier": "high"
+        },
+        {
+          "code": "arena_ambiguous_family",
+          "key": "gpt-5.5"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "gpt-5.2-chat-latest-20260210",
+          "slug": "gpt-5.2-chat-latest-20260210"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "qwen3.7-max-preview",
+          "slug": "qwen3.7-max-preview"
+        },
+        {
+          "code": "arena_no_family",
+          "key": "grok-4.20-beta1",
+          "slug": "grok-4.20-beta1"
+        }
+      ]
+    },
+    {
+      "source": "OpenRouter /api/v1/models",
+      "ok": true,
+      "models": 400,
+      "price_overlays": 16,
+      "authenticated": false
+    }
+  ],
+  "openrouter": {
+    "ok": true,
+    "models": 400,
+    "price_overlays": 16
+  },
+  "arena": {
+    "ok": true,
+    "entries": 383,
+    "attaches": 88,
+    "license": "CC BY 4.0"
+  },
+  "gaps": [
+    {
+      "family": "Claude Fable 5",
+      "provider": "Anthropic",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "",
+      "partial_tiers": []
+    },
+    {
+      "family": "Claude Opus 4.8",
+      "provider": "Anthropic",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Claude Sonnet 5",
+      "provider": "Anthropic",
+      "expected_tiers": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "none"
+      ],
+      "published_tiers": [
+        "max",
+        "high"
+      ],
+      "missing_tiers": [
+        "low",
+        "medium",
+        "xhigh",
+        "none"
+      ],
+      "published_rows": 2,
+      "complete": false,
+      "notes": "",
+      "partial_tiers": []
+    },
+    {
+      "family": "DeepSeek V4 Flash 0731",
+      "provider": "DeepSeek",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3 Max (Preview)",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3 Max Thinking (Preview)",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3.6 Max Preview",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3.7",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    },
+    {
+      "family": "Qwen3.8",
+      "provider": "Alibaba",
+      "expected_tiers": [],
+      "published_tiers": [
+        "max"
+      ],
+      "missing_tiers": [
+        "(additional efforts may exist at product level)"
+      ],
+      "published_rows": 1,
+      "complete": false,
+      "notes": "Heuristic: single published row for a reasoning/adaptive model name."
+    }
+  ],
+  "fable": {
+    "family": "Claude Fable 5",
+    "provider": "Anthropic",
+    "expected_tiers": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "published_tiers": [
+      "max"
+    ],
+    "missing_tiers": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "published_rows": 1,
+    "complete": false,
+    "notes": "",
+    "partial_tiers": []
+  }
+}

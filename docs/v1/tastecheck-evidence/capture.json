@@ -1,0 +1,1440 @@
+{
+  "capturedAt": "2026-08-04T01:56:24.237Z",
+  "views": [
+    {
+      "vp": {
+        "name": "wide-1440",
+        "w": 1440,
+        "h": 900
+      },
+      "measure": {
+        "title": "Model Observatory",
+        "backend": "r3f",
+        "heat": null,
+        "stageBackend": "r3f",
+        "modelCount": "35",
+        "pointCount": 33,
+        "bodyTextLen": 1686,
+        "hasCinema": true,
+        "pick": {
+          "eyebrow": {
+            "tag": "P",
+            "text": "MODEL UNIVERSE / V0",
+            "color": "rgb(137, 147, 158)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "13.12px",
+            "fontWeight": "400",
+            "w": 1018,
+            "h": 17,
+            "visible": true
+          },
+          "h1": {
+            "tag": "H1",
+            "text": "Speed × cost × intelligence",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+            "fontSize": "33.28px",
+            "fontWeight": "500",
+            "w": 1018,
+            "h": 35,
+            "visible": true
+          },
+          "badge": {
+            "tag": "DIV",
+            "text": "STAGE · THREE",
+            "color": "rgb(232, 241, 228)",
+            "bg": "rgba(7, 12, 11, 0.82)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "10px",
+            "fontWeight": "400",
+            "w": 113,
+            "h": 24,
+            "visible": true
+          },
+          "stage": {
+            "tag": "DIV",
+            "text": "STAGE · THREECOST ($/M)INTELLIGENCE≤fl0.111010002040608010010100",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 762,
+            "h": 504,
+            "visible": true
+          },
+          "console": {
+            "tag": "ASIDE",
+            "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgb(11, 17, 16)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 352,
+            "h": 608,
+            "visible": true
+          },
+          "guide": {
+            "tag": "ASIDE",
+            "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(16, 22, 29, 0.94)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 244,
+            "h": 504,
+            "visible": true
+          },
+          "projections": {
+            "tag": "SECTION",
+            "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 1416,
+            "h": 256,
+            "visible": true
+          }
+        },
+        "focusableCount": 9,
+        "focusables": [
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "ENTER CINEMA [C]",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "speed weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "cost weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "intelligence weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "coding",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "chat",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "vision",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "RAG",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "long-context",
+            "tabIndex": 0
+          }
+        ],
+        "reducedMotion": false,
+        "canvasCount": 1,
+        "ariaLive": 4
+      },
+      "errors": [],
+      "tabOrder": [
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "STAGE KEY14 FRONTIER"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "stage-guide-heading",
+          "text": "PROVIDER SHAPES · 17 PROVIDERS"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cinema-toggle",
+          "text": "ENTER CINEMA [C]"
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-speed",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-cost",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-intelligence",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "coding"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip is-active",
+          "text": "chat"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "vision"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "RAG"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "long-context"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "INCOMPLETE DATA / EXCLUDED 2"
+        }
+      ],
+      "cinemaToggled": false,
+      "contrasts": {
+        "eyebrow": 6.311454973210602,
+        "h1": 15.254179341474186,
+        "badge": 17.003587908051987,
+        "stage": 15.254179341474186,
+        "console": 15.254179341474186,
+        "guide": 15.254179341474186,
+        "projections": 15.254179341474186
+      },
+      "htmlBg": "rgb(7, 12, 11)"
+    },
+    {
+      "vp": {
+        "name": "laptop-1280",
+        "w": 1280,
+        "h": 800
+      },
+      "measure": {
+        "title": "Model Observatory",
+        "backend": "r3f",
+        "heat": null,
+        "stageBackend": "r3f",
+        "modelCount": "35",
+        "pointCount": 33,
+        "bodyTextLen": 1686,
+        "hasCinema": true,
+        "pick": {
+          "eyebrow": {
+            "tag": "P",
+            "text": "MODEL UNIVERSE / V0",
+            "color": "rgb(137, 147, 158)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "12.96px",
+            "fontWeight": "400",
+            "w": 858,
+            "h": 17,
+            "visible": true
+          },
+          "h1": {
+            "tag": "H1",
+            "text": "Speed × cost × intelligence",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+            "fontSize": "33.28px",
+            "fontWeight": "500",
+            "w": 858,
+            "h": 35,
+            "visible": true
+          },
+          "badge": {
+            "tag": "DIV",
+            "text": "STAGE · THREE",
+            "color": "rgb(232, 241, 228)",
+            "bg": "rgba(7, 12, 11, 0.82)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "10px",
+            "fontWeight": "400",
+            "w": 113,
+            "h": 24,
+            "visible": true
+          },
+          "stage": {
+            "tag": "DIV",
+            "text": "STAGE · THREECOST ($/M)INTELLIGENCE≤fl0.111010002040608010010100",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 640,
+            "h": 404,
+            "visible": true
+          },
+          "console": {
+            "tag": "ASIDE",
+            "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgb(11, 17, 16)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 352,
+            "h": 508,
+            "visible": true
+          },
+          "guide": {
+            "tag": "ASIDE",
+            "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(16, 22, 29, 0.94)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 206,
+            "h": 404,
+            "visible": true
+          },
+          "projections": {
+            "tag": "SECTION",
+            "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 1256,
+            "h": 256,
+            "visible": true
+          }
+        },
+        "focusableCount": 9,
+        "focusables": [
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "ENTER CINEMA [C]",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "speed weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "cost weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "intelligence weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "coding",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "chat",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "vision",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "RAG",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "long-context",
+            "tabIndex": 0
+          }
+        ],
+        "reducedMotion": false,
+        "canvasCount": 1,
+        "ariaLive": 4
+      },
+      "errors": [],
+      "tabOrder": [
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "STAGE KEY14 FRONTIER"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "stage-guide-heading",
+          "text": "PROVIDER SHAPES · 17 PROVIDERS"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cinema-toggle",
+          "text": "ENTER CINEMA [C]"
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-speed",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-cost",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-intelligence",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "coding"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip is-active",
+          "text": "chat"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "vision"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "RAG"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "long-context"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "INCOMPLETE DATA / EXCLUDED 2"
+        }
+      ],
+      "cinemaToggled": false,
+      "contrasts": {
+        "eyebrow": 6.311454973210602,
+        "h1": 15.254179341474186,
+        "badge": 17.003587908051987,
+        "stage": 15.254179341474186,
+        "console": 15.254179341474186,
+        "guide": 15.254179341474186,
+        "projections": 15.254179341474186
+      },
+      "htmlBg": "rgb(7, 12, 11)"
+    },
+    {
+      "vp": {
+        "name": "tablet-768",
+        "w": 768,
+        "h": 1024
+      },
+      "measure": {
+        "title": "Model Observatory",
+        "backend": "r3f",
+        "heat": null,
+        "stageBackend": "r3f",
+        "modelCount": "35",
+        "pointCount": 33,
+        "bodyTextLen": 1635,
+        "hasCinema": true,
+        "pick": {
+          "eyebrow": {
+            "tag": "P",
+            "text": "MODEL UNIVERSE / V0",
+            "color": "rgb(137, 147, 158)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "12.192px",
+            "fontWeight": "400",
+            "w": 346,
+            "h": 15,
+            "visible": true
+          },
+          "h1": {
+            "tag": "H1",
+            "text": "Speed × cost × intelligence",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+            "fontSize": "28.2304px",
+            "fontWeight": "500",
+            "w": 346,
+            "h": 30,
+            "visible": true
+          },
+          "badge": {
+            "tag": "DIV",
+            "text": "STAGE · THREE",
+            "color": "rgb(232, 241, 228)",
+            "bg": "rgba(7, 12, 11, 0.82)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "10px",
+            "fontWeight": "400",
+            "w": 113,
+            "h": 24,
+            "visible": true
+          },
+          "stage": {
+            "tag": "DIV",
+            "text": "STAGE · THREECOST ($/M)100",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 142,
+            "h": 636,
+            "visible": true
+          },
+          "console": {
+            "tag": "ASIDE",
+            "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgb(11, 17, 16)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 352,
+            "h": 732,
+            "visible": true
+          },
+          "guide": {
+            "tag": "ASIDE",
+            "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(16, 22, 29, 0.94)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 192,
+            "h": 636,
+            "visible": true
+          },
+          "projections": {
+            "tag": "SECTION",
+            "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 744,
+            "h": 256,
+            "visible": true
+          }
+        },
+        "focusableCount": 9,
+        "focusables": [
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "ENTER CINEMA [C]",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "speed weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "cost weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "intelligence weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "coding",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "chat",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "vision",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "RAG",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "long-context",
+            "tabIndex": 0
+          }
+        ],
+        "reducedMotion": false,
+        "canvasCount": 1,
+        "ariaLive": 4
+      },
+      "errors": [],
+      "tabOrder": [
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "STAGE KEY14 FRONTIER"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "stage-guide-heading",
+          "text": "PROVIDER SHAPES · 17 PROVIDERS"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cinema-toggle",
+          "text": "ENTER CINEMA [C]"
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-speed",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-cost",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-intelligence",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "coding"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip is-active",
+          "text": "chat"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "vision"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "RAG"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "long-context"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "INCOMPLETE DATA / EXCLUDED 2"
+        }
+      ],
+      "cinemaToggled": false,
+      "contrasts": {
+        "eyebrow": 6.311454973210602,
+        "h1": 15.254179341474186,
+        "badge": 17.003587908051987,
+        "stage": 15.254179341474186,
+        "console": 15.254179341474186,
+        "guide": 15.254179341474186,
+        "projections": 15.254179341474186
+      },
+      "htmlBg": "rgb(7, 12, 11)"
+    },
+    {
+      "vp": {
+        "name": "phone-375",
+        "w": 375,
+        "h": 812
+      },
+      "measure": {
+        "title": "Model Observatory",
+        "backend": "r3f",
+        "heat": null,
+        "stageBackend": "r3f",
+        "modelCount": "35",
+        "pointCount": 33,
+        "bodyTextLen": 751,
+        "hasCinema": true,
+        "pick": {
+          "eyebrow": {
+            "tag": "P",
+            "text": "MODEL UNIVERSE / V0",
+            "color": "rgb(137, 147, 158)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "11.6025px",
+            "fontWeight": "400",
+            "w": 317,
+            "h": 15,
+            "visible": true
+          },
+          "h1": {
+            "tag": "H1",
+            "text": "Speed × cost × intelligence",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+            "fontSize": "23.2px",
+            "fontWeight": "500",
+            "w": 317,
+            "h": 24,
+            "visible": true
+          },
+          "badge": {
+            "tag": "DIV",
+            "text": "STAGE · THREE",
+            "color": "rgb(232, 241, 228)",
+            "bg": "rgba(7, 12, 11, 0.82)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "10px",
+            "fontWeight": "400",
+            "w": 113,
+            "h": 24,
+            "visible": true
+          },
+          "stage": {
+            "tag": "DIV",
+            "text": "STAGE · THREECOST ($/M)INTELLIGENCE≤fl0.111010002040608010100",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 317,
+            "h": 300,
+            "visible": true
+          },
+          "console": {
+            "tag": "ASIDE",
+            "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgb(11, 17, 16)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 351,
+            "h": 610,
+            "visible": true
+          },
+          "guide": {
+            "tag": "ASIDE",
+            "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(16, 22, 29, 0.94)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 317,
+            "h": 38,
+            "visible": true
+          },
+          "projections": {
+            "tag": "SECTION",
+            "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 351,
+            "h": 602,
+            "visible": true
+          }
+        },
+        "focusableCount": 9,
+        "focusables": [
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "ENTER CINEMA [C]",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "speed weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "cost weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "intelligence weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "coding",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "chat",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "vision",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "RAG",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "long-context",
+            "tabIndex": 0
+          }
+        ],
+        "reducedMotion": false,
+        "canvasCount": 1,
+        "ariaLive": 4
+      },
+      "errors": [],
+      "tabOrder": [
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "STAGE KEY14 FRONTIER"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cinema-toggle",
+          "text": "ENTER CINEMA [C]"
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-speed",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-cost",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-intelligence",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "coding"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip is-active",
+          "text": "chat"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "vision"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "RAG"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "long-context"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "INCOMPLETE DATA / EXCLUDED 2"
+        },
+        {
+          "tag": "BODY",
+          "id": "",
+          "cls": "",
+          "text": "MODEL UNIVERSE / V0\n          "
+        }
+      ],
+      "cinemaToggled": false,
+      "contrasts": {
+        "eyebrow": 6.311454973210602,
+        "h1": 15.254179341474186,
+        "badge": 17.003587908051987,
+        "stage": 15.254179341474186,
+        "console": 15.254179341474186,
+        "guide": 15.254179341474186,
+        "projections": 15.254179341474186
+      },
+      "htmlBg": "rgb(7, 12, 11)"
+    },
+    {
+      "vp": {
+        "name": "narrow-320",
+        "w": 320,
+        "h": 700
+      },
+      "measure": {
+        "title": "Model Observatory",
+        "backend": "r3f",
+        "heat": null,
+        "stageBackend": "r3f",
+        "modelCount": "35",
+        "pointCount": 33,
+        "bodyTextLen": 729,
+        "hasCinema": true,
+        "pick": {
+          "eyebrow": {
+            "tag": "P",
+            "text": "MODEL UNIVERSE / V0",
+            "color": "rgb(137, 147, 158)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "11.52px",
+            "fontWeight": "400",
+            "w": 262,
+            "h": 15,
+            "visible": true
+          },
+          "h1": {
+            "tag": "H1",
+            "text": "Speed × cost × intelligence",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+            "fontSize": "22.72px",
+            "fontWeight": "500",
+            "w": 262,
+            "h": 24,
+            "visible": true
+          },
+          "badge": {
+            "tag": "DIV",
+            "text": "STAGE · THREE",
+            "color": "rgb(232, 241, 228)",
+            "bg": "rgba(7, 12, 11, 0.82)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "10px",
+            "fontWeight": "400",
+            "w": 113,
+            "h": 24,
+            "visible": true
+          },
+          "stage": {
+            "tag": "DIV",
+            "text": "STAGE · THREECOST ($/M)≤fl0.111010002010100",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 262,
+            "h": 300,
+            "visible": true
+          },
+          "console": {
+            "tag": "ASIDE",
+            "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgb(11, 17, 16)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 296,
+            "h": 608,
+            "visible": true
+          },
+          "guide": {
+            "tag": "ASIDE",
+            "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(16, 22, 29, 0.94)",
+            "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 262,
+            "h": 38,
+            "visible": true
+          },
+          "projections": {
+            "tag": "SECTION",
+            "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+            "color": "rgb(231, 226, 216)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "font": "\"Inter Tight\", system-ui, sans-serif",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "w": 296,
+            "h": 602,
+            "visible": true
+          }
+        },
+        "focusableCount": 9,
+        "focusables": [
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "ENTER CINEMA [C]",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "speed weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "cost weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "range",
+            "text": "intelligence weight",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "coding",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "chat",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "vision",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "RAG",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "button",
+            "text": "long-context",
+            "tabIndex": 0
+          }
+        ],
+        "reducedMotion": false,
+        "canvasCount": 1,
+        "ariaLive": 4
+      },
+      "errors": [],
+      "tabOrder": [
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "STAGE KEY14 FRONTIER"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cinema-toggle",
+          "text": "ENTER CINEMA [C]"
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-speed",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-cost",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "INPUT",
+          "id": "weight-intelligence",
+          "cls": "",
+          "text": ""
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "coding"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip is-active",
+          "text": "chat"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "vision"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "RAG"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "preset-chip",
+          "text": "long-context"
+        },
+        {
+          "tag": "SUMMARY",
+          "id": "",
+          "cls": "",
+          "text": "INCOMPLETE DATA / EXCLUDED 2"
+        },
+        {
+          "tag": "BODY",
+          "id": "",
+          "cls": "",
+          "text": "MODEL UNIVERSE / V0\n          "
+        }
+      ],
+      "cinemaToggled": false,
+      "contrasts": {
+        "eyebrow": 6.311454973210602,
+        "h1": 15.254179341474186,
+        "badge": 17.003587908051987,
+        "stage": 15.254179341474186,
+        "console": 15.254179341474186,
+        "guide": 15.254179341474186,
+        "projections": 15.254179341474186
+      },
+      "htmlBg": "rgb(7, 12, 11)"
+    }
+  ],
+  "plotly": {
+    "title": "Model Observatory",
+    "backend": "plotly",
+    "heat": null,
+    "stageBackend": "plotly",
+    "modelCount": "35",
+    "bodyTextLen": 1606,
+    "hasCinema": true,
+    "pick": {
+      "eyebrow": {
+        "tag": "P",
+        "text": "MODEL UNIVERSE / V0",
+        "color": "rgb(137, 147, 158)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+        "fontSize": "13.12px",
+        "fontWeight": "400",
+        "w": 1018,
+        "h": 17,
+        "visible": true
+      },
+      "h1": {
+        "tag": "H1",
+        "text": "Speed × cost × intelligence",
+        "color": "rgb(231, 226, 216)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "font": "\"Inter Tight\", Söhne, \"Neue Haas Grotesk",
+        "fontSize": "33.28px",
+        "fontWeight": "500",
+        "w": 1018,
+        "h": 35,
+        "visible": true
+      },
+      "badge": null,
+      "stage": {
+        "tag": "DIV",
+        "text": "",
+        "color": "rgb(231, 226, 216)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "font": "\"Inter Tight\", system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "w": 762,
+        "h": 504,
+        "visible": true
+      },
+      "console": {
+        "tag": "ASIDE",
+        "text": "INSTRUMENT CONSOLE\n      Value readout\n      ENTER CINEMA [C]\n      \n      \n    ",
+        "color": "rgb(231, 226, 216)",
+        "bg": "rgb(11, 17, 16)",
+        "font": "\"Inter Tight\", system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "w": 352,
+        "h": 608,
+        "visible": true
+      },
+      "guide": {
+        "tag": "ASIDE",
+        "text": "STAGE KEY14 FRONTIER\n        \n          \n            ENCODING\n            \n     ",
+        "color": "rgb(231, 226, 216)",
+        "bg": "rgba(16, 22, 29, 0.94)",
+        "font": "\"IBM Plex Mono\", \"Geist Mono\", ui-monosp",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "w": 244,
+        "h": 504,
+        "visible": true
+      },
+      "projections": {
+        "tag": "SECTION",
+        "text": "SPEED / INTELLIGENCEPROJECTION 01100020406080100SPEED (TPS)INTELLIGENCE (INDEX)\n",
+        "color": "rgb(231, 226, 216)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "font": "\"Inter Tight\", system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "w": 1416,
+        "h": 256,
+        "visible": true
+      }
+    },
+    "focusableCount": 9,
+    "focusables": [
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "ENTER CINEMA [C]",
+        "tabIndex": 0
+      },
+      {
+        "tag": "INPUT",
+        "type": "range",
+        "text": "speed weight",
+        "tabIndex": 0
+      },
+      {
+        "tag": "INPUT",
+        "type": "range",
+        "text": "cost weight",
+        "tabIndex": 0
+      },
+      {
+        "tag": "INPUT",
+        "type": "range",
+        "text": "intelligence weight",
+        "tabIndex": 0
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "coding",
+        "tabIndex": 0
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "chat",
+        "tabIndex": 0
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "vision",
+        "tabIndex": 0
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "RAG",
+        "tabIndex": 0
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "text": "long-context",
+        "tabIndex": 0
+      }
+    ],
+    "reducedMotion": false,
+    "canvasCount": 1,
+    "ariaLive": 4
+  },
+  "reducedMotionCinema": {
+    "bodyClass": "",
+    "htmlClass": "",
+    "prefers": true
+  },
+  "zoom400": {
+    "overflowX": true,
+    "scrollW": 1280,
+    "clientW": 360
+  },
+  "coldLoad": {
+    "tLoad": 857,
+    "tReady": 958,
+    "resources": [
+      {
+        "name": "index-Bbj7dIAY.js",
+        "transferSize": 1619156,
+        "duration": 133
+      },
+      {
+        "name": "inter-tight-400-latin-DX-nOvPD.woff2",
+        "transferSize": 45172,
+        "duration": 53
+      },
+      {
+        "name": "inter-tight-500-latin-BFXNXuvF.woff2",
+        "transferSize": 22916,
+        "duration": 8
+      },
+      {
+        "name": "ibm-plex-mono-500-latin-DSY6xOcd.woff2",
+        "transferSize": 15188,
+        "duration": 62
+      },
+      {
+        "name": "ibm-plex-mono-400-latin-DMJ8VG8y.woff2",
+        "transferSize": 15008,
+        "duration": 8
+      },
+      {
+        "name": "index-Bxh_EmAx.css",
+        "transferSize": 3595,
+        "duration": 5
+      }
+    ]
+  }
+}

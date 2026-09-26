@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Model Observatory">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070C0B"/>
+      <stop offset="100%" stop-color="#0E1A18"/>
+    </linearGradient>
+    <linearGradient id="fil" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3D9B8F"/>
+      <stop offset="100%" stop-color="#8FD9C8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- axes suggestion -->
+  <g stroke="#2A403C" stroke-width="2" fill="none" opacity="0.9">
+    <path d="M160 480 L160 140"/>
+    <path d="M160 480 L980 480"/>
+    <path d="M160 480 L420 200"/>
+  </g>
+  <g fill="url(#fil)">
+    <circle cx="320" cy="360" r="10" opacity="0.85"/>
+    <circle cx="410" cy="300" r="14" opacity="0.9"/>
+    <circle cx="520" cy="250" r="12" opacity="0.8"/>
+    <circle cx="610" cy="320" r="16" opacity="0.95"/>
+    <circle cx="700" cy="210" r="11" opacity="0.85"/>
+    <circle cx="780" cy="280" r="13" opacity="0.9"/>
+    <circle cx="860" cy="340" r="9" opacity="0.75"/>
+  </g>
+  <text x="80" y="90" fill="#E8EFE9" font-family="ui-sans-serif, system-ui, sans-serif" font-size="48" font-weight="600">Model Observatory</text>
+  <text x="80" y="150" fill="#8FD9C8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="28">Speed × cost × intelligence</text>
+  <text x="80" y="560" fill="#7A908C" font-family="ui-monospace, monospace" font-size="20">viz.kyanitelabs.tech · free · MIT · Decide shortlists</text>
+</svg>

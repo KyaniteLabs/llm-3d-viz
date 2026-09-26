@@ -1,0 +1,9 @@
+{
+  "backend": "r3f",
+  "heat": false,
+  "visible": 24,
+  "pointCount": 22,
+  "title": "Speed × cost × intelligence",
+  "taskRows": 24,
+  "bodyOverflow": "hidden"
+}

@@ -1,0 +1,55 @@
+# Model Observatory — https://viz.kyanitelabs.tech/
+# Crawl + AI discovery policy (SEO / GEO / AIEO)
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /.wrangler/
+Disallow: /node_modules/
+
+# Common AI / research crawlers — explicit allow for citation surfaces
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /about.md
+Allow: /sitemap.xml
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://viz.kyanitelabs.tech/sitemap.xml
+
+# Host identity
+# Canonical product: https://viz.kyanitelabs.tech/
+# Agent brief: https://viz.kyanitelabs.tech/llms.txt

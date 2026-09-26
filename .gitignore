@@ -1,0 +1,32 @@
+
+.cache/
+.elder-gods/
+.gjc/
+.omc/
+.omx/
+.scratch-mobile-ux/
+# Ad-hoc local screenshots / capture dumps
+# Catalog auto-update runtime
+# Local agent / tool workspaces (never ship)
+# Mobile UX workscratch (screenshots/metrics)
+data/aa-api-snapshot.json
+data/arena-text-style-control-latest.parquet
+data/openrouter-snapshot.json
+dist/
+logs/
+node_modules/
+playwright-report/
+stage-only.png
+test-results/
+tmp-*.png
+tmp-*/
+
+.env
+.env.local
+.gstack/
+
+.playwright-mcp/
+.wrangler/
+**/.wrangler/
+
+.scratch/

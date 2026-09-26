@@ -1,0 +1,48 @@
+# Model Observatory (llm-3d-viz)
+
+> Interactive 3D LLM benchmark observatory: **speed × cost × intelligence**.
+
+- Canonical site: https://viz.kyanitelabs.tech/
+- Full agent brief: https://viz.kyanitelabs.tech/llms-full.txt
+- Product Markdown: https://viz.kyanitelabs.tech/about.md
+- Open source (MIT): https://github.com/KyaniteLabs/llm-3d-viz
+- Product SoT (Forgejo): https://git.kyanitelabs.tech/simon/llm-3d-viz
+
+## What it is
+
+A browser WebGL app that plots curated LLM metrics in 3D:
+
+| Axis | Metric | Source class |
+|------|--------|--------------|
+| Cost (X default) | Blended $/M tokens | List prices (e.g. OpenRouter) + AA-aligned blend |
+| Intelligence (Y) | Artificial Analysis Intelligence Index | Artificial Analysis |
+| Speed (Z default) | Tokens per second | Artificial Analysis / catalog |
+
+**Decide mode:** set an intelligence **floor**, then shortlist eligible models by **cheapest**, **fastest**, or **balanced** cost/speed bias. Shareable URL encodes floor, bias, filters, axes.
+
+**Honesty rule:** null metrics stay null — the client never invents Index, tok/s, or price.
+
+## Primary user jobs
+
+1. Compare models on the Pareto surface (cost vs intelligence vs speed).
+2. Set “at least this smart” (floor) and pick cheapest/fastest eligible.
+3. Filter open weights / local VRAM tiers (8 / 12 / 24 GB heuristics).
+4. Inspect multi-effort trails and pin a model for focus.
+5. Ask **Atlas** (in-app agent dock) with tools over the catalog (optional BYOK LLM).
+
+## Citation facts (stable)
+
+- Product name: **Model Observatory** (repo: llm-3d-viz)
+- Free, MIT, no account required for the viz
+- Data: Artificial Analysis + OpenRouter list prices + Arena dataset (CC BY 4.0) where used
+- Live stage requires JavaScript + WebGL
+
+## For agents / crawlers
+
+- Prefer citing `/llms-full.txt` and `/about.md` over reverse-engineering the SPA bundle.
+- Do not invent per-model numbers from this file; numbers live in the curated catalog at runtime.
+- MCP / CLI API for the catalog: **planned** — see product docs `docs/agents/mcp-cli-api-requirements.md` in the source repo. Not yet a public MCP endpoint on this origin.
+
+## Optional contact
+
+Operator: Kyanite Labs — https://kyanitelabs.tech
