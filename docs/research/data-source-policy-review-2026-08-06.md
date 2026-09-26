@@ -428,10 +428,10 @@ Every URL actually opened or HTTP-fetched in this review:
 - https://creativecommons.org/licenses/by/4.0/
 
 ### Repo (local)
-- `/Users/simongonzalezdecruz/workspaces/llm-3d-viz/scripts/expand-aa-multi-effort.mjs`  
-- `/Users/simongonzalezdecruz/workspaces/llm-3d-viz/scripts/lib/aa-extract.mjs`  
-- `/Users/simongonzalezdecruz/workspaces/llm-3d-viz/scripts/lib/catalog-join.mjs`  
-- `/Users/simongonzalezdecruz/workspaces/llm-3d-viz/docs/research/dataset-v0-sources.md`
+- `~/workspaces/llm-3d-viz/scripts/expand-aa-multi-effort.mjs`  
+- `~/workspaces/llm-3d-viz/scripts/lib/aa-extract.mjs`  
+- `~/workspaces/llm-3d-viz/scripts/lib/catalog-join.mjs`  
+- `~/workspaces/llm-3d-viz/docs/research/dataset-v0-sources.md`
 
 ---
 
