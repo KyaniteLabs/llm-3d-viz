@@ -5,7 +5,7 @@
 <!-- s-plus-geo:start -->
 entity: llm-3d-viz
 site: https://viz.kyanitelabs.tech/
-forgejo: https://git.kyanitelabs.tech/simon/llm-3d-viz
+forgejo: https://git.kyanitelabs.tech/simon/llm-3d-viz (private, maintainers only)
 oss: https://github.com/KyaniteLabs/llm-3d-viz
 tldr: Interactive 3D LLM benchmark observatory (speed × cost × intelligence) with Decide mode and Atlas agent tools.
 <!-- s-plus-geo:end -->
@@ -51,7 +51,7 @@ Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[do
 | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Visual system |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Module seams |
 | [docs/forkers/README.md](docs/forkers/README.md) | Fork guide |
-| [docs/agents/mcp-cli-api-requirements.md](docs/agents/mcp-cli-api-requirements.md) | MCP + CLI API requirements |
+| `docs/agents/mcp-cli-api-requirements.md` (Forgejo product repo only; not in this GitHub copy) | MCP + CLI API requirements |
 
 ## SEO / GEO / AIEO (crawl + agents)
 
@@ -123,10 +123,10 @@ The live product is **https://viz.kyanitelabs.tech/**. The repository currently 
 
 | Repo | Role |
 |------|------|
-| **Product (Forgejo)** [simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Product source of truth for development, catalog operations, and deployment |
+| **Product (Forgejo, private, maintainers only)** [simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Product source of truth for development, catalog operations, and deployment |
 | **Open source (GitHub)** [KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) | Separate public MIT repository for forks and customization |
 
-Product work stays on **Forgejo only**. GitHub is **not a live mirror**; it is refreshed only when deliberately published. Policy: [docs/agents/dual-repo.md](docs/agents/dual-repo.md).
+Product work stays on **Forgejo only**. GitHub is **not a live mirror**; it is refreshed only when deliberately published. Policy: `docs/agents/dual-repo.md` in the Forgejo product repo (not included in this GitHub copy).
 
 ## License
 
