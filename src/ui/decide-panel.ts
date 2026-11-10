@@ -14,6 +14,7 @@ import {
 } from "../lib/decide";
 import { formatIntelligence, formatPricePerM, formatTps } from "../lib/format";
 import { displayName } from "../lib/display-name";
+import { setFloorByAnchor, setFloorByUser } from "../lib/floor-state";
 import type { AppState, AppStore } from "../state";
 
 function esc(s: string): string {
@@ -134,9 +135,7 @@ export class DecidePanel {
       const floor = clampFloor(Number((t as HTMLInputElement).value));
       this.store.update({
         intelligenceFloor: floor,
-        floorAnchorModelId: null,
-        floorSource: "user",
-        floorUserSet: true,
+        ...setFloorByUser(),
       });
       return;
     }
@@ -147,20 +146,14 @@ export class DecidePanel {
     if (t.matches("[data-decide-anchor]")) {
       const id = (t as HTMLSelectElement).value || null;
       if (!id) {
-        this.store.update({
-          floorAnchorModelId: null,
-          floorSource: "user",
-          floorUserSet: true,
-        });
+        this.store.update(setFloorByUser());
         return;
       }
       const floor = floorFromAnchor(this.models, id) ?? floorFromAnchor(this.productCatalog, id);
       if (floor == null) return;
       this.store.update({
-        floorAnchorModelId: id,
         intelligenceFloor: floor,
-        floorSource: "anchor",
-        floorUserSet: true,
+        ...setFloorByAnchor(id),
       });
     }
   }

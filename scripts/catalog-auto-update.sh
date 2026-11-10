@@ -30,17 +30,53 @@ STATUS_FILE="$STATE_DIR/last-status.json"
 HISTORY_FILE="$STATE_DIR/status-history.jsonl"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 
+# Run-status machine (persisted to STATUS_FILE, appended to HISTORY_FILE by the
+# EXIT trap). A run ends in exactly ONE terminal record:
+#
+#   (start) ──▶ ok:true  changed:false               (scrape ok, nothing new)
+#           ──▶ ok:true  changed:true deployed:false (SKIP_BUILD=1)
+#           ──▶ ok:true  changed:true deployed:true  (DONE)
+#           ──▶ ok:false stage:<STATUS_FAIL_STAGES>  (abort at that stage)
+#
+# Every record goes through status_ok / status_fail (never a bare printf), at
+# most once per run. An exit that wrote no record is recorded by the trap as
+# stage "unknown" + rc — it must never re-use the PREVIOUS run's record (that
+# re-appended stale history and, after a lock overlap, suppressed the alert).
+# Byte format is unchanged: {"at":…,"ok":…,<fields>}.
+STATUS_FAIL_STAGES=" lock fetch parse_vet builder_gate write scrape guard build deploy_config rsync restart health pages unknown "
+STATUS_WRITTEN=0
+_status_write() { # $1=ok(true|false) $2=fields json tail (optional)
+  if [[ "$STATUS_WRITTEN" -eq 1 ]]; then
+    echo "catalog-auto-update: refusing a second status record for this run" >&2
+    return 1
+  fi
+  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":$1${2:+,$2}}" >"$STATUS_FILE"
+  STATUS_WRITTEN=1
+}
+status_ok() { _status_write true "$1"; }
+status_fail() { # $1=stage $2=extra fields (optional)
+  case "$STATUS_FAIL_STAGES" in
+    *" $1 "*) ;;
+    *) echo "catalog-auto-update: unknown failure stage '$1'" >&2; return 1 ;;
+  esac
+  _status_write false "\"stage\":\"$1\"${2:+,$2}" && STATUS_STAGE="$1"
+}
+STATUS_STAGE=""
+
 # Plan WS1 (audit H5/M7): durable status history + failure alerting. Every exit
 # path writes STATUS_FILE before exiting; this trap appends it to the history
 # (consumed by scripts/catalog-silence-check.sh) and fires one aggregated
 # failure alert via the shared dedup store — lock overlap is NOT a failure.
 on_exit() {
   rc=$?
-  if [[ -f "$STATUS_FILE" ]]; then
+  if [[ "$STATUS_WRITTEN" -eq 0 && $rc -ne 0 ]]; then
+    status_fail unknown "\"rc\":$rc" || true
+  fi
+  if [[ "$STATUS_WRITTEN" -eq 1 && -f "$STATUS_FILE" ]]; then
     cat "$STATUS_FILE" >>"$HISTORY_FILE" 2>/dev/null || true
   fi
   if [[ $rc -ne 0 ]]; then
-    stage="$(node -e "try{const s=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));console.log(s.stage||'unknown')}catch{console.log('unknown')}" "$STATUS_FILE" 2>/dev/null || echo unknown)"
+    stage="${STATUS_STAGE:-unknown}"
     if [[ "$stage" != "lock" ]]; then
       log "ALERT: firing pipeline-failure alert (stage=$stage rc=$rc)"
       node "$REPO_ROOT/scripts/lib/catalog-alerts.mjs" --failure "$stage" >>"$LOG_DIR/catalog-auto-update.log" 2>&1 || true
@@ -71,7 +107,12 @@ cd "$REPO_ROOT"
 LOCK_FILE="$STATE_DIR/catalog-auto-update.lock"
 LOCK_DIR="$STATE_DIR/catalog-auto-update.lockd"
 LOCK_HELD_DIR=""
-lock_cleanup() { [[ -n "$LOCK_HELD_DIR" ]] && rm -rf "$LOCK_HELD_DIR"; }
+# Must return 0: as the EXIT trap's last command under `set -e`, a false
+# `[[ … ]] && rm` here replaced EVERY exit code (incl. success) with 1.
+lock_cleanup() {
+  if [[ -n "$LOCK_HELD_DIR" ]]; then rm -rf "$LOCK_HELD_DIR"; fi
+  return 0
+}
 acquire_lock() {
   if command -v flock >/dev/null 2>&1; then
     exec 9>"$LOCK_FILE"
@@ -98,7 +139,7 @@ acquire_lock() {
 }
 if ! acquire_lock; then
   log "ABORT: another catalog-auto-update is already running (overlap)"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"lock\",\"reason\":\"overlap\"}" >"$STATUS_FILE"
+  status_fail lock '"reason":"overlap"'
   exit 10
 fi
 
@@ -132,7 +173,7 @@ if [[ "$builder_rc" -ne 0 ]]; then
     *) stage="scrape"       ; label="builder failed (unclassified rc=$builder_rc)" ;;
   esac
   log "ERROR: $label"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"$stage\",\"builder_rc\":$builder_rc}" >"$STATUS_FILE"
+  status_fail "$stage" "\"builder_rc\":$builder_rc"
   exit 2
 fi
 
@@ -148,14 +189,14 @@ deployed_rows=""
 [[ -f "$DEPLOYED_ROWS_FILE" ]] && deployed_rows="$(cat "$DEPLOYED_ROWS_FILE")"
 if [[ "$row_count" -lt "$MIN_ROWS" ]]; then
   log "ABORT: row_count=$row_count below MIN_ROWS=$MIN_ROWS — likely AA schema change or empty scrape"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"reason\":\"below_min\"}" >"$STATUS_FILE"
+  status_fail guard "\"rows\":$row_count,\"reason\":\"below_min\""
   exit 8
 fi
 if [[ -n "$deployed_rows" && "$deployed_rows" -gt 0 ]]; then
   shrink_pct=$(( (deployed_rows - row_count) * 100 / deployed_rows ))
   if [[ "$shrink_pct" -gt 50 ]]; then
     log "ABORT: row_count=$row_count dropped ${shrink_pct}% from last deployed $deployed_rows — likely scrape failure"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"guard\",\"rows\":$row_count,\"prev\":$deployed_rows,\"shrink\":$shrink_pct}" >"$STATUS_FILE"
+    status_fail guard "\"rows\":$row_count,\"prev\":$deployed_rows,\"shrink\":$shrink_pct"
     exit 8
   fi
 fi
@@ -185,7 +226,7 @@ fi
 
 if [[ "$changed" -eq 0 ]]; then
   log "no catalog change — skip build/deploy"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\"}" >"$STATUS_FILE"
+  status_ok "\"changed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\""
   echo "$after_hash" >"$HASH_FILE"
   exit 0
 fi
@@ -195,7 +236,7 @@ fi
 # is stale; the next non-SKIP_BUILD run will build+deploy.
 if [[ "${SKIP_BUILD:-0}" == "1" ]]; then
   log "SKIP_BUILD=1 — scrape only, skipping build and deploy (deployed:false)"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":true,\"scraped\":true,\"deployed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\"}" >"$STATUS_FILE"
+  status_ok "\"changed\":true,\"scraped\":true,\"deployed\":false,\"rows\":$row_count,\"hash\":\"$after_hash\""
   exit 0
 fi
 
@@ -203,7 +244,7 @@ fi
 log "building…"
 if ! npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
   log "ERROR: build failed"
-  printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"build\",\"rows\":$row_count}" >"$STATUS_FILE"
+  status_fail build "\"rows\":$row_count"
   exit 3
 fi
 log "build ok"
@@ -216,6 +257,7 @@ case "$DEPLOY_DIST" in
     : ;; # allowed — dedicated deploy path
   *)
     log "ABORT: DEPLOY_DIST='$DEPLOY_DIST' is not the required '*/sites/llm-3d-viz/dist' path for rsync --delete"
+    status_fail deploy_config "\"rows\":$row_count"
     exit 9 ;;
 esac
 fi
@@ -224,12 +266,12 @@ if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   # Expand ~ on remote via ssh shell
   if ! rsync -az --delete "$REPO_ROOT/dist/" "${DEPLOY_HOST}:${DEPLOY_DIST}/" >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
     log "ERROR: rsync deploy failed"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"rsync\",\"rows\":$row_count}" >"$STATUS_FILE"
+    status_fail rsync "\"rows\":$row_count"
     exit 4
   fi
   if ! ssh "$DEPLOY_HOST" 'docker restart llm-3d-viz' >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
     log "ERROR: docker restart failed"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"restart\",\"rows\":$row_count}" >"$STATUS_FILE"
+    status_fail restart "\"rows\":$row_count"
     exit 5
   fi
   # Optional health check (set HEALTH_URL in operator env — never hardcode private IPs here)
@@ -237,7 +279,7 @@ if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
     code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$HEALTH_URL" || echo 000)"
     log "health $HEALTH_URL → $code"
     if [[ "$code" != "200" ]]; then
-      printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"health\",\"code\":\"$code\",\"rows\":$row_count}" >"$STATUS_FILE"
+      status_fail health "\"code\":\"$code\",\"rows\":$row_count"
       exit 6
     fi
   else
@@ -254,7 +296,7 @@ if [[ "${DEPLOY_PAGES:-0}" == "1" && "${SKIP_PAGES:-0}" != "1" && -n "${CLOUDFLA
         --project-name="$PAGES_PROJECT" --branch="${PAGES_BRANCH:-main}" --commit-dirty=true \
         >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
     log "ERROR: pages deploy failed"
-    printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":false,\"stage\":\"pages\",\"rows\":$row_count}" >"$STATUS_FILE"
+    status_fail pages "\"rows\":$row_count"
     exit 7
   fi
   log "pages deploy ok"
@@ -266,7 +308,7 @@ fi
 # build + deploy + health. This is the point where the catalog is truly live.
 echo "$after_hash" >"$HASH_FILE"
 echo "$row_count" >"$DEPLOYED_ROWS_FILE"
-printf '%s\n' "{\"at\":\"$(ts)\",\"ok\":true,\"changed\":true,\"rows\":$row_count,\"hash\":\"$after_hash\",\"deployed\":true}" >"$STATUS_FILE"
+status_ok "\"changed\":true,\"rows\":$row_count,\"hash\":\"$after_hash\",\"deployed\":true"
 log "DONE catalog updated and deployed (rows=$row_count)"
 
 # W5 / ticket #191 — dataset release tag + pruned raw snapshot archive.

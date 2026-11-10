@@ -9,6 +9,7 @@ import {
 } from "./lib/axis-metrics";
 import { applyFilters, sameFilters, type ModelFilters } from "./lib/filters";
 import { parseShareableState, writeShareableUrl } from "./lib/url-state";
+import { enterDecideDefault } from "./lib/floor-state";
 import { Stage3DThree } from "./viz/stage3d-three";
 import type { Stage3DSurface } from "./viz/stage-api";
 import { createStore, type AppState } from "./state";
@@ -460,12 +461,11 @@ async function boot() {
   decideToggle?.addEventListener("click", () => {
     const cur = store.getState();
     const next = !cur.decideMode;
-    if (next && !cur.floorUserSet) {
+    if (next && cur.floorSource === "default") {
       store.update({
         decideMode: true,
         intelligenceFloor: DEFAULT_INTELLIGENCE_FLOOR,
-        floorSource: "default",
-        floorAnchorModelId: null,
+        ...enterDecideDefault(cur),
       });
     } else {
       store.update({ decideMode: next });

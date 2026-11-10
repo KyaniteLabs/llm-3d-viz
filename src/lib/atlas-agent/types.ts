@@ -4,6 +4,7 @@
  */
 
 import type { AxisMapping } from "../axis-metrics";
+import type { FloorSource } from "../decide";
 import type { ModelFilters } from "../filters";
 import type { ScoreWeights } from "../score";
 
@@ -92,7 +93,7 @@ export interface AtlasAgentContext {
   axisMapping?: AxisMapping;
   weights?: ScoreWeights;
   floorAnchorModelId?: string | null;
-  floorSource?: string;
+  floorSource?: FloorSource;
 }
 
 export function emptyProposal(
