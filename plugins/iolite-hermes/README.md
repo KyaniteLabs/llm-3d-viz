@@ -20,6 +20,7 @@ Speed: not measured yet, so these are ranked on cost and intelligence.
 3. Claude Haiku 5.5 (Anthropic): intelligence 88.7 (ECI), $0.20/M, speed: not measured yet
 Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100.
 Prices: LiteLLM model_prices_and_context_window.json, MIT licence.
+Licences: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/ ; MIT https://opensource.org/licenses/MIT . Full notices: ATTRIBUTION.md
 ```
 
 Inside Hermes the same answer is `/iolite shortlist`. Try `/iolite shortlist 0 cheap` or `/iolite model Claude Opus 4.6` too.
@@ -68,9 +69,9 @@ The bundled catalog is `data/catalog.json`; `ATTRIBUTION.md` has the full credit
 |---|---|---|---|
 | Intelligence | Epoch AI Benchmarking Hub, Epoch Capabilities Index (ECI) | CC BY | 255 |
 | Arena rating | LMArena leaderboard dataset, shown as a Bradley-Terry rating, not Elo | CC BY 4.0 | 419 |
-| Prices | LiteLLM `model_prices_and_context_window.json` | MIT | 253 priced models |
+| Prices | LiteLLM `model_prices_and_context_window.json` | MIT | 254 priced models |
 
-- 621 models in all; 253 have both an intelligence score and a price. Only those can be picked.
+- 621 models in all; 254 have both an intelligence score and a price. Only those can be picked.
 - 366 models are not in Epoch's list. Their intelligence is their LMArena rating mapped onto the ECI scale with a line fitted on the 53 models in both (R² 0.92). The answer labels these `(LMArena)` instead of `(ECI)`.
 - Prices come from the model's own vendor where LiteLLM lists one, and from a hosting provider (Together, Fireworks, DeepInfra and a few more) for some open models. Effort variants such as "high" or "xhigh" share their base model's price.
 - Refresh it with `python3 scripts/build_catalog.py` from the repository root. It downloads the three sources and rewrites the catalog and `ATTRIBUTION.md`.
