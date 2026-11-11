@@ -1,6 +1,6 @@
 name: iolite
 label: Iolite
-version: "0.4.1"
+version: "0.5.0"
 manifest_version: 2
 api_version: 1
 description: >
@@ -8,8 +8,8 @@ description: >
   data that ships inside the plugin, so a fresh install gives a real answer
   with no setup and no network. Set an intelligence floor (or name an anchor
   model), drop everything below it or without a price, keep the cost x
-  intelligence front, and rank it toward cheaper, smarter or balanced. Two
-  tools, iolite_shortlist and iolite_model, a /iolite slash command and a
+  intelligence front, and rank it toward cheaper, smarter or balanced. Three
+  tools, iolite_shortlist, iolite_model and iolite_show, a /iolite slash command and a
   bundled skill. Bundled data, each source with its licence and credit in
   ATTRIBUTION.md and in every answer: Epoch AI Benchmarking Hub ECI (CC BY),
   LMArena ratings (CC BY 4.0, Bradley-Terry), LiteLLM prices (MIT). Speed has
@@ -29,7 +29,12 @@ description: >
   seconds per task, task ids hashed; set measure_usage false to stop). The
   pane's "My plans" editor saves my_prices.json through one more local route,
   POST /api/plugins/iolite/my-prices (validated, atomic, 0600; never shipped
-  or uploaded). The pane makes no other request, and models with
+  or uploaded). Agent shortlist and model calls push live floor, picks and focus
+  events to the pane. iolite_show sets 3D/2D, focus, floor and camera; POST
+  /api/plugins/iolite/pane-receipt acknowledges commands and presence checks
+  using temporary 0600 markers removed by the caller. No prompt text is sent.
+  Desktop starts off: enable it in Capabilities -> Plugins, search Iolite,
+  then open the Iolite composer button. The agent cannot change the client's switch. Models with
   no price or no score are not plotted. Disclosure: no network unless you set catalog_url (one GET,
   https unless you set allow_http, sent as written with no credentials added;
   a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on
@@ -42,7 +47,7 @@ license: MIT
 requires_hermes: ">=0.23.0"
 tags: [models, routing, cost, pareto]
 requires_env: []
-provides_tools: [iolite_shortlist, iolite_model]
+provides_tools: [iolite_shortlist, iolite_model, iolite_show]
 provides_hooks: [post_api_request]
 config_schema:
   catalog_path:

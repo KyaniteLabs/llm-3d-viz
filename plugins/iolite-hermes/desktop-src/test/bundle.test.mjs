@@ -32,18 +32,87 @@ export const useRef = () => ({ current: null })
 export const useCallback = f => f
 `
 
-function load(extra = '') {
+function load(extra = '', reactStub = REACT_STUB) {
   const dir = mkdtempSync(path.join(tmpdir(), 'iolite-bundle-'))
   const sdk = path.join(dir, 'sdk.mjs'), react = path.join(dir, 'react.mjs')
-  writeFileSync(sdk, SDK_STUB + extra); writeFileSync(react, REACT_STUB)
+  writeFileSync(sdk, SDK_STUB + extra); writeFileSync(react, reactStub)
   const urls = { '@hermes/plugin-sdk': pathToFileURL(sdk).href, react: pathToFileURL(react).href, 'react/jsx-runtime': pathToFileURL(react).href }
   const rewritten = src.replace(/(from\s*)(["'])(@hermes\/plugin-sdk|react(?:\/jsx-runtime)?)\2/g, (_, pre, q, spec) => `${pre}${q}${urls[spec]}${q}`)
   const leftover = [...rewritten.matchAll(/(?:^|\n)\s*(?:import|export)[^;\n]*?from\s*["']([^"']+)["']/g)].map(m => m[1]).filter(s => !s.startsWith('file:'))
   assert.deepEqual(leftover, [], 'the bundle imports something other than the SDK and react')
   const file = path.join(dir, 'plugin.mjs')
   writeFileSync(file, rewritten)
-  return { dir, file, sdk }
+  return { dir, file, sdk, react }
 }
+
+// A small hook driver mounts the shipped pane without a DOM/canvas. It keeps real effect
+// lifetimes and functional state updates, so missing wiring cannot hide behind reducer tests.
+const HOOK_DRIVER = `
+export function createElement(type, props, ...children) { return { type, props: props || {}, children } }
+let cursor = 0, slots = [], pending = [], cleanups = []
+export function useState(value) {
+  const i = cursor++
+  if (!(i in slots)) slots[i] = typeof value === 'function' ? value() : value
+  return [slots[i], next => { slots[i] = typeof next === 'function' ? next(slots[i]) : next }]
+}
+export function useRef() { const i = cursor++; return slots[i] ||= { current: null } }
+export function useMemo(f) { return f() }
+export function useCallback(f) { return f }
+export function useEffect(f, deps) {
+  const i = cursor++, prev = slots[i]
+  if (!prev || deps.some((v, n) => v !== prev[n])) {
+    slots[i] = deps
+    pending.push(() => { if (cleanups[i]) cleanups[i](); cleanups[i] = f() })
+  }
+}
+export function render(Component, props) {
+  cursor = 0
+  const tree = Component(props)
+  const tasks = pending; pending = []; tasks.forEach(f => f())
+  return tree
+}
+export function unmount() { cleanups.forEach(f => { if (f) f() }) }
+`
+
+test('built pane subscribes, renders live controls and announcements, and disposes on unmount', async () => {
+  const { dir, file, sdk, react } = load(`
+export const listeners = new Map()
+host.onEvent = (name, fn) => { listeners.set(name, fn); return () => listeners.delete(name) }
+`, HOOK_DRIVER)
+  let hooks
+  try {
+    const plugin = (await import(pathToFileURL(file).href)).default
+    const stubs = await import(pathToFileURL(sdk).href)
+    hooks = await import(pathToFileURL(react).href)
+    const registered = []
+    const ctx = { register: c => registered.push(c), rest: async () => ({ ok: false }) }
+    plugin.register(ctx)
+    registered.find(c => c.area === 'command-palette').data.run()
+    const el = stubs.calls.workspaces[0].opts.render()
+    const render = () => hooks.render(el.type, el.props)
+    const nodes = tree => !tree || typeof tree !== 'object' ? [] : [tree, ...tree.children.flat(Infinity).flatMap(nodes)]
+    render()
+    assert.equal(stubs.listeners.size, 4)
+    const emit = (event, payload) => stubs.listeners.get('plugin.iolite.' + event)({ payload })
+    emit('shortlist.updated', { floor: 60, objective: 'min_cost', picks: ['gpt-6.1-terra'] })
+    let tree = render(); tree = render()
+    let all = nodes(tree)
+    assert.ok(all.some(n => n.props.role === 'status' && JSON.stringify(n.children).includes('floor 60')))
+    assert.ok(all.some(n => n.props.picks instanceof Set && n.props.picks.has('gpt-6.1-terra')))
+    emit('model.focused', { focus_model: 'gpt-6.1-sol' })
+    tree = render(); tree = render(); all = nodes(tree)
+    assert.ok(all.some(n => n.props.point?.id === 'gpt-6.1-sol'), 'detail follows focused slug')
+    all.find(n => typeof n.props.setPinnedId === 'function').props.setPinnedId('gpt-6.1-terra')
+    render()
+    emit('view.set', { view: '2d', floor: 0, reset_camera: true })
+    tree = render(); tree = render(); all = nodes(tree)
+    assert.ok(all.some(n => n.type === 'canvas' && n.props['aria-label'].startsWith('2D')))
+    assert.ok(all.some(n => n.props.role === 'status' && JSON.stringify(n.children).includes('floor 0')))
+    assert.ok(all.some(n => n.props.point?.id === 'gpt-6.1-terra'), 'omitting focus preserves manual selection')
+    hooks.unmount()
+    assert.equal(stubs.listeners.size, 0)
+  } finally { if (hooks) hooks.unmount(); rmSync(dir, { recursive: true, force: true }) }
+})
 
 test('bundle: no forbidden constructs and no remote or dynamic imports', () => {
   for (const [name, re] of [['eval', /\beval\s*\(/], ['new Function', /new\s+Function\b/], ['dynamic import', /\bimport\s*\(/],

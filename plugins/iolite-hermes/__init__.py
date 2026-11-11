@@ -3,6 +3,7 @@
 Tools
   iolite_shortlist  floor (or anchor model) + objective -> Pareto shortlist with reasons
   iolite_model      look up one catalog row by name or slug
+  iolite_show       set the Desktop pane's view, focus, floor and camera
 Slash command
   /iolite shortlist | model | status | help, the same answers from chat
 Skill
@@ -64,7 +65,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.4.1"
+VERSION = "0.5.0"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
@@ -130,6 +131,27 @@ MODEL_SCHEMA = {
         "type": "object",
         "properties": {"query": {"type": "string", "description": "A model name or slug, e.g. 'gpt-5' or 'Claude Opus 5.5'."}},
         "required": ["query"],
+    },
+}
+
+SHOW_SCHEMA = {
+    "name": "iolite_show",
+    "description": (
+        "Control the open Iolite Desktop pane: switch 3D/2D, focus a catalog model by name or slug, "
+        "move its intelligence floor, or reset its camera. Reports whether a listening pane acknowledged "
+        "the command. If none listens, ask the user to enable Iolite in Capabilities -> Plugins and "
+        "open its composer button. Cannot enable the Desktop plugin for the user."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "view": {"type": "string", "enum": ["3d", "2d"]},
+            "focus_model": {"type": "string", "description": "Catalog name or slug; ambiguous names are refused."},
+            "floor": {"type": "number", "minimum": 0, "maximum": 100},
+            "reset_camera": {"type": "boolean"},
+        },
+        "required": ["view"],
+        "additionalProperties": False,
     },
 }
 
@@ -942,6 +964,92 @@ def task_stats_by_slug(rows: List[dict], stats: Optional[Dict[str, dict]] = None
 # ----------------------------------------------------------------------------- landscape (Desktop pane)
 LAST_SHORTLIST_FILE = "last_shortlist.json"
 LANDSCAPE_MAX_PICKS = 25
+PANE_RECEIPT_TIMEOUT = 1.0
+DESKTOP_SETUP = 'Capabilities -> Plugins -> search "Iolite" -> switch on, then composer button "Iolite".'
+NO_DESKTOP = "no Desktop window is listening; ask the user to open the Iolite pane"
+
+
+def _pane_broadcaster():
+    """Hermes is optional, and the sanctioned bridge is imported only when used."""
+    try:
+        from hermes_cli.plugin_events import broadcast_plugin_event
+        return broadcast_plugin_event
+    except ImportError:
+        logger.debug("iolite: no Hermes Desktop event bridge")
+        return None
+
+
+def _broadcast_pane_event(event: str, payload: dict) -> None:
+    try:
+        send = _pane_broadcaster()
+        if send is not None:
+            send(PLUGIN_ID, event, payload)
+    except Exception:
+        logger.debug("iolite: Desktop event was not delivered", exc_info=True)
+
+
+def receive_pane_receipt(payload: Any) -> dict:
+    """A pane can acknowledge only an existing, fresh request. No arbitrary files or state.
+
+    A temporary 0600 marker in the plugin data directory crosses the dashboard/agent process
+    boundary without importing gateway privates. The sender removes it after at most one second.
+    """
+    receipt = payload.get("receipt") if isinstance(payload, dict) else None
+    if not isinstance(receipt, str) or not re.fullmatch(r"[a-f0-9]{32}", receipt):
+        return {"ok": False}
+    try:
+        path = _data_dir() / f".pane-{receipt}.receipt"
+        fd = os.open(path, os.O_RDWR | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(fd, "r+b") as fh:
+            st = os.fstat(fh.fileno())
+            if not stat.S_ISREG(st.st_mode) or st.st_size > 1 or not 0 <= time.time() - st.st_mtime < 5:
+                return {"ok": False}
+            fh.write(b"1")
+        return {"ok": True}
+    except OSError:
+        return {"ok": False}
+
+
+def _send_to_pane(event: str, payload: dict) -> bool:
+    """True only when an open pane receipts this event, never from broadcast's None return.
+
+    No heartbeat, browser storage, prompt text, or durable presence claim. A slow/missing
+    receipt counts as not listening; late receipts cannot create files or satisfy a later call.
+    """
+    path = None
+    attempted = False
+    try:
+        send = _pane_broadcaster()
+        if send is None:
+            return False
+        receipt = os.urandom(16).hex()
+        d = _data_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        path = d / f".pane-{receipt}.receipt"
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        attempted = True
+        send(PLUGIN_ID, event, {**payload, "receipt": receipt})
+        deadline = time.monotonic() + PANE_RECEIPT_TIMEOUT
+        while True:
+            if path.read_bytes() == b"1":
+                return True
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                logger.debug("iolite: no Desktop pane receipt")
+                return False
+            time.sleep(min(0.02, remaining))
+    except Exception:
+        logger.debug("iolite: no Desktop pane receipt", exc_info=True)
+        if not attempted:
+            _broadcast_pane_event(event, payload)
+        return False
+    finally:
+        if path is not None:
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                logger.debug("iolite: could not remove Desktop receipt", exc_info=True)
 
 
 def _remember_shortlist(res: dict) -> None:
@@ -1273,10 +1381,16 @@ def iolite_shortlist(args: Optional[dict] = None, **_kw) -> str:
             return _err(_safe_msg(exc))
         try:
             text = _shortlist(rows, source, args)
+            res = json.loads(text)
             try:
-                _remember_shortlist(json.loads(text))
+                _remember_shortlist(res)
             except Exception:
                 logger.debug("iolite: could not remember the shortlist", exc_info=True)
+            if res.get("ok"):
+                _broadcast_pane_event("shortlist.updated", {
+                    "floor": res["floor_applied"]["intelligence"], "objective": res["objective"],
+                    "picks": [m["slug"] for m in res["shortlist"] if m.get("slug")],
+                })
             return text
         except ArgError as exc:
             return _err(str(exc))
@@ -1384,6 +1498,55 @@ def _rows_at_my_prices(rows: List[dict]) -> Tuple[List[dict], int]:
     return out, covered
 
 
+def _model_hits(rows: List[dict], query: str) -> List[dict]:
+    q = _safe_text(query, 200).strip().casefold()
+    exact = [r for r in rows if q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold())]
+    return exact or [r for r in rows
+                     if q in str(r.get("model", "")).casefold() or q in str(r.get("slug", "")).casefold()]
+
+
+def iolite_show(args: Optional[dict] = None, **_kw) -> str:
+    try:
+        if args is None:
+            args = {}
+        if not isinstance(args, dict):
+            return _err("arguments must be an object")
+        if set(args) - {"view", "focus_model", "floor", "reset_camera"}:
+            return _err("arguments may contain only view, focus_model, floor and reset_camera")
+        if args.get("view") not in ("3d", "2d"):
+            return _err("view must be 3d or 2d")
+        payload = {"view": args["view"]}
+        if "floor" in args:
+            floor = _arg_number(args, "floor")
+            if floor is None or not 0 <= floor <= 100:
+                return _err("floor must be a number from 0 to 100")
+            payload["floor"] = floor
+        if "reset_camera" in args:
+            if not isinstance(args["reset_camera"], bool):
+                return _err("reset_camera must be a boolean")
+            payload["reset_camera"] = args["reset_camera"]
+        if "focus_model" in args:
+            query = args["focus_model"]
+            if not isinstance(query, str) or not query.strip():
+                return _err("focus_model must be a model name or slug")
+            rows, _ = load_catalog()
+            hits = _model_hits(rows, query)
+            if len(hits) != 1 or not hits[0].get("slug"):
+                return _err("focus_model must match one catalog model with a slug; use an exact name or slug")
+            payload["focus_model"] = hits[0]["slug"]
+        listening = _send_to_pane("view.set", payload)
+        return _dumps({"ok": True, **payload, "desktop_listening": listening,
+                       "message": "Desktop pane is listening; controls received." if listening else NO_DESKTOP,
+                       "setup": DESKTOP_SETUP})
+    except ArgError as exc:
+        return _err(str(exc))
+    except CatalogError as exc:
+        return _err(_safe_msg(exc))
+    except Exception:
+        logger.debug("iolite: show failed", exc_info=True)
+        return _err("Iolite hit an unexpected error")
+
+
 def iolite_model(args: Optional[dict] = None, **_kw) -> str:
     try:
         if args is not None and not isinstance(args, dict):
@@ -1395,14 +1558,13 @@ def iolite_model(args: Optional[dict] = None, **_kw) -> str:
             rows, source = load_catalog()
         except Exception as exc:
             return _err(_safe_msg(exc))
-        exact = [r for r in rows if q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold())]
-        hits = exact or [r for r in rows
-                         if q in str(r.get("model", "")).casefold() or q in str(r.get("slug", "")).casefold()]
+        hits = _model_hits(rows, q)
         res: Dict[str, Any] = {"ok": True, "matches": [_summary(r) for r in hits[:10]],
                                "total_matches": len(hits), "catalog_source": source,
                                "data_credits": _data_credits(hits[:10])}
         if getattr(rows, "rejected", 0):
             res["rows_refused_for_provenance"] = rows.rejected
+        _broadcast_pane_event("model.focused", {"focus_model": hits[0].get("slug") if hits else None})
         return _dumps(res)
     except Exception:
         logger.debug("iolite: model lookup failed", exc_info=True)
@@ -1421,7 +1583,7 @@ _HELP = """/iolite picks a model by intelligence floor, then cost and speed.
       last word can be an objective, and a quoted name is never read as one.
   /iolite model <name or slug>
   /iolite prices     your own plan prices (my_prices.json) and how each is worked out
-  /iolite status     catalog source, snapshot date, data credits and speed measuring, no network call
+  /iolite status     catalog source, snapshot date, speed measuring and Desktop pane listening check
   /iolite help"""
 
 _OBJECTIVE_WORDS = {"cheap": "min_cost", "cheapest": "min_cost", "min_cost": "min_cost",
@@ -1650,6 +1812,9 @@ def _status() -> str:
                      + (f"{n} models measured so far." if n else "none measured yet."))
     else:
         lines.append("Speed: measure_speed is off, so speed is not measured and rows show speed not measured yet.")
+    listening = _send_to_pane("presence.check", {})
+    lines.append("Desktop pane is listening." if listening else f"Desktop: {NO_DESKTOP} (no receipt within 1 s).")
+    lines.append("Desktop starts off; its switch belongs to the client. Open " + DESKTOP_SETUP)
     return "\n".join(lines)
 
 
@@ -1716,6 +1881,8 @@ def register(ctx) -> None:
                       handler=iolite_shortlist, description=SHORTLIST_SCHEMA["description"], emoji="🧭")
     ctx.register_tool(name="iolite_model", toolset="iolite", schema=MODEL_SCHEMA,
                       handler=iolite_model, description=MODEL_SCHEMA["description"], emoji="🧭")
+    ctx.register_tool(name="iolite_show", toolset="iolite", schema=SHOW_SCHEMA,
+                      handler=iolite_show, description=SHOW_SCHEMA["description"], emoji="🧭")
     register_hook = getattr(ctx, "register_hook", None)
     if callable(register_hook):
         try:
