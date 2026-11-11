@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { models, allModels, isScorable } from "../src/data/models";
+import { models, allModels, isScorable, CLOUD_SCORABLE_FLOOR } from "../src/data/models";
+
+// These assert the real catalog's contents. The public data plane ships
+// licensed metrics as null (ba01e4d), so they only run where the full data
+// plane is present.
+const hasLicensedMetrics = CLOUD_SCORABLE_FLOOR > 0;
 import { RELEASE_FLOOR_ISO, meetsReleaseFloor } from "../src/data/catalog-scope";
 import { deriveEffortTier, familyIdOf, groupByFamily } from "../src/lib/family";
 
 describe("multi-effort catalog (AA expansion)", () => {
-  it("has many scorable rows and multi-effort families for curves", () => {
+  it.skipIf(!hasLicensedMetrics)("has many scorable rows and multi-effort families for curves", () => {
     const scorable = models.filter(isScorable);
     expect(scorable.length).toBeGreaterThan(50);
     const byFamily = groupByFamily(scorable);
@@ -12,7 +17,7 @@ describe("multi-effort catalog (AA expansion)", () => {
     expect(multi.length).toBeGreaterThanOrEqual(12);
   });
 
-  it("includes full GPT-5.6 Sol and Claude Opus 5 intensity ladders", () => {
+  it.skipIf(!hasLicensedMetrics)("includes full GPT-5.6 Sol and Claude Opus 5 intensity ladders", () => {
     const sol = models.filter((m) => familyIdOf(m) === "GPT-5.6 Sol" && isScorable(m));
     const opus = models.filter((m) => familyIdOf(m) === "Claude Opus 5" && isScorable(m));
     const solTiers = new Set(sol.map((m) => deriveEffortTier(m)));
@@ -25,7 +30,7 @@ describe("multi-effort catalog (AA expansion)", () => {
     expect(opusTiers.has("max")).toBe(true);
   });
 
-  it("orders family groups by effort rank (low → xhigh)", () => {
+  it.skipIf(!hasLicensedMetrics)("orders family groups by effort rank (low → xhigh)", () => {
     const sol = groupByFamily(models.filter(isScorable)).get("GPT-5.6 Sol") ?? [];
     expect(sol.length).toBeGreaterThanOrEqual(5);
     const ranks = sol.map((m) => {

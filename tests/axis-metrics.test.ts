@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { models } from "../src/data/models";
+import { syntheticModels as models } from "./helpers/synthetic-catalog";
 import {
   DEFAULT_AXIS_MAPPING,
   applyEconomyBasis,
