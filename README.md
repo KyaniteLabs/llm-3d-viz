@@ -1,6 +1,6 @@
-# llm-3d-viz
+# Iolite
 
-> **llm-3d-viz is an interactive 3D LLM benchmark observatory** for comparing speed, cost, and intelligence, with a decision-oriented shortlist mode and local Atlas agent tools.
+> **Iolite is an interactive 3D LLM benchmark observatory** for comparing speed, cost, and intelligence, with a decision-oriented shortlist mode and local Atlas agent tools.
 
 <!-- s-plus-geo:start -->
 entity: llm-3d-viz
@@ -12,7 +12,7 @@ tldr: Interactive 3D LLM benchmark observatory (speed × cost × intelligence) w
 
 ## TL;DR
 
-Model Observatory plots a curated catalog of large language models in a Three.js/WebGL stage. Compare the Pareto surface, set an intelligence floor, and find models that are cheapest, fastest, or balanced among the eligible set. The site is live at [viz.kyanitelabs.tech](https://viz.kyanitelabs.tech/); the application is free to use and requires no account.
+Iolite plots a curated catalog of large language models in a Three.js/WebGL stage. Compare the Pareto surface, set an intelligence floor, and find models that are cheapest, fastest, or balanced among the eligible set. The site is live at [viz.kyanitelabs.tech](https://viz.kyanitelabs.tech/); the application is free to use and requires no account.
 
 ## Who it's for
 
@@ -95,7 +95,7 @@ Atlas CLI and MCP run against the local repository/catalog. They are not hosted 
 
 ## FAQ
 
-### What does llm-3d-viz measure?
+### What does Iolite measure?
 
 It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. This repository ships the PUBLIC data plane: publicly displayed measurements come only from the Arena leaderboard (CC BY 4.0), vendor-published launch figures, first-party provider pricing pages, and the project's own measurements — see `/sources/` on the live site. Fields whose provenance would require a third-party measurement license are nulled rather than republished (`scripts/gen-public-catalog.mjs`); operators running the private pipeline with their own API keys fill them for internal use.
 
@@ -109,7 +109,7 @@ No. Coverage varies by model and axis. The UI and coverage reporting preserve nu
 
 ### Is Atlas a hosted MCP API?
 
-No. Atlas CLI and MCP are local-only repository tools using stdio. The in-app Atlas path defaults to offline catalog tools; optional BYOK LLM endpoints can be configured by the user, but llm-3d-viz does not provide a public hosted MCP endpoint.
+No. Atlas CLI and MCP are local-only repository tools using stdio. The in-app Atlas path defaults to offline catalog tools; optional BYOK LLM endpoints can be configured by the user, but Iolite does not provide a public hosted MCP endpoint.
 
 ### Can I fork this project?
 

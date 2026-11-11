@@ -4,9 +4,9 @@
  */
 export const APP_BRANDING = {
   /** Shell wordmark (`[data-app-title]` in index.html). */
-  title: "Model Observatory",
+  title: "Iolite",
   /** Product line under the title (`[data-app-tagline]` / h1). */
   tagline: "Speed × cost × intelligence",
   /** Browser tab title (`document.title`). */
-  documentTitle: "Model Observatory",
+  documentTitle: "Iolite",
 } as const;

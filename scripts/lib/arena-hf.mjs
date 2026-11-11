@@ -20,7 +20,7 @@ export const ARENA_HF_CONFIG = "text_style_control";
 export const ARENA_HF_PARQUET_URL =
   "https://huggingface.co/api/datasets/lmarena-ai/leaderboard-dataset/parquet/text_style_control/latest/0.parquet";
 
-export const ARENA_UA = "llm-3d-viz-catalog/0.1 (+https://viz.kyanitelabs.tech; HF parquet CC-BY-4.0)";
+export const ARENA_UA = "iolite-catalog/0.1 (+https://viz.kyanitelabs.tech; HF parquet CC-BY-4.0)";
 
 /**
  * Convert HF leaderboard row → shape expected by parseArenaIdentity / applyArenaElo.

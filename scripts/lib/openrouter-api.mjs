@@ -6,7 +6,7 @@
  */
 
 export const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-export const OPENROUTER_UA = "llm-3d-viz-catalog/0.1 (+https://viz.kyanitelabs.tech; OpenRouter models API)";
+export const OPENROUTER_UA = "iolite-catalog/0.1 (+https://viz.kyanitelabs.tech; OpenRouter models API)";
 
 export async function fetchOpenRouterModels(options = {}) {
   const headers = {

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Model Observatory">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Iolite">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#070C0B"/>
@@ -25,7 +25,7 @@
     <circle cx="780" cy="280" r="13" opacity="0.9"/>
     <circle cx="860" cy="340" r="9" opacity="0.75"/>
   </g>
-  <text x="80" y="90" fill="#E8EFE9" font-family="ui-sans-serif, system-ui, sans-serif" font-size="48" font-weight="600">Model Observatory</text>
+  <text x="80" y="90" fill="#E8EFE9" font-family="ui-sans-serif, system-ui, sans-serif" font-size="48" font-weight="600">Iolite</text>
   <text x="80" y="150" fill="#8FD9C8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="28">Speed × cost × intelligence</text>
   <text x="80" y="560" fill="#7A908C" font-family="ui-monospace, monospace" font-size="20">viz.kyanitelabs.tech · free · MIT · Decide shortlists</text>
 </svg>

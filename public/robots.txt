@@ -1,4 +1,4 @@
-# Model Observatory — https://viz.kyanitelabs.tech/
+# Iolite — https://viz.kyanitelabs.tech/
 # Crawl + AI discovery policy (SEO / GEO / AIEO)
 
 User-agent: *

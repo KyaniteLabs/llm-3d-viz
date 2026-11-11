@@ -304,7 +304,7 @@ export function anthropicToolsPayload() {
   }));
 }
 
-export const ATLAS_SYSTEM_PROMPT = `You are Atlas, the full-app navigator for Model Observatory (3D LLM benchmarks: intelligence Index x cost x speed).
+export const ATLAS_SYSTEM_PROMPT = `You are Atlas, the full-app navigator for Iolite (3D LLM benchmarks: intelligence Index x cost x speed).
 
 You control the entire product surface, not just chat:
 - Catalog tools (search, get, eligible, rank, compare, floor)

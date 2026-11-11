@@ -48,7 +48,7 @@ cleaned="$(printf '%s\n' "$existing" | awk -v b="$MARKER_BEGIN" -v e="$MARKER_EN
   printf '\n%s\n' "$BLOCK"
 } | crontab -
 
-echo "Installed llm-3d-viz catalog cron (3×/day: 06:07, 14:07, 22:07 local)."
+echo "Installed Iolite catalog cron (3×/day: 06:07, 14:07, 22:07 local)."
 if printf '%s\n' "$existing" | grep -q "$SILENCE_MARKER_BEGIN"; then
   echo "NOTE: legacy silence cron block was removed — watchdog lives in launchd now."
 fi
