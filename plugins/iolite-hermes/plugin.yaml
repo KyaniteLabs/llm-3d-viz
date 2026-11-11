@@ -24,8 +24,12 @@ description: >
   route of this plugin, /api/plugins/iolite/landscape, which returns your
   measured speeds and the floor and picks of your last /iolite shortlist, kept
   in last_shortlist.json in the plugin data directory (set remember_shortlist
-  false to stop keeping it), plus your own prices from my_prices.json there if
-  you wrote one (read only, never shipped or uploaded). The pane makes no other request, and models with
+  false to stop keeping it), plus your own prices from my_prices.json there and
+  your per-task medians from tasks.json (a second hook use: tokens and model
+  seconds per task, task ids hashed; set measure_usage false to stop). The
+  pane's "My plans" editor saves my_prices.json through one more local route,
+  POST /api/plugins/iolite/my-prices (validated, atomic, 0600; never shipped
+  or uploaded). The pane makes no other request, and models with
   no price or no score are not plotted. Disclosure: no network unless you set catalog_url (one GET,
   https unless you set allow_http, sent as written with no credentials added;
   a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on
@@ -65,6 +69,10 @@ config_schema:
     type: bool
     default: true
     description: "Record tokens per second of your own model calls (rolling median, kept locally in speed.json, never uploaded) and show it as 'measured locally'. Off records and shows nothing."
+  measure_usage:
+    type: bool
+    default: true
+    description: "Record tokens and model seconds per task of your own calls (task ids hashed, kept locally in tasks.json, at most 2000 tasks and 90 days, never uploaded). Feeds the pane's cost, time and tokens per task views and prices subscription plans by your measured usage. Off records and shows nothing."
   remember_shortlist:
     type: bool
     default: true

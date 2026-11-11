@@ -264,11 +264,11 @@ export class Stage {
       ctx.textAlign = align
       ctx.fillText(text, Math.min(Math.max(q.x, 6 + lo), this.width - 6 - hi), q.y)
     }
-    for (const t of ticks.x) label([pos(t, domains.x, true), -1, sz * 1.12], fmtPriceTick(t))
+    for (const t of ticks.x) label([pos(t, domains.x, true), -1, sz * 1.12], (s.layout.xTick || fmtPriceTick)(t))
     for (const t of ticks.z) label([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? 'right' : 'left')
     for (const t of ticks.y) label([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? 'right' : 'left')
     ctx.fillStyle = pal.text
-    label([0, -1, sz * 1.7], (s.layout.priceTitle || 'PRICE $/M · LOG'))
+    label([0, -1, sz * 1.7], (s.layout.xTitle || s.layout.priceTitle || 'PRICE $/M · LOG'))
     label([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? 'right' : 'left')
     label([sx * 1.04, 1.12, sz * 1.04], 'INTELLIGENCE 0-100', sx < 0 ? 'right' : 'left')
     this.drawMarks(ctx, s, pal, P, true)
@@ -309,11 +309,11 @@ export class Stage {
     ctx.beginPath(); ctx.moveTo(l, t); ctx.lineTo(l, t + h); ctx.lineTo(l + w, t + h); ctx.stroke()
     setFont(ctx, 11); spaced(ctx, '0.06em'); ctx.fillStyle = pal.muted
     ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    for (const v of xs) ctx.fillText(fmtPriceTick(v), px(v), t + h + 8)
+    for (const v of xs) ctx.fillText((s.layout.xTick || fmtPriceTick)(v), px(v), t + h + 8)
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
     for (const v of ys) ctx.fillText(String(v), l - 8, py(v))
     ctx.fillStyle = pal.text; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    ctx.fillText((s.layout.priceTitle || 'PRICE $/M · LOG'), l + w / 2, t + h + 30)
+    ctx.fillText((s.layout.xTitle || s.layout.priceTitle || 'PRICE $/M · LOG'), l + w / 2, t + h + 30)
     ctx.save(); ctx.translate(18, t + h / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'
     ctx.fillText('INTELLIGENCE 0-100', 0, 0); ctx.restore()
     if (typeof s.floor === 'number' && s.floor >= domains.y.lo && s.floor <= domains.y.hi) {
@@ -331,7 +331,7 @@ export class Stage {
   drawMarks(ctx, s, pal, P, is3d) {
     const { layout, picks, floor } = s
     const proj = layout.points.map(pt => ({ pt, q: P([pt.px, pt.py, is3d ? pt.pz : 0]) }))
-    const ridge = proj.filter(o => o.pt.front).sort((a, b) => a.pt.m.c - b.pt.m.c || a.pt.m.i - b.pt.m.i)
+    const ridge = proj.filter(o => o.pt.front).sort((a, b) => a.pt.xv - b.pt.xv || a.pt.m.i - b.pt.m.i)
     ctx.setLineDash([])
     if (ridge.length > 1) {
       ctx.beginPath(); ridge.forEach((o, i) => (i ? ctx.lineTo(o.q.x, o.q.y) : ctx.moveTo(o.q.x, o.q.y)))

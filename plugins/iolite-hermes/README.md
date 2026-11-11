@@ -100,27 +100,60 @@ cd desktop-src && npm install && npm run build && npm test
 ## Your own prices
 
 List prices are wrong for you when you pay a flat subscription. A prepaid yearly plan
-costs nothing per extra token, and an old plan may be cheaper than today's. Write
-`my_prices.json` in the plugin data directory (`$HERMES_HOME/plugin-data/iolite/`) and
-the pane's **Price: Mine** switch replots every model your plans cover and recomputes the
-front. Iolite only reads this file. It never ships in the plugin and is never uploaded.
+costs nothing per extra token, and an old plan may be cheaper than today's. Every user can
+enter their own plans, and the front is recomputed at their prices.
+
+**In the pane:** open **My plans**, pick a provider under **Start from** (it fills in only the
+kind and which models the plan covers, never an amount), type what you paid, and press
+**Save plans**. Each plan says how many catalog models it covers and what price it gives
+them. Then switch **Price: Mine**: every covered model is replotted at your price and the
+front is redrawn. Plans are saved by the plugin's local route (`POST
+/api/plugins/iolite/my-prices`) to `my_prices.json` in the plugin data directory
+(`$HERMES_HOME/plugin-data/iolite/`, mode 0600). They stay on that machine: the file never
+ships in the plugin and is never uploaded. You can also write the file by hand:
 
 ```json
 {"plans": [
   {"name": "My yearly plan", "mode": "sunk", "match": ["glm-5"]},
   {"name": "Monthly plan", "mode": "amortized", "paid_usd": 20, "period_months": 1,
-   "tokens_per_month_m": 40, "models": ["gpt-6.1-terra"]},
+   "models": ["gpt-6.1-terra"]},
   {"name": "Credits deal", "mode": "fixed", "usd_per_m": 0.25, "match": ["deepseek-v4"]}
 ]}
 ```
 
 - `sunk`: already paid, so another token costs $0.
 - `amortized`: what you paid per month divided by the millions of tokens you use a month.
+  Leave `tokens_per_month_m` out and Iolite uses what it has measured on this machine over
+  the last 30 days for the models the plan covers. Until it has a week of use, the price is
+  marked early; with no use yet, the plan waits and the pane says so.
 - `fixed`: a $/M you state.
 
 `models` lists exact catalog slugs and wins over `match`, which takes slug fragments of at
-least 3 characters. A plan missing what its mode needs is skipped and named in the pane,
-never guessed. Models no plan covers stay at list price.
+least 3 characters. A plan missing what its mode needs is refused when you save it, and
+skipped and named in the pane if the file was written by hand; it is never guessed. Models
+no plan covers stay at list price.
+
+From chat: `/iolite prices` lists your plans and the price each gives, and
+`/iolite shortlist 60 cheap price=mine` picks at your prices (each pick shows its list
+price next to yours). The `iolite_shortlist` tool takes `price: "mine"` the same way.
+
+## Per task: cost, time and tokens
+
+Price per million tokens is not what a task costs you. A model that is cheap per token but
+writes ten times as much can cost more per task, and a fast model can still take longer if
+it thinks at length. So Iolite measures your own calls (the plugin's `post_api_request`
+hook records input and output tokens and seconds per task in `tasks.json`, mode 0600,
+kept 90 days and at most 2000 tasks, never uploaded) and the pane's **X axis** switch gives
+four separate views, each with its own front:
+
+- **$/M:** list or your price per million tokens.
+- **Cost/task:** your median input and output tokens per task at that model's input and
+  output price (or your plan's price, so a prepaid plan costs $0 a task).
+- **Time/task:** median seconds of model time per task.
+- **Tokens/task:** median input plus output tokens per task.
+
+The per-task views plot only models with at least 3 measured tasks and say how many they
+left out; nothing is estimated. Set `measure_usage: false` to stop recording.
 
 ## Use your own catalog
 
@@ -167,7 +200,7 @@ Restart the gateway, then ask: *"Shortlist three models at least as smart as <a 
   - `catalog_url`: one GET, https only unless you set `allow_http: true`, cached in memory for `cache_minutes`. Iolite sends the URL as you write it and adds no credentials of its own. A URL with `user:password@` is refused; a `?token=` query is accepted and sent as written, so treat the URL as a secret you chose to put in config. URLs with whitespace or control characters, or a bad port, are refused before any request. The whole response must arrive within `timeout_seconds` (slow-drip responses are cut off) and stay under 8 MB, and redirects are followed only on the same origin. Answers and `/iolite status` show only the scheme, host and path, never the query string or fragment, and error messages never contain the URL.
   - A failed fetch is remembered for five minutes and not retried.
 - **Output:** every row field is cleaned before it is shown: control characters and newlines removed, text capped at 200 characters, `@` mentions and chat markup defused, non-finite numbers dropped.
-- **Storage:** the plugin writes two files in its plugin data directory, both mode 0600: `speed.json` (your own speed measurements only) and `last_shortlist.json` (the floor, objective and picked slugs of your latest shortlist; `remember_shortlist: false` turns it off), and registers one hook, `post_api_request`, which reads token counts and timing and nothing else. `measure_speed: false` turns the hook and speed.json off. The Desktop pane adds one local REST route and no outbound request. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
+- **Storage:** the plugin writes files only in its plugin data directory, all mode 0600: `speed.json` (your own speed measurements only; `measure_speed: false` turns it off), `tasks.json` (input and output tokens and seconds per task, keyed by a hash of the task or session id, no prompt text; `measure_usage: false` turns it off), `last_shortlist.json` (the floor, objective and picked slugs of your latest shortlist; `remember_shortlist: false` turns it off) and `my_prices.json` (only the plans you save). It registers one hook, `post_api_request`, which reads token counts and timing and nothing else. The Desktop pane adds two local REST routes (GET `/landscape`, POST `/my-prices`) and no outbound request. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
 
 ## Tests
 

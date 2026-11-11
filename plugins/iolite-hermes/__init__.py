@@ -70,6 +70,7 @@ DEFAULTS: Dict[str, Any] = {
     "cache_minutes": 60,
     "timeout_seconds": 15,
     "measure_speed": True,
+    "measure_usage": True,
     "remember_shortlist": True,
 }
 OBJECTIVES = {"min_cost": -1.0, "max_speed": 1.0, "balanced": None}
@@ -112,6 +113,10 @@ SHORTLIST_SCHEMA = {
                           "description": "min_cost, max_speed or balanced. Default balanced."},
             "bias": {"type": "number", "description": "balanced only: -1 cheaper ... +1 faster. Default 0."},
             "n": {"type": "integer", "description": f"Shortlist size, 1-{MAX_N}. Default 3."},
+            "price": {"type": "string", "enum": ["list", "mine"],
+                      "description": "list (default): public list prices. mine: the user's own plan prices from "
+                                     "my_prices.json where a plan covers the model (prepaid plans count as $0), list "
+                                     "price elsewhere. Use mine when the user asks what is cheapest for them."},
         },
     },
 }
@@ -129,7 +134,7 @@ MODEL_SCHEMA = {
 
 _FIELDS = ("model", "slug", "provider", "openness", "reasoning", "context_length", "tps", "ttft",
            "blended_price_per_M", "intelligence", "intelligence_metric", "intelligence_as_of",
-           "arena_rating", "price_provider", "tps_note", "data_date",
+           "arena_rating", "price_provider", "tps_note", "data_date", "list_price_per_M", "your_plan",
            "source", "source_url", "license", "attribution")
 _TEXT_FIELDS = ("model", "slug", "provider", "openness", "data_date", "source", "license", "attribution")
 _NUMERIC = ("context_length", "tps", "ttft", "blended_price_per_M")
@@ -642,8 +647,15 @@ def _tokens_per_second(api_duration: Any, started_at: Any, first_chunk_at: Any, 
 
 
 def _on_post_api_request(model: Any = None, api_duration: Any = None, started_at: Any = None,
-                         first_chunk_at: Any = None, usage: Any = None, **_kw) -> None:
-    """Hermes post_api_request hook. Records one speed sample; never raises into Hermes."""
+                         first_chunk_at: Any = None, usage: Any = None, task_id: Any = None,
+                         session_id: Any = None, **_kw) -> None:
+    """Hermes post_api_request hook. Adds the call to its task (measure_usage) and records one
+    speed sample (measure_speed); never raises into Hermes."""
+    try:
+        if _measure_usage_on():
+            _record_task(model, task_id, session_id, api_duration, usage)
+    except Exception:
+        logger.debug("iolite: could not record task usage", exc_info=True)
     try:
         if not _measure_speed_on():
             return
@@ -698,6 +710,162 @@ def _with_speed(rows: List[dict]) -> List[dict]:
     except Exception:
         logger.debug("iolite: could not merge local speeds", exc_info=True)
         return rows
+
+
+# ----------------------------------------------------------------------------- local task meter
+#
+# Per-task cost, time and tokens have no public source either, and they are what a plan is
+# really paid in. The same post_api_request hook adds each call to its task: per (task, model)
+# it keeps input and output tokens, model seconds (the sum of API call durations, so tool
+# time is left out) and the call count. Task ids are stored hashed. tasks.json lives in the
+# plugin data directory, 0600, at most TASKS_MAX records and TASKS_MAX_DAYS days; it never
+# leaves the machine. measure_usage false turns it off.
+
+TASKS_FILE = "tasks.json"
+TASKS_MAX = 2000
+TASKS_MAX_DAYS = 90
+TASKS_MAX_BYTES = 2 * 1024 * 1024
+TASK_MIN_TASKS = 3        # a model's per-task numbers are shown only after this many tasks
+USAGE_EARLY_DAYS = 7      # under this, measured monthly usage is labelled early
+TASK_LABEL = "median per task, measured locally from your own Hermes calls; model time only, tool time left out"
+_tasks_lock = threading.Lock()
+
+
+def _measure_usage_on() -> bool:
+    return _truthy_cfg("measure_usage")
+
+
+def _task_record_key(task_id: Any, session_id: Any, key: str) -> Optional[str]:
+    raw = task_id if isinstance(task_id, str) and task_id.strip() else session_id
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    return hashlib.sha256(raw.strip().encode("utf-8", "replace")).hexdigest()[:16] + ":" + key
+
+
+def _read_tasks() -> Dict[str, dict]:
+    """{hashed task:model key: {"k", "model", "in", "out", "sec", "calls", "day"}}. Anything
+    unreadable is an empty record; never raises."""
+    try:
+        path = _data_dir() / TASKS_FILE
+        st = path.stat()
+        if not stat.S_ISREG(st.st_mode) or st.st_size > TASKS_MAX_BYTES:
+            return {}
+        data = json.loads(path.read_bytes())
+        tasks = data.get("tasks") if isinstance(data, dict) else None
+        return {k: v for k, v in tasks.items() if isinstance(v, dict)} if isinstance(tasks, dict) else {}
+    except Exception:
+        return {}
+
+
+def _write_tasks(tasks: Dict[str, dict]) -> None:
+    d = _data_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".tasks-", suffix=".tmp", dir=d)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump({"version": 1, "note": "tokens and model seconds per task of your own calls, measured "
+                       "locally; task ids hashed; never uploaded", "tasks": tasks}, fh, allow_nan=False)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, d / TASKS_FILE)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _record_task(model: Any, task_id: Any, session_id: Any, api_duration: Any, usage: Any) -> None:
+    key = _speed_key(model)
+    rec_key = _task_record_key(task_id, session_id, key) if key else None
+    if not rec_key or not isinstance(usage, dict):
+        return
+    tin, tout = netio._num(usage.get("input_tokens")), netio._num(usage.get("output_tokens"))
+    sec = netio._num(api_duration)
+    if tin is None and tout is None:
+        return
+    tin, tout = max(0.0, tin or 0.0), max(0.0, tout or 0.0)
+    sec = sec if sec is not None and 0 <= sec < 24 * 3600 else 0.0
+    today = time.strftime("%Y-%m-%d")
+    with _tasks_lock:
+        tasks = _read_tasks()
+        e = tasks.get(rec_key) or {}
+        tasks[rec_key] = {"k": key, "model": _safe_text(str(model), 80),
+                          "in": int((netio._num(e.get("in")) or 0) + tin),
+                          "out": int((netio._num(e.get("out")) or 0) + tout),
+                          "sec": round((netio._num(e.get("sec")) or 0) + sec, 3),
+                          "calls": int(netio._num(e.get("calls")) or 0) + 1,
+                          "first": _safe_text(e.get("first"), 10) or today, "day": today}
+        cutoff = time.strftime("%Y-%m-%d", time.localtime(time.time() - TASKS_MAX_DAYS * 86400))
+        tasks = {k: v for k, v in tasks.items() if str(v.get("day", "")) >= cutoff}
+        if len(tasks) > TASKS_MAX:
+            for old in sorted(tasks, key=lambda k: str(tasks[k].get("day", "")))[:len(tasks) - TASKS_MAX]:
+                tasks.pop(old, None)
+        _write_tasks(tasks)
+
+
+def _task_stats(tasks: Optional[Dict[str, dict]] = None) -> Dict[str, dict]:
+    """{model key: {"n", "in", "out", "sec", "model"}}: medians per task, only for models with at
+    least TASK_MIN_TASKS tasks. Never estimated."""
+    tasks = _read_tasks() if tasks is None else tasks
+    by: Dict[str, List[dict]] = {}
+    for v in tasks.values():
+        k = v.get("k")
+        if isinstance(k, str) and k and netio._num(v.get("calls")):
+            by.setdefault(k, []).append(v)
+    out: Dict[str, dict] = {}
+    for k, vs in by.items():
+        if len(vs) < TASK_MIN_TASKS:
+            continue
+        med = lambda f: statistics.median(netio._num(v.get(f)) or 0.0 for v in vs)  # noqa: E731
+        out[k] = {"n": len(vs), "in": round(med("in")), "out": round(med("out")), "sec": round(med("sec"), 2),
+                  "model": _safe_text(vs[-1].get("model"), 80)}
+    return out
+
+
+def _monthly_usage(tasks: Optional[Dict[str, dict]] = None) -> dict:
+    """Measured tokens per month by model key over the last 30 days: {"by_key": {key: M tokens},
+    "days": days of data, "early": under USAGE_EARLY_DAYS}. Short histories are scaled to 30
+    days and marked early."""
+    tasks = _read_tasks() if tasks is None else tasks
+    cutoff = time.strftime("%Y-%m-%d", time.localtime(time.time() - 30 * 86400))
+    totals: Dict[str, float] = {}
+    first = None
+    for v in tasks.values():
+        day, k = str(v.get("day", "")), v.get("k")
+        if day < cutoff or not isinstance(k, str) or not k:
+            continue
+        totals[k] = totals.get(k, 0.0) + (netio._num(v.get("in")) or 0) + (netio._num(v.get("out")) or 0)
+        f = str(v.get("first") or day)
+        first = f if first is None or f < first else first
+    if not totals:
+        return {"by_key": {}, "days": 0, "early": True}
+    try:
+        days = max(1, min(30, int((time.time() - time.mktime(time.strptime(max(first, cutoff), "%Y-%m-%d"))) // 86400) + 1))
+    except Exception:
+        days = 1
+    scale = 30.0 / days
+    return {"by_key": {k: t * scale / 1e6 for k, t in totals.items()}, "days": days, "early": days < USAGE_EARLY_DAYS}
+
+
+def _row_keys(r: dict) -> List[str]:
+    return [k for k in (_speed_key(r.get("slug")), _speed_key(r.get("model")), _speed_key(r.get("_price_key"))) if k]
+
+
+def task_stats_by_slug(rows: List[dict], stats: Optional[Dict[str, dict]] = None) -> Dict[str, dict]:
+    """Per-task medians keyed by catalog slug, matched the same whole-and-exact way as speed."""
+    stats = _task_stats() if stats is None else stats
+    out: Dict[str, dict] = {}
+    if not stats:
+        return out
+    for r in rows:
+        slug = r.get("slug")
+        if not isinstance(slug, str) or not slug:
+            continue
+        hit = next((stats[k] for k in _row_keys(r) if k in stats), None)
+        if hit:
+            out[slug] = {k: hit[k] for k in ("n", "in", "out", "sec")}
+    return out
 
 
 # ----------------------------------------------------------------------------- landscape (Desktop pane)
@@ -760,6 +928,7 @@ def _read_last_shortlist() -> Optional[dict]:
 # ----------------------------------------------------------------------------- my prices (personal overlay)
 MY_PRICES_FILE = "my_prices.json"
 MY_PRICES_MAX_PLANS = 40
+MY_PRICES_MAX_BYTES = 64 * 1024
 MY_PRICE_MODES = ("sunk", "amortized", "fixed")
 
 
@@ -781,10 +950,44 @@ def _my_plan_price(plan: dict) -> Optional[float]:
     return None
 
 
+def _validate_plan(raw: Any, n: int) -> Tuple[Optional[dict], Optional[str]]:
+    """(clean plan, None) or (None, problem). The clean plan keeps only known fields, so it is
+    also what save_my_prices writes. An amortized plan with no tokens_per_month_m is valid: its
+    usage is measured locally (measure_usage) and it is priced once usage exists."""
+    if not isinstance(raw, dict):
+        return None, f"plan {n} is not an object"
+    name = _safe_text(raw.get("name"), 80) or f"plan {n}"
+    mode = raw.get("mode")
+    if mode not in MY_PRICE_MODES:
+        return None, f"{name}: mode must be sunk, amortized or fixed"
+    clean: Dict[str, Any] = {"name": name, "mode": mode}
+    if mode == "fixed":
+        clean["usd_per_m"] = netio._num(raw.get("usd_per_m"))
+        if _my_plan_price(clean) is None:
+            return None, f"{name}: fixed needs usd_per_m, 0 or more"
+    if mode == "amortized":
+        for k in ("paid_usd", "period_months", "tokens_per_month_m"):
+            v = netio._num(raw.get(k))
+            if v is not None:
+                clean[k] = v
+        paid, months = clean.get("paid_usd"), clean.get("period_months")
+        if paid is None or months is None or paid < 0 or months <= 0:
+            return None, f"{name}: amortized needs paid_usd and period_months"
+        used = clean.get("tokens_per_month_m")
+        if used is not None and used <= 0:
+            return None, f"{name}: tokens_per_month_m must be more than 0, or left out to measure it"
+    clean["models"] = [s.strip().casefold() for s in raw.get("models") or () if isinstance(s, str) and s.strip()][:200]
+    clean["match"] = [s.strip().casefold() for s in raw.get("match") or () if isinstance(s, str) and len(s.strip()) >= 3][:40]
+    if not clean["models"] and not clean["match"]:
+        return None, f"{name}: list its catalog slugs in 'models' or slug fragments (3+ letters) in 'match'"
+    return clean, None
+
+
 def _read_my_prices() -> dict:
-    """Your own prices, from my_prices.json in the plugin data directory. You write that file;
-    Iolite only reads it, never ships or uploads it. Returns {"plans": [...], "problems": [...]};
-    a missing file gives no plans and no problems. Never raises."""
+    """Your own prices, from my_prices.json in the plugin data directory. You write that file
+    (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
+    Returns {"plans": [...], "problems": [...]}; a plan's usd_per_m is None while it waits for
+    measured usage. A missing file gives no plans and no problems. Never raises."""
     out: Dict[str, Any] = {"plans": [], "problems": []}
     try:
         path = _data_dir() / MY_PRICES_FILE
@@ -792,7 +995,7 @@ def _read_my_prices() -> dict:
             st = path.stat()
         except FileNotFoundError:
             return out
-        if not stat.S_ISREG(st.st_mode) or st.st_size > 64 * 1024:
+        if not stat.S_ISREG(st.st_mode) or st.st_size > MY_PRICES_MAX_BYTES:
             out["problems"].append("my_prices.json is not a small regular file")
             return out
         data = json.loads(path.read_bytes())
@@ -801,44 +1004,121 @@ def _read_my_prices() -> dict:
             out["problems"].append("my_prices.json has no 'plans' list")
             return out
         for n, raw in enumerate(plans[:MY_PRICES_MAX_PLANS], 1):
-            if not isinstance(raw, dict):
-                out["problems"].append(f"plan {n} is not an object")
+            clean, problem = _validate_plan(raw, n)
+            if problem:
+                out["problems"].append(problem)
                 continue
-            name = _safe_text(raw.get("name"), 80) or f"plan {n}"
-            mode = raw.get("mode")
-            if mode not in MY_PRICE_MODES:
-                out["problems"].append(f"{name}: mode must be sunk, amortized or fixed")
-                continue
-            price = _my_plan_price(raw)
-            if price is None:
-                need = {"amortized": "paid_usd, period_months and tokens_per_month_m", "fixed": "usd_per_m"}[mode]
-                out["problems"].append(f"{name}: {mode} needs {need}")
-                continue
-            slugs = [s.casefold() for s in raw.get("models") or () if isinstance(s, str) and s][:200]
-            match = [s.casefold() for s in raw.get("match") or () if isinstance(s, str) and len(s) >= 3][:40]
-            if not slugs and not match:
-                out["problems"].append(f"{name}: list its catalog slugs in 'models' or slug fragments in 'match'")
-                continue
-            out["plans"].append({"name": name, "mode": mode, "usd_per_m": price, "models": slugs, "match": match})
+            out["plans"].append({**clean, "usd_per_m": _my_plan_price(clean)})
     except Exception:
         out["problems"].append("my_prices.json could not be read as JSON")
     return out
 
 
+def save_my_prices(payload: Any) -> dict:
+    """Validate and write my_prices.json (atomic, 0600). All or nothing: any problem writes
+    nothing and returns the problems. Returns the landscape's my_prices block on success."""
+    plans = payload.get("plans") if isinstance(payload, dict) else None
+    if not isinstance(plans, list):
+        return {"ok": False, "problems": ["send {\"plans\": [...]}"]}
+    if len(plans) > MY_PRICES_MAX_PLANS:
+        return {"ok": False, "problems": [f"at most {MY_PRICES_MAX_PLANS} plans"]}
+    clean, problems = [], []
+    for n, raw in enumerate(plans, 1):
+        c, p = _validate_plan(raw, n)
+        (problems.append(p) if p else clean.append(c))
+    if problems:
+        return {"ok": False, "problems": problems[:20]}
+    body = json.dumps({"version": 1, "note": "your own plan prices; written by Iolite, kept on this machine, "
+                       "never shipped or uploaded", "plans": clean}, allow_nan=False, indent=1)
+    if len(body.encode("utf-8")) > MY_PRICES_MAX_BYTES:
+        return {"ok": False, "problems": ["the plans are too large to save"]}
+    d = _data_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, d / MY_PRICES_FILE)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+    state = landscape_state()
+    return {"ok": True, "my_prices": state.get("my_prices")}
+
+
+def _plan_covers(plan: dict, slug: str) -> bool:
+    key = slug.casefold()
+    return key in plan["models"] or any(f in key for f in plan["match"])
+
+
+def _resolve_measured(rows: List[dict], plans: List[dict], usage: Optional[dict]) -> List[dict]:
+    """Plans with usd_per_m filled from measured usage where they needed it. A plan that still
+    has no usage keeps None and is reported by the caller, never priced by guess."""
+    out = []
+    by_key = (usage or {}).get("by_key") or {}
+    for p in plans:
+        if p.get("usd_per_m") is not None or p.get("mode") != "amortized":
+            out.append(p)
+            continue
+        keys = set()
+        for r in rows:
+            slug = r.get("slug")
+            if isinstance(slug, str) and slug and _plan_covers(p, slug):
+                keys.update(_row_keys(r))
+        used = sum(by_key.get(k, 0.0) for k in keys)
+        if used > 0:
+            price = p["paid_usd"] / p["period_months"] / used
+            out.append({**p, "usd_per_m": price, "measured": {"tokens_per_month_m": round(used, 3),
+                        "days": usage.get("days"), "early": bool(usage.get("early"))}})
+        else:
+            out.append(p)
+    return out
+
+
 def my_price_overrides(rows: List[dict], plans: List[dict]) -> Dict[str, dict]:
-    """{catalog slug: {"usd_per_m", "plan", "mode"}} for every row a plan covers. The first plan
-    that names the slug in 'models' wins; otherwise the first whose 'match' fragment is in it."""
+    """{catalog slug: {"usd_per_m", "plan", "mode"}} for every row a priced plan covers. The
+    first plan that names the slug in 'models' wins; otherwise the first whose 'match'
+    fragment is in it. Plans still waiting for measured usage cover nothing."""
+    priced = [p for p in plans if p.get("usd_per_m") is not None]
     out: Dict[str, dict] = {}
     for r in rows:
         slug = r.get("slug")
         if not isinstance(slug, str) or not slug:
             continue
         key = slug.casefold()
-        hit = next((p for p in plans if key in p["models"]), None) or \
-            next((p for p in plans if any(f in key for f in p["match"])), None)
+        hit = next((p for p in priced if key in p["models"]), None) or \
+            next((p for p in priced if any(f in key for f in p["match"])), None)
         if hit:
             out[slug] = {"usd_per_m": hit["usd_per_m"], "plan": hit["name"], "mode": hit["mode"]}
     return out
+
+
+def my_prices_state(rows: List[dict]) -> dict:
+    """The my_prices block the pane and /iolite prices read."""
+    mine = _read_my_prices()
+    usage = _monthly_usage() if _measure_usage_on() else None
+    plans = _resolve_measured(rows, mine["plans"], usage)
+    problems = list(mine["problems"])
+    for p in plans:
+        if p.get("usd_per_m") is None:
+            problems.append(f"{p['name']}: waiting for measured usage of its models (or set tokens_per_month_m)"
+                            if _measure_usage_on() else f"{p['name']}: needs tokens_per_month_m while measure_usage is off")
+    shown = []
+    for p in plans:
+        e = {"name": p["name"], "mode": p["mode"], "usd_per_m": p.get("usd_per_m"),
+             "covers": sum(1 for r in rows if isinstance(r.get("slug"), str) and r["slug"] and _plan_covers(p, r["slug"]))}
+        for k in ("paid_usd", "period_months", "tokens_per_month_m", "models", "match", "measured"):
+            if k in p:
+                e[k] = p[k]
+        if p["mode"] == "fixed":
+            e["usd_per_m_set"] = p.get("usd_per_m")
+        shown.append(e)
+    return {"prices": my_price_overrides(rows, plans), "plans": shown, "problems": problems[:10],
+            "file": MY_PRICES_FILE}
 
 
 def landscape_state() -> dict:
@@ -858,10 +1138,10 @@ def landscape_state() -> dict:
             slug = r.get("slug")
             if tps is not None and tps > 0 and isinstance(slug, str) and slug:
                 out["speed"][slug] = {"tps": tps, "note": r.get("tps_note")}
-        mine = _read_my_prices()
-        out["my_prices"] = {"prices": my_price_overrides(rows, mine["plans"]),
-                            "plans": [{"name": p["name"], "mode": p["mode"], "usd_per_m": p["usd_per_m"]} for p in mine["plans"]],
-                            "problems": mine["problems"][:10]}
+        out["my_prices"] = my_prices_state(rows)
+        out["measure_usage"] = _measure_usage_on()
+        out["tasks"] = task_stats_by_slug(rows) if _measure_usage_on() else {}
+        out["task_label"] = TASK_LABEL
     except Exception as exc:
         out["catalog_source"] = None
         out["bundled"] = False
@@ -964,6 +1244,15 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
     else:
         floor, floor_source = decide.DEFAULT_INTELLIGENCE_FLOOR, "default"
 
+    price_arg = args.get("price") or "list"
+    if price_arg not in ("list", "mine"):
+        return _err("price must be list or mine")
+    snapshot_id = decide.catalog_snapshot_id(rows)
+    basis = "list price (LiteLLM), blended $/M"
+    if price_arg == "mine":
+        rows, covered = _rows_at_my_prices(rows)
+        basis = (f"your own plan prices from {MY_PRICES_FILE} for {covered} model{'s' if covered != 1 else ''}, "
+                 "list price for the rest" if covered else f"list price: {MY_PRICES_FILE} covers no catalog model")
     out = decide.shortlist_from_decide(rows, floor, bias, n)
     mode = out["mode"]
     reason = decide.bias_reason(bias)
@@ -988,8 +1277,9 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
                            **_summary(m))
                       for i, m in enumerate(out["shortlist"])],
         "refusals": refusals,
-        "catalog_snapshot_id": decide.catalog_snapshot_id(rows),
+        "catalog_snapshot_id": snapshot_id,
         "catalog_source": source,
+        "price_basis": basis,
     }
     if scorable:
         res["max_scorable_intelligence"] = max(decide.intelligence_of(r) for r in scorable)
@@ -1003,6 +1293,24 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
     if snap:
         res["catalog_generated"] = snap
     return _dumps(res)
+
+
+def _rows_at_my_prices(rows: List[dict]) -> Tuple[List[dict], int]:
+    """Rows with blended_price_per_M replaced by the user's plan price where a plan covers the
+    model; the list price moves to list_price_per_M and the plan name to your_plan. Copies only."""
+    prices = my_prices_state(rows)["prices"]
+    out = _Rows()
+    out.rejected, out.meta = getattr(rows, "rejected", 0), getattr(rows, "meta", {})
+    covered = 0
+    for r in rows:
+        o = prices.get(r.get("slug")) if isinstance(r.get("slug"), str) else None
+        if o is None:
+            out.append(r)
+            continue
+        covered += 1
+        out.append({**r, "blended_price_per_M": o["usd_per_m"], "list_price_per_M": r.get("blended_price_per_M"),
+                    "your_plan": f"{o['plan']} ({o['mode']})"})
+    return out, covered
 
 
 def iolite_model(args: Optional[dict] = None, **_kw) -> str:
@@ -1032,7 +1340,7 @@ def iolite_model(args: Optional[dict] = None, **_kw) -> str:
 
 _HELP = """/iolite picks a model by intelligence floor, then cost and speed.
 
-  /iolite shortlist [floor|anchor model] [cheap|fast|balanced] [n=3] [bias=0]
+  /iolite shortlist [floor|anchor model] [cheap|fast|balanced] [n=3] [bias=0] [price=mine]
       Works on the bundled catalog with no setup. Until it has measured your model speeds,
       "fast" favours the smarter model, since speed is not measured yet.
       e.g. /iolite shortlist 60 cheap
@@ -1041,6 +1349,7 @@ _HELP = """/iolite picks a model by intelligence floor, then cost and speed.
       A lone number is the floor; any other words name the anchor model. Only the
       last word can be an objective, and a quoted name is never read as one.
   /iolite model <name or slug>
+  /iolite prices     your own plan prices (my_prices.json) and how each is worked out
   /iolite status     catalog source, snapshot date, data credits and speed measuring, no network call
   /iolite help"""
 
@@ -1084,6 +1393,8 @@ def _parse_words(rest: str) -> Tuple[dict, Optional[str]]:
                 args["n"] = int(low[2:])
             except ValueError:
                 raise ValueError(f"n must be a whole number, got {_safe_text(w[2:], 40)!r}") from None
+        elif low in ("price=mine", "price=list"):
+            args["price"] = low[6:]
         elif low.startswith("bias=") and not any(c.isspace() for c in w):
             try:
                 args["bias"] = float(low[5:])
@@ -1147,6 +1458,50 @@ def _provenance_line(res: dict) -> str:
     return f"\n{n} catalog rows were refused: their source names Artificial Analysis." if n else ""
 
 
+def _shown_money(m: dict) -> str:
+    """The price a shortlist line prints: your plan price with the list price beside it when a
+    plan covers the model; a prepaid $0 reads prepaid, never free tier."""
+    if not m.get("your_plan"):
+        return _money(m.get("blended_price_per_M"))
+    v = m.get("blended_price_per_M")
+    mine = "$0/M prepaid" if v == 0 else _money(v)
+    return f"{mine} on {_md(m['your_plan'])}, list {_money(m.get('list_price_per_M'))}"
+
+
+def _fmt_prices() -> str:
+    """/iolite prices: your plans, what each costs per million tokens and why, and where the
+    file lives. Reads local files only."""
+    try:
+        rows, _ = load_catalog()
+    except Exception as exc:
+        return f"Iolite: {_safe_msg(exc)}"
+    st = my_prices_state(rows)
+    lines = [f"Your prices live in {MY_PRICES_FILE} in the Iolite plugin data folder ({_md(str(_data_dir()))}); "
+             "kept on this machine, never shipped or uploaded. Edit them in the Desktop pane (My plans) or by hand."]
+    if not st["plans"]:
+        lines.append("No plans yet, so every price is the public list price.")
+    for p in st["plans"]:
+        v = p.get("usd_per_m")
+        if p["mode"] == "sunk":
+            why = "prepaid and already spent, so another token costs $0"
+        elif p["mode"] == "fixed":
+            why = "a price you set"
+        elif v is None:
+            why = f"${p['paid_usd']:g} over {p['period_months']:g} months, waiting for measured usage"
+        elif "measured" in p:
+            ms = p["measured"]
+            why = (f"${p['paid_usd']:g} over {p['period_months']:g} months / {ms['tokens_per_month_m']:g}M tokens a month "
+                   f"measured over {ms['days']} day{'s' if ms['days'] != 1 else ''}" + (" (early)" if ms["early"] else ""))
+        else:
+            why = f"${p['paid_usd']:g} over {p['period_months']:g} months / {p['tokens_per_month_m']:g}M tokens a month you set"
+        price = "pending" if v is None else ("$0/M" if v == 0 else _money(v))
+        lines.append(f"- {_md(p['name'])}: {price}, {why}; covers {p['covers']} catalog model{'s' if p['covers'] != 1 else ''}.")
+    for prob in st["problems"]:
+        lines.append(f"Skipped: {_md(prob)}")
+    lines.append("Use them with /iolite shortlist ... price=mine. Results enter the chat like any tool output.")
+    return "\n".join(lines)
+
+
 def _fmt_shortlist(res: dict) -> str:
     if not res.get("ok"):
         return f"Iolite: {res.get('error')}"
@@ -1166,10 +1521,12 @@ def _fmt_shortlist(res: dict) -> str:
             advice = (f"{res['scorable_count']} models have a price and a score, but none reaches the floor"
                       + (f" (the highest score is {top:g}). Try a floor at or below {top:g}." if top is not None else "."))
         return head + "\n" + advice + _provenance_line(res)
+    if res.get("price_basis") and not str(res["price_basis"]).startswith("list price (LiteLLM)"):
+        head += f"\nPrices: {_md(res['price_basis'])}."
     lines = [head]
     for m in res["shortlist"]:
         lines.append(f"{m['rank']}. {_md(m.get('model'))} ({_md(m.get('provider') or '?')}): intelligence "
-                     f"{m.get('intelligence')}{_metric_tag(m)}, {_money(m.get('blended_price_per_M'))}, "
+                     f"{m.get('intelligence')}{_metric_tag(m)}, {_shown_money(m)}, "
                      f"{_speed_text(m)}")
     credits = "".join(f"\n{_md(c)}" for c in res.get("data_credits") or [])
     return ("\n".join(lines) + _speed_footer(res["shortlist"]) + (credits or _credit_lines(res["shortlist"]))
@@ -1243,6 +1600,8 @@ def _slash(raw_args: str) -> str:
             return _HELP
         if cmd == "status":
             return _status()
+        if cmd == "prices":
+            return _fmt_prices()
         if cmd == "model":
             try:
                 query = " ".join(shlex.split(rest))
@@ -1297,7 +1656,7 @@ def register(ctx) -> None:
         try:
             register_command("iolite", handler=_slash,
                              description="Iolite: shortlist LLMs by intelligence floor, then cost (and speed once measured).",
-                             args_hint="shortlist [floor|model] [cheap|fast|balanced] [n=3] | model <name> | status")
+                             args_hint="shortlist [floor|model] [cheap|fast|balanced] [n=3] [price=mine] | model <name> | prices | status")
         except Exception:
             logger.debug("iolite: register_command failed", exc_info=True)
     register_skill = getattr(ctx, "register_skill", None)

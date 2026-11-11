@@ -6,10 +6,10 @@
  * least as smart and strictly better on one of the two.
  */
 
-/** Cheapest positive price halved: where a $0 (free tier) model sits on a log axis. */
-export function priceEpsilon(models) {
+/** Smallest positive value halved: where a $0 (free tier or prepaid) model sits on a log axis. */
+export function priceEpsilon(models, cost = m => m.c) {
   let lo = Infinity
-  for (const m of models) if (m.c > 0 && m.c < lo) lo = m.c
+  for (const m of models) { const v = cost(m); if (v > 0 && v < lo) lo = v }
   return Number.isFinite(lo) ? lo / 2 : 0.01
 }
 
@@ -18,18 +18,18 @@ export function priceEpsilon(models) {
  * smartest; a price group enters the front only when it beats every cheaper model.
  * Raw prices are compared (a $0 model is cheaper than any priced one), not the plotted epsilon.
  */
-export function costIntelligenceFront(models) {
-  const valid = models.filter(m => Number.isFinite(m.c) && Number.isFinite(m.i) && m.c >= 0 && m.i >= 0)
-  const sorted = valid.slice().sort((a, b) => a.c - b.c)
+export function costIntelligenceFront(models, cost = m => m.c, intel = m => m.i) {
+  const valid = models.filter(m => Number.isFinite(cost(m)) && Number.isFinite(intel(m)) && cost(m) >= 0 && intel(m) >= 0)
+  const sorted = valid.slice().sort((a, b) => cost(a) - cost(b))
   const keep = []
   let bestCheaper = -Infinity
   let j = 0
   while (j < sorted.length) {
     let k = j
-    while (k < sorted.length && sorted[k].c === sorted[j].c) k++
+    while (k < sorted.length && cost(sorted[k]) === cost(sorted[j])) k++
     let top = -Infinity
-    for (let n = j; n < k; n++) top = Math.max(top, sorted[n].i)
-    if (top > bestCheaper) for (let n = j; n < k; n++) if (sorted[n].i === top) keep.push(sorted[n])
+    for (let n = j; n < k; n++) top = Math.max(top, intel(sorted[n]))
+    if (top > bestCheaper) for (let n = j; n < k; n++) if (intel(sorted[n]) === top) keep.push(sorted[n])
     bestCheaper = Math.max(bestCheaper, top)
     j = k
   }
@@ -47,6 +47,69 @@ export function zValue(m, zMode, speed) {
     return t !== null && Number.isFinite(t) && t > 0 ? t : null
   }
   return Number.isFinite(m.x) && m.x > 0 ? m.x : null
+}
+
+/* ---- the X axis: price per million tokens, or cost, time or tokens per task -------------- */
+
+export const X_PRICE = 'price'
+export const X_TASK_COST = 'task_cost'
+export const X_TASK_TIME = 'task_time'
+export const X_TASK_TOKENS = 'task_tokens'
+export const X_MODES = [X_PRICE, X_TASK_COST, X_TASK_TIME, X_TASK_TOKENS]
+
+function pos(v) { return typeof v === 'number' && Number.isFinite(v) && v >= 0 }
+
+/**
+ * A model's X value, lower is better, or null when it has none (never estimated).
+ *   price: blended $/M (list or your plan's, whichever the snapshot carries).
+ *   task_cost: median input tokens x input price + median output tokens x output price, in $.
+ *     A plan price covers both directions; with no input/output split the blend is used.
+ *   task_time: median model seconds per task (API time; tool time left out).
+ *   task_tokens: median input + output tokens per task.
+ * Task values come from `tasks` ({slug: {n, in, out, sec}}, measured locally).
+ */
+export function xValue(m, xMode, tasks) {
+  if (xMode === X_PRICE || !xMode) return pos(m.c) ? m.c : null
+  const t = tasks && Object.prototype.hasOwnProperty.call(tasks, m.s) ? tasks[m.s] : null
+  if (!t || !pos(t.in) || !pos(t.out)) return null
+  if (xMode === X_TASK_TOKENS) return t.in + t.out > 0 ? t.in + t.out : null
+  if (xMode === X_TASK_TIME) return pos(t.sec) && t.sec > 0 ? t.sec : null
+  if (xMode === X_TASK_COST) {
+    if (!pos(m.c)) return null
+    const split = !m.mp && pos(m.ci) && pos(m.co)
+    const ci = split ? m.ci : m.c, co = split ? m.co : m.c
+    return (t.in * ci + t.out * co) / 1e6
+  }
+  return null
+}
+
+/** How many snapshot models have per-task numbers. */
+export function taskCount(snapshot, tasks) {
+  if (!tasks || typeof tasks !== 'object') return 0
+  return snapshot.models.filter(m => xValue(m, X_TASK_TOKENS, tasks) !== null).length
+}
+
+export function fmtUsd(v) {
+  if (!Number.isFinite(v)) return '?'
+  if (v === 0) return '$0'
+  if (v < 0.01) return `$${Number(v.toPrecision(2))}`
+  return `$${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+export function fmtSeconds(v) {
+  if (!Number.isFinite(v)) return '?'
+  if (v < 1) return `${Number(v.toPrecision(2))} s`
+  if (v < 120) return `${Number(v.toPrecision(3))} s`
+  return `${Number((v / 60).toPrecision(3))} min`
+}
+
+/** Axis title and tick formatter for an X mode; `mine` marks plan prices. */
+export function xAxis(xMode, mine) {
+  const who = mine ? 'YOUR ' : ''
+  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ · LOG`, tick: fmtUsd, value: fmtUsd }
+  if (xMode === X_TASK_TIME) return { title: 'MODEL TIME PER TASK · LOG', tick: v => fmtSeconds(v).replace(' ', ''), value: fmtSeconds }
+  if (xMode === X_TASK_TOKENS) return { title: 'TOKENS PER TASK · LOG', tick: fmtTokens, value: v => `${fmtTokens(v)} tokens` }
+  return { title: mine ? 'YOUR PRICE $/M · LOG' : 'PRICE $/M · LOG', tick: fmtPriceTick, value: fmtPrice }
 }
 
 function decadeFloor(v) { return Math.pow(10, Math.floor(Math.log10(v) + 1e-9)) }
@@ -70,40 +133,43 @@ function logNorm(v, lo, hi) {
  *   asked for and measured, tokens per second (log).
  * A model with no z value in the chosen mode is left out and counted, never given a guess.
  */
-export function buildLayout(snapshot, { z = Z_CONTEXT, speed = null } = {}) {
+export function buildLayout(snapshot, { z = Z_CONTEXT, speed = null, x = X_PRICE, tasks = null } = {}) {
   const all = snapshot.models
-  const eps = priceEpsilon(all)
   const withZ = []
-  let missingZ = 0
+  let missingZ = 0, missingX = 0
   for (const m of all) {
+    const xv = xValue(m, x, tasks)
+    if (xv === null) { missingX++; continue }
     const zv = zValue(m, z, speed)
     if (zv === null) missingZ++
-    else withZ.push({ m, zv })
+    else withZ.push({ m, xv, zv })
   }
-  const front = new Set(costIntelligenceFront(withZ.map(p => p.m)).map(m => m.s))
+  const eps = priceEpsilon(withZ, p => p.xv)
+  const front = new Set(costIntelligenceFront(withZ, p => p.xv, p => p.m.i).map(p => p.m.s))
   if (!withZ.length) {
-    return { points: [], front: [], domains: null, plotted: 0, missingZ, eps, z }
+    return { points: [], front: [], domains: null, plotted: 0, missingZ, missingX, eps, z, x }
   }
-  const price = withZ.map(p => Math.max(p.m.c, eps))
+  const price = withZ.map(p => Math.max(p.xv, eps))
   const xLo = decadeFloor(Math.min(...price)), xHi = Math.max(decadeCeil(Math.max(...price)), xLo * 10)
   const ints = withZ.map(p => p.m.i)
   const yLo = Math.floor(Math.min(...ints) / 10) * 10, yHi = Math.max(Math.ceil(Math.max(...ints) / 10) * 10, yLo + 10)
   const zs = withZ.map(p => p.zv)
   const zLo = decadeFloor(Math.min(...zs)), zHi = Math.max(decadeCeil(Math.max(...zs)), zLo * 10)
   const domains = { x: { lo: xLo, hi: xHi }, y: { lo: yLo, hi: yHi }, z: { lo: zLo, hi: zHi } }
-  const points = withZ.map(({ m, zv }, idx) => ({
+  const points = withZ.map(({ m, xv, zv }, idx) => ({
     id: m.s,
     index: idx,
     m,
+    xv,
     zv,
     free: m.c === 0 && !m.mp,
     front: front.has(m.s),
-    px: logNorm(Math.max(m.c, eps), xLo, xHi) * 2 - 1,
+    px: logNorm(Math.max(xv, eps), xLo, xHi) * 2 - 1,
     py: ((m.i - yLo) / (yHi - yLo)) * 2 - 1,
     pz: logNorm(zv, zLo, zHi) * 2 - 1,
   }))
-  const frontPoints = points.filter(p => p.front).sort((a, b) => a.m.c - b.m.c || a.m.i - b.m.i)
-  return { points, front: frontPoints, domains, plotted: points.length, missingZ, eps, z }
+  const frontPoints = points.filter(p => p.front).sort((a, b) => a.xv - b.xv || a.m.i - b.m.i)
+  return { points, front: frontPoints, domains, plotted: points.length, missingZ, missingX, eps, z, x }
 }
 
 /** Where an intelligence floor sits on the y axis, or null when it is outside the domain. */
@@ -114,13 +180,14 @@ export function floorPosition(domains, floor) {
   return ((floor - lo) / (hi - lo)) * 2 - 1
 }
 
-/** The cheapest front model that costs no more and is at least as smart as `point`, or null. */
+/** The lowest-X front model that is no worse on X and at least as smart as `point`, or null. */
 export function beatenBy(point, front) {
+  const xv = p => (typeof p.xv === 'number' ? p.xv : p.m.c)
   let best = null
   for (const f of front) {
     if (f.id === point.id) continue
-    if (f.m.c <= point.m.c && f.m.i >= point.m.i && (f.m.c < point.m.c || f.m.i > point.m.i)) {
-      if (!best || f.m.c < best.m.c || (f.m.c === best.m.c && f.m.i > best.m.i)) best = f
+    if (xv(f) <= xv(point) && f.m.i >= point.m.i && (xv(f) < xv(point) || f.m.i > point.m.i)) {
+      if (!best || xv(f) < xv(best) || (xv(f) === xv(best) && f.m.i > best.m.i)) best = f
     }
   }
   return best

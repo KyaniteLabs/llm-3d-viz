@@ -2,14 +2,14 @@
 
 // src/plugin.js
 import { COMPOSER_AREAS, GHOST_ICON_BTN, PALETTE_AREA, host } from "@hermes/plugin-sdk";
-import { createElement as h2 } from "react";
+import { createElement as h3 } from "react";
 
 // src/pane.js
-import { createElement as h, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createElement as h2, useCallback, useEffect as useEffect2, useMemo as useMemo2, useRef, useState as useState2 } from "react";
 import * as SDK from "@hermes/plugin-sdk";
 
 // src/snapshot.json
-var snapshot_default = { schema: "iolite-landscape-snapshot/1", generated: "2026-11-11", total: 621, plotted: 254, unplotted: 367, free: 3, blend: "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4", eci: { low: 50.54, high: 174.24 }, credits: ["Intelligence: Epoch AI, 'Capabilities & benchmarking', Epoch Capabilities Index (CC BY), accessed 2026-11-11. Rescaled to 0-100.", "Fallback intelligence: LMArena Bradley-Terry rating, style-controlled (CC BY 4.0), published 2026-11-09. Bradley-Terry, not Elo; mapped onto the ECI scale where a model has no ECI.", "Prices and context: LiteLLM model_prices_and_context_window.json (MIT), Copyright (c) 2023 Berri AI. Blended price = (3 x input + 1 x output) / 4."], stats: { with_arena: 419, with_eci: 255 }, models: [{ n: "Gemma 4 31B IT", p: "Google DeepMind", s: "gemma-4-31b-it", i: 75.7, t: "ECI", c: 0, x: 262144 }, { n: "Gemma 3 27B IT", p: "google", s: "gemma-3-27b-it", i: 69.7, t: "LMArena", c: 0, x: 131072, a: 1365.4 }, { n: "GLM-4.7-Flash", p: "zai", s: "glm-4.7-flash", i: 69.5, t: "LMArena", c: 0, x: 2e5, a: 1364.5 }, { n: "Qwen2.5-Coder (7B)", p: "Alibaba", s: "qwen2.5-coder-7b", i: 46.5, t: "ECI", c: 0.015, x: 32768 }, { n: "Llama 3.1 8B Instruct", p: "meta", s: "llama-3.1-8b-instruct", i: 49.4, t: "LMArena", c: 0.0275, x: 16384, a: 1211.2 }, { n: "Llama 3 8B Instruct", p: "meta", s: "llama-3-8b-instruct", i: 51.1, t: "LMArena", c: 0.04, x: 8192, a: 1223.7 }, { n: "Llama 3.2 3B Instruct", p: "meta", s: "llama-3.2-3b-instruct", i: 43.6, t: "LMArena", c: 0.06, x: 131072, a: 1166.9 }, { n: "Llama 3.2 1B Instruct", p: "meta", s: "llama-3.2-1b-instruct", i: 36.3, t: "LMArena", c: 0.06, x: 131072, a: 1111.2 }, { n: "Gemma 3 4B IT", p: "google", s: "gemma-3-4b-it", i: 61.5, t: "LMArena", c: 0.0625, x: 131072, a: 1303.2 }, { n: "Mistral NeMo", p: "Mistral AI", s: "mistral-nemo", i: 51.3, t: "ECI", c: 0.0725, x: 60288 }, { n: "Gemma 3 12B IT", p: "google", s: "gemma-3-12b-it", i: 66.6, t: "LMArena", c: 0.075, x: 131072, a: 1341.8 }, { n: "gpt-oss-20b", p: "OpenAI", s: "gpt-oss-20b", i: 68.3, t: "ECI", c: 0.0875, x: 131072, a: 1317.6 }, { n: "Phi-4", p: "Microsoft Research", s: "phi-4", i: 63.5, t: "ECI", c: 0.0875, x: 16384, a: 1256.3 }, { n: "Phi-3 Mini 128K Instruct", p: "microsoft", s: "phi-3-mini-128k-instruct", i: 38.8, t: "LMArena", c: 0.1, x: 131072, a: 1130 }, { n: "Gemma 2B IT", p: "google", s: "gemma-2b-it", i: 34, t: "LMArena", c: 0.1, x: 8192, a: 1093.8 }, { n: "StarCoder 2 3B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-3b", i: 14.1, t: "ECI", c: 0.1, x: 16384 }, { n: "GPT-5 nano", p: "OpenAI", s: "gpt-5-nano", i: 71.6, t: "ECI", c: 0.1375, x: 272e3 }, { n: "GPT-5 nano (High)", p: "openai", s: "gpt-5-nano-high", i: 66, t: "LMArena", c: 0.1375, x: 272e3, a: 1337.6 }, { n: "Mistral Small 24B Instruct (2501)", p: "mistral", s: "mistral-small-24b-instruct-2501", i: 57.7, t: "LMArena", c: 0.15, x: 32768, a: 1274.4 }, { n: "NVIDIA-Nemotron-3-Super-120B-A12B", p: "nvidia", s: "nvidia-nemotron-3-super-120b-a12b", i: 69, t: "LMArena", c: 0.15625, x: 262144, a: 1359.9 }, { n: "MiMo-V2-Flash (Non-Thinking)", p: "xiaomi", s: "mimo-v2-flash-non-thinking", i: 73.1, t: "LMArena", c: 0.165, x: 262144, a: 1391.8 }, { n: "MiMo-V2-Flash (Thinking)", p: "xiaomi", s: "mimo-v2-flash-thinking", i: 72.4, t: "LMArena", c: 0.165, x: 262144, a: 1386.2 }, { n: "Llama 3.3 Nemotron Super 49B v1.5", p: "nvidia", s: "llama-3.3-nemotron-super-49b-v1.5", i: 66.8, t: "LMArena", c: 0.175, x: 131072, a: 1343.2 }, { n: "Llama 3.3 Nemotron Super 49B v1", p: "nvidia", s: "llama-3.3-nemotron-super-49b-v1", i: 64.7, t: "LMArena", c: 0.175, x: 131072, a: 1327.8 }, { n: "GPT-4.1 nano (2025-04-14)", p: "openai", s: "gpt-4.1-nano-2025-04-14", i: 64, t: "LMArena", c: 0.175, x: 1047576, a: 1322.3 }, { n: "GPT-4.1 nano", p: "OpenAI", s: "gpt-4.1-nano", i: 61.7, t: "ECI", c: 0.175, x: 1047576 }, { n: "Qwen3.5-9B", p: "Alibaba", s: "qwen3.5-9b", i: 71.8, t: "ECI", c: 0.19, x: 262144 }, { n: "Claude Haiku 5.5", p: "Anthropic", s: "claude-haiku-5.5", i: 88.7, t: "ECI", c: 0.2, x: 1e6 }, { n: "GPT-6 Luna", p: "OpenAI", s: "gpt-6-luna", i: 85.7, t: "ECI", c: 0.2, x: 922e3 }, { n: "GPT-6 Luna (Max)", p: "openai", s: "gpt-6-luna-max", i: 79.6, t: "LMArena", c: 0.2, x: 922e3, a: 1440.8 }, { n: "Claude Haiku 5.5 (High)", p: "anthropic", s: "claude-haiku-5.5-high", i: 77.1, t: "LMArena", c: 0.2, x: 1e6, a: 1422.4 }, { n: "Qwen3-14B", p: "Alibaba", s: "qwen3-14b", i: 69.2, t: "ECI", c: 0.2, x: 40960 }, { n: "Qwen3-8B", p: "Alibaba", s: "qwen3-8b", i: 66, t: "ECI", c: 0.2, x: 40960 }, { n: "Gemma 2 9B IT", p: "google", s: "gemma-2-9b-it", i: 56.8, t: "LMArena", c: 0.2, x: 8192, a: 1267.1 }, { n: "Gemma 7B", p: "Google DeepMind", s: "gemma-7b", i: 42.9, t: "ECI", c: 0.2, x: 8192 }, { n: "Gemma 7B IT", p: "google", s: "gemma-7b-it", i: 39.8, t: "LMArena", c: 0.2, x: 8192, a: 1137.9 }, { n: "Zephyr 7B Beta", p: "", s: "zephyr-7b-beta", i: 38.9, t: "LMArena", c: 0.2, x: 32768, a: 1130.9 }, { n: "StarCoder 2 15B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-15b", i: 37.3, t: "ECI", c: 0.2, x: 16384 }, { n: "Yi 6B", p: "01.AI", s: "yi-6b", i: 35.9, t: "ECI", c: 0.2, x: 4096 }, { n: "StarCoder 2 7B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-7b", i: 18.7, t: "ECI", c: 0.2, x: 16384 }, { n: "GLM-5.3-Flash", p: "Z.ai (Zhipu AI)", s: "glm-5.3-flash", i: 83.3, t: "ECI", c: 0.2375, x: 1048576, a: 1474.2 }, { n: "DeepSeek V4 Flash 0731", p: "DeepSeek", s: "deepseek-v4-flash-0731", i: 84, t: "ECI", c: 0.25, x: 1e6 }, { n: "Hy3", p: "tencent", s: "hy3", i: 81.3, t: "LMArena", c: 0.25, x: 262144, a: 1454.2 }, { n: "gpt-oss-120b", p: "OpenAI", s: "gpt-oss-120b", i: 72.5, t: "ECI", c: 0.2625, x: 131072, a: 1351.7 }, { n: "Qwen3-30B-A3B", p: "Alibaba", s: "qwen3-30b-a3b", i: 67.7, t: "ECI", c: 0.2625, x: 131072, a: 1326.5 }, { n: "GPT-4o mini (2024-07-18)", p: "openai", s: "gpt-4o-mini-2024-07-18", i: 63.4, t: "LMArena", c: 0.2625, x: 128e3, a: 1317.6 }, { n: "GPT-4o mini", p: "OpenAI", s: "gpt-4o-mini", i: 59.4, t: "ECI", c: 0.2625, x: 128e3 }, { n: "Command R+ (08-2024)", p: "cohere", s: "command-r-08-2024", i: 58, t: "LMArena", c: 0.2625, x: 128e3, a: 1276.4 }, { n: "Llama 3.3 70B Instruct", p: "meta", s: "llama-3.3-70b-instruct", i: 63.5, t: "LMArena", c: 0.2725, x: 131072, a: 1318.1 }, { n: "Llama 4 Scout 17B 16E Instruct", p: "meta", s: "llama-4-scout-17b-16e-instruct", i: 63.9, t: "LMArena", c: 0.2825, x: 1048576, a: 1321.5 }, { n: "DeepSeek-V3.2-Exp (Thinking)", p: "deepseek", s: "deepseek-v3.2-exp-thinking", i: 77.5, t: "LMArena", c: 0.305, x: 163840, a: 1425.2 }, { n: "DeepSeek-V3.2-Exp", p: "DeepSeek", s: "deepseek-v3.2-exp", i: 75.9, t: "ECI", c: 0.305, x: 163840, a: 1421.9 }, { n: "DeepSeek-V3.2", p: "DeepSeek", s: "deepseek-v3.2", i: 77.4, t: "ECI", c: 0.31, x: 163840, a: 1424.7 }, { n: "DeepSeek-V3.2 (Thinking)", p: "deepseek", s: "deepseek-v3.2-thinking", i: 77.2, t: "LMArena", c: 0.31, x: 163840, a: 1422.6 }, { n: "Qwen 3.6 35B-A3B", p: "Alibaba", s: "qwen-3.6-35b-a3b", i: 75.6, t: "ECI", c: 0.3125, x: 262144 }, { n: "Qwen3.5-35B-A3B", p: "Alibaba", s: "qwen3.5-35b-a3b", i: 75.5, t: "ECI", c: 0.355, x: 262144, a: 1394 }, { n: "Qwen3-235B-A22B-Instruct (2507)", p: "alibaba", s: "qwen3-235b-a22b-instruct-2507", i: 77.1, t: "LMArena", c: 0.385, x: 262144, a: 1422.2 }, { n: "Qwen3-235B-A22B (Non-Thinking)", p: "alibaba", s: "qwen3-235b-a22b-non-thinking", i: 74.5, t: "LMArena", c: 0.385, x: 131072, a: 1402.2 }, { n: "Qwen3-235B-A22B-Thinking (2507)", p: "alibaba", s: "qwen3-235b-a22b-thinking-2507", i: 74.2, t: "LMArena", c: 0.385, x: 262144, a: 1400.2 }, { n: "Qwen3-235B-A22B", p: "Alibaba", s: "qwen3-235b-a22b", i: 71, t: "ECI", c: 0.385, x: 131072, a: 1374.8 }, { n: "Qwen3-Next-80B-A3B-Instruct", p: "alibaba", s: "qwen3-next-80b-a3b-instruct", i: 74, t: "LMArena", c: 0.4125, x: 262144, a: 1398.7 }, { n: "Qwen3-Next-80B-A3B-Thinking", p: "alibaba", s: "qwen3-next-80b-a3b-thinking", i: 70.2, t: "LMArena", c: 0.4125, x: 262144, a: 1369.4 }, { n: "GLM-4.5-Air", p: "zai", s: "glm-4.5-air", i: 70.7, t: "LMArena", c: 0.425, x: 128e3, a: 1372.9 }, { n: "GPT-5.6 Luna", p: "OpenAI", s: "gpt-5.6-luna", i: 85.9, t: "ECI", c: 0.45, x: 922e3 }, { n: "GPT-5.6 Luna (xHigh)", p: "openai", s: "gpt-5.6-luna-xhigh", i: 81.2, t: "LMArena", c: 0.45, x: 922e3, a: 1453.2 }, { n: "GLM-4.6V", p: "zai", s: "glm-4.6v", i: 71.4, t: "LMArena", c: 0.45, x: 131072, a: 1378.3 }, { n: "DeepSeek-V3.1-Terminus (Thinking)", p: "deepseek", s: "deepseek-v3.1-terminus-thinking", i: 76.3, t: "LMArena", c: 0.4525, x: 163840, a: 1416 }, { n: "DeepSeek-V3.1-Terminus", p: "deepseek", s: "deepseek-v3.1-terminus", i: 76.1, t: "LMArena", c: 0.4525, x: 163840, a: 1414.7 }, { n: "GPT-5.4 Nano", p: "OpenAI", s: "gpt-5.4-nano", i: 77.5, t: "ECI", c: 0.4625, x: 272e3 }, { n: "GPT-5.4 nano (High)", p: "openai", s: "gpt-5.4-nano-high", i: 74.3, t: "LMArena", c: 0.4625, x: 272e3, a: 1401 }, { n: "DeepSeek-V3", p: "DeepSeek", s: "deepseek-v3", i: 65.6, t: "ECI", c: 0.4775, x: 65536, a: 1358.4 }, { n: "Qwen3-30B-A3B-Instruct (2507)", p: "alibaba", s: "qwen3-30b-a3b-instruct-2507", i: 71.9, t: "LMArena", c: 0.5, x: 262144, a: 1382.3 }, { n: "Mixtral 8x7B", p: "Mistral AI", s: "mixtral-8x7b", i: 50.8, t: "ECI", c: 0.5, x: 32768 }, { n: "Nous Hermes 2 Mixtral 8x7B DPO", p: "", s: "nous-hermes-2-mixtral-8x7b-dpo", i: 43.3, t: "LMArena", c: 0.5, x: 32768, a: 1164.5 }, { n: "DeepSeek-Coder-V2-Lite-Base", p: "", s: "deepseek-coder-v2-lite-base", i: 40, t: "ECI", c: 0.5, x: 163840 }, { n: "DeepSeek V4.1 Flash 1017", p: "DeepSeek", s: "deepseek-v4.1-flash-1017", i: 88, t: "ECI", c: 0.525, x: 1048576 }, { n: "DeepSeek V4.1 Flash", p: "DeepSeek", s: "deepseek-v4.1-flash", i: 85.6, t: "ECI", c: 0.525, x: 1048576 }, { n: "DeepSeek-V4.1-Flash-20260910 (Max)", p: "deepseek", s: "deepseek-v4.1-flash-20260910-max", i: 84, t: "LMArena", c: 0.525, x: 1048576, a: 1475 }, { n: "MiniMax-M3", p: "MiniMax", s: "minimax-m3", i: 78.6, t: "ECI", c: 0.525, x: 1e6, a: 1435.9 }, { n: "DeepSeek-V4-Flash", p: "DeepSeek", s: "deepseek-v4-flash", i: 77.9, t: "ECI", c: 0.525, x: 1e6, a: 1435.8 }, { n: "MiniMax-M2.7", p: "minimax", s: "minimax-m2.7", i: 76.2, t: "LMArena", c: 0.525, x: 196608, a: 1414.9 }, { n: "MiniMax-M2.5", p: "minimax", s: "minimax-m2.5", i: 73, t: "LMArena", c: 0.525, x: 1e6, a: 1390.8 }, { n: "MiniMax-M2", p: "minimax", s: "minimax-m2", i: 66.8, t: "LMArena", c: 0.525, x: 2e5, a: 1343.6 }, { n: "Qwen3.7-Plus", p: "Alibaba", s: "qwen3.7-plus", i: 78.7, t: "ECI", c: 0.56, x: 1e6, a: 1455.3 }, { n: "Gemini 3.1 Flash-Lite Preview", p: "google", s: "gemini-3.1-flash-lite-preview", i: 78.5, t: "LMArena", c: 0.5625, x: 1048576, a: 1433 }, { n: "Gemini 3.1 Flash-Lite", p: "Google", s: "gemini-3.1-flash-lite", i: 76.3, t: "ECI", c: 0.5625, x: 1048576 }, { n: "Llama 3 70B Instruct", p: "meta", s: "llama-3-70b-instruct", i: 58, t: "LMArena", c: 0.5675, x: 8192, a: 1276.7 }, { n: "Beam 1.0 501B A23B", p: "reflection", s: "beam-1.0-501b-a23b", i: 78.7, t: "LMArena", c: 0.6, x: 1048576, a: 1434.6 }, { n: "Llama 3.1 Nemotron 70B Instruct", p: "nvidia", s: "llama-3.1-nemotron-70b-instruct", i: 60.9, t: "LMArena", c: 0.6, x: 131072, a: 1298.8 }, { n: "Mixtral 8x7B Instruct v0.1", p: "mistral", s: "mixtral-8x7b-instruct-v0.1", i: 47.6, t: "LMArena", c: 0.6, x: 32768, a: 1197.3 }, { n: "Inkling-Small", p: "Thinking Machines", s: "inkling-small", i: 81, t: "ECI", c: 0.6375, x: 524288, a: 1405.2 }, { n: "GPT-5 mini", p: "OpenAI", s: "gpt-5-mini", i: 77.2, t: "ECI", c: 0.6875, x: 272e3 }, { n: "GPT-5 mini (High)", p: "openai", s: "gpt-5-mini-high", i: 72.9, t: "LMArena", c: 0.6875, x: 272e3, a: 1389.9 }, { n: "Qwen3-VL-235B-A22B-Instruct", p: "alibaba", s: "qwen3-vl-235b-a22b-instruct", i: 75.9, t: "LMArena", c: 0.7, x: 131072, a: 1413.2 }, { n: "GPT-4.1 mini (2025-04-14)", p: "openai", s: "gpt-4.1-mini-2025-04-14", i: 72, t: "LMArena", c: 0.7, x: 1047576, a: 1382.8 }, { n: "GPT-4.1 mini", p: "OpenAI", s: "gpt-4.1-mini", i: 67.7, t: "ECI", c: 0.7, x: 1047576 }, { n: "Mistral Large 3", p: "mistral", s: "mistral-large-3", i: 76.1, t: "LMArena", c: 0.75, x: 262144, a: 1414.7 }, { n: "GPT-3.5 Turbo (0125)", p: "openai", s: "gpt-3.5-turbo-0125", i: 51.3, t: "LMArena", c: 0.75, x: 16385, a: 1225.8 }, { n: "Qwen3-Coder-480B-A35B-Instruct", p: "alibaba", s: "qwen3-coder-480b-a35b-instruct", i: 72.6, t: "LMArena", c: 0.7875, x: 262144, a: 1387.5 }, { n: "MiMo-V2.5", p: "xiaomi", s: "mimo-v2.5", i: 78.6, t: "LMArena", c: 0.8, x: 262144, a: 1433.7 }, { n: "Qwen3.5-122B-A10B", p: "alibaba", s: "qwen3.5-122b-a10b", i: 76.3, t: "LMArena", c: 0.8175, x: 262144, a: 1416.3 }, { n: "Qwen3.5-27B", p: "alibaba", s: "qwen3.5-27b", i: 75.3, t: "LMArena", c: 0.845, x: 262144, a: 1408.6 }, { n: "Gemini 3.5 Flash-Lite", p: "Google DeepMind", s: "gemini-3.5-flash-lite", i: 76.8, t: "ECI", c: 0.85, x: 1048576, a: 1454.8 }, { n: "Gemini 2.5 Flash", p: "google", s: "gemini-2.5-flash", i: 75.4, t: "LMArena", c: 0.85, x: 1048576, a: 1409.2 }, { n: "Gemini 2.5 Flash Preview (09-2025)", p: "google", s: "gemini-2.5-flash-preview-09-2025", i: 74.6, t: "LMArena", c: 0.85, x: 1048576, a: 1403.1 }, { n: "DeepSeek-V3.1 (Thinking)", p: "deepseek", s: "deepseek-v3.1-thinking", i: 76.3, t: "LMArena", c: 0.875, x: 131072, a: 1415.8 }, { n: "DeepSeek-V3.1", p: "DeepSeek", s: "deepseek-v3.1", i: 73, t: "ECI", c: 0.875, x: 131072, a: 1417.3 }, { n: "DeepSeek-V3 (0324)", p: "deepseek", s: "deepseek-v3-0324", i: 73.6, t: "LMArena", c: 0.9, x: 163840, a: 1395.2 }, { n: "Qwen3-32B", p: "Alibaba", s: "qwen3-32b", i: 69.9, t: "ECI", c: 0.9, x: 131072, a: 1346.8 }, { n: "QwQ-32B", p: "Alibaba", s: "qwq-32b", i: 69.5, t: "ECI", c: 0.9, x: 131072, a: 1335.5 }, { n: "GLM-4.5V", p: "zai", s: "glm-4.5v", i: 67.9, t: "LMArena", c: 0.9, x: 128e3, a: 1352 }, { n: "Llama 3.1 Nemotron Ultra 253B v1", p: "nvidia", s: "llama-3.1-nemotron-ultra-253b-v1", i: 67.3, t: "LMArena", c: 0.9, x: 128e3, a: 1347.6 }, { n: "Qwen2-72B-Instruct", p: "alibaba", s: "qwen2-72b-instruct", i: 56.1, t: "LMArena", c: 0.9, x: 32768, a: 1261.9 }, { n: "Yi 34B Chat", p: "", s: "yi-34b-chat", i: 45.8, t: "LMArena", c: 0.9, x: 4096, a: 1183.8 }, { n: "Code Llama 34B Instruct", p: "meta", s: "code-llama-34b-instruct", i: 39.7, t: "LMArena", c: 0.9, x: 16384, a: 1137 }, { n: "Code Llama 70B Instruct", p: "meta", s: "code-llama-70b-instruct", i: 37.4, t: "LMArena", c: 0.9, x: 4096, a: 1119.3 }, { n: "DeepSeek-R1", p: "DeepSeek", s: "deepseek-r1", i: 71.2, t: "ECI", c: 0.96, x: 65536, a: 1398.1 }, { n: "GLM-4.6", p: "zai", s: "glm-4.6", i: 77.4, t: "LMArena", c: 1, x: 2e5, a: 1424.4 }, { n: "GLM-4.5", p: "zai", s: "glm-4.5", i: 75.7, t: "LMArena", c: 1, x: 128e3, a: 1411 }, { n: "GLM-4.7", p: "Z.ai (Zhipu AI)", s: "glm-4.7", i: 75, t: "ECI", c: 1, x: 2e5, a: 1441.4 }, { n: "Qwen3.6 27B", p: "Alibaba", s: "qwen3.6-27b", i: 77.8, t: "ECI", c: 1.04, x: 262144 }, { n: "Mistral Large 4", p: "Mistral AI", s: "mistral-large-4", i: 84.1, t: "ECI", c: 1.05, x: 1048576, a: 1423.1 }, { n: "Qwen 3.8 27B", p: "Alibaba", s: "qwen-3.8-27b", i: 82.6, t: "ECI", c: 1.05, x: 262144, a: 1433.3 }, { n: "Kimi K2 Thinking", p: "Moonshot", s: "kimi-k2-thinking", i: 76.8, t: "ECI", c: 1.075, x: 262144 }, { n: "Qwen 3.6 Plus", p: "Alibaba", s: "qwen-3.6-plus", i: 79.5, t: "ECI", c: 1.125, x: 1e6, a: 1442.9 }, { n: "Kimi K2.5 (Thinking)", p: "moonshot", s: "kimi-k2.5-thinking", i: 80.7, t: "LMArena", c: 1.2, x: 262144, a: 1449.5 }, { n: "Kimi K2.5", p: "Moonshot", s: "kimi-k2.5", i: 79.4, t: "ECI", c: 1.2, x: 262144 }, { n: "Qwen2.5-72B-Instruct", p: "alibaba", s: "qwen2.5-72b-instruct", i: 61.5, t: "LMArena", c: 1.2, x: 32768, a: 1302.9 }, { n: "Mixtral 8x22B", p: "Mistral AI", s: "mixtral-8x22b", i: 55.2, t: "ECI", c: 1.2, x: 65536 }, { n: "GPT-3.5 Turbo (1106)", p: "openai", s: "gpt-3.5-turbo-1106", i: 48.5, t: "LMArena", c: 1.25, x: 16385, a: 1204.4 }, { n: "Qwen3-VL-235B-A22B-Thinking", p: "alibaba", s: "qwen3-vl-235b-a22b-thinking", i: 73.5, t: "LMArena", c: 1.3, x: 131072, a: 1394.7 }, { n: "Qwen3.5 397B-A17B", p: "Alibaba", s: "qwen3.5-397b-a17b", i: 78.7, t: "ECI", c: 1.35, x: 262144, a: 1441.5 }, { n: "Gemini 3.8 Flash", p: "Google DeepMind", s: "gemini-3.8-flash", i: 87.4, t: "ECI", c: 1.5, x: 1048576 }, { n: "Gemini 3.7 Flash", p: "Google DeepMind", s: "gemini-3.7-flash", i: 87.2, t: "ECI", c: 1.5, x: 1048576 }, { n: "Gemini 3.8 Flash (High)", p: "google", s: "gemini-3.8-flash-high", i: 87, t: "LMArena", c: 1.5, x: 1048576, a: 1497.5 }, { n: "Gemini 3.7 Flash (High)", p: "google", s: "gemini-3.7-flash-high", i: 85.9, t: "LMArena", c: 1.5, x: 1048576, a: 1489.4 }, { n: "Gemini 3.6 Flash (High)", p: "google", s: "gemini-3.6-flash-high", i: 85, t: "LMArena", c: 1.5, x: 1048576, a: 1482.5 }, { n: "Gemini 3.6 Flash", p: "Google DeepMind", s: "gemini-3.6-flash", i: 84.6, t: "ECI", c: 1.5, x: 1048576 }, { n: "MiMo-V2.5-Pro", p: "xiaomi", s: "mimo-v2.5-pro", i: 82.9, t: "LMArena", c: 1.5, x: 1048576, a: 1466.5 }, { n: "GLM-5", p: "Z.ai (Zhipu AI)", s: "glm-5", i: 77.6, t: "ECI", c: 1.55, x: 2e5, a: 1457.4 }, { n: "Grok 4.20 Multi-Agent Beta (0309)", p: "xai", s: "grok-4.20-multi-agent-beta-0309", i: 83.5, t: "LMArena", c: 1.5625, x: 1e6, a: 1471.1 }, { n: "Grok 4.20", p: "xAI", s: "grok-4.20", i: 82.2, t: "ECI", c: 1.5625, x: 1e6 }, { n: "Grok 4.3", p: "xai", s: "grok-4.3", i: 79.7, t: "LMArena", c: 1.5625, x: 1e6, a: 1441.7 }, { n: "GPT-5.4 mini (High)", p: "openai", s: "gpt-5.4-mini-high", i: 80.4, t: "LMArena", c: 1.6875, x: 272e3, a: 1447.4 }, { n: "GPT-5.4 Mini", p: "OpenAI", s: "gpt-5.4-mini", i: 79.9, t: "ECI", c: 1.6875, x: 272e3 }, { n: "Kimi K2.6", p: "Moonshot", s: "kimi-k2.6", i: 81.6, t: "ECI", c: 1.7125, x: 262144, a: 1460.8 }, { n: "Kimi K2.7 Code", p: "Moonshot", s: "kimi-k2.7-code", i: 81.3, t: "ECI", c: 1.7125, x: 262144 }, { n: "Inkling", p: "Thinking Machines", s: "inkling", i: 79.1, t: "ECI", c: 1.7625, x: 524288, a: 1443.1 }, { n: "GLM-5V-Turbo", p: "zai", s: "glm-5v-turbo", i: 78.7, t: "LMArena", c: 1.9, x: 2e5, a: 1434.1 }, { n: "o4-mini", p: "OpenAI", s: "o4-mini", i: 76.5, t: "ECI", c: 1.925, x: 2e5 }, { n: "o4-mini (2025-04-16)", p: "openai", s: "o4-mini-2025-04-16", i: 73, t: "LMArena", c: 1.925, x: 2e5, a: 1390.8 }, { n: "o3-mini", p: "OpenAI", s: "o3-mini", i: 72.8, t: "ECI", c: 1.925, x: 2e5, a: 1348.2 }, { n: "o3-mini (High)", p: "openai", s: "o3-mini-high", i: 69.4, t: "LMArena", c: 1.925, x: 2e5, a: 1363.6 }, { n: "o1-mini", p: "OpenAI", s: "o1-mini", i: 68.6, t: "ECI", c: 1.925, x: 128e3, a: 1336.8 }, { n: "DeepSeek V4 Pro 0813", p: "DeepSeek", s: "deepseek-v4-pro-0813", i: 85.2, t: "ECI", c: 1.98, x: 1048576 }, { n: "DeepSeek-V4-Pro", p: "DeepSeek", s: "deepseek-v4-pro", i: 80.5, t: "ECI", c: 1.98, x: 1e6, a: 1458.1 }, { n: "GPT-6.1 Terra", p: "OpenAI", s: "gpt-6.1-terra", i: 95, t: "ECI", c: 2, x: 922e3 }, { n: "Muse Spark Open", p: "Meta AI", s: "muse-spark-open", i: 84.8, t: "ECI", c: 2, x: 1048576 }, { n: "Claude Haiku 4.5 (20251001)", p: "anthropic", s: "claude-haiku-4.5-20251001", i: 76.1, t: "LMArena", c: 2, x: 2e5, a: 1414 }, { n: "Claude Haiku 4.5", p: "Anthropic", s: "claude-haiku-4.5", i: 74.6, t: "ECI", c: 2, x: 2e5 }, { n: "GLM-5.3", p: "Z.ai (Zhipu AI)", s: "glm-5.3", i: 86, t: "ECI", c: 2.15, x: 1e6 }, { n: "GLM-5.3 (Max)", p: "zai", s: "glm-5.3-max", i: 85, t: "LMArena", c: 2.15, x: 1e6, a: 1482.5 }, { n: "GLM-5.2 (Max)", p: "zai", s: "glm-5.2-max", i: 84.1, t: "LMArena", c: 2.15, x: 1e6, a: 1475.1 }, { n: "GLM-5.2", p: "Z.ai (Zhipu AI)", s: "glm-5.2", i: 82.8, t: "ECI", c: 2.15, x: 1e6 }, { n: "GLM-5.1", p: "Z.ai (Zhipu AI)", s: "glm-5.1", i: 81, t: "ECI", c: 2.15, x: 2e5, a: 1465.2 }, { n: "Qwen3-Max", p: "Alibaba", s: "qwen3-max", i: 74.4, t: "ECI", c: 2.4, x: 256e3 }, { n: "Grok 4.6", p: "xAI", s: "grok-4.6", i: 86.8, t: "ECI", c: 3, x: 5e5 }, { n: "Qwen 3.8 Max", p: "Alibaba", s: "qwen-3.8-max", i: 86.4, t: "ECI", c: 3, x: 991808, a: 1484 }, { n: "Grok 4.7", p: "xAI", s: "grok-4.7", i: 85.3, t: "ECI", c: 3, x: 5e5 }, { n: "Grok 4.5", p: "xAI", s: "grok-4.5", i: 84.5, t: "ECI", c: 3, x: 5e5, a: 1465.8 }, { n: "Grok 4.6 (High)", p: "xai", s: "grok-4.6-high", i: 81.6, t: "LMArena", c: 3, x: 5e5, a: 1456.5 }, { n: "Grok 4.7 (xHigh)", p: "xai", s: "grok-4.7-xhigh", i: 79.7, t: "LMArena", c: 3, x: 5e5, a: 1442 }, { n: "Mistral Medium 3.5", p: "Mistral AI", s: "mistral-medium-3.5", i: 73.6, t: "ECI", c: 3, x: 262144, a: 1426.5 }, { n: "Mistral Medium 3", p: "Mistral AI", s: "mistral-medium-3", i: 66.6, t: "ECI", c: 3, x: 262144 }, { n: "Mistral Medium", p: "mistral", s: "mistral-medium", i: 51, t: "LMArena", c: 3, x: 262144, a: 1222.8 }, { n: "Gemini 3.5 Flash", p: "Google DeepMind", s: "gemini-3.5-flash", i: 84.6, t: "ECI", c: 3.375, x: 1048576 }, { n: "Gemini 3.5 Flash (High)", p: "google", s: "gemini-3.5-flash-high", i: 84.5, t: "LMArena", c: 3.375, x: 1048576, a: 1478.4 }, { n: "Gemini 3.5 Flash (Medium)", p: "google", s: "gemini-3.5-flash-medium", i: 84.2, t: "LMArena", c: 3.375, x: 1048576, a: 1476.1 }, { n: "GPT-5.1 (High)", p: "openai", s: "gpt-5.1-high", i: 81.5, t: "LMArena", c: 3.4375, x: 272e3, a: 1455.5 }, { n: "GPT-5.1", p: "OpenAI", s: "gpt-5.1", i: 81.1, t: "ECI", c: 3.4375, x: 272e3, a: 1438.6 }, { n: "GPT-5", p: "OpenAI", s: "gpt-5", i: 80.4, t: "ECI", c: 3.4375, x: 272e3 }, { n: "Gemini 2.5 Pro", p: "google", s: "gemini-2.5-pro", i: 80.2, t: "LMArena", c: 3.4375, x: 1048576, a: 1445.5 }, { n: "GPT-5 (High)", p: "openai", s: "gpt-5-high", i: 78.8, t: "LMArena", c: 3.4375, x: 272e3, a: 1434.8 }, { n: "GPT-5 Chat", p: "openai", s: "gpt-5-chat", i: 77.7, t: "LMArena", c: 3.4375, x: 128e3, a: 1426.7 }, { n: "o3 (2025-04-16)", p: "openai", s: "o3-2025-04-16", i: 78.3, t: "LMArena", c: 3.5, x: 2e5, a: 1431.5 }, { n: "o3", p: "OpenAI", s: "o3", i: 78, t: "ECI", c: 3.5, x: 2e5 }, { n: "GPT-4.1 (2025-04-14)", p: "openai", s: "gpt-4.1-2025-04-14", i: 76.1, t: "LMArena", c: 3.5, x: 1047576, a: 1414.6 }, { n: "GPT-4.1", p: "OpenAI", s: "gpt-4.1", i: 69.2, t: "ECI", c: 3.5, x: 1047576 }, { n: "Qwen3.7-Max", p: "Alibaba", s: "qwen3.7-max", i: 84, t: "ECI", c: 3.75, x: 991808 }, { n: "GPT-6.1 Sol", p: "OpenAI", s: "gpt-6.1-sol", i: 95.7, t: "ECI", c: 4, x: 922e3 }, { n: "Gemini 4 Argon", p: "Google DeepMind", s: "gemini-4-argon", i: 93.8, t: "ECI", c: 4, x: 1048576 }, { n: "Claude Sonnet 5.5", p: "Anthropic", s: "claude-sonnet-5.5", i: 93.6, t: "ECI", c: 4, x: 1e6 }, { n: "GPT-6 Sol", p: "OpenAI", s: "gpt-6-sol", i: 91.7, t: "ECI", c: 4, x: 922e3 }, { n: "Gemini 4 Carbon (High)", p: "google", s: "gemini-4-carbon-high", i: 90.7, t: "LMArena", c: 4, x: 1048576, a: 1526 }, { n: "Gemini 4 Argon (High)", p: "google", s: "gemini-4-argon-high", i: 90.3, t: "LMArena", c: 4, x: 1048576, a: 1522.4 }, { n: "Kimi K3.1 Pro", p: "Moonshot", s: "kimi-k3.1-pro", i: 90.1, t: "ECI", c: 4, x: 1048576 }, { n: "Claude Sonnet 5", p: "Anthropic", s: "claude-sonnet-5", i: 85.8, t: "ECI", c: 4, x: 1e6 }, { n: "Kimi K3.1 Pro (Max)", p: "moonshot", s: "kimi-k3.1-pro-max", i: 85.1, t: "LMArena", c: 4, x: 1048576, a: 1483 }, { n: "GPT-6.1 Sol (Max)", p: "openai", s: "gpt-6.1-sol-max", i: 85, t: "LMArena", c: 4, x: 922e3, a: 1482.1 }, { n: "Claude Sonnet 5.5 (xHigh)", p: "anthropic", s: "claude-sonnet-5.5-xhigh", i: 83.7, t: "LMArena", c: 4, x: 1e6, a: 1472.5 }, { n: "Claude Sonnet 5 (High)", p: "anthropic", s: "claude-sonnet-5-high", i: 82.2, t: "LMArena", c: 4, x: 1e6, a: 1460.8 }, { n: "GPT-6 Sol (Max)", p: "openai", s: "gpt-6-sol-max", i: 81.7, t: "LMArena", c: 4, x: 922e3, a: 1456.8 }, { n: "DeepSeek-R1 (0528)", p: "deepseek", s: "deepseek-r1-0528", i: 77, t: "LMArena", c: 4, x: 163840, a: 1421.4 }, { n: "Command A (03-2025)", p: "cohere", s: "command-a-03-2025", i: 68.1, t: "LMArena", c: 4.375, x: 256e3, a: 1353.7 }, { n: "GPT-4o (2024-08-06)", p: "openai", s: "gpt-4o-2024-08-06", i: 65.8, t: "LMArena", c: 4.375, x: 128e3, a: 1335.6 }, { n: "GPT-5.6 Terra", p: "OpenAI", s: "gpt-5.6-terra", i: 89.2, t: "ECI", c: 4.5, x: 922e3 }, { n: "Gemini 3.1 Pro Preview", p: "google", s: "gemini-3.1-pro-preview", i: 85.6, t: "LMArena", c: 4.5, x: 1048576, a: 1486.7 }, { n: "Gemini 3.1 Pro", p: "Google DeepMind", s: "gemini-3.1-pro", i: 85.5, t: "ECI", c: 4.5, x: 1e6 }, { n: "GPT-5.6 Terra (xHigh)", p: "openai", s: "gpt-5.6-terra-xhigh", i: 83.1, t: "LMArena", c: 4.5, x: 922e3, a: 1467.9 }, { n: "GPT-5.2", p: "OpenAI", s: "gpt-5.2", i: 84, t: "ECI", c: 4.8125, x: 272e3, a: 1435.3 }, { n: "GPT-5.3 Chat", p: "openai", s: "gpt-5.3-chat", i: 80.8, t: "LMArena", c: 4.8125, x: 111616, a: 1450.1 }, { n: "GPT-5.2 (High)", p: "openai", s: "gpt-5.2-high", i: 79.1, t: "LMArena", c: 4.8125, x: 272e3, a: 1437.4 }, { n: "GPT-5.4", p: "OpenAI", s: "gpt-5.4", i: 86.7, t: "ECI", c: 5.625, x: 105e4, a: 1465 }, { n: "GPT-5.4 (High)", p: "openai", s: "gpt-5.4-high", i: 84.1, t: "LMArena", c: 5.625, x: 105e4, a: 1475.2 }, { n: "Kimi K3", p: "Moonshot", s: "kimi-k3", i: 87.3, t: "ECI", c: 6, x: 1048576 }, { n: "Kimi K3 (Max)", p: "moonshot", s: "kimi-k3-max", i: 85.6, t: "LMArena", c: 6, x: 1048576, a: 1487.1 }, { n: "Claude Sonnet 4.6", p: "Anthropic", s: "claude-sonnet-4.6", i: 82.7, t: "ECI", c: 6, x: 1e6, a: 1472 }, { n: "Claude Sonnet 4.5 (20250929)", p: "anthropic", s: "claude-sonnet-4.5-20250929", i: 81.4, t: "LMArena", c: 6, x: 2e5, a: 1455.1 }, { n: "Claude Sonnet 4.5", p: "Anthropic", s: "claude-sonnet-4.5", i: 78.5, t: "ECI", c: 6, x: 2e5 }, { n: "GPT-4o (2024-05-13)", p: "openai", s: "gpt-4o-2024-05-13", i: 67.1, t: "LMArena", c: 7.5, x: 128e3, a: 1346.2 }, { n: "Claude Opus 5.5", p: "Anthropic", s: "claude-opus-5.5", i: 95.5, t: "ECI", c: 8, x: 1e6 }, { n: "GPT-5.6 Sol", p: "OpenAI", s: "gpt-5.6-sol", i: 90.9, t: "ECI", c: 8, x: 922e3 }, { n: "Claude Opus 5.5 (High)", p: "anthropic", s: "claude-opus-5.5-high", i: 88.1, t: "LMArena", c: 8, x: 1e6, a: 1506.1 }, { n: "GPT-5.6 Sol (xHigh)", p: "openai", s: "gpt-5.6-sol-xhigh", i: 85.4, t: "LMArena", c: 8, x: 922e3, a: 1485 }, { n: "Claude Opus 5", p: "Anthropic", s: "claude-opus-5", i: 92.1, t: "ECI", c: 10, x: 1e6 }, { n: "Claude Opus 4.8", p: "Anthropic", s: "claude-opus-4.8", i: 88.4, t: "ECI", c: 10, x: 1e6, a: 1474.3 }, { n: "Claude Opus 4.6 (High)", p: "anthropic", s: "claude-opus-4.6-high", i: 87.7, t: "LMArena", c: 10, x: 1e6, a: 1503 }, { n: "Claude Opus 4.7 (High)", p: "anthropic", s: "claude-opus-4.7-high", i: 87.5, t: "LMArena", c: 10, x: 1e6, a: 1501.1 }, { n: "Claude Opus 4.7", p: "Anthropic", s: "claude-opus-4.7", i: 86.5, t: "ECI", c: 10, x: 1e6, a: 1493.8 }, { n: "Claude Opus 5 (High)", p: "anthropic", s: "claude-opus-5-high", i: 86, t: "LMArena", c: 10, x: 1e6, a: 1489.8 }, { n: "Claude Opus 5 (Max)", p: "anthropic", s: "claude-opus-5-max", i: 85.9, t: "LMArena", c: 10, x: 1e6, a: 1488.8 }, { n: "Claude Opus 4.6", p: "Anthropic", s: "claude-opus-4.6", i: 85.5, t: "ECI", c: 10, x: 1e6, a: 1496.5 }, { n: "Claude Opus 4.8 (High)", p: "anthropic", s: "claude-opus-4.8-high", i: 84.9, t: "LMArena", c: 10, x: 1e6, a: 1481.8 }, { n: "Claude Opus 4.5 (20251101)", p: "anthropic", s: "claude-opus-4.5-20251101", i: 83.4, t: "LMArena", c: 10, x: 2e5, a: 1469.7 }, { n: "Claude Opus 4.5", p: "Anthropic", s: "claude-opus-4.5", i: 81.9, t: "ECI", c: 10, x: 2e5 }, { n: "GPT-5.5", p: "OpenAI", s: "gpt-5.5", i: 88.5, t: "ECI", c: 11.25, x: 105e4, a: 1476.1 }, { n: "GPT-5.5 (High)", p: "openai", s: "gpt-5.5-high", i: 84.9, t: "LMArena", c: 11.25, x: 105e4, a: 1481.3 }, { n: "Mistral Large (2402)", p: "mistral", s: "mistral-large-2402", i: 53.6, t: "LMArena", c: 12, x: 32e3, a: 1242.7 }, { n: "GPT-4 Turbo (2024-04-09)", p: "openai", s: "gpt-4-turbo-2024-04-09", i: 64.3, t: "LMArena", c: 15, x: 128e3, a: 1324.6 }, { n: "Claude Fable 5.2", p: "Anthropic", s: "claude-fable-5.2", i: 100, t: "ECI", c: 16, x: 1e6 }, { n: "GPT-6 Astra", p: "OpenAI", s: "gpt-6-astra", i: 95.9, t: "ECI", c: 20, x: 922e3 }, { n: "Claude Fable 5.1", p: "Anthropic", s: "claude-fable-5.1", i: 94.2, t: "ECI", c: 20, x: 1e6 }, { n: "Claude Fable 5", p: "Anthropic", s: "claude-fable-5", i: 91.9, t: "ECI", c: 20, x: 1e6 }, { n: "Claude Fable 5 (High)", p: "anthropic", s: "claude-fable-5-high", i: 87.8, t: "LMArena", c: 20, x: 1e6, a: 1503.9 }, { n: "Claude Fable 5.1 (Max)", p: "anthropic", s: "claude-fable-5.1-max", i: 87.7, t: "LMArena", c: 20, x: 1e6, a: 1502.7 }, { n: "GPT-6 Astra (Max)", p: "openai", s: "gpt-6-astra-max", i: 83.9, t: "LMArena", c: 20, x: 922e3, a: 1474.1 }, { n: "o1 (2024-12-17)", p: "openai", s: "o1-2024-12-17", i: 74.5, t: "LMArena", c: 26.25, x: 2e5, a: 1402.3 }, { n: "o1", p: "OpenAI", s: "o1", i: 73.3, t: "ECI", c: 26.25, x: 2e5 }, { n: "o3-pro", p: "OpenAI", s: "o3-pro", i: 78.3, t: "ECI", c: 35, x: 2e5 }, { n: "GPT-4 (0613)", p: "openai", s: "gpt-4-0613", i: 58, t: "LMArena", c: 37.5, x: 8192, a: 1276.4 }, { n: "GPT-5 Pro", p: "OpenAI", s: "gpt-5-pro", i: 81.4, t: "ECI", c: 41.25, x: 4e5 }, { n: "GPT-5.2 Pro", p: "OpenAI", s: "gpt-5.2-pro", i: 86.2, t: "ECI", c: 57.75, x: 272e3 }, { n: "GPT-5.5 Pro", p: "OpenAI", s: "gpt-5.5-pro", i: 90.7, t: "ECI", c: 67.5, x: 105e4 }, { n: "GPT-5.4 Pro", p: "OpenAI", s: "gpt-5.4-pro", i: 88.6, t: "ECI", c: 67.5, x: 105e4 }] };
+var snapshot_default = { schema: "iolite-landscape-snapshot/1", generated: "2026-11-11", total: 621, plotted: 254, unplotted: 367, free: 3, blend: "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4", eci: { low: 50.54, high: 174.24 }, credits: ["Intelligence: Epoch AI, 'Capabilities & benchmarking', Epoch Capabilities Index (CC BY), accessed 2026-11-11. Rescaled to 0-100.", "Fallback intelligence: LMArena Bradley-Terry rating, style-controlled (CC BY 4.0), published 2026-11-09. Bradley-Terry, not Elo; mapped onto the ECI scale where a model has no ECI.", "Prices and context: LiteLLM model_prices_and_context_window.json (MIT), Copyright (c) 2023 Berri AI. Blended price = (3 x input + 1 x output) / 4."], stats: { with_arena: 419, with_eci: 255 }, models: [{ n: "Gemma 4 31B IT", p: "Google DeepMind", s: "gemma-4-31b-it", i: 75.7, t: "ECI", c: 0, ci: 0, co: 0, x: 262144 }, { n: "Gemma 3 27B IT", p: "google", s: "gemma-3-27b-it", i: 69.7, t: "LMArena", c: 0, ci: 0, co: 0, x: 131072, a: 1365.4 }, { n: "GLM-4.7-Flash", p: "zai", s: "glm-4.7-flash", i: 69.5, t: "LMArena", c: 0, ci: 0, co: 0, x: 2e5, a: 1364.5 }, { n: "Qwen2.5-Coder (7B)", p: "Alibaba", s: "qwen2.5-coder-7b", i: 46.5, t: "ECI", c: 0.015, ci: 0.01, co: 0.03, x: 32768 }, { n: "Llama 3.1 8B Instruct", p: "meta", s: "llama-3.1-8b-instruct", i: 49.4, t: "LMArena", c: 0.0275, ci: 0.02, co: 0.05, x: 16384, a: 1211.2 }, { n: "Llama 3 8B Instruct", p: "meta", s: "llama-3-8b-instruct", i: 51.1, t: "LMArena", c: 0.04, ci: 0.04, co: 0.04, x: 8192, a: 1223.7 }, { n: "Llama 3.2 3B Instruct", p: "meta", s: "llama-3.2-3b-instruct", i: 43.6, t: "LMArena", c: 0.06, ci: 0.06, co: 0.06, x: 131072, a: 1166.9 }, { n: "Llama 3.2 1B Instruct", p: "meta", s: "llama-3.2-1b-instruct", i: 36.3, t: "LMArena", c: 0.06, ci: 0.06, co: 0.06, x: 131072, a: 1111.2 }, { n: "Gemma 3 4B IT", p: "google", s: "gemma-3-4b-it", i: 61.5, t: "LMArena", c: 0.0625, ci: 0.05, co: 0.1, x: 131072, a: 1303.2 }, { n: "Mistral NeMo", p: "Mistral AI", s: "mistral-nemo", i: 51.3, t: "ECI", c: 0.0725, ci: 0.04, co: 0.17, x: 60288 }, { n: "Gemma 3 12B IT", p: "google", s: "gemma-3-12b-it", i: 66.6, t: "LMArena", c: 0.075, ci: 0.05, co: 0.15, x: 131072, a: 1341.8 }, { n: "gpt-oss-20b", p: "OpenAI", s: "gpt-oss-20b", i: 68.3, t: "ECI", c: 0.0875, ci: 0.05, co: 0.2, x: 131072, a: 1317.6 }, { n: "Phi-4", p: "Microsoft Research", s: "phi-4", i: 63.5, t: "ECI", c: 0.0875, ci: 0.07, co: 0.14, x: 16384, a: 1256.3 }, { n: "Phi-3 Mini 128K Instruct", p: "microsoft", s: "phi-3-mini-128k-instruct", i: 38.8, t: "LMArena", c: 0.1, ci: 0.1, co: 0.1, x: 131072, a: 1130 }, { n: "Gemma 2B IT", p: "google", s: "gemma-2b-it", i: 34, t: "LMArena", c: 0.1, ci: 0.1, co: 0.1, x: 8192, a: 1093.8 }, { n: "StarCoder 2 3B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-3b", i: 14.1, t: "ECI", c: 0.1, ci: 0.1, co: 0.1, x: 16384 }, { n: "GPT-5 nano", p: "OpenAI", s: "gpt-5-nano", i: 71.6, t: "ECI", c: 0.1375, ci: 0.05, co: 0.4, x: 272e3 }, { n: "GPT-5 nano (High)", p: "openai", s: "gpt-5-nano-high", i: 66, t: "LMArena", c: 0.1375, ci: 0.05, co: 0.4, x: 272e3, a: 1337.6 }, { n: "Mistral Small 24B Instruct (2501)", p: "mistral", s: "mistral-small-24b-instruct-2501", i: 57.7, t: "LMArena", c: 0.15, ci: 0.1, co: 0.3, x: 32768, a: 1274.4 }, { n: "NVIDIA-Nemotron-3-Super-120B-A12B", p: "nvidia", s: "nvidia-nemotron-3-super-120b-a12b", i: 69, t: "LMArena", c: 0.15625, ci: 0.075, co: 0.4, x: 262144, a: 1359.9 }, { n: "MiMo-V2-Flash (Non-Thinking)", p: "xiaomi", s: "mimo-v2-flash-non-thinking", i: 73.1, t: "LMArena", c: 0.165, ci: 0.11, co: 0.33, x: 262144, a: 1391.8 }, { n: "MiMo-V2-Flash (Thinking)", p: "xiaomi", s: "mimo-v2-flash-thinking", i: 72.4, t: "LMArena", c: 0.165, ci: 0.11, co: 0.33, x: 262144, a: 1386.2 }, { n: "Llama 3.3 Nemotron Super 49B v1.5", p: "nvidia", s: "llama-3.3-nemotron-super-49b-v1.5", i: 66.8, t: "LMArena", c: 0.175, ci: 0.1, co: 0.4, x: 131072, a: 1343.2 }, { n: "Llama 3.3 Nemotron Super 49B v1", p: "nvidia", s: "llama-3.3-nemotron-super-49b-v1", i: 64.7, t: "LMArena", c: 0.175, ci: 0.1, co: 0.4, x: 131072, a: 1327.8 }, { n: "GPT-4.1 nano (2025-04-14)", p: "openai", s: "gpt-4.1-nano-2025-04-14", i: 64, t: "LMArena", c: 0.175, ci: 0.1, co: 0.4, x: 1047576, a: 1322.3 }, { n: "GPT-4.1 nano", p: "OpenAI", s: "gpt-4.1-nano", i: 61.7, t: "ECI", c: 0.175, ci: 0.1, co: 0.4, x: 1047576 }, { n: "Qwen3.5-9B", p: "Alibaba", s: "qwen3.5-9b", i: 71.8, t: "ECI", c: 0.19, ci: 0.17, co: 0.25, x: 262144 }, { n: "Claude Haiku 5.5", p: "Anthropic", s: "claude-haiku-5.5", i: 88.7, t: "ECI", c: 0.2, ci: 0.1, co: 0.5, x: 1e6 }, { n: "GPT-6 Luna", p: "OpenAI", s: "gpt-6-luna", i: 85.7, t: "ECI", c: 0.2, ci: 0.1, co: 0.5, x: 922e3 }, { n: "GPT-6 Luna (Max)", p: "openai", s: "gpt-6-luna-max", i: 79.6, t: "LMArena", c: 0.2, ci: 0.1, co: 0.5, x: 922e3, a: 1440.8 }, { n: "Claude Haiku 5.5 (High)", p: "anthropic", s: "claude-haiku-5.5-high", i: 77.1, t: "LMArena", c: 0.2, ci: 0.1, co: 0.5, x: 1e6, a: 1422.4 }, { n: "Qwen3-14B", p: "Alibaba", s: "qwen3-14b", i: 69.2, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 40960 }, { n: "Qwen3-8B", p: "Alibaba", s: "qwen3-8b", i: 66, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 40960 }, { n: "Gemma 2 9B IT", p: "google", s: "gemma-2-9b-it", i: 56.8, t: "LMArena", c: 0.2, ci: 0.2, co: 0.2, x: 8192, a: 1267.1 }, { n: "Gemma 7B", p: "Google DeepMind", s: "gemma-7b", i: 42.9, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 8192 }, { n: "Gemma 7B IT", p: "google", s: "gemma-7b-it", i: 39.8, t: "LMArena", c: 0.2, ci: 0.2, co: 0.2, x: 8192, a: 1137.9 }, { n: "Zephyr 7B Beta", p: "", s: "zephyr-7b-beta", i: 38.9, t: "LMArena", c: 0.2, ci: 0.2, co: 0.2, x: 32768, a: 1130.9 }, { n: "StarCoder 2 15B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-15b", i: 37.3, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 16384 }, { n: "Yi 6B", p: "01.AI", s: "yi-6b", i: 35.9, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 4096 }, { n: "StarCoder 2 7B", p: "Hugging Face,ServiceNow,Nvidia,BigCode", s: "starcoder-2-7b", i: 18.7, t: "ECI", c: 0.2, ci: 0.2, co: 0.2, x: 16384 }, { n: "GLM-5.3-Flash", p: "Z.ai (Zhipu AI)", s: "glm-5.3-flash", i: 83.3, t: "ECI", c: 0.2375, ci: 0.15, co: 0.5, x: 1048576, a: 1474.2 }, { n: "DeepSeek V4 Flash 0731", p: "DeepSeek", s: "deepseek-v4-flash-0731", i: 84, t: "ECI", c: 0.25, ci: 0.2, co: 0.4, x: 1e6 }, { n: "Hy3", p: "tencent", s: "hy3", i: 81.3, t: "LMArena", c: 0.25, ci: 0.14, co: 0.58, x: 262144, a: 1454.2 }, { n: "gpt-oss-120b", p: "OpenAI", s: "gpt-oss-120b", i: 72.5, t: "ECI", c: 0.2625, ci: 0.15, co: 0.6, x: 131072, a: 1351.7 }, { n: "Qwen3-30B-A3B", p: "Alibaba", s: "qwen3-30b-a3b", i: 67.7, t: "ECI", c: 0.2625, ci: 0.15, co: 0.6, x: 131072, a: 1326.5 }, { n: "GPT-4o mini (2024-07-18)", p: "openai", s: "gpt-4o-mini-2024-07-18", i: 63.4, t: "LMArena", c: 0.2625, ci: 0.15, co: 0.6, x: 128e3, a: 1317.6 }, { n: "GPT-4o mini", p: "OpenAI", s: "gpt-4o-mini", i: 59.4, t: "ECI", c: 0.2625, ci: 0.15, co: 0.6, x: 128e3 }, { n: "Command R+ (08-2024)", p: "cohere", s: "command-r-08-2024", i: 58, t: "LMArena", c: 0.2625, ci: 0.15, co: 0.6, x: 128e3, a: 1276.4 }, { n: "Llama 3.3 70B Instruct", p: "meta", s: "llama-3.3-70b-instruct", i: 63.5, t: "LMArena", c: 0.2725, ci: 0.23, co: 0.4, x: 131072, a: 1318.1 }, { n: "Llama 4 Scout 17B 16E Instruct", p: "meta", s: "llama-4-scout-17b-16e-instruct", i: 63.9, t: "LMArena", c: 0.2825, ci: 0.18, co: 0.59, x: 1048576, a: 1321.5 }, { n: "DeepSeek-V3.2-Exp (Thinking)", p: "deepseek", s: "deepseek-v3.2-exp-thinking", i: 77.5, t: "LMArena", c: 0.305, ci: 0.27, co: 0.41, x: 163840, a: 1425.2 }, { n: "DeepSeek-V3.2-Exp", p: "DeepSeek", s: "deepseek-v3.2-exp", i: 75.9, t: "ECI", c: 0.305, ci: 0.27, co: 0.41, x: 163840, a: 1421.9 }, { n: "DeepSeek-V3.2", p: "DeepSeek", s: "deepseek-v3.2", i: 77.4, t: "ECI", c: 0.31, ci: 0.28, co: 0.4, x: 163840, a: 1424.7 }, { n: "DeepSeek-V3.2 (Thinking)", p: "deepseek", s: "deepseek-v3.2-thinking", i: 77.2, t: "LMArena", c: 0.31, ci: 0.28, co: 0.4, x: 163840, a: 1422.6 }, { n: "Qwen 3.6 35B-A3B", p: "Alibaba", s: "qwen-3.6-35b-a3b", i: 75.6, t: "ECI", c: 0.3125, ci: 0.1, co: 0.95, x: 262144 }, { n: "Qwen3.5-35B-A3B", p: "Alibaba", s: "qwen3.5-35b-a3b", i: 75.5, t: "ECI", c: 0.355, ci: 0.14, co: 1, x: 262144, a: 1394 }, { n: "Qwen3-235B-A22B-Instruct (2507)", p: "alibaba", s: "qwen3-235b-a22b-instruct-2507", i: 77.1, t: "LMArena", c: 0.385, ci: 0.22, co: 0.88, x: 262144, a: 1422.2 }, { n: "Qwen3-235B-A22B (Non-Thinking)", p: "alibaba", s: "qwen3-235b-a22b-non-thinking", i: 74.5, t: "LMArena", c: 0.385, ci: 0.22, co: 0.88, x: 131072, a: 1402.2 }, { n: "Qwen3-235B-A22B-Thinking (2507)", p: "alibaba", s: "qwen3-235b-a22b-thinking-2507", i: 74.2, t: "LMArena", c: 0.385, ci: 0.22, co: 0.88, x: 262144, a: 1400.2 }, { n: "Qwen3-235B-A22B", p: "Alibaba", s: "qwen3-235b-a22b", i: 71, t: "ECI", c: 0.385, ci: 0.22, co: 0.88, x: 131072, a: 1374.8 }, { n: "Qwen3-Next-80B-A3B-Instruct", p: "alibaba", s: "qwen3-next-80b-a3b-instruct", i: 74, t: "LMArena", c: 0.4125, ci: 0.15, co: 1.2, x: 262144, a: 1398.7 }, { n: "Qwen3-Next-80B-A3B-Thinking", p: "alibaba", s: "qwen3-next-80b-a3b-thinking", i: 70.2, t: "LMArena", c: 0.4125, ci: 0.15, co: 1.2, x: 262144, a: 1369.4 }, { n: "GLM-4.5-Air", p: "zai", s: "glm-4.5-air", i: 70.7, t: "LMArena", c: 0.425, ci: 0.2, co: 1.1, x: 128e3, a: 1372.9 }, { n: "GPT-5.6 Luna", p: "OpenAI", s: "gpt-5.6-luna", i: 85.9, t: "ECI", c: 0.45, ci: 0.2, co: 1.2, x: 922e3 }, { n: "GPT-5.6 Luna (xHigh)", p: "openai", s: "gpt-5.6-luna-xhigh", i: 81.2, t: "LMArena", c: 0.45, ci: 0.2, co: 1.2, x: 922e3, a: 1453.2 }, { n: "GLM-4.6V", p: "zai", s: "glm-4.6v", i: 71.4, t: "LMArena", c: 0.45, ci: 0.3, co: 0.9, x: 131072, a: 1378.3 }, { n: "DeepSeek-V3.1-Terminus (Thinking)", p: "deepseek", s: "deepseek-v3.1-terminus-thinking", i: 76.3, t: "LMArena", c: 0.4525, ci: 0.27, co: 1, x: 163840, a: 1416 }, { n: "DeepSeek-V3.1-Terminus", p: "deepseek", s: "deepseek-v3.1-terminus", i: 76.1, t: "LMArena", c: 0.4525, ci: 0.27, co: 1, x: 163840, a: 1414.7 }, { n: "GPT-5.4 Nano", p: "OpenAI", s: "gpt-5.4-nano", i: 77.5, t: "ECI", c: 0.4625, ci: 0.2, co: 1.25, x: 272e3 }, { n: "GPT-5.4 nano (High)", p: "openai", s: "gpt-5.4-nano-high", i: 74.3, t: "LMArena", c: 0.4625, ci: 0.2, co: 1.25, x: 272e3, a: 1401 }, { n: "DeepSeek-V3", p: "DeepSeek", s: "deepseek-v3", i: 65.6, t: "ECI", c: 0.4775, ci: 0.27, co: 1.1, x: 65536, a: 1358.4 }, { n: "Qwen3-30B-A3B-Instruct (2507)", p: "alibaba", s: "qwen3-30b-a3b-instruct-2507", i: 71.9, t: "LMArena", c: 0.5, ci: 0.5, co: 0.5, x: 262144, a: 1382.3 }, { n: "Mixtral 8x7B", p: "Mistral AI", s: "mixtral-8x7b", i: 50.8, t: "ECI", c: 0.5, ci: 0.5, co: 0.5, x: 32768 }, { n: "Nous Hermes 2 Mixtral 8x7B DPO", p: "", s: "nous-hermes-2-mixtral-8x7b-dpo", i: 43.3, t: "LMArena", c: 0.5, ci: 0.5, co: 0.5, x: 32768, a: 1164.5 }, { n: "DeepSeek-Coder-V2-Lite-Base", p: "", s: "deepseek-coder-v2-lite-base", i: 40, t: "ECI", c: 0.5, ci: 0.5, co: 0.5, x: 163840 }, { n: "DeepSeek V4.1 Flash 1017", p: "DeepSeek", s: "deepseek-v4.1-flash-1017", i: 88, t: "ECI", c: 0.525, ci: 0.3, co: 1.2, x: 1048576 }, { n: "DeepSeek V4.1 Flash", p: "DeepSeek", s: "deepseek-v4.1-flash", i: 85.6, t: "ECI", c: 0.525, ci: 0.3, co: 1.2, x: 1048576 }, { n: "DeepSeek-V4.1-Flash-20260910 (Max)", p: "deepseek", s: "deepseek-v4.1-flash-20260910-max", i: 84, t: "LMArena", c: 0.525, ci: 0.3, co: 1.2, x: 1048576, a: 1475 }, { n: "MiniMax-M3", p: "MiniMax", s: "minimax-m3", i: 78.6, t: "ECI", c: 0.525, ci: 0.3, co: 1.2, x: 1e6, a: 1435.9 }, { n: "DeepSeek-V4-Flash", p: "DeepSeek", s: "deepseek-v4-flash", i: 77.9, t: "ECI", c: 0.525, ci: 0.3, co: 1.2, x: 1e6, a: 1435.8 }, { n: "MiniMax-M2.7", p: "minimax", s: "minimax-m2.7", i: 76.2, t: "LMArena", c: 0.525, ci: 0.3, co: 1.2, x: 196608, a: 1414.9 }, { n: "MiniMax-M2.5", p: "minimax", s: "minimax-m2.5", i: 73, t: "LMArena", c: 0.525, ci: 0.3, co: 1.2, x: 1e6, a: 1390.8 }, { n: "MiniMax-M2", p: "minimax", s: "minimax-m2", i: 66.8, t: "LMArena", c: 0.525, ci: 0.3, co: 1.2, x: 2e5, a: 1343.6 }, { n: "Qwen3.7-Plus", p: "Alibaba", s: "qwen3.7-plus", i: 78.7, t: "ECI", c: 0.56, ci: 0.32, co: 1.28, x: 1e6, a: 1455.3 }, { n: "Gemini 3.1 Flash-Lite Preview", p: "google", s: "gemini-3.1-flash-lite-preview", i: 78.5, t: "LMArena", c: 0.5625, ci: 0.25, co: 1.5, x: 1048576, a: 1433 }, { n: "Gemini 3.1 Flash-Lite", p: "Google", s: "gemini-3.1-flash-lite", i: 76.3, t: "ECI", c: 0.5625, ci: 0.25, co: 1.5, x: 1048576 }, { n: "Llama 3 70B Instruct", p: "meta", s: "llama-3-70b-instruct", i: 58, t: "LMArena", c: 0.5675, ci: 0.51, co: 0.74, x: 8192, a: 1276.7 }, { n: "Beam 1.0 501B A23B", p: "reflection", s: "beam-1.0-501b-a23b", i: 78.7, t: "LMArena", c: 0.6, ci: 0.4, co: 1.2, x: 1048576, a: 1434.6 }, { n: "Llama 3.1 Nemotron 70B Instruct", p: "nvidia", s: "llama-3.1-nemotron-70b-instruct", i: 60.9, t: "LMArena", c: 0.6, ci: 0.6, co: 0.6, x: 131072, a: 1298.8 }, { n: "Mixtral 8x7B Instruct v0.1", p: "mistral", s: "mixtral-8x7b-instruct-v0.1", i: 47.6, t: "LMArena", c: 0.6, ci: 0.6, co: 0.6, x: 32768, a: 1197.3 }, { n: "Inkling-Small", p: "Thinking Machines", s: "inkling-small", i: 81, t: "ECI", c: 0.6375, ci: 0.45, co: 1.2, x: 524288, a: 1405.2 }, { n: "GPT-5 mini", p: "OpenAI", s: "gpt-5-mini", i: 77.2, t: "ECI", c: 0.6875, ci: 0.25, co: 2, x: 272e3 }, { n: "GPT-5 mini (High)", p: "openai", s: "gpt-5-mini-high", i: 72.9, t: "LMArena", c: 0.6875, ci: 0.25, co: 2, x: 272e3, a: 1389.9 }, { n: "Qwen3-VL-235B-A22B-Instruct", p: "alibaba", s: "qwen3-vl-235b-a22b-instruct", i: 75.9, t: "LMArena", c: 0.7, ci: 0.4, co: 1.6, x: 131072, a: 1413.2 }, { n: "GPT-4.1 mini (2025-04-14)", p: "openai", s: "gpt-4.1-mini-2025-04-14", i: 72, t: "LMArena", c: 0.7, ci: 0.4, co: 1.6, x: 1047576, a: 1382.8 }, { n: "GPT-4.1 mini", p: "OpenAI", s: "gpt-4.1-mini", i: 67.7, t: "ECI", c: 0.7, ci: 0.4, co: 1.6, x: 1047576 }, { n: "Mistral Large 3", p: "mistral", s: "mistral-large-3", i: 76.1, t: "LMArena", c: 0.75, ci: 0.5, co: 1.5, x: 262144, a: 1414.7 }, { n: "GPT-3.5 Turbo (0125)", p: "openai", s: "gpt-3.5-turbo-0125", i: 51.3, t: "LMArena", c: 0.75, ci: 0.5, co: 1.5, x: 16385, a: 1225.8 }, { n: "Qwen3-Coder-480B-A35B-Instruct", p: "alibaba", s: "qwen3-coder-480b-a35b-instruct", i: 72.6, t: "LMArena", c: 0.7875, ci: 0.45, co: 1.8, x: 262144, a: 1387.5 }, { n: "MiMo-V2.5", p: "xiaomi", s: "mimo-v2.5", i: 78.6, t: "LMArena", c: 0.8, ci: 0.4, co: 2, x: 262144, a: 1433.7 }, { n: "Qwen3.5-122B-A10B", p: "alibaba", s: "qwen3.5-122b-a10b", i: 76.3, t: "LMArena", c: 0.8175, ci: 0.29, co: 2.4, x: 262144, a: 1416.3 }, { n: "Qwen3.5-27B", p: "alibaba", s: "qwen3.5-27b", i: 75.3, t: "LMArena", c: 0.845, ci: 0.26, co: 2.6, x: 262144, a: 1408.6 }, { n: "Gemini 3.5 Flash-Lite", p: "Google DeepMind", s: "gemini-3.5-flash-lite", i: 76.8, t: "ECI", c: 0.85, ci: 0.3, co: 2.5, x: 1048576, a: 1454.8 }, { n: "Gemini 2.5 Flash", p: "google", s: "gemini-2.5-flash", i: 75.4, t: "LMArena", c: 0.85, ci: 0.3, co: 2.5, x: 1048576, a: 1409.2 }, { n: "Gemini 2.5 Flash Preview (09-2025)", p: "google", s: "gemini-2.5-flash-preview-09-2025", i: 74.6, t: "LMArena", c: 0.85, ci: 0.3, co: 2.5, x: 1048576, a: 1403.1 }, { n: "DeepSeek-V3.1 (Thinking)", p: "deepseek", s: "deepseek-v3.1-thinking", i: 76.3, t: "LMArena", c: 0.875, ci: 0.6, co: 1.7, x: 131072, a: 1415.8 }, { n: "DeepSeek-V3.1", p: "DeepSeek", s: "deepseek-v3.1", i: 73, t: "ECI", c: 0.875, ci: 0.6, co: 1.7, x: 131072, a: 1417.3 }, { n: "DeepSeek-V3 (0324)", p: "deepseek", s: "deepseek-v3-0324", i: 73.6, t: "LMArena", c: 0.9, ci: 0.9, co: 0.9, x: 163840, a: 1395.2 }, { n: "Qwen3-32B", p: "Alibaba", s: "qwen3-32b", i: 69.9, t: "ECI", c: 0.9, ci: 0.9, co: 0.9, x: 131072, a: 1346.8 }, { n: "QwQ-32B", p: "Alibaba", s: "qwq-32b", i: 69.5, t: "ECI", c: 0.9, ci: 0.9, co: 0.9, x: 131072, a: 1335.5 }, { n: "GLM-4.5V", p: "zai", s: "glm-4.5v", i: 67.9, t: "LMArena", c: 0.9, ci: 0.6, co: 1.8, x: 128e3, a: 1352 }, { n: "Llama 3.1 Nemotron Ultra 253B v1", p: "nvidia", s: "llama-3.1-nemotron-ultra-253b-v1", i: 67.3, t: "LMArena", c: 0.9, ci: 0.6, co: 1.8, x: 128e3, a: 1347.6 }, { n: "Qwen2-72B-Instruct", p: "alibaba", s: "qwen2-72b-instruct", i: 56.1, t: "LMArena", c: 0.9, ci: 0.9, co: 0.9, x: 32768, a: 1261.9 }, { n: "Yi 34B Chat", p: "", s: "yi-34b-chat", i: 45.8, t: "LMArena", c: 0.9, ci: 0.9, co: 0.9, x: 4096, a: 1183.8 }, { n: "Code Llama 34B Instruct", p: "meta", s: "code-llama-34b-instruct", i: 39.7, t: "LMArena", c: 0.9, ci: 0.9, co: 0.9, x: 16384, a: 1137 }, { n: "Code Llama 70B Instruct", p: "meta", s: "code-llama-70b-instruct", i: 37.4, t: "LMArena", c: 0.9, ci: 0.9, co: 0.9, x: 4096, a: 1119.3 }, { n: "DeepSeek-R1", p: "DeepSeek", s: "deepseek-r1", i: 71.2, t: "ECI", c: 0.96, ci: 0.55, co: 2.19, x: 65536, a: 1398.1 }, { n: "GLM-4.6", p: "zai", s: "glm-4.6", i: 77.4, t: "LMArena", c: 1, ci: 0.6, co: 2.2, x: 2e5, a: 1424.4 }, { n: "GLM-4.5", p: "zai", s: "glm-4.5", i: 75.7, t: "LMArena", c: 1, ci: 0.6, co: 2.2, x: 128e3, a: 1411 }, { n: "GLM-4.7", p: "Z.ai (Zhipu AI)", s: "glm-4.7", i: 75, t: "ECI", c: 1, ci: 0.6, co: 2.2, x: 2e5, a: 1441.4 }, { n: "Qwen3.6 27B", p: "Alibaba", s: "qwen3.6-27b", i: 77.8, t: "ECI", c: 1.04, ci: 0.32, co: 3.2, x: 262144 }, { n: "Mistral Large 4", p: "Mistral AI", s: "mistral-large-4", i: 84.1, t: "ECI", c: 1.05, ci: 0.7, co: 2.1, x: 1048576, a: 1423.1 }, { n: "Qwen 3.8 27B", p: "Alibaba", s: "qwen-3.8-27b", i: 82.6, t: "ECI", c: 1.05, ci: 0.4, co: 3, x: 262144, a: 1433.3 }, { n: "Kimi K2 Thinking", p: "Moonshot", s: "kimi-k2-thinking", i: 76.8, t: "ECI", c: 1.075, ci: 0.6, co: 2.5, x: 262144 }, { n: "Qwen 3.6 Plus", p: "Alibaba", s: "qwen-3.6-plus", i: 79.5, t: "ECI", c: 1.125, ci: 0.5, co: 3, x: 1e6, a: 1442.9 }, { n: "Kimi K2.5 (Thinking)", p: "moonshot", s: "kimi-k2.5-thinking", i: 80.7, t: "LMArena", c: 1.2, ci: 0.6, co: 3, x: 262144, a: 1449.5 }, { n: "Kimi K2.5", p: "Moonshot", s: "kimi-k2.5", i: 79.4, t: "ECI", c: 1.2, ci: 0.6, co: 3, x: 262144 }, { n: "Qwen2.5-72B-Instruct", p: "alibaba", s: "qwen2.5-72b-instruct", i: 61.5, t: "LMArena", c: 1.2, ci: 1.2, co: 1.2, x: 32768, a: 1302.9 }, { n: "Mixtral 8x22B", p: "Mistral AI", s: "mixtral-8x22b", i: 55.2, t: "ECI", c: 1.2, ci: 1.2, co: 1.2, x: 65536 }, { n: "GPT-3.5 Turbo (1106)", p: "openai", s: "gpt-3.5-turbo-1106", i: 48.5, t: "LMArena", c: 1.25, ci: 1, co: 2, x: 16385, a: 1204.4 }, { n: "Qwen3-VL-235B-A22B-Thinking", p: "alibaba", s: "qwen3-vl-235b-a22b-thinking", i: 73.5, t: "LMArena", c: 1.3, ci: 0.4, co: 4, x: 131072, a: 1394.7 }, { n: "Qwen3.5 397B-A17B", p: "Alibaba", s: "qwen3.5-397b-a17b", i: 78.7, t: "ECI", c: 1.35, ci: 0.6, co: 3.6, x: 262144, a: 1441.5 }, { n: "Gemini 3.8 Flash", p: "Google DeepMind", s: "gemini-3.8-flash", i: 87.4, t: "ECI", c: 1.5, ci: 0.75, co: 3.75, x: 1048576 }, { n: "Gemini 3.7 Flash", p: "Google DeepMind", s: "gemini-3.7-flash", i: 87.2, t: "ECI", c: 1.5, ci: 0.75, co: 3.75, x: 1048576 }, { n: "Gemini 3.8 Flash (High)", p: "google", s: "gemini-3.8-flash-high", i: 87, t: "LMArena", c: 1.5, ci: 0.75, co: 3.75, x: 1048576, a: 1497.5 }, { n: "Gemini 3.7 Flash (High)", p: "google", s: "gemini-3.7-flash-high", i: 85.9, t: "LMArena", c: 1.5, ci: 0.75, co: 3.75, x: 1048576, a: 1489.4 }, { n: "Gemini 3.6 Flash (High)", p: "google", s: "gemini-3.6-flash-high", i: 85, t: "LMArena", c: 1.5, ci: 0.75, co: 3.75, x: 1048576, a: 1482.5 }, { n: "Gemini 3.6 Flash", p: "Google DeepMind", s: "gemini-3.6-flash", i: 84.6, t: "ECI", c: 1.5, ci: 0.75, co: 3.75, x: 1048576 }, { n: "MiMo-V2.5-Pro", p: "xiaomi", s: "mimo-v2.5-pro", i: 82.9, t: "LMArena", c: 1.5, ci: 1, co: 3, x: 1048576, a: 1466.5 }, { n: "GLM-5", p: "Z.ai (Zhipu AI)", s: "glm-5", i: 77.6, t: "ECI", c: 1.55, ci: 1, co: 3.2, x: 2e5, a: 1457.4 }, { n: "Grok 4.20 Multi-Agent Beta (0309)", p: "xai", s: "grok-4.20-multi-agent-beta-0309", i: 83.5, t: "LMArena", c: 1.5625, ci: 1.25, co: 2.5, x: 1e6, a: 1471.1 }, { n: "Grok 4.20", p: "xAI", s: "grok-4.20", i: 82.2, t: "ECI", c: 1.5625, ci: 1.25, co: 2.5, x: 1e6 }, { n: "Grok 4.3", p: "xai", s: "grok-4.3", i: 79.7, t: "LMArena", c: 1.5625, ci: 1.25, co: 2.5, x: 1e6, a: 1441.7 }, { n: "GPT-5.4 mini (High)", p: "openai", s: "gpt-5.4-mini-high", i: 80.4, t: "LMArena", c: 1.6875, ci: 0.75, co: 4.5, x: 272e3, a: 1447.4 }, { n: "GPT-5.4 Mini", p: "OpenAI", s: "gpt-5.4-mini", i: 79.9, t: "ECI", c: 1.6875, ci: 0.75, co: 4.5, x: 272e3 }, { n: "Kimi K2.6", p: "Moonshot", s: "kimi-k2.6", i: 81.6, t: "ECI", c: 1.7125, ci: 0.95, co: 4, x: 262144, a: 1460.8 }, { n: "Kimi K2.7 Code", p: "Moonshot", s: "kimi-k2.7-code", i: 81.3, t: "ECI", c: 1.7125, ci: 0.95, co: 4, x: 262144 }, { n: "Inkling", p: "Thinking Machines", s: "inkling", i: 79.1, t: "ECI", c: 1.7625, ci: 1, co: 4.05, x: 524288, a: 1443.1 }, { n: "GLM-5V-Turbo", p: "zai", s: "glm-5v-turbo", i: 78.7, t: "LMArena", c: 1.9, ci: 1.2, co: 4, x: 2e5, a: 1434.1 }, { n: "o4-mini", p: "OpenAI", s: "o4-mini", i: 76.5, t: "ECI", c: 1.925, ci: 1.1, co: 4.4, x: 2e5 }, { n: "o4-mini (2025-04-16)", p: "openai", s: "o4-mini-2025-04-16", i: 73, t: "LMArena", c: 1.925, ci: 1.1, co: 4.4, x: 2e5, a: 1390.8 }, { n: "o3-mini", p: "OpenAI", s: "o3-mini", i: 72.8, t: "ECI", c: 1.925, ci: 1.1, co: 4.4, x: 2e5, a: 1348.2 }, { n: "o3-mini (High)", p: "openai", s: "o3-mini-high", i: 69.4, t: "LMArena", c: 1.925, ci: 1.1, co: 4.4, x: 2e5, a: 1363.6 }, { n: "o1-mini", p: "OpenAI", s: "o1-mini", i: 68.6, t: "ECI", c: 1.925, ci: 1.1, co: 4.4, x: 128e3, a: 1336.8 }, { n: "DeepSeek V4 Pro 0813", p: "DeepSeek", s: "deepseek-v4-pro-0813", i: 85.2, t: "ECI", c: 1.98, ci: 1.32, co: 3.96, x: 1048576 }, { n: "DeepSeek-V4-Pro", p: "DeepSeek", s: "deepseek-v4-pro", i: 80.5, t: "ECI", c: 1.98, ci: 1.32, co: 3.96, x: 1e6, a: 1458.1 }, { n: "GPT-6.1 Terra", p: "OpenAI", s: "gpt-6.1-terra", i: 95, t: "ECI", c: 2, ci: 1, co: 5, x: 922e3 }, { n: "Muse Spark Open", p: "Meta AI", s: "muse-spark-open", i: 84.8, t: "ECI", c: 2, ci: 1.25, co: 4.25, x: 1048576 }, { n: "Claude Haiku 4.5 (20251001)", p: "anthropic", s: "claude-haiku-4.5-20251001", i: 76.1, t: "LMArena", c: 2, ci: 1, co: 5, x: 2e5, a: 1414 }, { n: "Claude Haiku 4.5", p: "Anthropic", s: "claude-haiku-4.5", i: 74.6, t: "ECI", c: 2, ci: 1, co: 5, x: 2e5 }, { n: "GLM-5.3", p: "Z.ai (Zhipu AI)", s: "glm-5.3", i: 86, t: "ECI", c: 2.15, ci: 1.4, co: 4.4, x: 1e6 }, { n: "GLM-5.3 (Max)", p: "zai", s: "glm-5.3-max", i: 85, t: "LMArena", c: 2.15, ci: 1.4, co: 4.4, x: 1e6, a: 1482.5 }, { n: "GLM-5.2 (Max)", p: "zai", s: "glm-5.2-max", i: 84.1, t: "LMArena", c: 2.15, ci: 1.4, co: 4.4, x: 1e6, a: 1475.1 }, { n: "GLM-5.2", p: "Z.ai (Zhipu AI)", s: "glm-5.2", i: 82.8, t: "ECI", c: 2.15, ci: 1.4, co: 4.4, x: 1e6 }, { n: "GLM-5.1", p: "Z.ai (Zhipu AI)", s: "glm-5.1", i: 81, t: "ECI", c: 2.15, ci: 1.4, co: 4.4, x: 2e5, a: 1465.2 }, { n: "Qwen3-Max", p: "Alibaba", s: "qwen3-max", i: 74.4, t: "ECI", c: 2.4, ci: 1.2, co: 6, x: 256e3 }, { n: "Grok 4.6", p: "xAI", s: "grok-4.6", i: 86.8, t: "ECI", c: 3, ci: 2, co: 6, x: 5e5 }, { n: "Qwen 3.8 Max", p: "Alibaba", s: "qwen-3.8-max", i: 86.4, t: "ECI", c: 3, ci: 2, co: 6, x: 991808, a: 1484 }, { n: "Grok 4.7", p: "xAI", s: "grok-4.7", i: 85.3, t: "ECI", c: 3, ci: 2, co: 6, x: 5e5 }, { n: "Grok 4.5", p: "xAI", s: "grok-4.5", i: 84.5, t: "ECI", c: 3, ci: 2, co: 6, x: 5e5, a: 1465.8 }, { n: "Grok 4.6 (High)", p: "xai", s: "grok-4.6-high", i: 81.6, t: "LMArena", c: 3, ci: 2, co: 6, x: 5e5, a: 1456.5 }, { n: "Grok 4.7 (xHigh)", p: "xai", s: "grok-4.7-xhigh", i: 79.7, t: "LMArena", c: 3, ci: 2, co: 6, x: 5e5, a: 1442 }, { n: "Mistral Medium 3.5", p: "Mistral AI", s: "mistral-medium-3.5", i: 73.6, t: "ECI", c: 3, ci: 1.5, co: 7.5, x: 262144, a: 1426.5 }, { n: "Mistral Medium 3", p: "Mistral AI", s: "mistral-medium-3", i: 66.6, t: "ECI", c: 3, ci: 1.5, co: 7.5, x: 262144 }, { n: "Mistral Medium", p: "mistral", s: "mistral-medium", i: 51, t: "LMArena", c: 3, ci: 1.5, co: 7.5, x: 262144, a: 1222.8 }, { n: "Gemini 3.5 Flash", p: "Google DeepMind", s: "gemini-3.5-flash", i: 84.6, t: "ECI", c: 3.375, ci: 1.5, co: 9, x: 1048576 }, { n: "Gemini 3.5 Flash (High)", p: "google", s: "gemini-3.5-flash-high", i: 84.5, t: "LMArena", c: 3.375, ci: 1.5, co: 9, x: 1048576, a: 1478.4 }, { n: "Gemini 3.5 Flash (Medium)", p: "google", s: "gemini-3.5-flash-medium", i: 84.2, t: "LMArena", c: 3.375, ci: 1.5, co: 9, x: 1048576, a: 1476.1 }, { n: "GPT-5.1 (High)", p: "openai", s: "gpt-5.1-high", i: 81.5, t: "LMArena", c: 3.4375, ci: 1.25, co: 10, x: 272e3, a: 1455.5 }, { n: "GPT-5.1", p: "OpenAI", s: "gpt-5.1", i: 81.1, t: "ECI", c: 3.4375, ci: 1.25, co: 10, x: 272e3, a: 1438.6 }, { n: "GPT-5", p: "OpenAI", s: "gpt-5", i: 80.4, t: "ECI", c: 3.4375, ci: 1.25, co: 10, x: 272e3 }, { n: "Gemini 2.5 Pro", p: "google", s: "gemini-2.5-pro", i: 80.2, t: "LMArena", c: 3.4375, ci: 1.25, co: 10, x: 1048576, a: 1445.5 }, { n: "GPT-5 (High)", p: "openai", s: "gpt-5-high", i: 78.8, t: "LMArena", c: 3.4375, ci: 1.25, co: 10, x: 272e3, a: 1434.8 }, { n: "GPT-5 Chat", p: "openai", s: "gpt-5-chat", i: 77.7, t: "LMArena", c: 3.4375, ci: 1.25, co: 10, x: 128e3, a: 1426.7 }, { n: "o3 (2025-04-16)", p: "openai", s: "o3-2025-04-16", i: 78.3, t: "LMArena", c: 3.5, ci: 2, co: 8, x: 2e5, a: 1431.5 }, { n: "o3", p: "OpenAI", s: "o3", i: 78, t: "ECI", c: 3.5, ci: 2, co: 8, x: 2e5 }, { n: "GPT-4.1 (2025-04-14)", p: "openai", s: "gpt-4.1-2025-04-14", i: 76.1, t: "LMArena", c: 3.5, ci: 2, co: 8, x: 1047576, a: 1414.6 }, { n: "GPT-4.1", p: "OpenAI", s: "gpt-4.1", i: 69.2, t: "ECI", c: 3.5, ci: 2, co: 8, x: 1047576 }, { n: "Qwen3.7-Max", p: "Alibaba", s: "qwen3.7-max", i: 84, t: "ECI", c: 3.75, ci: 2.5, co: 7.5, x: 991808 }, { n: "GPT-6.1 Sol", p: "OpenAI", s: "gpt-6.1-sol", i: 95.7, t: "ECI", c: 4, ci: 2, co: 10, x: 922e3 }, { n: "Gemini 4 Argon", p: "Google DeepMind", s: "gemini-4-argon", i: 93.8, t: "ECI", c: 4, ci: 2, co: 10, x: 1048576 }, { n: "Claude Sonnet 5.5", p: "Anthropic", s: "claude-sonnet-5.5", i: 93.6, t: "ECI", c: 4, ci: 2, co: 10, x: 1e6 }, { n: "GPT-6 Sol", p: "OpenAI", s: "gpt-6-sol", i: 91.7, t: "ECI", c: 4, ci: 2, co: 10, x: 922e3 }, { n: "Gemini 4 Carbon (High)", p: "google", s: "gemini-4-carbon-high", i: 90.7, t: "LMArena", c: 4, ci: 2, co: 10, x: 1048576, a: 1526 }, { n: "Gemini 4 Argon (High)", p: "google", s: "gemini-4-argon-high", i: 90.3, t: "LMArena", c: 4, ci: 2, co: 10, x: 1048576, a: 1522.4 }, { n: "Kimi K3.1 Pro", p: "Moonshot", s: "kimi-k3.1-pro", i: 90.1, t: "ECI", c: 4, ci: 2, co: 10, x: 1048576 }, { n: "Claude Sonnet 5", p: "Anthropic", s: "claude-sonnet-5", i: 85.8, t: "ECI", c: 4, ci: 2, co: 10, x: 1e6 }, { n: "Kimi K3.1 Pro (Max)", p: "moonshot", s: "kimi-k3.1-pro-max", i: 85.1, t: "LMArena", c: 4, ci: 2, co: 10, x: 1048576, a: 1483 }, { n: "GPT-6.1 Sol (Max)", p: "openai", s: "gpt-6.1-sol-max", i: 85, t: "LMArena", c: 4, ci: 2, co: 10, x: 922e3, a: 1482.1 }, { n: "Claude Sonnet 5.5 (xHigh)", p: "anthropic", s: "claude-sonnet-5.5-xhigh", i: 83.7, t: "LMArena", c: 4, ci: 2, co: 10, x: 1e6, a: 1472.5 }, { n: "Claude Sonnet 5 (High)", p: "anthropic", s: "claude-sonnet-5-high", i: 82.2, t: "LMArena", c: 4, ci: 2, co: 10, x: 1e6, a: 1460.8 }, { n: "GPT-6 Sol (Max)", p: "openai", s: "gpt-6-sol-max", i: 81.7, t: "LMArena", c: 4, ci: 2, co: 10, x: 922e3, a: 1456.8 }, { n: "DeepSeek-R1 (0528)", p: "deepseek", s: "deepseek-r1-0528", i: 77, t: "LMArena", c: 4, ci: 3, co: 7, x: 163840, a: 1421.4 }, { n: "Command A (03-2025)", p: "cohere", s: "command-a-03-2025", i: 68.1, t: "LMArena", c: 4.375, ci: 2.5, co: 10, x: 256e3, a: 1353.7 }, { n: "GPT-4o (2024-08-06)", p: "openai", s: "gpt-4o-2024-08-06", i: 65.8, t: "LMArena", c: 4.375, ci: 2.5, co: 10, x: 128e3, a: 1335.6 }, { n: "GPT-5.6 Terra", p: "OpenAI", s: "gpt-5.6-terra", i: 89.2, t: "ECI", c: 4.5, ci: 2, co: 12, x: 922e3 }, { n: "Gemini 3.1 Pro Preview", p: "google", s: "gemini-3.1-pro-preview", i: 85.6, t: "LMArena", c: 4.5, ci: 2, co: 12, x: 1048576, a: 1486.7 }, { n: "Gemini 3.1 Pro", p: "Google DeepMind", s: "gemini-3.1-pro", i: 85.5, t: "ECI", c: 4.5, ci: 2, co: 12, x: 1e6 }, { n: "GPT-5.6 Terra (xHigh)", p: "openai", s: "gpt-5.6-terra-xhigh", i: 83.1, t: "LMArena", c: 4.5, ci: 2, co: 12, x: 922e3, a: 1467.9 }, { n: "GPT-5.2", p: "OpenAI", s: "gpt-5.2", i: 84, t: "ECI", c: 4.8125, ci: 1.75, co: 14, x: 272e3, a: 1435.3 }, { n: "GPT-5.3 Chat", p: "openai", s: "gpt-5.3-chat", i: 80.8, t: "LMArena", c: 4.8125, ci: 1.75, co: 14, x: 111616, a: 1450.1 }, { n: "GPT-5.2 (High)", p: "openai", s: "gpt-5.2-high", i: 79.1, t: "LMArena", c: 4.8125, ci: 1.75, co: 14, x: 272e3, a: 1437.4 }, { n: "GPT-5.4", p: "OpenAI", s: "gpt-5.4", i: 86.7, t: "ECI", c: 5.625, ci: 2.5, co: 15, x: 105e4, a: 1465 }, { n: "GPT-5.4 (High)", p: "openai", s: "gpt-5.4-high", i: 84.1, t: "LMArena", c: 5.625, ci: 2.5, co: 15, x: 105e4, a: 1475.2 }, { n: "Kimi K3", p: "Moonshot", s: "kimi-k3", i: 87.3, t: "ECI", c: 6, ci: 3, co: 15, x: 1048576 }, { n: "Kimi K3 (Max)", p: "moonshot", s: "kimi-k3-max", i: 85.6, t: "LMArena", c: 6, ci: 3, co: 15, x: 1048576, a: 1487.1 }, { n: "Claude Sonnet 4.6", p: "Anthropic", s: "claude-sonnet-4.6", i: 82.7, t: "ECI", c: 6, ci: 3, co: 15, x: 1e6, a: 1472 }, { n: "Claude Sonnet 4.5 (20250929)", p: "anthropic", s: "claude-sonnet-4.5-20250929", i: 81.4, t: "LMArena", c: 6, ci: 3, co: 15, x: 2e5, a: 1455.1 }, { n: "Claude Sonnet 4.5", p: "Anthropic", s: "claude-sonnet-4.5", i: 78.5, t: "ECI", c: 6, ci: 3, co: 15, x: 2e5 }, { n: "GPT-4o (2024-05-13)", p: "openai", s: "gpt-4o-2024-05-13", i: 67.1, t: "LMArena", c: 7.5, ci: 5, co: 15, x: 128e3, a: 1346.2 }, { n: "Claude Opus 5.5", p: "Anthropic", s: "claude-opus-5.5", i: 95.5, t: "ECI", c: 8, ci: 4, co: 20, x: 1e6 }, { n: "GPT-5.6 Sol", p: "OpenAI", s: "gpt-5.6-sol", i: 90.9, t: "ECI", c: 8, ci: 4, co: 20, x: 922e3 }, { n: "Claude Opus 5.5 (High)", p: "anthropic", s: "claude-opus-5.5-high", i: 88.1, t: "LMArena", c: 8, ci: 4, co: 20, x: 1e6, a: 1506.1 }, { n: "GPT-5.6 Sol (xHigh)", p: "openai", s: "gpt-5.6-sol-xhigh", i: 85.4, t: "LMArena", c: 8, ci: 4, co: 20, x: 922e3, a: 1485 }, { n: "Claude Opus 5", p: "Anthropic", s: "claude-opus-5", i: 92.1, t: "ECI", c: 10, ci: 5, co: 25, x: 1e6 }, { n: "Claude Opus 4.8", p: "Anthropic", s: "claude-opus-4.8", i: 88.4, t: "ECI", c: 10, ci: 5, co: 25, x: 1e6, a: 1474.3 }, { n: "Claude Opus 4.6 (High)", p: "anthropic", s: "claude-opus-4.6-high", i: 87.7, t: "LMArena", c: 10, ci: 5, co: 25, x: 1e6, a: 1503 }, { n: "Claude Opus 4.7 (High)", p: "anthropic", s: "claude-opus-4.7-high", i: 87.5, t: "LMArena", c: 10, ci: 5, co: 25, x: 1e6, a: 1501.1 }, { n: "Claude Opus 4.7", p: "Anthropic", s: "claude-opus-4.7", i: 86.5, t: "ECI", c: 10, ci: 5, co: 25, x: 1e6, a: 1493.8 }, { n: "Claude Opus 5 (High)", p: "anthropic", s: "claude-opus-5-high", i: 86, t: "LMArena", c: 10, ci: 5, co: 25, x: 1e6, a: 1489.8 }, { n: "Claude Opus 5 (Max)", p: "anthropic", s: "claude-opus-5-max", i: 85.9, t: "LMArena", c: 10, ci: 5, co: 25, x: 1e6, a: 1488.8 }, { n: "Claude Opus 4.6", p: "Anthropic", s: "claude-opus-4.6", i: 85.5, t: "ECI", c: 10, ci: 5, co: 25, x: 1e6, a: 1496.5 }, { n: "Claude Opus 4.8 (High)", p: "anthropic", s: "claude-opus-4.8-high", i: 84.9, t: "LMArena", c: 10, ci: 5, co: 25, x: 1e6, a: 1481.8 }, { n: "Claude Opus 4.5 (20251101)", p: "anthropic", s: "claude-opus-4.5-20251101", i: 83.4, t: "LMArena", c: 10, ci: 5, co: 25, x: 2e5, a: 1469.7 }, { n: "Claude Opus 4.5", p: "Anthropic", s: "claude-opus-4.5", i: 81.9, t: "ECI", c: 10, ci: 5, co: 25, x: 2e5 }, { n: "GPT-5.5", p: "OpenAI", s: "gpt-5.5", i: 88.5, t: "ECI", c: 11.25, ci: 5, co: 30, x: 105e4, a: 1476.1 }, { n: "GPT-5.5 (High)", p: "openai", s: "gpt-5.5-high", i: 84.9, t: "LMArena", c: 11.25, ci: 5, co: 30, x: 105e4, a: 1481.3 }, { n: "Mistral Large (2402)", p: "mistral", s: "mistral-large-2402", i: 53.6, t: "LMArena", c: 12, ci: 8, co: 24, x: 32e3, a: 1242.7 }, { n: "GPT-4 Turbo (2024-04-09)", p: "openai", s: "gpt-4-turbo-2024-04-09", i: 64.3, t: "LMArena", c: 15, ci: 10, co: 30, x: 128e3, a: 1324.6 }, { n: "Claude Fable 5.2", p: "Anthropic", s: "claude-fable-5.2", i: 100, t: "ECI", c: 16, ci: 8, co: 40, x: 1e6 }, { n: "GPT-6 Astra", p: "OpenAI", s: "gpt-6-astra", i: 95.9, t: "ECI", c: 20, ci: 10, co: 50, x: 922e3 }, { n: "Claude Fable 5.1", p: "Anthropic", s: "claude-fable-5.1", i: 94.2, t: "ECI", c: 20, ci: 10, co: 50, x: 1e6 }, { n: "Claude Fable 5", p: "Anthropic", s: "claude-fable-5", i: 91.9, t: "ECI", c: 20, ci: 10, co: 50, x: 1e6 }, { n: "Claude Fable 5 (High)", p: "anthropic", s: "claude-fable-5-high", i: 87.8, t: "LMArena", c: 20, ci: 10, co: 50, x: 1e6, a: 1503.9 }, { n: "Claude Fable 5.1 (Max)", p: "anthropic", s: "claude-fable-5.1-max", i: 87.7, t: "LMArena", c: 20, ci: 10, co: 50, x: 1e6, a: 1502.7 }, { n: "GPT-6 Astra (Max)", p: "openai", s: "gpt-6-astra-max", i: 83.9, t: "LMArena", c: 20, ci: 10, co: 50, x: 922e3, a: 1474.1 }, { n: "o1 (2024-12-17)", p: "openai", s: "o1-2024-12-17", i: 74.5, t: "LMArena", c: 26.25, ci: 15, co: 60, x: 2e5, a: 1402.3 }, { n: "o1", p: "OpenAI", s: "o1", i: 73.3, t: "ECI", c: 26.25, ci: 15, co: 60, x: 2e5 }, { n: "o3-pro", p: "OpenAI", s: "o3-pro", i: 78.3, t: "ECI", c: 35, ci: 20, co: 80, x: 2e5 }, { n: "GPT-4 (0613)", p: "openai", s: "gpt-4-0613", i: 58, t: "LMArena", c: 37.5, ci: 30, co: 60, x: 8192, a: 1276.4 }, { n: "GPT-5 Pro", p: "OpenAI", s: "gpt-5-pro", i: 81.4, t: "ECI", c: 41.25, ci: 15, co: 120, x: 4e5 }, { n: "GPT-5.2 Pro", p: "OpenAI", s: "gpt-5.2-pro", i: 86.2, t: "ECI", c: 57.75, ci: 21, co: 168, x: 272e3 }, { n: "GPT-5.5 Pro", p: "OpenAI", s: "gpt-5.5-pro", i: 90.7, t: "ECI", c: 67.5, ci: 30, co: 180, x: 105e4 }, { n: "GPT-5.4 Pro", p: "OpenAI", s: "gpt-5.4-pro", i: 88.6, t: "ECI", c: 67.5, ci: 30, co: 180, x: 105e4 }] };
 
 // src/palette.js
 var DARK = {
@@ -53,24 +53,27 @@ function paletteFor(mode) {
 }
 
 // src/frontier.js
-function priceEpsilon(models) {
+function priceEpsilon(models, cost = (m) => m.c) {
   let lo = Infinity;
-  for (const m of models) if (m.c > 0 && m.c < lo) lo = m.c;
+  for (const m of models) {
+    const v = cost(m);
+    if (v > 0 && v < lo) lo = v;
+  }
   return Number.isFinite(lo) ? lo / 2 : 0.01;
 }
-function costIntelligenceFront(models) {
-  const valid = models.filter((m) => Number.isFinite(m.c) && Number.isFinite(m.i) && m.c >= 0 && m.i >= 0);
-  const sorted = valid.slice().sort((a, b) => a.c - b.c);
+function costIntelligenceFront(models, cost = (m) => m.c, intel = (m) => m.i) {
+  const valid = models.filter((m) => Number.isFinite(cost(m)) && Number.isFinite(intel(m)) && cost(m) >= 0 && intel(m) >= 0);
+  const sorted = valid.slice().sort((a, b) => cost(a) - cost(b));
   const keep = [];
   let bestCheaper = -Infinity;
   let j = 0;
   while (j < sorted.length) {
     let k = j;
-    while (k < sorted.length && sorted[k].c === sorted[j].c) k++;
+    while (k < sorted.length && cost(sorted[k]) === cost(sorted[j])) k++;
     let top = -Infinity;
-    for (let n = j; n < k; n++) top = Math.max(top, sorted[n].i);
+    for (let n = j; n < k; n++) top = Math.max(top, intel(sorted[n]));
     if (top > bestCheaper) {
-      for (let n = j; n < k; n++) if (sorted[n].i === top) keep.push(sorted[n]);
+      for (let n = j; n < k; n++) if (intel(sorted[n]) === top) keep.push(sorted[n]);
     }
     bestCheaper = Math.max(bestCheaper, top);
     j = k;
@@ -87,6 +90,50 @@ function zValue(m, zMode, speed) {
   }
   return Number.isFinite(m.x) && m.x > 0 ? m.x : null;
 }
+var X_PRICE = "price";
+var X_TASK_COST = "task_cost";
+var X_TASK_TIME = "task_time";
+var X_TASK_TOKENS = "task_tokens";
+function pos(v) {
+  return typeof v === "number" && Number.isFinite(v) && v >= 0;
+}
+function xValue(m, xMode, tasks) {
+  if (xMode === X_PRICE || !xMode) return pos(m.c) ? m.c : null;
+  const t = tasks && Object.prototype.hasOwnProperty.call(tasks, m.s) ? tasks[m.s] : null;
+  if (!t || !pos(t.in) || !pos(t.out)) return null;
+  if (xMode === X_TASK_TOKENS) return t.in + t.out > 0 ? t.in + t.out : null;
+  if (xMode === X_TASK_TIME) return pos(t.sec) && t.sec > 0 ? t.sec : null;
+  if (xMode === X_TASK_COST) {
+    if (!pos(m.c)) return null;
+    const split = !m.mp && pos(m.ci) && pos(m.co);
+    const ci = split ? m.ci : m.c, co = split ? m.co : m.c;
+    return (t.in * ci + t.out * co) / 1e6;
+  }
+  return null;
+}
+function taskCount(snapshot, tasks) {
+  if (!tasks || typeof tasks !== "object") return 0;
+  return snapshot.models.filter((m) => xValue(m, X_TASK_TOKENS, tasks) !== null).length;
+}
+function fmtUsd(v) {
+  if (!Number.isFinite(v)) return "?";
+  if (v === 0) return "$0";
+  if (v < 0.01) return `$${Number(v.toPrecision(2))}`;
+  return `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+function fmtSeconds(v) {
+  if (!Number.isFinite(v)) return "?";
+  if (v < 1) return `${Number(v.toPrecision(2))} s`;
+  if (v < 120) return `${Number(v.toPrecision(3))} s`;
+  return `${Number((v / 60).toPrecision(3))} min`;
+}
+function xAxis(xMode, mine) {
+  const who = mine ? "YOUR " : "";
+  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ \xB7 LOG`, tick: fmtUsd, value: fmtUsd };
+  if (xMode === X_TASK_TIME) return { title: "MODEL TIME PER TASK \xB7 LOG", tick: (v) => fmtSeconds(v).replace(" ", ""), value: fmtSeconds };
+  if (xMode === X_TASK_TOKENS) return { title: "TOKENS PER TASK \xB7 LOG", tick: fmtTokens, value: (v) => `${fmtTokens(v)} tokens` };
+  return { title: mine ? "YOUR PRICE $/M \xB7 LOG" : "PRICE $/M \xB7 LOG", tick: fmtPriceTick, value: fmtPrice };
+}
 function decadeFloor(v) {
   return Math.pow(10, Math.floor(Math.log10(v) + 1e-9));
 }
@@ -102,40 +149,46 @@ function logNorm(v, lo, hi) {
   const a = Math.log(lo), b = Math.log(hi);
   return b === a ? 0.5 : (Math.log(v) - a) / (b - a);
 }
-function buildLayout(snapshot, { z = Z_CONTEXT, speed = null } = {}) {
+function buildLayout(snapshot, { z = Z_CONTEXT, speed = null, x = X_PRICE, tasks = null } = {}) {
   const all = snapshot.models;
-  const eps = priceEpsilon(all);
   const withZ = [];
-  let missingZ = 0;
+  let missingZ = 0, missingX = 0;
   for (const m of all) {
+    const xv = xValue(m, x, tasks);
+    if (xv === null) {
+      missingX++;
+      continue;
+    }
     const zv = zValue(m, z, speed);
     if (zv === null) missingZ++;
-    else withZ.push({ m, zv });
+    else withZ.push({ m, xv, zv });
   }
-  const front = new Set(costIntelligenceFront(withZ.map((p) => p.m)).map((m) => m.s));
+  const eps = priceEpsilon(withZ, (p) => p.xv);
+  const front = new Set(costIntelligenceFront(withZ, (p) => p.xv, (p) => p.m.i).map((p) => p.m.s));
   if (!withZ.length) {
-    return { points: [], front: [], domains: null, plotted: 0, missingZ, eps, z };
+    return { points: [], front: [], domains: null, plotted: 0, missingZ, missingX, eps, z, x };
   }
-  const price = withZ.map((p) => Math.max(p.m.c, eps));
+  const price = withZ.map((p) => Math.max(p.xv, eps));
   const xLo = decadeFloor(Math.min(...price)), xHi = Math.max(decadeCeil(Math.max(...price)), xLo * 10);
   const ints = withZ.map((p) => p.m.i);
   const yLo = Math.floor(Math.min(...ints) / 10) * 10, yHi = Math.max(Math.ceil(Math.max(...ints) / 10) * 10, yLo + 10);
   const zs = withZ.map((p) => p.zv);
   const zLo = decadeFloor(Math.min(...zs)), zHi = Math.max(decadeCeil(Math.max(...zs)), zLo * 10);
   const domains = { x: { lo: xLo, hi: xHi }, y: { lo: yLo, hi: yHi }, z: { lo: zLo, hi: zHi } };
-  const points = withZ.map(({ m, zv }, idx) => ({
+  const points = withZ.map(({ m, xv, zv }, idx) => ({
     id: m.s,
     index: idx,
     m,
+    xv,
     zv,
     free: m.c === 0 && !m.mp,
     front: front.has(m.s),
-    px: logNorm(Math.max(m.c, eps), xLo, xHi) * 2 - 1,
+    px: logNorm(Math.max(xv, eps), xLo, xHi) * 2 - 1,
     py: (m.i - yLo) / (yHi - yLo) * 2 - 1,
     pz: logNorm(zv, zLo, zHi) * 2 - 1
   }));
-  const frontPoints = points.filter((p) => p.front).sort((a, b) => a.m.c - b.m.c || a.m.i - b.m.i);
-  return { points, front: frontPoints, domains, plotted: points.length, missingZ, eps, z };
+  const frontPoints = points.filter((p) => p.front).sort((a, b) => a.xv - b.xv || a.m.i - b.m.i);
+  return { points, front: frontPoints, domains, plotted: points.length, missingZ, missingX, eps, z, x };
 }
 function floorPosition(domains, floor) {
   if (!domains || typeof floor !== "number" || !Number.isFinite(floor)) return null;
@@ -144,11 +197,12 @@ function floorPosition(domains, floor) {
   return (floor - lo) / (hi - lo) * 2 - 1;
 }
 function beatenBy(point, front) {
+  const xv = (p) => typeof p.xv === "number" ? p.xv : p.m.c;
   let best = null;
   for (const f of front) {
     if (f.id === point.id) continue;
-    if (f.m.c <= point.m.c && f.m.i >= point.m.i && (f.m.c < point.m.c || f.m.i > point.m.i)) {
-      if (!best || f.m.c < best.m.c || f.m.c === best.m.c && f.m.i > best.m.i) best = f;
+    if (xv(f) <= xv(point) && f.m.i >= point.m.i && (xv(f) < xv(point) || f.m.i > point.m.i)) {
+      if (!best || xv(f) < xv(best) || xv(f) === xv(best) && f.m.i > best.m.i) best = f;
     }
   }
   return best;
@@ -244,9 +298,9 @@ function makeProjector3d(view, width, height) {
 }
 function makeProjector2d(width, height) {
   const m = { l: 74, r: 26, t: 30, b: 62 };
-  const w = Math.max(width - m.l - m.r, 10), h3 = Math.max(height - m.t - m.b, 10);
-  const fn = (p) => ({ x: m.l + (p[0] + 1) / 2 * w, y: m.t + (1 - (p[1] + 1) / 2) * h3, depth: 0, k: 1 });
-  fn.rect = { l: m.l, t: m.t, w, h: h3 };
+  const w = Math.max(width - m.l - m.r, 10), h4 = Math.max(height - m.t - m.b, 10);
+  const fn = (p) => ({ x: m.l + (p[0] + 1) / 2 * w, y: m.t + (1 - (p[1] + 1) / 2) * h4, depth: 0, k: 1 });
+  fn.rect = { l: m.l, t: m.t, w, h: h4 };
   return fn;
 }
 function setFont(ctx, px, weight = 400) {
@@ -392,18 +446,18 @@ var Stage = class {
     const r = this.canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     let best = null, bestScore = Infinity;
-    for (const h3 of this.hits) {
-      const d = Math.hypot(h3.x - x, h3.y - y);
-      if (d <= h3.r + 6 && d - h3.depth * 1e-3 < bestScore) {
-        best = h3.id;
-        bestScore = d - h3.depth * 1e-3;
+    for (const h4 of this.hits) {
+      const d = Math.hypot(h4.x - x, h4.y - y);
+      if (d <= h4.r + 6 && d - h4.depth * 1e-3 < bestScore) {
+        best = h4.id;
+        bestScore = d - h4.depth * 1e-3;
       }
     }
     return best;
   }
   /** Screen position of a point id (used to place the focus label and by tests). */
   screenOf(id) {
-    return this.hits.find((h3) => h3.id === id) || null;
+    return this.hits.find((h4) => h4.id === id) || null;
   }
   draw() {
     const s = this.state;
@@ -438,19 +492,19 @@ var Stage = class {
       z: decadeTicks(domains.z.lo, domains.z.hi),
       y: yTicks(domains.y)
     };
-    const pos = (v, d, log) => (log ? (Math.log(v) - Math.log(d.lo)) / (Math.log(d.hi) - Math.log(d.lo)) : (v - d.lo) / (d.hi - d.lo)) * 2 - 1;
+    const pos2 = (v, d, log) => (log ? (Math.log(v) - Math.log(d.lo)) / (Math.log(d.hi) - Math.log(d.lo)) : (v - d.lo) / (d.hi - d.lo)) * 2 - 1;
     for (const t of ticks.x) {
-      const x = pos(t, domains.x, true);
+      const x = pos2(t, domains.x, true);
       line([x, -1, -1], [x, -1, 1], pal.grid);
       line([x, -1, -sz], [x, 1, -sz], pal.grid);
     }
     for (const t of ticks.z) {
-      const z = pos(t, domains.z, true);
+      const z = pos2(t, domains.z, true);
       line([-1, -1, z], [1, -1, z], pal.grid);
       line([-sx, -1, z], [-sx, 1, z], pal.grid);
     }
     for (const t of ticks.y) {
-      const y = pos(t, domains.y, false);
+      const y = pos2(t, domains.y, false);
       line([-sx, y, -1], [-sx, y, 1], pal.grid);
       line([-1, y, -sz], [1, y, -sz], pal.grid);
     }
@@ -473,11 +527,11 @@ var Stage = class {
       ctx.textAlign = align;
       ctx.fillText(text, Math.min(Math.max(q.x, 6 + lo), this.width - 6 - hi), q.y);
     };
-    for (const t of ticks.x) label([pos(t, domains.x, true), -1, sz * 1.12], fmtPriceTick(t));
-    for (const t of ticks.z) label([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? "right" : "left");
-    for (const t of ticks.y) label([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? "right" : "left");
+    for (const t of ticks.x) label([pos2(t, domains.x, true), -1, sz * 1.12], (s.layout.xTick || fmtPriceTick)(t));
+    for (const t of ticks.z) label([sx * 1.12, -1, pos2(t, domains.z, true)], fmtTokens(t), sx < 0 ? "right" : "left");
+    for (const t of ticks.y) label([sx * 1.04, pos2(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? "right" : "left");
     ctx.fillStyle = pal.text;
-    label([0, -1, sz * 1.7], s.layout.priceTitle || "PRICE $/M \xB7 LOG");
+    label([0, -1, sz * 1.7], s.layout.xTitle || s.layout.priceTitle || "PRICE $/M \xB7 LOG");
     label([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? "right" : "left");
     label([sx * 1.04, 1.12, sz * 1.04], "INTELLIGENCE 0-100", sx < 0 ? "right" : "left");
     this.drawMarks(ctx, s, pal, P, true);
@@ -523,18 +577,18 @@ var Stage = class {
   /* ---------------------------------------------------------------- 2D */
   draw2d(ctx, s, pal) {
     const P = makeProjector2d(this.width, this.height);
-    const { l, t, w, h: h3 } = P.rect;
+    const { l, t, w, h: h4 } = P.rect;
     const { domains } = s.layout;
     const xs = decadeTicks(domains.x.lo, domains.x.hi), ys = yTicks(domains.y);
     const px = (v) => l + (Math.log(v) - Math.log(domains.x.lo)) / (Math.log(domains.x.hi) - Math.log(domains.x.lo)) * w;
-    const py = (v) => t + h3 - (v - domains.y.lo) / (domains.y.hi - domains.y.lo) * h3;
+    const py = (v) => t + h4 - (v - domains.y.lo) / (domains.y.hi - domains.y.lo) * h4;
     ctx.lineWidth = 1;
     ctx.strokeStyle = pal.grid;
     ctx.setLineDash([]);
     for (const v of xs) {
       ctx.beginPath();
       ctx.moveTo(px(v), t);
-      ctx.lineTo(px(v), t + h3);
+      ctx.lineTo(px(v), t + h4);
       ctx.stroke();
     }
     for (const v of ys) {
@@ -546,24 +600,24 @@ var Stage = class {
     ctx.strokeStyle = pal.axis;
     ctx.beginPath();
     ctx.moveTo(l, t);
-    ctx.lineTo(l, t + h3);
-    ctx.lineTo(l + w, t + h3);
+    ctx.lineTo(l, t + h4);
+    ctx.lineTo(l + w, t + h4);
     ctx.stroke();
     setFont(ctx, 11);
     spaced(ctx, "0.06em");
     ctx.fillStyle = pal.muted;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    for (const v of xs) ctx.fillText(fmtPriceTick(v), px(v), t + h3 + 8);
+    for (const v of xs) ctx.fillText((s.layout.xTick || fmtPriceTick)(v), px(v), t + h4 + 8);
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     for (const v of ys) ctx.fillText(String(v), l - 8, py(v));
     ctx.fillStyle = pal.text;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText(s.layout.priceTitle || "PRICE $/M \xB7 LOG", l + w / 2, t + h3 + 30);
+    ctx.fillText(s.layout.xTitle || s.layout.priceTitle || "PRICE $/M \xB7 LOG", l + w / 2, t + h4 + 30);
     ctx.save();
-    ctx.translate(18, t + h3 / 2);
+    ctx.translate(18, t + h4 / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textBaseline = "top";
     ctx.fillText("INTELLIGENCE 0-100", 0, 0);
@@ -591,7 +645,7 @@ var Stage = class {
   drawMarks(ctx, s, pal, P, is3d) {
     const { layout, picks, floor } = s;
     const proj = layout.points.map((pt) => ({ pt, q: P([pt.px, pt.py, is3d ? pt.pz : 0]) }));
-    const ridge = proj.filter((o) => o.pt.front).sort((a, b) => a.pt.m.c - b.pt.m.c || a.pt.m.i - b.pt.m.i);
+    const ridge = proj.filter((o) => o.pt.front).sort((a, b) => a.pt.xv - b.pt.xv || a.pt.m.i - b.pt.m.i);
     ctx.setLineDash([]);
     if (ridge.length > 1) {
       ctx.beginPath();
@@ -693,6 +747,264 @@ function zTitle(z) {
   return z === Z_SPEED ? "SPEED TOK/S \xB7 MEASURED LOCALLY \xB7 LOG" : "CONTEXT WINDOW TOKENS \xB7 LOG";
 }
 
+// src/plans.js
+import { createElement as h, useEffect, useMemo, useState } from "react";
+
+// src/plans-model.js
+var KINDS = [
+  { id: "sunk", label: "Prepaid, already paid", help: "Another token costs you $0. For plans paid up front." },
+  { id: "amortized", label: "Subscription, split over my usage", help: "What you pay a month divided by the tokens you use a month. Leave tokens blank and Iolite measures them." },
+  { id: "fixed", label: "Fixed price per million tokens", help: "A $/M you know, such as a negotiated rate." }
+];
+var TEMPLATES = [
+  { id: "anthropic", label: "Anthropic (Claude)", cover: "claude-" },
+  { id: "openai", label: "OpenAI (GPT)", cover: "gpt-" },
+  { id: "google", label: "Google (Gemini)", cover: "gemini-" },
+  { id: "zai", label: "Z.ai (GLM)", cover: "glm-" },
+  { id: "minimax", label: "MiniMax", cover: "minimax-" },
+  { id: "moonshot", label: "Moonshot (Kimi)", cover: "kimi-" },
+  { id: "deepseek", label: "DeepSeek", cover: "deepseek-" },
+  { id: "xai", label: "xAI (Grok)", cover: "grok-" },
+  { id: "xiaomi", label: "Xiaomi (MiMo)", cover: "mimo-" },
+  { id: "qwen", label: "Qwen", cover: "qwen" }
+];
+var PERIODS = [1, 3, 6, 12, 24];
+var seq = 0;
+var newId = () => `p${++seq}`;
+function toDraft(p) {
+  const str = (v) => typeof v === "number" && Number.isFinite(v) ? String(v) : "";
+  return {
+    id: newId(),
+    name: String(p.name || ""),
+    mode: KINDS.some((k) => k.id === p.mode) ? p.mode : "sunk",
+    cover: [...(p.models || []).map((m) => "=" + m), ...p.match || []].join(", "),
+    paid: str(p.paid_usd),
+    months: PERIODS.includes(p.period_months) ? p.period_months : 12,
+    tokens: str(p.tokens_per_month_m),
+    usd: str(p.mode === "fixed" ? p.usd_per_m_set ?? p.usd_per_m : void 0)
+  };
+}
+function fromTemplate(t) {
+  return { id: newId(), name: `${t.label} plan`, mode: "amortized", cover: t.cover, paid: "", months: 12, tokens: "", usd: "" };
+}
+function blankDraft() {
+  return { id: newId(), name: "", mode: "amortized", cover: "", paid: "", months: 12, tokens: "", usd: "" };
+}
+function splitCover(text) {
+  const words = String(text || "").toLowerCase().split(/[\s,]+/).filter(Boolean);
+  const models = [], match = [];
+  for (const w of words) {
+    if (w.startsWith("=") && w.length > 1) models.push(w.slice(1));
+    else if (w.length >= 3) match.push(w);
+  }
+  return { models, match };
+}
+function coveredBy(draft, models) {
+  const { models: exact, match } = splitCover(draft.cover);
+  const ex = new Set(exact);
+  return models.filter((m) => {
+    const k = m.s.toLowerCase();
+    return ex.has(k) || match.some((f) => k.includes(f));
+  });
+}
+function num(s) {
+  if (typeof s !== "string" || !s.trim()) return null;
+  const v = Number(s);
+  return Number.isFinite(v) ? v : NaN;
+}
+function toPlan(d, slugs) {
+  const name = d.name.trim() || "My plan";
+  const { models, match } = splitCover(d.cover);
+  if (!models.length && !match.length) return { problem: `${name}: say which models it covers (for example glm- or claude-)` };
+  const plan = { name, mode: d.mode, models, match };
+  if (d.mode === "fixed") {
+    const v = num(d.usd);
+    if (v === null || Number.isNaN(v) || v < 0) return { problem: `${name}: enter the price per million tokens` };
+    plan.usd_per_m = v;
+  }
+  if (d.mode === "amortized") {
+    const paid = num(d.paid), tokens = num(d.tokens);
+    if (paid === null || Number.isNaN(paid) || paid < 0) return { problem: `${name}: enter what you paid` };
+    plan.paid_usd = paid;
+    plan.period_months = d.months;
+    if (tokens !== null) {
+      if (Number.isNaN(tokens) || tokens <= 0) return { problem: `${name}: tokens a month must be more than 0, or blank to measure` };
+      plan.tokens_per_month_m = tokens;
+    }
+  }
+  return { plan };
+}
+function draftPrice(d, saved) {
+  if (d.mode === "sunk") return "$0/M: another token costs nothing";
+  if (d.mode === "fixed") {
+    const v = num(d.usd);
+    return v === null || Number.isNaN(v) ? "enter a price" : fmtPrice(v);
+  }
+  const paid = num(d.paid), tokens = num(d.tokens);
+  if (paid === null || Number.isNaN(paid)) return "enter what you paid";
+  const perMonth = paid / d.months;
+  if (tokens !== null && !Number.isNaN(tokens) && tokens > 0) return `${fmtPrice(perMonth / tokens)} ($${perMonth.toFixed(2)} a month / ${tokens}M tokens)`;
+  if (saved && typeof saved.usd_per_m === "number" && saved.measured) {
+    const ms = saved.measured;
+    return `${fmtPrice(saved.usd_per_m)} from ${ms.tokens_per_month_m}M tokens a month measured over ${ms.days} day${ms.days === 1 ? "" : "s"}${ms.early ? " (early)" : ""}`;
+  }
+  return `$${perMonth.toFixed(2)} a month; the $/M appears once Iolite has measured your usage of these models`;
+}
+
+// src/plans.js
+var fieldStyle = (pal) => ({ font: "inherit", color: pal.text, background: pal.ground, border: `1px solid ${pal.hair}`, borderRadius: 4, padding: "4px 6px", minWidth: 0 });
+var labelStyle = (pal) => ({ display: "flex", flexDirection: "column", gap: 2, fontSize: 12, color: pal.muted, minWidth: 0 });
+var btn = (pal) => ({ padding: "4px 10px", border: `1px solid ${pal.hair}`, background: "transparent", fontFamily: FONT_MONO, fontSize: 12 });
+function PlanFields({ d, n, onChange, onRemove, models, saved, pal }) {
+  const covered = useMemo(() => coveredBy(d, models), [d.cover, models]);
+  const set = (k, v) => onChange({ ...d, [k]: v });
+  const kind = KINDS.find((k) => k.id === d.mode);
+  const fid = `iolite-plan-${d.id}`;
+  return h(
+    "fieldset",
+    { style: { border: `1px solid ${pal.hair}`, borderRadius: 6, padding: "8px 10px", margin: 0, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" } },
+    h("legend", { style: { fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: pal.muted, padding: "0 4px" } }, `Plan ${n}`),
+    h(
+      "label",
+      { style: labelStyle(pal) },
+      "Name",
+      h("input", { type: "text", value: d.name, maxLength: 80, placeholder: "e.g. GLM coding plan", onChange: (e) => set("name", e.target.value), style: fieldStyle(pal) })
+    ),
+    h(
+      "label",
+      { style: labelStyle(pal) },
+      "Kind",
+      h(
+        "select",
+        { value: d.mode, onChange: (e) => set("mode", e.target.value), "aria-describedby": `${fid}-kind`, style: fieldStyle(pal) },
+        KINDS.map((k) => h("option", { key: k.id, value: k.id }, k.label))
+      )
+    ),
+    h(
+      "label",
+      { style: { ...labelStyle(pal), gridColumn: "1 / -1" } },
+      "Covers these models (slug fragments, comma separated; =slug for one exact model)",
+      h("input", { type: "text", value: d.cover, maxLength: 400, placeholder: "glm-, kimi-k3", onChange: (e) => set("cover", e.target.value), "aria-describedby": `${fid}-cov`, style: fieldStyle(pal) })
+    ),
+    d.mode === "amortized" ? h(
+      "label",
+      { style: labelStyle(pal) },
+      "You paid ($)",
+      h("input", { type: "number", min: 0, step: "any", inputMode: "decimal", value: d.paid, onChange: (e) => set("paid", e.target.value), style: fieldStyle(pal) })
+    ) : null,
+    d.mode === "amortized" ? h(
+      "label",
+      { style: labelStyle(pal) },
+      "For",
+      h(
+        "select",
+        { value: d.months, onChange: (e) => set("months", Number(e.target.value)), style: fieldStyle(pal) },
+        PERIODS.map((m) => h("option", { key: m, value: m }, m === 1 ? "1 month" : m === 12 ? "1 year" : m === 24 ? "2 years" : `${m} months`))
+      )
+    ) : null,
+    d.mode === "amortized" ? h(
+      "label",
+      { style: labelStyle(pal) },
+      "Tokens a month, millions (blank: measure)",
+      h("input", { type: "number", min: 0, step: "any", inputMode: "decimal", value: d.tokens, onChange: (e) => set("tokens", e.target.value), style: fieldStyle(pal) })
+    ) : null,
+    d.mode === "fixed" ? h(
+      "label",
+      { style: labelStyle(pal) },
+      "Price per million tokens ($)",
+      h("input", { type: "number", min: 0, step: "any", inputMode: "decimal", value: d.usd, onChange: (e) => set("usd", e.target.value), style: fieldStyle(pal) })
+    ) : null,
+    h(
+      "div",
+      { style: { gridColumn: "1 / -1", fontSize: 12, color: pal.muted, display: "grid", gap: 2 } },
+      h("div", { id: `${fid}-kind` }, kind ? kind.help : ""),
+      h("div", { id: `${fid}-cov` }, covered.length ? `Covers ${covered.length} catalog model${covered.length === 1 ? "" : "s"}: ${covered.slice(0, 4).map((m) => m.n).join(", ")}${covered.length > 4 ? ", ..." : ""}` : "Covers no catalog model yet."),
+      h("div", { style: { color: pal.text } }, `Your price: ${draftPrice(d, saved)}`)
+    ),
+    h(
+      "div",
+      { style: { gridColumn: "1 / -1" } },
+      h("button", { type: "button", onClick: onRemove, style: btn(pal), "aria-label": `Remove plan ${n}${d.name ? ", " + d.name : ""}` }, "Remove")
+    )
+  );
+}
+function PlansEditor({ ctx, mine, models, pal, onSaved }) {
+  const savedPlans = mine && mine.plans || [];
+  const [drafts, setDrafts] = useState(() => savedPlans.map(toDraft));
+  const [status, setStatus] = useState(null);
+  const [template, setTemplate] = useState("");
+  useEffect(() => {
+    setDrafts(savedPlans.map(toDraft));
+  }, [mine]);
+  const slugs = useMemo(() => models.map((m) => m.s), [models]);
+  const savedByName = new Map(savedPlans.map((p) => [p.name, p]));
+  const save = () => {
+    const out = drafts.map((d) => toPlan(d, slugs));
+    const problems = out.filter((o) => o.problem).map((o) => o.problem);
+    if (problems.length) {
+      setStatus({ kind: "error", text: problems.join("; ") });
+      return;
+    }
+    if (typeof ctx.rest !== "function") {
+      setStatus({ kind: "error", text: "This Hermes build has no plugin REST route, so plans cannot be saved here." });
+      return;
+    }
+    setStatus({ kind: "info", text: "Saving..." });
+    Promise.resolve(ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan) }, timeoutMs: 5e3 })).then(
+      (res) => {
+        if (res && res.ok) {
+          setStatus({ kind: "info", text: `Saved ${out.length} plan${out.length === 1 ? "" : "s"} on this machine.` });
+          onSaved();
+        } else setStatus({ kind: "error", text: `Not saved: ${(res && res.problems || ["the route refused"]).join("; ")}` });
+      },
+      (err) => setStatus({ kind: "error", text: `Not saved: ${err && err.message ? String(err.message).slice(0, 120) : "the route is not available"}` })
+    );
+  };
+  const add = () => {
+    const t = TEMPLATES.find((x) => x.id === template);
+    setDrafts((ds) => [...ds, t ? fromTemplate(t) : blankDraft()]);
+    setTemplate("");
+  };
+  return h(
+    "section",
+    { "aria-label": "My plans", style: { margin: "0 16px 12px", background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, display: "grid", gap: 10 } },
+    h("h3", { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.muted } }, "My plans"),
+    h(
+      "p",
+      { style: { margin: 0, fontSize: 12, color: pal.muted } },
+      "Price the models you already pay for, so the front shows what is cheapest for you. Saved to my_prices.json in the Iolite plugin data folder; it stays on this machine. Templates fill in the provider only; amounts are yours."
+    ),
+    drafts.map((d, i) => h(PlanFields, {
+      key: d.id,
+      d,
+      n: i + 1,
+      models,
+      pal,
+      saved: savedByName.get(d.name.trim()),
+      onChange: (nd) => setDrafts((ds) => ds.map((x) => x.id === d.id ? nd : x)),
+      onRemove: () => setDrafts((ds) => ds.filter((x) => x.id !== d.id))
+    })),
+    h(
+      "div",
+      { style: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "end" } },
+      h(
+        "label",
+        { style: labelStyle(pal) },
+        "Start from",
+        h(
+          "select",
+          { value: template, onChange: (e) => setTemplate(e.target.value), style: fieldStyle(pal) },
+          h("option", { value: "" }, "Blank plan"),
+          TEMPLATES.map((t) => h("option", { key: t.id, value: t.id }, t.label))
+        )
+      ),
+      h("button", { type: "button", onClick: add, style: btn(pal) }, "Add plan"),
+      h("button", { type: "button", onClick: save, style: { ...btn(pal), background: pal.frontier, color: pal.ground, borderColor: pal.frontier } }, "Save plans")
+    ),
+    status ? h("div", { role: status.kind === "error" ? "alert" : "status", style: { fontSize: 12, color: status.kind === "error" ? pal.copper : pal.text } }, status.text) : null
+  );
+}
+
 // src/pane.js
 var useRenderedMode = typeof SDK.useTheme === "function" ? () => {
   const t = SDK.useTheme();
@@ -700,11 +1012,11 @@ var useRenderedMode = typeof SDK.useTheme === "function" ? () => {
 } : () => "dark";
 function useReducedMotion() {
   const query = () => typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  const [reduced, setReduced] = useState(() => {
+  const [reduced, setReduced] = useState2(() => {
     const q = query();
     return !!(q && q.matches);
   });
-  useEffect(() => {
+  useEffect2(() => {
     const q = query();
     if (!q) return void 0;
     const on = (e) => setReduced(!!e.matches);
@@ -725,18 +1037,18 @@ var CSS = `
 .iolite-ls button { font: inherit; color: inherit; cursor: pointer; border-radius: 4px; transition: background-color 200ms cubic-bezier(0.2,0,0,1), border-color 200ms cubic-bezier(0.2,0,0,1); }
 .iolite-ls button:focus-visible, .iolite-ls canvas:focus-visible { outline: 2px solid var(--iolite-focus); outline-offset: 2px; }
 .iolite-ls button[disabled], .iolite-ls button[aria-disabled="true"] { cursor: not-allowed; opacity: 0.6; }
-.iolite-ls .iolite-body { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 16px 12px; flex: 1 1 auto; min-height: 0; }
+.iolite-ls .iolite-body { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 16px 12px; flex: 1 0 auto; min-height: 340px; }
 .iolite-ls .iolite-stage { flex: 1 1 440px; min-width: 0; min-height: 340px; position: relative; border-radius: 8px; overflow: hidden; }
 .iolite-ls .iolite-aside { flex: 0 1 320px; min-width: 260px; display: flex; flex-direction: column; gap: 12px; }
 .iolite-ls ol { list-style: none; margin: 0; padding: 0; }
 @media (prefers-reduced-motion: reduce) { .iolite-ls button { transition: none; } }
 `;
 function Segmented({ label, value, options, onChange, pal }) {
-  return h(
+  return h2(
     "div",
     { role: "group", "aria-label": label, style: { display: "inline-flex", gap: 0, alignItems: "center" } },
-    h("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 8 } }, label),
-    options.map((o, i) => h("button", {
+    h2("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 8, whiteSpace: "nowrap" } }, label),
+    options.map((o, i) => h2("button", {
       key: o.id,
       type: "button",
       title: o.title,
@@ -753,22 +1065,24 @@ function Segmented({ label, value, options, onChange, pal }) {
         background: value === o.id ? pal.frontier : "transparent",
         color: value === o.id ? pal.ground : pal.text,
         fontFamily: FONT_MONO,
-        fontSize: 12
+        fontSize: 12,
+        opacity: o.disabled ? 0.45 : 1,
+        cursor: o.disabled ? "not-allowed" : "pointer"
       }
     }, o.label))
   );
 }
 function Row({ k, v, pal }) {
-  return h(
+  return h2(
     "div",
     { style: { display: "flex", gap: 8, justifyContent: "space-between", padding: "2px 0" } },
-    h("dt", { style: { color: pal.muted, flex: "0 0 auto" } }, k),
-    h("dd", { style: { margin: 0, textAlign: "right", color: pal.text, minWidth: 0, overflowWrap: "anywhere" } }, v)
+    h2("dt", { style: { color: pal.muted, flex: "0 0 auto" } }, k),
+    h2("dd", { style: { margin: 0, textAlign: "right", color: pal.text, minWidth: 0, overflowWrap: "anywhere" } }, v)
   );
 }
-function Detail({ point, front, isPick, speed, pal }) {
+function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
   if (!point) {
-    return h(
+    return h2(
       "p",
       { style: { margin: 0, color: pal.muted } },
       "Hover or focus a point, or tab through the front list, to read its numbers and where they come from."
@@ -777,24 +1091,30 @@ function Detail({ point, front, isPick, speed, pal }) {
   const m = point.m;
   const sp = speed && speed[m.s];
   const beat = point.front ? null : beatenBy(point, front);
-  return h(
+  const t = tasks && tasks[m.s];
+  const frontName = xMode === X_PRICE ? "cost x intelligence" : `${xAxis(xMode).title.split(" \xB7 ")[0].toLowerCase()} x intelligence`;
+  return h2(
     "div",
     null,
-    h("div", { style: { fontWeight: 600, fontSize: 15, color: pal.text, overflowWrap: "anywhere" } }, m.n),
-    h("div", { style: { color: pal.muted, marginBottom: 6 } }, m.p || "provider not stated"),
-    h(
+    h2("div", { style: { fontWeight: 600, fontSize: 15, color: pal.text, overflowWrap: "anywhere" } }, m.n),
+    h2("div", { style: { color: pal.muted, marginBottom: 6 } }, m.p || "provider not stated"),
+    h2(
       "dl",
       { style: { margin: 0 } },
-      h(Row, { pal, k: "Intelligence", v: `${m.i} (${m.t})` }),
-      m.mp ? h(Row, { pal, k: "Your price", v: `${m.mp.mode === "sunk" ? "$0/M, prepaid: another token costs nothing" : fmtPrice(m.c) + ", " + m.mp.mode} (${m.mp.plan})` }) : null,
-      h(Row, { pal, k: m.mp ? "List price" : "Price, blended", v: fmtPrice(m.mp ? m.l : m.c) }),
-      h(Row, { pal, k: "Context", v: m.x ? `${fmtTokens(m.x)} tokens` : "not stated" }),
-      m.a !== void 0 ? h(Row, { pal, k: "Arena rating", v: `${m.a} (Bradley-Terry)` }) : null,
-      h(Row, { pal, k: "Speed", v: sp ? `${fmtTps(sp.tps)}, measured locally` : "not measured yet" }),
-      h(Row, { pal, k: "Front", v: point.front ? "on the cost x intelligence front" : beat ? `beaten by ${beat.m.n}` : "off the front" }),
-      isPick ? h(Row, { pal, k: "Shortlist", v: "picked by your last /iolite shortlist" }) : null
+      h2(Row, { pal, k: "Intelligence", v: `${m.i} (${m.t})` }),
+      m.mp ? h2(Row, { pal, k: "Your price", v: `${m.mp.mode === "sunk" ? "$0/M, prepaid: another token costs nothing" : fmtPrice(m.c) + ", " + m.mp.mode} (${m.mp.plan})` }) : null,
+      h2(Row, { pal, k: m.mp ? "List price" : "Price, blended", v: fmtPrice(m.mp ? m.l : m.c) }),
+      h2(Row, { pal, k: "Context", v: m.x ? `${fmtTokens(m.x)} tokens` : "not stated" }),
+      m.a !== void 0 ? h2(Row, { pal, k: "Arena rating", v: `${m.a} (Bradley-Terry)` }) : null,
+      h2(Row, { pal, k: "Speed", v: sp ? `${fmtTps(sp.tps)}, measured locally` : "not measured yet" }),
+      t ? h2(Row, { pal, k: m.mp ? "Your cost per task" : "Cost per task", v: fmtUsd(xValue(m, X_TASK_COST, tasks)) }) : null,
+      t ? h2(Row, { pal, k: "Model time per task", v: fmtSeconds(t.sec) }) : null,
+      t ? h2(Row, { pal, k: "Tokens per task", v: `${fmtTokens(t.in)} in, ${fmtTokens(t.out)} out` }) : null,
+      h2(Row, { pal, k: "Per task", v: t ? `median of your ${t.n} tasks, measured locally` : "not measured yet (3 tasks)" }),
+      h2(Row, { pal, k: "Front", v: point.front ? `on the ${frontName} front` : beat ? `beaten by ${beat.m.n}` : "off the front" }),
+      isPick ? h2(Row, { pal, k: "Shortlist", v: "picked by your last /iolite shortlist" }) : null
     ),
-    h(
+    h2(
       "p",
       { style: { margin: "8px 0 0", color: pal.muted, fontSize: 12 } },
       `${INTEL_NOTE[m.t] || "Intelligence score"}. `,
@@ -807,13 +1127,15 @@ function LandscapePane({ ctx }) {
   const mode = useRenderedMode();
   const reduced = useReducedMotion();
   const pal = paletteFor(mode);
-  const [view, setView] = useState("3d");
-  const [zMode, setZMode] = useState(Z_CONTEXT);
-  const [basis, setBasis] = useState(PRICE_LIST);
-  const [hoverId, setHoverId] = useState(null);
-  const [focusId, setFocusId] = useState(null);
-  const [pinnedId, setPinnedId] = useState(null);
-  const [rest, setRest] = useState({ status: "loading" });
+  const [view, setView] = useState2("3d");
+  const [zMode, setZMode] = useState2(Z_CONTEXT);
+  const [basis, setBasis] = useState2(PRICE_LIST);
+  const [xMode, setXMode] = useState2(X_PRICE);
+  const [plansOpen, setPlansOpen] = useState2(false);
+  const [hoverId, setHoverId] = useState2(null);
+  const [focusId, setFocusId] = useState2(null);
+  const [pinnedId, setPinnedId] = useState2(null);
+  const [rest, setRest] = useState2({ status: "loading" });
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
@@ -851,27 +1173,32 @@ function LandscapePane({ ctx }) {
       clearTimeout(timer);
     };
   }, [ctx]);
-  useEffect(() => load(), [load]);
+  useEffect2(() => load(), [load]);
   const data = rest.status === "ok" ? rest.data : null;
   const speed = data && data.measure_speed ? data.speed || {} : null;
   const speedCount = speed ? Object.keys(speed).filter((s) => snapshot_default.models.some((m) => m.s === s)).length : 0;
   const effectiveZ = zMode === Z_SPEED && speedCount > 0 ? Z_SPEED : Z_CONTEXT;
   const mine = data && data.my_prices ? data.my_prices : null;
-  const priced = useMemo(() => applyMyPrices(snapshot_default, mine ? mine.prices : null), [mine]);
+  const priced = useMemo2(() => applyMyPrices(snapshot_default, mine ? mine.prices : null), [mine]);
   const effectiveBasis = basis === PRICE_MINE && priced.covered > 0 ? PRICE_MINE : PRICE_LIST;
   const shown = effectiveBasis === PRICE_MINE ? priced.snapshot : snapshot_default;
-  const layout = useMemo(() => ({
-    ...buildLayout(shown, { z: effectiveZ, speed }),
-    priceTitle: effectiveBasis === PRICE_MINE ? "YOUR PRICE $/M \xB7 LOG" : "PRICE $/M \xB7 LOG"
-  }), [shown, effectiveZ, speed, effectiveBasis]);
+  const tasks = data && data.measure_usage !== false ? data.tasks || {} : null;
+  const tasksMeasured = taskCount(snapshot_default, tasks);
+  const effectiveX = xMode !== X_PRICE && tasksMeasured > 0 ? xMode : X_PRICE;
+  const axis = xAxis(effectiveX, effectiveBasis === PRICE_MINE);
+  const layout = useMemo2(() => ({
+    ...buildLayout(shown, { z: effectiveZ, speed, x: effectiveX, tasks }),
+    xTitle: axis.title,
+    xTick: axis.tick
+  }), [shown, effectiveZ, speed, effectiveX, tasks, axis.title]);
   const last = data && data.last_shortlist ? data.last_shortlist : null;
-  const picks = useMemo(() => matchPicks(layout.points, last ? last.picks : []), [layout, last]);
+  const picks = useMemo2(() => matchPicks(layout.points, last ? last.picks : []), [layout, last]);
   const floor = last && typeof last.floor === "number" ? last.floor : null;
   const floorShown = floorPosition(layout.domains, floor) !== null ? floor : null;
-  const byId = useMemo(() => new Map(layout.points.map((p) => [p.id, p])), [layout]);
+  const byId = useMemo2(() => new Map(layout.points.map((p) => [p.id, p])), [layout]);
   const highlightId = hoverId || focusId || pinnedId;
   const highlighted = highlightId ? byId.get(highlightId) || null : null;
-  useEffect(() => {
+  useEffect2(() => {
     const canvas = canvasRef.current;
     if (!canvas) return void 0;
     const stage = new Stage(canvas, {
@@ -895,7 +1222,7 @@ function LandscapePane({ ctx }) {
       stageRef.current = null;
     };
   }, []);
-  useEffect(() => {
+  useEffect2(() => {
     const stage = stageRef.current;
     if (stage) stage.update({ layout, view, palette: pal, picks, floor: floorShown, hoverId, highlightId, reducedMotion: reduced });
   }, [layout, view, pal, picks, floorShown, hoverId, highlightId, reduced]);
@@ -904,20 +1231,21 @@ function LandscapePane({ ctx }) {
   const zLabel = zTitle(layout.z);
   const restNote = rest.status === "loading" ? "Reading speed and your last shortlist from the Python half..." : rest.status === "unavailable" ? `Speed and your last shortlist come from the Python half over REST, which is not reachable (${rest.reason}). Third axis stays on context window; no speed is shown or guessed.` : !data.measure_speed ? "Speed measuring is off (measure_speed), so there is no speed to plot. Third axis stays on context window." : speedCount === 0 ? "No model has a locally measured speed yet (each needs 3 calls through Hermes). Third axis stays on context window." : `Speed measured locally for ${speedCount} model${speedCount === 1 ? "" : "s"}, kept on this machine and not comparable across machines.`;
   const shortNote = rest.status !== "ok" ? null : last && last.picks.length ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? "" : "s"} and the floor (${last.floor === null ? "none" : last.floor}, ${last.floor_source || "source not stated"}) from your last /iolite shortlist${last.saved ? `, ${last.saved}` : ""}.` : "No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.";
-  const mineNote = rest.status !== "ok" ? null : priced.covered === 0 ? `My price: no plans yet. Add my_prices.json to the Iolite plugin data folder to price your own subscriptions; it stays on this machine.${mine && mine.problems && mine.problems.length ? " Problems: " + mine.problems.join("; ") + "." : ""}` : `My price: ${priced.covered} model${priced.covered === 1 ? "" : "s"} priced from your ${mine.plans.length} plan${mine.plans.length === 1 ? "" : "s"} (${mine.plans.map((p) => p.name).join(", ")}); everything else stays at list price.${mine.problems && mine.problems.length ? " Skipped: " + mine.problems.join("; ") + "." : ""}`;
+  const mineNote = rest.status !== "ok" ? null : priced.covered === 0 ? `My price: no plans yet. Open My plans to price the subscriptions you already pay for; they stay on this machine.${mine && mine.problems && mine.problems.length ? " Problems: " + mine.problems.join("; ") + "." : ""}` : `My price: ${priced.covered} model${priced.covered === 1 ? "" : "s"} priced from your ${mine.plans.length} plan${mine.plans.length === 1 ? "" : "s"} (${mine.plans.map((p) => p.name).join(", ")}); everything else stays at list price.${mine.problems && mine.problems.length ? " Skipped: " + mine.problems.join("; ") + "." : ""}`;
   const catalogNote = data && data.bundled === false ? `Note: /iolite is using ${data.catalog_source || "another catalog"}; this pane always plots the bundled snapshot.` : null;
-  const countLine = effectiveZ === Z_SPEED ? `${layout.plotted} of ${snapshot_default.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot_default.unplotted} of ${snapshot_default.total} catalog models have no price or no score and are never plotted.` : `${layout.plotted} of ${snapshot_default.total} catalog models plotted; ${snapshot_default.unplotted} have no price or no score and are not plotted.`;
-  const label = `${view === "3d" ? "3D" : "2D"} model landscape: price, intelligence${view === "3d" ? " and " + (effectiveZ === Z_SPEED ? "locally measured speed" : "context window") : ""}. ${layout.plotted} models plotted, ${frontList.length} on the cost by intelligence front. ${view === "3d" ? "Arrow keys rotate, plus and minus zoom, 0 resets. " : ""}The front list beside the plot has every front model.`;
-  return h(
+  const taskNote = rest.status !== "ok" ? null : data.measure_usage === false ? "Per-task views are off (measure_usage), so cost, time and tokens per task are not measured." : tasksMeasured === 0 ? "Cost, time and tokens per task: not measured yet. Each model needs 3 tasks through Hermes; the numbers stay on this machine." : `Per task: medians of your own tasks for ${tasksMeasured} model${tasksMeasured === 1 ? "" : "s"}, measured locally. Model time only; tool time is left out.`;
+  const countLine = effectiveX !== X_PRICE ? `${layout.plotted} models with per-task numbers measured on this machine plotted; the rest have none yet and are not plotted or guessed.` : effectiveZ === Z_SPEED ? `${layout.plotted} of ${snapshot_default.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot_default.unplotted} of ${snapshot_default.total} catalog models have no price or no score and are never plotted.` : `${layout.plotted} of ${snapshot_default.total} catalog models plotted; ${snapshot_default.unplotted} have no price or no score and are not plotted.`;
+  const label = `${view === "3d" ? "3D" : "2D"} model landscape: ${axis.title.split(" \xB7 ")[0].toLowerCase()}, intelligence${view === "3d" ? " and " + (effectiveZ === Z_SPEED ? "locally measured speed" : "context window") : ""}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === "3d" ? "Arrow keys rotate, plus and minus zoom, 0 resets. " : ""}The front list beside the plot has every front model.`;
+  return h2(
     "div",
     { className: "iolite-ls", style: cssVars },
-    h("style", null, CSS),
-    h(
+    h2("style", null, CSS),
+    h2(
       "header",
       { style: { display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center", padding: "12px 16px 8px" } },
-      h("h2", { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" } }, "Iolite \xB7 model landscape"),
-      h(Segmented, { pal, label: "View", value: view, onChange: setView, options: [{ id: "3d", label: "3D", title: "Rotate and zoom the 3D landscape" }, { id: "2d", label: "2D", title: "Price by intelligence, flat" }] }),
-      h(Segmented, {
+      h2("h2", { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" } }, "Iolite \xB7 model landscape"),
+      h2(Segmented, { pal, label: "View", value: view, onChange: setView, options: [{ id: "3d", label: "3D", title: "Rotate and zoom the 3D landscape" }, { id: "2d", label: "2D", title: "Price by intelligence, flat" }] }),
+      h2(Segmented, {
         pal,
         label: "Price",
         value: effectiveBasis,
@@ -927,7 +1255,19 @@ function LandscapePane({ ctx }) {
           { id: PRICE_MINE, label: "Mine", disabled: priced.covered === 0, title: priced.covered === 0 ? "No plans in my_prices.json yet" : "What another token costs you on your own plans" }
         ]
       }),
-      h(Segmented, {
+      h2(Segmented, {
+        pal,
+        label: "X axis",
+        value: effectiveX,
+        onChange: setXMode,
+        options: [
+          { id: X_PRICE, label: "$/M", title: "Price per million tokens (log)" },
+          { id: X_TASK_COST, label: "Cost/task", disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? "Needs 3 measured tasks per model" : "Median dollars per task at the chosen price (log)" },
+          { id: X_TASK_TIME, label: "Time/task", disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? "Needs 3 measured tasks per model" : "Median model seconds per task (log)" },
+          { id: X_TASK_TOKENS, label: "Tokens/task", disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? "Needs 3 measured tasks per model" : "Median input + output tokens per task (log)" }
+        ]
+      }),
+      h2(Segmented, {
         pal,
         label: "Third axis",
         value: effectiveZ,
@@ -937,50 +1277,53 @@ function LandscapePane({ ctx }) {
           { id: Z_SPEED, label: "Speed", disabled: speedCount === 0, title: speedCount === 0 ? "No locally measured speed yet" : "Tokens per second measured on this machine (log)" }
         ]
       }),
-      view === "3d" ? h("button", { type: "button", onClick: () => stageRef.current && stageRef.current.resetView(), style: { padding: "4px 10px", border: `1px solid ${pal.hair}`, background: "transparent", fontFamily: FONT_MONO, fontSize: 12 } }, "Reset view") : null,
-      h("button", { type: "button", onClick: load, style: { padding: "4px 10px", border: `1px solid ${pal.hair}`, background: "transparent", fontFamily: FONT_MONO, fontSize: 12 }, title: "Read speed and your last shortlist again" }, "Refresh")
+      view === "3d" ? h2("button", { type: "button", onClick: () => stageRef.current && stageRef.current.resetView(), style: { padding: "4px 10px", border: `1px solid ${pal.hair}`, background: "transparent", fontFamily: FONT_MONO, fontSize: 12 } }, "Reset view") : null,
+      h2("button", { type: "button", "aria-expanded": plansOpen, "aria-controls": "iolite-my-plans", onClick: () => setPlansOpen((o) => !o), style: { padding: "4px 10px", border: `1px solid ${pal.hair}`, background: plansOpen ? pal.panelRaised : "transparent", fontFamily: FONT_MONO, fontSize: 12 } }, "My plans"),
+      h2("button", { type: "button", onClick: load, style: { padding: "4px 10px", border: `1px solid ${pal.hair}`, background: "transparent", fontFamily: FONT_MONO, fontSize: 12 }, title: "Read speed and your last shortlist again" }, "Refresh")
     ),
-    h(
+    h2(
       "div",
       { style: { padding: "0 16px 10px", color: pal.muted, fontSize: 12 }, "aria-live": "polite" },
-      h("div", null, countLine, ` Third axis: ${zLabel.toLowerCase()}.`),
-      h("div", null, restNote),
-      mineNote ? h("div", null, mineNote) : null,
-      shortNote ? h("div", null, shortNote) : null,
-      catalogNote ? h("div", null, catalogNote) : null
+      h2("div", null, countLine, ` Third axis: ${zLabel.toLowerCase()}.`),
+      h2("div", null, restNote),
+      mineNote ? h2("div", null, mineNote) : null,
+      taskNote ? h2("div", null, taskNote) : null,
+      shortNote ? h2("div", null, shortNote) : null,
+      catalogNote ? h2("div", null, catalogNote) : null
     ),
-    h(
+    plansOpen ? h2("div", { id: "iolite-my-plans" }, h2(PlansEditor, { ctx, mine, models: snapshot_default.models, pal, onSaved: load })) : null,
+    h2(
       "div",
       { className: "iolite-body" },
-      h(
+      h2(
         "div",
         { className: "iolite-stage", ref: wrapRef, style: { background: pal.ground, border: `1px solid ${pal.hair}` } },
-        h("canvas", { ref: canvasRef, role: "img", "aria-label": label, tabIndex: 0, style: { display: "block", touchAction: "none", cursor: view === "3d" ? "grab" : "default" } }),
-        layout.plotted === 0 ? h("div", { style: { position: "absolute", inset: 0, display: "grid", placeItems: "center", color: pal.muted, padding: 24, textAlign: "center" } }, "Nothing to plot on this axis yet.") : null
+        h2("canvas", { ref: canvasRef, role: "img", "aria-label": label, tabIndex: 0, style: { display: "block", touchAction: "none", cursor: view === "3d" ? "grab" : "default" } }),
+        layout.plotted === 0 ? h2("div", { style: { position: "absolute", inset: 0, display: "grid", placeItems: "center", color: pal.muted, padding: 24, textAlign: "center" } }, "Nothing to plot on this axis yet.") : null
       ),
-      h(
+      h2(
         "aside",
         { className: "iolite-aside" },
-        h(
+        h2(
           "section",
           { "aria-label": "Selected model", "aria-live": "polite", style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
-          h(Detail, { point: highlighted, front: frontList, isPick: !!highlighted && picks.has(highlighted.id), speed, pal })
+          h2(Detail, { point: highlighted, front: frontList, isPick: !!highlighted && picks.has(highlighted.id), speed, tasks, xMode: effectiveX, pal })
         ),
-        h(
+        h2(
           "section",
           { "aria-label": "Cost by intelligence front", style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, minHeight: 0 } },
-          h(
+          h2(
             "h3",
             { style: { margin: "0 0 6px", fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.muted } },
-            `Front \xB7 ${frontList.length} models, cheapest first`
+            `Front \xB7 ${frontList.length} models, ${effectiveX === X_PRICE ? "cheapest" : effectiveX === X_TASK_TIME ? "fastest" : effectiveX === X_TASK_TOKENS ? "fewest tokens" : "cheapest per task"} first`
           ),
-          h(
+          h2(
             "ol",
             { style: { maxHeight: 300, overflowY: "auto" } },
-            frontList.map((p) => h(
+            frontList.map((p) => h2(
               "li",
               { key: p.id },
-              h(
+              h2(
                 "button",
                 {
                   type: "button",
@@ -1002,20 +1345,20 @@ function LandscapePane({ ctx }) {
                     color: pal.text
                   }
                 },
-                h("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, (picks.has(p.id) ? "[pick] " : "") + p.m.n),
-                h("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, `${p.m.i} \xB7 ${fmtShownPrice(p.m).replace("/M", "").replace(" (free tier)", " free")}`)
+                h2("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, (picks.has(p.id) ? "[pick] " : "") + p.m.n),
+                h2("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, `${p.m.i} \xB7 ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace("/M", "").replace(" (free tier)", " free") : axis.value(p.xv)}`)
               )
             ))
           )
         )
       )
     ),
-    h(
+    h2(
       "footer",
       { style: { padding: "8px 16px 14px", color: pal.muted, fontSize: 11.5, borderTop: `1px solid ${pal.hair}` } },
-      h("div", null, "Frontier = no model costs the same or less and is at least as smart. Dominated models are small rings; front models are wire spheres on the ridge; picks have a diamond; the copper ring is focus. Openness is not in the catalog, so there is one glyph per class."),
-      snapshot_default.credits.map((c, i) => h("div", { key: i }, c)),
-      h("div", null, `Snapshot ${snapshot_default.generated}. Not affiliated with Epoch AI, LMArena or LiteLLM. Full notices: ATTRIBUTION.md in the plugin.`)
+      h2("div", null, "Frontier = no model is as good or better on the X axis and at least as smart. Dominated models are small rings; front models are wire spheres on the ridge; picks have a diamond; the copper ring is focus. Openness is not in the catalog, so there is one glyph per class."),
+      snapshot_default.credits.map((c, i) => h2("div", { key: i }, c)),
+      h2("div", null, `Snapshot ${snapshot_default.generated}. Not affiliated with Epoch AI, LMArena or LiteLLM. Full notices: ATTRIBUTION.md in the plugin.`)
     )
   );
 }
@@ -1032,7 +1375,7 @@ function openLandscape() {
   return host.openWorkspace(PANE_ID, {
     title: "Model landscape",
     minWidth: "28rem",
-    render: () => h2(LandscapePane, { ctx: pluginCtx })
+    render: () => h3(LandscapePane, { ctx: pluginCtx })
   });
 }
 var plugin_default = {
@@ -1047,7 +1390,7 @@ var plugin_default = {
       area: COMPOSER_AREAS.actions,
       id: "model-landscape",
       title: TITLE,
-      render: () => h2("button", {
+      render: () => h3("button", {
         type: "button",
         className: GHOST_ICON_BTN,
         title: "Iolite: model landscape, price by intelligence by context or speed",

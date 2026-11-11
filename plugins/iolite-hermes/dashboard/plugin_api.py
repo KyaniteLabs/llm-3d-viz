@@ -1,10 +1,13 @@
 """Iolite dashboard API, mounted at ``/api/plugins/iolite/``.
 
-One read-only endpoint, ``GET /landscape``, for the Desktop "model landscape" pane:
+Two endpoints. ``GET /landscape``, read-only, for the Desktop "model landscape" pane:
 the locally measured speeds (tokens per second of your own calls, by catalog slug),
 the floor and picks of your latest ``/iolite shortlist``, and which catalog ``/iolite``
-is using, and your own prices. It reads small files from the plugin data directory
-(``speed.json``, ``last_shortlist.json`` and, if you wrote it, ``my_prices.json``) and the catalog; no network, no secrets, nothing written.
+is using, your own prices and your per-task medians. It reads small files from the plugin
+data directory (``speed.json``, ``tasks.json``, ``last_shortlist.json`` and, if present,
+``my_prices.json``) and the catalog. ``POST /my-prices`` validates the plans the pane's
+"My plans" editor sends and writes ``my_prices.json`` there (atomic, 0600), all or nothing.
+No network, no secrets; nothing leaves the machine.
 
 The logic lives in the package's agent half (``__init__.py``), loaded here BY PATH so
 there is one implementation and the two surfaces cannot drift (the dashboard loader
@@ -18,7 +21,7 @@ import logging
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 
 log = logging.getLogger(__name__)
 
@@ -48,3 +51,12 @@ def landscape() -> dict:
     except Exception:  # never hand a traceback to the pane; it shows "not reachable"
         log.debug("iolite: landscape failed", exc_info=True)
         return {"ok": False, "error": "Iolite could not read its local data"}
+
+
+@router.post("/my-prices")
+def my_prices(payload: Any = Body(default=None)) -> dict:
+    try:
+        return _load_agent_half().save_my_prices(payload)
+    except Exception:
+        log.debug("iolite: saving my prices failed", exc_info=True)
+        return {"ok": False, "problems": ["Iolite could not save your prices"]}

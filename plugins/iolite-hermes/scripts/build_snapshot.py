@@ -6,7 +6,7 @@
 
 Input is data/catalog.json (the same bundled catalog /iolite answers from); output is a
 small JSON file with only what the pane plots: name, provider, slug, intelligence and its
-source tag, blended price per million tokens, context window and the LMArena rating.
+source tag, blended, input and output price per million tokens, context window and the LMArena rating.
 Rows with no price or no score are not plotted; they are counted, never invented.
 Speed is not in the snapshot: there is no lawful public speed source, so the pane reads
 speed measured on the user's own machine at run time.
@@ -68,6 +68,9 @@ def build(catalog: Dict[str, Any]) -> Dict[str, Any]:
             "t": source_tag(intel.get("metric")),
             "c": round(cost, 6),
         }
+        pin, pout = _finite(price.get("input_per_M")), _finite(price.get("output_per_M"))
+        if pin is not None and pout is not None and pin >= 0 and pout >= 0:
+            row["ci"], row["co"] = round(pin, 6), round(pout, 6)
         ctx = _finite(r.get("context_length"))
         if ctx is not None and ctx > 0:
             row["x"] = int(ctx)
