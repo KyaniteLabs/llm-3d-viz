@@ -9,7 +9,7 @@ import { Stage, zTitle } from './scene.js'
 import { FONT_MONO, FONT_SANS, paletteFor } from './palette.js'
 import {
   PRICE_LIST, PRICE_MINE, X_PRICE, X_TASK_COST, X_TASK_TIME, X_TASK_TOKENS, Z_CONTEXT, Z_SPEED, applyMyPrices, beatenBy, buildLayout,
-  fmtPrice, fmtSeconds, fmtShownPrice, fmtTokens, fmtTps, fmtUsd, floorPosition, matchPicks, taskCount, xAxis, xValue,
+  fmtPrice, fmtSeconds, fmtShownPrice, fmtTaskCost, findModels, fmtTokens, fmtTps, fmtUsd, floorPosition, matchPicks, taskCount, xAxis, xValue,
 } from './frontier.js'
 import { PlansEditor } from './plans.js'
 
@@ -89,7 +89,7 @@ function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
       h(Row, { pal, k: 'Context', v: m.x ? `${fmtTokens(m.x)} tokens` : 'not stated' }),
       m.a !== undefined ? h(Row, { pal, k: 'Arena rating', v: `${m.a} (Bradley-Terry)` }) : null,
       h(Row, { pal, k: 'Speed', v: sp ? `${fmtTps(sp.tps)}, measured locally` : 'not measured yet' }),
-      t ? h(Row, { pal, k: m.mp ? 'Your cost per task' : 'Cost per task', v: fmtUsd(xValue(m, X_TASK_COST, tasks)) }) : null,
+      t ? h(Row, { pal, k: m.mp ? 'Your cost per task' : 'Cost per task', v: fmtTaskCost(xValue(m, X_TASK_COST, tasks), m) }) : null,
       t ? h(Row, { pal, k: 'Model time per task', v: fmtSeconds(t.sec) }) : null,
       t ? h(Row, { pal, k: 'Tokens per task', v: `${fmtTokens(t.in)} in, ${fmtTokens(t.out)} out` }) : null,
       h(Row, { pal, k: 'Per task', v: t ? `median of your ${t.n} tasks, measured locally` : 'not measured yet (3 tasks)' }),
@@ -99,6 +99,22 @@ function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
       `${INTEL_NOTE[m.t] || 'Intelligence score'}. `,
       sp && sp.note ? `Speed ${sp.note}. ` : '',
       'Credits: Epoch AI (CC BY), LMArena (CC BY 4.0), LiteLLM (MIT).'))
+}
+
+function ModelButton({ p, pinnedId, highlightId, picks, setFocusId, setHoverId, setPinnedId, note, pal }) {
+  return h('li', null,
+    h('button', {
+      type: 'button', 'aria-pressed': pinnedId === p.id,
+      onFocus: () => setFocusId(p.id), onBlur: () => setFocusId(prev => (prev === p.id ? null : prev)),
+      onMouseEnter: () => setHoverId(p.id), onMouseLeave: () => setHoverId(prev => (prev === p.id ? null : prev)),
+      onClick: () => setPinnedId(prev => (prev === p.id ? null : p.id)),
+      style: {
+        display: 'flex', width: '100%', gap: 8, justifyContent: 'space-between', textAlign: 'left', padding: '4px 6px',
+        border: `1px solid ${pinnedId === p.id ? pal.frontier : 'transparent'}`, background: highlightId === p.id ? pal.panel : 'transparent', color: pal.text,
+      },
+    },
+    h('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, (picks.has(p.id) ? '[pick] ' : '') + p.m.n),
+    h('span', { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: '0 0 auto' } }, note)))
 }
 
 export function LandscapePane({ ctx }) {
@@ -113,6 +129,7 @@ export function LandscapePane({ ctx }) {
   const [hoverId, setHoverId] = useState(null)
   const [focusId, setFocusId] = useState(null)
   const [pinnedId, setPinnedId] = useState(null)
+  const [query, setQuery] = useState('')
   const [rest, setRest] = useState({ status: 'loading' })
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
@@ -225,7 +242,10 @@ export function LandscapePane({ ctx }) {
     ? `${layout.plotted} of ${snapshot.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot.unplotted} of ${snapshot.total} catalog models have no price or no score and are never plotted.`
     : `${layout.plotted} of ${snapshot.total} catalog models plotted; ${snapshot.unplotted} have no price or no score and are not plotted.`
 
-  const label = `${view === '3d' ? '3D' : '2D'} model landscape: ${axis.title.split(' · ')[0].toLowerCase()}, intelligence${view === '3d' ? ' and ' + (effectiveZ === Z_SPEED ? 'locally measured speed' : 'context window') : ''}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === '3d' ? 'Arrow keys rotate, plus and minus zoom, 0 resets. ' : ''}The front list beside the plot has every front model.`
+  const found = useMemo(() => findModels(layout.points, query), [layout, query])
+  const btnProps = { pinnedId, highlightId, picks, setFocusId, setHoverId, setPinnedId, pal }
+  const noteFor = p => `${p.m.i} · ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace('/M', '').replace(' (free tier)', ' free') : axis.value(p.xv, p.m)}`
+  const label = `${view === '3d' ? '3D' : '2D'} model landscape: ${axis.title.split(' · ')[0].toLowerCase()}, intelligence${view === '3d' ? ' and ' + (effectiveZ === Z_SPEED ? 'locally measured speed' : 'context window') : ''}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === '3d' ? 'Arrow keys rotate, plus and minus zoom, 0 resets. ' : ''}The front list beside the plot has every front model, and Find a model reaches all the others.`
 
   return h('div', { className: 'iolite-ls', style: cssVars },
     h('style', null, CSS),
@@ -277,19 +297,19 @@ export function LandscapePane({ ctx }) {
           h('h3', { style: { margin: '0 0 6px', fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } },
             `Front · ${frontList.length} models, ${effectiveX === X_PRICE ? 'cheapest' : effectiveX === X_TASK_TIME ? 'fastest' : effectiveX === X_TASK_TOKENS ? 'fewest tokens' : 'cheapest per task'} first`),
           h('ol', { style: { maxHeight: 300, overflowY: 'auto' } },
-            frontList.map(p => h('li', { key: p.id },
-              h('button', {
-                type: 'button', 'aria-pressed': pinnedId === p.id,
-                onFocus: () => setFocusId(p.id), onBlur: () => setFocusId(prev => (prev === p.id ? null : prev)),
-                onMouseEnter: () => setHoverId(p.id), onMouseLeave: () => setHoverId(prev => (prev === p.id ? null : prev)),
-                onClick: () => setPinnedId(prev => (prev === p.id ? null : p.id)),
-                style: {
-                  display: 'flex', width: '100%', gap: 8, justifyContent: 'space-between', textAlign: 'left', padding: '4px 6px',
-                  border: `1px solid ${pinnedId === p.id ? pal.frontier : 'transparent'}`, background: highlightId === p.id ? pal.panel : 'transparent', color: pal.text,
-                },
-              },
-              h('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, (picks.has(p.id) ? '[pick] ' : '') + p.m.n),
-              h('span', { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: '0 0 auto' } }, `${p.m.i} · ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace('/M', '').replace(' (free tier)', ' free') : axis.value(p.xv)}`)))))))),
+            frontList.map(p => h(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) })))),
+        h('section', { 'aria-label': 'Find a model', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
+          h('label', { htmlFor: 'iolite-find', style: { display: 'block', margin: '0 0 6px', fontFamily: FONT_MONO, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } }, 'Find a model'),
+          h('input', {
+            id: 'iolite-find', type: 'search', value: query, placeholder: 'name, slug or provider', autoComplete: 'off', 'aria-describedby': 'iolite-find-count',
+            onChange: e => setQuery(e.target.value),
+            style: { width: '100%', font: 'inherit', color: pal.text, background: pal.ground, border: `1px solid ${pal.hair}`, borderRadius: 4, padding: '4px 6px' },
+          }),
+          h('div', { id: 'iolite-find-count', 'aria-live': 'polite', style: { color: pal.muted, fontSize: 12, margin: '4px 0' } },
+            !query.trim() ? `Any of the ${layout.plotted} plotted models; Tab to a result to show it.`
+              : found.total === 0 ? 'No plotted model matches.'
+                : `${found.total} match${found.total === 1 ? '' : 'es'}${found.total > found.hits.length ? `, showing the ${found.hits.length} smartest` : ''}.`),
+          found.hits.length ? h('ol', null, found.hits.map(p => h(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) }))) : null))),
     h('footer', { style: { padding: '8px 16px 14px', color: pal.muted, fontSize: 11.5, borderTop: `1px solid ${pal.hair}` } },
       h('div', null, 'Frontier = no model is as good or better on the X axis and at least as smart. Dominated models are small rings; front models are wire spheres on the ridge; picks have a diamond; the copper ring is focus. Openness is not in the catalog, so there is one glyph per class.'),
       snapshot.credits.map((c, i) => h('div', { key: i }, c)),

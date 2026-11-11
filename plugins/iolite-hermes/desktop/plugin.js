@@ -122,6 +122,10 @@ function fmtUsd(v) {
   if (v < 0.01) return `$${Number(v.toPrecision(2))}`;
   return `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
+function fmtTaskCost(v, m) {
+  if (v === 0) return m && m.mp ? "$0 (prepaid)" : "$0 (free tier)";
+  return fmtUsd(v);
+}
 function fmtSeconds(v) {
   if (!Number.isFinite(v)) return "?";
   if (v < 1) return `${Number(v.toPrecision(2))} s`;
@@ -130,7 +134,7 @@ function fmtSeconds(v) {
 }
 function xAxis(xMode, mine) {
   const who = mine ? "YOUR " : "";
-  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ \xB7 LOG`, tick: fmtUsd, value: fmtUsd };
+  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ \xB7 LOG`, tick: fmtUsd, value: fmtTaskCost };
   if (xMode === X_TASK_TIME) return { title: "MODEL TIME PER TASK \xB7 LOG", tick: (v) => fmtSeconds(v).replace(" ", ""), value: fmtSeconds };
   if (xMode === X_TASK_TOKENS) return { title: "TOKENS PER TASK \xB7 LOG", tick: fmtTokens, value: (v) => `${fmtTokens(v)} tokens` };
   return { title: mine ? "YOUR PRICE $/M \xB7 LOG" : "PRICE $/M \xB7 LOG", tick: fmtPriceTick, value: fmtPrice };
@@ -252,6 +256,15 @@ function applyMyPrices(snapshot, prices) {
 function fmtShownPrice(m) {
   if (m.mp && m.c === 0) return "$0/M (prepaid)";
   return fmtPrice(m.c);
+}
+function findModels(points, query, limit = 8) {
+  const words = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return { hits: [], total: 0 };
+  const all = points.filter((p) => {
+    const hay = `${p.m.n} ${p.m.s} ${p.m.p || ""}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  }).sort((a, b) => b.m.i - a.m.i || a.m.n.localeCompare(b.m.n));
+  return { hits: all.slice(0, limit), total: all.length };
 }
 
 // src/scene.js
@@ -1108,7 +1121,7 @@ function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
       h2(Row, { pal, k: "Context", v: m.x ? `${fmtTokens(m.x)} tokens` : "not stated" }),
       m.a !== void 0 ? h2(Row, { pal, k: "Arena rating", v: `${m.a} (Bradley-Terry)` }) : null,
       h2(Row, { pal, k: "Speed", v: sp ? `${fmtTps(sp.tps)}, measured locally` : "not measured yet" }),
-      t ? h2(Row, { pal, k: m.mp ? "Your cost per task" : "Cost per task", v: fmtUsd(xValue(m, X_TASK_COST, tasks)) }) : null,
+      t ? h2(Row, { pal, k: m.mp ? "Your cost per task" : "Cost per task", v: fmtTaskCost(xValue(m, X_TASK_COST, tasks), m) }) : null,
       t ? h2(Row, { pal, k: "Model time per task", v: fmtSeconds(t.sec) }) : null,
       t ? h2(Row, { pal, k: "Tokens per task", v: `${fmtTokens(t.in)} in, ${fmtTokens(t.out)} out` }) : null,
       h2(Row, { pal, k: "Per task", v: t ? `median of your ${t.n} tasks, measured locally` : "not measured yet (3 tasks)" }),
@@ -1124,6 +1137,37 @@ function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
     )
   );
 }
+function ModelButton({ p, pinnedId, highlightId, picks, setFocusId, setHoverId, setPinnedId, note, pal }) {
+  return h2(
+    "li",
+    null,
+    h2(
+      "button",
+      {
+        type: "button",
+        "aria-pressed": pinnedId === p.id,
+        onFocus: () => setFocusId(p.id),
+        onBlur: () => setFocusId((prev) => prev === p.id ? null : prev),
+        onMouseEnter: () => setHoverId(p.id),
+        onMouseLeave: () => setHoverId((prev) => prev === p.id ? null : prev),
+        onClick: () => setPinnedId((prev) => prev === p.id ? null : p.id),
+        style: {
+          display: "flex",
+          width: "100%",
+          gap: 8,
+          justifyContent: "space-between",
+          textAlign: "left",
+          padding: "4px 6px",
+          border: `1px solid ${pinnedId === p.id ? pal.frontier : "transparent"}`,
+          background: highlightId === p.id ? pal.panel : "transparent",
+          color: pal.text
+        }
+      },
+      h2("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, (picks.has(p.id) ? "[pick] " : "") + p.m.n),
+      h2("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, note)
+    )
+  );
+}
 function LandscapePane({ ctx }) {
   const mode = useRenderedMode();
   const reduced = useReducedMotion();
@@ -1136,6 +1180,7 @@ function LandscapePane({ ctx }) {
   const [hoverId, setHoverId] = useState2(null);
   const [focusId, setFocusId] = useState2(null);
   const [pinnedId, setPinnedId] = useState2(null);
+  const [query, setQuery] = useState2("");
   const [rest, setRest] = useState2({ status: "loading" });
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
@@ -1243,7 +1288,10 @@ function LandscapePane({ ctx }) {
   const catalogNote = data && data.bundled === false ? `Note: /iolite is using ${data.catalog_source || "another catalog"}; this pane always plots the bundled snapshot.` : null;
   const taskNote = rest.status !== "ok" ? null : data.measure_usage === false ? "Per-task views are off (measure_usage), so cost, time and tokens per task are not measured." : tasksMeasured === 0 ? "Cost, time and tokens per task: not measured yet. Each model needs 3 tasks through Hermes; the numbers stay on this machine." : `Per task: medians of your own tasks for ${tasksMeasured} model${tasksMeasured === 1 ? "" : "s"}, measured locally. Model time only; tool time is left out.`;
   const countLine = effectiveX !== X_PRICE ? `${layout.plotted} models with per-task numbers measured on this machine plotted; the rest have none yet and are not plotted or guessed.` : effectiveZ === Z_SPEED ? `${layout.plotted} of ${snapshot_default.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot_default.unplotted} of ${snapshot_default.total} catalog models have no price or no score and are never plotted.` : `${layout.plotted} of ${snapshot_default.total} catalog models plotted; ${snapshot_default.unplotted} have no price or no score and are not plotted.`;
-  const label = `${view === "3d" ? "3D" : "2D"} model landscape: ${axis.title.split(" \xB7 ")[0].toLowerCase()}, intelligence${view === "3d" ? " and " + (effectiveZ === Z_SPEED ? "locally measured speed" : "context window") : ""}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === "3d" ? "Arrow keys rotate, plus and minus zoom, 0 resets. " : ""}The front list beside the plot has every front model.`;
+  const found = useMemo2(() => findModels(layout.points, query), [layout, query]);
+  const btnProps = { pinnedId, highlightId, picks, setFocusId, setHoverId, setPinnedId, pal };
+  const noteFor = (p) => `${p.m.i} \xB7 ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace("/M", "").replace(" (free tier)", " free") : axis.value(p.xv, p.m)}`;
+  const label = `${view === "3d" ? "3D" : "2D"} model landscape: ${axis.title.split(" \xB7 ")[0].toLowerCase()}, intelligence${view === "3d" ? " and " + (effectiveZ === Z_SPEED ? "locally measured speed" : "context window") : ""}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === "3d" ? "Arrow keys rotate, plus and minus zoom, 0 resets. " : ""}The front list beside the plot has every front model, and Find a model reaches all the others.`;
   return h2(
     "div",
     { className: "iolite-ls", style: cssVars },
@@ -1328,36 +1376,29 @@ function LandscapePane({ ctx }) {
           h2(
             "ol",
             { style: { maxHeight: 300, overflowY: "auto" } },
-            frontList.map((p) => h2(
-              "li",
-              { key: p.id },
-              h2(
-                "button",
-                {
-                  type: "button",
-                  "aria-pressed": pinnedId === p.id,
-                  onFocus: () => setFocusId(p.id),
-                  onBlur: () => setFocusId((prev) => prev === p.id ? null : prev),
-                  onMouseEnter: () => setHoverId(p.id),
-                  onMouseLeave: () => setHoverId((prev) => prev === p.id ? null : prev),
-                  onClick: () => setPinnedId((prev) => prev === p.id ? null : p.id),
-                  style: {
-                    display: "flex",
-                    width: "100%",
-                    gap: 8,
-                    justifyContent: "space-between",
-                    textAlign: "left",
-                    padding: "4px 6px",
-                    border: `1px solid ${pinnedId === p.id ? pal.frontier : "transparent"}`,
-                    background: highlightId === p.id ? pal.panel : "transparent",
-                    color: pal.text
-                  }
-                },
-                h2("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, (picks.has(p.id) ? "[pick] " : "") + p.m.n),
-                h2("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, `${p.m.i} \xB7 ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace("/M", "").replace(" (free tier)", " free") : axis.value(p.xv)}`)
-              )
-            ))
+            frontList.map((p) => h2(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) }))
           )
+        ),
+        h2(
+          "section",
+          { "aria-label": "Find a model", style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
+          h2("label", { htmlFor: "iolite-find", style: { display: "block", margin: "0 0 6px", fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.muted } }, "Find a model"),
+          h2("input", {
+            id: "iolite-find",
+            type: "search",
+            value: query,
+            placeholder: "name, slug or provider",
+            autoComplete: "off",
+            "aria-describedby": "iolite-find-count",
+            onChange: (e) => setQuery(e.target.value),
+            style: { width: "100%", font: "inherit", color: pal.text, background: pal.ground, border: `1px solid ${pal.hair}`, borderRadius: 4, padding: "4px 6px" }
+          }),
+          h2(
+            "div",
+            { id: "iolite-find-count", "aria-live": "polite", style: { color: pal.muted, fontSize: 12, margin: "4px 0" } },
+            !query.trim() ? `Any of the ${layout.plotted} plotted models; Tab to a result to show it.` : found.total === 0 ? "No plotted model matches." : `${found.total} match${found.total === 1 ? "" : "es"}${found.total > found.hits.length ? `, showing the ${found.hits.length} smartest` : ""}.`
+          ),
+          found.hits.length ? h2("ol", null, found.hits.map((p) => h2(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) }))) : null
         )
       )
     ),

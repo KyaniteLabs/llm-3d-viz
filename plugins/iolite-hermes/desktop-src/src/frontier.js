@@ -96,6 +96,12 @@ export function fmtUsd(v) {
   return `$${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+/** Dollars per task; a $0 task says why: a prepaid plan, or a free-tier list price. */
+export function fmtTaskCost(v, m) {
+  if (v === 0) return m && m.mp ? '$0 (prepaid)' : '$0 (free tier)'
+  return fmtUsd(v)
+}
+
 export function fmtSeconds(v) {
   if (!Number.isFinite(v)) return '?'
   if (v < 1) return `${Number(v.toPrecision(2))} s`
@@ -106,7 +112,7 @@ export function fmtSeconds(v) {
 /** Axis title and tick formatter for an X mode; `mine` marks plan prices. */
 export function xAxis(xMode, mine) {
   const who = mine ? 'YOUR ' : ''
-  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ · LOG`, tick: fmtUsd, value: fmtUsd }
+  if (xMode === X_TASK_COST) return { title: `${who}COST PER TASK $ · LOG`, tick: fmtUsd, value: fmtTaskCost }
   if (xMode === X_TASK_TIME) return { title: 'MODEL TIME PER TASK · LOG', tick: v => fmtSeconds(v).replace(' ', ''), value: fmtSeconds }
   if (xMode === X_TASK_TOKENS) return { title: 'TOKENS PER TASK · LOG', tick: fmtTokens, value: v => `${fmtTokens(v)} tokens` }
   return { title: mine ? 'YOUR PRICE $/M · LOG' : 'PRICE $/M · LOG', tick: fmtPriceTick, value: fmtPrice }
@@ -254,4 +260,15 @@ export function applyMyPrices(snapshot, prices) {
 export function fmtShownPrice(m) {
   if (m.mp && m.c === 0) return '$0/M (prepaid)'
   return fmtPrice(m.c)
+}
+
+/** Plotted points whose name, slug or provider contains every word of the query, smartest first. */
+export function findModels(points, query, limit = 8) {
+  const words = String(query || '').toLowerCase().split(/\s+/).filter(Boolean)
+  if (!words.length) return { hits: [], total: 0 }
+  const all = points.filter(p => {
+    const hay = `${p.m.n} ${p.m.s} ${p.m.p || ''}`.toLowerCase()
+    return words.every(w => hay.includes(w))
+  }).sort((a, b) => b.m.i - a.m.i || a.m.n.localeCompare(b.m.n))
+  return { hits: all.slice(0, limit), total: all.length }
 }

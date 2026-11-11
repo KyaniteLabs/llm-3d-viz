@@ -109,3 +109,25 @@ test('snapshot: counts add up, no speed field, no Artificial Analysis', () => {
   assert.ok(snapshot.credits.some(c => /CC BY 4\.0/.test(c) && /Bradley-Terry/.test(c) && /not Elo/.test(c)))
   assert.ok(snapshot.credits.some(c => /LiteLLM/.test(c) && /MIT/.test(c)))
 })
+
+test('findModels reaches any plotted model by name, slug or provider, smartest first', async () => {
+  const { findModels } = await import('../src/frontier.js')
+  const pts = [
+    { id: 'a', m: { n: 'GLM-5.3', s: 'zai/glm-5.3', p: 'Z.ai', i: 86 } },
+    { id: 'b', m: { n: 'GLM-5.3 Air', s: 'zai/glm-5.3-air', p: 'Z.ai', i: 70 } },
+    { id: 'c', m: { n: 'Kimi K3', s: 'moonshot/kimi-k3', p: 'Moonshot', i: 88 } },
+  ]
+  assert.deepEqual(findModels(pts, '').hits, [])
+  assert.deepEqual(findModels(pts, 'glm').hits.map(p => p.id), ['a', 'b'])
+  assert.deepEqual(findModels(pts, 'z.ai air').hits.map(p => p.id), ['b'])
+  assert.deepEqual(findModels(pts, 'moonshot').hits.map(p => p.id), ['c'])
+  const r = findModels(pts, 'glm', 1)
+  assert.equal(r.total, 2); assert.equal(r.hits.length, 1)
+})
+
+test('a $0 task cost says prepaid or free tier', async () => {
+  const { fmtTaskCost } = await import('../src/frontier.js')
+  assert.equal(fmtTaskCost(0, { mp: { plan: 'x' } }), '$0 (prepaid)')
+  assert.equal(fmtTaskCost(0, {}), '$0 (free tier)')
+  assert.equal(fmtTaskCost(0.5, {}), '$0.50')
+})
