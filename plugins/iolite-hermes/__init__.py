@@ -64,7 +64,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
@@ -240,7 +240,10 @@ def _safe_text(v: Any, limit: int = MAX_TEXT) -> str:
     return text[:limit]
 
 
-_MD_SPECIALS = re.compile(r"([\\*_~|\[\]()#])")
+# Only the characters that start a link, code span or emphasis run. Parentheses and
+# underscores stay plain: without a "[" they cannot form a link, and a backslash before
+# them shows up literally on surfaces that print slash output as plain text.
+_MD_SPECIALS = re.compile(r"([\\`*~|\[\]<>#])")
 
 
 def _md(v: Any) -> str:

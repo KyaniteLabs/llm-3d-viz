@@ -162,3 +162,22 @@ def test_fresh_install_answers_from_the_bundled_catalog(monkeypatch):
     assert out["ok"] is True and len(out["shortlist"]) == 3
     assert out["mode"] == "cost" and out["catalog_generated"]
     assert "bundled" in c.commands["iolite"]("status")
+
+
+def test_credit_line_prints_plain_on_plain_text_surfaces(monkeypatch):
+    # The Desktop chat prints slash output as plain text, so a "\(" or "\_" escape
+    # shows up literally in the credit line the licences ask us to print.
+    monkeypatch.setattr(plugin, "_cfg", lambda key, default=None: None)
+    plugin._cache.clear()
+    c = FullCtx()
+    plugin.register(c)
+    out = c.commands["iolite"]("shortlist 60 cheap")
+    assert "(CC BY)" in out and "model_prices_and_context_window.json" in out
+    assert "\\(" not in out and "\\_" not in out
+
+
+def test_markdown_link_in_catalog_text_is_still_defused():
+    for evil in ("[click](https://evil.example)", "![x](https://evil.example/p.png)", "`code`", "<b>"):
+        out = plugin._md(evil)
+        assert "](" not in out.replace("\\]", "") and "[" not in out.replace("\\[", "")
+        assert "`" not in out.replace("\\`", "") and "<" not in out.replace("\\<", "")
