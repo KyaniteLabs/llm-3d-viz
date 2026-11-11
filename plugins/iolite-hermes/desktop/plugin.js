@@ -1207,9 +1207,16 @@ function LandscapePane({ ctx }) {
       onSelect: (id) => setPinnedId((prev) => id && id === prev ? null : id)
     });
     stageRef.current = stage;
+    let last2 = "";
     const fit = () => {
-      const box = wrapRef.current && wrapRef.current.getBoundingClientRect();
-      if (box && box.width > 0) stage.resize(box.width, Math.max(box.height, 340), typeof window !== "undefined" && window.devicePixelRatio || 1);
+      const el = wrapRef.current;
+      if (!el || el.clientWidth <= 0) return;
+      const w = el.clientWidth, ht = Math.max(el.clientHeight, 300);
+      const dpr = typeof window !== "undefined" && window.devicePixelRatio || 1;
+      const key = `${w}x${ht}@${dpr}`;
+      if (key === last2) return;
+      last2 = key;
+      stage.resize(w, ht, dpr);
     };
     fit();
     let ro = null;
@@ -1299,7 +1306,7 @@ function LandscapePane({ ctx }) {
       h2(
         "div",
         { className: "iolite-stage", ref: wrapRef, style: { background: pal.ground, border: `1px solid ${pal.hair}` } },
-        h2("canvas", { ref: canvasRef, role: "img", "aria-label": label, tabIndex: 0, style: { display: "block", touchAction: "none", cursor: view === "3d" ? "grab" : "default" } }),
+        h2("canvas", { ref: canvasRef, role: "img", "aria-label": label, tabIndex: 0, style: { display: "block", position: "absolute", inset: 0, touchAction: "none", cursor: view === "3d" ? "grab" : "default" } }),
         layout.plotted === 0 ? h2("div", { style: { position: "absolute", inset: 0, display: "grid", placeItems: "center", color: pal.muted, padding: 24, textAlign: "center" } }, "Nothing to plot on this axis yet.") : null
       ),
       h2(

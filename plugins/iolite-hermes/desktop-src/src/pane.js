@@ -173,9 +173,19 @@ export function LandscapePane({ ctx }) {
       onSelect: id => setPinnedId(prev => (id && id === prev ? null : id)),
     })
     stageRef.current = stage
+    // Measure the content box (no border) and keep the canvas out of flow (absolute), so the
+    // canvas can never push its own box bigger: sizing it from the border box grew the stage
+    // 2px per ResizeObserver tick and scrolled the page forever where nothing capped the height.
+    let last = ''
     const fit = () => {
-      const box = wrapRef.current && wrapRef.current.getBoundingClientRect()
-      if (box && box.width > 0) stage.resize(box.width, Math.max(box.height, 340), (typeof window !== 'undefined' && window.devicePixelRatio) || 1)
+      const el = wrapRef.current
+      if (!el || el.clientWidth <= 0) return
+      const w = el.clientWidth, ht = Math.max(el.clientHeight, 300)
+      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
+      const key = `${w}x${ht}@${dpr}`
+      if (key === last) return
+      last = key
+      stage.resize(w, ht, dpr)
     }
     fit()
     let ro = null
@@ -258,7 +268,7 @@ export function LandscapePane({ ctx }) {
     plansOpen ? h('div', { id: 'iolite-my-plans' }, h(PlansEditor, { ctx, mine, models: snapshot.models, pal, onSaved: load })) : null,
     h('div', { className: 'iolite-body' },
       h('div', { className: 'iolite-stage', ref: wrapRef, style: { background: pal.ground, border: `1px solid ${pal.hair}` } },
-        h('canvas', { ref: canvasRef, role: 'img', 'aria-label': label, tabIndex: 0, style: { display: 'block', touchAction: 'none', cursor: view === '3d' ? 'grab' : 'default' } }),
+        h('canvas', { ref: canvasRef, role: 'img', 'aria-label': label, tabIndex: 0, style: { display: 'block', position: 'absolute', inset: 0, touchAction: 'none', cursor: view === '3d' ? 'grab' : 'default' } }),
         layout.plotted === 0 ? h('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: pal.muted, padding: 24, textAlign: 'center' } }, 'Nothing to plot on this axis yet.') : null),
       h('aside', { className: 'iolite-aside' },
         h('section', { 'aria-label': 'Selected model', 'aria-live': 'polite', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
