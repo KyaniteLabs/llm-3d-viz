@@ -1,6 +1,7 @@
 """The bundled catalog, the nested catalog schema, and local speed measurement."""
 import importlib.util
 import json
+import os
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -147,7 +148,27 @@ def test_hook_works_without_a_ctx_state_using_hermes_home(tmp_path):
     c = Ctx()
     plugin.register(c)
     _call(c, n=3)
-    assert (tmp_path / "hermes-home" / "plugin-data" / "iolite" / "speed.json").is_file()
+    # The same folder Hermes gives the plugin (PluginState("iolite").data_dir), seen live in an
+    # isolated Hermes on 2026-11-11, so dashboard routes and agent hooks share one folder.
+    assert (tmp_path / "hermes-home" / "plugin-data" / "agent-plugin-iolite-f2b75fcf" / "speed.json").is_file()
+
+
+def test_legacy_folder_is_adopted_without_overwrite(tmp_path):
+    legacy = tmp_path / "hermes-home" / "plugin-data" / "iolite"
+    legacy.mkdir(parents=True)
+    (legacy / "my_prices.json").write_text('{"plans": []}')
+    os.chmod(legacy / "my_prices.json", 0o600)
+    (legacy / "speed.json").write_text("old")
+    new = tmp_path / "hermes-home" / "plugin-data" / "agent-plugin-iolite-f2b75fcf"
+    new.mkdir(parents=True)
+    (new / "speed.json").write_text("new")
+    plugin._migrated.clear()
+    assert plugin._data_dir() == new
+    assert (new / "my_prices.json").read_text() == '{"plans": []}'
+    assert (new / "my_prices.json").stat().st_mode & 0o777 == 0o600
+    assert (new / "speed.json").read_text() == "new"          # never overwritten
+    assert (legacy / "my_prices.json").is_file()               # old folder left in place
+    assert not list(new.glob("*.adopt"))
 
 
 def test_local_speed_is_merged_labelled_and_switches_mode(tmp_path):
@@ -170,3 +191,14 @@ def test_too_few_samples_are_not_shown(tmp_path):
     _call(c, n=2)
     out = json.loads(c.tools["iolite_shortlist"]({}))
     assert out["mode"] == "cost"
+
+
+def test_shared_price_id_credits_only_the_exact_row():
+    # GLM-5.3 and its Max reasoning setting both price as zai/glm-5.3; a call to glm-5.3 is
+    # credited to glm-5.3 by slug and never to the Max row through the shared price id.
+    rows = [{"slug": "glm-5.3", "model": "GLM-5.3", "_price_key": "zai/glm-5.3"},
+            {"slug": "glm-5.3-max", "model": "GLM-5.3 (Max)", "_price_key": "zai/glm-5.3"},
+            {"slug": "solo", "model": "Solo", "_price_key": "acme/solo-v1"}]
+    stats = {"glm53": {"n": 3, "in": 1, "out": 2, "sec": 3.0}, "solov1": {"n": 3, "in": 4, "out": 5, "sec": 6.0}}
+    got = plugin.task_stats_by_slug(rows, stats)
+    assert set(got) == {"glm-5.3", "solo"}

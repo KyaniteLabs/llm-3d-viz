@@ -33,6 +33,7 @@ import logging
 import os
 import re
 import shlex
+import shutil
 import statistics
 import stat
 import tempfile
@@ -572,17 +573,65 @@ def _measure_speed_on() -> bool:
     return _truthy_cfg("measure_speed")
 
 
-def _data_dir() -> Path:
-    """The plugin's profile-scoped data directory: ctx.state.data_dir when Hermes gave us a
-    context, else $HERMES_HOME/plugin-data/iolite, else ~/.hermes/plugin-data/iolite."""
+PLUGIN_ID = "iolite"
+_LEGACY_FILES = ("speed.json", "tasks.json", "last_shortlist.json", "my_prices.json")
+_migrated: set = set()
+
+
+def _hermes_namespace_dir(home: Path) -> Path:
+    """The folder Hermes itself gives this plugin (PluginState(plugin_id).data_dir):
+    plugin-data/agent-plugin-iolite-<sha256(id)[:8]>. Asked of Hermes when importable, else
+    computed by the same rule, so the agent hooks and the dashboard routes share one folder."""
     try:
-        d = getattr(getattr(_ctx, "state", None), "data_dir", None) if _ctx is not None else None
+        from hermes_cli.plugins_state import PluginState  # type: ignore
+        d = PluginState(PLUGIN_ID).data_dir
         if d:
             return Path(d)
     except Exception:
         pass
-    home = os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes")
-    return Path(home) / "plugin-data" / "iolite"
+    digest = hashlib.sha256(PLUGIN_ID.encode("utf-8")).hexdigest()[:8]
+    return home / "plugin-data" / f"agent-plugin-{PLUGIN_ID}-{digest}"
+
+
+def _adopt_legacy(d: Path) -> None:
+    """Copy files an older build left in plugin-data/iolite into d, once per process, never
+    overwriting. The old folder is left in place."""
+    key = str(d)
+    if key in _migrated:
+        return
+    _migrated.add(key)
+    try:
+        legacy = d.parent / PLUGIN_ID
+        if legacy == d or not legacy.is_dir():
+            return
+        for name in _LEGACY_FILES:
+            src, dst = legacy / name, d / name
+            if src.is_file() and not dst.exists():
+                d.mkdir(parents=True, exist_ok=True)
+                tmp = dst.with_name(dst.name + ".adopt")
+                shutil.copy2(src, tmp)
+                os.chmod(tmp, src.stat().st_mode & 0o777)
+                os.replace(tmp, dst)
+    except Exception as exc:
+        logger.debug("iolite: legacy data adoption skipped: %s", exc)
+
+
+def _data_dir() -> Path:
+    """The plugin's profile-scoped data directory, the same one for agent hooks, tools and
+    dashboard routes: ctx.state.data_dir when Hermes gave us a context, else the folder Hermes
+    would give us under $HERMES_HOME (or ~/.hermes)."""
+    d: Optional[Path] = None
+    try:
+        got = getattr(getattr(_ctx, "state", None), "data_dir", None) if _ctx is not None else None
+        if got:
+            d = Path(got)
+    except Exception:
+        d = None
+    if d is None:
+        home = Path(os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes"))
+        d = _hermes_namespace_dir(home)
+    _adopt_legacy(d)
+    return d
 
 
 def _speed_key(name: Any) -> str:
@@ -693,12 +742,12 @@ def _with_speed(rows: List[dict]) -> List[dict]:
             return rows
         out = _Rows()
         out.rejected, out.meta = getattr(rows, "rejected", 0), getattr(rows, "meta", {})
+        shared = _shared_price_keys(rows)
         for r in rows:
             hit = None
             if r.get("tps") is None:
-                for cand in (r.get("slug"), r.get("model"), r.get("_price_key")):
-                    k = _speed_key(cand)
-                    if k and k in speeds:
+                for k in _row_keys(r, shared):
+                    if k in speeds:
                         hit = speeds[k]
                         break
             if hit is None:
@@ -848,8 +897,23 @@ def _monthly_usage(tasks: Optional[Dict[str, dict]] = None) -> dict:
     return {"by_key": {k: t * scale / 1e6 for k, t in totals.items()}, "days": days, "early": days < USAGE_EARLY_DAYS}
 
 
-def _row_keys(r: dict) -> List[str]:
-    return [k for k in (_speed_key(r.get("slug")), _speed_key(r.get("model")), _speed_key(r.get("_price_key"))) if k]
+def _shared_price_keys(rows: List[dict]) -> set:
+    """Price-file ids that more than one catalog row uses (e.g. GLM-5.3 and its Max reasoning
+    setting both price as zai/glm-5.3). A call measured under such an id cannot say which row
+    it was, so it is credited to none of them by that id."""
+    seen: Dict[str, int] = {}
+    for r in rows:
+        k = _speed_key(r.get("_price_key"))
+        if k:
+            seen[k] = seen.get(k, 0) + 1
+    return {k for k, n in seen.items() if n > 1}
+
+
+def _row_keys(r: dict, shared: Optional[set] = None) -> List[str]:
+    price = _speed_key(r.get("_price_key"))
+    if shared and price in shared:
+        price = ""
+    return [k for k in (_speed_key(r.get("slug")), _speed_key(r.get("model")), price) if k]
 
 
 def task_stats_by_slug(rows: List[dict], stats: Optional[Dict[str, dict]] = None) -> Dict[str, dict]:
@@ -858,11 +922,12 @@ def task_stats_by_slug(rows: List[dict], stats: Optional[Dict[str, dict]] = None
     out: Dict[str, dict] = {}
     if not stats:
         return out
+    shared = _shared_price_keys(rows)
     for r in rows:
         slug = r.get("slug")
         if not isinstance(slug, str) or not slug:
             continue
-        hit = next((stats[k] for k in _row_keys(r) if k in stats), None)
+        hit = next((stats[k] for k in _row_keys(r, shared) if k in stats), None)
         if hit:
             out[slug] = {k: hit[k] for k in ("n", "in", "out", "sec")}
     return out
