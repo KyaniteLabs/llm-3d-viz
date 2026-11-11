@@ -139,3 +139,17 @@ def test_url_fetch_sends_no_credentials_and_caches(monkeypatch):
 def test_non_http_url_rejected():
     out = json.loads(_setup({"catalog_url": "file:///etc/passwd"}).tools["iolite_shortlist"]({}))
     assert out["ok"] is False and "http" in out["error"]
+
+
+def test_legal_f2_f3_disclosure_text():
+    """Legal t_b99d20a1: SKILL.md tells the agent to pass data credits on (F2);
+    README names every local route the pane calls (F3)."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    skill = (root / "skills" / "iolite" / "SKILL.md").read_text()
+    assert "`data_credits`" in skill and "in your answer" in skill
+    readme = (root / "README.md").read_text()
+    assert "One local request" not in readme
+    for route in ("/api/plugins/iolite/landscape", "/api/plugins/iolite/my-prices",
+                  "/api/plugins/iolite/pane-receipt"):
+        assert route in readme
