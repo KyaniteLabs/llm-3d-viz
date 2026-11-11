@@ -10,6 +10,7 @@ import {
   type FloorSource,
 } from "./lib/decide";
 import { DEFAULT_FILTERS, sameFilters, type ModelFilters } from "./lib/filters";
+import { assertFloorProvenance, floorProvenanceOf } from "./lib/floor-state";
 import { presets, type ScoreWeights } from "./lib/score";
 
 export interface AppState {
@@ -84,6 +85,7 @@ export function createStore(initial: Partial<AppState> = {}) {
     providers: [...(state.filters.providers ?? [])],
     families: [...(state.filters.families ?? [])],
   };
+  assertFloorProvenance(floorProvenanceOf(state));
   const listeners = new Set<StateListener>();
 
   const emit = () => listeners.forEach((listener) => listener(state));
@@ -91,6 +93,8 @@ export function createStore(initial: Partial<AppState> = {}) {
   return {
     getState: () => state as Readonly<AppState>,
     replace: (next: Omit<AppState, "datarevision"> | AppState) => {
+      // Floor triple must name one stage (src/lib/floor-state.ts).
+      assertFloorProvenance(floorProvenanceOf(next));
       state = {
         ...next,
         weights: clampWeights(next.weights),
@@ -122,6 +126,10 @@ export function createStore(initial: Partial<AppState> = {}) {
         .filter((key) => key !== "weights" && key !== "axisMapping" && key !== "filters")
         .some((key) => patch[key] !== state[key]);
       if (!weightsChanged && !axesChanged && !filtersChanged && !scalarChanged) return;
+      if ("floorSource" in patch || "floorUserSet" in patch || "floorAnchorModelId" in patch) {
+        // Refuse a patch that would leave the floor triple in an illegal mix.
+        assertFloorProvenance(floorProvenanceOf({ ...state, ...patch }));
+      }
       state = {
         ...state,
         ...patch,

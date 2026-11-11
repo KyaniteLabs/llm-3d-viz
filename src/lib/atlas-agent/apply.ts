@@ -9,6 +9,7 @@ import {
 } from "../axis-metrics";
 import { clampBias, clampFloor } from "../decide";
 import { DEFAULT_FILTERS, type ModelFilters } from "../filters";
+import { setFloorByAnchor, setFloorByUser } from "../floor-state";
 import { presets, type PresetId, type ScoreWeights } from "../score";
 import type { AppStore } from "../../state";
 import type { AtlasProposal } from "./types";
@@ -42,9 +43,10 @@ export function proposalToStorePatch(
   }
   if (p.floor != null) {
     patch.intelligenceFloor = clampFloor(p.floor);
-    patch.floorUserSet = true;
-    patch.floorSource = p.floor_anchor_model_id ? "anchor" : "user";
-    patch.floorAnchorModelId = p.floor_anchor_model_id ?? null;
+    Object.assign(
+      patch,
+      p.floor_anchor_model_id?.trim() ? setFloorByAnchor(p.floor_anchor_model_id) : setFloorByUser(),
+    );
     appliedKeys.push("floor");
   }
   if (p.cost_speed_bias != null) {

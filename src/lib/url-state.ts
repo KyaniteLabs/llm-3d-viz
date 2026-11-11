@@ -34,6 +34,12 @@ import {
   DEFAULT_INTELLIGENCE_FLOOR,
   type FloorSource,
 } from "./decide";
+import {
+  defaultFloorProvenance,
+  setFloorByAnchor,
+  setFloorByUser,
+  type FloorProvenance,
+} from "./floor-state";
 import { DEFAULT_FILTERS, type ModelFilters } from "./filters";
 import { presets, type ScoreWeights } from "./score";
 
@@ -104,9 +110,7 @@ export function parseDecideFromParams(
   const decideMode = params.get("decide") === "1" || params.get("decide") === "true";
   let intelligenceFloor = DEFAULT_INTELLIGENCE_FLOOR;
   let costSpeedBias = DEFAULT_COST_SPEED_BIAS;
-  let floorAnchorModelId: string | null = null;
-  let floorSource: FloorSource = "default";
-  let floorUserSet = false;
+  let floor: FloorProvenance = defaultFloorProvenance();
 
   if (params.has("bias")) {
     costSpeedBias = clampBias(Number(params.get("bias")));
@@ -120,42 +124,30 @@ export function parseDecideFromParams(
     const id = anchorRaw.trim();
     const row = catalog?.find((m) => m.model === id);
     if (row && row.aa_intelligence_index != null) {
-      floorAnchorModelId = id;
       intelligenceFloor = clampFloor(row.aa_intelligence_index);
-      floorSource = "anchor";
-      floorUserSet = true;
+      floor = setFloorByAnchor(id);
     } else if (!catalog) {
       // Catalog not available at parse time — keep id; floor from query if any.
-      floorAnchorModelId = id;
       if (floorRaw != null && Number.isFinite(floorRaw)) {
         intelligenceFloor = clampFloor(floorRaw);
       }
-      floorSource = "anchor";
-      floorUserSet = true;
+      floor = setFloorByAnchor(id);
     } else if (floorRaw != null && Number.isFinite(floorRaw)) {
       // Unknown anchor → ignore anchor, use floor as user.
-      floorAnchorModelId = null;
       intelligenceFloor = clampFloor(floorRaw);
-      floorSource = "user";
-      floorUserSet = true;
+      floor = setFloorByUser();
     }
   } else if (floorRaw != null && Number.isFinite(floorRaw)) {
     intelligenceFloor = clampFloor(floorRaw);
-    floorSource = "user";
-    floorUserSet = true;
-  } else if (decideMode) {
-    intelligenceFloor = DEFAULT_INTELLIGENCE_FLOOR;
-    floorSource = "default";
-    floorUserSet = false;
+    floor = setFloorByUser();
   }
+  // else: stays default (fork default floor, source "default").
 
   return {
     decideMode,
     intelligenceFloor,
     costSpeedBias,
-    floorAnchorModelId,
-    floorSource,
-    floorUserSet,
+    ...floor,
   };
 }
 
@@ -342,7 +334,7 @@ export function serializeShareableState(
   }
   // Serialize user-set floor/bias/anchor independently of decideMode so turning
   // Decide off for Explore does not silently drop the configured setup on share.
-  if (d.floorUserSet || d.floorAnchorModelId) {
+  if (d.floorSource !== "default") {
     params.set("floor", String(clampFloor(d.intelligenceFloor)));
   }
   if (d.floorAnchorModelId) {
