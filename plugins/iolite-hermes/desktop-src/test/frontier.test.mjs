@@ -131,3 +131,20 @@ test('a $0 task cost says prepaid or free tier', async () => {
   assert.equal(fmtTaskCost(0, {}), '$0 (free tier)')
   assert.equal(fmtTaskCost(0.5, {}), '$0.50')
 })
+
+test('keepApart drops tick labels that would touch', async () => {
+  const { keepApart } = await import('../src/frontier.js')
+  const box = (l, w = 20) => ({ l, r: l + w, t: 0, b: 14 })
+  assert.deepEqual(keepApart([box(0), box(30), box(60)]), [0, 1, 2])
+  assert.deepEqual(keepApart([box(0), box(10), box(30), box(45)]), [0, 2])
+  assert.deepEqual(keepApart([box(0), box(22)], 4), [0])
+  const stacked = [{ l: 0, r: 20, t: 0, b: 14 }, { l: 0, r: 20, t: 20, b: 34 }, { l: 0, r: 20, t: 26, b: 40 }]
+  assert.deepEqual(keepApart(stacked), [0, 1])
+  assert.deepEqual(keepApart([]), [])
+})
+
+test('keepApart keeps tick labels off reserved axis titles', async () => {
+  const { keepApart } = await import('../src/frontier.js')
+  const title = { l: 0, r: 100, t: 0, b: 14 }
+  assert.deepEqual(keepApart([{ l: 50, r: 70, t: 2, b: 12 }, { l: 120, r: 140, t: 2, b: 12 }], 4, [title]), [1])
+})

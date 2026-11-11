@@ -128,6 +128,22 @@ export function decadeTicks(lo, hi) {
   return out
 }
 
+/**
+ * Which tick labels to draw so none touch: boxes are {l, r, t, b} in screen pixels, in axis
+ * order. Greedy: keep each label clear by at least gap px of every reserved box (axis titles,
+ * always drawn) and of every label already kept.
+ * Returns the kept indices. When an axis is foreshortened (a steep 3D angle, a narrow Speed
+ * range), labels thin out instead of printing over each other.
+ */
+export function keepApart(boxes, gap = 4, reserved = []) {
+  const apart = (b, k) => b.l >= k.r + gap || k.l >= b.r + gap || b.t >= k.b + gap || k.t >= b.b + gap
+  const kept = []
+  boxes.forEach((b, i) => {
+    if (reserved.every(k => apart(b, k)) && kept.every(j => apart(b, boxes[j]))) kept.push(i)
+  })
+  return kept
+}
+
 function logNorm(v, lo, hi) {
   const a = Math.log(lo), b = Math.log(hi)
   return b === a ? 0.5 : (Math.log(v) - a) / (b - a)

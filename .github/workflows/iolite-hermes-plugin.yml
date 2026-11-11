@@ -32,6 +32,28 @@ jobs:
         run: npm ci --ignore-scripts
       - name: decide.ts against the plugin's golden file
         run: npx vitest run tests/iolite-plugin-parity.test.ts tests/decide.test.ts
+  desktop:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plugins/iolite-hermes/desktop-src
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Snapshot matches the bundled catalog
+        run: python3 ../scripts/build_snapshot.py --check
+      - name: Install the one build dependency, pinned
+        run: npm install --no-save --no-package-lock --ignore-scripts esbuild@0.25.12
+      - name: Shipped bundle is current with its sources
+        run: |
+          node build.mjs
+          git diff --exit-code -- ../desktop/plugin.js
+      - name: Desktop pane tests
+        run: npm test
   hermes-validate:
     runs-on: ubuntu-latest
     steps:

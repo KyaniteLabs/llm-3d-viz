@@ -12,7 +12,7 @@
  * spin, and with reduced motion the camera stops the moment the pointer does.
  */
 import { FONT_MONO } from './palette.js'
-import { decadeTicks, fmtPriceTick, fmtTokens, floorPosition, Z_SPEED } from './frontier.js'
+import { decadeTicks, keepApart, fmtPriceTick, fmtTokens, floorPosition, Z_SPEED } from './frontier.js'
 
 const FOV = (42 * Math.PI) / 180
 const MIN_POL = 0.18
@@ -257,20 +257,29 @@ export class Stage {
     if (fy !== null) this.drawFloor3d(ctx, P, fy, pal, s.floor)
     // labels on the edges nearest the viewer
     setFont(ctx, 11); spaced(ctx, '0.06em'); ctx.fillStyle = pal.muted; ctx.textBaseline = 'middle'
-    const label = (p, text, align = 'center') => {
+    const place = (p, text, align = 'center') => {
       const q = P(p), tw = ctx.measureText(text).width
       const lo = align === 'right' ? tw : align === 'center' ? tw / 2 : 0
       const hi = align === 'left' ? tw : align === 'center' ? tw / 2 : 0
-      ctx.textAlign = align
-      ctx.fillText(text, Math.min(Math.max(q.x, 6 + lo), this.width - 6 - hi), q.y)
+      const x = Math.min(Math.max(q.x, 6 + lo), this.width - 6 - hi)
+      return { text, align, x, y: q.y, l: x - lo, r: x + hi, t: q.y - 7, b: q.y + 7 }
     }
-    for (const t of ticks.x) label([pos(t, domains.x, true), -1, sz * 1.12], (s.layout.xTick || fmtPriceTick)(t))
-    for (const t of ticks.z) label([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? 'right' : 'left')
-    for (const t of ticks.y) label([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? 'right' : 'left')
+    const draw = it => { ctx.textAlign = it.align; ctx.fillText(it.text, it.x, it.y) }
+    // Axis titles are placed first and always drawn; tick labels from every axis then thin out
+    // rather than touch each other or a title (a foreshortened axis, two axes meeting at a corner).
+    const titles = [
+      place([0, -1, sz * 1.7], (s.layout.xTitle || s.layout.priceTitle || 'PRICE $/M · LOG')),
+      place([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? 'right' : 'left'),
+      place([sx * 1.04, 1.12, sz * 1.04], 'INTELLIGENCE 0-100', sx < 0 ? 'right' : 'left'),
+    ]
+    const tickLabels = [
+      ...ticks.x.map(t => place([pos(t, domains.x, true), -1, sz * 1.12], (s.layout.xTick || fmtPriceTick)(t))),
+      ...ticks.z.map(t => place([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? 'right' : 'left')),
+      ...ticks.y.map(t => place([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? 'right' : 'left')),
+    ]
+    for (const i of keepApart(tickLabels, 4, titles)) draw(tickLabels[i])
     ctx.fillStyle = pal.text
-    label([0, -1, sz * 1.7], (s.layout.xTitle || s.layout.priceTitle || 'PRICE $/M · LOG'))
-    label([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? 'right' : 'left')
-    label([sx * 1.04, 1.12, sz * 1.04], 'INTELLIGENCE 0-100', sx < 0 ? 'right' : 'left')
+    titles.forEach(draw)
     this.drawMarks(ctx, s, pal, P, true)
   }
 
@@ -309,7 +318,8 @@ export class Stage {
     ctx.beginPath(); ctx.moveTo(l, t); ctx.lineTo(l, t + h); ctx.lineTo(l + w, t + h); ctx.stroke()
     setFont(ctx, 11); spaced(ctx, '0.06em'); ctx.fillStyle = pal.muted
     ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    for (const v of xs) ctx.fillText((s.layout.xTick || fmtPriceTick)(v), px(v), t + h + 8)
+    const xl = xs.map(v => { const text = (s.layout.xTick || fmtPriceTick)(v), x = px(v), hw = ctx.measureText(text).width / 2; return { text, x, l: x - hw, r: x + hw, t: 0, b: 14 } })
+    for (const i of keepApart(xl)) ctx.fillText(xl[i].text, xl[i].x, t + h + 8)
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
     for (const v of ys) ctx.fillText(String(v), l - 8, py(v))
     ctx.fillStyle = pal.text; ctx.textAlign = 'center'; ctx.textBaseline = 'top'

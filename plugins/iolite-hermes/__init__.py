@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from . import decide, netio
+    from . import decide, netio, providers
 except ImportError:  # loaded as a bare module (tests, validator)
     import importlib.util
 
@@ -59,6 +59,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 
     decide = _load("iolite_decide", "decide.py")
     netio = _load("iolite_netio", "netio.py")
+    providers = _load("iolite_providers", "providers.py")
 
 logger = logging.getLogger(__name__)
 
@@ -273,6 +274,8 @@ def _clean_row(r: dict) -> dict:
     for k in _TEXT_FIELDS:
         if k in r:
             row[k] = _safe_text(r[k]) or None
+    if row.get("provider"):
+        row["provider"] = providers.display_provider(row["provider"])
     if "reasoning" in r:
         v = r["reasoning"]
         row["reasoning"] = v if isinstance(v, bool) else (_safe_text(v) or None)

@@ -25,6 +25,8 @@ from typing import Any, Dict, List, Optional
 HERE = Path(__file__).resolve().parent
 CATALOG = HERE.parent / "data" / "catalog.json"
 OUT = HERE.parent / "desktop-src" / "src" / "snapshot.json"
+sys.path.insert(0, str(HERE.parent))
+from providers import display_provider  # noqa: E402  one maker, one name (shared with /iolite)
 
 # Intelligence source tags. 0 = Epoch Capabilities Index; 1 = LMArena Bradley-Terry rating
 # mapped onto the ECI scale (the catalog's own fallback; see ATTRIBUTION.md).
@@ -62,7 +64,7 @@ def build(catalog: Dict[str, Any]) -> Dict[str, Any]:
             continue
         row: Dict[str, Any] = {
             "n": name.strip(),
-            "p": str(r.get("provider") or "").strip(),
+            "p": display_provider(r.get("provider")) or "",
             "s": str(r.get("slug") or name).strip(),
             "i": round(score, 2),
             "t": source_tag(intel.get("metric")),
