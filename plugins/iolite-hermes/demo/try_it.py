@@ -1,6 +1,6 @@
-"""Try Iolite in 30 seconds on the synthetic demo catalog. No Hermes, no network.
+"""Try Iolite in 30 seconds on the bundled catalog. No Hermes, no network.
 
-    python3 plugins/iolite-hermes/demo/try_it.py "shortlist 60 cheap"
+    python3 plugins/iolite-hermes/demo/try_it.py "shortlist"
 """
 import importlib.util
 import sys
@@ -17,7 +17,7 @@ class Ctx:
         self.commands = {}
 
     def get_config(self, key, default=None):
-        return {"catalog_path": str(HERE / "synthetic-catalog.json")}.get(key, default)
+        return {"measure_speed": False}.get(key, default)
 
     def register_tool(self, **kwargs):
         pass

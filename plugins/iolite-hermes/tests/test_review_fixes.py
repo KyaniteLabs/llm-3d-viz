@@ -66,7 +66,7 @@ def test_directory_missing_and_oversized_catalog_paths(tmp_path):
 
 def test_too_many_rows_are_refused(tmp_path, monkeypatch):
     monkeypatch.setattr(plugin, "MAX_ROWS", 3)
-    out = json.loads(_ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"][:4])}).tools["iolite_shortlist"]({}))
+    out = json.loads(_ctx({"catalog_path": _catalog(tmp_path, GOLDEN["catalogs"]["mixed"][:4])}).tools["iolite_shortlist"]({}))
     assert out["ok"] is False and "at most 3" in out["error"]
 
 
@@ -89,17 +89,17 @@ def test_a_slow_drip_catalog_url_hits_the_deadline(monkeypatch):
 # Row cleaning: no crash, no NaN, index kept to 0-100
 
 BAD_ROWS = [
-    {"model": "Str", "tps": "fast", "blended_price_per_M": "1", "aa_intelligence_index": "70"},
-    {"model": "Nan", "tps": float("nan"), "blended_price_per_M": 1.0, "aa_intelligence_index": 70},
-    {"model": "Inf", "tps": 100.0, "blended_price_per_M": float("inf"), "aa_intelligence_index": 70},
-    {"model": "Over", "tps": 100.0, "blended_price_per_M": 1.0, "aa_intelligence_index": 150},
-    {"model": "Bool", "tps": True, "blended_price_per_M": 1.0, "aa_intelligence_index": 70},
+    {"model": "Str", "tps": "fast", "blended_price_per_M": "1", "intelligence": "70"},
+    {"model": "Nan", "tps": float("nan"), "blended_price_per_M": 1.0, "intelligence": 70},
+    {"model": "Inf", "tps": 100.0, "blended_price_per_M": float("inf"), "intelligence": 70},
+    {"model": "Over", "tps": 100.0, "blended_price_per_M": 1.0, "intelligence": 150},
+    {"model": "Bool", "tps": True, "blended_price_per_M": 1.0, "intelligence": 70},
 ]
 
 
 def test_malformed_rows_are_unknown_not_fatal(tmp_path):
     p = tmp_path / "m.json"
-    p.write_text(json.dumps(list(GOLDEN["models"]) + BAD_ROWS))  # json allows NaN/Infinity
+    p.write_text(json.dumps(list(GOLDEN["catalogs"]["mixed"]) + BAD_ROWS))  # json allows NaN/Infinity
     c = _ctx({"catalog_path": str(p)})
     out = c.tools["iolite_shortlist"]({"floor": 0, "n": 25})
     assert "NaN" not in out and "Infinity" not in out
@@ -107,13 +107,13 @@ def test_malformed_rows_are_unknown_not_fatal(tmp_path):
     assert res["ok"] is True
     assert not {m["model"] for m in res["shortlist"]} & {r["model"] for r in BAD_ROWS}
     over = json.loads(c.tools["iolite_model"]({"query": "Over"}))["matches"][0]
-    assert over["aa_intelligence_index"] is None
+    assert over["intelligence"] is None
     nan = json.loads(c.tools["iolite_model"]({"query": "nan"}))["matches"][0]
     assert nan["tps"] is None
 
 
 def test_anchor_with_an_out_of_range_index_is_refused(tmp_path):
-    c = _ctx({"catalog_path": _catalog(tmp_path, list(GOLDEN["models"]) + BAD_ROWS[3:4])})
+    c = _ctx({"catalog_path": _catalog(tmp_path, list(GOLDEN["catalogs"]["mixed"]) + BAD_ROWS[3:4])})
     out = json.loads(c.tools["iolite_shortlist"]({"anchor_model": "Over"}))
     assert out["ok"] is False and "no valid score" in out["error"]
 
@@ -130,14 +130,14 @@ def test_pareto_sweep_matches_the_pairwise_definition(seed):
     rnd = random.Random(seed)
     rows = [{"model": f"m{i}", "tps": rnd.choice([rnd.uniform(0, 300), rnd.choice([10, 10.04, 50, 120])]),
              "blended_price_per_M": rnd.choice([rnd.uniform(0, 30), rnd.choice([0, 1, 1.004, 2.5])]),
-             "aa_intelligence_index": rnd.uniform(0, 100)} for i in range(rnd.randint(0, 120))]
+             "intelligence": rnd.uniform(0, 100)} for i in range(rnd.randint(0, 120))]
     assert decide.cost_speed_pareto(rows) == _pairwise(rows)
 
 
 def test_pareto_is_fast_on_a_big_catalog():
     rnd = random.Random(7)
     rows = [{"model": f"m{i}", "tps": rnd.uniform(1, 300), "blended_price_per_M": rnd.uniform(0, 30),
-             "aa_intelligence_index": 60} for i in range(20_000)]
+             "intelligence": 60} for i in range(20_000)]
     t0 = time.monotonic()
     decide.cost_speed_pareto(rows)
     assert time.monotonic() - t0 < 2
@@ -188,8 +188,8 @@ def test_locale_order_matches_node_on_random_names():
 # Slash command and formatting
 
 def test_slash_splits_on_any_whitespace_and_unquotes_model_names(tmp_path):
-    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])})
-    name = GOLDEN["models"][0]["model"]
+    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["catalogs"]["mixed"])})
+    name = GOLDEN["catalogs"]["mixed"][0]["model"]
     plain = c.commands["iolite"](f"model {name}")
     assert c.commands["iolite"](f"model\t{name}") == plain
     assert c.commands["iolite"](f'model "{name}"') == plain
@@ -198,7 +198,7 @@ def test_slash_splits_on_any_whitespace_and_unquotes_model_names(tmp_path):
 
 def test_substring_search_covers_slugs(tmp_path):
     rows = [{"model": "Readable Name", "slug": "vendor-xyz-large-2", "tps": 50, "blended_price_per_M": 1,
-             "aa_intelligence_index": 60}]
+             "intelligence": 60}]
     out = json.loads(_ctx({"catalog_path": _catalog(tmp_path, rows)}).tools["iolite_model"]({"query": "xyz-large"}))
     assert [m["model"] for m in out["matches"]] == ["Readable Name"]
 

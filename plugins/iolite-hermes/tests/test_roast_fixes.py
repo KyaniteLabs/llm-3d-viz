@@ -20,7 +20,7 @@ from test_hardening import GOLDEN, Resp, ROOT, _catalog, _ctx, plugin  # noqa: F
 from test_hardening import clean  # noqa: F401  (autouse fixture)
 
 netio = plugin.netio
-ROW = {"tps": 10, "blended_price_per_M": 1, "aa_intelligence_index": 60}
+ROW = {"tps": 10, "blended_price_per_M": 1, "intelligence": 60}
 
 
 def _row(model, **kw):
@@ -66,7 +66,7 @@ def test_plain_http_needs_an_explicit_opt_in(monkeypatch):
 
     def opener(req, timeout):
         seen.append(req.full_url)
-        return Resp(json.dumps(GOLDEN["models"]).encode())
+        return Resp(json.dumps(GOLDEN["catalogs"]["mixed"]).encode())
     monkeypatch.setattr(plugin, "_url_opener", opener)
     out = json.loads(_ctx({"catalog_url": "http://cat.example/m.json"}).tools["iolite_shortlist"]({}))
     assert out["ok"] is False and "https" in out["error"] and not seen
@@ -93,7 +93,7 @@ def test_permission_error_does_not_reveal_the_full_path(monkeypatch, tmp_path):
 def test_a_nan_provider_does_not_break_iolite_model(tmp_path):
     p = tmp_path / "m.json"
     p.write_text('[{"model": "x", "provider": NaN, "reasoning": NaN, "tps": 1, "blended_price_per_M": 1, '
-                 '"aa_intelligence_index": 60}]')
+                 '"intelligence": 60}]')
     c = _ctx({"catalog_path": str(p)})
     for tool, args in (("iolite_model", {"query": "x"}), ("iolite_shortlist", {"floor": 0})):
         out = c.tools[tool](args)
@@ -102,10 +102,12 @@ def test_a_nan_provider_does_not_break_iolite_model(tmp_path):
 
 def test_a_huge_json_integer_does_not_poison_the_catalog(tmp_path):
     p = tmp_path / "m.json"
-    p.write_text('[{"model": "Big", "tps": 1%s, "blended_price_per_M": 1, "aa_intelligence_index": 60},'
-                 ' {"model": "Ok", "tps": 5, "blended_price_per_M": 1, "aa_intelligence_index": 60}]' % ("0" * 400))
+    p.write_text('[{"model": "Big", "tps": 1%s, "blended_price_per_M": 1, "intelligence": 60},'
+                 ' {"model": "Ok", "tps": 5, "blended_price_per_M": 1, "intelligence": 60}]' % ("0" * 400))
     out = json.loads(_ctx({"catalog_path": str(p)}).tools["iolite_shortlist"]({"floor": 0}))
-    assert out["ok"] is True and [m["model"] for m in out["shortlist"]] == ["Ok"]
+    assert out["ok"] is True and sorted(m["model"] for m in out["shortlist"]) == ["Big", "Ok"]
+    big = next(m for m in out["shortlist"] if m["model"] == "Big")
+    assert big["tps"] is None  # the absurd number is dropped, the row is kept
 
 
 @pytest.mark.parametrize("name,arg", [("floor", 10 ** 400), ("bias", 10 ** 400), ("n", 10 ** 400)])
@@ -143,9 +145,9 @@ def test_row_text_cannot_forge_chat_output(tmp_path):
 # 4. Argument parsing
 
 def test_numeric_strings_are_coerced(tmp_path):
-    rows = [_row("A", aa_intelligence_index=55), _row("B", aa_intelligence_index=65, tps=20, blended_price_per_M=2)]
+    rows = [_row("A", intelligence=55), _row("B", intelligence=65, tps=20, blended_price_per_M=2)]
     out = _tool(tmp_path, rows, args={"floor": "60", "n": "1", "bias": "0.5"})
-    assert out["floor_applied"] == {"aa_intelligence_index": 60.0, "source": "user"}
+    assert out["floor_applied"] == {"intelligence": 60.0, "source": "user"}
     assert out["cost_speed_bias"] == 0.5 and [m["model"] for m in out["shortlist"]] == ["B"]
 
 
@@ -164,7 +166,7 @@ def test_only_the_last_unquoted_word_is_an_objective():
 
 
 def test_slash_keeps_a_model_name_that_ends_in_an_objective_word(tmp_path):
-    rows = [_row("Grok 4 Fast", aa_intelligence_index=61), _row("Grok 4", aa_intelligence_index=30)]
+    rows = [_row("Grok 4 Fast", intelligence=61), _row("Grok 4", intelligence=30)]
     c = _ctx({"catalog_path": _catalog(tmp_path, rows)})
     assert c.commands["iolite"]("shortlist Grok 4 Fast").startswith("Floor 61 (anchor), balanced")
 
@@ -180,13 +182,13 @@ def test_min_cost_returns_the_cheapest_model(tmp_path):
 # 6. Anchor identity
 
 def test_anchor_slug_picks_the_row_it_names(tmp_path):
-    rows = [_row("Twin", slug="twin-a", aa_intelligence_index=40), _row("Twin", slug="twin-b", aa_intelligence_index=80)]
+    rows = [_row("Twin", slug="twin-a", intelligence=40), _row("Twin", slug="twin-b", intelligence=80)]
     out = _tool(tmp_path, rows, args={"anchor_model": "twin-b"})
-    assert out["floor_applied"]["aa_intelligence_index"] == 80.0 and out["anchor"]["slug"] == "twin-b"
+    assert out["floor_applied"]["intelligence"] == 80.0 and out["anchor"]["slug"] == "twin-b"
 
 
 def test_an_ambiguous_anchor_name_is_refused(tmp_path):
-    rows = [_row("Twin", slug="twin-a", aa_intelligence_index=40), _row("Twin", slug="twin-b", aa_intelligence_index=80)]
+    rows = [_row("Twin", slug="twin-a", intelligence=40), _row("Twin", slug="twin-b", intelligence=80)]
     out = _tool(tmp_path, rows, args={"anchor_model": "Twin"})
     assert out["ok"] is False and "2 rows" in out["error"] and "twin-a" in out["error"]
 
@@ -261,12 +263,12 @@ def test_a_catalog_that_names_artificial_analysis_as_its_source_is_refused(tmp_p
 # 10. Empty results
 
 def test_empty_result_says_whether_data_is_missing_or_below_the_floor(tmp_path):
-    missing = _tool(tmp_path, [{"model": "A", "aa_intelligence_index": 90}], args={"floor": 0})
+    missing = _tool(tmp_path, [{"model": "A", "intelligence": 90}], args={"floor": 0})
     assert missing["refusals"] == ["no_scorable_models"] and missing["scorable_count"] == 0
     text = plugin._fmt_shortlist(missing)
     assert "no floor can help" in text and "lower floor" not in text
-    below = _tool(tmp_path, [_row("A", aa_intelligence_index=40)], args={"floor": 80})
-    assert below["refusals"] == ["no_pick_eligible_models"] and below["max_scorable_index"] == 40
+    below = _tool(tmp_path, [_row("A", intelligence=40)], args={"floor": 80})
+    assert below["refusals"] == ["no_pick_eligible_models"] and below["max_scorable_intelligence"] == 40
     assert "Try a floor at or below 40" in plugin._fmt_shortlist(below)
 
 
@@ -288,21 +290,13 @@ def test_no_artificial_analysis_fetch_path_exists(monkeypatch, tmp_path):
     monkeypatch.setattr(plugin.urllib.request, "urlopen", lambda *a, **k: pytest.fail("network"))
     monkeypatch.setattr(netio, "open_same_origin", lambda *a, **k: pytest.fail("network"))
     out = _tool(tmp_path, [_row("A")], args={"floor": 0})
-    assert out["ok"] is True and not any(k.startswith("aa_") and k != "aa_intelligence_index" for k in out)
+    assert out["ok"] is True and not any(k.startswith("aa_") and k != "intelligence" for k in out)
     assert "attribution" not in out
 
 
-# Demo catalog
-
-def test_the_demo_catalog_is_clearly_synthetic():
-    data = json.loads((ROOT / "demo" / "synthetic-catalog.json").read_text())
-    assert "SYNTHETIC" in data["note"]
-    for r in data["models"]:
-        assert r["synthetic"] is True and r["model"].startswith("Demo ")
-        assert "Artificial Analysis" not in json.dumps(r) and "synthetic" in r["source"].lower()
-
+# Demo script
 
 def test_the_demo_script_prints_the_readme_sample():
-    out = subprocess.run([sys.executable, str(ROOT / "demo" / "try_it.py"), "shortlist 60 cheap"],
+    out = subprocess.run([sys.executable, str(ROOT / "demo" / "try_it.py"), "shortlist"],
                          capture_output=True, text=True, timeout=30, check=True).stdout
     assert out in (ROOT / "README.md").read_text()

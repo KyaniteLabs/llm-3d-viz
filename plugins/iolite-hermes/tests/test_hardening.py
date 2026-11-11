@@ -130,7 +130,7 @@ def test_catalog_url_errors_are_plain(monkeypatch, make, needle):
 
 @pytest.mark.parametrize("args", [["floor", 50], "floor=50", 7])
 def test_non_dict_arguments(tmp_path, args):
-    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])})
+    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["catalogs"]["mixed"])})
     for tool in ("iolite_shortlist", "iolite_model"):
         assert json.loads(c.tools[tool](args))["ok"] is False
 
@@ -138,7 +138,7 @@ def test_non_dict_arguments(tmp_path, args):
 @pytest.mark.parametrize("bad", [{"objective": ["min_cost"]}, {"objective": {"x": 1}}, {"anchor_model": ["a"]},
                                  {"floor": "high"}, {"n": "lots"}, {"bias": "lean"}, {"floor": True}])
 def test_odd_argument_types_are_clear_errors(tmp_path, bad):
-    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])})
+    c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["catalogs"]["mixed"])})
     out = json.loads(c.tools["iolite_shortlist"](bad))
     assert out["ok"] is False
     key = next(iter(bad))
@@ -146,11 +146,11 @@ def test_odd_argument_types_are_clear_errors(tmp_path, bad):
 
 
 def test_one_huge_number_does_not_break_every_answer(tmp_path):
-    rows = list(GOLDEN["models"]) + [{"model": "Huge", "tps": 1e308, "blended_price_per_M": 1e307,
-                                      "aa_intelligence_index": 99}]
+    rows = list(GOLDEN["catalogs"]["mixed"]) + [{"model": "Huge", "tps": 1e308, "blended_price_per_M": 1e307,
+                                      "intelligence": 99}]
     c = _ctx({"catalog_path": _catalog(tmp_path, rows)})
     out = json.loads(c.tools["iolite_shortlist"]({"floor": 0}))
-    base = json.loads(_ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])}).tools["iolite_shortlist"]({"floor": 0}))
+    base = json.loads(_ctx({"catalog_path": _catalog(tmp_path, GOLDEN["catalogs"]["mixed"])}).tools["iolite_shortlist"]({"floor": 0}))
     assert out["ok"] is True and out["eligible_count"] == base["eligible_count"] + 1
 
 
@@ -171,15 +171,15 @@ def test_non_finite_floor_is_refused(word):
 
 def test_anchor_matches_case_insensitively_and_by_slug(tmp_path):
     rows = [{"model": "Tie Alpha", "slug": "tie-alpha", "tps": 10, "blended_price_per_M": 1,
-             "aa_intelligence_index": 61}]
+             "intelligence": 61}]
     c = _ctx({"catalog_path": _catalog(tmp_path, rows)})
     for anchor in ("Tie Alpha", "TIE ALPHA", "tie-alpha"):
         out = json.loads(c.tools["iolite_shortlist"]({"anchor_model": anchor}))
-        assert out["ok"] and out["floor_applied"] == {"aa_intelligence_index": 61.0, "source": "anchor"}
+        assert out["ok"] and out["floor_applied"] == {"intelligence": 61.0, "source": "anchor"}
 
 
 def test_slash_unquoted_anchor_end_to_end(tmp_path):
-    rows = [{"model": "Synthetic Model 07", "tps": 10, "blended_price_per_M": 1, "aa_intelligence_index": 40}]
+    rows = [{"model": "Synthetic Model 07", "tps": 10, "blended_price_per_M": 1, "intelligence": 40}]
     c = _ctx({"catalog_path": _catalog(tmp_path, rows)})
     out = c.commands["iolite"]("shortlist synthetic model 07")
     assert out.startswith("Floor 40 (anchor)")
@@ -188,7 +188,7 @@ def test_slash_unquoted_anchor_end_to_end(tmp_path):
 def test_model_without_index_prints_a_question_mark(tmp_path):
     c = _ctx({"catalog_path": _catalog(tmp_path, [{"model": "NoIdx", "provider": "P"}])})
     out = c.commands["iolite"]("model noidx")
-    assert "index ?" in out and "None" not in out
+    assert "intelligence ?" in out and "None" not in out
 
 
 # 7. Sources are named without tokens or home-directory paths.
@@ -198,7 +198,7 @@ def test_catalog_url_is_redacted_in_answers_and_status(monkeypatch):
 
     def opener(req, timeout):
         assert req.full_url == url  # the real URL is still what we fetch
-        return Resp(json.dumps(GOLDEN["models"]).encode())
+        return Resp(json.dumps(GOLDEN["catalogs"]["mixed"]).encode())
     monkeypatch.setattr(plugin, "_url_opener", opener)
     c = _ctx({"catalog_url": url})
     out = c.tools["iolite_shortlist"]({})
@@ -215,7 +215,7 @@ def test_catalog_url_with_user_and_password_is_refused(monkeypatch):
 
 
 def test_catalog_path_shows_only_the_file_name(tmp_path):
-    p = _catalog(tmp_path, GOLDEN["models"])
+    p = _catalog(tmp_path, GOLDEN["catalogs"]["mixed"])
     c = _ctx({"catalog_path": p})
     out = json.loads(c.tools["iolite_shortlist"]({}))
     assert out["catalog_source"] == "file:models.json"

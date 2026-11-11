@@ -36,7 +36,7 @@ class FullCtx:
 @pytest.fixture
 def ctx(tmp_path):
     p = tmp_path / "models.json"
-    p.write_text(json.dumps({"models": GOLDEN["models"]}))
+    p.write_text(json.dumps({"models": GOLDEN["catalogs"]["mixed"]}))
     c = FullCtx({"catalog_path": str(p)})
     plugin.register(c)
     plugin._cache.clear()
@@ -147,8 +147,18 @@ def test_settings_fall_back_to_config_without_ctx(monkeypatch):
     assert plugin._cfg("cache_minutes") == plugin.DEFAULTS["cache_minutes"]
 
 
-def test_missing_catalog_error_names_the_real_config_path(monkeypatch):
-    c = FullCtx({})
+def test_bad_catalog_path_error_names_the_setting_not_the_directory(monkeypatch):
+    c = FullCtx({"catalog_path": "/nonexistent/iolite-catalog.json"})
     plugin.register(c)
-    err = json.loads(c.tools["iolite_shortlist"]({}))["error"]
-    assert "plugins.entries.iolite.settings" in err
+    out = json.loads(c.tools["iolite_shortlist"]({}))
+    assert out["ok"] is False and "catalog_path" in out["error"]
+    assert "/nonexistent" not in out["error"]
+
+
+def test_fresh_install_answers_from_the_bundled_catalog(monkeypatch):
+    c = FullCtx({"measure_speed": False})
+    plugin.register(c)
+    out = json.loads(c.tools["iolite_shortlist"]({}))
+    assert out["ok"] is True and len(out["shortlist"]) == 3
+    assert out["mode"] == "cost" and out["catalog_generated"]
+    assert "bundled" in c.commands["iolite"]("status")

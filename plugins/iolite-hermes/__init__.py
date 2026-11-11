@@ -8,15 +8,20 @@ Slash command
 Skill
   iolite:iolite walks the agent through floor, objective and the answer
 
-Data source (no default; you choose it). First one set wins:
+Data source. First one set wins:
   catalog_path       a local JSON file: a list of rows or {"models": [...]}
   catalog_url        an https URL of an Iolite /api/v1/models.json you are allowed to read,
                      e.g. your own private instance. Fetched with a plain GET, cached in
                      memory. Plain http needs allow_http: true.
+  (neither)          the catalog bundled in data/catalog.json: Epoch AI's Capabilities Index
+                     and the LMArena leaderboard for intelligence, LiteLLM's price file for
+                     cost. Licences and credits are in ATTRIBUTION.md.
 
-The plugin ships no catalog and fetches nothing else. Rows whose source or
-provenance names Artificial Analysis are refused. Every public path returns a
-JSON string (or, for the slash command, text) and never raises into Hermes.
+Speed has no public source. When measure_speed is on (the default) a post_api_request
+hook records tokens per second of your own model calls in a small JSON file in the plugin
+data directory, and answers use it, labelled as measured locally. Nothing is uploaded.
+Rows whose source or provenance names Artificial Analysis are refused. Every public path
+returns a JSON string (or, for the slash command, text) and never raises into Hermes.
 """
 
 from __future__ import annotations
@@ -28,7 +33,9 @@ import logging
 import os
 import re
 import shlex
+import statistics
 import stat
+import tempfile
 import threading
 import time
 import unicodedata
@@ -55,13 +62,14 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.2.4"
+VERSION = "0.3.0"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
     "allow_http": False,
     "cache_minutes": 60,
     "timeout_seconds": 15,
+    "measure_speed": True,
 }
 OBJECTIVES = {"min_cost": -1.0, "max_speed": 1.0, "balanced": None}
 MAX_N = 25
@@ -88,8 +96,9 @@ SHORTLIST_SCHEMA = {
     "name": "iolite_shortlist",
     "description": (
         "Shortlist LLMs that clear an intelligence floor, then trade cost against speed. "
-        "Models below the floor or missing price, speed or index are excluded; the rest are "
-        "reduced to the cost x speed Pareto front and ranked by objective. Give floor (0-100, "
+        "Models below the floor or missing price or score are excluded; the rest are reduced to the "
+        "cost x speed Pareto front (when every candidate has a locally measured speed) or to the "
+        "cost x intelligence front (speed not measured yet) and ranked by objective. Give floor (0-100, "
         "an intelligence score on a 0-100 scale; the source is up to the catalog) or anchor_model "
         "(use that model's score as the floor). objective: min_cost, max_speed or balanced (bias -1..1)."
     ),
@@ -108,7 +117,7 @@ SHORTLIST_SCHEMA = {
 
 MODEL_SCHEMA = {
     "name": "iolite_model",
-    "description": "Look up one model in the configured Iolite catalog by name or slug (case-insensitive; substring match if no exact hit).",
+    "description": "Look up one model in the Iolite catalog (bundled unless catalog_path or catalog_url is set) by name or slug (case-insensitive; substring match if no exact hit).",
     "parameters": {
         "type": "object",
         "properties": {"query": {"type": "string", "description": "A model name or slug, e.g. 'gpt-5' or 'Claude Opus 5.5'."}},
@@ -118,12 +127,14 @@ MODEL_SCHEMA = {
 
 
 _FIELDS = ("model", "slug", "provider", "openness", "reasoning", "context_length", "tps", "ttft",
-           "blended_price_per_M", "aa_intelligence_index", "data_date",
+           "blended_price_per_M", "intelligence", "intelligence_metric", "intelligence_as_of",
+           "arena_rating", "price_provider", "tps_note", "data_date",
            "source", "source_url", "license", "attribution")
 _TEXT_FIELDS = ("model", "slug", "provider", "openness", "data_date", "source", "license", "attribution")
 _NUMERIC = ("context_length", "tps", "ttft", "blended_price_per_M")
 _PROVENANCE_KEYS = ("source", "sources", "source_url", "provenance", "attribution", "data_source",
-                    "license", "licence", "origin", "citation")
+                    "license", "licence", "origin", "citation", "intelligence", "price", "arena")
+BUNDLED_CATALOG = Path(__file__).with_name("data") / "catalog.json"
 
 
 def _settings_from_config() -> Dict[str, Any]:
@@ -261,17 +272,48 @@ def _clean_row(r: dict) -> dict:
     url = r.get("source_url")
     if isinstance(url, str) and url.strip().casefold().startswith(("https://", "http://")):
         row["source_url"] = _safe_text(url.strip()) or None
+    price = r.get("price") if isinstance(r.get("price"), dict) else {}
+    intel = r.get("intelligence") if isinstance(r.get("intelligence"), dict) else {}
+    arena = r.get("arena") if isinstance(r.get("arena"), dict) else {}
     for k in _NUMERIC:
         if k in r:
             row[k] = netio._num(r[k])
-    if "aa_intelligence_index" in r:
-        row["aa_intelligence_index"] = netio.index_or_none(r["aa_intelligence_index"])
+    if "blended_price_per_M" not in row and price:
+        row["blended_price_per_M"] = netio._num(price.get("blended_per_M"))
+    # Intelligence: the nested catalog block, the flat `intelligence` number, or the
+    # deprecated flat `aa_intelligence_index` alias, in that order.
+    if intel:
+        row["intelligence"] = netio.index_or_none(intel.get("value"))
+    elif "intelligence" in r:
+        row["intelligence"] = netio.index_or_none(r["intelligence"])
+    elif "aa_intelligence_index" in r:
+        row["intelligence"] = netio.index_or_none(r["aa_intelligence_index"])
+    credits: List[str] = []
+    if intel:
+        row["intelligence_metric"] = _safe_text(intel.get("metric"), 80) or None
+        row["intelligence_as_of"] = _safe_text(intel.get("as_of"), 20) or None
+        credits.append(_safe_text(intel.get("attribution"), 600))
+    if arena:
+        row["arena_rating"] = netio._num(arena.get("rating"))
+        credits.append(_safe_text(arena.get("attribution"), 600))
+    if price:
+        row["price_provider"] = _safe_text(price.get("litellm_provider"), 60) or None
+        src = _safe_text(price.get("source"), 120)
+        lic = _safe_text(price.get("license"), 20)
+        if src:
+            credits.append(f"Prices: {src}" + (f", {lic} licence" if lic else "") + ".")
+        key = price.get("litellm_key")
+        if isinstance(key, str):
+            row["_price_key"] = key
+    row["_credits"] = [c for c in credits if c]
     return row
 
 
 class _Rows(list):
-    """Catalog rows, plus how many were refused for naming Artificial Analysis."""
+    """Catalog rows, plus how many were refused for naming Artificial Analysis and the
+    catalog's own header (when it has one)."""
     rejected = 0
+    meta: Dict[str, str] = {}
 
 
 def _rows(payload: Any) -> List[dict]:
@@ -284,6 +326,11 @@ def _rows(payload: Any) -> List[dict]:
     if len(rows) > MAX_ROWS:
         raise CatalogError(f"catalog has {len(rows)} rows; Iolite reads at most {MAX_ROWS}")
     out = _Rows()
+    out.meta = {}
+    if isinstance(payload, dict):
+        for k in ("generated", "schema"):
+            if isinstance(payload.get(k), str):
+                out.meta[k] = _safe_text(payload[k], 40)
     for r in rows:
         if not isinstance(r, dict) or not isinstance(r.get("model"), str):
             continue
@@ -418,9 +465,34 @@ def _parse_json(body: bytes, what: str) -> Any:
         raise CatalogError(f"{what} is not valid JSON") from None
 
 
+_bundled_cache: Dict[Tuple[int, int], List[dict]] = {}
+
+
+def _bundled_catalog() -> Tuple[List[dict], str]:
+    """The catalog shipped in data/catalog.json, parsed once per file version."""
+    try:
+        st = BUNDLED_CATALOG.stat()
+    except OSError:
+        raise CatalogError("the bundled catalog (data/catalog.json) is missing; reinstall the plugin, "
+                           "or set catalog_path or catalog_url") from None
+    key = (st.st_mtime_ns, st.st_size)
+    rows = _bundled_cache.get(key)
+    if rows is None:
+        rows = _rows(_parse_json(_read_catalog_file(str(BUNDLED_CATALOG)), "the bundled catalog"))
+        _bundled_cache.clear()
+        _bundled_cache[key] = rows
+    return rows, "bundled catalog"
+
+
 def load_catalog() -> Tuple[List[dict], str]:
-    """Return (rows, source label). Raises CatalogError when nothing is configured
-    or the source cannot be read; its message is always safe to show."""
+    """Return (rows, source label). catalog_path wins, then catalog_url, else the bundled
+    catalog. Raises CatalogError when the source cannot be read; its message is always safe
+    to show. Rows carry any locally measured speed (see _with_speed)."""
+    rows, label = _load_base_catalog()
+    return _with_speed(rows), label
+
+
+def _load_base_catalog() -> Tuple[List[dict], str]:
     path = str(_cfg("catalog_path") or "").strip()
     url = str(_cfg("catalog_url") or "").strip()
     if path:
@@ -428,11 +500,7 @@ def load_catalog() -> Tuple[List[dict], str]:
         payload = _parse_json(_read_catalog_file(path), f"catalog_path {name}")
         return _rows(payload), _source_label(path=path)
     if not url:
-        raise CatalogError(
-            "No catalog configured. Under plugins.entries.iolite.settings, set catalog_path "
-            "(a local JSON file) or catalog_url (an https Iolite /api/v1/models.json you may use). "
-            "The repository's demo/synthetic-catalog.json is invented data you can try first."
-        )
+        return _bundled_catalog()
     label = _redact_url(url)  # validates before any request exists
 
     def fetch():
@@ -467,6 +535,178 @@ def load_catalog() -> Tuple[List[dict], str]:
             raise CatalogError(f"catalog_url {label} did not return JSON") from None
         return _rows(payload), label
     return _cached_fetch(hashlib.sha256(url.encode()).hexdigest(), _num_cfg("cache_minutes") * 60, fetch)
+
+
+# ----------------------------------------------------------------------------- local speed
+#
+# No public source gives lawful per-model speed numbers, so Iolite measures your own: a
+# post_api_request hook keeps a rolling median of output tokens per second per model in a
+# small JSON file in the plugin data directory. It never leaves the machine.
+
+SPEED_FILE = "speed.json"
+SPEED_WINDOW = 25        # samples kept per model
+SPEED_MIN_SAMPLES = 3    # a speed is shown only after this many calls
+SPEED_MIN_TOKENS = 20    # shorter replies say little about throughput
+SPEED_MIN_SECONDS = 0.25
+SPEED_MAX_TPS = 5000.0   # above this the timing is wrong, not the model fast
+SPEED_MAX_MODELS = 500
+SPEED_MAX_BYTES = 1024 * 1024
+SPEED_LABEL = "measured locally on this machine, {date}; not comparable across machines"
+_speed_lock = threading.Lock()
+
+
+def _truthy_cfg(key: str) -> bool:
+    v = _cfg(key)
+    if isinstance(v, str):
+        return v.strip().casefold() not in ("false", "no", "0", "off", "")
+    return bool(v)
+
+
+def _measure_speed_on() -> bool:
+    return _truthy_cfg("measure_speed")
+
+
+def _data_dir() -> Path:
+    """The plugin's profile-scoped data directory: ctx.state.data_dir when Hermes gave us a
+    context, else $HERMES_HOME/plugin-data/iolite, else ~/.hermes/plugin-data/iolite."""
+    try:
+        d = getattr(getattr(_ctx, "state", None), "data_dir", None) if _ctx is not None else None
+        if d:
+            return Path(d)
+    except Exception:
+        pass
+    home = os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes")
+    return Path(home) / "plugin-data" / "iolite"
+
+
+def _speed_key(name: Any) -> str:
+    """A model id reduced to lowercase letters and digits, provider prefix and trailing
+    date dropped: 'anthropic/claude-opus-4.6' and 'claude-opus-4-6' both give 'claudeopus46'."""
+    if not isinstance(name, str):
+        return ""
+    ident = name.strip().split("/")[-1]
+    ident = re.sub(r"[-@_](?:\d{8}|\d{4}-\d{2}-\d{2})$", "", ident)
+    return re.sub(r"[^a-z0-9]", "", ident.casefold())
+
+
+def _read_speeds() -> Dict[str, dict]:
+    """The recorded speeds: {key: {"model", "median_tps", "n", "updated"}}. Anything
+    unreadable or malformed is an empty record; this never raises."""
+    try:
+        path = _data_dir() / SPEED_FILE
+        st = path.stat()
+        if not stat.S_ISREG(st.st_mode) or st.st_size > SPEED_MAX_BYTES:
+            return {}
+        data = json.loads(path.read_bytes())
+        models = data.get("models") if isinstance(data, dict) else None
+        return models if isinstance(models, dict) else {}
+    except Exception:
+        return {}
+
+
+def _write_speeds(models: Dict[str, dict]) -> None:
+    d = _data_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".speed-", suffix=".tmp", dir=d)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump({"version": 1, "note": "tokens per second of your own calls, measured locally; "
+                       "never uploaded", "models": models}, fh, allow_nan=False)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, d / SPEED_FILE)  # atomic: a reader sees the old file or the new one
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _tokens_per_second(api_duration: Any, started_at: Any, first_chunk_at: Any, usage: Any) -> Optional[float]:
+    """Output tokens / generation seconds, or None when the call says too little. When the
+    call streamed, time to the first chunk is not generation time and is left out."""
+    if not isinstance(usage, dict):
+        return None
+    tokens = netio._num(usage.get("output_tokens"))
+    seconds = netio._num(api_duration)
+    if tokens is None or seconds is None or tokens < SPEED_MIN_TOKENS:
+        return None
+    start, first = netio._num(started_at), netio._num(first_chunk_at)
+    if start is not None and first is not None and 0 <= first - start < seconds:
+        seconds -= first - start
+    if seconds < SPEED_MIN_SECONDS:
+        return None
+    tps = tokens / seconds
+    return tps if 0 < tps <= SPEED_MAX_TPS else None
+
+
+def _on_post_api_request(model: Any = None, api_duration: Any = None, started_at: Any = None,
+                         first_chunk_at: Any = None, usage: Any = None, **_kw) -> None:
+    """Hermes post_api_request hook. Records one speed sample; never raises into Hermes."""
+    try:
+        if not _measure_speed_on():
+            return
+        key = _speed_key(model)
+        tps = _tokens_per_second(api_duration, started_at, first_chunk_at, usage)
+        if not key or tps is None:
+            return
+        with _speed_lock:
+            models = _read_speeds()
+            entry = models.get(key) if isinstance(models.get(key), dict) else {}
+            samples = [x for x in (entry.get("samples") or []) if netio._num(x) is not None]
+            samples = (samples + [round(tps, 2)])[-SPEED_WINDOW:]
+            models[key] = {"model": _safe_text(str(model), 80), "samples": samples,
+                           "median_tps": round(statistics.median(samples), 2), "n": len(samples),
+                           "updated": time.strftime("%Y-%m-%d")}
+            if len(models) > SPEED_MAX_MODELS:
+                for old in sorted(models, key=lambda k: str(models[k].get("updated", "")))[:len(models) - SPEED_MAX_MODELS]:
+                    models.pop(old, None)
+            _write_speeds(models)
+    except Exception:
+        logger.debug("iolite: could not record a speed sample", exc_info=True)
+
+
+def _with_speed(rows: List[dict]) -> List[dict]:
+    """Rows with locally measured speed filled in where the catalog has none. The catalog's
+    own rows are never changed; matched rows are copies. A model matches on its slug, name or
+    price-file id, whole and exact, and needs SPEED_MIN_SAMPLES calls."""
+    try:
+        if not _measure_speed_on():
+            return rows
+        speeds = {k: v for k, v in _read_speeds().items()
+                  if isinstance(v, dict) and netio._num(v.get("median_tps")) is not None
+                  and (netio._num(v.get("n")) or 0) >= SPEED_MIN_SAMPLES}
+        if not speeds:
+            return rows
+        out = _Rows()
+        out.rejected, out.meta = getattr(rows, "rejected", 0), getattr(rows, "meta", {})
+        for r in rows:
+            hit = None
+            if r.get("tps") is None:
+                for cand in (r.get("slug"), r.get("model"), r.get("_price_key")):
+                    k = _speed_key(cand)
+                    if k and k in speeds:
+                        hit = speeds[k]
+                        break
+            if hit is None:
+                out.append(r)
+            else:
+                out.append({**r, "tps": float(hit["median_tps"]),
+                            "tps_note": SPEED_LABEL.format(date=_safe_text(str(hit.get("updated", "")), 10) or "unknown date")})
+        return out
+    except Exception:
+        logger.debug("iolite: could not merge local speeds", exc_info=True)
+        return rows
+
+
+def _data_credits(rows: List[dict]) -> List[str]:
+    """The distinct credit lines of the rows being shown (the licences ask for them)."""
+    seen: List[str] = []
+    for m in rows:
+        for c in m.get("_credits") or ():
+            if c and c not in seen:
+                seen.append(c)
+    return seen[:6]
 
 
 def _summary(m: dict) -> dict:
@@ -550,33 +790,43 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
         floor, floor_source = decide.DEFAULT_INTELLIGENCE_FLOOR, "default"
 
     out = decide.shortlist_from_decide(rows, floor, bias, n)
+    mode = out["mode"]
     reason = decide.bias_reason(bias)
-    scorable = [r for r in rows if decide.is_scorable(r)]
+    scorable = [r for r in rows if decide.is_scorable(r, need_speed=False)]
     refusals: List[str] = []
     if not out["eligible"]:
         refusals = ["no_pick_eligible_models" if scorable else "no_scorable_models"]
     res: Dict[str, Any] = {
         "ok": True,
         "schema_version": "1.0",
-        "floor_applied": {"aa_intelligence_index": floor, "source": floor_source},
+        "floor_applied": {"intelligence": floor, "source": floor_source},
+        "mode": mode,
+        "speed": ("measured locally on this machine; not comparable across machines"
+                  if mode == "cost_speed" else "not measured yet"),
         "objective": objective,
         "cost_speed_bias": bias,
         "eligible_count": len(out["eligible"]),
         "pareto_count": len(out["pareto"]),
+        "front": "cost x speed" if mode == "cost_speed" else "cost x intelligence",
         "scorable_count": len(scorable),
-        "shortlist": [dict(rank=i + 1, reasons=["on_pareto", reason], **_summary(m))
+        "shortlist": [dict(rank=i + 1, reasons=["on_pareto" if mode == "cost_speed" else "on_cost_front", reason],
+                           **_summary(m))
                       for i, m in enumerate(out["shortlist"])],
         "refusals": refusals,
         "catalog_snapshot_id": decide.catalog_snapshot_id(rows),
         "catalog_source": source,
     }
     if scorable:
-        res["max_scorable_index"] = max(r["aa_intelligence_index"] for r in scorable)
+        res["max_scorable_intelligence"] = max(decide.intelligence_of(r) for r in scorable)
     if anchor_row is not None:
         res["anchor"] = {"model": anchor_row.get("model"), "slug": anchor_row.get("slug")}
     rejected = getattr(rows, "rejected", 0)
     if rejected:
         res["rows_refused_for_provenance"] = rejected
+    res["data_credits"] = _data_credits(out["shortlist"])
+    snap = getattr(rows, "meta", {}).get("generated")
+    if snap:
+        res["catalog_generated"] = snap
     return _dumps(res)
 
 
@@ -595,7 +845,8 @@ def iolite_model(args: Optional[dict] = None, **_kw) -> str:
         hits = exact or [r for r in rows
                          if q in str(r.get("model", "")).casefold() or q in str(r.get("slug", "")).casefold()]
         res: Dict[str, Any] = {"ok": True, "matches": [_summary(r) for r in hits[:10]],
-                               "total_matches": len(hits), "catalog_source": source}
+                               "total_matches": len(hits), "catalog_source": source,
+                               "data_credits": _data_credits(hits[:10])}
         if getattr(rows, "rejected", 0):
             res["rows_refused_for_provenance"] = rows.rejected
         return _dumps(res)
@@ -607,13 +858,15 @@ def iolite_model(args: Optional[dict] = None, **_kw) -> str:
 _HELP = """/iolite picks a model by intelligence floor, then cost and speed.
 
   /iolite shortlist [floor|anchor model] [cheap|fast|balanced] [n=3] [bias=0]
+      Works on the bundled catalog with no setup. Until it has measured your model speeds,
+      "fast" favours the smarter model, since speed is not measured yet.
       e.g. /iolite shortlist 60 cheap
            /iolite shortlist Claude Opus 5.5 fast n=5
            /iolite shortlist "Grok 4 Fast" cheap
       A lone number is the floor; any other words name the anchor model. Only the
       last word can be an objective, and a quoted name is never read as one.
   /iolite model <name or slug>
-  /iolite status     which catalog source is set, with no network call
+  /iolite status     catalog source, snapshot date, data credits and speed measuring, no network call
   /iolite help"""
 
 _OBJECTIVE_WORDS = {"cheap": "min_cost", "cheapest": "min_cost", "min_cost": "min_cost",
@@ -697,6 +950,20 @@ def _credit_lines(rows: List[dict]) -> str:
     return "".join(f"\nData: {_md(v)}" for v in seen[:5])
 
 
+def _metric_tag(m: dict) -> str:
+    metric = m.get("intelligence_metric") or ""
+    return " (ECI)" if metric.startswith("Epoch") else " (LMArena)" if metric.startswith("LMArena") else ""
+
+
+def _speed_text(m: dict) -> str:
+    return f"{_num(m.get('tps'), 'tok/s')} (local)" if m.get("tps") is not None else "speed: not measured yet"
+
+
+def _speed_footer(rows: List[dict]) -> str:
+    notes = sorted({m["tps_note"] for m in rows if m.get("tps_note")})
+    return "".join(f"\nSpeed {_md(n)}." for n in notes[:2])
+
+
 def _provenance_line(res: dict) -> str:
     n = res.get("rows_refused_for_provenance")
     return f"\n{n} catalog rows were refused: their source names Artificial Analysis." if n else ""
@@ -706,23 +973,29 @@ def _fmt_shortlist(res: dict) -> str:
     if not res.get("ok"):
         return f"Iolite: {res.get('error')}"
     fl = res["floor_applied"]
-    head = (f"Floor {fl['aa_intelligence_index']:g} ({fl['source']}), {res['objective']}: "
-            f"{res['eligible_count']} models clear it, {res['pareto_count']} on the cost x speed front.")
+    head = (f"Floor {fl['intelligence']:g} ({fl['source']}), {res['objective']}: "
+            f"{res['eligible_count']} models clear it, {res['pareto_count']} on the {res.get('front', 'cost x speed')} front.")
+    if res.get("mode") == "cost":
+        head += "\nSpeed: not measured yet, so these are ranked on cost and intelligence."
+        if res.get("objective") == "max_speed" or (res.get("cost_speed_bias") or 0) > 0.25:
+            head += " 'Fast' favours the smarter model here."
     if not res["shortlist"]:
         if not res.get("scorable_count"):
-            advice = ("No row in this catalog has price, speed and score all known, so no floor can help. "
+            advice = ("No row in this catalog has both a price and a score, so no floor can help. "
                       "Add the missing fields to the catalog, or point Iolite at one that has them.")
         else:
-            top = res.get("max_scorable_index")
-            advice = (f"{res['scorable_count']} models have price, speed and score, but none reaches the floor"
+            top = res.get("max_scorable_intelligence")
+            advice = (f"{res['scorable_count']} models have a price and a score, but none reaches the floor"
                       + (f" (the highest score is {top:g}). Try a floor at or below {top:g}." if top is not None else "."))
         return head + "\n" + advice + _provenance_line(res)
     lines = [head]
     for m in res["shortlist"]:
-        lines.append(f"{m['rank']}. {_md(m.get('model'))} ({_md(m.get('provider') or '?')}): index "
-                     f"{m.get('aa_intelligence_index')}, {_money(m.get('blended_price_per_M'))}, "
-                     f"{_num(m.get('tps'), 'tok/s')}")
-    return "\n".join(lines) + _credit_lines(res["shortlist"]) + _provenance_line(res)
+        lines.append(f"{m['rank']}. {_md(m.get('model'))} ({_md(m.get('provider') or '?')}): intelligence "
+                     f"{m.get('intelligence')}{_metric_tag(m)}, {_money(m.get('blended_price_per_M'))}, "
+                     f"{_speed_text(m)}")
+    credits = "".join(f"\n{_md(c)}" for c in res.get("data_credits") or [])
+    return ("\n".join(lines) + _speed_footer(res["shortlist"]) + (credits or _credit_lines(res["shortlist"]))
+            + _provenance_line(res))
 
 
 def _fmt_model(res: dict) -> str:
@@ -730,27 +1003,48 @@ def _fmt_model(res: dict) -> str:
         return f"Iolite: {res.get('error')}"
     if not res["matches"]:
         return "No model matches that name." + _provenance_line(res)
-    lines = [f"{_md(m.get('model'))} ({_md(m.get('provider') or '?')}): index "
-             f"{m.get('aa_intelligence_index') if m.get('aa_intelligence_index') is not None else '?'}, "
-             f"{_money(m.get('blended_price_per_M'))}, {_num(m.get('tps'), 'tok/s')}, "
+    lines = [f"{_md(m.get('model'))} ({_md(m.get('provider') or '?')}): intelligence "
+             f"{m.get('intelligence') if m.get('intelligence') is not None else '?'}{_metric_tag(m)}, "
+             f"{_money(m.get('blended_price_per_M'))}, {_speed_text(m)}, "
              f"context {_num(m.get('context_length'), 'tokens')}"
+             + (f", arena {m['arena_rating']:g} (Bradley-Terry)" if m.get("arena_rating") is not None else "")
              for m in res["matches"]]
     more = res["total_matches"] - len(res["matches"])
     if more > 0:
         lines.append(f"...and {more} more. Use a longer name.")
-    return "\n".join(lines) + _credit_lines(res["matches"]) + _provenance_line(res)
+    credits = "".join(f"\n{_md(c)}" for c in res.get("data_credits") or [])
+    return ("\n".join(lines) + _speed_footer(res["matches"]) + (credits or _credit_lines(res["matches"]))
+            + _provenance_line(res))
 
 
 def _status() -> str:
     path = str(_cfg("catalog_path") or "").strip()
     url = str(_cfg("catalog_url") or "").strip()
+    lines = [f"Iolite {VERSION}"]
     if path:
-        src = f"catalog_path ({_source_label(path=path)})"
+        lines.append(f"Source: catalog_path ({_source_label(path=path)})")
     elif url:
-        src = f"catalog_url {_source_label(url=url)}"
+        lines.append(f"Source: catalog_url {_source_label(url=url)}")
     else:
-        src = "none. Set catalog_path or catalog_url"
-    return f"Iolite {VERSION}\nSource: {src}"
+        lines.append("Source: the bundled catalog (no catalog_path or catalog_url set)")
+    try:
+        rows, _ = _load_base_catalog() if (path or url) else _bundled_catalog()
+        n_both = sum(1 for r in rows if decide.is_scorable(r, need_speed=False))
+        gen = getattr(rows, "meta", {}).get("generated")
+        lines.append(f"Snapshot: {gen or 'date not stated'}; {len(rows)} models, {n_both} with price and score")
+        if not (path or url):
+            lines.append("Credits: intelligence from Epoch AI's Capabilities Index (CC BY) and the LMArena "
+                         "leaderboard dataset (CC BY 4.0); prices from LiteLLM (MIT). Full notices: ATTRIBUTION.md")
+    except Exception as exc:
+        lines.append(f"Snapshot: could not be read ({_safe_msg(exc)})")
+    if _measure_speed_on():
+        n = sum(1 for v in _read_speeds().values() if isinstance(v, dict)
+                and (netio._num(v.get("n")) or 0) >= SPEED_MIN_SAMPLES)
+        lines.append("Speed: measuring tokens per second of your own calls, kept on this machine, never uploaded; "
+                     + (f"{n} models measured so far." if n else "none measured yet."))
+    else:
+        lines.append("Speed: measure_speed is off, so speed is not measured and rows show speed not measured yet.")
+    return "\n".join(lines)
 
 
 def _whole_name_is_in_catalog(name: str) -> bool:
@@ -814,11 +1108,17 @@ def register(ctx) -> None:
                       handler=iolite_shortlist, description=SHORTLIST_SCHEMA["description"], emoji="🧭")
     ctx.register_tool(name="iolite_model", toolset="iolite", schema=MODEL_SCHEMA,
                       handler=iolite_model, description=MODEL_SCHEMA["description"], emoji="🧭")
+    register_hook = getattr(ctx, "register_hook", None)
+    if callable(register_hook):
+        try:
+            register_hook("post_api_request", _on_post_api_request)
+        except Exception:
+            logger.debug("iolite: register_hook failed", exc_info=True)
     register_command = getattr(ctx, "register_command", None)
     if callable(register_command):
         try:
             register_command("iolite", handler=_slash,
-                             description="Iolite: shortlist LLMs by intelligence floor, then cost and speed.",
+                             description="Iolite: shortlist LLMs by intelligence floor, then cost (and speed once measured).",
                              args_hint="shortlist [floor|model] [cheap|fast|balanced] [n=3] | model <name> | status")
         except Exception:
             logger.debug("iolite: register_command failed", exc_info=True)

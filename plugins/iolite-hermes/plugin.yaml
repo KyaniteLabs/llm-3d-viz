@@ -1,40 +1,45 @@
 name: iolite
 label: Iolite
-version: "0.2.4"
+version: "0.3.0"
 manifest_version: 2
 api_version: 1
 description: >
-  Pick an LLM that is smart enough, then cheapest or fastest, in one tool
-  call. Set an intelligence floor (or name an anchor model), drop everything
-  below it or missing price, speed or score, keep the cost x speed Pareto
-  front, and rank it toward cheaper, faster or balanced. Two tools,
-  iolite_shortlist and iolite_model, a /iolite slash command and a bundled
-  skill. The decision logic is a port of the observatory's own, checked by a
-  golden file. Disclosure: the plugin ships no model data and has no default
-  source; it reads only what you configure, first match wins: the
-  catalog_path file (no network) or the catalog_url (one GET, https unless you
-  set allow_http, sent as written with no credentials added; a user:password@
-  URL is refused and a ?token= query is sent as written; cached in memory, 8
-  MB cap, a deadline on the whole response, same-origin redirects only).
-  Rows whose source or provenance names Artificial Analysis are refused.
-  Benchmark and price data carry their providers' terms, so use a catalog you
-  may use. No hooks and no secrets read; the plugin writes nothing. Hermes
-  keeps tool results in session history like any tool output.
+  Pick an LLM that is smart enough, then cheapest, in one tool call, from real
+  data that ships inside the plugin, so a fresh install gives a real answer
+  with no setup and no network. Set an intelligence floor (or name an anchor
+  model), drop everything below it or without a price, keep the cost x
+  intelligence front, and rank it toward cheaper, smarter or balanced. Two
+  tools, iolite_shortlist and iolite_model, a /iolite slash command and a
+  bundled skill. Bundled data, each source with its licence and credit in
+  ATTRIBUTION.md and in every answer: Epoch AI Benchmarking Hub ECI (CC BY),
+  LMArena ratings (CC BY 4.0, Bradley-Terry), LiteLLM prices (MIT). Speed has
+  no lawful public source, so Iolite measures it on your own machine: a
+  post_api_request hook keeps a rolling median of tokens per second per model
+  in speed.json in the plugin data directory, labelled as measured locally and
+  not comparable across machines. Nothing is uploaded; set measure_speed false
+  to turn it off. Disclosure: no network unless you set catalog_url (one GET,
+  https unless you set allow_http, sent as written with no credentials added;
+  a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on
+  the whole response, same-origin redirects only). catalog_path or catalog_url
+  replace the bundled data; rows whose source or provenance names Artificial
+  Analysis are refused. No secrets read. Hermes keeps tool results in session
+  history like any tool output.
 author: KyaniteLabs
 license: MIT
 requires_hermes: ">=0.23.0"
-tags: [models, routing, cost, latency, pareto]
+tags: [models, routing, cost, pareto]
 requires_env: []
 provides_tools: [iolite_shortlist, iolite_model]
+provides_hooks: [post_api_request]
 config_schema:
   catalog_path:
     type: str
     default: ""
-    description: "Set under plugins.entries.iolite.settings. Local catalog JSON: a list of rows or an object with a 'models' list (the shape of /api/v1/models.json). Wins over catalog_url."
+    description: "Set under plugins.entries.iolite.settings. Local catalog JSON: a list of rows or an object with a 'models' list (the shape of /api/v1/models.json). Replaces the bundled catalog. Wins over catalog_url."
   catalog_url:
     type: str
     default: ""
-    description: "An https URL of an Iolite /api/v1/models.json you are allowed to read, for example your own private instance. Empty means no network."
+    description: "An https URL of a catalog JSON you are allowed to read, replacing the bundled catalog. Empty means the bundled catalog and no network."
   allow_http:
     type: bool
     default: false
@@ -47,3 +52,7 @@ config_schema:
     type: int
     default: 15
     description: "Time limit in seconds for a whole catalog_url fetch, redirects included."
+  measure_speed:
+    type: bool
+    default: true
+    description: "Record tokens per second of your own model calls (rolling median, kept locally in speed.json, never uploaded) and show it as 'measured locally'. Off records and shows nothing."

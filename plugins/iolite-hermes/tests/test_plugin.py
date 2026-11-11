@@ -29,7 +29,7 @@ class Ctx:
 @pytest.fixture
 def catalog(tmp_path):
     p = tmp_path / "models.json"
-    p.write_text(json.dumps({"schema_version": "1", "models": GOLDEN["models"]}))
+    p.write_text(json.dumps({"schema_version": "1", "models": GOLDEN["catalogs"]["mixed"]}))
     return p
 
 
@@ -51,24 +51,26 @@ def test_no_source_configured_refuses_without_network(monkeypatch):
         raise AssertionError("network used with no catalog_url")
     monkeypatch.setattr(plugin.netio, "open_same_origin", boom)
     monkeypatch.setattr(plugin.urllib.request, "urlopen", boom)
-    out = json.loads(_setup({}).tools["iolite_shortlist"]({}))
-    assert out["ok"] is False and "No catalog configured" in out["error"]
+    out = json.loads(_setup({"measure_speed": False}).tools["iolite_shortlist"]({}))
+    assert out["ok"] is True and out["shortlist"] and out["mode"] == "cost"
+    assert any("Epoch" in c for c in out["data_credits"])
 
 
 def test_shortlist_matches_decide_for_min_cost(catalog):
     ctx = _setup({"catalog_path": str(catalog)})
     out = json.loads(ctx.tools["iolite_shortlist"]({"floor": 50, "objective": "min_cost", "n": 3}))
-    case = next(c for c in GOLDEN["cases"] if c["floor"] == 50 and c["bias"] == -1 and c["n"] == 3)
+    case = next(c for c in GOLDEN["cases"] if c["catalog"] == "mixed" and c["floor"] == 50 and c["bias"] == -1 and c["n"] == 3)
     assert [r["model"] for r in out["shortlist"]] == case["shortlist_ids"]
-    assert out["floor_applied"] == {"aa_intelligence_index": 50, "source": "user"}
-    assert all(r["reasons"] == ["on_pareto", "bias_cheap"] for r in out["shortlist"])
+    assert out["floor_applied"] == {"intelligence": 50, "source": "user"}
+    assert all(r["reasons"] == ["on_cost_front", "bias_cheap"] for r in out["shortlist"])
+    assert out["mode"] == "cost"
     assert out["catalog_snapshot_id"] == GOLDEN["snapshot_id"]
 
 
 def test_anchor_floor_and_unknown_anchor(catalog):
     ctx = _setup({"catalog_path": str(catalog)})
     out = json.loads(ctx.tools["iolite_shortlist"]({"anchor_model": "tie alpha", "objective": "max_speed"}))
-    assert out["floor_applied"] == {"aa_intelligence_index": 80.0, "source": "anchor"}
+    assert out["floor_applied"] == {"intelligence": 80.0, "source": "anchor"}
     assert out["shortlist"][0]["reasons"][1] == "bias_fast"
     bad = json.loads(ctx.tools["iolite_shortlist"]({"anchor_model": "nope"}))
     assert bad["ok"] is False
@@ -103,7 +105,7 @@ def test_url_fetch_sends_no_credentials_and_caches(monkeypatch):
         def __exit__(self, *a):
             return False
 
-        body = json.dumps(GOLDEN["models"]).encode()
+        body = json.dumps(GOLDEN["catalogs"]["mixed"]).encode()
 
         def read(self, n):
             chunk, self.body = self.body[:n], self.body[n:]
