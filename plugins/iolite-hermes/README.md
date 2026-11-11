@@ -32,6 +32,7 @@ It is the decide mode of the [Iolite observatory](../../README.md), packaged as 
 |---|---|
 | `iolite_shortlist` | Drops models below the floor or without a price. Keeps the cost × intelligence front and ranks it toward `min_cost`, `max_speed` (the smarter end, until speed is measured) or `balanced`. Once every candidate has a locally measured speed, it uses the cost × speed front instead. |
 | `iolite_model` | Looks up one model by name or slug. |
+| `iolite_show` | Controls an open Desktop pane: 3D/2D, model focus, intelligence floor and camera reset. Reports whether the pane received it. |
 
 From chat, `/iolite` gives the same answers without the agent:
 
@@ -42,7 +43,7 @@ From chat, `/iolite` gives the same answers without the agent:
 /iolite status
 ```
 
-A bare number is the floor, the words before the last one name an anchor model, and a last word of `cheap`, `fast` or `balanced` sets the objective. A model name that ends in one of those words ("Grok 4 Fast") keeps its name when the catalog has it, or when you put it in quotes. `status` says which source is set, without a network call. The bundled `iolite:iolite` skill tells the agent how to set the floor, pick the objective and show the data credit.
+A bare number is the floor, the words before the last one name an anchor model, and a last word of `cheap`, `fast` or `balanced` sets the objective. A model name that ends in one of those words ("Grok 4 Fast") keeps its name when the catalog has it, or when you put it in quotes. `status` says which source is set and checks whether a Desktop pane is listening, without fetching external data. The bundled `iolite:iolite` skill tells the agent how to set the floor, pick the objective and show the data credit.
 
 `iolite_shortlist` takes these inputs:
 - `floor`: 0–100 on the catalog's intelligence scale (Epoch ECI rescaled to 0–100); default 50. A numeric string such as "60" is accepted; anything else is a clear error naming the argument.
@@ -83,8 +84,13 @@ Until every candidate has a measurement, answers say "speed: not measured yet" a
 
 ## Hermes Desktop: model landscape
 
+The Desktop half starts **off**. To enable and open it: **Capabilities -> Plugins -> search "Iolite" -> switch on, then composer button "Iolite"**. The switch lives in the client's browser storage; the agent can guide you but cannot flip it. `/iolite status` checks for a listening pane and repeats that path.
+
 In Hermes Desktop, the composer button "Iolite" and the command "Iolite: model landscape" open a pane that plots the bundled catalog: price (log) by intelligence (0-100) by context window (log), in a 3D view you can orbit, drag, wheel-zoom and drive with the arrow keys, plus a linked 2D price by intelligence view. Wire spheres on a line are the cost x intelligence front (no model is cheaper and at least as smart), small rings are dominated models, a diamond is a pick from your last `/iolite shortlist`, and a dashed plane is its intelligence floor. Hover or focus a point, or tab through the front list, to read its numbers and where each comes from.
 
+- **Agent control, live:** successful `iolite_shortlist` calls (including `/iolite shortlist`) send `plugin.iolite.shortlist.updated` with `{floor, objective, picks}`; the pane moves its dashed floor, marks pick diamonds and focuses the first pick. `iolite_model` and `/iolite model` send `plugin.iolite.model.focused` with `{focus_model}` (the first matching slug, or null to clear focus when there are no matches). These events contain no prompt text or credentials, work even with `remember_shortlist: false`, and update the open pane without reloading. Changes are announced in an aria-live region.
+- **Ask the agent to click around:** `iolite_show({"view": "2d", "focus_model": "GPT-6.1 Terra", "floor": 60, "reset_camera": true})` sends `plugin.iolite.view.set`. Only `view` is required (`3d` or `2d`); omitted controls keep their state. Floor must be 0–100; camera reset must be boolean; focus uses the same exact-name/slug-first, case-insensitive substring lookup as `iolite_model`, but refuses ambiguous matches. Models absent from the bundled plot are announced as unplotted. Focusing a model hidden by a measured-only axis returns to price/context axes so its mark is visible.
+- **Delivery receipt:** `iolite_show` returns JSON with `ok`, the resolved controls, `desktop_listening`, `message` and `setup`. `desktop_listening: true` means a pane handled this command and acknowledged it through `POST /api/plugins/iolite/pane-receipt`. No receipt within one second means false, with: "no Desktop window is listening; ask the user to open the Iolite pane". A slow or unavailable REST route also counts as no receipt; false does not prove the client is disabled. `/iolite status` uses the same check with `plugin.iolite.presence.check`. Receipts use fresh random ids and temporary 0600 files in the plugin data directory, removed after the check; no heartbeat or browser-storage changes. Without Hermes or a Desktop listener, tools still work and the optional bridge is a debug-only no-op.
 - **Third axis:** context window by default, labelled on the chart, with a switch to speed. Speed is never bundled or estimated: the Speed switch plots only models you have measured on this machine (3 calls or more) and says how many it left out. Models with no price or no score are not plotted; the pane states that count.
 - **One local request:** the pane reads `/api/plugins/iolite/landscape`, served by this plugin's `dashboard/plugin_api.py`, for your measured speeds and last shortlist. If that route is not available it says so and still plots the bundled catalog. Set `remember_shortlist: false` to stop keeping `last_shortlist.json` (floor, objective and picked slugs, mode 0600, never uploaded).
 - **Data inside the file:** the pane is one ESM file, `desktop/plugin.js`, with the catalog snapshot inlined and credited on screen. It imports only `@hermes/plugin-sdk` and `react` and draws with Canvas 2D (no WebGL, no extra library).
@@ -95,7 +101,7 @@ Rebuild after changing the catalog or the sources (Node 20 or later, `esbuild` i
 
 ```sh
 python3 scripts/build_snapshot.py            # catalog.json -> desktop-src/src/snapshot.json (--check verifies)
-cd desktop-src && npm install && npm run build && npm test
+cd desktop-src && npm ci && npm run build && npm test
 ```
 
 ## Your own prices
@@ -201,7 +207,12 @@ Restart the gateway, then ask: *"Shortlist three models at least as smart as <a 
   - `catalog_url`: one GET, https only unless you set `allow_http: true`, cached in memory for `cache_minutes`. Iolite sends the URL as you write it and adds no credentials of its own. A URL with `user:password@` is refused; a `?token=` query is accepted and sent as written, so treat the URL as a secret you chose to put in config. URLs with whitespace or control characters, or a bad port, are refused before any request. The whole response must arrive within `timeout_seconds` (slow-drip responses are cut off) and stay under 8 MB, and redirects are followed only on the same origin. Answers and `/iolite status` show only the scheme, host and path, never the query string or fragment, and error messages never contain the URL.
   - A failed fetch is remembered for five minutes and not retried.
 - **Output:** every row field is cleaned before it is shown: control characters and newlines removed, text capped at 200 characters, `@` mentions and chat markup defused, non-finite numbers dropped.
-- **Storage:** the plugin writes files only in its plugin data directory, all mode 0600: `speed.json` (your own speed measurements only; `measure_speed: false` turns it off), `tasks.json` (input and output tokens and seconds per task, keyed by a hash of the task or session id, no prompt text; `measure_usage: false` turns it off), `last_shortlist.json` (the floor, objective and picked slugs of your latest shortlist; `remember_shortlist: false` turns it off) and `my_prices.json` (only the plans you save). It registers one hook, `post_api_request`, which reads token counts and timing and nothing else. The Desktop pane adds two local REST routes (GET `/landscape`, POST `/my-prices`) and no outbound request. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
+- **Storage:** the plugin writes files only in its plugin data directory, all mode 0600: `speed.json` (your own speed measurements only; `measure_speed: false` turns it off), `tasks.json` (input and output tokens and seconds per task, keyed by a hash of the task or session id, no prompt text; `measure_usage: false` turns it off), `last_shortlist.json` (the floor, objective and picked slugs of your latest shortlist; `remember_shortlist: false` turns it off) and `my_prices.json` (only the plans you save), plus temporary `.pane-<random id>.receipt` markers during listening checks. It registers one hook, `post_api_request`, which reads token counts and timing and nothing else. The Desktop pane adds three local REST routes (GET `/landscape`, POST `/my-prices`, POST `/pane-receipt`) and no outbound request. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
+
+## Known issues
+
+- **Local REST routes assume loopback.** The three Desktop routes (`/landscape`, `/my-prices`, `/pane-receipt`) add no auth of their own. They rely on the Hermes dashboard's own protection and its default 127.0.0.1 bind. If you expose the dashboard on a network interface, those routes are exposed with it: they reveal your latest shortlist and accept saved prices. Keep the dashboard on loopback.
+- **The agent cannot switch the pane on.** Turning on a Desktop plugin is a browser-side setting, so `iolite_show` reports when no pane is listening and tells the user the one step to take.
 
 ## Tests
 

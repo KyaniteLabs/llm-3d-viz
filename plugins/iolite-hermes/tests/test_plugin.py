@@ -41,8 +41,8 @@ def _setup(config):
     return ctx
 
 
-def test_registers_both_tools():
-    assert set(_setup({}).tools) == {"iolite_shortlist", "iolite_model"}
+def test_registers_all_tools():
+    assert set(_setup({}).tools) == {"iolite_shortlist", "iolite_model", "iolite_show"}
 
 
 def test_no_source_configured_refuses_without_network(monkeypatch):
