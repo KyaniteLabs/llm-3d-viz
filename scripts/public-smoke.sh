@@ -22,7 +22,7 @@ echo "[smoke] public origin: $PUBLIC_ORIGIN"
 
 # 1) App shell serves and names the app (title content, not just 200).
 index_html="$(fetch "$PUBLIC_ORIGIN/")"
-[[ "$index_html" == *"Model Observatory"* ]] || fail "index.html does not name the Model Observatory"
+[[ "$index_html" == *"Iolite"* ]] || fail "index.html does not name Iolite"
 
 # 2) The entry asset exists and carries real content (not an empty chunk).
 entry="$(printf '%s' "$index_html" | grep -oE 'assets/index-[a-zA-Z0-9_-]+\.js' | head -1)"
@@ -38,7 +38,7 @@ blog="$(fetch "$PUBLIC_ORIGIN/blog/2026-08-24-model-observatory/")"
 
 # 4) llms.txt is real content and links the blog.
 llms="$(fetch "$PUBLIC_ORIGIN/llms.txt")"
-[[ "$llms" == *"# Model Observatory"* ]] || fail "llms.txt missing its header"
+[[ "$llms" == *"# Iolite"* ]] || fail "llms.txt missing its header"
 [[ "$llms" == *"blog/2026-08-24-model-observatory/"* ]] || fail "llms.txt does not link the launch post"
 
 # 5) Sitemap carries the blog entry.

@@ -162,7 +162,7 @@ export class CinemaMode {
     const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
     const asOf = new Date().toISOString().slice(0, 10);
     el.textContent =
-      `Model Observatory · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
+      `Iolite · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
       (n != null ? ` · N=${n}` : "");
     // Wave 3 (cinema comprehension): a minimal encoding key rides just above
     // the method line — tiny, low-opacity, never competing with the canvas.

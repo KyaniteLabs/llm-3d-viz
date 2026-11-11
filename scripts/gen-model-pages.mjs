@@ -83,15 +83,15 @@ export function createTemplates(rows, dataDate, compareBySlug = {}) {
 <title>${esc(r.model)} — measured model card | Kyanite Labs</title>
 <meta name=description content="${esc(desc)}">
 <link rel=canonical href="${url}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Kyanite Labs Model Observatory">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Kyanite Labs Iolite">
 <meta property="og:title" content="${esc(r.model)} — measured model card"><meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}"><meta property="og:image" content="${ORIGIN}/og-image.png">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="${esc(r.model)} — measured model card"><meta name="twitter:description" content="${esc(desc)}">
 <script type="application/ld+json">${jsonld({
       '@context': 'https://schema.org', '@type': 'WebPage', name: `${r.model} — measured model card`, url,
-      description: desc, isPartOf: { '@type': 'WebSite', name: 'Kyanite Labs Model Observatory', url: ORIGIN + '/' },
+      description: desc, isPartOf: { '@type': 'WebSite', name: 'Kyanite Labs Iolite', url: ORIGIN + '/' },
       breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Model Observatory', item: ORIGIN + '/' },
+        { '@type': 'ListItem', position: 1, name: 'Iolite', item: ORIGIN + '/' },
         { '@type': 'ListItem', position: 2, name: 'Model cards', item: ORIGIN + '/m/' },
         { '@type': 'ListItem', position: 3, name: r.model, item: url }] },
       dateModified: dataDate || undefined })}</script>
@@ -125,7 +125,7 @@ ${FOOTER}
 <link rel=canonical href="${ORIGIN}/m/">
 <script type="application/ld+json">${jsonld({
       '@context': 'https://schema.org', '@type': 'Dataset',
-      name: 'Model Observatory catalog — measured LLM benchmarks', url: ORIGIN + '/m/',
+      name: 'Iolite catalog — measured LLM benchmarks', url: ORIGIN + '/m/',
       description: `Speed, price, and intelligence measurements for ${rows.length} language models, with per-field provenance. Catalog data ${dataDate}.`,
       creator: { '@type': 'Organization', name: 'Kyanite Labs', url: ORIGIN },
       variableMeasured: ['aa_intelligence_index', 'tps', 'ttft', 'blended_price_per_M', 'price_in_per_M', 'price_out_per_M', 'openness', 'context_length'],

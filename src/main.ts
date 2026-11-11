@@ -598,7 +598,7 @@ async function boot() {
       (copyInsightBtn as any).__bound = true;
       copyInsightBtn.addEventListener("click", async () => {
         const text = buildInsightMethodCopy({
-          title: "Model Observatory",
+          title: "Iolite",
           story: latestShareInput.story,
           axes: latestShareInput.axes,
           sources: latestShareInput.sources,

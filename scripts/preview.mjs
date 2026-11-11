@@ -44,7 +44,7 @@ const child = spawn(
 );
 
 const url = `http://${HOST}:${PORT}/`;
-console.log(`\n  llm-3d-viz (Safari-safe preview)\n  ${url}\n  Ctrl+C to stop\n`);
+console.log(`\n  Iolite (Safari-safe preview)\n  ${url}\n  Ctrl+C to stop\n`);
 
 // Best-effort open browsers (Chrome + Safari)
 for (const app of ["Google Chrome", "Safari"]) {

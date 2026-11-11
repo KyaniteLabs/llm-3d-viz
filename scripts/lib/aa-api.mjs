@@ -16,7 +16,7 @@ import {
 } from "../../src/lib/family-effort.shared.ts";
 
 export const AA_API_BASE = "https://artificialanalysis.ai/api/v2";
-export const AA_UA = "llm-3d-viz-catalog/0.1 (+https://viz.kyanitelabs.tech; AA Data API)";
+export const AA_UA = "iolite-catalog/0.1 (+https://viz.kyanitelabs.tech; AA Data API)";
 
 /** Env: AA_API_KEY or ARTIFICIAL_ANALYSIS_API_KEY */
 export function resolveAaApiKey(env = process.env) {

@@ -1,4 +1,4 @@
-# Model Observatory (llm-3d-viz)
+# Iolite (formerly Model Observatory)
 
 > Interactive 3D LLM benchmark observatory: **speed × cost × intelligence**.
 
@@ -42,7 +42,7 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 ## Citation facts (stable)
 
-- Product name: **Model Observatory** (repo: llm-3d-viz)
+- Product name: **Iolite** (formerly Model Observatory; repo: llm-3d-viz)
 - Free, MIT, no account required for the viz
 - Data: Arena dataset (CC BY 4.0) + vendor-published figures + first-party pricing; some third-party measurement data is not republished here for licensing reasons — see /sources/
 - Live stage requires JavaScript + WebGL

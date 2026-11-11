@@ -1,11 +1,11 @@
-# Model Observatory
+# Iolite
 
 **URL:** [https://viz.kyanitelabs.tech/](https://viz.kyanitelabs.tech/)  
-**Also known as:** llm-3d-viz
+**Also known as:** Model Observatory, llm-3d-viz
 
 ## What this is
 
-Model Observatory is an interactive **3D data visualization** for comparing large language models on three axes:
+Iolite is an interactive **3D data visualization** for comparing large language models on three axes:
 
 1. **Intelligence** — intelligence index (Arena Elo, vendor-published figures, and this project's own measurements, where measured)  
 2. **Cost** — blended price per million tokens (default)  

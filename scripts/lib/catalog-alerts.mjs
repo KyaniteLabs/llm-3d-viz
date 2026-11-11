@@ -202,7 +202,7 @@ export async function deliverAlert(
 function defaultNotify(title) {
   const r = spawnSync(
     "osascript",
-    ["-e", `display notification "${title.replace(/"/g, "'")}" with title "llm-3d-viz catalog"`],
+    ["-e", `display notification "${title.replace(/"/g, "'")}" with title "Iolite catalog"`],
     { timeout: 5000 },
   );
   return r.status === 0 ? "notified" : "error";

@@ -44,7 +44,7 @@ export function buildAtom(events, { limit = 50 } = {}) {
   }).join('\n');
   return `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Model Observatory — Frontier Watch</title>
+  <title>Iolite — Frontier Watch</title>
   <subtitle>Measured Pareto frontier movements (price × intelligence), from the Kyanite Labs catalog.</subtitle>
   <id>tag:kyanitelabs.tech,2026:frontier-watch</id>
   <link rel="alternate" type="text/markdown" href="${ORIGIN}/frontier-watch.md"/>

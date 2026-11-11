@@ -1,11 +1,11 @@
-# Model Observatory — full agent brief (llms-full.txt)
+# Iolite — full agent brief (llms-full.txt)
 
 Canonical: https://viz.kyanitelabs.tech/
 Updated: 2026-08-27
 
 ## One-sentence pitch
 
-Model Observatory is a free, MIT-licensed **3D LLM benchmark instrument** that maps models on **intelligence × cost (blended $/M) × speed (tok/s)** and supports **Decide mode**: intelligence floor → cost/speed shortlist with shareable URLs.
+Iolite is a free, MIT-licensed **3D LLM benchmark instrument** that maps models on **intelligence × cost (blended $/M) × speed (tok/s)** and supports **Decide mode**: intelligence floor → cost/speed shortlist with shareable URLs.
 
 ## Product surface (human UI)
 

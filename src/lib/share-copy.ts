@@ -16,7 +16,7 @@ export interface ShareCopyInput {
 }
 
 export function buildInsightMethodCopy(input: ShareCopyInput): string {
-  const cleanTitle = sanitizeSingleLine(input.title ?? "") || "Model Observatory";
+  const cleanTitle = sanitizeSingleLine(input.title ?? "") || "Iolite";
   const cleanStory = sanitizeSingleLine(input.story);
   const cleanAxes = sanitizeSingleLine(input.axes);
   const cleanSources = sanitizeSingleLine(input.sources);

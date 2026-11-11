@@ -1,4 +1,4 @@
-# Architecture — llm-3d-viz
+# Architecture — Iolite
 
 ## Job
 
