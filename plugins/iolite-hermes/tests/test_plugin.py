@@ -56,6 +56,19 @@ def test_no_source_configured_refuses_without_network(monkeypatch):
     assert any("Epoch" in c for c in out["data_credits"])
 
 
+def test_data_credits_carry_licence_links(monkeypatch):
+    """Legal: CC BY credits must point to the licence and ATTRIBUTION.md."""
+
+    def boom(*a, **k):
+        raise AssertionError("network used with no catalog_url")
+    monkeypatch.setattr(plugin.netio, "open_same_origin", boom)
+    monkeypatch.setattr(plugin.urllib.request, "urlopen", boom)
+    out = json.loads(_setup({"measure_speed": False}).tools["iolite_shortlist"]({}))
+    joined = " ".join(out["data_credits"])
+    assert "creativecommons.org/licenses/by/4.0" in joined
+    assert "ATTRIBUTION.md" in joined
+
+
 def test_shortlist_matches_decide_for_min_cost(catalog):
     ctx = _setup({"catalog_path": str(catalog)})
     out = json.loads(ctx.tools["iolite_shortlist"]({"floor": 50, "objective": "min_cost", "n": 3}))

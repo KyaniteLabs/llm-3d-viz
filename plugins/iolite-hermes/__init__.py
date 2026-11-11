@@ -65,7 +65,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
@@ -1328,6 +1328,11 @@ def landscape_state() -> dict:
     return out
 
 
+# CC BY 4.0 s3(a)(1)(C) asks for the licence text or a link to it with each use.
+_LICENCE_NOTICE = ("Licences: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/ ; "
+                   "MIT https://opensource.org/licenses/MIT . Full notices: ATTRIBUTION.md")
+
+
 def _data_credits(rows: List[dict]) -> List[str]:
     """The distinct credit lines of the rows being shown (the licences ask for them)."""
     seen: List[str] = []
@@ -1335,7 +1340,10 @@ def _data_credits(rows: List[dict]) -> List[str]:
         for c in m.get("_credits") or ():
             if c and c not in seen:
                 seen.append(c)
-    return seen[:6]
+    seen = seen[:6]
+    if seen:
+        seen.append(_LICENCE_NOTICE)
+    return seen
 
 
 def _summary(m: dict) -> dict:
@@ -1669,7 +1677,9 @@ def _credit_lines(rows: List[dict]) -> str:
             v = m.get(k)
             if v and v not in seen:
                 seen.append(v)
-    return "".join(f"\nData: {_md(v)}" for v in seen[:5])
+    if not seen:
+        return ""
+    return "".join(f"\nData: {_md(v)}" for v in seen[:5]) + f"\n{_md(_LICENCE_NOTICE)}"
 
 
 def _metric_tag(m: dict) -> str:
