@@ -96,7 +96,7 @@ export function buildLayout(snapshot, { z = Z_CONTEXT, speed = null } = {}) {
     index: idx,
     m,
     zv,
-    free: m.c === 0,
+    free: m.c === 0 && !m.mp,
     front: front.has(m.s),
     px: logNorm(Math.max(m.c, eps), xLo, xHi) * 2 - 1,
     py: ((m.i - yLo) / (yHi - yLo)) * 2 - 1,
@@ -159,4 +159,32 @@ export function fmtTokens(v) {
 export function fmtTps(v) {
   if (!Number.isFinite(v)) return '?'
   return v > 0 && v < 10 ? `${v.toFixed(1)} tok/s` : `${Math.round(v).toLocaleString('en-US')} tok/s`
+}
+
+export const PRICE_LIST = 'list'
+export const PRICE_MINE = 'mine'
+
+/**
+ * The snapshot with your own prices in place of list prices, for the "My price" view.
+ * `prices` is {slug: {usd_per_m, plan, mode}} from the Python half (my_prices.json, which
+ * you write and which never ships). A covered model keeps its list price in `l` and its plan
+ * in `mp`; an uncovered one is unchanged. Bad entries are ignored, never guessed.
+ */
+export function applyMyPrices(snapshot, prices) {
+  if (!prices || typeof prices !== 'object') return { snapshot, covered: 0 }
+  let covered = 0
+  const models = snapshot.models.map(m => {
+    const o = Object.prototype.hasOwnProperty.call(prices, m.s) ? prices[m.s] : null
+    const c = o && typeof o.usd_per_m === 'number' && Number.isFinite(o.usd_per_m) && o.usd_per_m >= 0 ? o.usd_per_m : null
+    if (c === null) return m
+    covered++
+    return { ...m, c, l: m.c, mp: { plan: String(o.plan || 'your plan').slice(0, 80), mode: String(o.mode || '') } }
+  })
+  return { snapshot: { ...snapshot, models }, covered }
+}
+
+/** A model's shown price: a prepaid ($0 marginal) plan reads "prepaid", never "free tier". */
+export function fmtShownPrice(m) {
+  if (m.mp && m.c === 0) return '$0/M (prepaid)'
+  return fmtPrice(m.c)
 }

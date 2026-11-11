@@ -128,7 +128,7 @@ function buildLayout(snapshot, { z = Z_CONTEXT, speed = null } = {}) {
     index: idx,
     m,
     zv,
-    free: m.c === 0,
+    free: m.c === 0 && !m.mp,
     front: front.has(m.s),
     px: logNorm(Math.max(m.c, eps), xLo, xHi) * 2 - 1,
     py: (m.i - yLo) / (yHi - yLo) * 2 - 1,
@@ -179,6 +179,24 @@ function fmtTokens(v) {
 function fmtTps(v) {
   if (!Number.isFinite(v)) return "?";
   return v > 0 && v < 10 ? `${v.toFixed(1)} tok/s` : `${Math.round(v).toLocaleString("en-US")} tok/s`;
+}
+var PRICE_LIST = "list";
+var PRICE_MINE = "mine";
+function applyMyPrices(snapshot, prices) {
+  if (!prices || typeof prices !== "object") return { snapshot, covered: 0 };
+  let covered = 0;
+  const models = snapshot.models.map((m) => {
+    const o = Object.prototype.hasOwnProperty.call(prices, m.s) ? prices[m.s] : null;
+    const c = o && typeof o.usd_per_m === "number" && Number.isFinite(o.usd_per_m) && o.usd_per_m >= 0 ? o.usd_per_m : null;
+    if (c === null) return m;
+    covered++;
+    return { ...m, c, l: m.c, mp: { plan: String(o.plan || "your plan").slice(0, 80), mode: String(o.mode || "") } };
+  });
+  return { snapshot: { ...snapshot, models }, covered };
+}
+function fmtShownPrice(m) {
+  if (m.mp && m.c === 0) return "$0/M (prepaid)";
+  return fmtPrice(m.c);
 }
 
 // src/scene.js
@@ -459,7 +477,7 @@ var Stage = class {
     for (const t of ticks.z) label([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? "right" : "left");
     for (const t of ticks.y) label([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? "right" : "left");
     ctx.fillStyle = pal.text;
-    label([0, -1, sz * 1.7], "PRICE $/M \xB7 LOG");
+    label([0, -1, sz * 1.7], s.layout.priceTitle || "PRICE $/M \xB7 LOG");
     label([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? "right" : "left");
     label([sx * 1.04, 1.12, sz * 1.04], "INTELLIGENCE 0-100", sx < 0 ? "right" : "left");
     this.drawMarks(ctx, s, pal, P, true);
@@ -543,7 +561,7 @@ var Stage = class {
     ctx.fillStyle = pal.text;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText("PRICE $/M \xB7 LOG", l + w / 2, t + h3 + 30);
+    ctx.fillText(s.layout.priceTitle || "PRICE $/M \xB7 LOG", l + w / 2, t + h3 + 30);
     ctx.save();
     ctx.translate(18, t + h3 / 2);
     ctx.rotate(-Math.PI / 2);
@@ -768,7 +786,8 @@ function Detail({ point, front, isPick, speed, pal }) {
       "dl",
       { style: { margin: 0 } },
       h(Row, { pal, k: "Intelligence", v: `${m.i} (${m.t})` }),
-      h(Row, { pal, k: "Price, blended", v: fmtPrice(m.c) }),
+      m.mp ? h(Row, { pal, k: "Your price", v: `${m.mp.mode === "sunk" ? "$0/M, prepaid: another token costs nothing" : fmtPrice(m.c) + ", " + m.mp.mode} (${m.mp.plan})` }) : null,
+      h(Row, { pal, k: m.mp ? "List price" : "Price, blended", v: fmtPrice(m.mp ? m.l : m.c) }),
       h(Row, { pal, k: "Context", v: m.x ? `${fmtTokens(m.x)} tokens` : "not stated" }),
       m.a !== void 0 ? h(Row, { pal, k: "Arena rating", v: `${m.a} (Bradley-Terry)` }) : null,
       h(Row, { pal, k: "Speed", v: sp ? `${fmtTps(sp.tps)}, measured locally` : "not measured yet" }),
@@ -790,6 +809,7 @@ function LandscapePane({ ctx }) {
   const pal = paletteFor(mode);
   const [view, setView] = useState("3d");
   const [zMode, setZMode] = useState(Z_CONTEXT);
+  const [basis, setBasis] = useState(PRICE_LIST);
   const [hoverId, setHoverId] = useState(null);
   const [focusId, setFocusId] = useState(null);
   const [pinnedId, setPinnedId] = useState(null);
@@ -836,7 +856,14 @@ function LandscapePane({ ctx }) {
   const speed = data && data.measure_speed ? data.speed || {} : null;
   const speedCount = speed ? Object.keys(speed).filter((s) => snapshot_default.models.some((m) => m.s === s)).length : 0;
   const effectiveZ = zMode === Z_SPEED && speedCount > 0 ? Z_SPEED : Z_CONTEXT;
-  const layout = useMemo(() => buildLayout(snapshot_default, { z: effectiveZ, speed }), [effectiveZ, speed]);
+  const mine = data && data.my_prices ? data.my_prices : null;
+  const priced = useMemo(() => applyMyPrices(snapshot_default, mine ? mine.prices : null), [mine]);
+  const effectiveBasis = basis === PRICE_MINE && priced.covered > 0 ? PRICE_MINE : PRICE_LIST;
+  const shown = effectiveBasis === PRICE_MINE ? priced.snapshot : snapshot_default;
+  const layout = useMemo(() => ({
+    ...buildLayout(shown, { z: effectiveZ, speed }),
+    priceTitle: effectiveBasis === PRICE_MINE ? "YOUR PRICE $/M \xB7 LOG" : "PRICE $/M \xB7 LOG"
+  }), [shown, effectiveZ, speed, effectiveBasis]);
   const last = data && data.last_shortlist ? data.last_shortlist : null;
   const picks = useMemo(() => matchPicks(layout.points, last ? last.picks : []), [layout, last]);
   const floor = last && typeof last.floor === "number" ? last.floor : null;
@@ -877,6 +904,7 @@ function LandscapePane({ ctx }) {
   const zLabel = zTitle(layout.z);
   const restNote = rest.status === "loading" ? "Reading speed and your last shortlist from the Python half..." : rest.status === "unavailable" ? `Speed and your last shortlist come from the Python half over REST, which is not reachable (${rest.reason}). Third axis stays on context window; no speed is shown or guessed.` : !data.measure_speed ? "Speed measuring is off (measure_speed), so there is no speed to plot. Third axis stays on context window." : speedCount === 0 ? "No model has a locally measured speed yet (each needs 3 calls through Hermes). Third axis stays on context window." : `Speed measured locally for ${speedCount} model${speedCount === 1 ? "" : "s"}, kept on this machine and not comparable across machines.`;
   const shortNote = rest.status !== "ok" ? null : last && last.picks.length ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? "" : "s"} and the floor (${last.floor === null ? "none" : last.floor}, ${last.floor_source || "source not stated"}) from your last /iolite shortlist${last.saved ? `, ${last.saved}` : ""}.` : "No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.";
+  const mineNote = rest.status !== "ok" ? null : priced.covered === 0 ? `My price: no plans yet. Add my_prices.json to the Iolite plugin data folder to price your own subscriptions; it stays on this machine.${mine && mine.problems && mine.problems.length ? " Problems: " + mine.problems.join("; ") + "." : ""}` : `My price: ${priced.covered} model${priced.covered === 1 ? "" : "s"} priced from your ${mine.plans.length} plan${mine.plans.length === 1 ? "" : "s"} (${mine.plans.map((p) => p.name).join(", ")}); everything else stays at list price.${mine.problems && mine.problems.length ? " Skipped: " + mine.problems.join("; ") + "." : ""}`;
   const catalogNote = data && data.bundled === false ? `Note: /iolite is using ${data.catalog_source || "another catalog"}; this pane always plots the bundled snapshot.` : null;
   const countLine = effectiveZ === Z_SPEED ? `${layout.plotted} of ${snapshot_default.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot_default.unplotted} of ${snapshot_default.total} catalog models have no price or no score and are never plotted.` : `${layout.plotted} of ${snapshot_default.total} catalog models plotted; ${snapshot_default.unplotted} have no price or no score and are not plotted.`;
   const label = `${view === "3d" ? "3D" : "2D"} model landscape: price, intelligence${view === "3d" ? " and " + (effectiveZ === Z_SPEED ? "locally measured speed" : "context window") : ""}. ${layout.plotted} models plotted, ${frontList.length} on the cost by intelligence front. ${view === "3d" ? "Arrow keys rotate, plus and minus zoom, 0 resets. " : ""}The front list beside the plot has every front model.`;
@@ -889,6 +917,16 @@ function LandscapePane({ ctx }) {
       { style: { display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center", padding: "12px 16px 8px" } },
       h("h2", { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" } }, "Iolite \xB7 model landscape"),
       h(Segmented, { pal, label: "View", value: view, onChange: setView, options: [{ id: "3d", label: "3D", title: "Rotate and zoom the 3D landscape" }, { id: "2d", label: "2D", title: "Price by intelligence, flat" }] }),
+      h(Segmented, {
+        pal,
+        label: "Price",
+        value: effectiveBasis,
+        onChange: setBasis,
+        options: [
+          { id: PRICE_LIST, label: "List", title: "Public list price per million tokens (LiteLLM)" },
+          { id: PRICE_MINE, label: "Mine", disabled: priced.covered === 0, title: priced.covered === 0 ? "No plans in my_prices.json yet" : "What another token costs you on your own plans" }
+        ]
+      }),
       h(Segmented, {
         pal,
         label: "Third axis",
@@ -907,6 +945,7 @@ function LandscapePane({ ctx }) {
       { style: { padding: "0 16px 10px", color: pal.muted, fontSize: 12 }, "aria-live": "polite" },
       h("div", null, countLine, ` Third axis: ${zLabel.toLowerCase()}.`),
       h("div", null, restNote),
+      mineNote ? h("div", null, mineNote) : null,
       shortNote ? h("div", null, shortNote) : null,
       catalogNote ? h("div", null, catalogNote) : null
     ),
@@ -964,7 +1003,7 @@ function LandscapePane({ ctx }) {
                   }
                 },
                 h("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, (picks.has(p.id) ? "[pick] " : "") + p.m.n),
-                h("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, `${p.m.i} \xB7 ${fmtPrice(p.m.c).replace("/M", "").replace(" (free tier)", " free")}`)
+                h("span", { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: "0 0 auto" } }, `${p.m.i} \xB7 ${fmtShownPrice(p.m).replace("/M", "").replace(" (free tier)", " free")}`)
               )
             ))
           )

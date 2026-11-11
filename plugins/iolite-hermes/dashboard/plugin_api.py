@@ -3,8 +3,8 @@
 One read-only endpoint, ``GET /landscape``, for the Desktop "model landscape" pane:
 the locally measured speeds (tokens per second of your own calls, by catalog slug),
 the floor and picks of your latest ``/iolite shortlist``, and which catalog ``/iolite``
-is using. It reads two small files from the plugin data directory (``speed.json`` and
-``last_shortlist.json``) and the catalog; no network, no secrets, nothing written.
+is using, and your own prices. It reads small files from the plugin data directory
+(``speed.json``, ``last_shortlist.json`` and, if you wrote it, ``my_prices.json``) and the catalog; no network, no secrets, nothing written.
 
 The logic lives in the package's agent half (``__init__.py``), loaded here BY PATH so
 there is one implementation and the two surfaces cannot drift (the dashboard loader

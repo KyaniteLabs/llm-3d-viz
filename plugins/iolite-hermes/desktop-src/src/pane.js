@@ -8,7 +8,7 @@ import snapshot from './snapshot.json'
 import { Stage, zTitle } from './scene.js'
 import { FONT_MONO, FONT_SANS, paletteFor } from './palette.js'
 import {
-  Z_CONTEXT, Z_SPEED, beatenBy, buildLayout, fmtPrice, fmtTokens, fmtTps, floorPosition, matchPicks,
+  PRICE_LIST, PRICE_MINE, Z_CONTEXT, Z_SPEED, applyMyPrices, beatenBy, buildLayout, fmtPrice, fmtShownPrice, fmtTokens, fmtTps, floorPosition, matchPicks,
 } from './frontier.js'
 
 /** Hermes' light or dark paint when the host offers it; dark (the design system's mode) otherwise. */
@@ -80,7 +80,8 @@ function Detail({ point, front, isPick, speed, pal }) {
     h('div', { style: { color: pal.muted, marginBottom: 6 } }, m.p || 'provider not stated'),
     h('dl', { style: { margin: 0 } },
       h(Row, { pal, k: 'Intelligence', v: `${m.i} (${m.t})` }),
-      h(Row, { pal, k: 'Price, blended', v: fmtPrice(m.c) }),
+      m.mp ? h(Row, { pal, k: 'Your price', v: `${m.mp.mode === 'sunk' ? '$0/M, prepaid: another token costs nothing' : fmtPrice(m.c) + ', ' + m.mp.mode} (${m.mp.plan})` }) : null,
+      h(Row, { pal, k: m.mp ? 'List price' : 'Price, blended', v: fmtPrice(m.mp ? m.l : m.c) }),
       h(Row, { pal, k: 'Context', v: m.x ? `${fmtTokens(m.x)} tokens` : 'not stated' }),
       m.a !== undefined ? h(Row, { pal, k: 'Arena rating', v: `${m.a} (Bradley-Terry)` }) : null,
       h(Row, { pal, k: 'Speed', v: sp ? `${fmtTps(sp.tps)}, measured locally` : 'not measured yet' }),
@@ -98,6 +99,7 @@ export function LandscapePane({ ctx }) {
   const pal = paletteFor(mode)
   const [view, setView] = useState('3d')
   const [zMode, setZMode] = useState(Z_CONTEXT)
+  const [basis, setBasis] = useState(PRICE_LIST)
   const [hoverId, setHoverId] = useState(null)
   const [focusId, setFocusId] = useState(null)
   const [pinnedId, setPinnedId] = useState(null)
@@ -132,7 +134,14 @@ export function LandscapePane({ ctx }) {
   const speed = data && data.measure_speed ? data.speed || {} : null
   const speedCount = speed ? Object.keys(speed).filter(s => snapshot.models.some(m => m.s === s)).length : 0
   const effectiveZ = zMode === Z_SPEED && speedCount > 0 ? Z_SPEED : Z_CONTEXT
-  const layout = useMemo(() => buildLayout(snapshot, { z: effectiveZ, speed }), [effectiveZ, speed])
+  const mine = data && data.my_prices ? data.my_prices : null
+  const priced = useMemo(() => applyMyPrices(snapshot, mine ? mine.prices : null), [mine])
+  const effectiveBasis = basis === PRICE_MINE && priced.covered > 0 ? PRICE_MINE : PRICE_LIST
+  const shown = effectiveBasis === PRICE_MINE ? priced.snapshot : snapshot
+  const layout = useMemo(() => ({
+    ...buildLayout(shown, { z: effectiveZ, speed }),
+    priceTitle: effectiveBasis === PRICE_MINE ? 'YOUR PRICE $/M · LOG' : 'PRICE $/M · LOG',
+  }), [shown, effectiveZ, speed, effectiveBasis])
   const last = data && data.last_shortlist ? data.last_shortlist : null
   const picks = useMemo(() => matchPicks(layout.points, last ? last.picks : []), [layout, last])
   const floor = last && typeof last.floor === 'number' ? last.floor : null
@@ -177,6 +186,10 @@ export function LandscapePane({ ctx }) {
   const shortNote = rest.status !== 'ok' ? null
     : last && last.picks.length ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? '' : 's'} and the floor (${last.floor === null ? 'none' : last.floor}, ${last.floor_source || 'source not stated'}) from your last /iolite shortlist${last.saved ? `, ${last.saved}` : ''}.`
       : 'No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.'
+  const mineNote = rest.status !== 'ok' ? null
+    : priced.covered === 0
+      ? `My price: no plans yet. Add my_prices.json to the Iolite plugin data folder to price your own subscriptions; it stays on this machine.${mine && mine.problems && mine.problems.length ? ' Problems: ' + mine.problems.join('; ') + '.' : ''}`
+      : `My price: ${priced.covered} model${priced.covered === 1 ? '' : 's'} priced from your ${mine.plans.length} plan${mine.plans.length === 1 ? '' : 's'} (${mine.plans.map(p => p.name).join(', ')}); everything else stays at list price.${mine.problems && mine.problems.length ? ' Skipped: ' + mine.problems.join('; ') + '.' : ''}`
   const catalogNote = data && data.bundled === false ? `Note: /iolite is using ${data.catalog_source || 'another catalog'}; this pane always plots the bundled snapshot.` : null
   const countLine = effectiveZ === Z_SPEED
     ? `${layout.plotted} of ${snapshot.plotted} priced and scored models plotted (the rest have no measured speed); ${snapshot.unplotted} of ${snapshot.total} catalog models have no price or no score and are never plotted.`
@@ -190,6 +203,13 @@ export function LandscapePane({ ctx }) {
       h('h2', { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase' } }, 'Iolite · model landscape'),
       h(Segmented, { pal, label: 'View', value: view, onChange: setView, options: [{ id: '3d', label: '3D', title: 'Rotate and zoom the 3D landscape' }, { id: '2d', label: '2D', title: 'Price by intelligence, flat' }] }),
       h(Segmented, {
+        pal, label: 'Price', value: effectiveBasis, onChange: setBasis,
+        options: [
+          { id: PRICE_LIST, label: 'List', title: 'Public list price per million tokens (LiteLLM)' },
+          { id: PRICE_MINE, label: 'Mine', disabled: priced.covered === 0, title: priced.covered === 0 ? 'No plans in my_prices.json yet' : 'What another token costs you on your own plans' },
+        ],
+      }),
+      h(Segmented, {
         pal, label: 'Third axis', value: effectiveZ, onChange: setZMode,
         options: [
           { id: Z_CONTEXT, label: 'Context', title: 'Context window, tokens (log)' },
@@ -201,6 +221,7 @@ export function LandscapePane({ ctx }) {
     h('div', { style: { padding: '0 16px 10px', color: pal.muted, fontSize: 12 }, 'aria-live': 'polite' },
       h('div', null, countLine, ` Third axis: ${zLabel.toLowerCase()}.`),
       h('div', null, restNote),
+      mineNote ? h('div', null, mineNote) : null,
       shortNote ? h('div', null, shortNote) : null,
       catalogNote ? h('div', null, catalogNote) : null),
     h('div', { className: 'iolite-body' },
@@ -226,7 +247,7 @@ export function LandscapePane({ ctx }) {
                 },
               },
               h('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, (picks.has(p.id) ? '[pick] ' : '') + p.m.n),
-              h('span', { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: '0 0 auto' } }, `${p.m.i} · ${fmtPrice(p.m.c).replace('/M', '').replace(' (free tier)', ' free')}`)))))))),
+              h('span', { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 12, flex: '0 0 auto' } }, `${p.m.i} · ${fmtShownPrice(p.m).replace('/M', '').replace(' (free tier)', ' free')}`)))))))),
     h('footer', { style: { padding: '8px 16px 14px', color: pal.muted, fontSize: 11.5, borderTop: `1px solid ${pal.hair}` } },
       h('div', null, 'Frontier = no model costs the same or less and is at least as smart. Dominated models are small rings; front models are wire spheres on the ridge; picks have a diamond; the copper ring is focus. Openness is not in the catalog, so there is one glyph per class.'),
       snapshot.credits.map((c, i) => h('div', { key: i }, c)),

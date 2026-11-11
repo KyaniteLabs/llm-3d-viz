@@ -268,7 +268,7 @@ export class Stage {
     for (const t of ticks.z) label([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? 'right' : 'left')
     for (const t of ticks.y) label([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? 'right' : 'left')
     ctx.fillStyle = pal.text
-    label([0, -1, sz * 1.7], 'PRICE $/M · LOG')
+    label([0, -1, sz * 1.7], (s.layout.priceTitle || 'PRICE $/M · LOG'))
     label([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? 'right' : 'left')
     label([sx * 1.04, 1.12, sz * 1.04], 'INTELLIGENCE 0-100', sx < 0 ? 'right' : 'left')
     this.drawMarks(ctx, s, pal, P, true)
@@ -313,7 +313,7 @@ export class Stage {
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
     for (const v of ys) ctx.fillText(String(v), l - 8, py(v))
     ctx.fillStyle = pal.text; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    ctx.fillText('PRICE $/M · LOG', l + w / 2, t + h + 30)
+    ctx.fillText((s.layout.priceTitle || 'PRICE $/M · LOG'), l + w / 2, t + h + 30)
     ctx.save(); ctx.translate(18, t + h / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top'
     ctx.fillText('INTELLIGENCE 0-100', 0, 0); ctx.restore()
     if (typeof s.floor === 'number' && s.floor >= domains.y.lo && s.floor <= domains.y.hi) {

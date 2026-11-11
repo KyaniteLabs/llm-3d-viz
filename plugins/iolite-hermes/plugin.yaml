@@ -24,7 +24,8 @@ description: >
   route of this plugin, /api/plugins/iolite/landscape, which returns your
   measured speeds and the floor and picks of your last /iolite shortlist, kept
   in last_shortlist.json in the plugin data directory (set remember_shortlist
-  false to stop keeping it). The pane makes no other request, and models with
+  false to stop keeping it), plus your own prices from my_prices.json there if
+  you wrote one (read only, never shipped or uploaded). The pane makes no other request, and models with
   no price or no score are not plotted. Disclosure: no network unless you set catalog_url (one GET,
   https unless you set allow_http, sent as written with no credentials added;
   a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on

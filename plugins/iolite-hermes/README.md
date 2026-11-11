@@ -97,6 +97,31 @@ python3 scripts/build_snapshot.py            # catalog.json -> desktop-src/src/s
 cd desktop-src && npm install && npm run build && npm test
 ```
 
+## Your own prices
+
+List prices are wrong for you when you pay a flat subscription. A prepaid yearly plan
+costs nothing per extra token, and an old plan may be cheaper than today's. Write
+`my_prices.json` in the plugin data directory (`$HERMES_HOME/plugin-data/iolite/`) and
+the pane's **Price: Mine** switch replots every model your plans cover and recomputes the
+front. Iolite only reads this file. It never ships in the plugin and is never uploaded.
+
+```json
+{"plans": [
+  {"name": "My yearly plan", "mode": "sunk", "match": ["glm-5"]},
+  {"name": "Monthly plan", "mode": "amortized", "paid_usd": 20, "period_months": 1,
+   "tokens_per_month_m": 40, "models": ["gpt-6.1-terra"]},
+  {"name": "Credits deal", "mode": "fixed", "usd_per_m": 0.25, "match": ["deepseek-v4"]}
+]}
+```
+
+- `sunk`: already paid, so another token costs $0.
+- `amortized`: what you paid per month divided by the millions of tokens you use a month.
+- `fixed`: a $/M you state.
+
+`models` lists exact catalog slugs and wins over `match`, which takes slug fragments of at
+least 3 characters. A plan missing what its mode needs is skipped and named in the pane,
+never guessed. Models no plan covers stay at list price.
+
 ## Use your own catalog
 
 `catalog_path` or `catalog_url` replace the bundled catalog:

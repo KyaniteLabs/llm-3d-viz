@@ -757,6 +757,90 @@ def _read_last_shortlist() -> Optional[dict]:
         return None
 
 
+# ----------------------------------------------------------------------------- my prices (personal overlay)
+MY_PRICES_FILE = "my_prices.json"
+MY_PRICES_MAX_PLANS = 40
+MY_PRICE_MODES = ("sunk", "amortized", "fixed")
+
+
+def _my_plan_price(plan: dict) -> Optional[float]:
+    """$/M tokens one plan gives you, or None when the plan lacks what its mode needs.
+    sunk: prepaid and already spent, so another token costs $0. amortized: what you paid per
+    month divided by the millions of tokens you use a month. fixed: a $/M you state."""
+    mode = plan.get("mode")
+    if mode == "sunk":
+        return 0.0
+    if mode == "fixed":
+        v = netio._num(plan.get("usd_per_m"))
+        return v if v is not None and v >= 0 else None
+    if mode == "amortized":
+        paid, months, used = (netio._num(plan.get(k)) for k in ("paid_usd", "period_months", "tokens_per_month_m"))
+        if paid is None or months is None or used is None or paid < 0 or months <= 0 or used <= 0:
+            return None
+        return paid / months / used
+    return None
+
+
+def _read_my_prices() -> dict:
+    """Your own prices, from my_prices.json in the plugin data directory. You write that file;
+    Iolite only reads it, never ships or uploads it. Returns {"plans": [...], "problems": [...]};
+    a missing file gives no plans and no problems. Never raises."""
+    out: Dict[str, Any] = {"plans": [], "problems": []}
+    try:
+        path = _data_dir() / MY_PRICES_FILE
+        try:
+            st = path.stat()
+        except FileNotFoundError:
+            return out
+        if not stat.S_ISREG(st.st_mode) or st.st_size > 64 * 1024:
+            out["problems"].append("my_prices.json is not a small regular file")
+            return out
+        data = json.loads(path.read_bytes())
+        plans = data.get("plans") if isinstance(data, dict) else None
+        if not isinstance(plans, list):
+            out["problems"].append("my_prices.json has no 'plans' list")
+            return out
+        for n, raw in enumerate(plans[:MY_PRICES_MAX_PLANS], 1):
+            if not isinstance(raw, dict):
+                out["problems"].append(f"plan {n} is not an object")
+                continue
+            name = _safe_text(raw.get("name"), 80) or f"plan {n}"
+            mode = raw.get("mode")
+            if mode not in MY_PRICE_MODES:
+                out["problems"].append(f"{name}: mode must be sunk, amortized or fixed")
+                continue
+            price = _my_plan_price(raw)
+            if price is None:
+                need = {"amortized": "paid_usd, period_months and tokens_per_month_m", "fixed": "usd_per_m"}[mode]
+                out["problems"].append(f"{name}: {mode} needs {need}")
+                continue
+            slugs = [s.casefold() for s in raw.get("models") or () if isinstance(s, str) and s][:200]
+            match = [s.casefold() for s in raw.get("match") or () if isinstance(s, str) and len(s) >= 3][:40]
+            if not slugs and not match:
+                out["problems"].append(f"{name}: list its catalog slugs in 'models' or slug fragments in 'match'")
+                continue
+            out["plans"].append({"name": name, "mode": mode, "usd_per_m": price, "models": slugs, "match": match})
+    except Exception:
+        out["problems"].append("my_prices.json could not be read as JSON")
+    return out
+
+
+def my_price_overrides(rows: List[dict], plans: List[dict]) -> Dict[str, dict]:
+    """{catalog slug: {"usd_per_m", "plan", "mode"}} for every row a plan covers. The first plan
+    that names the slug in 'models' wins; otherwise the first whose 'match' fragment is in it."""
+    out: Dict[str, dict] = {}
+    for r in rows:
+        slug = r.get("slug")
+        if not isinstance(slug, str) or not slug:
+            continue
+        key = slug.casefold()
+        hit = next((p for p in plans if key in p["models"]), None) or \
+            next((p for p in plans if any(f in key for f in p["match"])), None)
+        if hit:
+            out[slug] = {"usd_per_m": hit["usd_per_m"], "plan": hit["name"], "mode": hit["mode"]}
+    return out
+
+
 def landscape_state() -> dict:
     """What the Desktop landscape pane reads over REST: locally measured speeds (by catalog
     slug), the latest remembered shortlist and floor, and which catalog /iolite is using. Local
@@ -774,6 +858,10 @@ def landscape_state() -> dict:
             slug = r.get("slug")
             if tps is not None and tps > 0 and isinstance(slug, str) and slug:
                 out["speed"][slug] = {"tps": tps, "note": r.get("tps_note")}
+        mine = _read_my_prices()
+        out["my_prices"] = {"prices": my_price_overrides(rows, mine["plans"]),
+                            "plans": [{"name": p["name"], "mode": p["mode"], "usd_per_m": p["usd_per_m"]} for p in mine["plans"]],
+                            "problems": mine["problems"][:10]}
     except Exception as exc:
         out["catalog_source"] = None
         out["bundled"] = False
