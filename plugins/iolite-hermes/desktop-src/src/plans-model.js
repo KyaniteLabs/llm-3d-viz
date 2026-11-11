@@ -113,7 +113,7 @@ export function draftPrice(d, saved) {
   if (tokens !== null && !Number.isNaN(tokens) && tokens > 0) return `${fmtPrice(perMonth / tokens)} ($${perMonth.toFixed(2)} a month / ${tokens}M tokens)`
   if (saved && typeof saved.usd_per_m === 'number' && saved.measured) {
     const ms = saved.measured
-    return `${fmtPrice(saved.usd_per_m)} from ${ms.tokens_per_month_m}M tokens a month measured over ${ms.days} day${ms.days === 1 ? '' : 's'}${ms.early ? ' (early)' : ''}`
+    return `${fmtPrice(saved.usd_per_m)} from ${ms.tokens_per_month_m}M tokens a month measured over ${ms.days} day${ms.days === 1 ? '' : 's'}${ms.early ? '. Early estimate: under 7 days of use, so expect it to move' : ''}`
   }
   return `$${perMonth.toFixed(2)} a month; the $/M appears once Iolite has measured your usage of these models`
 }

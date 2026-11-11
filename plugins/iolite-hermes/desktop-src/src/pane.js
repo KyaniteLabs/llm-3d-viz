@@ -105,8 +105,12 @@ function ModelButton({ p, pinnedId, highlightId, picks, setFocusId, setHoverId, 
   return h('li', null,
     h('button', {
       type: 'button', 'aria-pressed': pinnedId === p.id,
-      onFocus: () => setFocusId(p.id), onBlur: () => setFocusId(prev => (prev === p.id ? null : prev)),
-      onMouseEnter: () => setHoverId(p.id), onMouseLeave: () => setHoverId(prev => (prev === p.id ? null : prev)),
+      // Keyboard focus outranks a stale mouse hover. Hover follows real mouse movement, not mouseenter,
+      // so a layout shift under a still pointer cannot steal the highlight.
+      onFocus: () => { setHoverId(null); setFocusId(p.id) },
+      onBlur: () => setFocusId(prev => (prev === p.id ? null : prev)),
+      onMouseMove: () => setHoverId(p.id),
+      onMouseLeave: () => setHoverId(prev => (prev === p.id ? null : prev)),
       onClick: () => setPinnedId(prev => (prev === p.id ? null : p.id)),
       style: {
         display: 'flex', width: '100%', gap: 8, justifyContent: 'space-between', textAlign: 'left', padding: '4px 6px',
@@ -291,7 +295,8 @@ export function LandscapePane({ ctx }) {
         h('canvas', { ref: canvasRef, role: 'img', 'aria-label': label, tabIndex: 0, style: { display: 'block', position: 'absolute', inset: 0, touchAction: 'none', cursor: view === '3d' ? 'grab' : 'default' } }),
         layout.plotted === 0 ? h('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: pal.muted, padding: 24, textAlign: 'center' } }, 'Nothing to plot on this axis yet.') : null),
       h('aside', { className: 'iolite-aside' },
-        h('section', { 'aria-label': 'Selected model', 'aria-live': 'polite', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
+        // minHeight reserves the filled panel's height, so hovering a list below never shifts that list.
+        h('section', { 'aria-label': 'Selected model', 'aria-live': 'polite', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, boxSizing: 'border-box', minHeight: '21em' } },
           h(Detail, { point: highlighted, front: frontList, isPick: !!highlighted && picks.has(highlighted.id), speed, tasks, xMode: effectiveX, pal })),
         h('section', { 'aria-label': 'Cost by intelligence front', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, minHeight: 0 } },
           h('h3', { style: { margin: '0 0 6px', fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } },

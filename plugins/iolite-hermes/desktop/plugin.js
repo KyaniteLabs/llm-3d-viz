@@ -860,7 +860,7 @@ function draftPrice(d, saved) {
   if (tokens !== null && !Number.isNaN(tokens) && tokens > 0) return `${fmtPrice(perMonth / tokens)} ($${perMonth.toFixed(2)} a month / ${tokens}M tokens)`;
   if (saved && typeof saved.usd_per_m === "number" && saved.measured) {
     const ms = saved.measured;
-    return `${fmtPrice(saved.usd_per_m)} from ${ms.tokens_per_month_m}M tokens a month measured over ${ms.days} day${ms.days === 1 ? "" : "s"}${ms.early ? " (early)" : ""}`;
+    return `${fmtPrice(saved.usd_per_m)} from ${ms.tokens_per_month_m}M tokens a month measured over ${ms.days} day${ms.days === 1 ? "" : "s"}${ms.early ? ". Early estimate: under 7 days of use, so expect it to move" : ""}`;
   }
   return `$${perMonth.toFixed(2)} a month; the $/M appears once Iolite has measured your usage of these models`;
 }
@@ -1146,9 +1146,14 @@ function ModelButton({ p, pinnedId, highlightId, picks, setFocusId, setHoverId, 
       {
         type: "button",
         "aria-pressed": pinnedId === p.id,
-        onFocus: () => setFocusId(p.id),
+        // Keyboard focus outranks a stale mouse hover. Hover follows real mouse movement, not mouseenter,
+        // so a layout shift under a still pointer cannot steal the highlight.
+        onFocus: () => {
+          setHoverId(null);
+          setFocusId(p.id);
+        },
         onBlur: () => setFocusId((prev) => prev === p.id ? null : prev),
-        onMouseEnter: () => setHoverId(p.id),
+        onMouseMove: () => setHoverId(p.id),
         onMouseLeave: () => setHoverId((prev) => prev === p.id ? null : prev),
         onClick: () => setPinnedId((prev) => prev === p.id ? null : p.id),
         style: {
@@ -1360,9 +1365,10 @@ function LandscapePane({ ctx }) {
       h2(
         "aside",
         { className: "iolite-aside" },
+        // minHeight reserves the filled panel's height, so hovering a list below never shifts that list.
         h2(
           "section",
-          { "aria-label": "Selected model", "aria-live": "polite", style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12 } },
+          { "aria-label": "Selected model", "aria-live": "polite", style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, boxSizing: "border-box", minHeight: "21em" } },
           h2(Detail, { point: highlighted, front: frontList, isPick: !!highlighted && picks.has(highlighted.id), speed, tasks, xMode: effectiveX, pal })
         ),
         h2(

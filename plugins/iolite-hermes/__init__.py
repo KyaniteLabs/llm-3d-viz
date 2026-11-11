@@ -1556,7 +1556,7 @@ def _fmt_prices() -> str:
         elif "measured" in p:
             ms = p["measured"]
             why = (f"${p['paid_usd']:g} over {p['period_months']:g} months / {ms['tokens_per_month_m']:g}M tokens a month "
-                   f"measured over {ms['days']} day{'s' if ms['days'] != 1 else ''}" + (" (early)" if ms["early"] else ""))
+                   f"measured over {ms['days']} day{'s' if ms['days'] != 1 else ''}" + (f". Early estimate: under {USAGE_EARLY_DAYS} days of use, so expect it to move" if ms["early"] else ""))
         else:
             why = f"${p['paid_usd']:g} over {p['period_months']:g} months / {p['tokens_per_month_m']:g}M tokens a month you set"
         price = "pending" if v is None else ("$0/M" if v == 0 else _money(v))
