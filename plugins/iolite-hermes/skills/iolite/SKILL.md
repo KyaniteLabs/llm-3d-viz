@@ -29,3 +29,4 @@ Read `desktop_listening` in the result: true means a pane acknowledged this comm
 - If the shortlist is empty, read `refusals`. `no_scorable_models` (and `scorable_count` of 0) means no row has both a price and an intelligence score: say the catalog lacks that data and that no floor will help. `no_pick_eligible_models` means some rows are complete but none reaches the floor: give `max_scorable_intelligence` and offer a floor at or below it.
 - If `rows_refused_for_provenance` is above 0, say that many catalog rows were refused because their source names Artificial Analysis.
 - Benchmark scores describe the benchmark, not the user's task. Say so when the top picks are close.
+- Include the data credit lines the tool returns (`data_credits`) in your answer, as written. They credit the data sources under their licences.
