@@ -5,8 +5,13 @@ tests/test_decide.py asserts this module against tests/fixtures/decide-golden.js
 a golden file generated from decide.ts; the repo's vitest parity test fails when
 decide.ts and the golden file disagree.
 
-Models are plain dicts with the catalog field names: model, tps,
-blended_price_per_M, aa_intelligence_index, data_date.
+Models are plain dicts with the catalog field names: model, tps (optional),
+blended_price_per_M, intelligence, data_date. The old name `aa_intelligence_index`
+is still read as a deprecated alias of `intelligence`.
+
+Speed is optional. When every candidate that clears the floor has a measured tps the
+shortlist is the full cost x speed front ("cost_speed" mode). Otherwise it is the
+cost x intelligence front ("cost" mode): no model is ranked on a speed nobody measured.
 """
 
 from __future__ import annotations
@@ -34,10 +39,24 @@ def _finite(v: Any) -> bool:
         return False
 
 
-def is_scorable(m: Model) -> bool:
-    """src/data/models.ts isScorable: tps, price and index all finite and >= 0."""
-    for key in ("tps", "blended_price_per_M", "aa_intelligence_index"):
-        v = m.get(key)
+def intelligence_of(m: Model) -> Any:
+    """The intelligence score: `intelligence`, else the deprecated `aa_intelligence_index`."""
+    v = m.get("intelligence")
+    return m.get("aa_intelligence_index") if v is None else v
+
+
+def has_speed(m: Model) -> bool:
+    v = m.get("tps")
+    return v is not None and _finite(v) and v >= 0
+
+
+def is_scorable(m: Model, need_speed: bool = True) -> bool:
+    """src/data/models.ts isScorable: tps, price and index all finite and >= 0.
+    With need_speed=False only price and intelligence are required (speed is optional)."""
+    vals = [m.get("blended_price_per_M"), intelligence_of(m)]
+    if need_speed:
+        vals.append(m.get("tps"))
+    for v in vals:
         if v is None or not _finite(v) or v < 0:
             return False
     return True
@@ -55,14 +74,14 @@ def clamp_bias(n: Any) -> float:
     return min(1.0, max(-1.0, float(n)))
 
 
-def is_pick_eligible(m: Model, floor: float) -> bool:
-    if not is_scorable(m):
+def is_pick_eligible(m: Model, floor: float, need_speed: bool = True) -> bool:
+    if not is_scorable(m, need_speed):
         return False
-    return m["aa_intelligence_index"] >= clamp_floor(floor)
+    return intelligence_of(m) >= clamp_floor(floor)
 
 
-def filter_pick_eligible(models: Iterable[Model], floor: float) -> List[Model]:
-    return [m for m in models if is_pick_eligible(m, floor)]
+def filter_pick_eligible(models: Iterable[Model], floor: float, need_speed: bool = True) -> List[Model]:
+    return [m for m in models if is_pick_eligible(m, floor, need_speed)]
 
 
 def dominates_cost_speed(a: Model, b: Model) -> bool:
@@ -95,6 +114,27 @@ def cost_speed_pareto(models: Iterable[Model]) -> List[Model]:
         top = max(speed for _, speed, _ in keyed[j:k])
         if top > best_cheaper:
             keep.update(i for _, speed, i in keyed[j:k] if speed == top)
+        best_cheaper = max(best_cheaper, top)
+        j = k
+    return [m for i, m in enumerate(valid) if i in keep]
+
+
+def cost_intelligence_pareto(models: Iterable[Model]) -> List[Model]:
+    """No-speed front: models no other model beats on cost (lower) and intelligence (higher),
+    in input order. Same sweep as cost_speed_pareto with intelligence in speed's place."""
+    valid = [m for m in models if is_scorable(m, need_speed=False)]
+    keyed = [(m["blended_price_per_M"], intelligence_of(m), i) for i, m in enumerate(valid)]
+    keyed.sort(key=lambda k: k[0])
+    keep = set()
+    best_cheaper = -math.inf
+    j = 0
+    while j < len(keyed):
+        k = j
+        while k < len(keyed) and keyed[k][0] == keyed[j][0]:
+            k += 1
+        top = max(v for _, v, _ in keyed[j:k])
+        if top > best_cheaper:
+            keep.update(i for _, v, i in keyed[j:k] if v == top)
         best_cheaper = max(best_cheaper, top)
         j = k
     return [m for i, m in enumerate(valid) if i in keep]
@@ -135,12 +175,18 @@ def _locale_key(name: str):
     return (tuple(primary), tuple(secondary), tuple(tertiary))
 
 
-def rank_pareto_by_bias(pareto: List[Model], bias: float) -> List[Model]:
+def rank_pareto_by_bias(pareto: List[Model], bias: float, axis: str = "tps") -> List[Model]:
+    """bias -1 -> cheaper first, +1 -> the other axis first (faster, or in "cost" mode, smarter).
+    axis is "tps" for the cost x speed front or "intelligence" for the cost front."""
     b = clamp_bias(bias)
     if not pareto:
         return []
+
+    def other(m: Model) -> Any:
+        return intelligence_of(m) if axis == "intelligence" else m["tps"]
+
     costs = [m["blended_price_per_M"] for m in pareto]
-    speeds = [m["tps"] for m in pareto]
+    speeds = [other(m) for m in pareto]
     min_c, max_c = min(costs), max(costs)
     min_s, max_s = min(speeds), max(speeds)
     span_c = (max_c - min_c) or 1
@@ -151,14 +197,14 @@ def rank_pareto_by_bias(pareto: List[Model], bias: float) -> List[Model]:
     scored = []
     for m in pareto:
         cheap = (max_c - m["blended_price_per_M"]) / span_c
-        fast = (m["tps"] - min_s) / span_s
+        fast = (other(m) - min_s) / span_s
         scored.append((w_cheap * cheap + w_fast * fast, m))
 
     def cmp(x, y):
         (sx, mx), (sy, my) = x, y
         for d in (sy - sx,
                   mx["blended_price_per_M"] - my["blended_price_per_M"],
-                  my["tps"] - mx["tps"]):
+                  other(my) - other(mx)):
             if d:
                 return -1 if d < 0 else 1
         kx, ky = _locale_key(mx["model"]), _locale_key(my["model"])
@@ -168,20 +214,30 @@ def rank_pareto_by_bias(pareto: List[Model], bias: float) -> List[Model]:
     return [m for _, m in scored]
 
 
+def decide_mode(eligible: List[Model]) -> str:
+    """"cost_speed" when every candidate has a measured speed, else "cost"."""
+    return "cost_speed" if eligible and all(has_speed(m) for m in eligible) else "cost"
+
+
 def shortlist_from_decide(models: List[Model], floor: float, bias: float,
-                          n: Any = DEFAULT_SHORTLIST_N) -> Dict[str, List[Model]]:
+                          n: Any = DEFAULT_SHORTLIST_N) -> Dict[str, Any]:
     safe_n = math.floor(n) if _finite(n) and n > 0 else DEFAULT_SHORTLIST_N
-    eligible = filter_pick_eligible(models, floor)
-    pareto = cost_speed_pareto(eligible)
-    ranked = rank_pareto_by_bias(pareto, bias)
-    return {"eligible": eligible, "pareto": pareto, "shortlist": ranked[:safe_n]}
+    eligible = filter_pick_eligible(models, floor, need_speed=False)
+    mode = decide_mode(eligible)
+    if mode == "cost_speed":
+        pareto = cost_speed_pareto(eligible)
+        ranked = rank_pareto_by_bias(pareto, bias)
+    else:
+        pareto = cost_intelligence_pareto(eligible)
+        ranked = rank_pareto_by_bias(pareto, bias, axis="intelligence")
+    return {"eligible": eligible, "pareto": pareto, "shortlist": ranked[:safe_n], "mode": mode}
 
 
 def floor_from_anchor(models: Iterable[Model], anchor: str) -> Optional[float]:
     row = next((m for m in models if m.get("model") == anchor), None)
     if row is None:
         return None
-    idx = row.get("aa_intelligence_index")
+    idx = intelligence_of(row)
     if idx is None or not _finite(idx) or idx < 0 or idx > 100:
         return None
     return float(idx)
@@ -220,8 +276,8 @@ def _js_num(v: Any) -> str:
 
 def catalog_snapshot_payload(models: Iterable[Model]) -> str:
     rows = [
-        "|".join(_js_num(m.get(k)) for k in
-                 ("model", "aa_intelligence_index", "tps", "blended_price_per_M", "data_date"))
+        "|".join(_js_num(intelligence_of(m) if k == "intelligence" else m.get(k)) for k in
+                 ("model", "intelligence", "tps", "blended_price_per_M", "data_date"))
         for m in models
     ]
     rows.sort(key=_locale_key)
