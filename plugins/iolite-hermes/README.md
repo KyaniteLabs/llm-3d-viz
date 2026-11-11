@@ -81,6 +81,22 @@ No lawful public source for model speed exists, so Iolite does not ship one. Ins
 
 Until every candidate has a measurement, answers say "speed: not measured yet" and rank on cost and intelligence only. In that mode `fast` favours the smarter model, not a faster one.
 
+## Hermes Desktop: model landscape
+
+In Hermes Desktop, the composer button "Iolite" and the command "Iolite: model landscape" open a pane that plots the bundled catalog: price (log) by intelligence (0-100) by context window (log), in a 3D view you can orbit, drag, wheel-zoom and drive with the arrow keys, plus a linked 2D price by intelligence view. Wire spheres on a line are the cost x intelligence front (no model is cheaper and at least as smart), small rings are dominated models, a diamond is a pick from your last `/iolite shortlist`, and a dashed plane is its intelligence floor. Hover or focus a point, or tab through the front list, to read its numbers and where each comes from.
+
+- **Third axis:** context window by default, labelled on the chart, with a switch to speed. Speed is never bundled or estimated: the Speed switch plots only models you have measured on this machine (3 calls or more) and says how many it left out. Models with no price or no score are not plotted; the pane states that count.
+- **One local request:** the pane reads `/api/plugins/iolite/landscape`, served by this plugin's `dashboard/plugin_api.py`, for your measured speeds and last shortlist. If that route is not available it says so and still plots the bundled catalog. Set `remember_shortlist: false` to stop keeping `last_shortlist.json` (floor, objective and picked slugs, mode 0600, never uploaded).
+- **Data inside the file:** the pane is one ESM file, `desktop/plugin.js`, with the catalog snapshot inlined and credited on screen. It imports only `@hermes/plugin-sdk` and `react` and draws with Canvas 2D (no WebGL, no extra library).
+- **Not shown:** openness is not in the catalog, so there is no open or closed glyph; one glyph is used per class.
+
+Rebuild after changing the catalog or the sources (Node 20 or later, `esbuild` is the only build dependency):
+
+```sh
+python3 scripts/build_snapshot.py            # catalog.json -> desktop-src/src/snapshot.json (--check verifies)
+cd desktop-src && npm install && npm run build && npm test
+```
+
 ## Use your own catalog
 
 `catalog_path` or `catalog_url` replace the bundled catalog:
@@ -126,12 +142,13 @@ Restart the gateway, then ask: *"Shortlist three models at least as smart as <a 
   - `catalog_url`: one GET, https only unless you set `allow_http: true`, cached in memory for `cache_minutes`. Iolite sends the URL as you write it and adds no credentials of its own. A URL with `user:password@` is refused; a `?token=` query is accepted and sent as written, so treat the URL as a secret you chose to put in config. URLs with whitespace or control characters, or a bad port, are refused before any request. The whole response must arrive within `timeout_seconds` (slow-drip responses are cut off) and stay under 8 MB, and redirects are followed only on the same origin. Answers and `/iolite status` show only the scheme, host and path, never the query string or fragment, and error messages never contain the URL.
   - A failed fetch is remembered for five minutes and not retried.
 - **Output:** every row field is cleaned before it is shown: control characters and newlines removed, text capped at 200 characters, `@` mentions and chat markup defused, non-finite numbers dropped.
-- **Storage:** the plugin writes one file, `speed.json` in its plugin data directory (mode 0600, your own speed measurements only), and registers one hook, `post_api_request`, which reads token counts and timing and nothing else. `measure_speed: false` turns both off. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
+- **Storage:** the plugin writes two files in its plugin data directory, both mode 0600: `speed.json` (your own speed measurements only) and `last_shortlist.json` (the floor, objective and picked slugs of your latest shortlist; `remember_shortlist: false` turns it off), and registers one hook, `post_api_request`, which reads token counts and timing and nothing else. `measure_speed: false` turns the hook and speed.json off. The Desktop pane adds one local REST route and no outbound request. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
 
 ## Tests
 
 ```sh
 cd plugins/iolite-hermes && python3 -m pytest -q
+cd desktop-src && npm test      # Desktop pane: front parity with decide.py, palette contrast, bundle checks
 ```
 
 `tests/fixtures/decide-golden.json` is generated from `src/lib/decide.ts` over synthetic catalogs by `tests/iolite-plugin-parity.test.ts` in the repo's vitest suite, and the Python tests compare `decide.py` with it. The vitest parity test fails when `decide.ts` and the golden file disagree; the CI job runs it whenever `decide.ts` changes.

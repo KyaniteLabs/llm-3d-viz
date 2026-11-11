@@ -73,6 +73,10 @@ There is no speed data in this catalog. No public source of per-model hosted-API
 redistributed. Iolite records tokens per second from your own calls, on your own machine, and
 never uploads them.
 
+## Hermes Desktop pane
+
+The Desktop landscape pane draws a compact snapshot of the same catalog (`desktop-src/src/snapshot.json`, built by `scripts/build_snapshot.py`) and shows the same credits and notices on screen. It adds no data source.
+
 ## Not affiliated
 
 Epoch AI, LMArena and BerriAI do not endorse Iolite.

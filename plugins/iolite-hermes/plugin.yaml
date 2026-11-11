@@ -1,6 +1,6 @@
 name: iolite
 label: Iolite
-version: "0.3.0"
+version: "0.4.0"
 manifest_version: 2
 api_version: 1
 description: >
@@ -17,7 +17,15 @@ description: >
   post_api_request hook keeps a rolling median of tokens per second per model
   in speed.json in the plugin data directory, labelled as measured locally and
   not comparable across machines. Nothing is uploaded; set measure_speed false
-  to turn it off. Disclosure: no network unless you set catalog_url (one GET,
+  to turn it off. Hermes Desktop pane: "Iolite: model landscape" (composer
+  button and command palette) plots the bundled catalog in 3D (price x
+  intelligence x context window, or speed once you have measured it) with a
+  linked 2D view and the cost x intelligence front. It reads one local REST
+  route of this plugin, /api/plugins/iolite/landscape, which returns your
+  measured speeds and the floor and picks of your last /iolite shortlist, kept
+  in last_shortlist.json in the plugin data directory (set remember_shortlist
+  false to stop keeping it). The pane makes no other request, and models with
+  no price or no score are not plotted. Disclosure: no network unless you set catalog_url (one GET,
   https unless you set allow_http, sent as written with no credentials added;
   a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on
   the whole response, same-origin redirects only). catalog_path or catalog_url
@@ -56,3 +64,7 @@ config_schema:
     type: bool
     default: true
     description: "Record tokens per second of your own model calls (rolling median, kept locally in speed.json, never uploaded) and show it as 'measured locally'. Off records and shows nothing."
+  remember_shortlist:
+    type: bool
+    default: true
+    description: "Keep the floor, objective and picked model slugs of your latest /iolite shortlist in last_shortlist.json in the plugin data directory (never uploaded) so the Desktop landscape pane can mark them. Off keeps nothing."
