@@ -5,10 +5,12 @@
  * locally measured speed and your last shortlist. If that route is absent the pane says so.
  */
 import { COMPOSER_AREAS, GHOST_ICON_BTN, PALETTE_AREA, host } from '@hermes/plugin-sdk'
+import * as sdk from '@hermes/plugin-sdk'
 import { createElement as h } from 'react'
 import { LandscapePane } from './pane.js'
 
 const PANE_ID = 'iolite:landscape'
+const PATH = '/iolite'
 const TITLE = 'Iolite: model landscape'
 let pluginCtx = null
 
@@ -43,6 +45,12 @@ export default {
         onClick: e => { e.preventDefault(); openLandscape() },
       }, 'Iolite'),
     })
+    // A sidebar entry and its own page, next to the other plugins (as Epoch does). Older
+    // Desktops without these areas keep the composer button and the palette command.
+    if (sdk.ROUTES_AREA && sdk.SIDEBAR_NAV_AREA) {
+      ctx.register({ id: 'page', area: sdk.ROUTES_AREA, data: { path: PATH }, render: () => h(LandscapePane, { ctx }) })
+      ctx.register({ id: 'nav', area: sdk.SIDEBAR_NAV_AREA, data: { path: PATH, label: 'Iolite', codicon: 'graph-scatter' } })
+    }
     if (PALETTE_AREA) {
       ctx.register({
         id: 'model-landscape',

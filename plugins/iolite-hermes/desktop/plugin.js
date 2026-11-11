@@ -2,6 +2,7 @@
 
 // src/plugin.js
 import { COMPOSER_AREAS, GHOST_ICON_BTN, PALETTE_AREA, host } from "@hermes/plugin-sdk";
+import * as sdk from "@hermes/plugin-sdk";
 import { createElement as h3 } from "react";
 
 // src/pane.js
@@ -1365,6 +1366,7 @@ function LandscapePane({ ctx }) {
 
 // src/plugin.js
 var PANE_ID = "iolite:landscape";
+var PATH = "/iolite";
 var TITLE = "Iolite: model landscape";
 var pluginCtx = null;
 function openLandscape() {
@@ -1400,6 +1402,10 @@ var plugin_default = {
         }
       }, "Iolite")
     });
+    if (sdk.ROUTES_AREA && sdk.SIDEBAR_NAV_AREA) {
+      ctx.register({ id: "page", area: sdk.ROUTES_AREA, data: { path: PATH }, render: () => h3(LandscapePane, { ctx }) });
+      ctx.register({ id: "nav", area: sdk.SIDEBAR_NAV_AREA, data: { path: PATH, label: "Iolite", codicon: "graph-scatter" } });
+    }
     if (PALETTE_AREA) {
       ctx.register({
         id: "model-landscape",

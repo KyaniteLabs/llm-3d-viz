@@ -32,10 +32,10 @@ export const useRef = () => ({ current: null })
 export const useCallback = f => f
 `
 
-function load() {
+function load(extra = '') {
   const dir = mkdtempSync(path.join(tmpdir(), 'iolite-bundle-'))
   const sdk = path.join(dir, 'sdk.mjs'), react = path.join(dir, 'react.mjs')
-  writeFileSync(sdk, SDK_STUB); writeFileSync(react, REACT_STUB)
+  writeFileSync(sdk, SDK_STUB + extra); writeFileSync(react, REACT_STUB)
   const urls = { '@hermes/plugin-sdk': pathToFileURL(sdk).href, react: pathToFileURL(react).href, 'react/jsx-runtime': pathToFileURL(react).href }
   const rewritten = src.replace(/(from\s*)(["'])(@hermes\/plugin-sdk|react(?:\/jsx-runtime)?)\2/g, (_, pre, q, spec) => `${pre}${q}${urls[spec]}${q}`)
   const leftover = [...rewritten.matchAll(/(?:^|\n)\s*(?:import|export)[^;\n]*?from\s*["']([^"']+)["']/g)].map(m => m[1]).filter(s => !s.startsWith('file:'))
@@ -103,5 +103,21 @@ test('without host.openWorkspace the action says so instead of failing', async (
     assert.equal(stubs.calls.notices.length, 1)
     assert.match(stubs.calls.notices[0].message, /Update Hermes Desktop/)
     stubs.host.openWorkspace = old
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('register() adds a sidebar entry and a /iolite page when the Desktop has those areas', async () => {
+  const { dir, file } = load("export const ROUTES_AREA = 'routes'\nexport const SIDEBAR_NAV_AREA = 'sidebar.nav'\n")
+  try {
+    const plugin = (await import(pathToFileURL(file).href)).default
+    const registered = []
+    plugin.register({ register: c => { registered.push(c); return () => {} }, rest: async () => ({ ok: true }) })
+    const page = registered.find(c => c.area === 'routes')
+    const nav = registered.find(c => c.area === 'sidebar.nav')
+    assert.ok(page && nav, 'one route and one sidebar entry')
+    assert.equal(registered.length, 4)
+    assert.equal(page.data.path, '/iolite')
+    assert.deepEqual(nav.data, { path: '/iolite', label: 'Iolite', codicon: 'graph-scatter' })
+    assert.equal(typeof page.render().type, 'function', 'the page renders the landscape pane')
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
