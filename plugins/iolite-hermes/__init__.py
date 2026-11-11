@@ -62,7 +62,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
@@ -70,6 +70,7 @@ DEFAULTS: Dict[str, Any] = {
     "cache_minutes": 60,
     "timeout_seconds": 15,
     "measure_speed": True,
+    "remember_shortlist": True,
 }
 OBJECTIVES = {"min_cost": -1.0, "max_speed": 1.0, "balanced": None}
 MAX_N = 25
@@ -699,6 +700,87 @@ def _with_speed(rows: List[dict]) -> List[dict]:
         return rows
 
 
+# ----------------------------------------------------------------------------- landscape (Desktop pane)
+LAST_SHORTLIST_FILE = "last_shortlist.json"
+LANDSCAPE_MAX_PICKS = 25
+
+
+def _remember_shortlist(res: dict) -> None:
+    """Keep the floor and picks of the latest /iolite shortlist in the plugin data directory,
+    so the Desktop landscape pane can mark them. Best effort: never raises, writes nothing when
+    remember_shortlist is off. Only the floor, objective and picked slugs are kept, never the
+    arguments' free text, and nothing leaves the machine."""
+    try:
+        if not _truthy_cfg("remember_shortlist") or not res.get("ok"):
+            return
+        picks = [_safe_text(m.get("slug") or m.get("model"), 120) for m in res.get("shortlist") or ()
+                 if isinstance(m, dict) and (m.get("slug") or m.get("model"))][:LANDSCAPE_MAX_PICKS]
+        floor = res.get("floor_applied") or {}
+        record = {"version": 1, "saved": time.strftime("%Y-%m-%d"),
+                  "floor": floor.get("intelligence"), "floor_source": floor.get("source"),
+                  "objective": res.get("objective"), "mode": res.get("mode"), "picks": picks}
+        d = _data_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(prefix=".last-", suffix=".tmp", dir=d)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(record, fh, allow_nan=False)
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, d / LAST_SHORTLIST_FILE)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+    except Exception:
+        logger.debug("iolite: could not remember the shortlist", exc_info=True)
+
+
+def _read_last_shortlist() -> Optional[dict]:
+    """The remembered shortlist, validated field by field, or None. Never raises."""
+    try:
+        path = _data_dir() / LAST_SHORTLIST_FILE
+        st = path.stat()
+        if not stat.S_ISREG(st.st_mode) or st.st_size > 64 * 1024:
+            return None
+        data = json.loads(path.read_bytes())
+        if not isinstance(data, dict) or not isinstance(data.get("picks"), list):
+            return None
+        floor = netio._num(data.get("floor"))
+        return {"floor": floor if floor is not None and 0 <= floor <= 100 else None,
+                "floor_source": _safe_text(data.get("floor_source"), 20) or None,
+                "objective": _safe_text(data.get("objective"), 20) or None,
+                "saved": _safe_text(data.get("saved"), 10) or None,
+                "picks": [_safe_text(p, 120) for p in data["picks"][:LANDSCAPE_MAX_PICKS] if isinstance(p, str)]}
+    except Exception:
+        return None
+
+
+def landscape_state() -> dict:
+    """What the Desktop landscape pane reads over REST: locally measured speeds (by catalog
+    slug), the latest remembered shortlist and floor, and which catalog /iolite is using. Local
+    files only, no network. Speeds appear only where measure_speed is on and a model has at
+    least SPEED_MIN_SAMPLES calls; a model with no measurement is absent, never estimated."""
+    out: Dict[str, Any] = {"ok": True, "version": VERSION, "measure_speed": _measure_speed_on(),
+                           "speed": {}, "speed_label": SPEED_LABEL.format(date="date per model"),
+                           "last_shortlist": _read_last_shortlist()}
+    try:
+        rows, source = load_catalog()
+        out["catalog_source"] = source
+        out["bundled"] = source == "bundled catalog"
+        for r in rows:
+            tps = netio._num(r.get("tps"))
+            slug = r.get("slug")
+            if tps is not None and tps > 0 and isinstance(slug, str) and slug:
+                out["speed"][slug] = {"tps": tps, "note": r.get("tps_note")}
+    except Exception as exc:
+        out["catalog_source"] = None
+        out["bundled"] = False
+        out["catalog_error"] = _safe_msg(exc)
+    return out
+
+
 def _data_credits(rows: List[dict]) -> List[str]:
     """The distinct credit lines of the rows being shown (the licences ask for them)."""
     seen: List[str] = []
@@ -751,7 +833,12 @@ def iolite_shortlist(args: Optional[dict] = None, **_kw) -> str:
         except Exception as exc:  # never raise into Hermes
             return _err(_safe_msg(exc))
         try:
-            return _shortlist(rows, source, args)
+            text = _shortlist(rows, source, args)
+            try:
+                _remember_shortlist(json.loads(text))
+            except Exception:
+                logger.debug("iolite: could not remember the shortlist", exc_info=True)
+            return text
         except ArgError as exc:
             return _err(str(exc))
         except Exception:  # one malformed catalog row must not become a traceback
