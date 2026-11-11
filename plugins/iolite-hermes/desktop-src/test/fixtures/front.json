@@ -1,0 +1,10 @@
+{
+ "note": "slugs on the cost x intelligence front of the bundled catalog, from decide.cost_intelligence_pareto; tests/test_landscape.py checks this file against the Python",
+ "front": [
+  "claude-fable-5.2",
+  "claude-haiku-5.5",
+  "gemma-4-31b-it",
+  "gpt-6.1-sol",
+  "gpt-6.1-terra"
+ ]
+}

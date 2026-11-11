@@ -7,6 +7,7 @@ import {
   dominatesCostSpeed,
   filterPickEligible,
   isPickEligible,
+  intelligenceOf,
   rankParetoByBias,
   shortlistFromDecide,
 } from "../src/lib/decide";
@@ -60,6 +61,13 @@ describe("cost×speed Pareto", () => {
     expect(dominatesCostSpeed(mid, dominated)).toBe(true);
     const front = costSpeedPareto([cheapSlow, mid, expensiveFast, dominated]);
     expect(new Set(front.map((m) => m.model))).toEqual(new Set(["cs", "mid", "ef"]));
+  });
+
+  it("compares cost and speed at full precision, not rounded", () => {
+    const cheapest = model("cheapest", 1, 0.001, 70);
+    const dearer = model("dearer", 2, 0.0049, 70);
+    expect(dominatesCostSpeed(dearer, cheapest)).toBe(false);
+    expect(costSpeedPareto([cheapest, dearer]).map((m) => m.model)).toEqual(["cheapest", "dearer"]);
   });
 });
 
@@ -129,5 +137,35 @@ describe("bias shortlist", () => {
       });
       expect(resp.floor_applied.source).toBe(source);
     }
+  });
+});
+
+describe("speed is optional", () => {
+  it("ranks the cost x intelligence front when no speed is measured", () => {
+    const rows = [
+      model("cheap", null, 0.5, 60),
+      model("mid", null, 2, 80),
+      model("smart", null, 9, 95),
+      model("dominated", null, 3, 70),
+    ];
+    const out = shortlistFromDecide(rows, 50, -1, 3);
+    expect(out.mode).toBe("cost");
+    expect(out.pareto.map((m) => m.model).sort()).toEqual(["cheap", "mid", "smart"]);
+    expect(out.shortlist[0].model).toBe("cheap");
+    expect(shortlistFromDecide(rows, 50, 1, 3).shortlist[0].model).toBe("smart");
+  });
+
+  it("uses the full cost x speed front only when every candidate has a speed", () => {
+    const withSpeed = [model("a", 10, 1, 60), model("b", 90, 4, 60)];
+    expect(shortlistFromDecide(withSpeed, 50, 0, 3).mode).toBe("cost_speed");
+    const mixed = [...withSpeed, model("c", null, 0.2, 60)];
+    expect(shortlistFromDecide(mixed, 50, 0, 3).mode).toBe("cost");
+  });
+
+  it("reads intelligence, falling back to the deprecated aa_intelligence_index", () => {
+    const row = model("x", 1, 1, 77) as unknown as Record<string, unknown>;
+    expect(intelligenceOf(row as unknown as Model)).toBe(77);
+    const renamed = { ...row, intelligence: 55 } as unknown as Model;
+    expect(intelligenceOf(renamed)).toBe(55);
   });
 });

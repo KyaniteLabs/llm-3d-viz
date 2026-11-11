@@ -1,0 +1,79 @@
+name: iolite
+label: Iolite
+version: "0.4.0"
+manifest_version: 2
+api_version: 1
+description: >
+  Pick an LLM that is smart enough, then cheapest, in one tool call, from real
+  data that ships inside the plugin, so a fresh install gives a real answer
+  with no setup and no network. Set an intelligence floor (or name an anchor
+  model), drop everything below it or without a price, keep the cost x
+  intelligence front, and rank it toward cheaper, smarter or balanced. Two
+  tools, iolite_shortlist and iolite_model, a /iolite slash command and a
+  bundled skill. Bundled data, each source with its licence and credit in
+  ATTRIBUTION.md and in every answer: Epoch AI Benchmarking Hub ECI (CC BY),
+  LMArena ratings (CC BY 4.0, Bradley-Terry), LiteLLM prices (MIT). Speed has
+  no lawful public source, so Iolite measures it on your own machine: a
+  post_api_request hook keeps a rolling median of tokens per second per model
+  in speed.json in the plugin data directory, labelled as measured locally and
+  not comparable across machines. Nothing is uploaded; set measure_speed false
+  to turn it off. Hermes Desktop pane: "Iolite: model landscape" (composer
+  button and command palette) plots the bundled catalog in 3D (price x
+  intelligence x context window, or speed once you have measured it) with a
+  linked 2D view and the cost x intelligence front. It reads one local REST
+  route of this plugin, /api/plugins/iolite/landscape, which returns your
+  measured speeds and the floor and picks of your last /iolite shortlist, kept
+  in last_shortlist.json in the plugin data directory (set remember_shortlist
+  false to stop keeping it), plus your own prices from my_prices.json there and
+  your per-task medians from tasks.json (a second hook use: tokens and model
+  seconds per task, task ids hashed; set measure_usage false to stop). The
+  pane's "My plans" editor saves my_prices.json through one more local route,
+  POST /api/plugins/iolite/my-prices (validated, atomic, 0600; never shipped
+  or uploaded). The pane makes no other request, and models with
+  no price or no score are not plotted. Disclosure: no network unless you set catalog_url (one GET,
+  https unless you set allow_http, sent as written with no credentials added;
+  a user:password@ URL is refused; cached in memory, 8 MB cap, a deadline on
+  the whole response, same-origin redirects only). catalog_path or catalog_url
+  replace the bundled data; rows whose source or provenance names Artificial
+  Analysis are refused. No secrets read. Hermes keeps tool results in session
+  history like any tool output.
+author: KyaniteLabs
+license: MIT
+requires_hermes: ">=0.23.0"
+tags: [models, routing, cost, pareto]
+requires_env: []
+provides_tools: [iolite_shortlist, iolite_model]
+provides_hooks: [post_api_request]
+config_schema:
+  catalog_path:
+    type: str
+    default: ""
+    description: "Set under plugins.entries.iolite.settings. Local catalog JSON: a list of rows or an object with a 'models' list (the shape of /api/v1/models.json). Replaces the bundled catalog. Wins over catalog_url."
+  catalog_url:
+    type: str
+    default: ""
+    description: "An https URL of a catalog JSON you are allowed to read, replacing the bundled catalog. Empty means the bundled catalog and no network."
+  allow_http:
+    type: bool
+    default: false
+    description: "Allow a plain http catalog_url. Off by default; turn it on only for a trusted local network."
+  cache_minutes:
+    type: int
+    default: 60
+    description: "How long a fetched catalog is reused in memory."
+  timeout_seconds:
+    type: int
+    default: 15
+    description: "Time limit in seconds for a whole catalog_url fetch, redirects included."
+  measure_speed:
+    type: bool
+    default: true
+    description: "Record tokens per second of your own model calls (rolling median, kept locally in speed.json, never uploaded) and show it as 'measured locally'. Off records and shows nothing."
+  measure_usage:
+    type: bool
+    default: true
+    description: "Record tokens and model seconds per task of your own calls (task ids hashed, kept locally in tasks.json, at most 2000 tasks and 90 days, never uploaded). Feeds the pane's cost, time and tokens per task views and prices subscription plans by your measured usage. Off records and shows nothing."
+  remember_shortlist:
+    type: bool
+    default: true
+    description: "Keep the floor, objective and picked model slugs of your latest /iolite shortlist in last_shortlist.json in the plugin data directory (never uploaded) so the Desktop landscape pane can mark them. Off keeps nothing."
