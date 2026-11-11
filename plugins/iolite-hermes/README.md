@@ -17,7 +17,7 @@ Floor 50 (default), balanced: 233 models clear it, 5 on the cost x intelligence 
 Speed: not measured yet, so these are ranked on cost and intelligence.
 1. GPT-6.1 Terra (OpenAI): intelligence 95.0 (ECI), $2.00/M, speed: not measured yet
 2. GPT-6.1 Sol (OpenAI): intelligence 95.7 (ECI), $4.00/M, speed: not measured yet
-3. Claude Haiku 5.5 (Anthropic): intelligence 88.7 (ECI), $0.2/M, speed: not measured yet
+3. Claude Haiku 5.5 (Anthropic): intelligence 88.7 (ECI), $0.20/M, speed: not measured yet
 Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data \(CC BY\). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100.
 Prices: LiteLLM model\_prices\_and\_context\_window.json, MIT licence.
 ```

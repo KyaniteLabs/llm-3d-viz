@@ -204,7 +204,7 @@ def test_substring_search_covers_slugs(tmp_path):
 
 
 @pytest.mark.parametrize("v,text", [(0.004, "$0.004/M"), (0.15, "$0.15/M"), (3.5, "$3.50/M"),
-                                    (1234.5, "$1,234.50/M"), (0, "$0.00/M"), ("x", "?"), (True, "?")])
+                                    (1234.5, "$1,234.50/M"), (0, "$0/M (free tier)"), (0.2, "$0.20/M"), ("x", "?"), (True, "?")])
 def test_money(v, text):
     assert plugin._money(v) == text
 

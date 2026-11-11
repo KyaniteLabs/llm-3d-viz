@@ -875,11 +875,14 @@ _OBJECTIVE_WORDS = {"cheap": "min_cost", "cheapest": "min_cost", "min_cost": "mi
 
 
 def _money(v: Any) -> str:
-    """Dollars per million tokens. Under $1 keeps three significant figures, so
-    $0.004/M doesn't print as $0.00/M."""
+    """Dollars per million tokens, always in cents ($0.20/M, $2.00/M). Prices
+    under a cent keep three significant figures, so $0.004/M doesn't print as
+    $0.00/M. A listed price of zero is a provider's free tier, and says so."""
     if netio._num(v) is None:
         return "?"
-    return f"${v:.3g}/M" if 0 < v < 1 else f"${v:,.2f}/M"
+    if v == 0:
+        return "$0/M (free tier)"
+    return f"${v:.3g}/M" if 0 < v < 0.01 else f"${v:,.2f}/M"
 
 
 def _num(v: Any, unit: str) -> str:
