@@ -67,7 +67,7 @@ def test_old_ctx_without_command_or_skill_still_loads():
 
     old = Old()
     plugin.register(old)
-    assert set(old.tools) == {"iolite_shortlist", "iolite_model"}
+    assert set(old.tools) == {"iolite_shortlist", "iolite_model", "iolite_show"}
 
 
 @pytest.mark.parametrize("text", ["", "help", "--help"])

@@ -1,9 +1,9 @@
 {
   "name": "iolite",
   "label": "Iolite",
-  "description": "Model landscape data for the Desktop pane. No dashboard tab of its own; exposes GET /landscape (locally measured speeds, the latest /iolite shortlist) under /api/plugins/iolite/.",
+  "description": "Model landscape data for the Desktop pane. No dashboard tab of its own; exposes GET /landscape, POST /my-prices and POST /pane-receipt under /api/plugins/iolite/.",
   "icon": "Compass",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "tab": { "hidden": true },
   "api": "plugin_api.py"
 }

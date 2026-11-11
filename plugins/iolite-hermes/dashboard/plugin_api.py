@@ -1,6 +1,6 @@
 """Iolite dashboard API, mounted at ``/api/plugins/iolite/``.
 
-Two endpoints. ``GET /landscape``, read-only, for the Desktop "model landscape" pane:
+``GET /landscape``, read-only, for the Desktop "model landscape" pane:
 the locally measured speeds (tokens per second of your own calls, by catalog slug),
 the floor and picks of your latest ``/iolite shortlist``, and which catalog ``/iolite``
 is using, your own prices and your per-task medians. It reads small files from the plugin
@@ -8,6 +8,8 @@ data directory (``speed.json``, ``tasks.json``, ``last_shortlist.json`` and, if 
 ``my_prices.json``) and the catalog. ``POST /my-prices`` validates the plans the pane's
 "My plans" editor sends and writes ``my_prices.json`` there (atomic, 0600), all or nothing.
 No network, no secrets; nothing leaves the machine.
+``POST /pane-receipt`` acknowledges a pending agent command or presence probe; it can
+only mark a fresh, temporary receipt already created by the agent half.
 
 The logic lives in the package's agent half (``__init__.py``), loaded here BY PATH so
 there is one implementation and the two surfaces cannot drift (the dashboard loader
@@ -60,3 +62,12 @@ def my_prices(payload: Any = Body(default=None)) -> dict:
     except Exception:
         log.debug("iolite: saving my prices failed", exc_info=True)
         return {"ok": False, "problems": ["Iolite could not save your prices"]}
+
+
+@router.post("/pane-receipt")
+def pane_receipt(payload: Any = Body(default=None)) -> dict:
+    try:
+        return _load_agent_half().receive_pane_receipt(payload)
+    except Exception:
+        log.debug("iolite: pane receipt failed", exc_info=True)
+        return {"ok": False}

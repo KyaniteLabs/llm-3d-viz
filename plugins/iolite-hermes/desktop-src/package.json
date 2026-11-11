@@ -1,7 +1,7 @@
 {
   "name": "iolite-hermes-desktop",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Build and test tooling for the Iolite Desktop pane. Not shipped: Hermes loads ../desktop/plugin.js.",
   "type": "module",
   "scripts": {

@@ -12,6 +12,7 @@ import {
   fmtPrice, fmtSeconds, fmtShownPrice, fmtTaskCost, findModels, fmtTokens, fmtTps, fmtUsd, floorPosition, matchPicks, taskCount, xAxis, xValue,
 } from './frontier.js'
 import { PlansEditor } from './plans.js'
+import { initialPaneState, subscribePaneEvents } from './pane-events.js'
 
 /** Hermes' light or dark paint when the host offers it; dark (the design system's mode) otherwise. */
 const useRenderedMode = typeof SDK.useTheme === 'function'
@@ -125,7 +126,9 @@ export function LandscapePane({ ctx }) {
   const mode = useRenderedMode()
   const reduced = useReducedMotion()
   const pal = paletteFor(mode)
-  const [view, setView] = useState('3d')
+  const [pane, setPane] = useState(initialPaneState)
+  const view = pane.view
+  const setView = view => setPane(prev => ({ ...prev, view }))
   const [zMode, setZMode] = useState(Z_CONTEXT)
   const [basis, setBasis] = useState(PRICE_LIST)
   const [xMode, setXMode] = useState(X_PRICE)
@@ -138,6 +141,8 @@ export function LandscapePane({ ctx }) {
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const stageRef = useRef(null)
+
+  useEffect(() => subscribePaneEvents(SDK.host, ctx, setPane), [ctx])
 
   const load = useCallback(() => {
     setRest({ status: 'loading' })
@@ -177,13 +182,27 @@ export function LandscapePane({ ctx }) {
     ...buildLayout(shown, { z: effectiveZ, speed, x: effectiveX, tasks }),
     xTitle: axis.title, xTick: axis.tick,
   }), [shown, effectiveZ, speed, effectiveX, tasks, axis.title])
-  const last = data && data.last_shortlist ? data.last_shortlist : null
+  // Live events outrank a REST snapshot that may have started loading before the tool ran.
+  const last = pane.last || (data && data.last_shortlist ? data.last_shortlist : null)
   const picks = useMemo(() => matchPicks(layout.points, last ? last.picks : []), [layout, last])
-  const floor = last && typeof last.floor === 'number' ? last.floor : null
+  const floor = pane.floor !== undefined ? pane.floor : last && typeof last.floor === 'number' ? last.floor : null
   const floorShown = floorPosition(layout.domains, floor) !== null ? floor : null
   const byId = useMemo(() => new Map(layout.points.map(p => [p.id, p])), [layout])
   const highlightId = hoverId || focusId || pinnedId
   const highlighted = highlightId ? byId.get(highlightId) || null : null
+
+  useEffect(() => {
+    if (!pane.focusRevision) return
+    setHoverId(null)
+    setFocusId(null)
+    setPinnedId(pane.focus_model)
+    // A measured-only axis can hide the requested model. Return to the full catalog view
+    // when needed, so focusing a priced/scored model actually reveals its mark.
+    if (pane.focus_model && !byId.has(pane.focus_model)) {
+      setXMode(X_PRICE)
+      setZMode(Z_CONTEXT)
+    }
+  }, [pane.focus_model, pane.focusRevision])
 
   // the stage lives as long as the canvas
   useEffect(() => {
@@ -215,6 +234,10 @@ export function LandscapePane({ ctx }) {
   }, [])
 
   useEffect(() => {
+    if (pane.cameraReset && stageRef.current) stageRef.current.resetView()
+  }, [pane.cameraReset])
+
+  useEffect(() => {
     const stage = stageRef.current
     if (stage) stage.update({ layout, view, palette: pal, picks, floor: floorShown, hoverId, highlightId, reducedMotion: reduced })
   }, [layout, view, pal, picks, floorShown, hoverId, highlightId, reduced])
@@ -228,9 +251,9 @@ export function LandscapePane({ ctx }) {
       : !data.measure_speed ? 'Speed measuring is off (measure_speed), so there is no speed to plot. Third axis stays on context window.'
         : speedCount === 0 ? 'No model has a locally measured speed yet (each needs 3 calls through Hermes). Third axis stays on context window.'
           : `Speed measured locally for ${speedCount} model${speedCount === 1 ? '' : 's'}, kept on this machine and not comparable across machines.`
-  const shortNote = rest.status !== 'ok' ? null
-    : last && last.picks.length ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? '' : 's'} and the floor (${last.floor === null ? 'none' : last.floor}, ${last.floor_source || 'source not stated'}) from your last /iolite shortlist${last.saved ? `, ${last.saved}` : ''}.`
-      : 'No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.'
+  const shortNote = last
+    ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? '' : 's'} from your last /iolite shortlist (${last.objective || 'objective not stated'}). Floor: ${floor === null ? 'none' : floor}${pane.floor !== undefined ? ', set by the agent' : ''}.`
+    : rest.status === 'ok' ? 'No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.' : null
   const mineNote = rest.status !== 'ok' ? null
     : priced.covered === 0
       ? `My price: no plans yet. Open My plans to price the subscriptions you already pay for; they stay on this machine.${mine && mine.problems && mine.problems.length ? ' Problems: ' + mine.problems.join('; ') + '.' : ''}`
@@ -253,6 +276,9 @@ export function LandscapePane({ ctx }) {
 
   return h('div', { className: 'iolite-ls', style: cssVars },
     h('style', null, CSS),
+    h('div', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', style: { padding: '0 16px', color: pal.muted, fontSize: 12 } },
+      h('span', { key: pane.revision }, pane.announcement,
+        pane.focus_model && !snapshot.models.some(m => m.s === pane.focus_model) ? ' This model has no plotted mark in the bundled catalog.' : '')),
     h('header', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px 20px', alignItems: 'center', padding: '12px 16px 8px' } },
       h('h2', { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase' } }, 'Iolite · model landscape'),
       h(Segmented, { pal, label: 'View', value: view, onChange: setView, options: [{ id: '3d', label: '3D', title: 'Rotate and zoom the 3D landscape' }, { id: '2d', label: '2D', title: 'Price by intelligence, flat' }] }),

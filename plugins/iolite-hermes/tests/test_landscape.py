@@ -126,7 +126,8 @@ def test_dashboard_route_returns_the_snapshot(tmp_path):
     spec2 = importlib.util.spec_from_file_location("iolite_dashboard_api", ROOT / "dashboard" / "plugin_api.py")
     api = importlib.util.module_from_spec(spec2)
     spec2.loader.exec_module(api)
-    assert sorted((r.path, tuple(sorted(r.methods))) for r in api.router.routes) == [("/landscape", ("GET",)), ("/my-prices", ("POST",))]
+    assert sorted((r.path, tuple(sorted(r.methods))) for r in api.router.routes) == [
+        ("/landscape", ("GET",)), ("/my-prices", ("POST",)), ("/pane-receipt", ("POST",))]
     out = api.landscape()
     assert out["ok"] is True and "speed" in out and "last_shortlist" in out
 

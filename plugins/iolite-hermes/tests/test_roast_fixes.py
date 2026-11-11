@@ -195,8 +195,25 @@ def test_an_ambiguous_anchor_name_is_refused(tmp_path):
 
 # 8. Deadlines on slow reads
 
-def test_a_buffered_drip_is_cut_off_at_the_deadline():
+@pytest.fixture
+def connected_sockets():
+    """Some sandboxes allow socketpair creation but deny sends; don't hang in begin()."""
     a, b = socket.socketpair()
+    try:
+        try:
+            a.sendall(b"probe")
+        except PermissionError:
+            pytest.skip("sandbox denies socketpair sends")
+        b.settimeout(1)
+        assert b.recv(5) == b"probe"
+        yield a, b
+    finally:
+        a.close()
+        b.close()
+
+
+def test_a_buffered_drip_is_cut_off_at_the_deadline(connected_sockets):
+    a, b = connected_sockets
     stop = threading.Event()
 
     def drip():
@@ -220,8 +237,8 @@ def test_a_buffered_drip_is_cut_off_at_the_deadline():
     assert time.monotonic() - t0 < 1.5
 
 
-def test_a_silent_server_is_cut_off_at_the_deadline():
-    a, b = socket.socketpair()
+def test_a_silent_server_is_cut_off_at_the_deadline(connected_sockets):
+    a, b = connected_sockets
     a.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nabc")
     resp = http.client.HTTPResponse(b)
     resp.begin()
