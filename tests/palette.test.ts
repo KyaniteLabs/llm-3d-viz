@@ -29,7 +29,7 @@ import {
   MID_EFFORT_SIZE_SCALE,
   DOMINATED_CHROMA_PULL,
 } from "../src/viz/palette";
-import { models } from "../src/data/models";
+import { syntheticModels as models } from "./helpers/synthetic-catalog";
 import { frontier } from "../src/lib/pareto";
 import { normalizedScores, weightedOptimum, type ScoreWeights } from "../src/lib/score";
 
