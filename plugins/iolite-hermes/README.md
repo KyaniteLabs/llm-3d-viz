@@ -4,7 +4,24 @@
 
 Choosing a model usually turns into a spreadsheet: which models are smart enough, then which of those is cheapest or fastest. Iolite does that in one tool call. You set an intelligence floor, and it hands back the few models worth picking.
 
-It is the decide mode of the [Iolite observatory](../../README.md), packaged as a Hermes plugin. The ranking is a tested port of the observatory's own logic.
+## Try it in a minute (synthetic data)
+
+The repo ships a clearly synthetic demo catalog: ten invented "Demo ..." models, no real measurements. Run it without Hermes or a network:
+
+```sh
+python3 plugins/iolite-hermes/demo/try_it.py "shortlist 60 cheap"
+```
+
+```text
+Floor 60 (user), min_cost: 9 models clear it, 2 on the cost x speed front.
+1. Demo Wren Lite (Demo Labs East): index 63.0, $0.12/M, 240 tok/s
+2. Demo Finch Swift (Demo Labs South): index 66.0, $0.3/M, 310 tok/s
+Data: Synthetic demo data: invented values, not real measurements
+```
+
+To use it inside Hermes, set `catalog_path` to `plugins/iolite-hermes/demo/synthetic-catalog.json` (see below), then run `/iolite shortlist 60 cheap`. Swap in your own catalog when you are ready.
+
+It is the decide mode of the [Iolite observatory](../../README.md), packaged as a Hermes plugin. The ranking is a port of the observatory's own logic, checked by a golden file (see Tests).
 
 ## What the agent gets
 
@@ -22,10 +39,10 @@ From chat, `/iolite` gives the same answers without the agent:
 /iolite status
 ```
 
-A bare number is the floor, any other words name an anchor model, and `cheap`, `fast` or `balanced` set the objective. `status` says which source is set, without a network call. The bundled `iolite:iolite` skill tells the agent how to set the floor, pick the objective and credit the data.
+A bare number is the floor, the words before the last one name an anchor model, and a last word of `cheap`, `fast` or `balanced` sets the objective. A model name that ends in one of those words ("Grok 4 Fast") keeps its name when the catalog has it, or when you put it in quotes. `status` says which source is set, without a network call. The bundled `iolite:iolite` skill tells the agent how to set the floor, pick the objective and show the data credit.
 
 `iolite_shortlist` takes these inputs:
-- `floor`: 0–100 on the Intelligence Index scale; default 50.
+- `floor`: 0–100 on the catalog's intelligence score scale (the source of the score is up to the catalog); default 50. A numeric string such as "60" is accepted; anything else is a clear error naming the argument.
 - `anchor_model`: "at least as smart as this model".
 - `objective`.
 - `bias`: −1 to +1 when the objective is balanced.
@@ -36,7 +53,7 @@ Each result carries:
 - the shortlist, each pick marked as on the cost × speed front, with the objective that ranked it;
 - the counts of eligible and Pareto models;
 - a catalog snapshot id, so two answers can be compared;
-- when you set `IOLITE_AA_API_KEY`, an `aa_display` block with Artificial Analysis numbers beside each pick, plus the `attribution` credit. These are display only and never change the ranking.
+- the matched row's `license` and `attribution`, when the catalog gives them, and a count of rows refused for provenance.
 
 ## Point it at a catalog
 
@@ -55,29 +72,7 @@ plugins:
 
 Either form works: a JSON list of rows, or the observatory's `/api/v1/models.json` object with a `models` list. Each row needs `model`, `tps`, `blended_price_per_M` and `aa_intelligence_index`. Rows without a `model` name are skipped. Rows missing any of the other three show up in lookups but are never picked.
 
-### Optional: show Artificial Analysis numbers beside the picks
-
-A key does not give Iolite a catalog. The ranking always comes from `catalog_path` or `catalog_url` and nothing else. If you also have a free key from [artificialanalysis.ai/data-api](https://artificialanalysis.ai/data-api), set it in the gateway's environment:
-
-```sh
-export IOLITE_AA_API_KEY=...   # or put it in the profile's .env
-```
-
-Iolite then adds Artificial Analysis's own index, blended price and speed next to each model, in columns labelled "Artificial Analysis (display only, not used for ranking)". Those numbers never enter a ranking, sort or score: with or without a key, the same arguments return the same picks in the same order (a test checks this).
-
-How the key is used:
-
-- One fetch per answer. Each shortlist or model lookup makes one request run against the free language-models endpoint (a few pages of the same endpoint, 200 models a page) and keeps the values only for that answer.
-- No cache. Nothing is kept between answers and nothing is written to disk.
-- Never retried. If Artificial Analysis refuses (a 429 or the daily quota of 100 requests on the free tier, a bad key, a server error), the answer says so in `aa_display_error`, still shows the ranking, and does not try again. The next question makes its own single attempt.
-- The key is read through Hermes's secret scope, so each profile uses its own key, and it is sent only to `https://artificialanalysis.ai`. It is never logged or returned in tool output.
-- The values are shown to the person who holds the key, and to nobody else. Iolite does not publish, store or re-serve them, and does not combine them into a shared ranking.
-
-Every answer that shows these numbers carries this credit, as Artificial Analysis's terms require, and `/iolite` prints it under the result:
-
-> Source: Artificial Analysis (artificialanalysis.ai)
-
-Keep it wherever you show the values. Artificial Analysis's [terms](https://artificialanalysis.ai/data-api) limit what you may do with what you fetch, so read them before you pass the values on. Iolite ships no Artificial Analysis data and has no key of its own.
+Catalog rows whose `source`, `provenance` or `source_url` names Artificial Analysis are refused when they arrive through `catalog_path` or `catalog_url`, and the answer counts them. An Artificial Analysis display may return in a later release, behind a private display.
 
 ## Install
 
@@ -101,10 +96,10 @@ Restart the gateway, then ask: *"Shortlist three models at least as smart as <a 
 
 - **Network:** none unless you configure a source. First match wins:
   - `catalog_path`: no network.
-  - `catalog_url`: one plain GET, cached in memory for `cache_minutes`. Iolite sends the URL exactly as you write it and adds no credentials of its own. A URL with `user:password@` is refused. The whole response must arrive within `timeout_seconds` and stay under 8 MB, and redirects are followed only on the same origin. Answers and `/iolite status` show only the scheme, host and path, never the query string or fragment.
-  - `timeout_seconds` bounds the whole `catalog_url` fetch. A failed fetch is remembered for five minutes and not retried.
-- **Display-only key:** `IOLITE_AA_API_KEY` is not a catalog source. When set, each answer makes one fetch of `https://artificialanalysis.ai` with your key in the `x-api-key` header, uses it only to print labelled numbers beside the picks, and keeps nothing: no cache, no disk, no retry. A redirect to any other origin is refused before it is followed, so the key can't travel with it. The key is never logged or returned in tool output.
-- It registers no hooks, runs nothing in the background and writes no files. It reads one secret, `IOLITE_AA_API_KEY`. Like any Python HTTP client it also honours the standard `*_proxy` variables.
+  - `catalog_url`: one GET, https only unless you set `allow_http: true`, cached in memory for `cache_minutes`. Iolite sends the URL as you write it and adds no credentials of its own. A URL with `user:password@` is refused; a `?token=` query is accepted and sent as written, so treat the URL as a secret you chose to put in config. URLs with whitespace or control characters, or a bad port, are refused before any request. The whole response must arrive within `timeout_seconds` (slow-drip responses are cut off) and stay under 8 MB, and redirects are followed only on the same origin. Answers and `/iolite status` show only the scheme, host and path, never the query string or fragment, and error messages never contain the URL.
+  - A failed fetch is remembered for five minutes and not retried.
+- **Output:** every row field is cleaned before it is shown: control characters and newlines removed, text capped at 200 characters, `@` mentions and chat markup defused, non-finite numbers dropped.
+- **Storage:** the plugin writes nothing and registers no hooks. Hermes keeps tool results in session history like any tool output. It reads no secrets. Like any Python HTTP client it honours the standard `*_proxy` variables.
 
 ## Tests
 
@@ -112,7 +107,7 @@ Restart the gateway, then ask: *"Shortlist three models at least as smart as <a 
 cd plugins/iolite-hermes && python3 -m pytest -q
 ```
 
-`tests/fixtures/aa-free-pages.json` is invented data in the shape of the Artificial Analysis free endpoint; no real Artificial Analysis data ships with the plugin. `tests/fixtures/decide-golden.json` is generated from `src/lib/decide.ts` over a synthetic catalog by `tests/iolite-plugin-parity.test.ts` in the repo's vitest suite. If either side drifts, a suite fails.
+`tests/fixtures/decide-golden.json` is generated from `src/lib/decide.ts` over a synthetic catalog by `tests/iolite-plugin-parity.test.ts` in the repo's vitest suite, and the Python tests compare `decide.py` with it. The vitest parity test fails when `decide.ts` and the golden file disagree; the CI job runs it whenever `decide.ts` changes.
 
 ## Licence
 

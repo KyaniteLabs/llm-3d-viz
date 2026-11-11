@@ -1,0 +1,125 @@
+{
+ "note": "SYNTHETIC DEMO DATA. Every model, provider and number here is invented for the Iolite quick-start. It is not real benchmark, price or speed data.",
+ "models": [
+  {
+   "model": "Demo Heron Pro",
+   "slug": "heron-pro",
+   "provider": "Demo Labs North",
+   "aa_intelligence_index": 88,
+   "blended_price_per_M": 4.2,
+   "tps": 55,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Heron Mini",
+   "slug": "heron-mini",
+   "provider": "Demo Labs North",
+   "aa_intelligence_index": 71,
+   "blended_price_per_M": 0.45,
+   "tps": 160,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Wren Large",
+   "slug": "wren-large",
+   "provider": "Demo Labs East",
+   "aa_intelligence_index": 84,
+   "blended_price_per_M": 3.1,
+   "tps": 70,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Wren Lite",
+   "slug": "wren-lite",
+   "provider": "Demo Labs East",
+   "aa_intelligence_index": 63,
+   "blended_price_per_M": 0.12,
+   "tps": 240,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Finch Max",
+   "slug": "finch-max",
+   "provider": "Demo Labs South",
+   "aa_intelligence_index": 92,
+   "blended_price_per_M": 9.0,
+   "tps": 35,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Finch Swift",
+   "slug": "finch-swift",
+   "provider": "Demo Labs South",
+   "aa_intelligence_index": 66,
+   "blended_price_per_M": 0.3,
+   "tps": 310,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Lark Plus",
+   "slug": "lark-plus",
+   "provider": "Demo Labs West",
+   "aa_intelligence_index": 77,
+   "blended_price_per_M": 1.1,
+   "tps": 120,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Lark Nano",
+   "slug": "lark-nano",
+   "provider": "Demo Labs West",
+   "aa_intelligence_index": 48,
+   "blended_price_per_M": 0.03,
+   "tps": 420,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Pipit One",
+   "slug": "pipit-one",
+   "provider": "Demo Labs North",
+   "aa_intelligence_index": 69,
+   "blended_price_per_M": 0.8,
+   "tps": 90,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  },
+  {
+   "model": "Demo Swift Dear",
+   "slug": "swift-dear",
+   "provider": "Demo Labs East",
+   "aa_intelligence_index": 74,
+   "blended_price_per_M": 2.6,
+   "tps": 60,
+   "data_date": "2026-11-10",
+   "synthetic": true,
+   "source": "Synthetic demo data (invented)",
+   "attribution": "Synthetic demo data: invented values, not real measurements"
+  }
+ ]
+}

@@ -2,9 +2,9 @@ name: Iolite Hermes plugin
 on:
   push:
     branches: [main]
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/lib/decide.ts", "src/lib/pareto.ts", "src/data/models.ts", "src/config/fork-defaults.ts", "tests/decide.test.ts", "tests/iolite-plugin-parity.test.ts", "package.json", "package-lock.json"]
   pull_request:
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/lib/decide.ts", "src/lib/pareto.ts", "src/data/models.ts", "src/config/fork-defaults.ts", "tests/decide.test.ts", "tests/iolite-plugin-parity.test.ts", "package.json", "package-lock.json"]
 permissions:
   contents: read
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13"]
+        python: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -22,6 +22,16 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Plugin unit tests
         run: python -m pip install pytest==8.4.2 && cd plugins/iolite-hermes && python -m pytest -q
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Install the repo's locked dependencies (runner's preinstalled node)
+        run: npm ci --ignore-scripts
+      - name: decide.ts against the plugin's golden file
+        run: npx vitest run tests/iolite-plugin-parity.test.ts tests/decide.test.ts
   hermes-validate:
     runs-on: ubuntu-latest
     steps:
