@@ -1,0 +1,24 @@
+---
+name: iolite
+description: Pick an LLM for a job with the Iolite tools. Set an intelligence floor, then trade cost against speed, and answer with a short ranked list and its tradeoffs.
+---
+
+# Iolite: pick a model
+
+Use this when someone asks which model to use, wants a cheaper or faster model that is still smart enough, or wants to compare a model against the field. Don't use it for questions the catalog can't answer, such as which model writes better poetry.
+
+## Steps
+
+1. **Set the floor.** If the user names a model they trust ("at least as good as X"), pass it as `anchor_model`. Otherwise pass `floor` on the 0–100 Intelligence Index scale. If they give neither, the default of 50 applies; say so.
+2. **Pick the objective.** Use `min_cost` for "cheapest", `max_speed` for "fastest", and `balanced` for everything else. With `balanced`, `bias` leans from −1 (cheaper) to +1 (faster).
+3. **Call `iolite_shortlist`.** Keep `n` at 3 unless the user asks for more; the maximum is 25.
+4. **Answer.** For each pick, give the model, its index, its blended price per million tokens and its speed in tokens per second. Every pick is on the cost × speed front, so state the tradeoff from those numbers (for example "half the price, a third slower"), not reasons the data doesn't give. Also give the floor you applied and how many models cleared it.
+5. **Look one up** with `iolite_model` when the user names a specific model.
+
+## Rules
+
+- If the result has `aa_display`, those Artificial Analysis numbers are display only. Quote them as a labelled column beside the pick ("Artificial Analysis, display only"), never use them to rank, reorder, filter or recommend, and credit them word for word: "Source: Artificial Analysis (artificialanalysis.ai)". Show them to the person who asked and nobody else: never write them to files, memory or any shared place.
+- If the result has `aa_display_error` (for example a 429 or daily quota), tell the user in one line, give the ranking anyway, and do not call the tool again to retry.
+- If the result says no catalog is configured, tell the user to set `catalog_path` or `catalog_url`. An `IOLITE_AA_API_KEY` alone is not a catalog. Don't make up numbers.
+- If the shortlist is empty, say no model clears the floor with price, speed and index all known, and offer a lower floor.
+- Benchmark scores describe the benchmark, not the user's task. Say so when the top picks are close.
