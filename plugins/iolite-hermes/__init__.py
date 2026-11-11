@@ -217,7 +217,7 @@ def _safe_text(v: Any, limit: int = MAX_TEXT) -> str:
         else:
             out.append(ch)
     text = " ".join("".join(out).split())
-    text = text.replace("@", "@​").replace("<", "‹").replace(">", "›").replace("`", "'")
+    text = text.replace("@", "@\u200b").replace("<", "\u2039").replace(">", "\u203a").replace("`", "'")
     return text[:limit]
 
 
