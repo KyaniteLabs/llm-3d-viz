@@ -4,7 +4,6 @@
  */
 import { isScorable, type Model } from "../data/models";
 import { FORK_DEFAULTS } from "../config/fork-defaults";
-import { roundTo } from "./pareto";
 
 /** Forker override: `src/config/fork-defaults.ts` → decideFloor. */
 export const DEFAULT_INTELLIGENCE_FLOOR = FORK_DEFAULTS.decideFloor;
@@ -76,10 +75,11 @@ export function filterPickEligible(models: readonly Model[], floor: number): Mod
 /** 2D dominance on cost (min) × speed/tps (max) among pick-eligible models. */
 export function dominatesCostSpeed(a: Model, b: Model): boolean {
   if (!isScorable(a) || !isScorable(b)) return false;
-  const aCost = roundTo(a.blended_price_per_M!, 2);
-  const bCost = roundTo(b.blended_price_per_M!, 2);
-  const aSpeed = roundTo(a.tps!, 1);
-  const bSpeed = roundTo(b.tps!, 1);
+  // Full precision: rounding here let a model costing 4.9x more beat the cheapest.
+  const aCost = a.blended_price_per_M!;
+  const bCost = b.blended_price_per_M!;
+  const aSpeed = a.tps!;
+  const bSpeed = b.tps!;
   const atLeast = aCost <= bCost && aSpeed >= bSpeed;
   const strict = aCost < bCost || aSpeed > bSpeed;
   return atLeast && strict;

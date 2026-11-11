@@ -2,7 +2,8 @@
 
 Kept line-for-line close to the TypeScript so a reviewer can diff the two by eye.
 tests/test_decide.py asserts this module against tests/fixtures/decide-golden.json,
-which the repo's vitest suite regenerates from decide.ts itself.
+a golden file generated from decide.ts; the repo's vitest parity test fails when
+decide.ts and the golden file disagree.
 
 Models are plain dicts with the catalog field names: model, tps,
 blended_price_per_M, aa_intelligence_index, data_date.
@@ -24,25 +25,13 @@ DEFAULT_INTELLIGENCE_FLOOR = 50.0
 DEFAULT_COST_SPEED_BIAS = 0.0
 DEFAULT_SHORTLIST_N = 3
 
-_JS_EPSILON = 2.0 ** -52  # Number.EPSILON
-
-
 def _finite(v: Any) -> bool:
-    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
-
-
-def _js_round(x: float) -> float:
-    """Math.round: half rounds toward +infinity (Python's round() is banker's)."""
-    return float(math.floor(x + 0.5))
-
-
-def round_to(value: float, decimals: int) -> float:
-    """src/lib/pareto.ts roundTo."""
-    factor = 10 ** decimals
-    scaled = (value + _JS_EPSILON * max(1.0, abs(value))) * factor
-    if not math.isfinite(scaled):  # JS gives Infinity here; Python's floor would raise
-        return value
-    return _js_round(scaled) / factor
+    if not isinstance(v, (int, float)) or isinstance(v, bool):
+        return False
+    try:
+        return math.isfinite(v)
+    except OverflowError:  # an integer too large for a float
+        return False
 
 
 def is_scorable(m: Model) -> bool:
@@ -79,10 +68,9 @@ def filter_pick_eligible(models: Iterable[Model], floor: float) -> List[Model]:
 def dominates_cost_speed(a: Model, b: Model) -> bool:
     if not is_scorable(a) or not is_scorable(b):
         return False
-    a_cost = round_to(a["blended_price_per_M"], 2)
-    b_cost = round_to(b["blended_price_per_M"], 2)
-    a_speed = round_to(a["tps"], 1)
-    b_speed = round_to(b["tps"], 1)
+    # Full precision: rounding here once let a model costing 4.9x more beat the cheapest.
+    a_cost, b_cost = a["blended_price_per_M"], b["blended_price_per_M"]
+    a_speed, b_speed = a["tps"], b["tps"]
     at_least = a_cost <= b_cost and a_speed >= b_speed
     strict = a_cost < b_cost or a_speed > b_speed
     return at_least and strict
@@ -91,12 +79,11 @@ def dominates_cost_speed(a: Model, b: Model) -> bool:
 def cost_speed_pareto(models: Iterable[Model]) -> List[Model]:
     """The models no other model dominates (dominates_cost_speed), in input order.
 
-    Same answer as the TypeScript's pairwise check, in O(n log n): sort by rounded
-    cost, then a model survives only if it is the fastest at its cost and strictly
+    Same answer as the TypeScript's pairwise check, in O(n log n): sort by cost, then a model survives only if it is the fastest at its cost and strictly
     faster than everything cheaper. tests/test_decide.py checks it against the
     pairwise definition on random catalogs."""
     valid = [m for m in models if is_scorable(m)]
-    keyed = [(round_to(m["blended_price_per_M"], 2), round_to(m["tps"], 1), i) for i, m in enumerate(valid)]
+    keyed = [(m["blended_price_per_M"], m["tps"], i) for i, m in enumerate(valid)]
     keyed.sort(key=lambda k: k[0])
     keep = set()
     best_cheaper = -math.inf

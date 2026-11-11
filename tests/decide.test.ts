@@ -61,6 +61,13 @@ describe("cost×speed Pareto", () => {
     const front = costSpeedPareto([cheapSlow, mid, expensiveFast, dominated]);
     expect(new Set(front.map((m) => m.model))).toEqual(new Set(["cs", "mid", "ef"]));
   });
+
+  it("compares cost and speed at full precision, not rounded", () => {
+    const cheapest = model("cheapest", 1, 0.001, 70);
+    const dearer = model("dearer", 2, 0.0049, 70);
+    expect(dominatesCostSpeed(dearer, cheapest)).toBe(false);
+    expect(costSpeedPareto([cheapest, dearer]).map((m) => m.model)).toEqual(["cheapest", "dearer"]);
+  });
 });
 
 describe("bias shortlist", () => {

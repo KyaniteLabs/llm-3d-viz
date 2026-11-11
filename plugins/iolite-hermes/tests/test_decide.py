@@ -31,9 +31,28 @@ def test_snapshot_payload_and_id_parity():
     assert decide.catalog_snapshot_id(MODELS) == GOLDEN["snapshot_id"]
 
 
-def test_round_to_half_up_like_js():
-    assert decide.round_to(0.125, 2) == 0.13
-    assert decide.round_to(2.5, 0) == 3.0
+def test_dominance_uses_full_precision():
+    cheap_slow = {"model": "a", "tps": 1, "blended_price_per_M": 0.001, "aa_intelligence_index": 90}
+    dear_fast = {"model": "b", "tps": 2, "blended_price_per_M": 0.0049, "aa_intelligence_index": 90}
+    assert not decide.dominates_cost_speed(dear_fast, cheap_slow)
+    out = decide.shortlist_from_decide([cheap_slow, dear_fast], 0, -1, 3)
+    assert [m["model"] for m in out["pareto"]] == ["a", "b"]
+    assert out["shortlist"][0]["model"] == "a"
+
+
+def test_pareto_matches_the_pairwise_definition_on_close_prices():
+    import random
+    rnd = random.Random(7)
+    for _ in range(200):
+        rows = [{"model": f"m{i}", "tps": rnd.choice([1, 1.04, 1.06, 2, 3]),
+                 "blended_price_per_M": rnd.choice([0.001, 0.0049, 0.104, 0.096, 0.1]),
+                 "aa_intelligence_index": 50} for i in range(8)]
+        want = [m for m in rows if not any(o is not m and decide.dominates_cost_speed(o, m) for o in rows)]
+        assert decide.cost_speed_pareto(rows) == want
+
+
+def test_huge_integers_are_not_finite():
+    assert decide.clamp_floor(10 ** 400) == decide.DEFAULT_INTELLIGENCE_FLOOR
 
 
 @pytest.mark.parametrize("raw,want", [(float("nan"), 50.0), (float("inf"), 50.0), (-3, 0.0), (101, 100.0), (42, 42.0)])

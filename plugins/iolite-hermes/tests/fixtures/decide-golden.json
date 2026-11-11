@@ -638,10 +638,38 @@
    "blended_price_per_M": 1e-7,
    "aa_intelligence_index": 55,
    "data_date": "2026-11-10"
+  },
+  {
+   "model": "cheapest slow",
+   "tps": 1,
+   "blended_price_per_M": 0.001,
+   "aa_intelligence_index": 65,
+   "data_date": "2026-11-10"
+  },
+  {
+   "model": "dearer a bit faster",
+   "tps": 2,
+   "blended_price_per_M": 0.0049,
+   "aa_intelligence_index": 65,
+   "data_date": "2026-11-10"
+  },
+  {
+   "model": "close price slow",
+   "tps": 10,
+   "blended_price_per_M": 0.096,
+   "aa_intelligence_index": 66,
+   "data_date": "2026-11-10"
+  },
+  {
+   "model": "close price fast",
+   "tps": 20,
+   "blended_price_per_M": 0.104,
+   "aa_intelligence_index": 66,
+   "data_date": "2026-11-10"
   }
  ],
- "snapshot_payload": "free and slow|60|1|0|2026-11-10\nhuge price|95|300|1000000|2026-11-10\nindex over floor exact|50|200|2|2026-11-10\nnegative price|90|50|-1|2026-11-10\nnegative tps|90|-5|1|2026-11-10\nround half price twin|70|99.95|0.1249999|2026-11-10\nround half price|70|99.95|0.125|2026-11-10\nSynthetic Model 00|54.4|177.328|14.353|2026-11-10\nSynthetic Model 01|6.8|313.83|2.064|2026-11-10\nSynthetic Model 02|5|389.929|18.217|2026-11-10\nSynthetic Model 03|69.9|374.727|28.904|2026-11-10\nSynthetic Model 04|80.9|65.609|4.637|2026-11-10\nSynthetic Model 05|89.5|113.125|25.203|2026-11-10\nSynthetic Model 06|62.7|103.693|13.796|2026-11-10\nSynthetic Model 07|52.2|329.366|22.001|2026-11-10\nSynthetic Model 08|82.9|330.557|19.636|2026-11-10\nSynthetic Model 09|17.7|376.123|11.925|2026-11-10\nSynthetic Model 10|55.7|170.602|7.846|2026-11-10\nSynthetic Model 11||75.666|29.598|2026-11-10\nSynthetic Model 12|94.6|26.99||2026-11-10\nSynthetic Model 13|30.9|343.757|23.254|2026-11-10\nSynthetic Model 14|59.2||20.426|2026-11-10\nSynthetic Model 15|66.4|188.946|6.452|2026-11-10\nSynthetic Model 16|99.9|198.031||2026-11-10\nSynthetic Model 17|72.6|256.005|26.317|2026-11-10\nSynthetic Model 18|90.6|51.169|23.269|2026-11-10\nSynthetic Model 19|39.8|382.247|2.186|2026-11-10\nSynthetic Model 20|68.8|27.454|2.215|2026-11-10\nSynthetic Model 21|46.4|335.492|6.088|2026-11-10\nSynthetic Model 22|23.9|289.209|1.368|2026-11-10\nSynthetic Model 23|98.8|202.421|3.961|2026-11-10\nSynthetic Model 24|0.6|17.024|20.262|2026-11-10\nSynthetic Model 25|29.2|196.073|3.996|2026-11-10\nSynthetic Model 26|11|283.846|16.433|2026-11-10\nSynthetic Model 27|6.5|151.228|6.034|2026-11-10\nSynthetic Model 28|72|188.845|22.584|2026-11-10\nSynthetic Model 29|41|276.435|23.414|2026-11-10\nSynthetic Model 30|8.6|69.792|2.218|2026-11-10\nSynthetic Model 31|86.6|31.429||2026-11-10\nSynthetic Model 32|93.5|112.701|11.39|2026-11-10\nSynthetic Model 33|70|98.688|12.026|2026-11-10\nSynthetic Model 34|11.6|377.489|11.736|2026-11-10\nSynthetic Model 35|2.7|117.88|18.977|2026-11-10\nSynthetic Model 36|70|358.4|7.45|2026-11-10\nSynthetic Model 37|54.6|151.957|11.061|2026-11-10\nSynthetic Model 38|92.7|297.947|16.334|2026-11-10\nSynthetic Model 39||353.626|16.023|2026-11-10\nSynthetic Model 40|69.2|173.118|22.616|2026-11-10\nSynthetic Model 41|21.4|200.978|21.408|2026-11-10\nSynthetic Model 42|48.5|372.594|6.654|2026-11-10\nSynthetic Model 43|62.6|370.992|2.942|2026-11-10\nSynthetic Model 44|95.4|183.743|4.215|2026-11-10\nSynthetic Model 45|79.9||6.607|2026-11-10\nSynthetic Model 46|51.6|308.116|5.463|2026-11-10\nSynthetic Model 47|28.3|337.682|23.335|2026-11-10\nSynthetic Model 48|69.4|124.219|21.32|2026-11-10\nSynthetic Model 49|72.6|149.836|2.706|2026-11-10\nSynthetic Model 50|8.7|116.3|22.361|2026-11-10\nSynthetic Model 51|25|227.867|29.572|2026-11-10\nSynthetic Model 52|15.8|387.891|2.892|2026-11-10\nSynthetic Model 53|82|284.541|5.004|2026-11-10\nSynthetic Model 54||278.881|10.365|2026-11-10\nSynthetic Model 55|64.7|318.283|10.472|2026-11-10\nSynthetic Model 56|55.2|204.843|17.801|2026-11-10\nSynthetic Model 57|93.9||21.664|2026-11-10\nSynthetic Model 58|78.3||4.36|2026-11-10\nSynthetic Model 59|52.4|109.324|15.852|2026-11-10\nSynthetic Model 60|3.1|44.25|16.723|2026-11-10\nSynthetic Model 61|16.4|373.672|24.201|2026-11-10\nSynthetic Model 62|89.3|107.966||2026-11-10\nSynthetic Model 63|58.8|71.132|17.95|2026-11-10\nSynthetic Model 64|76|241.716|25.904|2026-11-10\nSynthetic Model 65|55.7|73.659|4.843|2026-11-10\nSynthetic Model 66||121.264|23.104|2026-11-10\nSynthetic Model 67|49.3|214.697|29.733|2026-11-10\nSynthetic Model 68|1.8|251.619|12.81|2026-11-10\nSynthetic Model 69|48.1|211.517|20.771|2026-11-10\nSynthetic Model 70|18.7|287.235|29.35|2026-11-10\nSynthetic Model 71|68.5|287.946|0.064|2026-11-10\nSynthetic Model 72|38.6|124.457|23.642|2026-11-10\nSynthetic Model 73|47.6|66.239|15.234|2026-11-10\nSynthetic Model 74|99.7|185|24.622|2026-11-10\nSynthetic Model 75|81.7|396.838|25.76|2026-11-10\nSynthetic Model 76|97.9|209.186|22.735|2026-11-10\nSynthetic Model 77|70.6||15.534|2026-11-10\nSynthetic Model 78|61.9|377.692|15.648|2026-11-10\nSynthetic Model 79|72.1|51.458|10.512|2026-11-10\ntie alpha|80|120|1.5|2026-11-10\nTie Alpha|80|120|1.5|2026-11-10\ntie beta|80|120|1.5|2026-11-10\ntiny price|55|10|1e-7|2026-11-10",
- "snapshot_id": "cat_612acd3a8159fdd5",
+ "snapshot_payload": "cheapest slow|65|1|0.001|2026-11-10\nclose price fast|66|20|0.104|2026-11-10\nclose price slow|66|10|0.096|2026-11-10\ndearer a bit faster|65|2|0.0049|2026-11-10\nfree and slow|60|1|0|2026-11-10\nhuge price|95|300|1000000|2026-11-10\nindex over floor exact|50|200|2|2026-11-10\nnegative price|90|50|-1|2026-11-10\nnegative tps|90|-5|1|2026-11-10\nround half price twin|70|99.95|0.1249999|2026-11-10\nround half price|70|99.95|0.125|2026-11-10\nSynthetic Model 00|54.4|177.328|14.353|2026-11-10\nSynthetic Model 01|6.8|313.83|2.064|2026-11-10\nSynthetic Model 02|5|389.929|18.217|2026-11-10\nSynthetic Model 03|69.9|374.727|28.904|2026-11-10\nSynthetic Model 04|80.9|65.609|4.637|2026-11-10\nSynthetic Model 05|89.5|113.125|25.203|2026-11-10\nSynthetic Model 06|62.7|103.693|13.796|2026-11-10\nSynthetic Model 07|52.2|329.366|22.001|2026-11-10\nSynthetic Model 08|82.9|330.557|19.636|2026-11-10\nSynthetic Model 09|17.7|376.123|11.925|2026-11-10\nSynthetic Model 10|55.7|170.602|7.846|2026-11-10\nSynthetic Model 11||75.666|29.598|2026-11-10\nSynthetic Model 12|94.6|26.99||2026-11-10\nSynthetic Model 13|30.9|343.757|23.254|2026-11-10\nSynthetic Model 14|59.2||20.426|2026-11-10\nSynthetic Model 15|66.4|188.946|6.452|2026-11-10\nSynthetic Model 16|99.9|198.031||2026-11-10\nSynthetic Model 17|72.6|256.005|26.317|2026-11-10\nSynthetic Model 18|90.6|51.169|23.269|2026-11-10\nSynthetic Model 19|39.8|382.247|2.186|2026-11-10\nSynthetic Model 20|68.8|27.454|2.215|2026-11-10\nSynthetic Model 21|46.4|335.492|6.088|2026-11-10\nSynthetic Model 22|23.9|289.209|1.368|2026-11-10\nSynthetic Model 23|98.8|202.421|3.961|2026-11-10\nSynthetic Model 24|0.6|17.024|20.262|2026-11-10\nSynthetic Model 25|29.2|196.073|3.996|2026-11-10\nSynthetic Model 26|11|283.846|16.433|2026-11-10\nSynthetic Model 27|6.5|151.228|6.034|2026-11-10\nSynthetic Model 28|72|188.845|22.584|2026-11-10\nSynthetic Model 29|41|276.435|23.414|2026-11-10\nSynthetic Model 30|8.6|69.792|2.218|2026-11-10\nSynthetic Model 31|86.6|31.429||2026-11-10\nSynthetic Model 32|93.5|112.701|11.39|2026-11-10\nSynthetic Model 33|70|98.688|12.026|2026-11-10\nSynthetic Model 34|11.6|377.489|11.736|2026-11-10\nSynthetic Model 35|2.7|117.88|18.977|2026-11-10\nSynthetic Model 36|70|358.4|7.45|2026-11-10\nSynthetic Model 37|54.6|151.957|11.061|2026-11-10\nSynthetic Model 38|92.7|297.947|16.334|2026-11-10\nSynthetic Model 39||353.626|16.023|2026-11-10\nSynthetic Model 40|69.2|173.118|22.616|2026-11-10\nSynthetic Model 41|21.4|200.978|21.408|2026-11-10\nSynthetic Model 42|48.5|372.594|6.654|2026-11-10\nSynthetic Model 43|62.6|370.992|2.942|2026-11-10\nSynthetic Model 44|95.4|183.743|4.215|2026-11-10\nSynthetic Model 45|79.9||6.607|2026-11-10\nSynthetic Model 46|51.6|308.116|5.463|2026-11-10\nSynthetic Model 47|28.3|337.682|23.335|2026-11-10\nSynthetic Model 48|69.4|124.219|21.32|2026-11-10\nSynthetic Model 49|72.6|149.836|2.706|2026-11-10\nSynthetic Model 50|8.7|116.3|22.361|2026-11-10\nSynthetic Model 51|25|227.867|29.572|2026-11-10\nSynthetic Model 52|15.8|387.891|2.892|2026-11-10\nSynthetic Model 53|82|284.541|5.004|2026-11-10\nSynthetic Model 54||278.881|10.365|2026-11-10\nSynthetic Model 55|64.7|318.283|10.472|2026-11-10\nSynthetic Model 56|55.2|204.843|17.801|2026-11-10\nSynthetic Model 57|93.9||21.664|2026-11-10\nSynthetic Model 58|78.3||4.36|2026-11-10\nSynthetic Model 59|52.4|109.324|15.852|2026-11-10\nSynthetic Model 60|3.1|44.25|16.723|2026-11-10\nSynthetic Model 61|16.4|373.672|24.201|2026-11-10\nSynthetic Model 62|89.3|107.966||2026-11-10\nSynthetic Model 63|58.8|71.132|17.95|2026-11-10\nSynthetic Model 64|76|241.716|25.904|2026-11-10\nSynthetic Model 65|55.7|73.659|4.843|2026-11-10\nSynthetic Model 66||121.264|23.104|2026-11-10\nSynthetic Model 67|49.3|214.697|29.733|2026-11-10\nSynthetic Model 68|1.8|251.619|12.81|2026-11-10\nSynthetic Model 69|48.1|211.517|20.771|2026-11-10\nSynthetic Model 70|18.7|287.235|29.35|2026-11-10\nSynthetic Model 71|68.5|287.946|0.064|2026-11-10\nSynthetic Model 72|38.6|124.457|23.642|2026-11-10\nSynthetic Model 73|47.6|66.239|15.234|2026-11-10\nSynthetic Model 74|99.7|185|24.622|2026-11-10\nSynthetic Model 75|81.7|396.838|25.76|2026-11-10\nSynthetic Model 76|97.9|209.186|22.735|2026-11-10\nSynthetic Model 77|70.6||15.534|2026-11-10\nSynthetic Model 78|61.9|377.692|15.648|2026-11-10\nSynthetic Model 79|72.1|51.458|10.512|2026-11-10\ntie alpha|80|120|1.5|2026-11-10\nTie Alpha|80|120|1.5|2026-11-10\ntie beta|80|120|1.5|2026-11-10\ntiny price|55|10|1e-7|2026-11-10",
+ "snapshot_id": "cat_064556741746e89d",
  "cases": [
   {
    "floor": 0,
@@ -723,7 +751,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -733,10 +765,11 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
-    "tiny price"
+    "free and slow"
    ]
   },
   {
@@ -819,7 +852,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -829,12 +866,13 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 22"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -917,7 +955,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -927,9 +969,11 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
     "Synthetic Model 71",
     "Synthetic Model 22",
@@ -1020,7 +1064,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1030,12 +1078,13 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 22"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -1118,7 +1167,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1128,6 +1181,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1214,7 +1268,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1224,6 +1282,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1312,7 +1371,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1322,6 +1385,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1331,6 +1395,7 @@
     "Synthetic Model 22",
     "Synthetic Model 01",
     "tiny price",
+    "free and slow",
     "Synthetic Model 02",
     "Synthetic Model 75"
    ]
@@ -1415,7 +1480,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1425,6 +1494,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1513,7 +1583,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1523,6 +1597,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1609,7 +1684,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1619,6 +1698,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1707,7 +1787,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1717,6 +1801,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1727,6 +1812,7 @@
     "Synthetic Model 22",
     "Synthetic Model 02",
     "tiny price",
+    "free and slow",
     "Synthetic Model 75"
    ]
   },
@@ -1810,7 +1896,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1820,6 +1910,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -1908,7 +1999,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -1918,6 +2013,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2004,7 +2100,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2014,6 +2114,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2102,7 +2203,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2112,6 +2217,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2122,7 +2228,8 @@
     "Synthetic Model 22",
     "Synthetic Model 02",
     "Synthetic Model 75",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -2205,7 +2312,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2215,6 +2326,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2303,7 +2415,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2313,6 +2429,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2399,7 +2516,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2409,6 +2530,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2497,7 +2619,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2507,6 +2633,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2517,7 +2644,8 @@
     "Synthetic Model 01",
     "Synthetic Model 22",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -2600,7 +2728,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2610,6 +2742,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2698,7 +2831,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2708,6 +2845,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2794,7 +2932,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2804,6 +2946,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2892,7 +3035,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -2902,6 +3049,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -2912,7 +3060,8 @@
     "Synthetic Model 01",
     "Synthetic Model 22",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -2995,7 +3144,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -3005,6 +3158,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -3073,16 +3227,21 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
-    "tiny price"
+    "free and slow"
    ]
   },
   {
@@ -3145,18 +3304,23 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 19"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -3219,15 +3383,21 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
     "Synthetic Model 71",
     "Synthetic Model 19",
@@ -3294,18 +3464,23 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 19"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -3368,12 +3543,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -3440,12 +3620,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -3514,18 +3699,24 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
     "Synthetic Model 71",
     "Synthetic Model 19",
     "tiny price",
+    "free and slow",
     "Synthetic Model 75"
    ]
   },
@@ -3589,318 +3780,28 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 71",
-    "Synthetic Model 19",
-    "tiny price"
-   ]
-  },
-  {
-   "floor": 30,
-   "bias": 0,
-   "n": 1,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 13",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 19",
-    "Synthetic Model 20",
-    "Synthetic Model 21",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 29",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 42",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 67",
-    "Synthetic Model 69",
-    "Synthetic Model 71",
-    "Synthetic Model 72",
-    "Synthetic Model 73",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 19"
-   ]
-  },
-  {
-   "floor": 30,
-   "bias": 0,
-   "n": 3,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 13",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 19",
-    "Synthetic Model 20",
-    "Synthetic Model 21",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 29",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 42",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 67",
-    "Synthetic Model 69",
-    "Synthetic Model 71",
-    "Synthetic Model 72",
-    "Synthetic Model 73",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
-    "tiny price"
-   ]
-  },
-  {
-   "floor": 30,
-   "bias": 0,
-   "n": 10,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 13",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 19",
-    "Synthetic Model 20",
-    "Synthetic Model 21",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 29",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 42",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 67",
-    "Synthetic Model 69",
-    "Synthetic Model 71",
-    "Synthetic Model 72",
-    "Synthetic Model 73",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 19",
-    "Synthetic Model 71",
     "tiny price",
-    "Synthetic Model 75"
-   ]
-  },
-  {
-   "floor": 30,
-   "bias": 0,
-   "n": 0,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 13",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 19",
-    "Synthetic Model 20",
-    "Synthetic Model 21",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 29",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 42",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 67",
-    "Synthetic Model 69",
-    "Synthetic Model 71",
-    "Synthetic Model 72",
-    "Synthetic Model 73",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
-    "Synthetic Model 19",
     "Synthetic Model 71",
+    "Synthetic Model 19",
     "tiny price"
    ]
   },
   {
    "floor": 30,
-   "bias": 0.3,
+   "bias": 0,
    "n": 1,
    "eligible_ids": [
     "Synthetic Model 00",
@@ -3958,12 +3859,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -3972,6 +3878,322 @@
   },
   {
    "floor": 30,
+   "bias": 0,
+   "n": 3,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 13",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 19",
+    "Synthetic Model 20",
+    "Synthetic Model 21",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 29",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 42",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 67",
+    "Synthetic Model 69",
+    "Synthetic Model 71",
+    "Synthetic Model 72",
+    "Synthetic Model 73",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "tiny price"
+   ]
+  },
+  {
+   "floor": 30,
+   "bias": 0,
+   "n": 10,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 13",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 19",
+    "Synthetic Model 20",
+    "Synthetic Model 21",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 29",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 42",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 67",
+    "Synthetic Model 69",
+    "Synthetic Model 71",
+    "Synthetic Model 72",
+    "Synthetic Model 73",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "tiny price",
+    "free and slow",
+    "Synthetic Model 75"
+   ]
+  },
+  {
+   "floor": 30,
+   "bias": 0,
+   "n": 0,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 13",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 19",
+    "Synthetic Model 20",
+    "Synthetic Model 21",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 29",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 42",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 67",
+    "Synthetic Model 69",
+    "Synthetic Model 71",
+    "Synthetic Model 72",
+    "Synthetic Model 73",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "tiny price"
+   ]
+  },
+  {
+   "floor": 30,
+   "bias": 0.3,
+   "n": 1,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 13",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 19",
+    "Synthetic Model 20",
+    "Synthetic Model 21",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 29",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 42",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 67",
+    "Synthetic Model 69",
+    "Synthetic Model 71",
+    "Synthetic Model 72",
+    "Synthetic Model 73",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 19",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 19"
+   ]
+  },
+  {
+   "floor": 30,
    "bias": 0.3,
    "n": 3,
    "eligible_ids": [
@@ -4030,12 +4252,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4104,19 +4331,25 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -4179,12 +4412,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4253,12 +4491,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4325,12 +4568,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4399,19 +4647,25 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
     "Synthetic Model 75",
     "Synthetic Model 19",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -4474,12 +4728,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4548,12 +4807,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4620,12 +4884,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4694,19 +4963,25 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
     "Synthetic Model 75",
     "Synthetic Model 19",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -4769,12 +5044,17 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 19",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -4834,17 +5114,22 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
-    "tiny price"
+    "free and slow"
    ]
   },
   {
@@ -4898,485 +5183,527 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
+    "tiny price",
+    "Synthetic Model 71"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -1,
+   "n": 10,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "free and slow",
     "tiny price",
     "Synthetic Model 71",
+    "Synthetic Model 43",
+    "Synthetic Model 78",
+    "Synthetic Model 75"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -1,
+   "n": 0,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "free and slow",
+    "tiny price",
+    "Synthetic Model 71"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -0.5,
+   "n": 1,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 71"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -0.5,
+   "n": 3,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 71",
+    "Synthetic Model 43",
+    "tiny price"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -0.5,
+   "n": 10,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 71",
+    "Synthetic Model 43",
+    "tiny price",
+    "free and slow",
+    "Synthetic Model 78",
+    "Synthetic Model 75"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": -0.5,
+   "n": 0,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
+    "Synthetic Model 71",
+    "Synthetic Model 43",
+    "tiny price"
+   ]
+  },
+  {
+   "floor": 50,
+   "bias": 0,
+   "n": 1,
+   "eligible_ids": [
+    "Synthetic Model 00",
+    "Synthetic Model 03",
+    "Synthetic Model 04",
+    "Synthetic Model 05",
+    "Synthetic Model 06",
+    "Synthetic Model 07",
+    "Synthetic Model 08",
+    "Synthetic Model 10",
+    "Synthetic Model 15",
+    "Synthetic Model 17",
+    "Synthetic Model 18",
+    "Synthetic Model 20",
+    "Synthetic Model 23",
+    "Synthetic Model 28",
+    "Synthetic Model 32",
+    "Synthetic Model 33",
+    "Synthetic Model 36",
+    "Synthetic Model 37",
+    "Synthetic Model 38",
+    "Synthetic Model 40",
+    "Synthetic Model 43",
+    "Synthetic Model 44",
+    "Synthetic Model 46",
+    "Synthetic Model 48",
+    "Synthetic Model 49",
+    "Synthetic Model 53",
+    "Synthetic Model 55",
+    "Synthetic Model 56",
+    "Synthetic Model 59",
+    "Synthetic Model 63",
+    "Synthetic Model 64",
+    "Synthetic Model 65",
+    "Synthetic Model 71",
+    "Synthetic Model 74",
+    "Synthetic Model 75",
+    "Synthetic Model 76",
+    "Synthetic Model 78",
+    "Synthetic Model 79",
+    "tie beta",
+    "tie alpha",
+    "Tie Alpha",
+    "round half price",
+    "round half price twin",
+    "free and slow",
+    "index over floor exact",
+    "huge price",
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
+   ],
+   "pareto_ids": [
+    "Synthetic Model 43",
+    "Synthetic Model 71",
+    "Synthetic Model 75",
+    "Synthetic Model 78",
+    "free and slow",
+    "tiny price"
+   ],
+   "shortlist_ids": [
     "Synthetic Model 43"
    ]
   },
   {
    "floor": 50,
-   "bias": -1,
-   "n": 10,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 43",
-    "Synthetic Model 78",
-    "Synthetic Model 75"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": -1,
-   "n": 0,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 43"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": -0.5,
-   "n": 1,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 71"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": -0.5,
-   "n": 3,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 71",
-    "Synthetic Model 43",
-    "tiny price"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": -0.5,
-   "n": 10,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 71",
-    "Synthetic Model 43",
-    "tiny price",
-    "Synthetic Model 78",
-    "Synthetic Model 75"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": -0.5,
-   "n": 0,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 71",
-    "Synthetic Model 43",
-    "tiny price"
-   ]
-  },
-  {
-   "floor": 50,
-   "bias": 0,
-   "n": 1,
-   "eligible_ids": [
-    "Synthetic Model 00",
-    "Synthetic Model 03",
-    "Synthetic Model 04",
-    "Synthetic Model 05",
-    "Synthetic Model 06",
-    "Synthetic Model 07",
-    "Synthetic Model 08",
-    "Synthetic Model 10",
-    "Synthetic Model 15",
-    "Synthetic Model 17",
-    "Synthetic Model 18",
-    "Synthetic Model 20",
-    "Synthetic Model 23",
-    "Synthetic Model 28",
-    "Synthetic Model 32",
-    "Synthetic Model 33",
-    "Synthetic Model 36",
-    "Synthetic Model 37",
-    "Synthetic Model 38",
-    "Synthetic Model 40",
-    "Synthetic Model 43",
-    "Synthetic Model 44",
-    "Synthetic Model 46",
-    "Synthetic Model 48",
-    "Synthetic Model 49",
-    "Synthetic Model 53",
-    "Synthetic Model 55",
-    "Synthetic Model 56",
-    "Synthetic Model 59",
-    "Synthetic Model 63",
-    "Synthetic Model 64",
-    "Synthetic Model 65",
-    "Synthetic Model 71",
-    "Synthetic Model 74",
-    "Synthetic Model 75",
-    "Synthetic Model 76",
-    "Synthetic Model 78",
-    "Synthetic Model 79",
-    "tie beta",
-    "tie alpha",
-    "Tie Alpha",
-    "round half price",
-    "round half price twin",
-    "free and slow",
-    "index over floor exact",
-    "huge price",
-    "tiny price"
-   ],
-   "pareto_ids": [
-    "Synthetic Model 43",
-    "Synthetic Model 71",
-    "Synthetic Model 75",
-    "Synthetic Model 78",
-    "tiny price"
-   ],
-   "shortlist_ids": [
-    "Synthetic Model 43"
-   ]
-  },
-  {
-   "floor": 50,
    "bias": 0,
    "n": 3,
    "eligible_ids": [
@@ -5426,13 +5753,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5492,13 +5824,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5506,6 +5843,7 @@
     "Synthetic Model 71",
     "Synthetic Model 78",
     "tiny price",
+    "free and slow",
     "Synthetic Model 75"
    ]
   },
@@ -5560,13 +5898,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5626,13 +5969,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5690,13 +6038,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5756,13 +6109,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5770,7 +6128,8 @@
     "Synthetic Model 71",
     "Synthetic Model 78",
     "Synthetic Model 75",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -5824,13 +6183,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5890,13 +6254,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -5954,13 +6323,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6020,13 +6394,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6034,7 +6413,8 @@
     "Synthetic Model 78",
     "Synthetic Model 43",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -6088,13 +6468,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6154,13 +6539,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6218,13 +6608,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6284,13 +6679,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -6298,7 +6698,8 @@
     "Synthetic Model 78",
     "Synthetic Model 43",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -6352,13 +6753,18 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 43",
     "Synthetic Model 71",
     "Synthetic Model 75",
     "Synthetic Model 78",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -7593,7 +7999,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -7603,10 +8013,11 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
-    "tiny price"
+    "free and slow"
    ]
   },
   {
@@ -7689,7 +8100,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -7699,12 +8114,13 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 22"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -7787,7 +8203,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -7797,9 +8217,11 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
     "Synthetic Model 71",
     "Synthetic Model 22",
@@ -7890,7 +8312,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -7900,12 +8326,13 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
+    "free and slow",
     "tiny price",
-    "Synthetic Model 71",
-    "Synthetic Model 22"
+    "Synthetic Model 71"
    ]
   },
   {
@@ -7988,7 +8415,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -7998,6 +8429,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8084,7 +8516,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8094,6 +8530,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8182,7 +8619,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8192,6 +8633,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8201,6 +8643,7 @@
     "Synthetic Model 22",
     "Synthetic Model 01",
     "tiny price",
+    "free and slow",
     "Synthetic Model 02",
     "Synthetic Model 75"
    ]
@@ -8285,7 +8728,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8295,6 +8742,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8383,7 +8831,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8393,6 +8845,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8479,7 +8932,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8489,6 +8946,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8577,7 +9035,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8587,6 +9049,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8597,6 +9060,7 @@
     "Synthetic Model 22",
     "Synthetic Model 02",
     "tiny price",
+    "free and slow",
     "Synthetic Model 75"
    ]
   },
@@ -8680,7 +9144,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8690,6 +9158,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8778,7 +9247,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8788,6 +9261,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8874,7 +9348,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8884,6 +9362,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8972,7 +9451,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -8982,6 +9465,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -8992,7 +9476,8 @@
     "Synthetic Model 22",
     "Synthetic Model 02",
     "Synthetic Model 75",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -9075,7 +9560,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9085,6 +9574,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9173,7 +9663,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9183,6 +9677,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9269,7 +9764,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9279,6 +9778,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9367,7 +9867,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9377,6 +9881,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9387,7 +9892,8 @@
     "Synthetic Model 01",
     "Synthetic Model 22",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -9470,7 +9976,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9480,6 +9990,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9568,7 +10079,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9578,6 +10093,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9664,7 +10180,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9674,6 +10194,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9762,7 +10283,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9772,6 +10297,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
@@ -9782,7 +10308,8 @@
     "Synthetic Model 01",
     "Synthetic Model 22",
     "Synthetic Model 71",
-    "tiny price"
+    "tiny price",
+    "free and slow"
    ]
   },
   {
@@ -9865,7 +10392,11 @@
     "free and slow",
     "index over floor exact",
     "huge price",
-    "tiny price"
+    "tiny price",
+    "cheapest slow",
+    "dearer a bit faster",
+    "close price slow",
+    "close price fast"
    ],
    "pareto_ids": [
     "Synthetic Model 01",
@@ -9875,6 +10406,7 @@
     "Synthetic Model 52",
     "Synthetic Model 71",
     "Synthetic Model 75",
+    "free and slow",
     "tiny price"
    ],
    "shortlist_ids": [
