@@ -606,7 +606,8 @@ var Stage = class {
       ctx.strokeStyle = pal.copper;
       ctx.lineWidth = 2;
       ctx.stroke();
-      drawTag(ctx, q.x, q.y - r - 14, pt.m.n, pal, this.width);
+      const keep = order.filter((o) => o !== active && (o.pt.front || picks && picks.has(o.pt.id))).map((o) => o.q);
+      drawTag(ctx, q.x, q.y, r, pt.m.n, pal, this.width, this.height, keep);
     }
   }
 };
@@ -641,20 +642,28 @@ function drawDiamond(ctx, x, y, r, color) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 }
-function drawTag(ctx, x, y, text, pal, width) {
+function drawTag(ctx, x, y, r, text, pal, width, height, keep = []) {
   setFont(ctx, 11, 500);
   spaced(ctx, "0.02em");
-  const w = ctx.measureText(text).width + 12;
-  const left = clamp(x - w / 2, 4, Math.max(4, width - w - 4));
+  const w = ctx.measureText(text).width + 12, th = 18, gap = r + 10;
+  const fit = (left2, top2) => [clamp(left2, 4, Math.max(4, width - w - 4)), clamp(top2, 4, Math.max(4, (height || Infinity) - th - 4))];
+  const spots = [
+    fit(x - w / 2, y - gap - th),
+    fit(x - w / 2, y + gap),
+    fit(x + gap, y - th / 2),
+    fit(x - gap - w, y - th / 2)
+  ];
+  const clear = ([left2, top2]) => keep.every((k) => k.x < left2 - 10 || k.x > left2 + w + 10 || k.y < top2 - 10 || k.y > top2 + th + 10);
+  const [left, top] = spots.find(clear) || spots[0];
   ctx.fillStyle = pal.panelRaised;
-  ctx.fillRect(left, y - 17, w, 18);
+  ctx.fillRect(left, top, w, th);
   ctx.strokeStyle = pal.hair;
   ctx.lineWidth = 1;
-  ctx.strokeRect(left + 0.5, y - 16.5, w - 1, 17);
+  ctx.strokeRect(left + 0.5, top + 0.5, w - 1, th - 1);
   ctx.fillStyle = pal.text;
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, left + 6, y - 8);
+  ctx.fillText(text, left + 6, top + th / 2);
 }
 function yTicks(d) {
   const out = [];
