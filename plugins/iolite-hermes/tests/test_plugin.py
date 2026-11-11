@@ -46,11 +46,10 @@ def test_registers_both_tools():
 
 
 def test_no_source_configured_refuses_without_network(monkeypatch):
-    monkeypatch.delenv("IOLITE_AA_API_KEY", raising=False)
 
     def boom(*a, **k):
         raise AssertionError("network used with no catalog_url")
-    monkeypatch.setattr(plugin.aa_source, "open_same_origin", boom)
+    monkeypatch.setattr(plugin.netio, "open_same_origin", boom)
     monkeypatch.setattr(plugin.urllib.request, "urlopen", boom)
     out = json.loads(_setup({}).tools["iolite_shortlist"]({}))
     assert out["ok"] is False and "No catalog configured" in out["error"]

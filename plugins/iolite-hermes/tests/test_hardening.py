@@ -15,11 +15,9 @@ ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("iolite_plugin_hard", ROOT / "__init__.py")
 plugin = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(plugin)
-aa = plugin.aa_source
+netio = plugin.netio
 
-PAGES = json.loads((ROOT / "tests" / "fixtures" / "aa-free-pages.json").read_text())["pages"]
 GOLDEN = json.loads((ROOT / "tests" / "fixtures" / "decide-golden.json").read_text())
-KEY = "test-key-not-real-0123456789"
 
 
 class Resp(io.BytesIO):
@@ -65,25 +63,10 @@ def _catalog(tmp_path, rows):
     return str(p)
 
 
-# 1. The key comes through Hermes's secret scope when Hermes is there.
+# Redirects never carry a catalog fetch to another origin.
 
-def test_key_is_read_through_the_secret_scope(monkeypatch):
-    monkeypatch.setenv(aa.ENV_KEY, "global-env-key")
-    agent = types.ModuleType("agent")
-    scope = types.ModuleType("agent.secret_scope")
-    scope.get_secret_str = lambda name, default="": "profile-key" if name == aa.ENV_KEY else default
-    monkeypatch.setitem(sys.modules, "agent", agent)
-    monkeypatch.setitem(sys.modules, "agent.secret_scope", scope)
-    assert plugin._aa_key() == "profile-key"
+CAT_URL = "https://cat.example/api/v2/x"
 
-
-def test_key_falls_back_to_environ_outside_hermes(monkeypatch):
-    monkeypatch.setitem(sys.modules, "agent.secret_scope", None)  # import fails
-    monkeypatch.setenv(aa.ENV_KEY, " env-key ")
-    assert plugin._aa_key() == "env-key"
-
-
-# 2. Redirects never carry the key, or a catalog fetch, to another origin.
 
 def _redirect(handler, from_url, to_url, headers=None):
     req = urllib.request.Request(from_url, headers=headers or {})
@@ -91,35 +74,22 @@ def _redirect(handler, from_url, to_url, headers=None):
 
 
 @pytest.mark.parametrize("target", [
-    "http://artificialanalysis.ai/api/v2/x",        # https -> http downgrade
+    "http://cat.example/api/v2/x",        # https -> http downgrade
     "https://other-host.example/x",                 # another host
-    "https://artificialanalysis.ai.evil.example/x",  # look-alike host
-    "ftp://artificialanalysis.ai/x",                # another scheme
-    "https://artificialanalysis.ai:8443/x",         # another port
+    "https://cat.example.evil.example/x",  # look-alike host
+    "ftp://cat.example/x",                # another scheme
+    "https://cat.example:8443/x",         # another port
 ])
 def test_cross_origin_redirect_is_refused_before_it_is_built(target):
-    h = aa._SameOriginRedirect()
+    h = netio._SameOriginRedirect()
     with pytest.raises(urllib.error.HTTPError):
-        _redirect(h, aa.FREE_URL, target, {"x-api-key": KEY})
+        _redirect(h, CAT_URL, target, {"x-test": "h"})
 
 
 def test_same_origin_redirect_is_followed():
-    h = aa._SameOriginRedirect()
-    new = _redirect(h, aa.FREE_URL + "?page=1", "/api/v2/language/models/free?page=1&v=2")
-    assert new is not None and new.full_url.startswith("https://artificialanalysis.ai/")
-
-
-# 3. Paging: duplicates across pages are kept once.
-
-def test_duplicate_slugs_across_pages_are_kept_once(monkeypatch):
-    monkeypatch.setenv(aa.ENV_KEY, KEY)
-    dup = [dict(PAGES[0], pagination={"has_more": True}), dict(PAGES[0], pagination={"has_more": False})]
-
-    def opener(req, timeout):
-        page = int(req.full_url.rsplit("=", 1)[1])
-        return Resp(json.dumps(dup[page - 1]).encode())
-    rows = aa.fetch_rows(KEY, "2026-11-10", 15, "t", opener=opener)
-    assert len(rows) == len({r["slug"] for r in rows}) == len(PAGES[0]["data"])
+    h = netio._SameOriginRedirect()
+    new = _redirect(h, CAT_URL + "?page=1", "/api/v2/language/models/free?page=1&v=2")
+    assert new is not None and new.full_url.startswith("https://cat.example/")
 
 
 def test_catalog_url_failure_is_remembered(monkeypatch):
@@ -156,20 +126,6 @@ def test_catalog_url_errors_are_plain(monkeypatch, make, needle):
     assert out["ok"] is False and needle in out["error"]
 
 
-def test_aa_response_over_cap_and_not_json(monkeypatch):
-    for body, needle in ((b"x" * (aa.MAX_BYTES + 1), "exceeds 8 MB"), (b"<html>", "not JSON")):
-        with pytest.raises(aa.AaError, match=needle):
-            aa.fetch_rows(KEY, "d", 15, "t", opener=lambda req, t, b=body: Resp(b))
-
-
-def test_deadline_bounds_the_whole_walk(monkeypatch):
-    clock = iter([0.0, 0.0, 20.0, 20.0])
-    monkeypatch.setattr(aa.time, "monotonic", lambda: next(clock))
-    pages = [dict(PAGES[0], pagination={"has_more": True})] * 3
-    with pytest.raises(aa.AaError, match="did not answer within 15s"):
-        aa.fetch_rows(KEY, "d", 15, "t", opener=lambda req, t: Resp(json.dumps(pages[0]).encode()))
-
-
 # 5. Malformed arguments and extreme numbers return JSON errors, never raise.
 
 @pytest.mark.parametrize("args", [["floor", 50], "floor=50", 7])
@@ -179,16 +135,14 @@ def test_non_dict_arguments(tmp_path, args):
         assert json.loads(c.tools[tool](args))["ok"] is False
 
 
-@pytest.mark.parametrize("bad,ok", [({"objective": ["min_cost"]}, False), ({"objective": {"x": 1}}, False),
-                                    ({"anchor_model": ["a"]}, False), ({"floor": "high"}, True),
-                                    ({"n": "lots"}, True)])
-def test_odd_argument_types(tmp_path, bad, ok):
+@pytest.mark.parametrize("bad", [{"objective": ["min_cost"]}, {"objective": {"x": 1}}, {"anchor_model": ["a"]},
+                                 {"floor": "high"}, {"n": "lots"}, {"bias": "lean"}, {"floor": True}])
+def test_odd_argument_types_are_clear_errors(tmp_path, bad):
     c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])})
     out = json.loads(c.tools["iolite_shortlist"](bad))
-    assert out["ok"] is ok
-    if ok:  # an unusable floor or size falls back to the default
-        assert out["floor_applied"]["aa_intelligence_index"] == plugin.decide.clamp_floor(bad.get("floor", 50))
-        assert len(out["shortlist"]) <= plugin.decide.DEFAULT_SHORTLIST_N
+    assert out["ok"] is False
+    key = next(iter(bad))
+    assert key in out["error"] or key == "objective"
 
 
 def test_one_huge_number_does_not_break_every_answer(tmp_path):

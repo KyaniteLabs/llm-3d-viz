@@ -14,23 +14,13 @@ import time
 
 import pytest
 
-from test_hardening import GOLDEN, KEY, Resp, _catalog, _ctx, aa, plugin  # noqa: F401
+from test_hardening import GOLDEN, Resp, _catalog, _ctx, plugin  # noqa: F401
 from test_hardening import clean  # noqa: F401  (autouse fixture)
 
 decide = plugin.decide
 
 
-# Keys, caching and concurrency
-
-def test_key_with_a_newline_is_refused_without_echoing_it(monkeypatch, tmp_path):
-    p = tmp_path / "m.json"
-    p.write_text(json.dumps([{"model": "M", "tps": 1, "blended_price_per_M": 1, "aa_intelligence_index": 90}]))
-    monkeypatch.setattr(plugin, "_aa_key", lambda: "abc\nsecretpart")
-    monkeypatch.setattr(plugin, "_aa_opener", lambda *a: pytest.fail("must not fetch"))
-    out = json.loads(_ctx({"catalog_path": str(p)}).tools["iolite_shortlist"]({}))
-    assert out["ok"] is True and "paste the key again" in out["aa_display_error"]
-    assert "secretpart" not in json.dumps(out)
-
+# Caching and concurrency
 
 def test_concurrent_misses_fetch_once():
     calls, gate = [], threading.Event()
@@ -86,6 +76,8 @@ def test_a_slow_drip_catalog_url_hits_the_deadline(monkeypatch):
             time.sleep(0.15)
             return b" "
 
+        read1 = read
+
     monkeypatch.setattr(plugin, "_url_opener", lambda req, timeout: Drip())
     t0 = time.monotonic()
     out = json.loads(_ctx({"catalog_url": "https://cat.example/m.json", "timeout_seconds": 0.4})
@@ -123,7 +115,7 @@ def test_malformed_rows_are_unknown_not_fatal(tmp_path):
 def test_anchor_with_an_out_of_range_index_is_refused(tmp_path):
     c = _ctx({"catalog_path": _catalog(tmp_path, list(GOLDEN["models"]) + BAD_ROWS[3:4])})
     out = json.loads(c.tools["iolite_shortlist"]({"anchor_model": "Over"}))
-    assert out["ok"] is False and "no valid index" in out["error"]
+    assert out["ok"] is False and "no valid score" in out["error"]
 
 
 # decide.py parity with the TypeScript
@@ -194,15 +186,6 @@ def test_locale_order_matches_node_on_random_names():
 
 
 # Slash command and formatting
-
-def test_empty_results_still_credit_artificial_analysis():
-    res = {"ok": True, "floor_applied": {"aa_intelligence_index": 99, "source": "user"},
-           "objective": "balanced", "eligible_count": 0, "pareto_count": 0, "shortlist": [],
-           "attribution": dict(aa.ATTRIBUTION)}
-    assert "Artificial Analysis" in plugin._fmt_shortlist(res)
-    assert "Artificial Analysis" in plugin._fmt_model({"ok": True, "matches": [], "total_matches": 0,
-                                                       "attribution": dict(aa.ATTRIBUTION)})
-
 
 def test_slash_splits_on_any_whitespace_and_unquotes_model_names(tmp_path):
     c = _ctx({"catalog_path": _catalog(tmp_path, GOLDEN["models"])})

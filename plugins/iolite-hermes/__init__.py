@@ -10,30 +10,28 @@ Skill
 
 Data source (no default; you choose it). First one set wins:
   catalog_path       a local JSON file: a list of rows or {"models": [...]}
-  catalog_url        an Iolite /api/v1/models.json you are allowed to read, e.g. your
-                     own private instance. Fetched with a plain GET, cached in memory.
+  catalog_url        an https URL of an Iolite /api/v1/models.json you are allowed to read,
+                     e.g. your own private instance. Fetched with a plain GET, cached in
+                     memory. Plain http needs allow_http: true.
 
-Optional display (never a data source, never a ranking input):
-  IOLITE_AA_API_KEY  your own free Artificial Analysis Data API key. When set, each
-                     answer makes one fetch of the free language-models endpoint and
-                     shows Artificial Analysis's numbers beside the models the
-                     catalog already picked, labelled and credited. Nothing is cached
-                     or written; ranking and sorting never read these values.
-
-The plugin ships no catalog. Benchmark and price data carry their providers'
-terms, so the operator points it at a source they may use. Every path returns
-a JSON string and never raises into Hermes.
+The plugin ships no catalog and fetches nothing else. Rows whose source or
+provenance names Artificial Analysis are refused. Every public path returns a
+JSON string (or, for the slash command, text) and never raises into Hermes.
 """
 
 from __future__ import annotations
 
-import datetime
+import http.client
+import hashlib
 import json
 import logging
 import os
+import re
+import shlex
 import stat
 import threading
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -41,18 +39,18 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from . import decide
+    from . import decide, netio
 except ImportError:  # loaded as a bare module (tests, validator)
     import importlib.util
 
-    _spec = importlib.util.spec_from_file_location("iolite_decide", Path(__file__).with_name("decide.py"))
-    decide = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(decide)
-    _spec = importlib.util.spec_from_file_location("iolite_aa_source", Path(__file__).with_name("aa_source.py"))
-    aa_source = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(aa_source)
-else:
-    from . import aa_source
+    def _load(name: str, file: str):
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(file))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    decide = _load("iolite_decide", "decide.py")
+    netio = _load("iolite_netio", "netio.py")
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +59,7 @@ VERSION = "0.2.4"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
+    "allow_http": False,
     "cache_minutes": 60,
     "timeout_seconds": 15,
 }
@@ -68,12 +67,22 @@ OBJECTIVES = {"min_cost": -1.0, "max_speed": 1.0, "balanced": None}
 MAX_N = 25
 MAX_BYTES = 8 * 1024 * 1024
 MAX_ROWS = 20_000  # far above any real catalog; bounds the work one bad file can cause
+MAX_TEXT = 200
 
 _ctx = None
 _cache: Dict[str, Tuple[float, List[dict], str]] = {}
-_aa_opener = None  # tests swap in a fake; None means urllib with same-origin redirects
-_url_opener = None  # the same, for catalog_url
-FAIL_TTL_SECONDS = 300  # a failed fetch is remembered this long, so retries can't drain a quota
+_url_opener = None  # tests swap in a fake; None means urllib with same-origin redirects
+FAIL_TTL_SECONDS = 300  # a failed fetch is remembered this long, so retries can't hammer a source
+
+
+class CatalogError(LookupError, ValueError):
+    """A catalog problem with a message Iolite built itself: no URL query, no full
+    path, nothing a server or the OS wrote. Only these are shown or remembered."""
+
+
+class ArgError(ValueError):
+    """A tool or slash argument the caller can fix; the message names it."""
+
 
 SHORTLIST_SCHEMA = {
     "name": "iolite_shortlist",
@@ -81,14 +90,14 @@ SHORTLIST_SCHEMA = {
         "Shortlist LLMs that clear an intelligence floor, then trade cost against speed. "
         "Models below the floor or missing price, speed or index are excluded; the rest are "
         "reduced to the cost x speed Pareto front and ranked by objective. Give floor (0-100, "
-        "Artificial Analysis Intelligence Index scale) or anchor_model (use that model's index "
-        "as the floor). objective: min_cost, max_speed or balanced (bias -1..1)."
+        "an intelligence score on a 0-100 scale; the source is up to the catalog) or anchor_model "
+        "(use that model's score as the floor). objective: min_cost, max_speed or balanced (bias -1..1)."
     ),
     "parameters": {
         "type": "object",
         "properties": {
-            "floor": {"type": "number", "description": "Minimum intelligence index, 0-100. Default 50."},
-            "anchor_model": {"type": "string", "description": "A model name or slug (case-insensitive); its index becomes the floor."},
+            "floor": {"type": "number", "description": "Minimum intelligence score, 0-100 (a number or numeric string). Default 50."},
+            "anchor_model": {"type": "string", "description": "A model name or slug (case-insensitive); its score becomes the floor; an ambiguous name is refused, so use the slug."},
             "objective": {"type": "string", "enum": sorted(OBJECTIVES),
                           "description": "min_cost, max_speed or balanced. Default balanced."},
             "bias": {"type": "number", "description": "balanced only: -1 cheaper ... +1 faster. Default 0."},
@@ -107,8 +116,14 @@ MODEL_SCHEMA = {
     },
 }
 
-_FIELDS = ("model", "provider", "openness", "reasoning", "context_length", "tps", "ttft",
-           "blended_price_per_M", "aa_intelligence_index", "data_date")
+
+_FIELDS = ("model", "slug", "provider", "openness", "reasoning", "context_length", "tps", "ttft",
+           "blended_price_per_M", "aa_intelligence_index", "data_date",
+           "source", "source_url", "license", "attribution")
+_TEXT_FIELDS = ("model", "slug", "provider", "openness", "data_date", "source", "license", "attribution")
+_NUMERIC = ("context_length", "tps", "ttft", "blended_price_per_M")
+_PROVENANCE_KEYS = ("source", "sources", "source_url", "provenance", "attribution", "data_source",
+                    "license", "licence", "origin", "citation")
 
 
 def _settings_from_config() -> Dict[str, Any]:
@@ -136,7 +151,7 @@ def _num_cfg(key: str) -> float:
     val = _cfg(key)
     try:
         num = float(val)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return float(DEFAULTS[key])
     return num if num >= 0 and num == num and num != float("inf") else float(DEFAULTS[key])
 
@@ -145,46 +160,140 @@ def _timeout() -> float:
     return _num_cfg("timeout_seconds") or float(DEFAULTS["timeout_seconds"])
 
 
+def _allow_http() -> bool:
+    v = _cfg("allow_http")
+    return v is True or (isinstance(v, str) and v.strip().casefold() in ("true", "yes", "1"))
+
+
+_NUM_RE = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$")
+
+
+def _arg_number(args: dict, name: str) -> Optional[float]:
+    """A numeric argument given as a number or a numeric string. Absent is None;
+    anything unusable is an ArgError that names the argument."""
+    v = args.get(name)
+    if v is None:
+        return None
+    if isinstance(v, str):
+        text = v.strip()
+        if not _NUM_RE.match(text) or len(text) > 40:
+            raise ArgError(f"{name} must be a number, got {_safe_text(v, 40)!r}")
+        try:
+            v = float(text)
+        except OverflowError:
+            raise ArgError(f"{name} is too large; give a finite number") from None
+    elif isinstance(v, bool) or not isinstance(v, (int, float)):
+        raise ArgError(f"{name} must be a number")
+    f = netio._num(v)
+    if f is None:
+        raise ArgError(f"{name} is too large or not finite; give a finite number")
+    return f
+
+
 def _clamp_n(n: Any) -> int:
-    """Shortlist size: an integer from 1 to MAX_N. Anything unusable means the default."""
-    if isinstance(n, bool) or not isinstance(n, (int, float)) or n != n or n in (float("inf"), float("-inf")):
+    """Shortlist size: an integer from 1 to MAX_N. A numeric string counts; anything
+    else unusable means the default."""
+    if isinstance(n, str) and _NUM_RE.match(n.strip()) and len(n.strip()) <= 40:
+        n = float(n.strip())
+    f = netio._num(n)
+    if f is None:
         return decide.DEFAULT_SHORTLIST_N
-    return max(1, min(MAX_N, int(n)))
+    return max(1, min(MAX_N, int(f)))
 
 
-_NUMERIC = ("context_length", "tps", "ttft", "blended_price_per_M")
+def _safe_text(v: Any, limit: int = MAX_TEXT) -> str:
+    """Text from a catalog or a user, made safe to print in chat: control characters
+    and line breaks gone, length capped, @-mentions and <link> / <!channel> markup
+    and backticks defused."""
+    if not isinstance(v, str):
+        return ""
+    out = []
+    for ch in v:
+        cat = unicodedata.category(ch)
+        if cat in ("Zs", "Zl", "Zp") or ch in "\t\r\n":
+            out.append(" ")
+        elif cat in ("Cc", "Cf", "Cs", "Co", "Cn"):
+            continue
+        else:
+            out.append(ch)
+    text = " ".join("".join(out).split())
+    text = text.replace("@", "@​").replace("<", "‹").replace(">", "›").replace("`", "'")
+    return text[:limit]
+
+
+_MD_SPECIALS = re.compile(r"([\\*_~|\[\]()#])")
+
+
+def _md(v: Any) -> str:
+    """Escape chat-markdown characters in text printed by the slash command."""
+    return _MD_SPECIALS.sub(r"\\\1", str(v))
+
+
+def _names_aa(v: Any, depth: int = 0) -> bool:
+    if isinstance(v, str):
+        low = v.casefold().replace("-", " ").replace("_", " ")
+        return "artificial analysis" in low or "artificialanalysis" in low
+    if depth >= 4:
+        return False
+    if isinstance(v, dict):
+        return any(_names_aa(x, depth + 1) for x in v.values()) or any(_names_aa(k, depth + 1) for k in v)
+    if isinstance(v, (list, tuple)):
+        return any(_names_aa(x, depth + 1) for x in v)
+    return False
+
+
+def _provenance_is_prohibited(row: dict) -> bool:
+    return any(_names_aa(row.get(k)) for k in _PROVENANCE_KEYS)
 
 
 def _clean_row(r: dict) -> dict:
-    """A copy of a catalog row whose numbers are all finite or None. A string,
-    NaN, infinity or an index outside 0-100 reads as unknown, so one bad row is
-    left out of scoring instead of crashing it or leaking NaN into the answer."""
-    row = dict(r)
+    """A copy of a catalog row holding only known fields. Numbers are finite or None
+    (a string, NaN, infinity, a huge integer or an index outside 0-100 reads as
+    unknown, so one bad row is left out of scoring instead of crashing it) and
+    text is safe to print."""
+    row: Dict[str, Any] = {}
+    for k in _TEXT_FIELDS:
+        if k in r:
+            row[k] = _safe_text(r[k]) or None
+    if "reasoning" in r:
+        v = r["reasoning"]
+        row["reasoning"] = v if isinstance(v, bool) else (_safe_text(v) or None)
+    url = r.get("source_url")
+    if isinstance(url, str) and url.strip().casefold().startswith(("https://", "http://")):
+        row["source_url"] = _safe_text(url.strip()) or None
     for k in _NUMERIC:
-        if k in row:
-            row[k] = aa_source._num(row[k])
-    if "aa_intelligence_index" in row:
-        row["aa_intelligence_index"] = aa_source.index_or_none(row["aa_intelligence_index"])
+        if k in r:
+            row[k] = netio._num(r[k])
+    if "aa_intelligence_index" in r:
+        row["aa_intelligence_index"] = netio.index_or_none(r["aa_intelligence_index"])
     return row
 
 
+class _Rows(list):
+    """Catalog rows, plus how many were refused for naming Artificial Analysis."""
+    rejected = 0
+
+
 def _rows(payload: Any) -> List[dict]:
+    if isinstance(payload, dict) and any(_names_aa(payload.get(k)) for k in _PROVENANCE_KEYS):
+        raise CatalogError("the catalog names Artificial Analysis as its source; Iolite does not load "
+                           "Artificial Analysis data through catalog_path or catalog_url")
     rows = payload.get("models") if isinstance(payload, dict) else payload
     if not isinstance(rows, list):
-        raise ValueError("catalog must be a list of rows or an object with a 'models' list")
+        raise CatalogError("catalog must be a list of rows or an object with a 'models' list")
     if len(rows) > MAX_ROWS:
-        raise ValueError(f"catalog has {len(rows)} rows; Iolite reads at most {MAX_ROWS}")
-    return [_clean_row(r) for r in rows if isinstance(r, dict) and isinstance(r.get("model"), str)]
-
-
-def _aa_key() -> str:
-    """The operator's key, read through Hermes's secret scope so each profile on a
-    multiplexing gateway gets its own. Plain os.environ only outside Hermes."""
-    try:
-        from agent.secret_scope import get_secret_str
-    except ImportError:
-        return (os.environ.get(aa_source.ENV_KEY) or "").strip()
-    return (get_secret_str(aa_source.ENV_KEY) or "").strip()
+        raise CatalogError(f"catalog has {len(rows)} rows; Iolite reads at most {MAX_ROWS}")
+    out = _Rows()
+    for r in rows:
+        if not isinstance(r, dict) or not isinstance(r.get("model"), str):
+            continue
+        if _provenance_is_prohibited(r):
+            out.rejected += 1
+            continue
+        clean = _clean_row(r)
+        if clean.get("model"):
+            out.append(clean)
+    return out
 
 
 _failures: Dict[str, Tuple[float, str]] = {}
@@ -200,7 +309,8 @@ def _lock_for(cache_key: str) -> threading.Lock:
 def _cached_fetch(cache_key: str, ttl: float, fetch) -> Tuple[List[dict], str]:
     """Serve from cache; otherwise fetch once. A failure is remembered for
     FAIL_TTL_SECONDS and replayed, so an agent retrying a broken source spends
-    no extra requests. Concurrent misses on one key wait for a single fetch."""
+    no extra requests. Only Iolite's own constructed messages are remembered.
+    Concurrent misses on one key wait for a single fetch."""
 
     def cached():
         now = time.monotonic()
@@ -209,7 +319,7 @@ def _cached_fetch(cache_key: str, ttl: float, fetch) -> Tuple[List[dict], str]:
             return hit[1], hit[2]
         failed = _failures.get(cache_key)
         if failed and now - failed[0] < FAIL_TTL_SECONDS:
-            raise LookupError(failed[1])
+            raise CatalogError(failed[1])
         return None
 
     found = cached()
@@ -222,17 +332,44 @@ def _cached_fetch(cache_key: str, ttl: float, fetch) -> Tuple[List[dict], str]:
         try:
             rows, label = fetch()
         except Exception as exc:
-            _failures[cache_key] = (time.monotonic(), str(exc))
+            _failures[cache_key] = (time.monotonic(), _safe_msg(exc))
             raise
         _failures.pop(cache_key, None)
         _cache[cache_key] = (time.monotonic(), rows, label)
         return rows, label
 
 
+def _safe_msg(exc: BaseException) -> str:
+    return str(exc) if isinstance(exc, CatalogError) else "the catalog could not be loaded"
+
+
+def _validate_url(url: str) -> urllib.parse.SplitResult:
+    """Refuse a catalog_url before any request is built, so no library error can
+    echo it. Messages never contain the URL."""
+    if any(ch.isspace() or ord(ch) < 32 or ord(ch) == 127 for ch in url):
+        raise CatalogError("catalog_url must not contain spaces or control characters")
+    try:
+        u = urllib.parse.urlsplit(url)
+        port = u.port
+    except ValueError:
+        raise CatalogError("catalog_url is not a valid URL (check the host and port)") from None
+    scheme = u.scheme.lower()
+    if scheme not in ("https", "http"):
+        raise CatalogError("catalog_url must be an https URL")
+    if scheme == "http" and not _allow_http():
+        raise CatalogError("catalog_url must be https; set allow_http: true to permit plain http")
+    if not u.hostname:
+        raise CatalogError("catalog_url has no host")
+    if "@" in u.netloc:
+        raise CatalogError("catalog_url must not carry a user name or password; Iolite sends no credentials")
+    del port
+    return u
+
+
 def _redact_url(url: str) -> str:
     """scheme://host/path only: no user:password@, query string or fragment, which
-    is where a private instance's token would sit."""
-    u = urllib.parse.urlsplit(url)
+    is where a private instance's token would sit. Validates first."""
+    u = _validate_url(url)
     host = u.hostname or ""
     if u.port:
         host = f"{host}:{u.port}"
@@ -241,122 +378,95 @@ def _redact_url(url: str) -> str:
 
 def _source_label(path: str = "", url: str = "") -> str:
     if path:
-        return f"file:{Path(path).name}"
-    return _redact_url(url)
+        return f"file:{_safe_text(Path(path).name, 80)}"
+    try:
+        return _redact_url(url)
+    except CatalogError:
+        return "(invalid catalog_url)"
 
 
 def _read_catalog_file(path: str) -> bytes:
     """A regular file of at most MAX_BYTES. A FIFO, device or directory is refused
-    before it is opened for reading, so it cannot hang the call."""
+    before it is opened for reading, so it cannot hang the call. OS errors are
+    reported by file name only, never the full path."""
     p = Path(path).expanduser()
+    name = _safe_text(p.name, 80)
     try:
         st = p.stat()
+        if not stat.S_ISREG(st.st_mode):
+            raise CatalogError(f"catalog_path {name} is not a regular file")
+        if st.st_size > MAX_BYTES:
+            raise CatalogError("catalog file exceeds 8 MB")
+        fd = os.open(p, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
+        with os.fdopen(fd, "rb") as fh:
+            if not stat.S_ISREG(os.fstat(fh.fileno()).st_mode):  # swapped after the stat
+                raise CatalogError(f"catalog_path {name} is not a regular file")
+            body = fh.read(MAX_BYTES + 1)
     except OSError as exc:
-        raise LookupError(f"catalog_path {p.name}: {exc.strerror or exc.__class__.__name__}") from None
-    if not stat.S_ISREG(st.st_mode):
-        raise ValueError(f"catalog_path {p.name} is not a regular file")
-    if st.st_size > MAX_BYTES:
-        raise ValueError("catalog file exceeds 8 MB")
-    fd = os.open(p, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
-    with os.fdopen(fd, "rb") as fh:
-        if not stat.S_ISREG(os.fstat(fh.fileno()).st_mode):  # swapped after the stat
-            raise ValueError(f"catalog_path {p.name} is not a regular file")
-        body = fh.read(MAX_BYTES + 1)
+        raise CatalogError(f"catalog_path {name}: {_safe_text(exc.strerror or exc.__class__.__name__, 80)}") from None
     if len(body) > MAX_BYTES:
-        raise ValueError("catalog file exceeds 8 MB")
+        raise CatalogError("catalog file exceeds 8 MB")
     return body
 
 
+def _parse_json(body: bytes, what: str) -> Any:
+    try:
+        return json.loads(body)
+    except UnicodeDecodeError:
+        raise CatalogError(f"{what} is not UTF-8 JSON") from None
+    except (ValueError, RecursionError):
+        raise CatalogError(f"{what} is not valid JSON") from None
+
+
 def load_catalog() -> Tuple[List[dict], str]:
-    """Return (rows, source label). Raises LookupError when nothing is configured."""
+    """Return (rows, source label). Raises CatalogError when nothing is configured
+    or the source cannot be read; its message is always safe to show."""
     path = str(_cfg("catalog_path") or "").strip()
     url = str(_cfg("catalog_url") or "").strip()
     if path:
-        try:
-            payload = json.loads(_read_catalog_file(path))
-        except UnicodeDecodeError:
-            raise ValueError(f"catalog_path {Path(path).name} is not UTF-8 JSON") from None
-        except json.JSONDecodeError:
-            raise ValueError(f"catalog_path {Path(path).name} is not valid JSON") from None
+        name = _safe_text(Path(path).name, 80)
+        payload = _parse_json(_read_catalog_file(path), f"catalog_path {name}")
         return _rows(payload), _source_label(path=path)
     if not url:
-        raise LookupError(
+        raise CatalogError(
             "No catalog configured. Under plugins.entries.iolite.settings, set catalog_path "
-            "(a local JSON file) or catalog_url (an Iolite /api/v1/models.json you may use). "
-            f"{aa_source.ENV_KEY} only adds Artificial Analysis numbers beside the picks; "
-            "it is not a catalog."
+            "(a local JSON file) or catalog_url (an https Iolite /api/v1/models.json you may use). "
+            "The repository's demo/synthetic-catalog.json is invented data you can try first."
         )
-    if not url.lower().startswith(("https://", "http://")):
-        raise ValueError("catalog_url must be http(s)")
-    if "@" in urllib.parse.urlsplit(url).netloc:
-        raise ValueError("catalog_url must not carry a user name or password; Iolite sends no credentials")
-    label = _source_label(url=url)
+    label = _redact_url(url)  # validates before any request exists
 
     def fetch():
-        req = urllib.request.Request(url, headers={"User-Agent": f"iolite-hermes/{VERSION}",
-                                                   "Accept": "application/json"})
-        opener = _url_opener or aa_source.open_same_origin
         timeout = _timeout()
         deadline = time.monotonic() + timeout
         try:
+            req = urllib.request.Request(url, headers={"User-Agent": f"iolite-hermes/{VERSION}",
+                                                       "Accept": "application/json"})
+            opener = _url_opener or netio.open_same_origin
             with opener(req, timeout) as resp:
-                body = aa_source.read_capped(resp, deadline, MAX_BYTES, f"catalog_url {label}")
+                body = netio.read_capped(resp, deadline, MAX_BYTES, f"catalog_url {label}")
         except urllib.error.HTTPError as exc:
             if 300 <= exc.code < 400:
-                raise LookupError(f"catalog_url {label} redirected to another origin; refused") from None
-            raise LookupError(f"catalog_url {label} returned HTTP {exc.code}") from None
+                raise CatalogError(f"catalog_url {label} redirected to another origin; refused") from None
+            raise CatalogError(f"catalog_url {label} returned HTTP {exc.code}") from None
         except TimeoutError:
-            raise LookupError(f"catalog_url {label} did not answer within {timeout:g} s") from None
+            raise CatalogError(f"catalog_url {label} did not answer within {timeout:g} s") from None
         except urllib.error.URLError as exc:
             reason = exc.reason if isinstance(exc.reason, str) else exc.reason.__class__.__name__
-            raise LookupError(f"could not reach catalog_url {label}: {reason}") from None
+            raise CatalogError(f"could not reach catalog_url {label}: {_safe_text(reason, 80)}") from None
+        except (ValueError, http.client.HTTPException):
+            raise CatalogError(f"catalog_url {label} is not a valid URL") from None
         except OSError as exc:
-            raise LookupError(f"could not reach catalog_url {label}: {exc.__class__.__name__}") from None
+            raise CatalogError(f"could not reach catalog_url {label}: {exc.__class__.__name__}") from None
+        except Exception as exc:  # never str(exc): library messages can carry the URL
+            raise CatalogError(f"could not read catalog_url {label} ({exc.__class__.__name__})") from None
         if len(body) > MAX_BYTES:
-            raise ValueError("catalog response exceeds 8 MB")
+            raise CatalogError("catalog response exceeds 8 MB")
         try:
             payload = json.loads(body)
-        except ValueError:
-            raise ValueError(f"catalog_url {label} did not return JSON") from None
+        except (ValueError, RecursionError):
+            raise CatalogError(f"catalog_url {label} did not return JSON") from None
         return _rows(payload), label
-    return _cached_fetch(url, _num_cfg("cache_minutes") * 60, fetch)
-
-
-def _aa_display(models: List[dict]) -> dict:
-    """Artificial Analysis numbers for models already chosen from the catalog.
-
-    Display only: called after the ranking is final, never handed to decide.py,
-    and its result is attached beside the picks, not merged into them. One fetch
-    per call, no retry, no cache, nothing written. Returns {} without a key."""
-    key = _aa_key()
-    if not key or not models:
-        return {}
-    try:
-        opener = _aa_opener or aa_source.open_same_origin
-        found = aa_source.fetch_rows(key, datetime.date.today().isoformat(), _timeout(),
-                                     f"iolite-hermes/{VERSION}", opener=opener)
-    except Exception as exc:  # a failed display must not fail the answer
-        msg = str(exc) if isinstance(exc, aa_source.AaError) else "Artificial Analysis request failed"
-        return {"aa_display_error": msg + " The ranking above does not use Artificial Analysis. Do not retry in a loop."}
-    by_slug = {str(r.get("slug", "")).casefold(): r for r in found if r.get("slug")}
-    by_name = {str(r.get("model", "")).casefold(): r for r in found}
-    shown: Dict[str, dict] = {}
-    for m in models:
-        name = str(m.get("model", ""))
-        r = by_slug.get(str(m.get("slug", "")).casefold()) if m.get("slug") else None
-        r = r or by_name.get(name.casefold())
-        if r is None:
-            continue
-        shown[name] = {
-            "label": "Artificial Analysis (display only, not used for ranking)",
-            "intelligence_index": r.get("aa_intelligence_index"),
-            "blended_price_per_M": r.get("blended_price_per_M"),
-            "tps": r.get("tps"),
-            "source_url": r.get("source_url"),
-        }
-    if not shown:
-        return {"aa_display": {}, "aa_display_note": "No picked model was found in Artificial Analysis's list."}
-    return {"aa_display": shown, "attribution": dict(aa_source.ATTRIBUTION)}
+    return _cached_fetch(hashlib.sha256(url.encode()).hexdigest(), _num_cfg("cache_minutes") * 60, fetch)
 
 
 def _summary(m: dict) -> dict:
@@ -371,32 +481,45 @@ def _err(msg: str) -> str:
     return _dumps({"ok": False, "error": msg})
 
 
-def _resolve_anchor(rows: List[dict], anchor: str) -> Optional[str]:
-    """The catalog's own spelling of `anchor`: exact first, then case-insensitive
-    on name or slug, the same matching iolite_model uses."""
-    if any(r.get("model") == anchor for r in rows):
-        return anchor
-    q = anchor.strip().casefold()
-    for r in rows:
-        if q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold()):
-            return r.get("model")
-    return None
+def _resolve_anchor(rows: List[dict], anchor: str) -> dict:
+    """The one catalog row `anchor` names: a slug, else an exact model name, else a
+    case-insensitive one. A name shared by several rows is refused, never guessed."""
+    q = anchor.strip()
+    shown = _safe_text(q, 80)
+    for hits in (
+        [r for r in rows if r.get("slug") and str(r["slug"]).casefold() == q.casefold()],
+        [r for r in rows if r.get("model") == q],
+        [r for r in rows if str(r.get("model", "")).casefold() == q.casefold()],
+    ):
+        if len(hits) == 1:
+            return hits[0]
+        if len(hits) > 1:
+            slugs = [str(r["slug"]) for r in hits if r.get("slug")][:4]
+            hint = f"; use the slug ({', '.join(slugs)})" if slugs else "; the catalog gives them no slug to tell them apart"
+            raise ArgError(f"anchor_model {shown!r} matches {len(hits)} rows{hint}")
+    raise ArgError(f"anchor_model {shown!r} not found")
 
 
 def iolite_shortlist(args: Optional[dict] = None, **_kw) -> str:
-    if args is None:
-        args = {}
-    if not isinstance(args, dict):
-        return _err("arguments must be an object")
     try:
-        rows, source = load_catalog()
-    except Exception as exc:  # never raise into Hermes
-        return _err(str(exc))
-    try:
-        return _shortlist(rows, source, args)
-    except Exception:  # one malformed catalog row must not become a traceback
+        if args is None:
+            args = {}
+        if not isinstance(args, dict):
+            return _err("arguments must be an object")
+        try:
+            rows, source = load_catalog()
+        except Exception as exc:  # never raise into Hermes
+            return _err(_safe_msg(exc))
+        try:
+            return _shortlist(rows, source, args)
+        except ArgError as exc:
+            return _err(str(exc))
+        except Exception:  # one malformed catalog row must not become a traceback
+            logger.debug("iolite: shortlist failed", exc_info=True)
+            return _err("the catalog has a row Iolite cannot score; check its numbers")
+    except Exception:
         logger.debug("iolite: shortlist failed", exc_info=True)
-        return _err("the catalog has a row Iolite cannot score; check its numbers")
+        return _err("Iolite hit an unexpected error")
 
 
 def _shortlist(rows: List[dict], source: str, args: dict) -> str:
@@ -404,26 +527,35 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
     if not isinstance(objective, str) or objective not in OBJECTIVES:
         return _err(f"objective must be one of {sorted(OBJECTIVES)}")
     fixed = OBJECTIVES[objective]
-    bias = decide.clamp_bias(fixed if fixed is not None else args.get("bias", decide.DEFAULT_COST_SPEED_BIAS))
+    bias_arg = _arg_number(args, "bias")
+    bias = decide.clamp_bias(fixed if fixed is not None else
+                             (decide.DEFAULT_COST_SPEED_BIAS if bias_arg is None else bias_arg))
+    floor_arg = _arg_number(args, "floor")
+    n_arg = _arg_number(args, "n")
+    n = decide.DEFAULT_SHORTLIST_N if n_arg is None else _clamp_n(n_arg)
 
     anchor = args.get("anchor_model")
     if anchor is not None and not isinstance(anchor, str):
         return _err("anchor_model must be a model name")
+    anchor_row = None
     if anchor and anchor.strip():
-        name = _resolve_anchor(rows, anchor)
-        floor = decide.floor_from_anchor(rows, name) if name is not None else None
+        anchor_row = _resolve_anchor(rows, anchor)
+        floor = decide.floor_from_anchor([anchor_row], anchor_row["model"])
         if floor is None:
-            return _err(f"anchor_model {anchor!r} not found or has no valid index")
+            raise ArgError(f"anchor_model {_safe_text(anchor, 80)!r} has no valid score to use as a floor")
         floor_source = "anchor"
-    elif args.get("floor") is not None:
-        floor, floor_source = decide.clamp_floor(args["floor"]), "user"
+    elif floor_arg is not None:
+        floor, floor_source = decide.clamp_floor(floor_arg), "user"
     else:
         floor, floor_source = decide.DEFAULT_INTELLIGENCE_FLOOR, "default"
 
-    n = _clamp_n(args.get("n", decide.DEFAULT_SHORTLIST_N))
     out = decide.shortlist_from_decide(rows, floor, bias, n)
     reason = decide.bias_reason(bias)
-    return _dumps({
+    scorable = [r for r in rows if decide.is_scorable(r)]
+    refusals: List[str] = []
+    if not out["eligible"]:
+        refusals = ["no_pick_eligible_models" if scorable else "no_scorable_models"]
+    res: Dict[str, Any] = {
         "ok": True,
         "schema_version": "1.0",
         "floor_applied": {"aa_intelligence_index": floor, "source": floor_source},
@@ -431,39 +563,55 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
         "cost_speed_bias": bias,
         "eligible_count": len(out["eligible"]),
         "pareto_count": len(out["pareto"]),
+        "scorable_count": len(scorable),
         "shortlist": [dict(rank=i + 1, reasons=["on_pareto", reason], **_summary(m))
                       for i, m in enumerate(out["shortlist"])],
-        "refusals": [] if out["eligible"] else ["no_pick_eligible_models"],
+        "refusals": refusals,
         "catalog_snapshot_id": decide.catalog_snapshot_id(rows),
         "catalog_source": source,
-        **_aa_display(out["shortlist"]),
-    })
+    }
+    if scorable:
+        res["max_scorable_index"] = max(r["aa_intelligence_index"] for r in scorable)
+    if anchor_row is not None:
+        res["anchor"] = {"model": anchor_row.get("model"), "slug": anchor_row.get("slug")}
+    rejected = getattr(rows, "rejected", 0)
+    if rejected:
+        res["rows_refused_for_provenance"] = rejected
+    return _dumps(res)
 
 
 def iolite_model(args: Optional[dict] = None, **_kw) -> str:
-    if args is not None and not isinstance(args, dict):
-        return _err("arguments must be an object")
-    q = str((args or {}).get("query") or "").strip().casefold()
-    if not q:
-        return _err("query is required")
     try:
-        rows, source = load_catalog()
-    except Exception as exc:
-        return _err(str(exc))
-    exact = [r for r in rows if q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold())]
-    hits = exact or [r for r in rows
-                     if q in str(r.get("model", "")).casefold() or q in str(r.get("slug", "")).casefold()]
-    return _dumps({"ok": True, "matches": [_summary(r) for r in hits[:10]],
-                       "total_matches": len(hits), "catalog_source": source,
-                       **_aa_display(hits[:10])})
+        if args is not None and not isinstance(args, dict):
+            return _err("arguments must be an object")
+        q = _safe_text((args or {}).get("query"), 200).strip().casefold() if isinstance((args or {}).get("query"), str) else ""
+        if not q:
+            return _err("query is required")
+        try:
+            rows, source = load_catalog()
+        except Exception as exc:
+            return _err(_safe_msg(exc))
+        exact = [r for r in rows if q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold())]
+        hits = exact or [r for r in rows
+                         if q in str(r.get("model", "")).casefold() or q in str(r.get("slug", "")).casefold()]
+        res: Dict[str, Any] = {"ok": True, "matches": [_summary(r) for r in hits[:10]],
+                               "total_matches": len(hits), "catalog_source": source}
+        if getattr(rows, "rejected", 0):
+            res["rows_refused_for_provenance"] = rows.rejected
+        return _dumps(res)
+    except Exception:
+        logger.debug("iolite: model lookup failed", exc_info=True)
+        return _err("Iolite hit an unexpected error")
 
 
 _HELP = """/iolite picks a model by intelligence floor, then cost and speed.
 
-  /iolite shortlist [floor|anchor model] [cheap|fast|balanced] [n=3]
+  /iolite shortlist [floor|anchor model] [cheap|fast|balanced] [n=3] [bias=0]
       e.g. /iolite shortlist 60 cheap
            /iolite shortlist Claude Opus 5.5 fast n=5
-      A lone number is the floor; any other words name the anchor model.
+           /iolite shortlist "Grok 4 Fast" cheap
+      A lone number is the floor; any other words name the anchor model. Only the
+      last word can be an objective, and a quoted name is never read as one.
   /iolite model <name or slug>
   /iolite status     which catalog source is set, with no network call
   /iolite help"""
@@ -473,46 +621,25 @@ _OBJECTIVE_WORDS = {"cheap": "min_cost", "cheapest": "min_cost", "min_cost": "mi
                     "balanced": "balanced"}
 
 
-def _is_num(v: Any) -> bool:
-    return aa_source._num(v) is not None
-
-
 def _money(v: Any) -> str:
     """Dollars per million tokens. Under $1 keeps three significant figures, so
     $0.004/M doesn't print as $0.00/M."""
-    if not _is_num(v):
+    if netio._num(v) is None:
         return "?"
     return f"${v:.3g}/M" if 0 < v < 1 else f"${v:,.2f}/M"
 
 
 def _num(v: Any, unit: str) -> str:
     """Speeds under 10 keep one decimal, so 0.4 tok/s doesn't print as 0."""
-    if not _is_num(v):
+    if netio._num(v) is None:
         return "?"
     return f"{v:,.1f} {unit}" if 0 < v < 10 else f"{v:,.0f} {unit}"
 
 
-def _credit_line(res: dict) -> str:
-    a = res.get("attribution")
-    out = f"\n{a.get('text') or 'Source: Artificial Analysis (artificialanalysis.ai)'}" if isinstance(a, dict) else ""
-    for k in ("aa_display_error", "aa_display_note"):
-        if res.get(k):
-            out += f"\nArtificial Analysis: {res[k]}"
-    return out
-
-
-def _aa_col(res: dict, model: Any) -> str:
-    d = (res.get("aa_display") or {}).get(str(model))
-    if not isinstance(d, dict):
-        return ""
-    idx = d.get("intelligence_index")
-    return (f" | AA (display only): index {idx if idx is not None else '?'}, "
-            f"{_money(d.get('blended_price_per_M'))}, {_num(d.get('tps'), 'tok/s')}")
-
-
-def _parse_shortlist(rest: str) -> dict:
-    import shlex
-
+def _parse_words(rest: str) -> Tuple[dict, Optional[str]]:
+    """Parse /iolite shortlist arguments. Returns (args, tail), where tail is the
+    last word when it was read as an objective, so the caller can put it back if
+    the whole phrase turns out to be a model name."""
     try:
         words = shlex.split(rest)
     except ValueError as exc:
@@ -521,20 +648,24 @@ def _parse_shortlist(rest: str) -> dict:
     rest_words: List[str] = []
     for w in words:
         low = w.casefold()
-        if low in _OBJECTIVE_WORDS:
-            args["objective"] = _OBJECTIVE_WORDS[low]
-        elif low.startswith("n="):
+        if low.startswith("n=") and not any(c.isspace() for c in w):
             try:
                 args["n"] = int(low[2:])
             except ValueError:
-                raise ValueError(f"n must be a whole number, got {w[2:]!r}") from None
-        elif low.startswith("bias="):
+                raise ValueError(f"n must be a whole number, got {_safe_text(w[2:], 40)!r}") from None
+        elif low.startswith("bias=") and not any(c.isspace() for c in w):
             try:
                 args["bias"] = float(low[5:])
             except ValueError:
-                raise ValueError(f"bias must be a number from -1 to 1, got {w[5:]!r}") from None
+                raise ValueError(f"bias must be a number from -1 to 1, got {_safe_text(w[5:], 40)!r}") from None
         else:
             rest_words.append(w)
+    tail = None
+    # Only the last, unquoted word can be an objective ("Grok 4 Fast" is a name).
+    if rest_words and not any(c.isspace() for c in rest_words[-1]) \
+            and rest_words[-1].casefold() in _OBJECTIVE_WORDS:
+        tail = rest_words.pop()
+        args["objective"] = _OBJECTIVE_WORDS[tail.casefold()]
     # One word that is a number is the floor. Anything else is a model name,
     # numbers included ("Claude Opus 5.5", "Synthetic Model 07").
     if len(rest_words) == 1:
@@ -544,12 +675,31 @@ def _parse_shortlist(rest: str) -> dict:
             floor = None
         if floor is not None:
             if floor != floor or floor in (float("inf"), float("-inf")):
-                raise ValueError(f"the floor must be a number from 0 to 100, got {rest_words[0]!r}")
+                raise ValueError(f"the floor must be a number from 0 to 100, got {_safe_text(rest_words[0], 40)!r}")
             args["floor"] = floor
-            return args
+            return args, tail
     if rest_words:
         args["anchor_model"] = " ".join(rest_words)
-    return args
+    return args, tail
+
+
+def _parse_shortlist(rest: str) -> dict:
+    return _parse_words(rest)[0]
+
+
+def _credit_lines(rows: List[dict]) -> str:
+    seen: List[str] = []
+    for m in rows:
+        for k in ("attribution", "license"):
+            v = m.get(k)
+            if v and v not in seen:
+                seen.append(v)
+    return "".join(f"\nData: {_md(v)}" for v in seen[:5])
+
+
+def _provenance_line(res: dict) -> str:
+    n = res.get("rows_refused_for_provenance")
+    return f"\n{n} catalog rows were refused: their source names Artificial Analysis." if n else ""
 
 
 def _fmt_shortlist(res: dict) -> str:
@@ -559,30 +709,36 @@ def _fmt_shortlist(res: dict) -> str:
     head = (f"Floor {fl['aa_intelligence_index']:g} ({fl['source']}), {res['objective']}: "
             f"{res['eligible_count']} models clear it, {res['pareto_count']} on the cost x speed front.")
     if not res["shortlist"]:
-        return (head + "\nNo model clears this floor with price, speed and index all known. "
-                "Try a lower floor." + _credit_line(res))
+        if not res.get("scorable_count"):
+            advice = ("No row in this catalog has price, speed and score all known, so no floor can help. "
+                      "Add the missing fields to the catalog, or point Iolite at one that has them.")
+        else:
+            top = res.get("max_scorable_index")
+            advice = (f"{res['scorable_count']} models have price, speed and score, but none reaches the floor"
+                      + (f" (the highest score is {top:g}). Try a floor at or below {top:g}." if top is not None else "."))
+        return head + "\n" + advice + _provenance_line(res)
     lines = [head]
     for m in res["shortlist"]:
-        lines.append(f"{m['rank']}. {m.get('model')} ({m.get('provider') or '?'}): index "
+        lines.append(f"{m['rank']}. {_md(m.get('model'))} ({_md(m.get('provider') or '?')}): index "
                      f"{m.get('aa_intelligence_index')}, {_money(m.get('blended_price_per_M'))}, "
-                     f"{_num(m.get('tps'), 'tok/s')}" + _aa_col(res, m.get("model")))
-    return "\n".join(lines) + _credit_line(res)
+                     f"{_num(m.get('tps'), 'tok/s')}")
+    return "\n".join(lines) + _credit_lines(res["shortlist"]) + _provenance_line(res)
 
 
 def _fmt_model(res: dict) -> str:
     if not res.get("ok"):
         return f"Iolite: {res.get('error')}"
     if not res["matches"]:
-        return "No model matches that name." + _credit_line(res)
-    lines = [f"{m.get('model')} ({m.get('provider') or '?'}): index "
+        return "No model matches that name." + _provenance_line(res)
+    lines = [f"{_md(m.get('model'))} ({_md(m.get('provider') or '?')}): index "
              f"{m.get('aa_intelligence_index') if m.get('aa_intelligence_index') is not None else '?'}, "
              f"{_money(m.get('blended_price_per_M'))}, {_num(m.get('tps'), 'tok/s')}, "
-             f"context {_num(m.get('context_length'), 'tokens')}" + _aa_col(res, m.get("model"))
+             f"context {_num(m.get('context_length'), 'tokens')}"
              for m in res["matches"]]
     more = res["total_matches"] - len(res["matches"])
     if more > 0:
-        lines.append(f"…and {more} more. Use a longer name.")
-    return "\n".join(lines) + _credit_line(res)
+        lines.append(f"...and {more} more. Use a longer name.")
+    return "\n".join(lines) + _credit_lines(res["matches"]) + _provenance_line(res)
 
 
 def _status() -> str:
@@ -594,23 +750,28 @@ def _status() -> str:
         src = f"catalog_url {_source_label(url=url)}"
     else:
         src = "none. Set catalog_path or catalog_url"
-    aa = (f"{aa_source.ENV_KEY} is set: Artificial Analysis numbers are shown beside the picks (one fetch per answer, display only)"
-          if _aa_key() else f"{aa_source.ENV_KEY} not set")
-    return f"Iolite {VERSION}\nSource: {src}\nArtificial Analysis: {aa}"
+    return f"Iolite {VERSION}\nSource: {src}"
+
+
+def _whole_name_is_in_catalog(name: str) -> bool:
+    try:
+        rows, _ = load_catalog()
+    except Exception:
+        return False
+    q = name.casefold()
+    return any(q in (str(r.get("model", "")).casefold(), str(r.get("slug", "")).casefold()) for r in rows)
 
 
 def _slash(raw_args: str) -> str:
-    parts = (raw_args or "").split(None, 1)
-    cmd = parts[0].casefold() if parts else ""
-    rest = parts[1].strip() if len(parts) > 1 else ""
     try:
+        parts = (raw_args or "").split(None, 1)
+        cmd = parts[0].casefold() if parts else ""
+        rest = parts[1].strip() if len(parts) > 1 else ""
         if cmd in ("", "help", "-h", "--help"):
             return _HELP
         if cmd == "status":
             return _status()
         if cmd == "model":
-            import shlex
-
             try:
                 query = " ".join(shlex.split(rest))
             except ValueError:
@@ -619,13 +780,17 @@ def _slash(raw_args: str) -> str:
                 return "Name a model: /iolite model <name or slug>"
             return _fmt_model(json.loads(iolite_model({"query": query})))
         if cmd == "shortlist":
-            return _fmt_shortlist(json.loads(iolite_shortlist(_parse_shortlist(rest))))
+            args, tail = _parse_words(rest)
+            if tail and args.get("anchor_model") and _whole_name_is_in_catalog(f"{args['anchor_model']} {tail}"):
+                args["anchor_model"] = f"{args['anchor_model']} {tail}"  # "Grok 4 Fast" is a name
+                args.pop("objective", None)
+            return _fmt_shortlist(json.loads(iolite_shortlist(args)))
+        return f"Unknown subcommand {_safe_text(cmd, 40)!r}.\n\n{_HELP}"
     except ValueError as exc:
-        return f"{exc}\n\n{_HELP}"
+        return f"{_safe_text(str(exc), 300)}\n\n{_HELP}"
     except Exception:  # never raise into the chat surface
         logger.debug("iolite: slash command failed", exc_info=True)
         return "Iolite hit an unexpected error. Try /iolite status."
-    return f"Unknown subcommand {cmd!r}.\n\n{_HELP}"
 
 
 def _skill_description(skill_md: Path) -> str:

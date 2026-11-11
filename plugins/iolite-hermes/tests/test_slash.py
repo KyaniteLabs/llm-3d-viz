@@ -97,7 +97,7 @@ def test_shortlist_bad_inputs_are_explained(ctx):
 
 
 def test_empty_shortlist_says_why(ctx):
-    assert "No model clears this floor" in slash(ctx, "shortlist 100")
+    assert "none reaches the floor" in slash(ctx, "shortlist 100")
 
 
 def test_model_lookup_and_unknown(ctx):
@@ -107,17 +107,9 @@ def test_model_lookup_and_unknown(ctx):
 
 
 def test_status_makes_no_network_call(ctx, monkeypatch):
-    monkeypatch.setattr(plugin.aa_source, "open_same_origin", lambda *a, **k: pytest.fail("network"))
+    monkeypatch.setattr(plugin.netio, "open_same_origin", lambda *a, **k: pytest.fail("network"))
     out = slash(ctx, "status")
     assert f"Iolite {plugin.VERSION}" in out and "catalog_path" in out
-
-
-def test_status_names_the_key_but_never_prints_it(monkeypatch):
-    monkeypatch.setenv("IOLITE_AA_API_KEY", "sk-secret-value")
-    c = FullCtx({})
-    plugin.register(c)
-    out = c.commands["iolite"]("status")
-    assert "IOLITE_AA_API_KEY is set" in out and "sk-secret-value" not in out
 
 
 def test_unknown_subcommand(ctx):
@@ -129,14 +121,8 @@ def test_slash_never_raises(ctx, monkeypatch):
     assert "unexpected error" in slash(ctx, "shortlist")
 
 
-def test_attribution_line_when_data_is_from_aa():
-    res = {"ok": True, "matches": [{"model": "m", "provider": "p"}], "total_matches": 1,
-           "attribution": {"text": "Source: Artificial Analysis (artificialanalysis.ai)", "url": "https://artificialanalysis.ai/"}}
-    assert plugin._fmt_model(res).endswith("\nSource: Artificial Analysis (artificialanalysis.ai)")
-
-
 @pytest.mark.parametrize("n,want", [(0, 1), (-5, 1), (2.9, 2), (999, plugin.MAX_N), (True, 3),
-                                    ("4", 3), (None, 3), (float("nan"), 3), (float("inf"), 3)])
+                                    ("4", 4), (None, 3), (float("nan"), 3), (float("inf"), 3)])
 def test_clamp_n(n, want):
     assert plugin._clamp_n(n) == want
 
@@ -162,24 +148,7 @@ def test_settings_fall_back_to_config_without_ctx(monkeypatch):
 
 
 def test_missing_catalog_error_names_the_real_config_path(monkeypatch):
-    monkeypatch.delenv("IOLITE_AA_API_KEY", raising=False)
     c = FullCtx({})
     plugin.register(c)
     err = json.loads(c.tools["iolite_shortlist"]({}))["error"]
     assert "plugins.entries.iolite.settings" in err
-
-
-def test_aa_numbers_print_as_a_labelled_column_with_the_credit():
-    res = {"ok": True, "total_matches": 1, "matches": [{"model": "m", "provider": "p", "aa_intelligence_index": 80,
-                                                         "blended_price_per_M": 5, "tps": 50}],
-           "aa_display": {"m": {"intelligence_index": 70.0, "blended_price_per_M": 2.0, "tps": 90.0}},
-           "attribution": {"text": "Source: Artificial Analysis (artificialanalysis.ai)", "url": "https://artificialanalysis.ai/"}}
-    out = plugin._fmt_model(res)
-    assert "index 80" in out and "| AA (display only): index 70" in out
-    assert out.endswith("\nSource: Artificial Analysis (artificialanalysis.ai)")
-
-
-def test_aa_error_is_shown_without_hiding_the_ranking():
-    res = {"ok": True, "total_matches": 1, "matches": [{"model": "m", "provider": "p"}],
-           "aa_display_error": "Artificial Analysis rate limit or daily quota reached. Do not retry in a loop."}
-    assert "Artificial Analysis: Artificial Analysis rate limit" in plugin._fmt_model(res)
