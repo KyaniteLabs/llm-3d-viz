@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CINEMA_FOCUS_K, computeCinemaFocusIds } from "../src/lib/cinema-focus";
-import { models } from "../src/data/models";
+import { syntheticModels as models } from "./helpers/synthetic-catalog";
 import { frontier } from "../src/lib/pareto";
 
 describe("computeCinemaFocusIds", () => {
