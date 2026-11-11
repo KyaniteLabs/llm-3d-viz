@@ -3,6 +3,7 @@
     python3 plugins/iolite-hermes/demo/try_it.py "shortlist"
 """
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -28,4 +29,6 @@ class Ctx:
 
 ctx = Ctx()
 plugin.register(ctx)
-print(ctx.commands["iolite"](" ".join(sys.argv[1:]) or "shortlist 60 cheap"))
+out = ctx.commands["iolite"](" ".join(sys.argv[1:]) or "shortlist 60 cheap")
+# Chat output escapes markdown characters; a terminal shows them raw, so undo that here.
+print(re.sub(r"\\([\\*_~|\[\]()#])", r"\1", out))

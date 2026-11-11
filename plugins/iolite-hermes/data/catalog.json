@@ -61,14 +61,15 @@
   "litellm_chat_rows_usable": 1844,
   "litellm_dropped_third_party_source_rows": 11,
   "litellm_dropped_aggregator_provider": 0,
-  "rows_with_price": 253,
-  "rows_with_intelligence_and_price": 253,
+  "rows_with_price": 254,
+  "rows_with_intelligence_and_price": 254,
   "price_match_methods": {
    "exact": 204,
    "effort-tag:high": 25,
    "effort-tag:max": 10,
    "effort-tag:xhigh": 5,
    "effort-tag:medium": 1,
+   "alias+effort-tag:max": 1,
    "effort-tag:thinking": 6,
    "effort-tag:non-thinking": 2
   },
@@ -3046,7 +3047,24 @@
     "as_of": "2026-11-09",
     "changes": "renamed from 'rating'; subset to catalog models",
     "attribution": "LMArena Bradley-Terry rating (style-controlled). Source: LMArena leaderboard dataset, CC BY 4.0. Modified: renamed from \"rating\"; subset to catalog models. https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"
-   }
+   },
+   "price": {
+    "input_per_M": 0.3,
+    "output_per_M": 1.2,
+    "blended_per_M": 0.525,
+    "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+    "source": "LiteLLM model_prices_and_context_window.json",
+    "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+    "license": "MIT",
+    "license_url": "https://opensource.org/license/mit",
+    "as_of": "2026-11-11",
+    "litellm_key": "together_ai/deepseek-ai/DeepSeek-V4.1-Flash",
+    "litellm_provider": "together_ai",
+    "row_source": "https://api.together.ai/v1/models",
+    "match": "alias+effort-tag:max",
+    "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://api.together.ai/v1/models."
+   },
+   "context_length": 1048576
   },
   {
    "model": "GPT-5.2",

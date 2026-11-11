@@ -92,7 +92,12 @@ EXCLUDED_SOURCE_MARKERS = ("artificialanalysis", "tensormesh")  # ruling topic 5
 # Explicit pairs where the vendor's price-file id differs from the benchmark name by more than
 # punctuation. Keys are normalised names (see norm); values are LiteLLM keys. Each was checked by
 # hand: same model, not a neighbour. Anything not listed here is matched exactly or not at all.
-ALIASES: Dict[str, str] = {}
+ALIASES: Dict[str, str] = {
+    # LMArena "DeepSeek-V4.1-Flash-20260910" is the September build that hosts list undated
+    # (the 1017 build carries its own date). The vendor-dated row streamlake/...-260910 and
+    # Together's undated row both price it at $0.30 in / $1.20 out per million tokens.
+    "deepseekv41flash20260910": "together_ai/deepseek-ai/DeepSeek-V4.1-Flash",
+}
 
 # Reasoning-effort tags: "X (High)" is the same priced model as "X". Used for PRICE matching only.
 EFFORT_TAGS = {"high", "medium", "low", "minimal", "max", "xhigh", "thinking", "reasoning",
@@ -274,7 +279,10 @@ class PriceIndex:
         candidates.append((n, "exact"))
         base, tag = strip_effort(name)
         if tag:
-            candidates.append((norm(base), f"effort-tag:{tag.lower()}"))
+            b = norm(base)
+            if b in ALIASES and ALIASES[b] in self.by_litellm_key:
+                return (ALIASES[b], self.by_litellm_key[ALIASES[b]]), f"alias+effort-tag:{tag.lower()}"
+            candidates.append((b, f"effort-tag:{tag.lower()}"))
         for k, method in candidates:
             hit = self.by_key.get(k)
             if hit:
