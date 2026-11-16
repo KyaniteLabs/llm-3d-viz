@@ -2,9 +2,9 @@ name: Iolite Hermes plugin
 on:
   push:
     branches: [main]
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/lib/decide.ts", "src/lib/pareto.ts", "src/data/models.ts", "src/config/fork-defaults.ts", "tests/decide.test.ts", "tests/iolite-plugin-parity.test.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
   pull_request:
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/lib/decide.ts", "src/lib/pareto.ts", "src/data/models.ts", "src/config/fork-defaults.ts", "tests/decide.test.ts", "tests/iolite-plugin-parity.test.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
 permissions:
   contents: read
 jobs:
@@ -28,10 +28,13 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           persist-credentials: false
-      - name: Install the repo's locked dependencies (runner's preinstalled node)
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Install the repo's locked dependencies
         run: npm ci --ignore-scripts
-      - name: decide.ts against the plugin's golden file
-        run: npx vitest run tests/iolite-plugin-parity.test.ts tests/decide.test.ts
+      - name: Full root suite and Desktop node tests (includes parity)
+        run: npm test
   desktop:
     runs-on: ubuntu-latest
     defaults:
