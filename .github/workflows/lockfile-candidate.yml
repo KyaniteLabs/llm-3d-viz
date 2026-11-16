@@ -21,7 +21,8 @@ jobs:
           npm --version
           test "$(npm --version | cut -d. -f1)" = 10
           node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync("package.json","utf8"));p.devDependencies.vitest="4.1.12";fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n")'
-          npm install --package-lock-only --ignore-scripts || { tail -100 "$HOME"/.npm/_logs/*debug-0.log; exit 1; }
+          npx --yes --package=npm@11 npm --version
+          npx --yes --package=npm@11 npm install --package-lock-only --ignore-scripts || { tail -100 "$HOME"/.npm/_logs/*debug-0.log; exit 1; }
           node -e 'for (const f of ["package.json","package-lock.json"]) console.log("CANDIDATE_"+f+"="+Buffer.from(require("fs").readFileSync(f)).toString("base64"))'
           npm ci --ignore-scripts
       - name: Report remaining advisories without hiding test failures
