@@ -1,11 +1,11 @@
-name: Lockfile candidate
+name: Lockfile verification
 on:
   pull_request:
     paths: [".github/workflows/lockfile-candidate.yml", "package.json", "package-lock.json"]
 permissions:
   contents: read
 jobs:
-  candidate:
+  verify:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 10
     steps:
@@ -15,16 +15,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
-      - name: Generate bounded npm 10 candidate without lifecycle scripts
+      - name: Verify frozen install and npm 10 lockfile stability
         run: |
           node --version
           npm --version
           test "$(npm --version | cut -d. -f1)" = 10
-          npm update vite nanoid source-map-js --package-lock-only --ignore-scripts
-          git diff --exit-code -- package.json
-          node -e 'console.log("LOCK_CANDIDATE_BASE64="+Buffer.from(require("fs").readFileSync("package-lock.json")).toString("base64"))'
           npm ci --ignore-scripts
-      - name: Report candidate advisories without hiding test failures
+          npm install --ignore-scripts
+          git diff --exit-code -- package.json package-lock.json
+      - name: Report remaining advisories without hiding test failures
         continue-on-error: true
         run: npm audit --json
       - name: Validate root suites separately from known issue 15
