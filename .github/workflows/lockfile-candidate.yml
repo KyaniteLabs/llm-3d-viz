@@ -15,14 +15,14 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
-      - name: Verify frozen install and npm 10 lockfile stability
+      - name: Resolve exact Vitest security floor without scripts
         run: |
           node --version
           npm --version
           test "$(npm --version | cut -d. -f1)" = 10
+          npm install --save-dev --save-exact vitest@4.1.12 --package-lock-only --ignore-scripts
+          node -e 'for (const f of ["package.json","package-lock.json"]) console.log("CANDIDATE_"+f+"="+Buffer.from(require("fs").readFileSync(f)).toString("base64"))'
           npm ci --ignore-scripts
-          npm install --ignore-scripts
-          git diff --exit-code -- package.json package-lock.json
       - name: Report remaining advisories without hiding test failures
         continue-on-error: true
         run: npm audit --json
