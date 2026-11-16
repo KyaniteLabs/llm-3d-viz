@@ -33,6 +33,9 @@ jobs:
           node-version: "22"
       - name: Install the repo's locked dependencies
         run: npm ci --ignore-scripts
+      - name: Dependency advisory report (informational)
+        continue-on-error: true
+        run: npm audit --json
       - name: Full root suite and Desktop node tests (includes parity)
         run: npm test
   desktop:
