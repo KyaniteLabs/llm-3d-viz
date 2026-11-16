@@ -23,8 +23,10 @@ Iolite plots a curated catalog of large language models in a Three.js/WebGL stag
 
 ## Quick start
 
+The current npm lockfile is validated with Node 22 and npm 10 (CI uses npm 10.9.9). Use `npm ci` for a reproducible install; npm 10 lockfile stability is checked in CI.
+
 ```bash
-npm install
+npm ci
 npm run dev          # local Vite
 npm test             # vitest
 npm run build

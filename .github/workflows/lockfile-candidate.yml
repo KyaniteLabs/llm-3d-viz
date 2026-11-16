@@ -1,0 +1,36 @@
+name: Lockfile verification
+on:
+  pull_request:
+    paths: [".github/workflows/lockfile-candidate.yml", "package.json", "package-lock.json"]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+      - name: Verify frozen install and npm 10 lockfile stability
+        run: |
+          node --version
+          npm --version
+          test "$(npm --version | cut -d. -f1)" = 10
+          npm ci --ignore-scripts
+          npm install --ignore-scripts
+          git diff --exit-code -- package.json package-lock.json
+      - name: Report remaining advisories without hiding test failures
+        continue-on-error: true
+        run: npm audit --json
+      - name: Validate root suites separately from known issue 15
+        run: npx vitest run --exclude 'plugins/iolite-hermes/desktop-src/test/**'
+      - name: Validate Desktop node suites
+        if: always()
+        run: npm --prefix plugins/iolite-hermes/desktop-src test
+      - name: Validate build
+        if: always()
+        run: npm run build
