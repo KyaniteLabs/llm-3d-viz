@@ -9,6 +9,7 @@
  */
 
 import type { Model } from "../../data/models";
+import { hasSpeed } from "../decide";
 import { frontier } from "../pareto";
 import { displayName } from "../display-name";
 import { familyIdOf } from "../family";
@@ -94,7 +95,7 @@ function byMetric(get: (m: Model) => number | null, dir: 1 | -1) {
 export function toolQueryCatalog(
   ctx: AtlasAgentContext,
   c: CatalogConstraints = {},
-): { result: ModelSummary[]; trace: AtlasToolTrace } {
+): { result: ModelSummary[]; trace: AtlasToolTrace; missingMeasuredSpeed: boolean } {
   const pool = ctx.visible.slice();
   const f = num(c.floor) ? c.floor : ctx.floor;
 
@@ -105,7 +106,6 @@ export function toolQueryCatalog(
     if (c.openness && m.openness !== c.openness) return false;
     if (num(c.maxPrice) && (m.blended_price_per_M == null || m.blended_price_per_M > c.maxPrice!))
       return false;
-    if (num(c.minTps) && (m.tps == null || m.tps < c.minTps!)) return false;
     if (c.modality && !(m.modality ?? []).includes(c.modality as Model["modality"][number]))
       return false;
     if (num(c.minContext) && (m.context_length == null || m.context_length < c.minContext!)) return false;
@@ -118,6 +118,15 @@ export function toolQueryCatalog(
     if (c.family && !familyIdOf(m).toLowerCase().includes(c.family.toLowerCase())) return false;
     return true;
   });
+
+  const minTps = num(c.minTps) ? c.minTps : null;
+  let missingMeasuredSpeed = false;
+  if (c.objective === "max_speed" || minTps !== null) {
+    const matches = rows.length;
+    rows = rows.filter(hasSpeed);
+    missingMeasuredSpeed = matches > 0 && rows.length === 0;
+    if (minTps !== null) rows = rows.filter((m) => m.tps! >= minTps);
+  }
 
   if (c.frontierOnly) {
     const onFrontier = new Set(frontier(rows).map((m) => m.model));
@@ -150,9 +159,11 @@ export function toolQueryCatalog(
   if (c.provider) bits.push(`@${c.provider}`);
   if (c.excludeProvider) bits.push(`!${c.excludeProvider}`);
   if (c.family) bits.push(`family:${c.family}`);
+  if (missingMeasuredSpeed) bits.push("no measured speed among matching models");
 
   return {
     result: top,
+    missingMeasuredSpeed,
     trace: {
       name: "query_catalog",
       ok: true,

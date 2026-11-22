@@ -117,7 +117,7 @@ export const ATLAS_TOOL_DEFINITIONS = [
   {
     name: "query_catalog",
     description:
-      "Compositional filter+rank over the catalog: combine objective (min_cost/max_speed/max_intelligence) with constraints (floor, openness, maxPrice $/M, minTps tok/s, modality vision|audio, minContext tokens, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider). Returns ranked ModelSummary[]. Use for any multi-axis question.",
+      "Compositional filter+rank over the catalog: combine objective (min_cost/max_speed/max_intelligence) with constraints (floor, openness, maxPrice $/M, minTps tok/s, modality vision|audio, minContext tokens, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider). Speed objectives and thresholds require measured tok/s. Returns ranked ModelSummary[]. Use for any multi-axis question.",
     parameters: {
       type: "object",
       properties: {

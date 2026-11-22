@@ -89,6 +89,21 @@ describe("toolQueryCatalog", () => {
     expect(tps).toEqual([...tps].sort((a, b) => (b ?? 0) - (a ?? 0)));
   });
 
+  it("requires measured speed for a speed objective or threshold", () => {
+    const visible = [
+      m("Missing speed", 80, null, 1),
+      m("Invalid speed", 70, -5, 2),
+      m("Measured speed", 60, 20, 3),
+    ];
+    const scoped = { ...ctx(), visible };
+    expect(toolQueryCatalog(scoped, { objective: "max_speed" }).result.map(({ id }) => id))
+      .toEqual(["Measured speed"]);
+    expect(toolQueryCatalog(scoped, { minTps: 0 }).result.map(({ id }) => id))
+      .toEqual(["Measured speed"]);
+    expect(toolQueryCatalog(scoped).result.map(({ id }) => id))
+      .toEqual(["Missing speed", "Invalid speed", "Measured speed"]);
+  });
+
   it("honors the intelligence floor", () => {
     const { result } = toolQueryCatalog(ctx(), { floor: 55 });
     expect(result.every((r) => (r.index ?? -1) >= 55)).toBe(true);
@@ -213,6 +228,17 @@ describe("runOfflineAtlas — compositional queries", () => {
     expect(p.decide_mode).toBe(true);
     expect(p.cost_speed_bias).toBe(-1);
     expect(p.summary.toLowerCase()).toContain("open");
+  });
+
+  it("reports missing speed when the requested provider has no measured rows", () => {
+    const visible = [
+      m("Missing speed", 80, null, 1, { provider: "Anthropic" }),
+      m("Other provider", 60, 20, 3, { provider: "OpenAI" }),
+    ];
+    const proposal = runOfflineAtlas("fastest from Anthropic", { ...ctx(), catalog: visible, visible });
+    expect(proposal.shortlist_ids ?? []).toEqual([]);
+    expect(proposal.summary).toMatch(/no matching models have measured speed/i);
+    expect(proposal.tool_trace[0]?.detail).toMatch(/no measured speed/i);
   });
 
   it("answers a pure filter query without forcing Decide", () => {

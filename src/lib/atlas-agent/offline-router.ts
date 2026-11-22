@@ -131,12 +131,14 @@ export function runOfflineAtlas(
       if (ids.length === 0) {
         const gaps = unsupportedDataAxes(ctx, c);
         const scoped = dropUnsupportedData(ctx, c);
+        let missingMeasuredSpeed = q.missingMeasuredSpeed;
         const hasOtherAxes = Object.entries(scoped).some(
           ([k, v]) => k !== "limit" && v != null,
         );
         if (gaps.length && hasOtherAxes && !sameConstraints(scoped, c)) {
           const q2 = toolQueryCatalog(ctx, scoped);
           trace.push(q2.trace);
+          missingMeasuredSpeed ||= q2.missingMeasuredSpeed;
           const ids2 = q2.result.map((s) => s.id);
           if (ids2.length) {
             ids = ids2;
@@ -145,12 +147,12 @@ export function runOfflineAtlas(
           }
         }
         if (ids.length === 0) {
-          const why = gaps.length
-            ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
+          const why = missingMeasuredSpeed ? "No matching models have measured speed."
+            : gaps.length ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
             : `No models match (${label}). Try loosening a constraint.`;
           return emptyProposal(snap, why, {
             needs_confirm: false,
-            refuse_reason: gaps.length ? "unsupported data" : "empty query",
+            refuse_reason: missingMeasuredSpeed || gaps.length ? "unsupported data" : "empty query",
             tool_trace: trace,
           });
         }
@@ -158,9 +160,12 @@ export function runOfflineAtlas(
 
       // Objective set → Decide + ranked shortlist, honoring every constraint.
       if (active.objective) {
+        const applyPrompt = active.objective === "max_speed"
+          ? "Open Decide with a speed preference?"
+          : "Apply Decide with this ranking?";
         return emptyProposal(
           snap,
-          `${label.charAt(0).toUpperCase()}${label.slice(1)}: ${speakableList(ids)}. Apply Decide with this ranking?`,
+          `${label.charAt(0).toUpperCase()}${label.slice(1)}: ${speakableList(ids)}. ${applyPrompt}`,
           {
             floor: active.floor ?? ctx.floor,
             decide_mode: true,
