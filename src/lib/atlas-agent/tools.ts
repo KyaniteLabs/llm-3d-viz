@@ -169,6 +169,7 @@ export function toolRankEligible(
   floor: number,
   objective: RankObjective,
   n = 3,
+  { requireMeasuredSpeed = false } = {},
 ): {
   result: {
     shortlist: ModelSummary[];
@@ -185,7 +186,7 @@ export function toolRankEligible(
   const eligible = filterPickEligible(ctx.visible, f, false);
   const measured = eligible.filter(hasSpeed);
   const missingSpeed = eligible.length - measured.length;
-  const needsSpeed = objective === "max_speed";
+  const needsSpeed = objective === "max_speed" && requireMeasuredSpeed;
   const { shortlist, mode } = shortlistFromDecide(needsSpeed ? measured : eligible, f, bias, n);
   let message: string | null = null;
   if (needsSpeed && measured.length === 0) {
