@@ -88,3 +88,13 @@ def test_revision_stops_another_editor_overwriting_saved_plans(tmp_path, monkeyp
     assert [plan["name"] for plan in plugin.landscape_state()["my_prices"]["plans"]] == [
         "First plan", "Second plan",
     ]
+
+
+def test_revision_missing_cannot_overwrite_an_unreadable_file(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    revision = plugin.landscape_state()["my_prices"]["revision"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    oversized = b" " * (plugin.MY_PRICES_MAX_BYTES + 1)
+    path.write_bytes(oversized)
+    assert plugin.save_my_prices({"plans": [], "revision": revision})["ok"] is False
+    assert path.read_bytes() == oversized

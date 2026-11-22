@@ -1081,8 +1081,9 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
   const savedByName = new Map((savedPlans || []).map((p) => [p.name, p]));
   const saving = status?.kind === "saving";
   const editDisabled = drafts === null || saving;
-  const conflict = dirty.current && revision !== null && revision !== draftRevision.current;
-  const canSave = savedPlans !== null && !editDisabled && !conflict;
+  const synced = revision !== null && revision === draftRevision.current;
+  const conflict = dirty.current && revision !== null && !synced;
+  const canSave = synced && !editDisabled;
   const updateDrafts = (update) => {
     if (editDisabled || saveInFlight.current) return;
     dirty.current = true;
@@ -1103,7 +1104,7 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
     saveInFlight.current = true;
     setStatus({ kind: "saving", text: "Saving\u2026" });
     try {
-      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan), revision: mine?.revision }, timeoutMs: 5e3 });
+      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan), revision: typeof mine?.revision === "string" ? draftRevision.current : void 0 }, timeoutMs: 5e3 });
       if (res?.ok) {
         dirty.current = false;
         setStatus({ kind: "info", text: `Saved ${out.length} plan${out.length === 1 ? "" : "s"} on this machine.` });

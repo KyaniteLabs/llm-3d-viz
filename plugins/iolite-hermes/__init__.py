@@ -1168,12 +1168,13 @@ def _read_my_prices() -> dict:
     (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
     Returns plans, problems, and a revision of the file; a plan's usd_per_m is None while it waits for
     measured usage. A missing file gives no plans and no problems. Never raises."""
-    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": "missing"}
+    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": None}
     try:
         path = _data_dir() / MY_PRICES_FILE
         try:
             st = path.stat()
         except FileNotFoundError:
+            out["revision"] = "missing"
             return out
         if not stat.S_ISREG(st.st_mode) or st.st_size > MY_PRICES_MAX_BYTES:
             out["problems"].append("my_prices.json is not a small regular file")
@@ -1216,8 +1217,10 @@ def save_my_prices(payload: Any) -> dict:
         return {"ok": False, "problems": ["the plans are too large to save"]}
     revision = payload.get("revision")
     with _my_prices_lock:
-        if revision is not None and _read_my_prices()["revision"] != revision:
-            return {"ok": False, "problems": ["Saved plans changed. Refresh before saving again."]}
+        if revision is not None:
+            current = _read_my_prices()["revision"]
+            if current is None or current != revision:
+                return {"ok": False, "problems": ["Saved plans changed or could not be read. Refresh before saving again."]}
         d = _data_dir()
         d.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
