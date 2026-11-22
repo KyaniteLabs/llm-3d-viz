@@ -1,7 +1,7 @@
 name: Lockfile verification
 on:
   pull_request:
-    paths: [".github/workflows/lockfile-candidate.yml", "package.json", "package-lock.json"]
+    paths: [".github/workflows/lockfile-candidate.yml", "package.json", "package-lock.json", "tests/sharp.test.ts"]
 permissions:
   contents: read
 jobs:

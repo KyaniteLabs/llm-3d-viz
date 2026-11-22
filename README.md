@@ -25,6 +25,8 @@ Iolite plots a curated catalog of large language models in a Three.js/WebGL stag
 
 The current npm lockfile is validated with Node 22 and npm 10 (CI uses npm 10.9.9). Use `npm ci` for a reproducible install; npm 10 lockfile stability is checked in CI.
 
+Sharp's Node 20.9 minimum is covered by Vite 7's existing Node requirement (20.19+ or 22.12+). Renderer tests declare Sharp directly, and the Transformers override uses that same range. Remove the override once the Transformers version used by Kokoro declares a range that admits patched Sharp releases (0.35.5 or newer).
+
 ```bash
 npm ci
 npm run dev          # local Vite
