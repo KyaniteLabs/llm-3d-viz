@@ -27,6 +27,9 @@ describe('slug (single owner: scripts/lib/slug.mjs)', () => {
 
 describe('model page (createTemplates.page)', () => {
   const html = T.page(ROWS[0]);
+  it('links the site favicon from the model card', () => {
+    expect(html).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+  });
   it('carries canonical, og and twitter metadata', () => {
     expect(html).toContain('<link rel=canonical href="https://viz.kyanitelabs.tech/m/test-model-reasoning/">');
     expect(html).toContain('property="og:url"');
@@ -68,6 +71,9 @@ describe('model page (createTemplates.page)', () => {
 });
 
 describe('index page', () => {
+  it('links the site favicon from the model directory', () => {
+    expect(T.indexPage()).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+  });
   it('carries the ONE catalog-level Dataset JSON-LD with required properties', () => {
     const ld = ldJson(T.indexPage());
     expect(ld['@type']).toBe('Dataset');

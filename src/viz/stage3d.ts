@@ -50,7 +50,8 @@ export class Stage3D {
   private presentationMode: PresentationMode = "curve";
   private readonly heatEncoding: boolean;
   private priceFloor = 0.08125;
-  private renderGen = 0; // default fallback, will be computed dynamically
+  private renderGen = 0;
+  private renderQueue = Promise.resolve();
   // V03: retain the resolved Plotly module so destroy() can purge the owned hero
   // graph without relying on window.Plotly (never set in the bundled path).
   private plotly: PlotlyModule | null = null;
@@ -227,18 +228,32 @@ export class Stage3D {
   }
 
   public render(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
+    if (this.destroyed) return;
     if (options?.presentationMode) this.presentationMode = options.presentationMode;
-    // V05: thread StageRenderOptions into the Plotly hero so displayed axes/Decide
-    // semantics match the active controls instead of the hard-coded rate basis.
+    const gen = ++this.renderGen;
     this.gd.setAttribute("aria-busy", "true");
-    void this.renderWithPlotly(weights, modelsList, options);
+    // Plotly mutations share one graph. Let in-flight work settle before
+    // painting the newest generation, and skip superseded queued renders.
+    this.renderQueue = this.renderQueue.then(async () => {
+      if (gen !== this.renderGen) return;
+      try {
+        await this.renderWithPlotly(gen, weights, modelsList, options);
+      } catch (error) {
+        if (gen === this.renderGen) console.warn("[stage] Plotly render failed", error);
+        return;
+      } finally {
+        if (gen === this.renderGen) this.gd.removeAttribute("aria-busy");
+      }
+      if (gen === this.renderGen) this.gd.dispatchEvent(new Event("stage:rendered"));
+    });
   }
 
-  private async renderWithPlotly(weights: ScoreWeights, modelsList: Model[], options?: StageRenderOptions) {
-    // V04: capture generation BEFORE the first await so a destroy() issued while
-    // the lazy import is in flight cannot resurrect a torn-down instance.
-    const gen = ++this.renderGen;
-    if (this.destroyed) return;
+  private async renderWithPlotly(
+    gen: number,
+    weights: ScoreWeights,
+    modelsList: Model[],
+    options?: StageRenderOptions,
+  ) {
     const Plotly = await loadPlotly();
     if (this.destroyed || gen !== this.renderGen) return;
     this.plotly = Plotly;
@@ -593,38 +608,24 @@ export class Stage3D {
       };
     };
 
-    const applyMarkers = async () => {
-      if (this.destroyed || gen !== this.renderGen) return;
-      // gl3d can drop per-point marker arrays; re-assert after plot and mirror on __viz.
-      // Copies so Plotly cannot empty the intentional arrays we keep for QA.
-      const colorCopy = colors.slice();
-      const sizeCopy = sizes.slice();
-      await Plotly.restyle(this.gd, { "marker.color": [colorCopy], "marker.size": [sizeCopy] }, [0]);
-      if (this.destroyed || gen !== this.renderGen) return;
-      publishViz();
-      this.gd.removeAttribute("aria-busy");
-      this.gd.dispatchEvent(new Event("stage:rendered"));
-    };
-
-    if (!this.isInitialized) {
-      if (this.destroyed || gen !== this.renderGen) return;
-      const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
+    const initial = !this.isInitialized;
+    const plotReady = initial
+      ? Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config)
+      : Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
+    // Keep the intentional marker arrays available for QA during plotReady.
+    publishViz();
+    await plotReady;
+    if (this.destroyed) return;
+    if (initial) {
+      // The next render reuses the initialized graph even if this layout
+      // was superseded before Plotly finished attaching its event emitter.
       this.isInitialized = true;
-      void plotReady.then(async () => {
-        // The shared graph's listeners must attach even if a newer render
-        // superseded this first layout while the lazy plot initialized.
-        if (this.destroyed) return;
-        this.setupPlotlyListeners();
-        await applyMarkers();
-      });
-    } else {
-      if (this.destroyed || gen !== this.renderGen) return;
-      void Plotly.react(this.gd, [pointsTrace, ridgeTrace], layout as any, config).then(applyMarkers);
+      this.setupPlotlyListeners();
     }
-
-    // V04: do not publish after teardown.
-    if (this.destroyed || gen !== this.renderGen) return;
-    // Publish immediately with intentional arrays so tests don't race plotReady.
+    if (gen !== this.renderGen) return;
+    // gl3d can drop per-point marker arrays. Re-assert copies so Plotly
+    // cannot empty the intentional arrays we keep for QA.
+    await Plotly.restyle(this.gd, { "marker.color": [colors.slice()], "marker.size": [sizes.slice()] }, [0]);
     publishViz();
   }
 
