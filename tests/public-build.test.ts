@@ -30,3 +30,13 @@ it("generates the public frontier from the decision catalog without writing to p
     rmSync(out, { recursive: true, force: true });
   }
 });
+
+it("links the public frontier to the bundled sources and licence notices", () => {
+  const markdown = readFileSync("public/frontier-watch.md", "utf8");
+  const sources = readFileSync("public/sources/index.html", "utf8");
+  const notices = readFileSync("public/decision-data-attribution.txt", "utf8");
+  expect(markdown).toContain("/sources/#decision-data");
+  expect(sources).toMatch(/id="decision-data"[\s\S]*Epoch AI[\s\S]*LiteLLM/);
+  expect(sources).toContain("/decision-data-attribution.txt");
+  expect(notices).toContain("Copyright (c) 2023 Berri AI");
+});
