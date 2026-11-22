@@ -16,7 +16,7 @@ npm run atlas:cli -- eligible --floor 50 --provider Anthropic
 npm run atlas:cli -- rank --catalog /path/to/atlas.json --floor 50 --objective max_speed
 ```
 
-Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. They accept an optional provider and return results sorted by blended price. The public catalog has no speed measurements. Requesting `max_speed` or `balanced` returns an empty shortlist with an explanation.
+Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. `eligible` lists all priced models above the floor. `rank` returns the cost–capability frontier for the requested provider, or across all providers, ordered by blended price. The public catalog has no speed measurements. `max_speed` explains the missing input. `balanced` labels its cost–capability fallback.
 
 With `--catalog` or `ATLAS_CATALOG_PATH`, these commands use the supplied Atlas-format array and its AA Index scale. Other commands (`meta`, `search`, `get`, `floor`, `compare`) use the Atlas-format catalog. The resolver checks the explicit file, then the environment variable, then the local Atlas snapshot if exported, then the shipped draft.
 

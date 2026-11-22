@@ -29,7 +29,7 @@ import {
   toolRankEligible,
   toolSearchModels,
 } from "../src/lib/atlas-agent/tools";
-import { PUBLIC_SCORE_FLOOR, PUBLIC_SPEED_MESSAGE, publicDecision } from "../src/lib/public-decision";
+import { PUBLIC_SCORE_FLOOR, PUBLIC_SPEED_MESSAGE, publicDecision, publicFrontier } from "../src/lib/public-decision";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const FALLBACK_CATALOG = resolve(ROOT, "data/models.v0.draft.json");
@@ -87,8 +87,8 @@ Commands:
   compare <a> <b> [c...]
 
 Without an override, eligible and rank use direct Epoch scores (0–100) and the
-bundled public price catalog. Public rank defaults to min_cost. Speed and
-balanced objectives require speed measurements.
+bundled public price catalog. Public rank defaults to min_cost on the price and
+capability frontier. max_speed requires measured speed.
 
 Options:
   --catalog <path>   use an Atlas-format catalog with an AA Index floor;
@@ -194,12 +194,13 @@ function main() {
     const { eligible, ...coverage } = publicDecision(floor, values.provider?.trim());
     if (command === "eligible") print({ ...coverage, eligible });
     else {
-      const cost = objective === "min_cost";
+      const needsSpeed = objective === "max_speed";
       print({
         ...coverage,
         objective,
-        shortlist: cost ? eligible.slice(0, n) : [],
-        message: cost ? coverage.message : PUBLIC_SPEED_MESSAGE,
+        shortlist: needsSpeed ? [] : publicFrontier(eligible).slice(0, n),
+        message: coverage.message ?? (needsSpeed ? PUBLIC_SPEED_MESSAGE : objective === "balanced"
+          ? "Speed is unavailable. Showing the cost–capability frontier by price." : null),
       });
     }
     return;
@@ -211,6 +212,9 @@ function main() {
     const provider = values.provider.trim().toLowerCase();
     ctx.visible = catalog.filter((row) => row.provider.toLowerCase() === provider);
   }
+  const emptyMessage = values.provider && ctx.visible.length === 0
+    ? "No models match the requested provider."
+    : "No models meet the floor with price and intelligence data.";
   switch (command) {
     case "meta":
       print(toolGetCatalogMeta(ctx).result);
@@ -223,12 +227,17 @@ function main() {
       printLookup(got.result, got.trace.detail);
       break;
     }
-    case "eligible":
-      print(toolListEligible(ctx, floor).result);
+    case "eligible": {
+      const { result } = toolListEligible(ctx, floor, false);
+      print({ ...result, message: result.eligible.length ? null : emptyMessage });
       break;
-    case "rank":
-      print(toolRankEligible(ctx, floor, objective, n, { requireMeasuredSpeed: true }).result);
+    }
+    case "rank": {
+      const { result } = toolRankEligible(ctx, floor, objective, n, { requireMeasuredSpeed: true });
+      print({ ...result, message: result.shortlist.length ? result.message
+        : ctx.visible.length === 0 ? emptyMessage : result.message ?? emptyMessage });
       break;
+    }
     case "floor": {
       const proposed = toolProposeFloor(ctx, {
         floor: values.floor !== undefined ? floor : undefined,
