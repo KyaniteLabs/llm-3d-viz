@@ -107,7 +107,14 @@ test("Atlas submits the microphone result delivered after release", async ({ pag
   });
   await page.goto("/?view=observatory");
   const mic = page.locator("[data-atlas-mic]");
-  await mic.click();
+  await mic.hover();
+  await page.mouse.down();
+  await expect(mic).toHaveAttribute("aria-pressed", "true");
+  const secondary = { pointerId: 42, pointerType: "touch", isPrimary: false, button: 0 };
+  await mic.dispatchEvent("pointerup", secondary);
+  await mic.dispatchEvent("pointercancel", secondary);
+  await expect(mic).toHaveAttribute("aria-pressed", "true");
+  await page.mouse.up();
   await expect(page.locator("[data-atlas-proposal]")).toContainText("64");
   await expect(mic).toHaveAttribute("aria-pressed", "false");
   await mic.press("Space");

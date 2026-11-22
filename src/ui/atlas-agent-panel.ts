@@ -199,23 +199,43 @@ export class AtlasAgentPanel {
       }
     });
 
+    let microphonePointer: number | null = null;
+    let microphoneKey: string | null = null;
     mic?.addEventListener("pointerdown", (e) => {
-      if (!e.isPrimary || e.button !== 0) return;
+      if (!e.isPrimary || e.button !== 0 || microphonePointer !== null || microphoneKey !== null) return;
       e.preventDefault();
       mic.setPointerCapture(e.pointerId);
+      microphonePointer = e.pointerId;
       this.startListen(mic);
     });
-    mic?.addEventListener("pointerup", () => this.listenHandle?.finish());
-    mic?.addEventListener("pointercancel", () => this.cancelListen(mic));
-    mic?.addEventListener("blur", () => this.cancelListen(mic));
+    mic?.addEventListener("pointerup", (e) => {
+      if (e.pointerId !== microphonePointer) return;
+      microphonePointer = null;
+      this.listenHandle?.finish();
+    });
+    const cancelPointer = (e: PointerEvent) => {
+      if (e.pointerId !== microphonePointer || !mic) return;
+      microphonePointer = null;
+      this.cancelListen(mic);
+    };
+    mic?.addEventListener("pointercancel", cancelPointer);
+    mic?.addEventListener("lostpointercapture", cancelPointer);
+    mic?.addEventListener("blur", () => {
+      microphonePointer = null;
+      microphoneKey = null;
+      this.cancelListen(mic);
+    });
     mic?.addEventListener("keydown", (e) => {
       if (e.key !== " " && e.key !== "Enter") return;
       e.preventDefault();
-      if (!e.repeat) this.startListen(mic);
+      if (e.repeat || microphonePointer !== null || microphoneKey !== null) return;
+      microphoneKey = e.key;
+      this.startListen(mic);
     });
     mic?.addEventListener("keyup", (e) => {
-      if (e.key !== " " && e.key !== "Enter") return;
+      if (e.key !== microphoneKey) return;
       e.preventDefault();
+      microphoneKey = null;
       this.listenHandle?.finish();
     });
   }

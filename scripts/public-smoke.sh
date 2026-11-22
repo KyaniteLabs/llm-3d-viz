@@ -28,12 +28,21 @@ index_html="$(fetch "$PUBLIC_ORIGIN/")"
 [[ "$index_html" =~ assets/index-[a-zA-Z0-9_-]+\.js ]] || fail "no entry asset in index.html"
 entry="${BASH_REMATCH[0]}"
 bundle="$(fetch "$PUBLIC_ORIGIN/$entry")"
-[[ "$bundle" =~ public-decision-[a-zA-Z0-9_-]+\.js ]] || fail "entry asset does not load the public decision view"
-decision_asset="${BASH_REMATCH[0]}"
-decision_bundle="$(fetch "$PUBLIC_ORIGIN/assets/$decision_asset")"
-[[ "$decision_bundle" == *"Choose a model by price and capability"* ]] || fail "public decision view content is missing"
-frontier="$(fetch "$PUBLIC_ORIGIN/frontier-watch.json")"
-[[ "$frontier" == *"Epoch Capabilities Index"* ]] || fail "public frontier lacks the Epoch score basis"
+if [[ "${VIZ_DATA_PLANE:-private}" == "public" ]]; then
+  [[ "$bundle" =~ public-decision-[a-zA-Z0-9_-]+\.js ]] || fail "entry asset does not load the public decision view"
+  decision_asset="${BASH_REMATCH[0]}"
+  decision_bundle="$(fetch "$PUBLIC_ORIGIN/assets/$decision_asset")"
+  [[ "$decision_bundle" == *"Choose a model by price and capability"* ]] || fail "public decision view content is missing"
+  frontier="$(fetch "$PUBLIC_ORIGIN/frontier-watch.json")"
+  [[ "$frontier" == *"Epoch Capabilities Index"* ]] || fail "public frontier lacks the Epoch score basis"
+else
+  if [[ "$bundle" =~ main-[a-zA-Z0-9_-]+\.js ]]; then
+    decision_bundle="$(fetch "$PUBLIC_ORIGIN/assets/${BASH_REMATCH[0]}")"
+  else
+    decision_bundle="$bundle"
+  fi
+  [[ "$decision_bundle" == *"Pareto"* ]] || fail "observatory asset lacks Pareto content"
+fi
 
 # 3) Blog post serves its OWN page (unique title fragment), not the SPA shell
 #    — the exact 2026-08-24 false-positive class.

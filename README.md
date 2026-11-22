@@ -85,7 +85,7 @@ npm run atlas:cli -- eligible --floor 50 --provider Anthropic
 
 The public rank and eligible commands use direct Epoch Capabilities Index scores rescaled to 0–100 and LiteLLM blended USD per million tokens (75% input, 25% output). Arena ratings and their fitted estimates are outside this ranking. A price or speed measurement that is unavailable stays missing. See [data attribution](plugins/iolite-hermes/ATTRIBUTION.md).
 
-Pass `--catalog /path/to/atlas.json` or set `ATLAS_CATALOG_PATH` to use the original Atlas schema and an AA Index floor. Other CLI commands and `npm run atlas:mcp` use the Atlas schema, whose AA Index, speed, and cost fields are empty on the shipped legacy snapshot. Atlas CLI and MCP run against the local repository/catalog. They are not hosted services on the production origin. For an MCP client, use `command: npx`, `args: ["tsx", "bin/atlas-mcp-server.ts"]`, and `cwd: <repo>`. Set `ATLAS_MCP_FULL=1` to expose UI-control tools such as filters and cinema; the default is catalog-only.
+Pass `--catalog /path/to/atlas.json` or set `ATLAS_CATALOG_PATH` to use the original Atlas schema and an AA Index floor. Other CLI commands and `npm run atlas:mcp` use the Atlas schema, whose AA Index, speed, and cost fields are empty on the shipped legacy snapshot. Atlas CLI and MCP run against the local repository/catalog. They are not hosted services on the production origin. For an MCP client, use `command: npx`, `args: ["tsx", "bin/atlas-mcp-server.ts"]`, and `cwd: <repo>`. Set `ATLAS_MCP_FULL=1` for additional controls such as filters and cinema. The default tool set includes the `ui_action` proposal tool. An attached UI decides whether to apply a proposal.
 
 ## Encoding (glance-first)
 
