@@ -4,6 +4,7 @@ import {
   applyEconomyBasis,
   detectEconomyBasis,
   hasMappedAxes,
+  mappingHeading,
   sameAxisMapping,
   type AxisMapping,
   type EconomyBasis,
@@ -181,7 +182,7 @@ function renderStoryLine(el: HTMLElement, story: string, topModel: string | null
 
 export function startObservatory() {
   const url = new URL(window.location.href);
-  if (url.searchParams.get("view") !== "observatory") {
+  if (isOssEdition && url.searchParams.get("view") !== "observatory") {
     url.searchParams.set("view", "observatory");
     window.history.replaceState(window.history.state, "", url);
   }
@@ -201,12 +202,18 @@ export function startObservatory() {
 }
 
 async function boot() {
+  const hasScorableModels = allModels.some(isScorable);
+  const catalogMethod = {
+    headline: hasScorableModels ? APP_BRANDING.tagline : "Model observatory",
+    sources: formatCatalogSourceLabel(allModels),
+    asOf: allModels.map((model) => model.data_date).filter(Boolean).sort().at(-1) ?? "unknown",
+  };
   document.title = APP_BRANDING.documentTitle;
   // Canonical hooks: data-app-title / data-app-tagline on index.html scope-bar-brand.
   const wordmark = document.querySelector("[data-app-title]");
   if (wordmark) wordmark.textContent = APP_BRANDING.title;
-  const tag = document.querySelector("[data-app-tagline]");
-  if (tag) tag.textContent = APP_BRANDING.tagline;
+  const stageTitle = document.querySelector("[data-app-tagline]");
+  if (stageTitle) stageTitle.textContent = catalogMethod.headline;
   const stagePanel = document.querySelector(".stage") as HTMLElement;
   const stageVisual = stagePanel?.querySelector(".stage-visual") as HTMLElement | null;
   const placeholder = stageVisual?.querySelector(".stage-placeholder");
@@ -360,7 +367,8 @@ async function boot() {
 
   // Always-visible economy basis: rate ($/M · tok/s) vs task ($/task · s/task).
   // Remaps cost (X) and speed (Z); intelligence (Y) stays put.
-  const syncEconomyToggle = (mapping: AxisMapping) => {
+  const syncAxisControls = (mapping: AxisMapping) => {
+    if (stageTitle && hasScorableModels) stageTitle.textContent = mappingHeading(mapping);
     const basis = detectEconomyBasis(mapping);
     canvasHost.querySelectorAll<HTMLButtonElement>("[data-economy-basis]").forEach((btn) => {
       const id = btn.dataset.economyBasis as EconomyBasis | undefined;
@@ -377,8 +385,8 @@ async function boot() {
       store.update({ axisMapping: applyEconomyBasis(cur, basis) });
     });
   });
-  store.subscribe((state) => syncEconomyToggle(state.axisMapping));
-  syncEconomyToggle(store.getState().axisMapping);
+  store.subscribe((state) => syncAxisControls(state.axisMapping));
+  syncAxisControls(store.getState().axisMapping);
 
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
@@ -415,11 +423,6 @@ async function boot() {
     presentationMode,
   );
 
-  const catalogMethod = {
-    headline: allModels.some(isScorable) ? APP_BRANDING.tagline : "Model observatory",
-    sources: formatCatalogSourceLabel(allModels),
-    asOf: allModels.map((model) => model.data_date).filter(Boolean).sort().at(-1) ?? "unknown",
-  };
   const cinema = new CinemaMode(stage, store, catalogMethod);
   // Agent ↔ view-local control parity: register the controls that aren't store
   // state so Atlas can drive them too (ui_action bus, allow-listed).

@@ -133,26 +133,27 @@ it("cleans staging after a generator fails", async () => {
   expect(readdirSync(join(root, ".cache"))).toEqual([]);
 });
 
-it("writes private movement only when staging explicitly enables tracking", async () => {
+it.each(["staged", "manual"] as const)("writes private movement only when explicitly enabled for %s output", async (mode) => {
   const root = fixture();
   const draft = join(root, "data/models.v0.draft.json");
   const rows = JSON.parse(readFileSync(draft, "utf8"));
   writeFileSync(draft, JSON.stringify(rows.slice(-2)));
-  const output = join(root, "stage");
+  const output = join(root, mode === "staged" ? "stage" : "public");
   const state = join(root, ".cache/frontier-watch/last.json");
   const history = join(root, "data/frontier-events.generated.json");
-  mkdirSync(output);
+  mkdirSync(output, { recursive: true });
   mkdirSync(join(root, ".cache/frontier-watch"), { recursive: true });
   const before = JSON.stringify({ frontier: [{ model: "Fixture A", price: 1, ii: 40.12345 }, { model: "Fixture B", price: 2, ii: 50 }] });
   writeFileSync(state, before);
   // Mark this movement as delivered already so the fixture never sends alerts.
   mkdirSync(join(root, ".cache/catalog-sync"), { recursive: true });
   writeFileSync(join(root, ".cache/catalog-sync/alerted-signatures.json"), JSON.stringify({ "frontier-watch:jump:Fixture A": Date.now() }));
-  const env = { VIZ_DATA_PLANE: "private", VIZ_BUILD_PUBLIC_DIR: output };
+  const env: Record<string, string> = { VIZ_DATA_PLANE: "private" };
+  if (mode === "staged") env.VIZ_BUILD_PUBLIC_DIR = output;
   const readFrontier = () => JSON.parse(readFileSync(join(output, "frontier-watch.json"), "utf8"));
   const command = ["--import", "tsx", "scripts/frontier-watch.mjs"];
-  const staged = await run(root, process.execPath, command, env);
-  expect(staged.status, staged.stderr).toBe(0);
+  const untracked = await run(root, process.execPath, command, env);
+  expect(untracked.status, untracked.stderr).toBe(0);
   expect(readFrontier().events).toEqual([]);
   expect(readFileSync(state, "utf8")).toBe(before);
   expect(existsSync(history)).toBe(false);
