@@ -43,6 +43,9 @@ export function mountPublicDecision() {
   const tbody = shell.querySelector("tbody")!;
   for (const lab of publicProviders) provider.add(new Option(lab, lab));
 
+  // Match the published frontier across all providers before applying view filters.
+  const frontier = new Set(publicFrontier(publicDecision(0).eligible));
+
   function render() {
     if (!floor.validity.valid) {
       status.textContent = "Enter a minimum Epoch score from 0 to 100.";
@@ -58,7 +61,6 @@ export function mountPublicDecision() {
       `${count} priced ${count === 1 ? "model" : "models"} meet this floor.` +
       (missing ? ` ${missing} without a price ${missing === 1 ? "is" : "are"} excluded.` : "");
     results.hidden = count === 0;
-    const frontier = new Set(publicFrontier(decision.eligible));
     tbody.replaceChildren(...decision.eligible.map((row) => {
       const tr = document.createElement("tr");
       for (const value of [row.model, row.provider ?? "Unknown", row.intelligence.value.toString(),

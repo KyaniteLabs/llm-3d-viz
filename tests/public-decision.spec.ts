@@ -69,7 +69,11 @@ test("public Cinema credits the available observatory sources", async ({ page })
   await page.keyboard.press("c");
   const method = page.locator("[data-cinema-method]");
   await expect(method).toContainText("Arena");
-  await expect(method).toContainText(/catalog \d{4}-\d{2}-\d{2}/);
+  const models = JSON.parse(readFileSync(new URL("../data/models.v0.draft.json", import.meta.url), "utf8")) as { data_date?: string }[];
+  const latest = models.flatMap(({ data_date }) => data_date ? [data_date] : []).sort().at(-1);
+  expect(latest).toBeTruthy();
+  await expect(method).toContainText(`catalog ${latest}`);
+  await expect(method).not.toContainText(/speed/i);
   await expect(method).not.toContainText(/Artificial Analysis|OpenRouter/);
   await expect.poll(() => method.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
   const exported = await page.evaluate(() => {
@@ -89,5 +93,38 @@ test("public Cinema credits the available observatory sources", async ({ page })
   expect(exported.createdPng).toBe(true);
   expect(exported.credits).toContain("Iolite");
   expect(exported.credits.join(" ")).toContain("Arena");
-  expect(exported.credits.join(" ")).not.toContain("OpenRouter");
+  expect(exported.credits.join(" ")).not.toMatch(/OpenRouter|speed/i);
+});
+
+test("provider filtering keeps the same frontier as the published feed", async ({ page }) => {
+  await page.goto("/");
+  const feed = await page.request.get("/frontier-watch.json");
+  expect(feed.ok()).toBe(true);
+  const { frontier } = await feed.json() as { frontier: { model: string; provider: string }[] };
+  const expected = frontier.filter(({ provider }) => provider === "Anthropic").map(({ model }) => model);
+  expect(expected.length).toBeGreaterThan(0);
+
+  await page.getByLabel("Provider").selectOption("Anthropic");
+  await page.getByLabel("Minimum Epoch score").fill("0");
+  const badged = page.getByRole("row").filter({ hasText: "On frontier" }).locator("td:first-child");
+  await expect(badged).toHaveCount(expected.length);
+  for (const model of expected) {
+    await expect(badged.filter({ hasText: model })).toBeVisible();
+  }
+});
+
+test("clearing the floor hides previous results and asks for a valid value", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("table")).toBeVisible();
+  await page.getByLabel("Minimum Epoch score").clear();
+  await expect(page.getByRole("status")).toContainText("Enter a minimum Epoch score from 0 to 100.");
+  await expect(page.getByRole("table")).toBeHidden();
+});
+
+test("a provider with no bundled prices explains the empty results", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Minimum Epoch score").fill("0");
+  await page.getByLabel("Provider").selectOption("Microsoft");
+  await expect(page.getByRole("status")).toContainText("Models meet this floor but have no bundled price.");
+  await expect(page.getByRole("table")).toBeHidden();
 });
