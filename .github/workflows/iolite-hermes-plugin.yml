@@ -10,9 +10,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
-        python: ["3.11", "3.12", "3.13"]
+        # Floor (3.11) and 3.13 here; 3.14 runs in hermes-validate below.
+        python: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -24,6 +26,7 @@ jobs:
         run: python -m pip install pytest==8.4.2 && cd plugins/iolite-hermes && python -m pytest -q
   parity:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -34,6 +37,7 @@ jobs:
         run: npx vitest run tests/iolite-plugin-parity.test.ts tests/decide.test.ts
   desktop:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: plugins/iolite-hermes/desktop-src
@@ -56,6 +60,7 @@ jobs:
         run: npm test
   hermes-validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
