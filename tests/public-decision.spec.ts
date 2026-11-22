@@ -137,9 +137,13 @@ test("public Cinema credits the available observatory sources", async ({ page })
   await page.goto("/?view=observatory");
   await expect(page.locator("html")).toHaveAttribute("data-stage-backend", "r3f");
   await page.waitForFunction(() => typeof (window as any).__viz?.captureCinemaFrame === "function");
+  const heading = page.getByRole("heading", { level: 1 });
+  await expect(heading).toHaveText("Model observatory");
+  await page.locator('[data-economy-basis="task"]').click();
+  await expect(heading).toHaveText("Model observatory");
   await page.keyboard.press("c");
   const method = page.locator("[data-cinema-method]");
-  await expect(method).toContainText("Arena");
+  await expect(method).toContainText("Model observatory · sources Arena");
   const models = JSON.parse(readFileSync(new URL("../data/models.v0.draft.json", import.meta.url), "utf8")) as { data_date?: string }[];
   const latest = models.flatMap(({ data_date }) => data_date ? [data_date] : []).sort().at(-1);
   expect(latest).toBeTruthy();
@@ -171,15 +175,21 @@ test("provider filtering keeps the same frontier as the published feed", async (
   await page.goto("/");
   const feed = await page.request.get("/frontier-watch.json");
   expect(feed.ok()).toBe(true);
-  const { frontier } = await feed.json() as { frontier: { model: string; provider: string }[] };
-  const expected = frontier.filter(({ provider }) => provider === "Anthropic").map(({ model }) => model);
-  expect(expected.length).toBeGreaterThan(0);
+  const { frontier } = await feed.json() as { frontier: { model: string; provider: string | null }[] };
+  expect(frontier.length).toBeGreaterThan(0);
 
-  await page.getByLabel("Provider").selectOption("Anthropic");
   await page.getByLabel("Minimum Epoch score").fill("0");
   const badged = page.getByRole("row").filter({ hasText: "On frontier" }).locator("td:first-child");
-  await expect(badged).toHaveCount(expected.length);
-  for (const model of expected) {
+  await expect(badged).toHaveCount(frontier.length);
+  for (const { model } of frontier) {
+    await expect(badged.filter({ hasText: model })).toBeVisible();
+  }
+
+  await page.getByLabel("Provider").selectOption("Anthropic");
+  const anthropic = frontier.filter(({ provider }) => provider === "Anthropic");
+  expect(anthropic.length).toBeGreaterThan(0);
+  await expect(badged).toHaveCount(anthropic.length);
+  for (const { model } of anthropic) {
     await expect(badged.filter({ hasText: model })).toBeVisible();
   }
 });

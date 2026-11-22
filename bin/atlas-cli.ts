@@ -62,6 +62,14 @@ function loadCatalog(path: string): Model[] {
     throw new Error(`Catalog at ${path} contains invalid JSON.`);
   }
   if (!Array.isArray(raw)) throw new Error(`Catalog at ${path} must be a JSON array.`);
+  const rows: unknown[] = raw;
+  for (const [index, row] of rows.entries()) {
+    if (typeof row !== "object" || row === null ||
+        !("model" in row) || typeof row.model !== "string" ||
+        !("provider" in row) || typeof row.provider !== "string") {
+      throw new Error(`Catalog at ${path} has an invalid row at index ${index}. Expected an object with string "model" and "provider" fields.`);
+    }
+  }
   return raw as Model[];
 }
 

@@ -36,6 +36,8 @@ On a Linux CPU-only machine, use `ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm ci` to 
 
 Open the local Vite URL printed by `npm run dev` when working on the app. The dev server serves the checked-in snapshots of model pages, embeds, and Frontier Watch for direct-file consumers. Run `npm run build` followed by `npm run preview` to see freshly generated pages, the sitemap, and redirects in `dist/`. `npm run build:public` explicitly selects the public data plane. Maintainers with a private catalog can build it with `VIZ_DATA_PLANE=private npm run build`. The scheduled private catalog refresh also enables movement tracking.
 
+The standalone `scripts/frontier-watch.mjs` generator defaults to writing its output files under `public/`. Set `VIZ_BUILD_PUBLIC_DIR` to use a different existing directory. Movement history and alerts require `VIZ_FRONTIER_TRACK_MOVEMENT=1`.
+
 To customize a fork, see **[docs/forkers/README.md](docs/forkers/README.md)** for branding, lab colors, tokens, catalog, and defaults.
 
 To run a single Vitest file, use `npm test -- tests/decide.test.ts`.

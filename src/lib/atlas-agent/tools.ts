@@ -9,6 +9,8 @@ import {
   clampFloor,
   filterPickEligible,
   hasSpeed,
+  intelligenceOf,
+  isScorable,
   shortlistFromDecide,
   type CostSpeedBias,
   type DecideMode,
@@ -36,7 +38,7 @@ export function summary(m: Model): ModelSummary {
     id: m.model,
     display: displayName(m.model),
     provider: m.provider,
-    index: m.aa_intelligence_index,
+    index: intelligenceOf(m),
     tps: m.tps,
     price: m.blended_price_per_M,
     openness: m.openness,
@@ -146,13 +148,13 @@ export function toolListEligible(
   const excluded_sample: { id: string; reason: string }[] = [];
   for (const m of pool) {
     if (excluded_sample.length >= 5) break;
-    const iq = m.aa_intelligence_index;
-    if (iq == null) {
+    const iq = intelligenceOf(m);
+    if (iq === null || !Number.isFinite(iq) || iq < 0) {
       excluded_sample.push({ id: m.model, reason: "unmeasured intelligence" });
     } else if (iq < f) {
       excluded_sample.push({ id: m.model, reason: `index ${iq} < floor ${f}` });
-    } else if (m.blended_price_per_M == null) {
-      excluded_sample.push({ id: m.model, reason: "missing cost" });
+    } else if (!isScorable(m, false)) {
+      excluded_sample.push({ id: m.model, reason: "missing or invalid cost" });
     } else if (needSpeed && !hasSpeed(m)) {
       excluded_sample.push({ id: m.model, reason: "missing speed" });
     }
