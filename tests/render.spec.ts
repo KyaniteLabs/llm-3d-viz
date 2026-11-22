@@ -1564,16 +1564,14 @@ test.describe("2D Projection Render + Coupling Specs", () => {
       return { range: graph._fullLayout.xaxis.range.slice(), revision: graph.layout.datarevision };
     });
     await page.getByRole("tab", { name: "2D" }).click();
-    const initial = await read();
-    await page.evaluate(() => {
-      const graph = (window as any).__viz.projectionsInstance.gds[0];
-      graph.once("plotly_relayout", () => { (window as any).__projectionZoomComplete = true; });
-    });
     await page.locator(".projection .nsewdrag").first().hover();
+    const initial = await read();
     await page.mouse.wheel(0, -230);
-    await page.waitForFunction(() => (window as any).__projectionZoomComplete === true);
+    await expect.poll(async () => {
+      const { range } = await read();
+      return range[1] - range[0];
+    }).toBeLessThan(initial.range[1] - initial.range[0]);
     const zoomed = await read();
-    expect(zoomed.range[1] - zoomed.range[0]).toBeLessThan(initial.range[1] - initial.range[0]);
 
     await page.locator("#weight-cost").fill("9");
     await expect.poll(async () => (await read()).revision).toBeGreaterThan(zoomed.revision);
