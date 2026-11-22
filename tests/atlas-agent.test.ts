@@ -61,6 +61,24 @@ describe("atlas tools", () => {
     expect(ids).toEqual(["Fast Cheap", "Slow Smart"]);
   });
 
+  it("explains exclusions using the same scores and valid costs as eligibility", () => {
+    const visible = [
+      { ...m("Alternate Index", null, 80, 1), intelligence: 60 },
+      { ...m("Alternate Below Floor", 80, 80, 1), intelligence: 40 },
+      m("Invalid Index", Number.NaN, 80, 1),
+      m("Invalid Cost", 60, 80, -1),
+      m("Speed Missing", 60, null, 1),
+    ];
+    const { result } = toolListEligible({ ...ctx(), visible }, 50);
+    expect(result.eligible).toEqual([expect.objectContaining({ id: "Alternate Index", index: 60 })]);
+    expect(result.excluded_sample).toEqual([
+      { id: "Alternate Below Floor", reason: "index 40 < floor 50" },
+      { id: "Invalid Index", reason: "unmeasured intelligence" },
+      { id: "Invalid Cost", reason: "missing or invalid cost" },
+      { id: "Speed Missing", reason: "missing speed" },
+    ]);
+  });
+
   it("ranks cheapest among eligible", () => {
     const { result } = toolRankEligible(ctx(50), 50, "min_cost", 3);
     expect(result.shortlist[0]?.id).toBe("Fast Cheap");

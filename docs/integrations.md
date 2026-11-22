@@ -16,11 +16,11 @@ npm run atlas:cli -- eligible --floor 50 --provider Anthropic
 npm run atlas:cli -- rank --catalog /path/to/atlas.json --floor 50 --objective max_speed
 ```
 
-Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. `eligible` lists all priced models above the floor. `rank` returns the cost–capability frontier for the requested provider, or across all providers, ordered by blended price. The public catalog has no speed measurements. `max_speed` explains the missing input. `balanced` labels its cost–capability fallback.
+Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. `eligible` lists all priced models above the floor. `rank` returns the cost–capability frontier for the requested provider, or across all providers, ordered by blended price. The public catalog has no speed measurements. `max_speed` explains the missing input. `balanced` returns the same price-ordered frontier as `min_cost` and labels the fallback.
 
 With `--catalog` or `ATLAS_CATALOG_PATH`, these commands use the supplied Atlas-format array and its AA Index scale. Other commands (`meta`, `search`, `get`, `floor`, `compare`) use the Atlas-format catalog. The resolver checks the explicit file, then the environment variable, then the local Atlas snapshot if exported, then the shipped draft.
 
-Legacy `max_speed` ranks only models with a measured speed. For `min_cost` and `balanced`, the legacy tool can use cost and intelligence when eligible rows lack speed. The `mode`, `missing_speed_count`, and `message` fields report the dimensions used and the coverage gap.
+For CLI catalog overrides, `max_speed` ranks only models with a measured speed. With complete speed coverage, `balanced` gives normalized price and speed equal weight when ordering the cost–speed frontier. For `min_cost` and `balanced`, the legacy tool can use cost and intelligence when eligible rows lack speed. The `mode`, `missing_speed_count`, and `message` fields report the dimensions used and the coverage gap.
 
 Direct invocation with `npx tsx bin/atlas-cli.ts` keeps status diagnostics on stderr. Its exit codes and stdout are:
 
