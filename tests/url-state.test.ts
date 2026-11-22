@@ -44,6 +44,11 @@ describe("url-state", () => {
     expect(params.toString()).toBe("");
   });
 
+  it("preserves the observatory route when default state removes the last filter", () => {
+    const existing = new URLSearchParams("view=observatory&age=0&campaign=example");
+    expect(serializeShareableState(baseShare(), existing).toString()).toBe("view=observatory&campaign=example");
+  });
+
   it("round-trips non-default shareable state and preserves stage/heat", () => {
     const existing = new URLSearchParams("stage=plotly&heat=1");
     const state = {

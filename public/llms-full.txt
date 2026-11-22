@@ -23,13 +23,15 @@ Iolite is a free, MIT-licensed **3D LLM benchmark instrument** that maps models 
 
 Query params (subset): `decide=1`, `floor=`, `bias=`, `anchor=`, `providers=`, `families=`, `age=`, `me=`, `ax=`, `w=`, `catalog=`. Session-only: hover, pin, cinema.
 
-## Static model pages, embeds, and frontier log
+## Static model pages, embeds, and Frontier Watch
 
 Generated from the catalog on every build (zero JS, self-contained):
 
 - `/m/<slug>/` — one static card per catalog model: measured tok/s, blended $/M, intelligence index (+ coding/agentic indexes where measured), percentile context across the catalog, per-field provenance labels, catalog-date stamp. All-models index: `/m/`.
 - `/embed/<slug>` — iframe-embeddable per-model cards, regenerated with every catalog refresh.
-- `/frontier-watch.md` — dated movement log of the measured Pareto frontier (blended price ↓ × intelligence index ↑); `/frontier-watch.json` carries the machine-readable diff.
+- `/frontier-watch.md` gives the public price × capability snapshot from direct Epoch Capabilities Index scores and LiteLLM list prices. This decision catalog has its own coverage, so a frontier model may have no `/m/` card.
+- `/frontier-watch.json` in public builds uses a snapshot date (`YYYY-MM-DD`) in `as_of`, names `score_basis` and `price_basis`, and includes decision-catalog rows with nested `price` and `intelligence` fields. `/frontier-watch.xml` has no public movement entries with a single comparable snapshot.
+- In private builds, Frontier Watch uses the measured observatory catalog. The JSON uses an ISO timestamp and rows with `model`, `provider`, `price`, `ii`, and `tps`. A tracked refresh adds a movement log and records events for the private Atom feed.
 - `/blog/2026-08-24-model-observatory/` — launch post (SEO + AIGEO structured).
 - `/sitemap.xml` — `/`, `/m/`, every `/m/<slug>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, and self-listings for `/llms.txt` and `/llms-full.txt`.
 
@@ -39,7 +41,7 @@ Per-model numbers on these pages are catalog-sourced and labeled as such; lab-me
 
 - Catalog is **curated static/refresh pipeline**, not live free-form scraping in the browser.
 - **Nulls are honest** — unmeasured Index/cost/speed never fabricated.
-- Sources disclosed in UI footer + /sources/: Arena (CC BY 4.0), vendor-published figures, first-party pricing. Third-party measurement services are not republished here (license).
+- Sources are disclosed in the UI footer and `/sources/`. The public observatory catalog uses Arena (CC BY 4.0), vendor-published figures, and first-party pricing. See `/sources/#decision-data` for the public Frontier Watch method and Epoch AI and LiteLLM licences.
 
 ## Atlas agent tools (in-app, not public HTTP API yet)
 
