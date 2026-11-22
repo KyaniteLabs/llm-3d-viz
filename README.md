@@ -26,15 +26,17 @@ Iolite plots a curated catalog of large language models in a Three.js/WebGL stag
 ```bash
 npm install
 npm run dev          # local Vite
-npm test             # vitest
+npm test              # Vitest and Desktop Node tests
 npm run build         # public build in this OSS checkout
-npm run preview      # serve the generated dist/ files
+npm run preview       # serve the generated dist/ files
 npm run test:render  # Playwright (optional)
 ```
 
 Open the local Vite URL printed by `npm run dev` when working on the app. The dev server serves the checked-in snapshots of model pages, embeds, and Frontier Watch for direct-file consumers. Run `npm run build` followed by `npm run preview` to see freshly generated pages, the sitemap, and redirects in `dist/`. `npm run build:public` explicitly selects the public data plane. Maintainers with a private catalog can build it with `VIZ_DATA_PLANE=private npm run build`. The scheduled private catalog refresh also enables movement tracking.
 
 To customize a fork, see **[docs/forkers/README.md](docs/forkers/README.md)** for branding, lab colors, tokens, catalog, and defaults.
+
+To run a single Vitest file, use `npm test -- tests/decide.test.ts`.
 
 ## Features
 
