@@ -8,7 +8,13 @@ import {
   unsupportedDataAxes,
 } from "../src/lib/atlas-agent/query-catalog";
 import { runOfflineAtlas } from "../src/lib/atlas-agent/offline-router";
-import { validateProposal, type AtlasAgentContext } from "../src/lib/atlas-agent/types";
+import { proposalToStorePatch } from "../src/lib/atlas-agent/apply";
+import {
+  proposalHasApplyableChanges,
+  shouldAutoApplyProposal,
+  validateProposal,
+  type AtlasAgentContext,
+} from "../src/lib/atlas-agent/types";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 
 type Overrides = Partial<
@@ -230,6 +236,23 @@ describe("runOfflineAtlas — compositional queries", () => {
     expect(p.summary.toLowerCase()).toContain("open");
   });
 
+  it("answers a scoped speed question with measured results and no Apply action", () => {
+    const visible = [
+      m("Unknown Smart", 95, null, 1, { openness: "open" }),
+      m("Measured Slow", 75, 20, 3, { openness: "open" }),
+      m("Measured Fast", 60, 200, 2, { openness: "open" }),
+    ];
+    const proposal = runOfflineAtlas("fastest open model above 50", { ...ctx(), catalog: visible, visible });
+    expect(validateProposal(proposal)).toBe(true);
+    expect(proposal.shortlist_ids).toEqual(["Measured Fast", "Measured Slow"]);
+    expect(proposal.summary).toMatch(/measured fast.*measured slow/i);
+    expect(proposal.summary).not.toMatch(/apply|decide|unknown smart/i);
+    expect(proposal.needs_confirm).toBe(false);
+    expect(proposalHasApplyableChanges(proposal)).toBe(false);
+    expect(shouldAutoApplyProposal(proposal)).toBe(false);
+    expect(proposalToStorePatch(proposal, DEFAULT_FILTERS)).toEqual({ patch: {}, appliedKeys: [] });
+  });
+
   it("reports missing speed when the requested provider has no measured rows", () => {
     const visible = [
       m("Missing speed", 80, null, 1, { provider: "Anthropic" }),
@@ -239,6 +262,15 @@ describe("runOfflineAtlas — compositional queries", () => {
     expect(proposal.shortlist_ids ?? []).toEqual([]);
     expect(proposal.summary).toMatch(/no matching models have measured speed/i);
     expect(proposal.tool_trace[0]?.detail).toMatch(/no measured speed/i);
+  });
+
+  it("reports an unsupported constraint even when the retried scope has no measured speed", () => {
+    const visible = [m("Missing speed", 80, null, 1, { provider: "Anthropic" })];
+    const proposal = runOfflineAtlas("fastest from Anthropic with vision", { ...ctx(), catalog: visible, visible });
+    expect(proposal.shortlist_ids ?? []).toEqual([]);
+    expect(proposal.summary).toMatch(/couldn't check vision/i);
+    expect(proposal.summary).toMatch(/no matching models have measured speed/i);
+    expect(proposal.tool_trace.at(-1)?.detail).toMatch(/no measured speed/i);
   });
 
   it("answers a pure filter query without forcing Decide", () => {

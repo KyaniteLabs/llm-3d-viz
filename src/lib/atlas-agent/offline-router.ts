@@ -147,7 +147,10 @@ export function runOfflineAtlas(
           }
         }
         if (ids.length === 0) {
-          const why = missingMeasuredSpeed ? "No matching models have measured speed."
+          const why = missingMeasuredSpeed
+            ? gaps.length
+              ? `I couldn't check ${gaps.join(", ")}. With those constraints removed, no matching models have measured speed.`
+              : "No matching models have measured speed."
             : gaps.length ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
             : `No models match (${label}). Try loosening a constraint.`;
           return emptyProposal(snap, why, {
@@ -158,23 +161,29 @@ export function runOfflineAtlas(
         }
       }
 
-      // Objective set → Decide + ranked shortlist, honoring every constraint.
-      if (active.objective) {
-        const applyPrompt = active.objective === "max_speed"
-          ? "Open Decide with a speed preference?"
-          : "Apply Decide with this ranking?";
+      const rankedLabel = label.charAt(0).toUpperCase() + label.slice(1);
+      if (active.objective === "max_speed") {
         return emptyProposal(
           snap,
-          `${label.charAt(0).toUpperCase()}${label.slice(1)}: ${speakableList(ids)}. ${applyPrompt}`,
+          `${rankedLabel} matches by measured speed include ${speakableList(ids)}.`,
+          {
+            shortlist_ids: ids,
+            needs_confirm: false,
+            auto_apply: false,
+            tool_trace: trace,
+          },
+        );
+      }
+
+      // Other ranking objectives can propose changes to the Decide view.
+      if (active.objective) {
+        return emptyProposal(
+          snap,
+          `${rankedLabel}: ${speakableList(ids)}. Apply Decide with this ranking?`,
           {
             floor: active.floor ?? ctx.floor,
             decide_mode: true,
-            cost_speed_bias:
-              active.objective === "min_cost"
-                ? -1
-                : active.objective === "max_speed"
-                  ? 1
-                  : ctx.costSpeedBias,
+            cost_speed_bias: active.objective === "min_cost" ? -1 : ctx.costSpeedBias,
             shortlist_ids: ids,
             highlight_model_ids: ids,
             filters_patch: constraintFiltersPatch(ctx, active),

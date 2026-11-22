@@ -73,6 +73,23 @@ test("Atlas defaults to offline and clearing a selected endpoint restores offlin
   await expect(status).toHaveText("Offline tools only");
 });
 
+test("Atlas shows Apply only for responses with actions", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("atlas-voice-muted", "1"));
+  await page.goto("/?view=observatory");
+  const input = page.getByRole("textbox", { name: "Atlas command" });
+  const response = page.locator("[data-atlas-proposal]");
+
+  await input.fill("help");
+  await input.press("Enter");
+  await expect(response).toContainText("I can set an intelligence floor");
+  await expect(response.locator("[data-atlas-apply], [data-atlas-undo]")).toHaveCount(0);
+
+  await input.fill("floor 64");
+  await input.press("Enter");
+  await expect(response).toContainText("Floor 64");
+  await expect(response.getByRole("button", { name: "Apply", exact: true })).toBeEnabled();
+});
+
 test("the original observatory does not prefetch the voice model before a reply", async ({ page }) => {
   const voiceRequests: string[] = [];
   page.on("request", (request) => {

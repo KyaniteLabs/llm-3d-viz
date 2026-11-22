@@ -386,7 +386,7 @@ export class AtlasAgentPanel {
       ${shortlist ? `<p class="atlas-shortlist"><strong>Shortlist</strong> ${shortlist}</p>` : ""}
       ${p.floor != null ? `<p class="atlas-meta">Floor → <strong>${p.floor}</strong></p>` : ""}
       <div class="atlas-actions">
-        <button type="button" class="atlas-btn primary" data-atlas-apply ${canApply ? "" : "disabled"}>Apply</button>
+        ${canApply ? '<button type="button" class="atlas-btn primary" data-atlas-apply>Apply</button>' : ""}
         <button type="button" class="atlas-btn" data-atlas-dismiss>Dismiss</button>
       </div>
     `;
