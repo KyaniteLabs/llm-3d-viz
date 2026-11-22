@@ -1704,7 +1704,7 @@ test.describe("2D Projection Render + Coupling Specs", () => {
     await page.goto("/?stage=plotly&age=0");
     await waitForPlotlyStage(page);
 
-    const h1 = page.locator("h1");
+    const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toHaveText("Speed × cost × intelligence");
     const h1Box = await h1.boundingBox();
     expect(h1Box, "h1 should render").toBeTruthy();
