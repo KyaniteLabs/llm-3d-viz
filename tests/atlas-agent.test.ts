@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Model } from "../src/data/models";
+import { proposalToStorePatch } from "../src/lib/atlas-agent/apply";
 import { runOfflineAtlas } from "../src/lib/atlas-agent/offline-router";
 import { validateProposal, type AtlasAgentContext } from "../src/lib/atlas-agent/types";
 import { toolListEligible, toolRankEligible, toolProposeFloor } from "../src/lib/atlas-agent/tools";
+import { shortlistFromDecide } from "../src/lib/decide";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 
 function m(
@@ -116,12 +118,29 @@ describe("offline atlas agent", () => {
     expect(p.summary.toLowerCase()).toMatch(/cheap|fast cheap/);
   });
 
-  it("keeps Atlas and applied Decide on the same candidate pool", () => {
+  it.each(["fastest eligible", "balanced shortlist"])("%s describes the same pool as applied Decide", (prompt) => {
     const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
-    const p = runOfflineAtlas("fastest eligible", { ...ctx(), catalog: visible, visible });
+    const p = runOfflineAtlas(prompt, { ...ctx(), catalog: visible, visible });
+    const { patch } = proposalToStorePatch(p, DEFAULT_FILTERS);
+    const replay = shortlistFromDecide(visible, patch.intelligenceFloor!, patch.costSpeedBias!);
     expect(p.shortlist_ids).toEqual(["Cheap Unknown Speed"]);
-    expect(p.summary).toMatch(/price and intelligence/i);
-    expect(p.summary).toMatch(/missing measured speed/i);
+    expect(p.shortlist_ids).toEqual(replay.shortlist.map(({ model }) => model));
+    expect(p.summary).toMatch(/ranked by price and intelligence/i);
+    expect(p.summary).toMatch(/1 eligible model lacked measured speed/i);
+    expect(p.summary).not.toMatch(/fastest shortlist|balanced shortlist/i);
+    expect(p.tool_trace).toContainEqual({
+      name: "list_eligible",
+      ok: true,
+      detail: `${replay.eligible.length} eligible at floor 50`,
+    });
+  });
+
+  it.each(["floor 50", "floor from Fast Cheap"])("%s discloses the missing speed before Apply", (prompt) => {
+    const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
+    const p = runOfflineAtlas(prompt, { ...ctx(), catalog: visible, visible });
+    expect(p.shortlist_ids).toEqual(["Cheap Unknown Speed"]);
+    expect(p.summary).toMatch(/ranked by price and intelligence/i);
+    expect(p.summary).toMatch(/1 eligible model lacked measured speed/i);
   });
 
   it("why is Below Floor out explains Index vs floor", () => {

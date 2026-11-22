@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { resolve } from "node:path";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 
-function mcp(lines: unknown[], full = false) {
+function mcp(lines: unknown[], { full = false, catalogPath = "" } = {}) {
   const input = lines.map((line) => typeof line === "string" ? line : JSON.stringify(line)).join("\n");
   const result = spawnSync(process.execPath, ["--import", "tsx", "bin/atlas-mcp-server.ts"], {
     cwd: root,
     encoding: "utf8",
     input: `${input}\n`,
-    env: { ...process.env, ATLAS_CATALOG_PATH: "", ATLAS_MCP_FULL: full ? "1" : "0" },
+    env: { ...process.env, ATLAS_CATALOG_PATH: catalogPath, ATLAS_MCP_FULL: full ? "1" : "0" },
     timeout: 10_000,
   });
   expect(result.status, result.stderr).toBe(0);
@@ -74,11 +76,54 @@ describe("atlas MCP stdio", () => {
       request(1, "tools/list"),
       request(2, "tools/call", { name: "set_view", arguments: { cinema: true } }),
       request(3, "ping"),
-    ], full);
+    ], { full });
     expect(list.result.tools.some((tool: { name: string }) => tool.name === "set_view")).toBe(full);
     if (full) expect(call.result.isError).toBe(false);
     else expect(call.error.code).toBe(-32602);
     expect(ping.result).toEqual({});
+  });
+
+  it("lists the price and intelligence pool and requires measured speed for max_speed", () => {
+    const dir = mkdtempSync(join(tmpdir(), "iolite-mcp-"));
+    try {
+      const catalogPath = join(dir, "catalog.json");
+      writeFileSync(catalogPath, JSON.stringify([
+        { model: "Measured", provider: "Fixture", aa_intelligence_index: 65, tps: 20, blended_price_per_M: 2 },
+        { model: "Speed unknown", provider: "Fixture", aa_intelligence_index: 70, tps: null, blended_price_per_M: 1 },
+      ]));
+      const results = mcp([
+        request(1, "tools/call", { name: "list_eligible", arguments: { floor: 50 } }),
+        request(2, "tools/call", { name: "rank_eligible", arguments: { floor: 50, objective: "max_speed" } }),
+        request(3, "tools/call", { name: "rank_eligible", arguments: { floor: 70, objective: "max_speed" } }),
+        request(4, "tools/call", { name: "rank_eligible", arguments: { floor: 50, objective: "balanced" } }),
+      ], { catalogPath });
+      const [list, speed, noSpeed, balanced] = results.map(({ result }) => {
+        expect(result.isError).toBe(false);
+        return JSON.parse(result.content[0].text);
+      });
+      expect(list.eligible.map((row: { id: string }) => row.id)).toEqual(["Measured", "Speed unknown"]);
+      expect(list.excluded_sample).toEqual([]);
+      expect(speed).toMatchObject({
+        shortlist: [{ id: "Measured", tps: 20 }],
+        mode: "cost_speed",
+        missing_speed_count: 1,
+        message: expect.stringMatching(/excluded.*missing speed/i),
+      });
+      expect(noSpeed).toMatchObject({
+        shortlist: [],
+        mode: null,
+        missing_speed_count: 1,
+        message: expect.stringMatching(/no eligible models have measured speed/i),
+      });
+      expect(balanced).toMatchObject({
+        shortlist: [{ id: "Speed unknown", tps: null }],
+        mode: "cost",
+        missing_speed_count: 1,
+        message: expect.stringMatching(/price and intelligence/i),
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it(

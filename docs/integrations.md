@@ -50,6 +50,8 @@ The server reports `iolite` as its implementation name. The configuration key be
 
 Tools: `get_catalog_meta`, `search_models`, `get_model`, `list_eligible`, `rank_eligible`, `propose_floor`, `compare_models`, `query_catalog`, `list_providers`, `list_families`, `ui_action`. MCP uses the Atlas-format catalog (honors `ATLAS_CATALOG_PATH`). One process per catalog; no server state.
 
+`list_eligible` lists models at or above the intelligence floor with measured prices. `rank_eligible` uses that pool and requires measured speed for `max_speed`, as the CLI does with an Atlas-format catalog. For `min_cost` and `balanced`, incomplete speed coverage triggers the disclosed price-and-intelligence fallback. In-app Atlas proposals retain the full eligible pool so applying a proposal reproduces the Decide ranking.
+
 Set `ATLAS_MCP_FULL=1` to expose the additional view and decision-proposal tools. A client can call only the tools offered in its server's `tools/list`. View and decision tools return proposals that an attached UI can apply.
 
 ## 4. Embedding the tools directly (TS)

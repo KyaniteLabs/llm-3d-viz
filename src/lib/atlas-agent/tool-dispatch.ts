@@ -68,7 +68,7 @@ export const ATLAS_TOOL_DEFINITIONS = [
   },
   {
     name: "list_eligible",
-    description: "Models with Index >= floor and measured cost+speed.",
+    description: "List models at or above the intelligence floor with measured price. Speed may be missing.",
     parameters: {
       type: "object",
       properties: { floor: { type: "number" } },
@@ -78,7 +78,7 @@ export const ATLAS_TOOL_DEFINITIONS = [
   },
   {
     name: "rank_eligible",
-    description: "Rank eligible by min_cost, max_speed, or balanced.",
+    description: "Rank eligible models by min_cost, max_speed, or balanced. Use mode and message to explain the ranking dimensions and speed coverage.",
     parameters: {
       type: "object",
       properties: {
@@ -365,6 +365,7 @@ export function dispatchAtlasTool(
   name: string,
   rawArgs: unknown,
   ctx: AtlasAgentContext,
+  { requireMeasuredSpeed = false } = {},
 ): DispatchOutcome {
   const args = asObj(rawArgs);
 
@@ -388,7 +389,7 @@ export function dispatchAtlasTool(
     }
     case "list_eligible": {
       const floor = num(args.floor) ?? ctx.floor;
-      const { result, trace } = toolListEligible(ctx, floor);
+      const { result, trace } = toolListEligible(ctx, floor, false);
       return { kind: "tool_result", content: result, trace };
     }
     case "rank_eligible": {
@@ -397,7 +398,7 @@ export function dispatchAtlasTool(
       const objective: RankObjective =
         obj === "min_cost" || obj === "max_speed" || obj === "balanced" ? obj : "balanced";
       const n = num(args.n) ?? 3;
-      const { result, trace } = toolRankEligible(ctx, floor, objective, n);
+      const { result, trace } = toolRankEligible(ctx, floor, objective, n, { requireMeasuredSpeed });
       return { kind: "tool_result", content: result, trace };
     }
     case "propose_floor": {

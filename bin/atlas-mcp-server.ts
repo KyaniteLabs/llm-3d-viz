@@ -68,7 +68,11 @@ const fullModeTools = [
 ];
 const exposedTools = ATLAS_TOOL_DEFINITIONS
   .filter(({ name }) => FULL || !fullModeTools.includes(name))
-  .map(({ name, description, parameters }) => ({ name, description, inputSchema: parameters }));
+  .map(({ name, description, parameters }) => ({
+    name,
+    description: name === "rank_eligible" ? `${description} The max_speed objective requires measured speed.` : description,
+    inputSchema: parameters,
+  }));
 
 type JsonRpc = {
   jsonrpc: "2.0";
@@ -150,7 +154,7 @@ function handle({ method, id, params }: JsonRpc) {
         const floor =
           typeof args.floor === "number" ? args.floor : baseCtx.floor;
         const ctx: AtlasAgentContext = { ...baseCtx, floor };
-        const outcome = dispatchAtlasTool(name, args, ctx);
+        const outcome = dispatchAtlasTool(name, args, ctx, { requireMeasuredSpeed: true });
         if (outcome.kind === "finish") {
           respond(id, {
             content: [

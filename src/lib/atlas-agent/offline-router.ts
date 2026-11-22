@@ -6,7 +6,7 @@
 import { displayName } from "../display-name";
 import { DEFAULT_FILTERS } from "../filters";
 import type { ModelFilters } from "../filters";
-import type { AtlasAgentContext, AtlasProposal, AtlasToolTrace } from "./types";
+import type { AtlasAgentContext, AtlasProposal, AtlasToolTrace, RankObjective } from "./types";
 import { emptyProposal } from "./types";
 import type { CatalogConstraints } from "./query-catalog";
 import {
@@ -33,6 +33,20 @@ function speakableList(ids: string[], max = 3): string {
   if (names.length === 1) return names[0]!;
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+function describeShortlist(
+  ids: string[],
+  objective: RankObjective,
+  { mode, message }: ReturnType<typeof toolRankEligible>["result"],
+): string {
+  const label = objective === "min_cost" ? "cheapest shortlist"
+    : mode === "cost" ? "shortlist"
+    : objective === "max_speed" ? "fastest shortlist" : "balanced shortlist";
+  const summary = ids.length
+    ? `The ${label} includes ${speakableList(ids)}.`
+    : "The shortlist is empty.";
+  return message ? `${summary} ${message}` : summary;
 }
 
 /** Map compositional constraints onto the viz filter surface (best-effort). */
@@ -199,7 +213,7 @@ export function runOfflineAtlas(
       const ids = rank.result.shortlist.map((s) => s.id);
       return emptyProposal(
         snap,
-        `Floor ${prop.result.floor}. Among eligible, balanced shortlist: ${speakableList(ids)}. Apply to update Decide?`,
+        `Floor ${prop.result.floor}. ${describeShortlist(ids, "balanced", rank.result)} Apply to update Decide?`,
         {
           floor: prop.result.floor,
           floor_anchor_model_id: null,
@@ -245,7 +259,7 @@ export function runOfflineAtlas(
       const anchorLabel = displayName(prop.result.anchor_id!);
       return emptyProposal(
         snap,
-        `Floor ${prop.result.floor} from ${anchorLabel}. Shortlist: ${speakableList(ids)}. Apply?`,
+        `Floor ${prop.result.floor} from ${anchorLabel}. ${describeShortlist(ids, "balanced", rank.result)} Apply?`,
         {
           floor: prop.result.floor,
           floor_anchor_model_id: prop.result.anchor_id,
@@ -268,15 +282,11 @@ export function runOfflineAtlas(
       const objective = cheap ? "min_cost" : fast ? "max_speed" : "balanced";
       const floorMatch = text.match(/\b(?:over|above|floor\s*)(\d{1,3})\b/);
       const floor = floorMatch ? Number(floorMatch[1]) : ctx.floor;
-      const list = toolListEligible(ctx, floor);
+      const list = toolListEligible(ctx, floor, false);
       trace.push(list.trace);
       const rank = toolRankEligible(ctx, floor, objective, 3);
       trace.push(rank.trace);
       const ids = rank.result.shortlist.map((s) => s.id);
-      const usesCapability = objective === "max_speed" && rank.result.mode === "cost";
-      const label = usesCapability ? "price and intelligence"
-        : objective === "min_cost" ? "cheapest" : objective === "max_speed" ? "fastest" : "balanced";
-      const coverage = usesCapability ? " Some eligible models are missing measured speed." : "";
       if (ids.length === 0) {
         return emptyProposal(
           snap,
@@ -292,7 +302,7 @@ export function runOfflineAtlas(
       }
       return emptyProposal(
         snap,
-        `At floor ${floor}, ${label} shortlist: ${speakableList(ids)}.${coverage} Apply Decide with this ranking?`,
+        `Floor ${floor}. ${describeShortlist(ids, objective, rank.result)} Apply Decide with this ranking?`,
         {
           floor,
           decide_mode: true,
