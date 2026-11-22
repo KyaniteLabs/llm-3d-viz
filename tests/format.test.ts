@@ -9,6 +9,8 @@ import {
   TTFT_MULTI_MINUTE_MS,
 } from "../src/lib/format";
 import { displayName } from "../src/lib/display-name";
+import { optionalMetricDlRows } from "../src/lib/provenance";
+import { syntheticModels } from "./helpers/synthetic-catalog";
 
 describe("displayName", () => {
   it("removes parenthetical reasoning and effort metadata without changing ordinary release labels", () => {
@@ -41,6 +43,14 @@ describe("metric formatting (FIX-C #28: readout units)", () => {
     expect(formatTtftSeconds(143498)).toBe("143.5s");
     expect(formatTtftSeconds(null)).toBe("—");
   });
+});
+
+it("shows the publication date beside the Arena rating when a date is available", () => {
+  const model = { ...syntheticModels[0], arena_elo: 1280 };
+  expect(optionalMetricDlRows({ ...model, arena_publish_date: "2026-11-17" }))
+    .toContain("<dt>Arena rating</dt><dd>1,280 · 2026-11-17</dd>");
+  expect(optionalMetricDlRows({ ...model, arena_publish_date: "2026-11" }))
+    .toContain("<dt>Arena rating</dt><dd>1,280</dd>");
 });
 
 describe("ttft caveat (#28 r2: reasoning-gated via structured field)", () => {

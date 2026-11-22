@@ -77,9 +77,9 @@ git commit -qm "chore(oss): curation for $(date +%Y-%m-%d) publish (publish-oss.
 # the AA-fed data files that have no public equivalent (the private frontier
 # history's event text carries AA-derived prices/indices; only the .public
 # history ships).
-echo "[oss-publish] Path C: swap catalog to the public plane"
-if [ ! -f data/generated/public-catalog.json ]; then
-  echo "ERROR: data/generated/public-catalog.json missing — run node scripts/gen-public-catalog.mjs first." >&2
+echo "[oss-publish] Path C: refresh the public snapshot and swap to the public plane"
+if ! VIZ_PUBLIC_CATALOG_PATH=data/generated/public-catalog.json node scripts/gen-public-catalog.mjs; then
+  echo "ERROR: failed to refresh the public catalog snapshot." >&2
   git checkout -q main
   exit 4
 fi
@@ -87,7 +87,7 @@ cp data/generated/public-catalog.json data/models.v0.draft.json
 git rm -q data/atlas-catalog-snapshot.json data/atlas-catalog-meta.json \
   data/catalog-diff.generated.json \
   data/frontier-events.generated.json 2>/dev/null || true
-git add data/models.v0.draft.json
+git add data/generated/public-catalog.json data/models.v0.draft.json
 git commit -qm "chore(oss): public-plane data only (Path C 2026-08-29) — AA/OpenRouter-derived values never ship to OSS" || true
 
 echo "[oss-publish] cherry-picking OSS-edition commit $OSS_EDITION_COMMIT"

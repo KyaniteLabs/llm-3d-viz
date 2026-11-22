@@ -22,7 +22,14 @@ With `--catalog` or `ATLAS_CATALOG_PATH`, these commands use the supplied Atlas-
 
 Legacy `max_speed` ranks only models with a measured speed. For `min_cost` and `balanced`, the legacy tool can use cost and intelligence when eligible rows lack speed. The `mode`, `missing_speed_count`, and `message` fields report the dimensions used and the coverage gap.
 
-Use `npx tsx bin/atlas-cli.ts` directly if you need stdout to contain only JSON. Exit codes are 0 for a valid query (including an explained empty result) or help, 1 for invalid usage, 2 for an unresolved model lookup or anchor, and 3 for a catalog read or processing failure.
+Direct invocation with `npx tsx bin/atlas-cli.ts` keeps status diagnostics on stderr. Its exit codes and stdout are:
+
+| Exit | Meaning | Stdout |
+|---|---|---|
+| `0` | Valid query, including an empty result, or help | JSON for queries, plain text for help |
+| `1` | Invalid arguments | Empty |
+| `2` | Unresolved model lookup, anchor, or compare operand | JSON `null` for a lookup or anchor, or the matched rows for `compare` |
+| `3` | Catalog read, parse, or processing failure | Empty |
 
 ## 3. Atlas MCP server (stdio, JSON-RPC 2.0)
 

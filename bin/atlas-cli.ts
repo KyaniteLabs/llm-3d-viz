@@ -55,9 +55,14 @@ function loadCatalog(path: string): Model[] {
   } catch {
     throw new Error(`Cannot read catalog at ${path}.`);
   }
-  const raw = JSON.parse(content) as Model[];
-  if (!Array.isArray(raw)) throw new Error("catalog must be a JSON array");
-  return raw;
+  let raw: unknown;
+  try {
+    raw = JSON.parse(content);
+  } catch {
+    throw new Error(`Catalog at ${path} contains invalid JSON.`);
+  }
+  if (!Array.isArray(raw)) throw new Error(`Catalog at ${path} must be a JSON array.`);
+  return raw as Model[];
 }
 
 function ctxFrom(catalog: Model[], floor = 50): AtlasAgentContext {
@@ -94,6 +99,9 @@ Options:
   --catalog <path>   use an Atlas-format catalog with an AA Index floor;
                      also settable through ATLAS_CATALOG_PATH
   --help             show this help
+
+Without an override, the CLI uses data/atlas-catalog-snapshot.json when
+readable and falls back to data/models.v0.draft.json.
 `;
 
 class UsageError extends Error {}
@@ -149,7 +157,8 @@ function main() {
       },
     });
   } catch (error) {
-    throw new UsageError(error instanceof Error ? error.message : String(error));
+    const message = error instanceof Error ? error.message : String(error);
+    throw new UsageError(message.replace(/\s*\r?\n\s*/g, " "));
   }
   const { values, positionals, tokens } = parsed;
   const seenOptions = new Set<string>();

@@ -328,7 +328,7 @@ export class DecidePanel {
     const host = this.root.querySelector("[data-decide-shortlist]");
     if (!host) return;
     if (shortlist.length === 0) {
-      host.innerHTML = '<p class="console-note">Shortlist empty · 0 eligible</p>';
+      host.innerHTML = `<p class="console-note">Shortlist empty · ${eligibleN} eligible</p>`;
       return;
     }
     host.innerHTML = `

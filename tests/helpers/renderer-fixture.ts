@@ -16,7 +16,6 @@ export const test = base.extend<{}, { rendererOrigin: string }>({
       cacheDir: ".cache/renderer-suite/vite",
       server: {
         host: "127.0.0.1",
-        port: 0,
         hmr: false,
         watch: { ignored: ["**/.cache/**", "**/.scratch/**"] },
       },
@@ -56,8 +55,17 @@ export const test = base.extend<{}, { rendererOrigin: string }>({
         null_reason: "Synthetic row with no measured speed.",
       };
       replacement = JSON.stringify([...complete, incomplete]);
-      await server.listen();
-      const address = server.httpServer?.address();
+      const httpServer = server.httpServer;
+      if (!httpServer) throw new Error("Renderer fixture has no HTTP server");
+      // Vite's listen() treats port 0 as its default. Bind port 0 directly.
+      await new Promise<void>((resolve, reject) => {
+        httpServer.once("error", reject);
+        httpServer.listen(0, "127.0.0.1", () => {
+          httpServer.off("error", reject);
+          resolve();
+        });
+      });
+      const address = httpServer.address();
       if (!address || typeof address === "string") throw new Error("Renderer fixture failed to listen");
       await use(`http://127.0.0.1:${address.port}`);
     } finally {
