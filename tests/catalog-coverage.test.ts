@@ -5,6 +5,7 @@ import {
 } from "../src/lib/catalog-coverage";
 import {
   formatArenaElo,
+  formatCatalogSourceLabel,
   formatCoverageBadge,
   formatProvenanceLine,
   taskTimeInfo,
@@ -52,6 +53,20 @@ describe("catalog coverage", () => {
 });
 
 describe("provenance + task time honesty", () => {
+  it("credits present catalog fields independently of edition and ignores stamps on missing values", () => {
+    const sources: Model["sources"] = {
+      arena_elo: { origin: "arena", kind: "measured" },
+      context_length: { origin: "provider", kind: "list" },
+      aa_intelligence_index: { origin: "aa-api", kind: "measured" },
+      blended_price_per_M: { origin: "openrouter", kind: "list" },
+    };
+    const publicRow = row({ model: "Public", sources, arena_elo: 1250, aa_intelligence_index: null, blended_price_per_M: null });
+    expect(formatCatalogSourceLabel([publicRow])).toBe("Arena (CC BY 4.0) · provider-published figures");
+    const fullRow = row({ model: "Full", sources });
+    expect(formatCatalogSourceLabel([publicRow, fullRow]))
+      .toBe("Artificial Analysis · OpenRouter · Arena (CC BY 4.0) · provider-published figures");
+  });
+
   it("formats provenance from sources map", () => {
     const line = formatProvenanceLine({
       source: "AA Data API free",

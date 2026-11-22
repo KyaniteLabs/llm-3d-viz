@@ -112,7 +112,8 @@ describe("W1 per-family exception list", () => {
 
   it("exception lookup normalizes display names (effort suffixes stripped)", () => {
     expect(opennessForLab("OpenAI", "gpt-oss-120b (high)")).toBe("open");
-    expect(opennessForLab("Z AI", "GLM-5.3 (max)")).toBe("closed");
+    expect(opennessForLab("Meta", "Muse Spark 1.3 (max)")).toBe("closed");
+    expect(opennessForLab("Z AI", "GLM-5.3 (max)")).toBe("open");
   });
 
   it("spot check: the gpt-oss exception exists inside the closed OpenAI lab", () => {
@@ -158,31 +159,31 @@ describe("W1 applyCuratedOpenness overlay (build-time)", () => {
   });
 
   it("exception survives manual-row supersede (simulated AA family publication)", () => {
-    // Stage 1 — manual GLM-5.3 row alive: its explicit closed value wins.
-    const manualGlm = {
-      provider: "Z AI",
-      family_id: "GLM-5.3",
-      model: "GLM-5.3 (max)",
+    // A manual row keeps the explicit closed value while it is present.
+    const manualMuse = {
+      provider: "Meta",
+      family_id: "Muse Wonder",
+      model: "Muse Wonder",
       openness: "closed",
     };
-    const alive = applyCuratedOpenness([manualGlm], [manualGlm]);
+    const alive = applyCuratedOpenness([manualMuse], [manualMuse]);
     expect(alive.rows[0].openness).toBe("closed");
 
     // Stage 2 — AA publishes the family: the manual row is superseded
     // (loadManualAdditions drops it upstream, so manualRows is empty). The
-    // per-family exception — not the open Z AI lab class — decides.
-    const aaGlm = {
-      provider: "Z AI",
-      family_id: "GLM-5.3",
-      model: "GLM-5.3 (max)",
+    // per-family exception remains in effect for the successor row.
+    const aaMuse = {
+      provider: "Meta",
+      family_id: "Muse Wonder",
+      model: "Muse Wonder (max)",
       openness: "open", // whatever the retired mapper default guessed
     };
-    const superseded = applyCuratedOpenness([aaGlm], []);
+    const superseded = applyCuratedOpenness([aaMuse], []);
     expect(superseded.rows[0].openness).toBe("closed"); // exception survives
-    expect(FAMILY_OPENNESS_EXCEPTIONS[normalizeFamily("GLM-5.3")]).toBe("closed");
+    expect(FAMILY_OPENNESS_EXCEPTIONS[normalizeFamily("Muse Wonder")]).toBe("closed");
 
     // Contrast — a Z AI family without an exception resolves the open class.
-    expect(opennessForLab("Z AI", "GLM-5.2")).toBe("open");
+    expect(opennessForLab("Meta", "Muse Spark Open")).toBe("open");
   });
 
   it("family exceptions apply to overlay rows inside mixed labs (generated)", () => {

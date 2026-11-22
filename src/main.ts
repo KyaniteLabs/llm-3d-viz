@@ -178,7 +178,8 @@ function renderStoryLine(el: HTMLElement, story: string, topModel: string | null
   el.append(name, story.slice(at + topModel.length));
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+export function startObservatory() {
+  document.querySelector<HTMLElement>("#app-shell")!.hidden = false;
   void boot().catch((err) => {
     console.error("[boot] fatal", err);
     if (document.querySelector("[data-boot-fail]")) return;
@@ -191,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     banner.querySelector("button")?.addEventListener("click", () => location.reload());
     document.body.appendChild(banner);
   });
-});
+}
 
 async function boot() {
   document.title = APP_BRANDING.documentTitle;

@@ -59,6 +59,22 @@ def test_bundled_catalog_is_full_of_pickable_rows():
     assert not any("speed" in r or "tps" in r for r in CATALOG["models"])  # no public speed source
 
 
+def test_readme_coverage_matches_the_bundled_catalog():
+    readme = (ROOT / "README.md").read_text()
+    stats = CATALOG["stats"]
+    source_counts = {
+        "Intelligence": str(stats["rows_with_eci"]),
+        "Arena rating": str(stats["rows_with_arena"]),
+        "Prices": f'{stats["rows_with_price"]} priced models',
+    }
+    for source, count in source_counts.items():
+        assert re.search(rf"^\| {source} \|[^\n]+ \| {count} \|$", readme, re.M), source
+    assert f'{stats["rows_total"]} models in all' in readme
+    assert f'{stats["rows_with_intelligence_and_price"]} have both' in readme
+    assert f'{stats["rows_intelligence_from_arena"]} models use the Arena estimate' in readme
+    assert f'{stats["calibration_pairs"]} models in both sources' in readme
+
+
 def test_fresh_install_gives_a_real_answer_with_credits():
     c = Ctx({"measure_speed": False})
     plugin.register(c)

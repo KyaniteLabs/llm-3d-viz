@@ -1,11 +1,11 @@
 # Data attribution and licences
 
 The bundled `data/catalog.json` is a derived work of three openly licensed sources. It was built
-by `scripts/build_catalog.py` on 2026-11-11. Each catalog row repeats the credit that applies to it.
+by `scripts/build_catalog.py` on 2026-11-21. Each catalog row repeats the credit that applies to it.
 
 ## Intelligence: Epoch AI Capabilities Index (CC BY)
 
-Epoch AI, 'Capabilities & benchmarking'. Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/use-this-data' [online resource]. Accessed 11 Nov 2026.
+Epoch AI, 'Capabilities & benchmarking'. Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/use-this-data' [online resource]. Accessed 21 Nov 2026.
 
 Licence: [Creative Commons Attribution](https://creativecommons.org/licenses/by/4.0/). Epoch AI's data is free to use, distribute
 and reproduce provided the source and authors are credited.
@@ -14,13 +14,14 @@ Only `epoch_capabilities_index/eci_scores.csv` is read, which is Epoch's own dat
 upstream licences and are not used. No benchmark question or answer is included.
 
 Changes: subset to the models in this catalog; each ECI score is rescaled to 0-100 (the original
-value is kept as `intelligence.raw`).
+value is kept as `intelligence.raw`). `release_date` uses the full calendar date from the Epoch
+row. Arena publication dates describe leaderboard snapshots.
 
 ## Intelligence fallback: LMArena Bradley-Terry rating (CC BY 4.0)
 
 LMArena (Chatbot Arena) leaderboard, Bradley-Terry rating (style-controlled). Source: the
 `lmarena-ai/leaderboard-dataset` dataset on Hugging Face (https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset), config
-`text_style_control`, split `latest`, category `overall`, leaderboard publish date 2026-11-09.
+`text_style_control`, split `latest`, category `overall`, leaderboard publish date 2026-11-19.
 Licence: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 The rating is a Bradley-Terry score, not an Elo rating (LMArena moved from Elo to Bradley-Terry on
@@ -33,7 +34,7 @@ line fitted on the models that have both, then rescaled to 0-100 (see `scale` in
 ## Price: LiteLLM (MIT)
 
 Prices and context lengths come from `model_prices_and_context_window.json` in the BerriAI/litellm repository
-(commit 8b8ec4e3a64facae7af657ab06bc214dd5bf9060, 2026-11-11). Each row keeps LiteLLM's own `source` as
+(commit 0946b7416c5bb13f04f692bc3604b91b897d5e43, 2026-11-21). Each row keeps LiteLLM's own `source` as
 `price.row_source`. 11 rows whose source is a third-party benchmark aggregator or mirror, and every row
 served by an aggregator or reseller provider outside the allowed list, are dropped.
 Blended price: blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4.
@@ -41,7 +42,7 @@ Blended price: blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4.
 ```text
 Portions of this software are licensed as follows:
 
-* All content that resides under the "enterprise/" directory of this repository, if that directory exists, is licensed under the license defined in "enterprise/LICENSE".
+* All content that resides under the "litellm/enterprise/" directory of this repository, if that directory exists, is licensed under the license defined in "litellm/enterprise/LICENSE".
 * Content outside of the above mentioned directories or restrictions above is available under the MIT license as defined below.
 ---
 MIT License

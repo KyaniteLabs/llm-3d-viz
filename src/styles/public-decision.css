@@ -1,0 +1,29 @@
+:root { color-scheme: dark; }
+body { margin: 0; background: #10111a; color: #eeeefa; font: 1rem/1.5 system-ui, sans-serif; }
+.public-decision { max-width: 67rem; margin-inline: auto; padding-inline: clamp(1rem, 5vw, 3rem); }
+.public-decision header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-block: 1.25rem; border-bottom: 1px solid #36364d; }
+.public-decision header strong { font-size: 1.35rem; }
+.public-decision a { color: #c4b9ff; }
+.public-decision h1 { margin: 2.5rem 0 0.75rem; font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.12; }
+.public-decision p { margin-block: 0.75rem; }
+.public-decision form { display: flex; gap: 1rem; flex-wrap: wrap; margin-block: 1.75rem 1rem; }
+.public-decision label { display: grid; gap: 0.4rem; }
+.public-decision :is(input, select) { font: inherit; padding: 0.5rem 0.65rem; color: inherit; background: #1f2030; border: 1px solid #666682; border-radius: 0.3rem; }
+.public-decision input { width: 8rem; }
+.public-results { max-height: 32rem; overflow: auto; border-block: 1px solid #494961; }
+.public-results table { width: 100%; border-collapse: collapse; }
+.public-results :is(th, td) { padding: 0.65rem 0.75rem; text-align: left; border-bottom: 1px solid #36364d; }
+.public-results th { position: sticky; top: 0; background: #232339; }
+.public-results :is(th, td):nth-child(n+3) { text-align: right; font-variant-numeric: tabular-nums; }
+.public-decision footer { max-width: 55rem; padding-block: 1rem 2rem; color: #c8c8dd; }
+.public-frontier-label { display: block; color: #cec3ff; }
+.public-model-release { display: block; color: #c8c8dd; }
+.public-model-release time { white-space: nowrap; }
+
+@media (max-width: 36rem) {
+  .public-results table { table-layout: fixed; }
+  .public-results :is(th, td) { padding: 0.55rem 0.35rem; font-size: 0.875rem; overflow-wrap: anywhere; }
+  .public-results th:nth-child(1) { width: 28%; }
+  .public-results th:nth-child(2) { width: 24%; }
+  .public-results th:nth-child(3) { width: 18%; }
+}

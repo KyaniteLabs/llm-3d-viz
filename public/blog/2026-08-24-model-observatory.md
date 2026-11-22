@@ -54,7 +54,7 @@ The 3D stage is for orientation; **Decide mode** is for action. Set an intellige
 
 1. filters to models that clear the floor with complete measurements,
 2. ranks the survivors by your objective — minimum cost, maximum speed, or balanced,
-3. names a shortlist with the exact trade (e.g., "GPT-5.6 Luna: Index 50.1 · $0.17/M · 169 tok/s"), and
+3. names a shortlist and reports the available measurements and their sources, and
 4. syncs the whole state to the URL, so a shortlist is a link you can send.
 
 The floor and filters also drive the stage: models below the floor dim to near-invisibility — the chart shows you what you're excluding while the panel counts exactly what you're including, and the two numbers must agree (a consistency check verifies the copy against the DOM every build).

@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
+const browserPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+const externalBase = process.env.PLAYWRIGHT_BASE_URL;
+
 export default defineConfig({
   testDir: "./tests",
   testMatch: "**/*.spec.ts",
@@ -11,15 +14,16 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:5173",
-    channel: "chrome",
+    baseURL: externalBase ?? "http://localhost:5173",
+    channel: browserPath ? undefined : "chrome",
     headless: true,
     launchOptions: {
-      args: ["--no-sandbox", "--disable-gpu-sandbox", "--use-angle=swiftshader"],
+      executablePath: browserPath,
+      args: ["--no-sandbox", "--disable-gpu-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
     },
     trace: "on-first-retry",
   },
-  webServer: {
+  webServer: externalBase ? undefined : {
     command: "npx vite --host 127.0.0.1 --port 5173 --strictPort",
     url: "http://localhost:5173",
     reuseExistingServer: true,
