@@ -19,6 +19,7 @@ import { createInterface } from "node:readline";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import packageMetadata from "../package.json";
 import type { Model } from "../src/data/models";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 import { catalogSnapshotIdSyncForTests } from "../src/lib/decide";
@@ -53,47 +54,36 @@ const baseCtx: AtlasAgentContext = {
   filters: { ...DEFAULT_FILTERS },
 };
 
-function toolsList() {
-  return {
-    tools: ATLAS_TOOL_DEFINITIONS.filter((t) =>
-      ![
-        "set_filters",
-        "set_decide",
-        "set_view",
-        "set_axes",
-        "set_weights",
-        "focus_model",
-        "reset_scope",
-        "finish_turn",
-        "get_app_state",
-      ].includes(t.name),
-    ).map((t) => ({
-      name: t.name,
-      description: t.description,
-      inputSchema: t.parameters,
-    })),
-  };
-}
-
-// Also expose control tools for local hosts that want full surface
-function toolsListFull() {
-  return {
-    tools: ATLAS_TOOL_DEFINITIONS.map((t) => ({
-      name: t.name,
-      description: t.description,
-      inputSchema: t.parameters,
-    })),
-  };
-}
-
 const FULL = process.env.ATLAS_MCP_FULL === "1";
+const fullModeTools = [
+  "set_filters",
+  "set_decide",
+  "set_view",
+  "set_axes",
+  "set_weights",
+  "focus_model",
+  "reset_scope",
+  "finish_turn",
+  "get_app_state",
+];
+const exposedTools = ATLAS_TOOL_DEFINITIONS
+  .filter(({ name }) => FULL || !fullModeTools.includes(name))
+  .map(({ name, description, parameters }) => ({ name, description, inputSchema: parameters }));
 
 type JsonRpc = {
-  jsonrpc?: string;
+  jsonrpc: "2.0";
   id?: string | number | null;
-  method?: string;
+  method: string;
   params?: Record<string, unknown>;
 };
+
+function isRequest(value: unknown): value is JsonRpc {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const { jsonrpc, id, method, params } = value as Record<string, unknown>;
+  return jsonrpc === "2.0" && typeof method === "string" && method.length > 0 &&
+    (id === undefined || id === null || typeof id === "string" || typeof id === "number") &&
+    (params === undefined || (typeof params === "object" && params !== null && !Array.isArray(params)));
+}
 
 function respond(id: string | number | null | undefined, result: unknown) {
   const msg = { jsonrpc: "2.0", id: id ?? null, result };
@@ -113,20 +103,15 @@ function respondError(
   process.stdout.write(`${JSON.stringify(msg)}\n`);
 }
 
-async function handle(msg: JsonRpc) {
-  const method = msg.method ?? "";
-  const id = msg.id;
-
-  // Notifications (no id response)
-  if (id === undefined && method.startsWith("notifications/")) {
-    return;
-  }
+function handle({ method, id, params }: JsonRpc) {
+  // The stdio server has no notification state and notifications receive no response.
+  if (id === undefined) return;
 
   try {
     switch (method) {
       case "initialize": {
         const requested = String(
-          (msg.params as { protocolVersion?: string } | undefined)?.protocolVersion ??
+          params?.protocolVersion ??
             "2024-11-05",
         );
         // Echo client version when present; fall back to stable baseline.
@@ -143,7 +128,7 @@ async function handle(msg: JsonRpc) {
             resources: { subscribe: false, listChanged: false },
           },
           serverInfo: {
-            name: "atlas-observatory",
+            name: packageMetadata.name,
             version: "0.1.0",
           },
         });
@@ -153,11 +138,15 @@ async function handle(msg: JsonRpc) {
         respond(id, {});
         return;
       case "tools/list":
-        respond(id, FULL ? toolsListFull() : toolsList());
+        respond(id, { tools: exposedTools });
         return;
       case "tools/call": {
-        const name = String(msg.params?.name ?? "");
-        const args = (msg.params?.arguments ?? {}) as Record<string, unknown>;
+        const name = String(params?.name ?? "");
+        if (!exposedTools.some((tool) => tool.name === name)) {
+          respondError(id, -32602, `Unknown tool: ${name}`);
+          return;
+        }
+        const args = (params?.arguments ?? {}) as Record<string, unknown>;
         const floor =
           typeof args.floor === "number" ? args.floor : baseCtx.floor;
         const ctx: AtlasAgentContext = { ...baseCtx, floor };
@@ -204,7 +193,7 @@ async function handle(msg: JsonRpc) {
         });
         return;
       case "resources/read": {
-        const uri = String((msg.params as { uri?: string })?.uri ?? "");
+        const uri = String(params?.uri ?? "");
         if (uri === "catalog://meta") {
           respond(id, {
             contents: [
@@ -237,9 +226,7 @@ async function handle(msg: JsonRpc) {
         return;
       }
       default:
-        if (method) {
-          respondError(id, -32601, `Method not found: ${method}`);
-        }
+        respondError(id, -32601, `Method not found: ${method}`);
     }
   } catch (err) {
     respondError(
@@ -254,11 +241,18 @@ const rl = createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on("line", (line) => {
   const trimmed = line.trim();
   if (!trimmed) return;
+  let message: unknown;
   try {
-    void handle(JSON.parse(trimmed) as JsonRpc);
+    message = JSON.parse(trimmed);
   } catch {
     respondError(null, -32700, "Parse error");
+    return;
   }
+  if (!isRequest(message)) {
+    respondError(null, -32600, "Invalid Request");
+    return;
+  }
+  handle(message);
 });
 
 // stderr banner (never stdout — stdio is JSON-RPC only)

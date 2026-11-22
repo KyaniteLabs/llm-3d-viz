@@ -230,6 +230,7 @@ export class Stage3D {
     if (options?.presentationMode) this.presentationMode = options.presentationMode;
     // V05: thread StageRenderOptions into the Plotly hero so displayed axes/Decide
     // semantics match the active controls instead of the hard-coded rate basis.
+    this.gd.setAttribute("aria-busy", "true");
     void this.renderWithPlotly(weights, modelsList, options);
   }
 
@@ -599,7 +600,10 @@ export class Stage3D {
       const colorCopy = colors.slice();
       const sizeCopy = sizes.slice();
       await Plotly.restyle(this.gd, { "marker.color": [colorCopy], "marker.size": [sizeCopy] }, [0]);
+      if (this.destroyed || gen !== this.renderGen) return;
       publishViz();
+      this.gd.removeAttribute("aria-busy");
+      this.gd.dispatchEvent(new Event("stage:rendered"));
     };
 
     if (!this.isInitialized) {
@@ -607,8 +611,9 @@ export class Stage3D {
       const plotReady = Plotly.newPlot(this.gd, [pointsTrace, ridgeTrace], layout as any, config);
       this.isInitialized = true;
       void plotReady.then(async () => {
-        // V04: recheck after the async newPlot resolves — destroy() may have run.
-        if (this.destroyed || gen !== this.renderGen) return;
+        // The shared graph's listeners must attach even if a newer render
+        // superseded this first layout while the lazy plot initialized.
+        if (this.destroyed) return;
         this.setupPlotlyListeners();
         await applyMarkers();
       });

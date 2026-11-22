@@ -86,7 +86,7 @@ export function isAtlasLlmReady(cfg: AtlasLlmConfig): boolean {
 export function loadAtlasLlmConfig(): AtlasLlmConfig {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...ATLAS_PRESET_NUCBOX_UNSLOTH }; // default: LLM always on (NUCBox Unsloth)
+    if (!raw) return { ...DEFAULT_ATLAS_LLM_CONFIG };
     const parsed = JSON.parse(raw) as Partial<AtlasLlmConfig>;
     return normalizeAtlasLlmConfig(parsed);
   } catch {

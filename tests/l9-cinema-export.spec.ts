@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/measured-observatory";
 
 // L9 cinema export artifact: in cinema mode the compositor must produce a valid,
 // non-trivial 2× PNG (ink-field bg + stage capture + wordmark + method line). The
@@ -19,22 +19,9 @@ test("L9: cinema frame export yields a non-trivial 2× PNG", async ({ page }) =>
   await page.waitForFunction(() => (window as any).__viz?.cinemaMode === true, undefined, { timeout: 8000 });
   await page.waitForTimeout(900);
 
-  const result = await page.evaluate(() => {
-    const fn = (window as any).__viz?.captureCinemaFrame as (() => string | null) | undefined;
-    const url = fn ? fn() : null;
-    if (!url) return { ok: false };
-    return {
-      ok: true,
-      isPng: url.startsWith("data:image/png"),
-      len: url.length,
-      // Estimate decoded dimensions from the PNG IHDR (bytes 16..24).
-      width: url.length > 24 ? undefined : 0,
-    };
-  });
-
-  expect(result.ok, "captureCinemaFrame returned null").toBe(true);
-  expect(result.isPng, "not a PNG dataURL").toBe(true);
-  // A 2880×1800 ink-field PNG is well over 100kB of base64; guard against a blank/
-  // tiny capture (which would indicate the WebGL buffer wasn't composited).
-  expect(result.len, `PNG dataURL too small (${result.len}) — likely blank capture`).toBeGreaterThan(100_000);
+  const image = await page.evaluate(() => (window as any).__viz.captureCinemaFrame() as string);
+  expect(image).toMatch(/^data:image\/png;base64,/);
+  const png = Buffer.from(image.split(",")[1], "base64");
+  expect(png.byteLength).toBeGreaterThan(100_000);
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([2880, 1800]);
 });

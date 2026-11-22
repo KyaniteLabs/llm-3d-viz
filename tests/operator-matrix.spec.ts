@@ -2,7 +2,8 @@
  * Full operator-path matrix for default Three stage (desktop + mobile).
  * Assertions use real __viz / DOM observables from shipped main.ts — no tautologies.
  */
-import { test, expect, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { test, expect } from "./helpers/measured-observatory";
 
 async function waitForThreeStage(page: Page, timeoutMs = 20000) {
   await page.waitForFunction(
@@ -26,6 +27,9 @@ async function pass(_page: Page, name: string, fn: () => Promise<void>) {
 }
 
 async function runOperatorMatrix(page: Page, label: string) {
+  await page.addInitScript(() => {
+    (window as any).__viz = { referenceDate: "2026-11-01" };
+  });
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (msg) => {
@@ -198,27 +202,14 @@ async function runOperatorMatrix(page: Page, label: string) {
   });
 
   await pass(page, `${label}:workload-preset`, async () => {
-    const before = await page.evaluate(() => ({ ...((window as any).__viz?.weights ?? {}) }));
-    const preset = page.locator("[data-preset], button[data-workload]").first();
-    if ((await preset.count()) > 0) {
-      await preset.click({ force: true });
-      await page.waitForTimeout(400);
-      const after = await page.evaluate(() => ({ ...((window as any).__viz?.weights ?? {}) }));
-      // preset may match current chat weights; still require finite weights published
-      expect(typeof after.speed).toBe("number");
-      expect(typeof after.cost).toBe("number");
-      expect(typeof after.intelligence).toBe("number");
-    } else {
-      // Click preset chips inside console by text if present
-      const code = page.locator("button:has-text('code'), button:has-text('Code')").first();
-      if ((await code.count()) > 0) {
-        await code.click({ force: true });
-        await page.waitForTimeout(400);
-      }
-      const after = await page.evaluate(() => ({ ...((window as any).__viz?.weights ?? {}) }));
-      expect(typeof after.speed).toBe("number");
+    const advanced = page.locator("[data-advanced-panel]");
+    if (!(await advanced.evaluate((element: HTMLDetailsElement) => element.open))) {
+      await page.locator("[data-open-advanced]").click();
     }
-    void before;
+    await advanced.locator('button.preset-chip[data-preset="coding"]').click();
+    await expect.poll(() => page.evaluate(() => (window as any).__viz?.weights)).toEqual({
+      speed: 0.25, cost: 0.15, intelligence: 0.6,
+    });
   });
 
   await pass(page, `${label}:axis-or-locked`, async () => {
@@ -466,6 +457,13 @@ async function runOperatorMatrix(page: Page, label: string) {
     expect(st.decide).toBe(true);
     expect(st.me).toBe(false);
     expect(st.floor).toBe(52);
+    const chart = page.getByRole("img", { name: "Cost versus intelligence scatter of eligible models" });
+    await expect(chart).toBeVisible();
+    await expect(page.getByText("Some eligible models lack speed measurements.", { exact: false })).toBeVisible();
+    await expect(page.locator("[data-story-line]")).toContainText("cost × intelligence");
+    const dots = await chart.locator("circle").evaluateAll((circles) => circles.map((circle) => Number(circle.getAttribute("cy"))));
+    expect(dots.length).toBeGreaterThan(1);
+    expect(dots.every(Number.isFinite)).toBe(true);
   });
 
   await pass(page, `${label}:catalog-all`, async () => {

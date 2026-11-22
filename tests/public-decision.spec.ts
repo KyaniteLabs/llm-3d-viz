@@ -61,6 +61,70 @@ test("original Decide explains missing measurements and links to the public shor
   await expect(page.getByRole("table")).toBeVisible();
 });
 
+test("Atlas defaults to offline and clearing a selected endpoint restores offline", async ({ page }) => {
+  await page.goto("/?view=observatory");
+  await page.getByText("LLM endpoint (BYOK / NUCBox)", { exact: true }).click();
+  const status = page.locator("[data-atlas-llm-status]");
+  await expect(status).toHaveText("Offline tools only");
+  await page.getByRole("button", { name: "NUCBox Unsloth" }).click();
+  await expect(status).toContainText("same-origin /api/atlas/llm/v1");
+  await page.getByText("LLM endpoint (BYOK / NUCBox)", { exact: true }).click();
+  await page.locator("[data-atlas-llm-clear]").click();
+  await expect(status).toHaveText("Offline tools only");
+});
+
+test("the original observatory does not prefetch the voice model before a reply", async ({ page }) => {
+  const voiceRequests: string[] = [];
+  page.on("request", (request) => {
+    if (/kokoro(?:-tts|-js|-82m)|ort-wasm/i.test(request.url())) voiceRequests.push(request.url());
+  });
+  await page.clock.install();
+  await page.goto("/?view=observatory");
+  await expect(page.locator("[data-atlas-llm-status]")).toHaveText("Offline tools only");
+  await page.clock.fastForward(5000);
+  await expect(page.locator("[data-decide-toggle]")).toBeVisible();
+  expect(voiceRequests).toEqual([]);
+});
+
+test("Atlas submits the microphone result delivered after release", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("atlas-voice-muted", "1");
+    let transcriptNumber = 0;
+    class Recognition {
+      onresult?: (event: unknown) => void;
+      onend?: () => void;
+      start() {}
+      stop() {
+        const transcript = transcriptNumber++ === 0 ? "floor 64" : "floor 72";
+        setTimeout(() => {
+          this.onresult?.({ results: [[{ transcript, isFinal: true }]] });
+          this.onend?.();
+        }, 0);
+      }
+      abort() { this.onend?.(); }
+    }
+    Object.defineProperty(globalThis, "SpeechRecognition", { value: Recognition, configurable: true });
+  });
+  await page.goto("/?view=observatory");
+  const mic = page.locator("[data-atlas-mic]");
+  await mic.click();
+  await expect(page.locator("[data-atlas-proposal]")).toContainText("64");
+  await expect(mic).toHaveAttribute("aria-pressed", "false");
+  await mic.press("Space");
+  await expect(page.locator("[data-atlas-proposal]")).toContainText("72");
+  await expect(mic).toHaveAttribute("aria-pressed", "false");
+});
+
+test("a documented observatory link keeps its mobile source footer readable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?brand=full");
+  const footer = page.locator(".status-bar");
+  await expect(footer.locator("[data-data-sources]")).toContainText("Arena");
+  await expect.poll(() => footer.locator("[data-data-sources]").evaluate((element) =>
+    element.getBoundingClientRect().right <= window.innerWidth && element.scrollWidth <= element.clientWidth,
+  )).toBe(true);
+});
+
 test("public Cinema credits the available observatory sources", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/?view=observatory");
@@ -90,4 +154,17 @@ test("public Cinema credits the available observatory sources", async ({ page })
   expect(exported.credits).toContain("Iolite");
   expect(exported.credits.join(" ")).toContain("Arena");
   expect(exported.credits.join(" ")).not.toContain("OpenRouter");
+});
+
+test("the built frontier and generated pages reflect public data", async ({ request }) => {
+  const response = await request.get("/frontier-watch.json");
+  expect(response.ok()).toBe(true);
+  const data = await response.json();
+  expect(data.score_basis).toMatch(/Epoch/);
+  expect(data.frontier.length).toBeGreaterThan(0);
+  expect(data.frontier.every((row: { tps?: number }) => row.tps === undefined)).toBe(true);
+  const post = await request.get("/blog/2026-08-24-model-observatory/");
+  expect(await post.text()).not.toContain("Index 50.1 · $0.17/M · 169 tok/s");
+  const models = await request.get("/m/");
+  expect(await models.text()).toContain('rel="icon" href="/favicon.svg"');
 });

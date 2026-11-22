@@ -1418,7 +1418,7 @@ export class Stage3DThree implements Stage3DSurface {
     if (decideMode) {
       this.renderer.domElement.setAttribute(
         "aria-label",
-        `3D benchmark stage in Decide mode. ${this.pointMeshes.length} models. Floor ${floor}. Cost-speed shortlist and Pareto callouts active. Full table in instrument console.`,
+        `3D benchmark stage in Decide mode. ${this.pointMeshes.length} plotted models. Floor ${floor}. See Decide for the shortlist and eligible-model chart.`,
       );
     } else {
       const optName = optimumModel?.model ?? "none";

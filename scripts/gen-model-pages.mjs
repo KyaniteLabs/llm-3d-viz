@@ -85,6 +85,7 @@ export function createTemplates(rows, dataDate, compareBySlug = {}) {
 <link rel=canonical href="${url}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Kyanite Labs Iolite">
 <meta property="og:title" content="${esc(r.model)} — measured model card"><meta property="og:description" content="${esc(desc)}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:url" content="${url}"><meta property="og:image" content="${ORIGIN}/og-image.png">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="${esc(r.model)} — measured model card"><meta name="twitter:description" content="${esc(desc)}">
 <script type="application/ld+json">${jsonld({
@@ -121,6 +122,7 @@ ${FOOTER}
   function indexPage() {
     const items = rows.map(r => { const s = slug(r.model); return s ? `<p><a href="/m/${s}/">${esc(r.model)}</a> <span class="prov">${esc(r.provider)} · ${num(r.tps, 1)} tok/s · ${money(r.blended_price_per_M)}/M · ii ${r.aa_intelligence_index ?? '—'}</span></p>` : ''; }).filter(Boolean).join('\n');
     return `<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>All model cards (${rows.length}) | Kyanite Labs</title>
 <link rel=canonical href="${ORIGIN}/m/">
 <script type="application/ld+json">${jsonld({

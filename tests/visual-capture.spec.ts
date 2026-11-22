@@ -1,40 +1,35 @@
-import { test, expect } from "@playwright/test";
+import { test as publicTest, expect } from "@playwright/test";
+import { test as measuredTest } from "./helpers/measured-observatory";
 
-const BASE = "http://localhost:5173/";
-const OUT = ".omx/artifacts/visual-ralph/s-plus-w5/tc-fresh";
+publicTest.describe("Public catalog captures", () => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    publicTest(`public decision at ${viewport.width}px`, async ({ page }, testInfo) => {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+      await expect(page.getByRole("heading", { name: "Choose a model by price and capability" })).toBeVisible();
+      await expect(page.getByRole("table")).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath("public-decision.png"), animations: "disabled" });
+    });
+  }
+});
 
-test.describe("Visual quality captures", () => {
-  test("01-landing-default @1440", async ({ page }) => {
-    await page.goto(BASE, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => (window as any).__viz?.visibleCount > 0, { timeout: 15000 });
-    await page.waitForTimeout(3000);
-    await page.screenshot({ path: `${OUT}-01-landing-default.png` });
-    expect((await page.evaluate(() => (window as any).__viz?.visibleCount))).toBeGreaterThan(0);
+measuredTest.describe("Measured Observatory captures", () => {
+  measuredTest.use({ viewport: { width: 1440, height: 900 } });
+
+  measuredTest("Decide share link", async ({ page }, testInfo) => {
+    await page.goto("/?decide=1&age=0&floor=52&families=Fixture%20Family%2003");
+    await expect(page.locator(".decide-panel")).toBeVisible();
+    await expect(page.getByRole("img", { name: "Cost versus speed scatter of eligible models" })).toBeVisible();
+    await expect(page.locator("[data-shortlist-pin]").first()).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("observatory-decide.png"), animations: "disabled" });
   });
 
-  test("03-decide-open @1440", async ({ page }) => {
-    await page.goto(`${BASE}?decide=1`, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => (window as any).__viz?.visibleCount > 0, { timeout: 15000 });
-    await page.waitForTimeout(3000);
-    await page.screenshot({ path: `${OUT}-03-decide-open.png` });
-  });
-
-  test("04-cinema-on via keyboard c", async ({ page }) => {
-    await page.goto(BASE, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => (window as any).__viz?.visibleCount > 0, { timeout: 15000 });
-    await page.waitForTimeout(3000);
+  measuredTest("Cinema keyboard control", async ({ page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/?age=0&me=1");
+    await page.waitForFunction(() => (window as any).__viz?.pointCount > 0 && (window as any).__viz?.projectionsInstance);
     await page.keyboard.press("c");
-    await page.waitForTimeout(2500);
-    await page.screenshot({ path: `${OUT}-04-cinema-on.png` });
-  });
-
-  test("05-phone-390", async ({ browser }) => {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    const page = await ctx.newPage();
-    await page.goto(BASE, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => (window as any).__viz?.visibleCount > 0, { timeout: 15000 });
-    await page.waitForTimeout(3000);
-    await page.screenshot({ path: `${OUT}-05-phone-390.png` });
-    await ctx.close();
+    await expect(page.locator("[data-cinema-method]")).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("observatory-cinema.png"), animations: "disabled" });
   });
 });

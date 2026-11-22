@@ -1,5 +1,4 @@
-import { test, expect } from "@playwright/test";
-import { VISIBLE_FLOOR } from "./helpers/cloud-floor";
+import { test, expect } from "./helpers/measured-observatory";
 
 /**
  * D10 (redefined 2026-08-07): lab identity must be reachable WITHOUT color.
@@ -18,7 +17,7 @@ const displayNameNeedle = (id: string) =>
     .slice(0, 10);
 
 test("D10: focus-set direct labels render in the default r3f stage", async ({ page }) => {
-  await page.goto("/?age=0"); // no stage param → default r3f (Three) hero
+  await page.goto("/?age=0&me=0&catalog=all"); // no stage param → default r3f (Three) hero
 
   // Three stage ready + a real optimum computed + at least one label painted.
   await page.waitForFunction(
@@ -26,7 +25,7 @@ test("D10: focus-set direct labels render in the default r3f stage", async ({ pa
       document.documentElement.dataset.stageBackend === "r3f" &&
       !!((window as any).__viz?.optimumModelId) &&
       ((window as any).__viz?.visibleCount ?? 0) >= floor,
-    VISIBLE_FLOOR,
+    40,
     { timeout: 15000 },
   );
   // Mark labels (optimum + focus-set) are painted during render(); settle a beat.
