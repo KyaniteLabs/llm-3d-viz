@@ -5,8 +5,22 @@ import { test, expect } from "@playwright/test";
  * Small focused suite — not the full Plotly render suite.
  */
 test.describe("Decide mode v1", () => {
+  test("shared Decide mode and custom weights survive cold load and reload", async ({ page }) => {
+    await page.goto("/?decide=1&floor=52&me=0&age=0&w=2,3,5");
+    await expect(page.locator("[data-decide-toggle]")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".decide-panel")).toBeVisible();
+    await expect(page.locator("[data-decide-floor-out]")).toHaveText("52");
+    await expect(page.getByRole("region", { name: "Simple model picker" })).toBeHidden();
+    await expect.poll(() => page.evaluate(() => (window as any).__viz?.weights)).toEqual({
+      speed: 2, cost: 3, intelligence: 5,
+    });
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-decide-mode", "1");
+    await expect(page.locator("[data-decide-floor-out]")).toHaveText("52");
+  });
+
   test("toggle Decide: floor, hide value-score, shortlist, no optimum a11y", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?view=observatory");
     await page.waitForSelector("[data-decide-toggle]", { timeout: 30000 });
     // Stage may take a moment on Three
     await page.waitForTimeout(1200);
@@ -57,7 +71,7 @@ test.describe("Decide mode v1", () => {
 });
 
   test("AC-I5 Decide hide matrix: Explore hosts hidden, export kept", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?view=observatory");
     await page.waitForSelector("[data-decide-toggle]", { timeout: 30000 });
     await page.waitForTimeout(800);
     await page.click("[data-decide-toggle]");

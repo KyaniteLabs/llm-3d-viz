@@ -3,13 +3,17 @@
  * Production path for SPEC #137 / B′ (no AI button in v1).
  */
 import type { Model } from "../data/models";
+import { isOssEdition } from "../config/edition";
 import {
   buildDecideResponse,
   clampBias,
   clampFloor,
   DEFAULT_INTELLIGENCE_FLOOR,
   floorFromAnchor,
+  intelligenceOf,
+  isScorable,
   shortlistFromDecide,
+  type DecideMode,
   type DecideResponseV1,
 } from "../lib/decide";
 import { formatIntelligence, formatPricePerM, formatTps } from "../lib/format";
@@ -39,11 +43,10 @@ export class DecidePanel {
     this.root.hidden = true;
     this.root.innerHTML = `
       <p class="eyebrow">DECIDE</p>
-      <h2 class="decide-title">Intelligence floor → cost × speed</h2>
+      <h2 class="decide-title" data-decide-title>Intelligence floor</h2>
       <p class="console-note decide-blurb">
-        The glowing plane on the 3D stage is your intelligence floor (AA Index; default 50).
-        Models below it dim; only models on or above with measured cost + speed enter the pick set.
-        <span data-decide-blurb-tail>Cost × speed chart + Pareto ridge + shortlist of up to 3 follow the cheap↔fast bias.</span>
+        The plane on the 3D stage marks the minimum intelligence score (default ${DEFAULT_INTELLIGENCE_FLOOR}).
+        The shortlist requires a capability score and blended price.
       </p>
       <div class="decide-floor">
         <label class="decide-label">
@@ -60,11 +63,11 @@ export class DecidePanel {
       </div>
       <div class="decide-bias">
         <label class="decide-label">
-          <span>Prefer cheaper ← → Prefer faster</span>
+          <span data-decide-bias-label>Prefer cheaper ← → Prefer faster</span>
           <input type="range" min="-1" max="1" step="0.05" data-decide-bias value="0" />
         </label>
       </div>
-      <div class="decide-chart-host" data-decide-chart aria-label="Cost versus speed of eligible models"></div>
+      <div class="decide-chart-host" data-decide-chart></div>
       <section class="decide-shortlist" data-decide-shortlist aria-label="Shortlist"></section>
       <div class="decide-actions">
         <button type="button" class="scope-apply" data-decide-export>Copy decision</button>
@@ -86,7 +89,7 @@ export class DecidePanel {
   setModels(models: readonly Model[]) {
     this.models = models;
     this.fillAnchorOptions();
-    this.render(this.store.getState());
+    this.syncFromState(this.store.getState());
   }
 
   private fillAnchorOptions() {
@@ -219,7 +222,7 @@ export class DecidePanel {
       anchor.value = state.floorAnchorModelId ?? "";
     }
 
-    const { eligible, pareto, shortlist } = shortlistFromDecide(
+    const { eligible, pareto, shortlist, mode } = shortlistFromDecide(
       this.models,
       state.intelligenceFloor,
       state.costSpeedBias,
@@ -233,64 +236,63 @@ export class DecidePanel {
       catalogSnapshotId: this.catalogSnapshotId,
     });
 
-    this.renderChart(eligible, pareto, shortlist);
+    const useSpeed = mode === "cost_speed";
+    const title = this.root.querySelector("[data-decide-title]")!;
+    const biasLabel = this.root.querySelector("[data-decide-bias-label]")!;
+    title.textContent = eligible.length ? `Intelligence floor → cost × ${useSpeed ? "speed" : "intelligence"}` : "Intelligence floor";
+    biasLabel.textContent = `Prefer cheaper ← → ${useSpeed ? "Prefer faster" : "Prefer higher intelligence"}`;
+    if (biasInput) biasInput.disabled = eligible.length === 0;
+    this.renderChart(eligible, pareto, shortlist, mode);
     this.renderShortlist(shortlist, eligible.length, pareto.length);
-    this.renderBlurbTail(shortlist.length);
   }
 
-  /**
-   * H3 (uiux 2026-08-15): the blurb must never promise "shortlist of 3" while
-   * the ridge shows 2 — keep the promise count-driven so copy matches the
-   * visible header ("N of M on ridge") at every floor/bias.
-   */
-  private renderBlurbTail(shortlistN: number) {
-    const tail = this.root.querySelector<HTMLElement>("[data-decide-blurb-tail]");
-    if (!tail) return;
-    tail.textContent =
-      shortlistN > 0
-        ? `Cost × speed chart + Pareto ridge + shortlist of ${shortlistN} follow the cheap↔fast bias.`
-        : "Cost × speed chart + Pareto ridge follow the cheap↔fast bias — nothing passes this floor yet, so the shortlist is empty.";
-  }
-
-  private renderChart(eligible: Model[], pareto: Model[], shortlist: Model[]) {
+  private renderChart(eligible: Model[], pareto: Model[], shortlist: Model[], mode: DecideMode) {
     const host = this.root.querySelector("[data-decide-chart]");
     if (!host) return;
     if (eligible.length === 0) {
-      host.innerHTML = `<p class="console-note">No eligible models at this floor (need Index ≥ floor and cost + speed). Lower the floor or widen scope.</p>`;
+      const hasComparableModels = this.models.some((m) => isScorable(m, false)) ||
+        this.productCatalog.some((m) => isScorable(m, false));
+      const publicLink = isOssEdition ? ' <a href="/">Compare public model prices</a> using Epoch scores.' : "";
+      host.innerHTML = hasComparableModels
+        ? `<p class="console-note">No models in scope meet this floor with both a capability score and a blended price. Lower the floor or widen scope.</p>`
+        : `<p class="console-note">This catalog has no models with both a capability score and a blended price.${publicLink}</p>`;
       return;
     }
+    const useSpeed = mode === "cost_speed";
+    const metric = useSpeed ? "speed" : "intelligence";
+    const metricValue = (m: Model) => useSpeed ? Math.log10(m.tps! + 0.1) : intelligenceOf(m)!;
     const W = 280;
     const H = 160;
     const pad = { l: 36, r: 10, t: 10, b: 28 };
     const costs = eligible.map((m) => m.blended_price_per_M!);
-    const speeds = eligible.map((m) => m.tps!);
+    const values = eligible.map(metricValue);
     const minC = Math.min(...costs);
     const maxC = Math.max(...costs);
-    const minS = Math.min(...speeds);
-    const maxS = Math.max(...speeds);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
     const x = (c: number) =>
       pad.l +
       ((Math.log10(c + 0.01) - Math.log10(minC + 0.01)) /
         (Math.log10(maxC + 0.01) - Math.log10(minC + 0.01) || 1)) *
         (W - pad.l - pad.r);
-    const y = (s: number) =>
+    const y = (m: Model) =>
       H -
       pad.b -
-      ((Math.log10(s + 0.1) - Math.log10(minS + 0.1)) /
-        (Math.log10(maxS + 0.1) - Math.log10(minS + 0.1) || 1)) *
+      ((metricValue(m) - minValue) / (maxValue - minValue || 1)) *
         (H - pad.t - pad.b);
 
     const paretoIds = new Set(pareto.map((m) => m.model));
     const shortIds = new Set(shortlist.map((m) => m.model));
     const ridge = [...pareto].sort((a, b) => a.blended_price_per_M! - b.blended_price_per_M!);
     const poly = ridge
-      .map((m) => `${x(m.blended_price_per_M!).toFixed(1)},${y(m.tps!).toFixed(1)}`)
+      .map((m) => `${x(m.blended_price_per_M!).toFixed(1)},${y(m).toFixed(1)}`)
       .join(" ");
 
     const dots = eligible
       .map((m) => {
         const cx = x(m.blended_price_per_M!);
-        const cy = y(m.tps!);
+        const cy = y(m);
+        const valueLabel = useSpeed ? formatTps(m.tps) : `${formatIntelligence(intelligenceOf(m))} Index`;
         const kind = shortIds.has(m.model)
           ? "shortlist"
           : paretoIds.has(m.model)
@@ -300,15 +302,16 @@ export class DecidePanel {
         // readable. ≥6px at panel width now (r3.5 → ~6.2px rendered); the
         // pareto/shortlist steps stay ahead so hierarchy still reads.
         const r = kind === "shortlist" ? 5 : kind === "pareto" ? 4.2 : 3.5;
-        return `<circle class="decide-dot is-${kind}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" data-model="${esc(m.model)}"><title>${esc(displayName(m.model))} · ${formatPricePerM(m.blended_price_per_M!)} · ${formatTps(m.tps!)}</title></circle>`;
+        return `<circle class="decide-dot is-${kind}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" data-model="${esc(m.model)}"><title>${esc(displayName(m.model))} · ${formatPricePerM(m.blended_price_per_M!)} · ${valueLabel}</title></circle>`;
       })
       .join("");
 
     host.innerHTML = `
-      <svg class="decide-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Cost versus speed scatter of eligible models">
+      ${useSpeed ? "" : '<p class="console-note">Some eligible models lack speed measurements. This view compares cost and intelligence.</p>'}
+      <svg class="decide-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Cost versus ${metric} scatter of eligible models">
         <text class="decide-axis-label" x="${pad.l}" y="${H - 6}">← cheaper</text>
         <text class="decide-axis-label" x="${W - pad.r}" y="${H - 6}" text-anchor="end">cost →</text>
-        <text class="decide-axis-label" x="8" y="${pad.t + 8}" transform="rotate(-90 8 ${pad.t + 40})">speed</text>
+        <text class="decide-axis-label" x="8" y="${pad.t + 8}" transform="rotate(-90 8 ${pad.t + 40})">${metric}</text>
         ${poly ? `<polyline class="decide-ridge" fill="none" points="${poly}" />` : ""}
         ${dots}
       </svg>
@@ -316,7 +319,7 @@ export class DecidePanel {
         <span class="decide-leg is-eligible">eligible</span>
         <span class="decide-leg is-pareto">Pareto</span>
         <span class="decide-leg is-shortlist">shortlist</span>
-        · log scales · ${eligible.length} eligible · ridge ${pareto.length}
+        · ${useSpeed ? "log scales" : "log cost · linear intelligence"} · ${eligible.length} eligible · ridge ${pareto.length}
       </p>
     `;
   }
@@ -325,30 +328,11 @@ export class DecidePanel {
     const host = this.root.querySelector("[data-decide-shortlist]");
     if (!host) return;
     if (shortlist.length === 0) {
-      host.innerHTML = `<p class="console-note">Shortlist empty — lower the floor or widen scope. ${eligibleN} eligible · ${paretoN} on cost×speed ridge.</p>`;
-      return;
-    }
-    if (paretoN === 1) {
-      host.innerHTML = `
-        <p class="console-note">Only one model sits on the cost×speed Pareto ridge at this floor — shortlist size follows the ridge.</p>
-        <p class="weight-heading">SHORTLIST · ${shortlist.length} · ${eligibleN} eligible</p>
-        <ol class="decide-shortlist-ol">
-          ${shortlist
-            .map(
-              (m, i) => `
-            <li>
-              <button type="button" class="decide-shortlist-item" data-shortlist-pin="${esc(m.model)}">
-                <span class="decide-rank">${i + 1}</span>
-                <span class="decide-name">${esc(displayName(m.model))}</span>
-                <span class="decide-meta">${formatIntelligence(m.aa_intelligence_index!)} · ${formatPricePerM(m.blended_price_per_M!)} · ${formatTps(m.tps!)}</span>
-              </button>
-            </li>`,
-            )
-            .join("")}
-        </ol>`;
+      host.innerHTML = '<p class="console-note">Shortlist empty · 0 eligible</p>';
       return;
     }
     host.innerHTML = `
+      ${paretoN === 1 ? '<p class="console-note">One model sits on the Pareto ridge at this floor.</p>' : ""}
       <p class="weight-heading">SHORTLIST · ${shortlist.length} of ${paretoN} on ridge · ${eligibleN} eligible</p>
       <ol class="decide-shortlist-ol">
         ${shortlist
@@ -358,7 +342,7 @@ export class DecidePanel {
             <button type="button" class="decide-shortlist-item" data-shortlist-pin="${esc(m.model)}">
               <span class="decide-rank">${i + 1}</span>
               <span class="decide-name">${esc(displayName(m.model))}</span>
-              <span class="decide-meta">${formatIntelligence(m.aa_intelligence_index!)} · ${formatPricePerM(m.blended_price_per_M!)} · ${formatTps(m.tps!)}</span>
+              <span class="decide-meta">${formatIntelligence(intelligenceOf(m))} · ${formatPricePerM(m.blended_price_per_M!)} · ${formatTps(m.tps)}</span>
             </button>
           </li>`,
           )

@@ -1,3 +1,4 @@
+import { APP_BRANDING } from "../config/app-branding";
 import type { AppStore, AppState } from "../state";
 import { motionPreference } from "./sweep-timing";
 import type { Stage3DSurface } from "./stage-api";
@@ -35,7 +36,11 @@ export class CinemaMode {
   private exitFab: HTMLButtonElement | null = null;
   private exitFabHandler: ((e: Event) => void) | null = null;
 
-  constructor(stage: Stage3DSurface, store: AppStore) {
+  constructor(
+    stage: Stage3DSurface,
+    store: AppStore,
+    private readonly catalogMethod: { sources: string; asOf: string },
+  ) {
     this.stage = stage;
     this.store = store;
     const media = motionPreference();
@@ -140,41 +145,33 @@ export class CinemaMode {
     this.store.update({ cinemaMode: !this.store.getState().cinemaMode });
   }
 
+  private methodLine(): string {
+    const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
+    const { sources, asOf } = this.catalogMethod;
+    return `${APP_BRANDING.tagline} · sources ${sources} · catalog ${asOf}` +
+      (n != null ? ` · N=${n}` : "");
+  }
+
   /** Method line on cinema export frame (status-bar is CSS-hidden under is-cinema). */
   private syncMethodOverlay(active: boolean) {
     const host = this.stage.el ?? this.stage.gd;
-    let el = host.querySelector<HTMLElement>("[data-cinema-method]");
-    let key = host.querySelector<HTMLElement>("[data-cinema-key]");
+    let caption = host.querySelector<HTMLElement>(".cinema-caption");
     if (!active) {
-      el?.remove();
-      key?.remove();
+      caption?.remove();
       return;
     }
-    if (!el) {
-      el = document.createElement("div");
-      el.className = "cinema-method-line";
-      el.setAttribute("data-cinema-method", "1");
-      el.setAttribute("aria-hidden", "true");
+    if (!caption) {
+      caption = document.createElement("div");
+      caption.className = "cinema-caption";
+      caption.setAttribute("aria-hidden", "true");
+      caption.innerHTML = `
+        <div class="cinema-key-line" data-cinema-key>color = lab · ring = focus · filament = frontier</div>
+        <div class="cinema-method-line" data-cinema-method></div>`;
       const style = host.style as CSSStyleDeclaration;
       if (!style.position || style.position === "static") style.position = "relative";
-      host.appendChild(el);
+      host.appendChild(caption);
     }
-    const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
-    const asOf = new Date().toISOString().slice(0, 10);
-    el.textContent =
-      `Iolite · speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}` +
-      (n != null ? ` · N=${n}` : "");
-    // Wave 3 (cinema comprehension): a minimal encoding key rides just above
-    // the method line — tiny, low-opacity, never competing with the canvas.
-    // The only chrome beyond the exit control; nothing else returns.
-    if (!key) {
-      key = document.createElement("div");
-      key.className = "cinema-key-line";
-      key.setAttribute("data-cinema-key", "1");
-      key.setAttribute("aria-hidden", "true");
-      host.appendChild(key);
-    }
-    key.textContent = "color = lab · ring = focus · filament = frontier";
+    caption.querySelector("[data-cinema-method]")!.textContent = `${APP_BRANDING.title} · ${this.methodLine()}`;
   }
   /**
    * L9 — cinema export artifact: composite the live stage canvas with an ink-field
@@ -201,17 +198,12 @@ export class CinemaMode {
     ctx.fillStyle = "#E8F1E4";
     ctx.font = mono;
     ctx.textBaseline = "top";
-    ctx.fillText("MODEL OBSERVATORY", 24 * SCALE, 20 * SCALE);
+    ctx.fillText(APP_BRANDING.title, 24 * SCALE, 20 * SCALE);
     // Method line bottom.
-    const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
-    const asOf = new Date().toISOString().slice(0, 10);
-    const method = `speed × cost × intelligence · sources AA · OpenRouter · Arena · as of ${asOf}${
-      n != null ? ` · N=${n}` : ""
-    }`;
     ctx.fillStyle = "#89939E";
     ctx.font = mono;
     ctx.textBaseline = "bottom";
-    ctx.fillText(method, 24 * SCALE, out.height - 20 * SCALE);
+    ctx.fillText(this.methodLine(), 24 * SCALE, out.height - 20 * SCALE);
     // Hairline frame.
     ctx.strokeStyle = "rgba(201,212,196,0.18)";
     ctx.lineWidth = SCALE;
