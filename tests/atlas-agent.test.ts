@@ -120,6 +120,8 @@ describe("offline atlas agent", () => {
     const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
     const p = runOfflineAtlas("fastest eligible", { ...ctx(), catalog: visible, visible });
     expect(p.shortlist_ids).toEqual(["Cheap Unknown Speed"]);
+    expect(p.summary).toMatch(/price and intelligence/i);
+    expect(p.summary).toMatch(/missing measured speed/i);
   });
 
   it("why is Below Floor out explains Index vs floor", () => {

@@ -273,12 +273,14 @@ export function runOfflineAtlas(
       const rank = toolRankEligible(ctx, floor, objective, 3);
       trace.push(rank.trace);
       const ids = rank.result.shortlist.map((s) => s.id);
-      const label =
-        objective === "min_cost" ? "cheapest" : objective === "max_speed" ? "fastest" : "balanced";
+      const usesCapability = objective === "max_speed" && rank.result.mode === "cost";
+      const label = usesCapability ? "price and intelligence"
+        : objective === "min_cost" ? "cheapest" : objective === "max_speed" ? "fastest" : "balanced";
+      const coverage = usesCapability ? " Some eligible models are missing measured speed." : "";
       if (ids.length === 0) {
         return emptyProposal(
           snap,
-          `No eligible models at floor ${floor} with measured cost and speed.`,
+          `No eligible models at floor ${floor} with price and intelligence data.`,
           {
             floor,
             decide_mode: true,
@@ -290,7 +292,7 @@ export function runOfflineAtlas(
       }
       return emptyProposal(
         snap,
-        `At floor ${floor}, ${label} shortlist: ${speakableList(ids)}. Apply Decide with this ranking?`,
+        `At floor ${floor}, ${label} shortlist: ${speakableList(ids)}.${coverage} Apply Decide with this ranking?`,
         {
           floor,
           decide_mode: true,
