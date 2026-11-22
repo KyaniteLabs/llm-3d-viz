@@ -136,6 +136,14 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     assert.equal(field(plans()).props.d.name, 'Edited draft')
     button(pane(), 'Refresh').props.onClick()
     pane()
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, plans: [
+      ...valid.my_prices.plans, { name: 'Saved elsewhere', mode: 'sunk', models: ['gpt-6.1-sol'] },
+    ] } })
+    assertBlocked()
+    assert.equal(field(plans()).props.d.name, 'Edited draft')
+    assert.ok(plans().some(node => containsText(node, 'Saved plans changed')))
+    button(pane(), 'Refresh').props.onClick()
+    pane()
     await resolveRead({ ...valid, my_prices: { ...valid.my_prices } })
     const save = button(plans(), 'Save plans')
     save.props.onClick()

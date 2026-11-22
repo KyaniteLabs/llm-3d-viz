@@ -20,7 +20,7 @@ def _at(tmp_path, monkeypatch, body):
 
 def test_no_file_means_no_plans_and_no_problems(tmp_path, monkeypatch):
     _at(tmp_path, monkeypatch, None)
-    assert plugin._read_my_prices() == {"plans": [], "problems": []}
+    assert plugin._read_my_prices() == {"plans": [], "problems": [], "revision": "missing"}
     assert plugin.landscape_state()["my_prices"]["prices"] == {}
 
 
@@ -74,3 +74,17 @@ def test_overrides_exact_slug_beats_fragment_and_landscape_carries_them(tmp_path
 def test_my_prices_never_ship_in_the_bundle():
     assert not list(ROOT.rglob(plugin.MY_PRICES_FILE))
     assert "my_prices" not in (ROOT / "desktop-src" / "src" / "snapshot.json").read_text()
+
+
+def test_revision_stops_another_editor_overwriting_saved_plans(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    first = {"name": "First plan", "mode": "sunk", "models": ["glm-5.3"]}
+    second = {"name": "Second plan", "mode": "sunk", "models": ["glm-5.3"]}
+    assert plugin.save_my_prices({"plans": [first]})["ok"]
+    old = plugin.landscape_state()["my_prices"]["revision"]
+    assert plugin.save_my_prices({"plans": [first, second], "revision": old})["ok"]
+    conflicting = plugin.save_my_prices({"plans": [first], "revision": old})
+    assert conflicting["ok"] is False
+    assert [plan["name"] for plan in plugin.landscape_state()["my_prices"]["plans"]] == [
+        "First plan", "Second plan",
+    ]

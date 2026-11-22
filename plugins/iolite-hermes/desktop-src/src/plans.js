@@ -45,9 +45,20 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
       h('button', { type: 'button', onClick: onRemove, style: btn(pal), 'aria-label': `Remove plan ${n}${d.name ? ', ' + d.name : ''}` }, 'Remove')))
 }
 
+// Older local routes omit a revision. Compare writable inputs without derived usage or prices.
+function planRevision(mine, plans) {
+  return mine.revision ?? JSON.stringify(plans.map(p => [
+    p.name, p.mode, p.models || [], p.match || [],
+    p.mode === 'fixed' ? (p.usd_per_m_set ?? p.usd_per_m) : null,
+    p.mode === 'amortized' ? [p.paid_usd, p.period_months, p.measured ? null : p.tokens_per_month_m] : null,
+  ]))
+}
+
 export function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
   const fileError = Array.isArray(mine?.problems) && mine.problems.some(p => typeof p === 'string' && p.startsWith('my_prices.json '))
   const savedPlans = !loading && Array.isArray(mine?.plans) && !fileError ? mine.plans : null
+  const revision = savedPlans === null ? null : planRevision(mine, savedPlans)
+  const draftRevision = useRef(revision)
   const [drafts, setDrafts] = useState(() => savedPlans?.map(toDraft) ?? null)
   const [status, setStatus] = useState(null)
   const [template, setTemplate] = useState('')
@@ -55,13 +66,17 @@ export function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
   const saveInFlight = useRef(false)
   useEffect(() => {
     // A GET can fail or reload measurements during editing. Keep the user's drafts until a save succeeds.
-    if (savedPlans && !dirty.current) setDrafts(savedPlans.map(toDraft))
-  }, [savedPlans])
+    if (savedPlans && !dirty.current) {
+      draftRevision.current = revision
+      setDrafts(savedPlans.map(toDraft))
+    }
+  }, [savedPlans, revision])
   const slugs = useMemo(() => models.map(m => m.s), [models])
   const savedByName = new Map((savedPlans || []).map(p => [p.name, p]))
   const saving = status?.kind === 'saving'
   const editDisabled = drafts === null || saving
-  const canSave = savedPlans !== null && !editDisabled
+  const conflict = dirty.current && revision !== null && revision !== draftRevision.current
+  const canSave = savedPlans !== null && !editDisabled && !conflict
   const updateDrafts = update => {
     if (editDisabled || saveInFlight.current) return
     dirty.current = true
@@ -78,7 +93,7 @@ export function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
     saveInFlight.current = true
     setStatus({ kind: 'saving', text: 'Saving…' })
     try {
-      const res = await ctx.rest('/my-prices', { method: 'POST', body: { plans: out.map(o => o.plan) }, timeoutMs: 5000 })
+      const res = await ctx.rest('/my-prices', { method: 'POST', body: { plans: out.map(o => o.plan), revision: mine?.revision }, timeoutMs: 5000 })
       if (res?.ok) {
         dirty.current = false
         setStatus({ kind: 'info', text: `Saved ${out.length} plan${out.length === 1 ? '' : 's'} on this machine.` })
@@ -105,6 +120,8 @@ export function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
       'Price the models you already pay for, so the front shows what is cheapest for you. Saved to my_prices.json in the Iolite plugin data folder; it stays on this machine. Templates fill in the provider only; amounts are yours.'),
     savedPlans === null ? h('p', { style: { margin: 0, color: pal.muted } },
       loading ? 'Reading saved plans before enabling Save.' : 'Could not read saved plans. Refresh before saving.') : null,
+    conflict ? h('p', { role: 'alert', style: { margin: 0, color: pal.copper } },
+      'Saved plans changed. Reopen My plans to load the new list before saving.') : null,
     (drafts || []).map((d, i) => h(PlanFields, {
       key: d.id, d, n: i + 1, models, pal, saved: savedByName.get(d.name.trim()), disabled: saving,
       onChange: nd => updateDrafts(ds => ds.map(x => (x.id === d.id ? nd : x))),

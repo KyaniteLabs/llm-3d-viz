@@ -1051,22 +1051,38 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
     )
   );
 }
+function planRevision(mine, plans) {
+  return mine.revision ?? JSON.stringify(plans.map((p) => [
+    p.name,
+    p.mode,
+    p.models || [],
+    p.match || [],
+    p.mode === "fixed" ? p.usd_per_m_set ?? p.usd_per_m : null,
+    p.mode === "amortized" ? [p.paid_usd, p.period_months, p.measured ? null : p.tokens_per_month_m] : null
+  ]));
+}
 function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
   const fileError = Array.isArray(mine?.problems) && mine.problems.some((p) => typeof p === "string" && p.startsWith("my_prices.json "));
   const savedPlans = !loading && Array.isArray(mine?.plans) && !fileError ? mine.plans : null;
+  const revision = savedPlans === null ? null : planRevision(mine, savedPlans);
+  const draftRevision = useRef(revision);
   const [drafts, setDrafts] = useState(() => savedPlans?.map(toDraft) ?? null);
   const [status, setStatus] = useState(null);
   const [template, setTemplate] = useState("");
   const dirty = useRef(false);
   const saveInFlight = useRef(false);
   useEffect(() => {
-    if (savedPlans && !dirty.current) setDrafts(savedPlans.map(toDraft));
-  }, [savedPlans]);
+    if (savedPlans && !dirty.current) {
+      draftRevision.current = revision;
+      setDrafts(savedPlans.map(toDraft));
+    }
+  }, [savedPlans, revision]);
   const slugs = useMemo(() => models.map((m) => m.s), [models]);
   const savedByName = new Map((savedPlans || []).map((p) => [p.name, p]));
   const saving = status?.kind === "saving";
   const editDisabled = drafts === null || saving;
-  const canSave = savedPlans !== null && !editDisabled;
+  const conflict = dirty.current && revision !== null && revision !== draftRevision.current;
+  const canSave = savedPlans !== null && !editDisabled && !conflict;
   const updateDrafts = (update) => {
     if (editDisabled || saveInFlight.current) return;
     dirty.current = true;
@@ -1087,7 +1103,7 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
     saveInFlight.current = true;
     setStatus({ kind: "saving", text: "Saving\u2026" });
     try {
-      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan) }, timeoutMs: 5e3 });
+      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan), revision: mine?.revision }, timeoutMs: 5e3 });
       if (res?.ok) {
         dirty.current = false;
         setStatus({ kind: "info", text: `Saved ${out.length} plan${out.length === 1 ? "" : "s"} on this machine.` });
@@ -1119,6 +1135,11 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
       "p",
       { style: { margin: 0, color: pal.muted } },
       loading ? "Reading saved plans before enabling Save." : "Could not read saved plans. Refresh before saving."
+    ) : null,
+    conflict ? h(
+      "p",
+      { role: "alert", style: { margin: 0, color: pal.copper } },
+      "Saved plans changed. Reopen My plans to load the new list before saving."
     ) : null,
     (drafts || []).map((d, i) => h(PlanFields, {
       key: d.id,

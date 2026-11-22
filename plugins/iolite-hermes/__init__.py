@@ -1106,6 +1106,7 @@ def _read_last_shortlist() -> Optional[dict]:
 
 # ----------------------------------------------------------------------------- my prices (personal overlay)
 MY_PRICES_FILE = "my_prices.json"
+_my_prices_lock = threading.Lock()
 MY_PRICES_MAX_PLANS = 40
 MY_PRICES_MAX_BYTES = 64 * 1024
 MY_PRICE_MODES = ("sunk", "amortized", "fixed")
@@ -1165,9 +1166,9 @@ def _validate_plan(raw: Any, n: int) -> Tuple[Optional[dict], Optional[str]]:
 def _read_my_prices() -> dict:
     """Your own prices, from my_prices.json in the plugin data directory. You write that file
     (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
-    Returns {"plans": [...], "problems": [...]}; a plan's usd_per_m is None while it waits for
+    Returns plans, problems, and a revision of the file; a plan's usd_per_m is None while it waits for
     measured usage. A missing file gives no plans and no problems. Never raises."""
-    out: Dict[str, Any] = {"plans": [], "problems": []}
+    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": "missing"}
     try:
         path = _data_dir() / MY_PRICES_FILE
         try:
@@ -1177,7 +1178,9 @@ def _read_my_prices() -> dict:
         if not stat.S_ISREG(st.st_mode) or st.st_size > MY_PRICES_MAX_BYTES:
             out["problems"].append("my_prices.json is not a small regular file")
             return out
-        data = json.loads(path.read_bytes())
+        raw_file = path.read_bytes()
+        out["revision"] = hashlib.sha256(raw_file).hexdigest()
+        data = json.loads(raw_file)
         plans = data.get("plans") if isinstance(data, dict) else None
         if not isinstance(plans, list):
             out["problems"].append("my_prices.json has no 'plans' list")
@@ -1211,20 +1214,24 @@ def save_my_prices(payload: Any) -> dict:
                        "never shipped or uploaded", "plans": clean}, allow_nan=False, indent=1)
     if len(body.encode("utf-8")) > MY_PRICES_MAX_BYTES:
         return {"ok": False, "problems": ["the plans are too large to save"]}
-    d = _data_dir()
-    d.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            fh.write(body)
-        os.chmod(tmp, 0o600)
-        os.replace(tmp, d / MY_PRICES_FILE)
-    except BaseException:
+    revision = payload.get("revision")
+    with _my_prices_lock:
+        if revision is not None and _read_my_prices()["revision"] != revision:
+            return {"ok": False, "problems": ["Saved plans changed. Refresh before saving again."]}
+        d = _data_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
         try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(body)
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, d / MY_PRICES_FILE)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
     state = landscape_state()
     return {"ok": True, "my_prices": state.get("my_prices")}
 
@@ -1297,7 +1304,7 @@ def my_prices_state(rows: List[dict]) -> dict:
             e["usd_per_m_set"] = p.get("usd_per_m")
         shown.append(e)
     return {"prices": my_price_overrides(rows, plans), "plans": shown, "problems": problems[:10],
-            "file": MY_PRICES_FILE}
+            "file": MY_PRICES_FILE, "revision": mine["revision"]}
 
 
 def landscape_state() -> dict:
