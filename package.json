@@ -33,5 +33,10 @@
     "@types/three": "^0.185.3",
     "kokoro-js": "^1.2.1",
     "three": "^0.185.1"
+  },
+  "overrides": {
+    "@huggingface/transformers": {
+      "sharp": "0.35.5"
+    }
   }
 }
