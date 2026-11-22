@@ -4,7 +4,7 @@
 // intelligence index ↑) from the catalog, diffs against the last run, and on movement:
 // emits frontier-watch.{json,md,xml} and fires an alert when tracking is enabled.
 // The first tracked run records a baseline without alerting. The private catalog
-// cron opts in to tracking; other staged builds only emit the output files.
+// cron enables tracking with VIZ_FRONTIER_TRACK_MOVEMENT=1.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +22,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PLANE = DATA_PLANE; // 'public' | 'private' (from catalog-loader)
 const STATE = join(ROOT, `.cache/frontier-watch/last${PLANE === 'public' ? '.public' : ''}.json`);
 const publicDir = process.env.VIZ_BUILD_PUBLIC_DIR ?? join(ROOT, 'public');
-const trackMovement = !process.env.VIZ_BUILD_PUBLIC_DIR || process.env.VIZ_FRONTIER_TRACK_MOVEMENT === '1';
+const trackMovement = process.env.VIZ_FRONTIER_TRACK_MOVEMENT === '1';
 const OUT_JSON = join(publicDir, 'frontier-watch.json');
 const OUT_MD = join(publicDir, 'frontier-watch.md');
 
