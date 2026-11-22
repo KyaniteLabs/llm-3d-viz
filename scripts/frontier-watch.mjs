@@ -25,20 +25,22 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // stay the same; only the side-state diverges.
 const PLANE = DATA_PLANE; // 'public' | 'private' (from catalog-loader)
 const STATE = join(ROOT, `.cache/frontier-watch/last${PLANE === 'public' ? '.public' : ''}.json`);
-const OUT_JSON = join(ROOT, 'public/frontier-watch.json');
-const OUT_MD = join(ROOT, 'public/frontier-watch.md');
+const publicDir = process.env.VIZ_BUILD_PUBLIC_DIR ?? join(ROOT, 'public');
+const trackMovement = !process.env.VIZ_BUILD_PUBLIC_DIR || process.env.VIZ_FRONTIER_TRACK_MOVEMENT === '1';
+const OUT_JSON = join(publicDir, 'frontier-watch.json');
+const OUT_MD = join(publicDir, 'frontier-watch.md');
 
 const rows = loadCatalog();
 const frontier = computeFrontier(rows);
 const now = new Date();
-const prev = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : null;
+const prev = trackMovement && existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : null;
 
 const events = [];
 if (prev) {
   const prevSet = new Map(prev.frontier.map(m => [m.model, m]));
   for (const m of frontier) {
     const p = prevSet.get(m.model);
-    if (!p) { events.push({ key: `enter:${m.model}`, text: `NEW on frontier: ${m.model} (${m.provider}) — $${m.price.toFixed(2)}/M at intelligence ${m.ii}` }); continue; }
+    if (!p) { events.push({ key: `enter:${m.model}`, text: `NEW on frontier: ${m.model} (${m.provider}) — $${m.price.toFixed(2)}/M at intelligence ${m.ii.toFixed(1)}` }); continue; }
     if (m.price < p.price * 0.9) events.push({ key: `cut:${m.model}`, text: `PRICE CUT: ${m.model} $${p.price.toFixed(2)} → $${m.price.toFixed(2)}/M (−${Math.round(100 * (1 - m.price / p.price))}%)` });
     if (m.ii > p.ii) events.push({ key: `jump:${m.model}`, text: `INTELLIGENCE UP: ${m.model} index ${p.ii} → ${m.ii}` });
   }
@@ -48,15 +50,15 @@ if (prev) {
 
 writeFileSync(OUT_JSON, JSON.stringify({ as_of: now.toISOString(), frontier, events }, null, 1));
 let md = `# Frontier Watch — the measured Pareto frontier (price × intelligence)\n\nComputed ${now.toISOString()} from the live catalog (${rows.length} models; frontier = ${frontier.length}). Regenerated on every catalog refresh (3×/day); the public site deploys on approval, so the public copy updates when the site deploys. Alerts fire on movement.\n\n## Current frontier (cheapest first)\n\n| model | provider | $/M blended | intelligence | tok/s |\n|---|---|---|---|---|\n`;
-for (const m of frontier) md += `| [${m.model}](/m/${slug(m.model)}/) | ${m.provider} | $${m.price.toFixed(2)} | ${m.ii} | ${m.tps != null ? m.tps.toFixed(0) : '—'} |\n`;
+for (const m of frontier) md += `| [${m.model}](/m/${slug(m.model)}/) | ${m.provider} | $${m.price.toFixed(2)} | ${m.ii.toFixed(1)} | ${m.tps != null ? m.tps.toFixed(0) : '—'} |\n`;
 md += `\n## Movement log\n\n`;
 md += events.length ? events.map(e => `- **${now.toISOString().slice(0, 10)}** ${e.text}`).join('\n') + '\n' : `- ${now.toISOString().slice(0, 10)} no movement this refresh\n`;
 if (prev?.log?.length) md += prev.log.slice(0, 30).join('\n') + '\n';
 writeFileSync(OUT_MD, md);
 
-mkdirSync(dirname(STATE), { recursive: true });
+if (trackMovement) mkdirSync(dirname(STATE), { recursive: true });
 const log = [...(events.length ? [events.map(e => `- **${now.toISOString().slice(0, 10)}** ${e.text}`)] : []), ...(prev?.log || [])].slice(0, 30);
-writeFileSync(STATE, JSON.stringify({ as_of: now.toISOString(), frontier, log }, null, 1));
+if (trackMovement) writeFileSync(STATE, JSON.stringify({ as_of: now.toISOString(), frontier, log }, null, 1));
 
 // Phase 4 (plan 2026-08-29): durable committed event history + Atom feed.
 // The feed source is data/frontier-events.generated.json (committed, unbounded
@@ -64,8 +66,8 @@ writeFileSync(STATE, JSON.stringify({ as_of: now.toISOString(), frontier, log },
 const DURABLE = join(ROOT, `data/frontier-events${PLANE === 'public' ? '.public' : ''}.generated.json`);
 let history = existsSync(DURABLE) ? JSON.parse(readFileSync(DURABLE, 'utf8')) : seedFromLogLines(prev?.log);
 history = mergeEvents(history, events.map(e => ({ date: now.toISOString().slice(0, 10), text: e.text })));
-writeFileSync(DURABLE, JSON.stringify(history, null, 1));
-writeFileSync(join(ROOT, 'public/frontier-watch.xml'), buildAtom(history));
+if (trackMovement) writeFileSync(DURABLE, JSON.stringify(history, null, 1));
+writeFileSync(join(publicDir, 'frontier-watch.xml'), buildAtom(history));
 console.log(`frontier-feed: ${history.length} events in durable history -> public/frontier-watch.xml`);
 
 if (events.length && prev) {

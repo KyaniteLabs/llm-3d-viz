@@ -242,7 +242,7 @@ fi
 
 # 2) Build
 log "building…"
-if ! npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+if ! VIZ_FRONTIER_TRACK_MOVEMENT=1 npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
   log "ERROR: build failed"
   status_fail build "\"rows\":$row_count"
   exit 3

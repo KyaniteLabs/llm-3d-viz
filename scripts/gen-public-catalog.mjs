@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const FULL_PATH = join(ROOT, "data", "models.v0.draft.json");
-export const PUBLIC_PATH = join(ROOT, "data", "generated", "public-catalog.json");
+export const PUBLIC_PATH = process.env.VIZ_PUBLIC_CATALOG_PATH ?? join(ROOT, "data", "generated", "public-catalog.json");
 
 const STRIP_ORIGINS = new Set(["aa-api", "aa", "openrouter"]);
 const RESOURCE_FIELDS = new Map([

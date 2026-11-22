@@ -114,7 +114,7 @@ echo "[oss-publish] gate: tsc + build"
 # session on the publish branch and silently swallowed a follow-up commit —
 # same class as the dry-run restoration bug).
 npx tsc --noEmit || { git checkout -q main; exit 5; }
-npx vite build >/dev/null || { git checkout -q main; exit 5; }
+npm run build:public >/dev/null || { git checkout -q main; exit 5; }
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[oss-publish] DRY RUN — stopping before push."

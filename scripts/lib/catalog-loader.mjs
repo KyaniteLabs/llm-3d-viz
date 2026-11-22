@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const DATA_PLANE = process.env.VIZ_DATA_PLANE === "public" ? "public" : "private";
 const FULL = join(ROOT, "data", "models.v0.draft.json");
-const PUBLIC = join(ROOT, "data", "generated", "public-catalog.json");
+const PUBLIC = process.env.VIZ_PUBLIC_CATALOG_PATH ?? join(ROOT, "data", "generated", "public-catalog.json");
 
 export function catalogPath() {
   return DATA_PLANE === "public" ? PUBLIC : FULL;

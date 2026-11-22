@@ -32,3 +32,7 @@ tmp-*/
 **/.wrangler/
 
 .scratch/
+
+# Local exports from npm run catalog:snapshot
+/data/atlas-catalog-snapshot.json
+/data/atlas-catalog-meta.json

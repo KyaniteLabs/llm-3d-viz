@@ -126,17 +126,18 @@ export function pairsFromPaths(paths, bySlug) {
 }
 
 function main() {
+  const output = process.env.VIZ_BUILD_PUBLIC_DIR ?? join(ROOT, "public");
   const rows = loadCatalog();
   const dataDate = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
   const { page, bySlug } = createCompareTemplates(rows, dataDate);
   const paths = selectComparePairs(rows, { cap: CAP });
-  const DIR = join(ROOT, 'public/compare');
+  const DIR = join(output, 'compare');
   rmSync(DIR, { recursive: true, force: true }); // stale pairs must not linger
   let n = 0;
   for (const [a, b] of pairsFromPaths(paths, bySlug)) {
     const p = comparePath(a.model, b.model);
-    mkdirSync(join(ROOT, 'public', p), { recursive: true });
-    writeFileSync(join(ROOT, 'public', p, 'index.html'), page(a, b));
+    mkdirSync(join(output, p), { recursive: true });
+    writeFileSync(join(output, p, 'index.html'), page(a, b));
     n++;
   }
   console.log(`gen-compare-pages: ${n} compare pages (cap ${CAP}, staged) -> public/compare (catalog ${dataDate})`);
