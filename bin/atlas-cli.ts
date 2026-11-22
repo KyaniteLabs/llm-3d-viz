@@ -15,6 +15,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 import type { Model } from "../src/data/models";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 import { catalogSnapshotIdSyncForTests } from "../src/lib/decide";
@@ -28,7 +29,6 @@ import {
   toolRankEligible,
   toolSearchModels,
 } from "../src/lib/atlas-agent/tools";
-import type { RankObjective } from "../src/lib/atlas-agent/types";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const FALLBACK_CATALOG = resolve(ROOT, "data/models.v0.draft.json");
@@ -48,7 +48,13 @@ function resolveCatalogPath(explicit?: string): string {
 }
 
 function loadCatalog(path: string): Model[] {
-  const raw = JSON.parse(readFileSync(path, "utf8")) as Model[];
+  let content: string;
+  try {
+    content = readFileSync(path, "utf8");
+  } catch {
+    throw new Error(`Cannot read catalog at ${path}.`);
+  }
+  const raw = JSON.parse(content) as Model[];
   if (!Array.isArray(raw)) throw new Error("catalog must be a JSON array");
   return raw;
 }
@@ -64,88 +70,149 @@ function ctxFrom(catalog: Model[], floor = 50): AtlasAgentContext {
   };
 }
 
-function argValue(args: string[], name: string): string | undefined {
-  const i = args.indexOf(name);
-  if (i < 0) return undefined;
-  return args[i + 1];
-}
-
 function print(obj: unknown) {
   process.stdout.write(`${JSON.stringify(obj, null, 2)}\n`);
 }
 
-function usage(): never {
-  console.error(`Atlas CLI — catalog tools (read-only)
+const HELP = `Atlas CLI — catalog tools (read-only)
 
 Commands:
   meta
   search <query>
   get <name>
   eligible [--floor N]
-  rank [--floor N] [--objective min_cost|max_speed|balanced] [--n 3]
+  rank [--floor N] [--objective min_cost|max_speed|balanced] [--n N]
   floor --floor N | --anchor <name>
   compare <a> <b> [c...]
 
 Options:
-  --catalog <path>   default: data/models.v0.draft.json
-`);
-  process.exit(1);
+  --catalog <path>   use an Atlas-format catalog with an AA Index floor;
+                     also settable through ATLAS_CATALOG_PATH
+  --help             show this help
+`;
+
+class UsageError extends Error {}
+
+const commandOptions = {
+  meta: [],
+  search: [],
+  get: [],
+  eligible: ["floor"],
+  rank: ["floor", "objective", "n"],
+  floor: ["floor", "anchor"],
+  compare: [],
+} as const;
+
+function numericOption(value: string | undefined, name: string, fallback: number, max: number, min = 0) {
+  if (value === undefined) return fallback;
+  const number = Number(value);
+  if (!value.trim() || !Number.isFinite(number) || number < min || number > max ||
+      (name === "n" && !Number.isSafeInteger(number))) {
+    throw new UsageError(`--${name} requires ${name === "n" ? "an integer" : "a number"} from ${min} to ${max}.`);
+  }
+  return number;
+}
+
+function printLookup(result: unknown, detail?: string) {
+  print(result);
+  if (result === null) {
+    console.error(detail);
+    process.exitCode = 2;
+  }
 }
 
 function main() {
-  const argv = process.argv.slice(2);
-  if (!argv.length || argv[0] === "-h" || argv[0] === "--help") usage();
+  const [cmd, ...args] = process.argv.slice(2);
+  if (cmd === "-h" || cmd === "--help") {
+    process.stdout.write(HELP);
+    return;
+  }
+  if (!cmd || !Object.hasOwn(commandOptions, cmd)) {
+    throw new UsageError(cmd ? `Unknown command: ${cmd}.` : "A command is required.");
+  }
+  const command = cmd as keyof typeof commandOptions;
+  let parsed;
+  try {
+    parsed = parseArgs({
+      args,
+      allowPositionals: true,
+      options: {
+        catalog: { type: "string" }, floor: { type: "string" },
+        objective: { type: "string" }, n: { type: "string" }, anchor: { type: "string" },
+        help: { type: "boolean", short: "h" },
+      },
+    });
+  } catch (error) {
+    throw new UsageError(error instanceof Error ? error.message : String(error));
+  }
+  const { values, positionals } = parsed;
+  if (values.help) {
+    process.stdout.write(HELP);
+    return;
+  }
+  const allowed: readonly string[] = commandOptions[command];
+  for (const key of Object.keys(values)) {
+    if (key !== "catalog" && !allowed.includes(key)) {
+      throw new UsageError(`--${key} is unavailable for ${command}.`);
+    }
+    const value = values[key as keyof typeof values];
+    if (typeof value === "string" && !value.trim()) {
+      throw new UsageError(`--${key} requires a value.`);
+    }
+  }
+  const count = positionals.length;
+  const validPositionals = command === "compare" ? count >= 2
+    : command === "get" || command === "search" ? count === 1 : count === 0;
+  if (!validPositionals || positionals.some((value) => !value.trim())) {
+    throw new UsageError(`Invalid arguments for ${command}; see --help.`);
+  }
+  if (command === "floor" && (values.floor === undefined) === (values.anchor === undefined)) {
+    throw new UsageError("floor requires exactly one of --floor or --anchor.");
+  }
 
-  const catalogPath = resolveCatalogPath(argValue(argv, "--catalog"));
-  const catalog = loadCatalog(catalogPath);
-  const floor = Number(argValue(argv, "--floor") ?? 50);
-  const ctx = ctxFrom(catalog, Number.isFinite(floor) ? floor : 50);
-  const cmd = argv[0]!;
-
-  switch (cmd) {
+  const floor = numericOption(values.floor, "floor", 50, 100);
+  const n = numericOption(values.n, "n", 3, Number.MAX_SAFE_INTEGER, 1);
+  const objective = values.objective ?? "balanced";
+  if (objective !== "min_cost" && objective !== "max_speed" && objective !== "balanced") {
+    throw new UsageError("--objective requires min_cost, max_speed, or balanced.");
+  }
+  const catalog = loadCatalog(resolveCatalogPath(values.catalog));
+  const ctx = ctxFrom(catalog, floor);
+  switch (command) {
     case "meta":
       print(toolGetCatalogMeta(ctx).result);
       break;
-    case "search": {
-      const q = argv[1] ?? "";
-      print(toolSearchModels(ctx, q, "catalog").result);
+    case "search":
+      print(toolSearchModels(ctx, positionals[0]!, "catalog").result);
       break;
-    }
     case "get": {
-      const id = argv[1] ?? "";
-      const got = toolGetModel(ctx, id);
-      print(got.result);
-      if (!got.result) process.exit(2);
+      const got = toolGetModel(ctx, positionals[0]!);
+      printLookup(got.result, got.trace.detail);
       break;
     }
-    case "eligible": {
-      print(toolListEligible(ctx, ctx.floor).result);
+    case "eligible":
+      print(toolListEligible(ctx, floor).result);
       break;
-    }
-    case "rank": {
-      const obj = (argValue(argv, "--objective") ?? "balanced") as RankObjective;
-      const n = Number(argValue(argv, "--n") ?? 3);
-      print(toolRankEligible(ctx, ctx.floor, obj, n).result);
+    case "rank":
+      print(toolRankEligible(ctx, floor, objective, n).result);
       break;
-    }
     case "floor": {
-      const anchor = argValue(argv, "--anchor");
-      const f = argValue(argv, "--floor");
-      print(
-        toolProposeFloor(ctx, {
-          floor: f != null ? Number(f) : undefined,
-          anchor: anchor ?? undefined,
-        }).result,
-      );
+      const proposed = toolProposeFloor(ctx, {
+        floor: values.floor !== undefined ? floor : undefined,
+        anchor: values.anchor,
+      });
+      printLookup(proposed.result, proposed.trace.detail);
       break;
     }
     case "compare": {
-      const names = argv.slice(1).filter((a) => !a.startsWith("--"));
-      print(toolCompareModels(ctx, names).result);
+      const compared = toolCompareModels(ctx, positionals);
+      print(compared.result);
+      if (!compared.trace.ok) {
+        console.error(compared.trace.detail);
+        process.exitCode = 2;
+      }
       break;
     }
-    default:
-      usage();
   }
 }
 
@@ -153,5 +220,5 @@ try {
   main();
 } catch (err) {
   console.error(err instanceof Error ? err.message : err);
-  process.exit(3);
+  process.exitCode = err instanceof UsageError ? 1 : 3;
 }
