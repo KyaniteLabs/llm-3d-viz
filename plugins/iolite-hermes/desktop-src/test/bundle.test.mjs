@@ -11,6 +11,7 @@ import path from 'node:path'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const bundlePath = path.join(here, '../../desktop/plugin.js')
 const src = readFileSync(bundlePath, 'utf8')
+const expectedFront = JSON.parse(readFileSync(path.join(here, 'fixtures/front.json'), 'utf8')).front
 
 const SDK_STUB = `
 export const COMPOSER_AREAS = { actions: 'composer.actions' }
@@ -49,7 +50,8 @@ function load(extra = '', reactStub = REACT_STUB) {
 // lifetimes and functional state updates, so missing wiring cannot hide behind reducer tests.
 const HOOK_DRIVER = `
 export function createElement(type, props, ...children) { return { type, props: props || {}, children } }
-let cursor = 0, slots = [], pending = [], cleanups = []
+let cursor = 0, slots, pending, cleanups
+const instances = new Map()
 export function useState(value) {
   const i = cursor++
   if (!(i in slots)) slots[i] = typeof value === 'function' ? value() : value
@@ -66,13 +68,124 @@ export function useEffect(f, deps) {
   }
 }
 export function render(Component, props) {
-  cursor = 0
+  if (!instances.has(Component)) instances.set(Component, { slots: [], cleanups: [] })
+  ;({ slots, cleanups } = instances.get(Component))
+  cursor = 0; pending = []
   const tree = Component(props)
   const tasks = pending; pending = []; tasks.forEach(f => f())
   return tree
 }
-export function unmount() { cleanups.forEach(f => { if (f) f() }) }
+export function unmount() { for (const instance of instances.values()) instance.cleanups.forEach(f => { if (f) f() }) }
 `
+
+const nodes = tree => !tree || typeof tree !== 'object' ? [] : [tree, ...tree.children.flat(Infinity).flatMap(nodes)]
+const containsText = (node, text) => JSON.stringify(node.children).includes(text)
+
+test('built plan editor guards whole-list saves across loading, failed reads and retries', async () => {
+  const { dir, file, sdk, react } = load('', HOOK_DRIVER)
+  let hooks
+  try {
+    const plugin = (await import(pathToFileURL(file).href)).default
+    const stubs = await import(pathToFileURL(sdk).href)
+    hooks = await import(pathToFileURL(react).href)
+    const registered = [], reads = [], writes = []
+    const ctx = { register: c => registered.push(c), rest: (route, opts) => new Promise(resolve => {
+      if (route === '/landscape') reads.push(resolve)
+      else if (route === '/my-prices') writes.push({ plans: opts.body.plans, resolve })
+    }) }
+    plugin.register(ctx)
+    registered.find(c => c.area === 'command-palette').data.run()
+    const el = stubs.calls.workspaces[0].opts.render()
+    const pane = () => nodes(hooks.render(el.type, el.props))
+    const button = (tree, name) => tree.find(n => n.type === 'button' && n.children[0] === name)
+    const plans = () => {
+      const editor = pane().find(n => n.props.id === 'iolite-my-plans').children[0]
+      hooks.render(editor.type, editor.props)
+      return nodes(hooks.render(editor.type, editor.props))
+    }
+    const field = tree => tree.find(n => n.props.d)
+    const assertBlocked = () => {
+      const save = button(plans(), 'Save plans')
+      assert.equal(save.props.disabled, true)
+      save.props.onClick()
+      assert.equal(writes.length, 0)
+    }
+    const resolveRead = async data => { reads.at(-1)(data); await Promise.resolve() }
+    const valid = { ok: true, my_prices: { plans: [{ name: 'Existing', mode: 'sunk', models: ['gpt-6.1-sol'] }], prices: {}, problems: [] } }
+
+    button(pane(), 'My plans').props.onClick()
+    assertBlocked()
+    await resolveRead({ ok: false })
+    assertBlocked()
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    await resolveRead({ ok: true, my_prices: { plans: [], problems: ['my_prices.json could not be read as JSON'] } })
+    assertBlocked()
+
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    await resolveRead(valid)
+    const original = field(plans()).props
+    original.onChange({ ...original.d, name: 'Edited draft' })
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    assertBlocked()
+    assert.equal(field(plans()).props.d.name, 'Edited draft')
+    await resolveRead({ ok: false })
+    assertBlocked()
+    assert.equal(field(plans()).props.d.name, 'Edited draft')
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices } })
+    const save = button(plans(), 'Save plans')
+    save.props.onClick()
+    save.props.onClick()
+    assert.equal(writes.length, 1, 'a pending save blocks a second POST')
+    assert.equal(writes[0].plans[0].name, 'Edited draft')
+    writes[0].resolve({ ok: false, problems: ['retry me'] })
+    await Promise.resolve()
+    assert.equal(field(plans()).props.d.name, 'Edited draft')
+    const retry = button(plans(), 'Save plans')
+    assert.equal(!!retry.props.disabled, false)
+    retry.props.onClick()
+    assert.equal(writes.length, 2, 'a failed write can be retried')
+  } finally { if (hooks) hooks.unmount(); rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('built pane leads with the bundled front while local data loads or is unavailable', async () => {
+  const { dir, file, sdk, react } = load('', HOOK_DRIVER)
+  let hooks
+  try {
+    const plugin = (await import(pathToFileURL(file).href)).default
+    const stubs = await import(pathToFileURL(sdk).href)
+    hooks = await import(pathToFileURL(react).href)
+    const registered = [], pending = []
+    const ctx = { register: c => registered.push(c), rest: () => new Promise(resolve => pending.push(resolve)) }
+    plugin.register(ctx)
+    registered.find(c => c.area === 'command-palette').data.run()
+    const el = stubs.calls.workspaces[0].opts.render()
+    const render = () => nodes(hooks.render(el.type, el.props))
+    const localStatus = all => all.find(n => n.props['aria-label'] === 'Local data status')
+    const hasBundledFront = all => {
+      assert.ok(all.some(n => n.type === 'h2' && containsText(n, `${expectedFront.length} models on the front`)))
+      const detail = all.find(n => n.props['aria-label'] === 'Selected model')
+      assert.equal(detail.children.find(n => n?.props.point).props.point.m.c, 0)
+      assert.ok(all.some(n => n.type === 'canvas'))
+    }
+    let all = render()
+    hasBundledFront(all)
+    assert.ok(containsText(localStatus(all), 'Loading local measurements'))
+    all.find(n => n.type === 'button' && containsText(n, 'Refresh')).props.onClick()
+    render()
+    assert.equal(pending.length, 2)
+    pending[1]({ ok: false, error: 'local route failed' })
+    pending[0]({ ok: true, measure_speed: true, speed: {} })
+    await Promise.resolve()
+    all = render()
+    hasBundledFront(all)
+    assert.ok(containsText(localStatus(all), 'Local data unavailable. Showing the bundled snapshot.'))
+  } finally { if (hooks) hooks.unmount(); rmSync(dir, { recursive: true, force: true }) }
+})
 
 test('built pane subscribes, renders live controls and announcements, and disposes on unmount', async () => {
   const { dir, file, sdk, react } = load(`
@@ -90,7 +203,6 @@ host.onEvent = (name, fn) => { listeners.set(name, fn); return () => listeners.d
     registered.find(c => c.area === 'command-palette').data.run()
     const el = stubs.calls.workspaces[0].opts.render()
     const render = () => hooks.render(el.type, el.props)
-    const nodes = tree => !tree || typeof tree !== 'object' ? [] : [tree, ...tree.children.flat(Infinity).flatMap(nodes)]
     render()
     assert.equal(stubs.listeners.size, 4)
     const emit = (event, payload) => stubs.listeners.get('plugin.iolite.' + event)({ payload })
@@ -99,6 +211,7 @@ host.onEvent = (name, fn) => { listeners.set(name, fn); return () => listeners.d
     let all = nodes(tree)
     assert.ok(all.some(n => n.props.role === 'status' && JSON.stringify(n.children).includes('floor 60')))
     assert.ok(all.some(n => n.props.picks instanceof Set && n.props.picks.has('gpt-6.1-terra')))
+    assert.ok(all.some(n => n.props['aria-label'] === 'Chart legend' && containsText(n, 'Intelligence floor 60')), 'floor label belongs to the legend')
     emit('model.focused', { focus_model: 'gpt-6.1-sol' })
     tree = render(); tree = render(); all = nodes(tree)
     assert.ok(all.some(n => n.props.point?.id === 'gpt-6.1-sol'), 'detail follows focused slug')

@@ -10,7 +10,7 @@ for (const pal of [DARK, LIGHT]) {
     }
   })
   test(`${pal.mode}: marks and the focus ring show against the ground (3:1)`, () => {
-    for (const k of ['frontier', 'frontierDim', 'dominated', 'copper']) assert.ok(contrast(pal[k], pal.ground) >= 3, `${k}: ${contrast(pal[k], pal.ground).toFixed(2)}`)
+    for (const k of ['frontier', 'frontierDim', 'dominated', 'pick', 'copper']) assert.ok(contrast(pal[k], pal.ground) >= 3, `${k}: ${contrast(pal[k], pal.ground).toFixed(2)}`)
   })
   test(`${pal.mode}: a front mark is clearly stronger than a dominated one`, () => {
     assert.ok(contrast(pal.frontier, pal.ground) > contrast(pal.dominated, pal.ground) + 1)
@@ -21,5 +21,8 @@ for (const pal of [DARK, LIGHT]) {
   test(`${pal.mode}: the Save button label and error text read (4.5:1)`, () => {
     assert.ok(contrast(pal.ground, pal.frontier) >= 4.5, `ground on frontier: ${contrast(pal.ground, pal.frontier).toFixed(2)}`)
     for (const bg of [pal.ground, pal.panelRaised]) assert.ok(contrast(pal.copper, bg) >= 4.5, `copper text on ${bg}: ${contrast(pal.copper, bg).toFixed(2)}`)
+  })
+  test(`${pal.mode}: the wordmark reads against the panel (4.5:1)`, () => {
+    assert.ok(contrast(pal.frontier, pal.panel) >= 4.5)
   })
 }

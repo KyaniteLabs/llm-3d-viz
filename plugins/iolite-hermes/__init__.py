@@ -65,7 +65,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",

@@ -4,7 +4,7 @@
  * uploaded). Provider templates fill in only the kind and which models a plan covers; amounts
  * are always the user's own, never prefilled.
  */
-import { createElement as h, useEffect, useMemo, useState } from 'react'
+import { createElement as h, useEffect, useMemo, useRef, useState } from 'react'
 import { FONT_MONO } from './palette.js'
 import { KINDS, PERIODS, TEMPLATES, blankDraft, coveredBy, draftPrice, fromTemplate, toDraft, toPlan } from './plans-model.js'
 
@@ -12,12 +12,12 @@ const fieldStyle = pal => ({ font: 'inherit', color: pal.text, background: pal.g
 const labelStyle = pal => ({ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 12, color: pal.muted, minWidth: 0 })
 const btn = pal => ({ padding: '4px 10px', border: `1px solid ${pal.hair}`, background: 'transparent', fontFamily: FONT_MONO, fontSize: 12 })
 
-function PlanFields({ d, n, onChange, onRemove, models, saved, pal }) {
+function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) {
   const covered = useMemo(() => coveredBy(d, models), [d.cover, models])
   const set = (k, v) => onChange({ ...d, [k]: v })
   const kind = KINDS.find(k => k.id === d.mode)
   const fid = `iolite-plan-${d.id}`
-  return h('fieldset', { style: { border: `1px solid ${pal.hair}`, borderRadius: 6, padding: '8px 10px', margin: 0, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))' } },
+  return h('fieldset', { disabled, style: { border: `1px solid ${pal.hair}`, borderRadius: 6, padding: '8px 10px', margin: 0, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))' } },
     h('legend', { style: { fontFamily: FONT_MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: pal.muted, padding: '0 4px' } }, `Plan ${n}`),
     h('label', { style: labelStyle(pal) }, 'Name',
       h('input', { type: 'text', value: d.name, maxLength: 80, placeholder: 'e.g. GLM coding plan', onChange: e => set('name', e.target.value), style: fieldStyle(pal) })),
@@ -45,32 +45,57 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal }) {
       h('button', { type: 'button', onClick: onRemove, style: btn(pal), 'aria-label': `Remove plan ${n}${d.name ? ', ' + d.name : ''}` }, 'Remove')))
 }
 
-export function PlansEditor({ ctx, mine, models, pal, onSaved }) {
-  const savedPlans = (mine && mine.plans) || []
-  const [drafts, setDrafts] = useState(() => savedPlans.map(toDraft))
+export function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
+  const fileError = Array.isArray(mine?.problems) && mine.problems.some(p => typeof p === 'string' && p.startsWith('my_prices.json '))
+  const savedPlans = !loading && Array.isArray(mine?.plans) && !fileError ? mine.plans : null
+  const [drafts, setDrafts] = useState(() => savedPlans?.map(toDraft) ?? null)
   const [status, setStatus] = useState(null)
   const [template, setTemplate] = useState('')
-  useEffect(() => { setDrafts(savedPlans.map(toDraft)) }, [mine])
+  const dirty = useRef(false)
+  const saveInFlight = useRef(false)
+  useEffect(() => {
+    // A GET can fail or reload measurements during editing. Keep the user's drafts until a save succeeds.
+    if (savedPlans && !dirty.current) setDrafts(savedPlans.map(toDraft))
+  }, [savedPlans])
   const slugs = useMemo(() => models.map(m => m.s), [models])
-  const savedByName = new Map(savedPlans.map(p => [p.name, p]))
+  const savedByName = new Map((savedPlans || []).map(p => [p.name, p]))
+  const saving = status?.kind === 'saving'
+  const editDisabled = drafts === null || saving
+  const canSave = savedPlans !== null && !editDisabled
+  const updateDrafts = update => {
+    if (editDisabled || saveInFlight.current) return
+    dirty.current = true
+    setDrafts(update)
+  }
 
-  const save = () => {
+  const save = async () => {
+    // POST replaces the entire file. A missing or failed GET cannot stand in for an empty plan list.
+    if (!canSave || saveInFlight.current) return
     const out = drafts.map(d => toPlan(d, slugs))
     const problems = out.filter(o => o.problem).map(o => o.problem)
     if (problems.length) { setStatus({ kind: 'error', text: problems.join('; ') }); return }
     if (typeof ctx.rest !== 'function') { setStatus({ kind: 'error', text: 'This Hermes build has no plugin REST route, so plans cannot be saved here.' }); return }
-    setStatus({ kind: 'info', text: 'Saving...' })
-    Promise.resolve(ctx.rest('/my-prices', { method: 'POST', body: { plans: out.map(o => o.plan) }, timeoutMs: 5000 })).then(
-      res => {
-        if (res && res.ok) { setStatus({ kind: 'info', text: `Saved ${out.length} plan${out.length === 1 ? '' : 's'} on this machine.` }); onSaved() }
-        else setStatus({ kind: 'error', text: `Not saved: ${((res && res.problems) || ['the route refused']).join('; ')}` })
-      },
-      err => setStatus({ kind: 'error', text: `Not saved: ${err && err.message ? String(err.message).slice(0, 120) : 'the route is not available'}` }))
+    saveInFlight.current = true
+    setStatus({ kind: 'saving', text: 'Saving…' })
+    try {
+      const res = await ctx.rest('/my-prices', { method: 'POST', body: { plans: out.map(o => o.plan) }, timeoutMs: 5000 })
+      if (res?.ok) {
+        dirty.current = false
+        setStatus({ kind: 'info', text: `Saved ${out.length} plan${out.length === 1 ? '' : 's'} on this machine.` })
+        onSaved()
+      } else {
+        setStatus({ kind: 'error', text: `Not saved: ${(res?.problems || ['the route refused']).join('; ')}` })
+      }
+    } catch (err) {
+      setStatus({ kind: 'error', text: `Not saved: ${err?.message ? String(err.message).slice(0, 120) : 'the route is not available'}` })
+    } finally {
+      saveInFlight.current = false
+    }
   }
 
   const add = () => {
     const t = TEMPLATES.find(x => x.id === template)
-    setDrafts(ds => [...ds, t ? fromTemplate(t) : blankDraft()])
+    updateDrafts(ds => [...ds, t ? fromTemplate(t) : blankDraft()])
     setTemplate('')
   }
 
@@ -78,17 +103,19 @@ export function PlansEditor({ ctx, mine, models, pal, onSaved }) {
     h('h3', { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } }, 'My plans'),
     h('p', { style: { margin: 0, fontSize: 12, color: pal.muted } },
       'Price the models you already pay for, so the front shows what is cheapest for you. Saved to my_prices.json in the Iolite plugin data folder; it stays on this machine. Templates fill in the provider only; amounts are yours.'),
-    drafts.map((d, i) => h(PlanFields, {
-      key: d.id, d, n: i + 1, models, pal, saved: savedByName.get(d.name.trim()),
-      onChange: nd => setDrafts(ds => ds.map(x => (x.id === d.id ? nd : x))),
-      onRemove: () => setDrafts(ds => ds.filter(x => x.id !== d.id)),
+    savedPlans === null ? h('p', { style: { margin: 0, color: pal.muted } },
+      loading ? 'Reading saved plans before enabling Save.' : 'Could not read saved plans. Refresh before saving.') : null,
+    (drafts || []).map((d, i) => h(PlanFields, {
+      key: d.id, d, n: i + 1, models, pal, saved: savedByName.get(d.name.trim()), disabled: saving,
+      onChange: nd => updateDrafts(ds => ds.map(x => (x.id === d.id ? nd : x))),
+      onRemove: () => updateDrafts(ds => ds.filter(x => x.id !== d.id)),
     })),
     h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' } },
       h('label', { style: labelStyle(pal) }, 'Start from',
-        h('select', { value: template, onChange: e => setTemplate(e.target.value), style: fieldStyle(pal) },
+        h('select', { value: template, disabled: editDisabled, onChange: e => setTemplate(e.target.value), style: fieldStyle(pal) },
           h('option', { value: '' }, 'Blank plan'),
           TEMPLATES.map(t => h('option', { key: t.id, value: t.id }, t.label)))),
-      h('button', { type: 'button', onClick: add, style: btn(pal) }, 'Add plan'),
-      h('button', { type: 'button', onClick: save, style: { ...btn(pal), background: pal.frontier, color: pal.ground, borderColor: pal.frontier } }, 'Save plans')),
+      h('button', { type: 'button', onClick: add, disabled: editDisabled, style: btn(pal) }, 'Add plan'),
+      h('button', { type: 'button', onClick: save, disabled: !canSave, style: { ...btn(pal), background: pal.frontier, color: pal.ground, borderColor: pal.frontier } }, 'Save plans')),
     status ? h('div', { role: status.kind === 'error' ? 'alert' : 'status', style: { fontSize: 12, color: status.kind === 'error' ? pal.copper : pal.text } }, status.text) : null)
 }

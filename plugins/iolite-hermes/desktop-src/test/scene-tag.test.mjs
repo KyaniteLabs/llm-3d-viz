@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { drawTag } from '../src/scene.js'
+import { defaultView, drawTag, Stage } from '../src/scene.js'
 
 function fakeCtx() {
   const rects = []
@@ -34,4 +34,19 @@ test('focus tag stays inside the canvas', () => {
   drawTag(ctx, 5, 5, 4, 'Edge Model', pal, 300, 200, [])
   const [r] = ctx.rects
   assert.ok(r.x >= 4 && r.y >= 4 && r.x + r.w <= 296 && r.y + r.h <= 196)
+})
+
+test('the 3D floor still draws its dashed plane without a canvas label over model marks', () => {
+  const dashes = [], texts = []
+  const ctx = {
+    ...fakeCtx(), beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, stroke() {}, save() {}, clip() {}, restore() {},
+    setLineDash(pattern) { dashes.push(pattern) }, fillText(text) { texts.push(text) },
+  }
+  const stage = Object.assign(Object.create(Stage.prototype), {
+    view: defaultView(), width: 356, height: 320, drawMarks() {},
+  })
+  const domains = { x: { lo: 0.001, hi: 100 }, y: { lo: 0, hi: 100 }, z: { lo: 1000, hi: 1e6 } }
+  stage.draw3d(ctx, { floor: 90, layout: { domains } }, pal)
+  assert.ok(dashes.some(d => d[0] === 6 && d[1] === 4))
+  assert.ok(texts.every(t => !t.startsWith('FLOOR')), 'the floor label is shown in the HTML legend')
 })

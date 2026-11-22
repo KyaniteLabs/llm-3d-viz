@@ -2,8 +2,11 @@
  * The "Iolite: model landscape" pane. React is the only runtime dependency; the stage
  * (scene.js) and the data logic (frontier.js) know nothing about Hermes.
  */
-import { createElement as h, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createElement as h, useEffect, useMemo, useRef, useState } from 'react'
 import * as SDK from '@hermes/plugin-sdk'
+import interTight from '../../../../src/fonts/inter-tight-400-latin.woff2'
+import plexMono from '../../../../src/fonts/ibm-plex-mono-400-latin.woff2'
+import plexMonoMedium from '../../../../src/fonts/ibm-plex-mono-500-latin.woff2'
 import snapshot from './snapshot.json'
 import { Stage, zTitle } from './scene.js'
 import { FONT_MONO, FONT_SANS, paletteFor } from './palette.js'
@@ -38,31 +41,76 @@ const INTEL_NOTE = {
 }
 
 const CSS = `
+@font-face { font-family: 'Iolite Inter Tight'; src: url('${interTight}') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Iolite IBM Plex Mono'; src: url('${plexMono}') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Iolite IBM Plex Mono'; src: url('${plexMonoMedium}') format('woff2'); font-weight: 500; font-display: swap; }
 .iolite-ls { box-sizing: border-box; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: auto; font-family: ${FONT_SANS}; font-size: 13px; line-height: 1.45; }
 .iolite-ls *, .iolite-ls *::before, .iolite-ls *::after { box-sizing: border-box; }
 .iolite-ls button { font: inherit; color: inherit; cursor: pointer; border-radius: 4px; transition: background-color 200ms cubic-bezier(0.2,0,0,1), border-color 200ms cubic-bezier(0.2,0,0,1); }
-.iolite-ls button:focus-visible, .iolite-ls canvas:focus-visible { outline: 2px solid var(--iolite-focus); outline-offset: 2px; }
+.iolite-ls button:focus-visible, .iolite-ls summary:focus-visible, .iolite-ls input:focus-visible { outline: 2px solid var(--iolite-focus); outline-offset: 2px; }
+.iolite-ls canvas:focus-visible { outline: 2px solid var(--iolite-focus); outline-offset: -3px; }
 .iolite-ls button[disabled], .iolite-ls button[aria-disabled="true"] { cursor: not-allowed; opacity: 0.6; }
-.iolite-ls .iolite-body { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 16px 12px; flex: 1 0 auto; min-height: 340px; }
-.iolite-ls .iolite-stage { flex: 1 1 440px; min-width: 0; min-height: 340px; position: relative; border-radius: 8px; overflow: hidden; }
-.iolite-ls .iolite-aside { flex: 0 1 320px; min-width: 260px; display: flex; flex-direction: column; gap: 12px; }
+.iolite-ls .iolite-header { padding: 16px 16px 10px; }
+.iolite-ls .iolite-brand { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.iolite-ls .iolite-brand-mark { width: 13px; height: 13px; border: 1px solid currentColor; border-radius: 2px; transform: rotate(45deg); position: relative; margin: 0 3px; }
+.iolite-ls .iolite-brand-mark::after { content: ''; position: absolute; inset: 3px; border: 1px solid currentColor; }
+.iolite-ls .iolite-wordmark { color: var(--iolite-front); font-weight: 700; font-size: 18px; letter-spacing: 0.09em; text-transform: uppercase; }
+.iolite-ls .iolite-descriptor { color: var(--iolite-muted); font-size: 14px; }
+.iolite-ls .iolite-headline { margin: 8px 0 1px; font-family: ${FONT_SANS}; font-size: clamp(23px, 2.25vw, 32px); font-weight: 650; line-height: 1.2; letter-spacing: -0.025em; }
+.iolite-ls .iolite-status { min-height: 1.45em; color: var(--iolite-muted); font-size: 12px; }
+.iolite-ls .iolite-toolbar, .iolite-ls .iolite-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.iolite-ls .iolite-toolbar { column-gap: 14px; row-gap: 8px; margin-top: 12px; }
+.iolite-ls .iolite-controls { max-width: 100%; }
+.iolite-ls .iolite-controls > span { margin-right: 3px; color: var(--iolite-muted); font-family: ${FONT_MONO}; font-size: 11px; text-transform: uppercase; }
+.iolite-ls .iolite-toolbar button { padding: 4px 8px; border: 1px solid var(--iolite-hair); background: transparent; font-family: ${FONT_MONO}; font-size: 11.5px; white-space: nowrap; }
+.iolite-ls .iolite-toolbar button[aria-pressed="true"] { background: var(--iolite-front); color: var(--iolite-ground); }
+.iolite-ls .iolite-toolbar button[aria-expanded="true"] { background: var(--iolite-raised); }
+.iolite-ls .iolite-body { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 16px 12px; flex: 1 0 auto; }
+.iolite-ls .iolite-figure { display: flex; flex-direction: column; flex: 1 1 440px; min-width: 0; min-height: 420px; margin: 0; border: 1px solid var(--iolite-hair); border-radius: 8px; background: var(--iolite-ground); overflow: hidden; }
+.iolite-ls .iolite-stage { position: relative; flex: 1 0 320px; min-width: 0; overflow: hidden; }
+.iolite-ls .iolite-legend, .iolite-ls .iolite-axes { list-style: none; display: flex; flex-wrap: wrap; column-gap: 18px; row-gap: 6px; margin: 0; padding: 10px 12px; color: var(--iolite-muted); font-size: 12px; }
+.iolite-ls .iolite-legend li { display: inline-flex; align-items: center; gap: 7px; }
+.iolite-ls .iolite-glyph { display: inline-block; width: 11px; height: 11px; border: 1px solid currentColor; border-radius: 50%; }
+.iolite-ls .iolite-glyph-front { color: var(--iolite-front); position: relative; }
+.iolite-ls .iolite-glyph-front::before, .iolite-ls .iolite-glyph-front::after { content: ''; position: absolute; inset: 1px 3px; border: 1px solid currentColor; border-radius: 50%; }
+.iolite-ls .iolite-glyph-front::after { inset: 3px 1px; }
+.iolite-ls .iolite-glyph-off { width: 7px; height: 7px; margin: 0 2px; color: var(--iolite-off); }
+.iolite-ls .iolite-glyph-pick { width: 8px; height: 8px; margin: 0 1.5px; border-radius: 0; transform: rotate(45deg); color: var(--iolite-pick); }
+.iolite-ls .iolite-glyph-active { border-width: 2px; color: var(--iolite-focus); }
+.iolite-ls .iolite-glyph-floor { width: 14px; height: 0; border: 0; border-top: 1px dashed var(--iolite-floor); border-radius: 0; }
+.iolite-ls .iolite-axes { padding-top: 0; color: inherit; font-family: ${FONT_MONO}; font-size: 11px; }
+.iolite-ls .iolite-axes b { margin-right: 5px; color: var(--iolite-front); }
+.iolite-ls figcaption { padding: 7px 12px; border-top: 1px solid var(--iolite-hair); color: var(--iolite-muted); font-size: 12px; }
+.iolite-ls .iolite-aside { flex: 0 1 320px; min-width: min(260px, 100%); display: flex; flex-direction: column; gap: 12px; }
+.iolite-ls details { font-size: 12px; color: var(--iolite-muted); overflow-wrap: anywhere; }
+.iolite-ls details p { margin: 5px 0 0; }
+.iolite-ls summary { cursor: pointer; }
 .iolite-ls ol { list-style: none; margin: 0; padding: 0; }
 @media (prefers-reduced-motion: reduce) { .iolite-ls button { transition: none; } }
 `
 
-function Segmented({ label, value, options, onChange, pal }) {
-  return h('div', { role: 'group', 'aria-label': label, style: { display: 'inline-flex', gap: 0, alignItems: 'center' } },
-    h('span', { style: { color: pal.muted, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: 8, whiteSpace: 'nowrap' } }, label),
-    options.map((o, i) => h('button', {
+function Segmented({ label, value, options, onChange }) {
+  return h('div', { className: 'iolite-controls', role: 'group', 'aria-label': label },
+    h('span', { 'aria-hidden': true }, label),
+    options.map(o => h('button', {
       key: o.id, type: 'button', title: o.title, 'aria-pressed': value === o.id, 'aria-disabled': o.disabled ? 'true' : undefined,
       onClick: () => { if (!o.disabled) onChange(o.id) },
-      style: {
-        padding: '4px 10px', border: `1px solid ${pal.hair}`, marginLeft: i ? -1 : 0, borderRadius: 4,
-        background: value === o.id ? pal.frontier : 'transparent', color: value === o.id ? pal.ground : pal.text,
-        fontFamily: FONT_MONO, fontSize: 12, opacity: o.disabled ? 0.45 : 1, cursor: o.disabled ? 'not-allowed' : 'pointer',
-      },
     }, o.label)))
 }
+
+function frontHeadline(front, xMode, axis) {
+  if (!front.length) return 'No models on the front for this view.'
+  const value = p => xMode === X_PRICE
+    ? (p.m.c === 0 && !p.m.mp ? 'free' : fmtShownPrice(p.m).replace('.00/M', '/M'))
+    : axis.value(p.xv, p.m)
+  const first = value(front[0]), last = value(front[front.length - 1])
+  const range = first === last ? `at ${first === 'free' ? '$0/M' : first}` : `from ${first} to ${last}`
+  return `${front.length} model${front.length === 1 ? '' : 's'} on the front, ${range}.`
+}
+
+const GLYPHS = [
+  ['front', 'Front model'], ['off', 'Off the front'], ['pick', 'Shortlist pick'], ['active', 'Active model'],
+]
 
 function Row({ k, v, pal }) {
   return h('div', { style: { display: 'flex', gap: 8, justifyContent: 'space-between', padding: '2px 0' } },
@@ -72,8 +120,7 @@ function Row({ k, v, pal }) {
 
 function Detail({ point, front, isPick, speed, tasks, xMode, pal }) {
   if (!point) {
-    return h('p', { style: { margin: 0, color: pal.muted } },
-      'Hover or focus a point, or tab through the front list, to read its numbers and where they come from.')
+    return h('p', { style: { margin: 0, color: pal.muted } }, 'There are no models with data for these axes.')
   }
   const m = point.m
   const sp = speed && speed[m.s]
@@ -138,13 +185,18 @@ export function LandscapePane({ ctx }) {
   const [pinnedId, setPinnedId] = useState(null)
   const [query, setQuery] = useState('')
   const [rest, setRest] = useState({ status: 'loading' })
+  const [refreshVersion, setRefreshVersion] = useState(0)
+  const refresh = () => {
+    setRest({ status: 'loading' })
+    setRefreshVersion(version => version + 1)
+  }
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const stageRef = useRef(null)
 
   useEffect(() => subscribePaneEvents(SDK.host, ctx, setPane), [ctx])
 
-  const load = useCallback(() => {
+  useEffect(() => {
     setRest({ status: 'loading' })
     let live = true
     let done = false
@@ -157,14 +209,12 @@ export function LandscapePane({ ctx }) {
           if (!live || done) return
           done = true
           if (data && data.ok) setRest({ status: 'ok', data })
-          else setRest({ status: 'unavailable', reason: (data && data.error) || 'the route answered without data' })
+          else setRest({ status: 'unavailable', reason: data?.error ? String(data.error).slice(0, 120) : 'the route answered without data' })
         },
         err => { clearTimeout(timer); fail(err && err.message ? String(err.message).slice(0, 120) : 'the route is not available') })
     } catch (err) { clearTimeout(timer); fail('this Hermes build has no plugin REST route') }
     return () => { live = false; clearTimeout(timer) }
-  }, [ctx])
-
-  useEffect(() => load(), [load])
+  }, [ctx, refreshVersion])
 
   const data = rest.status === 'ok' ? rest.data : null
   const speed = data && data.measure_speed ? data.speed || {} : null
@@ -188,8 +238,8 @@ export function LandscapePane({ ctx }) {
   const floor = pane.floor !== undefined ? pane.floor : last && typeof last.floor === 'number' ? last.floor : null
   const floorShown = floorPosition(layout.domains, floor) !== null ? floor : null
   const byId = useMemo(() => new Map(layout.points.map(p => [p.id, p])), [layout])
-  const highlightId = hoverId || focusId || pinnedId
-  const highlighted = highlightId ? byId.get(highlightId) || null : null
+  const highlighted = byId.get(hoverId) || byId.get(focusId) || byId.get(pinnedId) || layout.front[0] || null
+  const highlightId = highlighted?.id
 
   useEffect(() => {
     if (!pane.focusRevision) return
@@ -213,6 +263,10 @@ export function LandscapePane({ ctx }) {
       onSelect: id => setPinnedId(prev => (id && id === prev ? null : id)),
     })
     stageRef.current = stage
+    if (typeof document !== 'undefined' && document.fonts) {
+      Promise.all([document.fonts.load(`400 11px ${FONT_MONO}`), document.fonts.load(`500 11px ${FONT_MONO}`)])
+        .then(() => { if (stageRef.current === stage) stage.draw() }, () => {})
+    }
     // Measure the content box (no border) and keep the canvas out of flow (absolute), so the
     // canvas can never push its own box bigger: sizing it from the border box grew the stage
     // 2px per ResizeObserver tick and scrolled the page forever where nothing capped the height.
@@ -243,21 +297,28 @@ export function LandscapePane({ ctx }) {
   }, [layout, view, pal, picks, floorShown, hoverId, highlightId, reduced])
 
   const frontList = layout.front
-  const cssVars = { '--iolite-focus': pal.copper, background: pal.panel, color: pal.text }
-  const zLabel = zTitle(layout.z)
-  const restNote = rest.status === 'loading' ? 'Reading speed and your last shortlist from the Python half...'
-    : rest.status === 'unavailable'
-      ? `Speed and your last shortlist come from the Python half over REST, which is not reachable (${rest.reason}). Third axis stays on context window; no speed is shown or guessed.`
-      : !data.measure_speed ? 'Speed measuring is off (measure_speed), so there is no speed to plot. Third axis stays on context window.'
+  const cssVars = {
+    '--iolite-focus': pal.copper, '--iolite-front': pal.frontier, '--iolite-off': pal.dominated,
+    '--iolite-pick': pal.pick, '--iolite-floor': pal.floor, '--iolite-ground': pal.ground, '--iolite-raised': pal.panelRaised,
+    '--iolite-hair': pal.hair, '--iolite-muted': pal.muted, background: pal.panel, color: pal.text,
+  }
+  const localStatus = rest.status === 'loading' ? 'Loading local measurements, plans and shortlist…'
+    : rest.status === 'unavailable' ? 'Local data unavailable. Showing the bundled snapshot.'
+      : `${layout.plotted} of ${snapshot.total} catalog models plotted.`
+  const localDisabled = rest.status === 'loading' ? 'Loading local data' : rest.status === 'unavailable' ? 'Refresh to retry local data' : null
+  const speedNote = rest.status !== 'ok' ? null
+    : !data.measure_speed ? 'Speed measuring is off (measure_speed).'
         : speedCount === 0 ? 'No model has a locally measured speed yet (each needs 3 calls through Hermes). Third axis stays on context window.'
           : `Speed measured locally for ${speedCount} model${speedCount === 1 ? '' : 's'}, kept on this machine and not comparable across machines.`
   const shortNote = last
     ? `Marked: ${last.picks.length} pick${last.picks.length === 1 ? '' : 's'} from your last /iolite shortlist (${last.objective || 'objective not stated'}). Floor: ${floor === null ? 'none' : floor}${pane.floor !== undefined ? ', set by the agent' : ''}.`
     : rest.status === 'ok' ? 'No remembered /iolite shortlist yet. Run /iolite shortlist to mark picks and the floor here.' : null
+  const plans = mine?.plans || []
+  const problems = mine?.problems || []
   const mineNote = rest.status !== 'ok' ? null
     : priced.covered === 0
-      ? `My price: no plans yet. Open My plans to price the subscriptions you already pay for; they stay on this machine.${mine && mine.problems && mine.problems.length ? ' Problems: ' + mine.problems.join('; ') + '.' : ''}`
-      : `My price: ${priced.covered} model${priced.covered === 1 ? '' : 's'} priced from your ${mine.plans.length} plan${mine.plans.length === 1 ? '' : 's'} (${mine.plans.map(p => p.name).join(', ')}); everything else stays at list price.${mine.problems && mine.problems.length ? ' Skipped: ' + mine.problems.join('; ') + '.' : ''}`
+      ? `My price: no model prices from your plans yet. Open My plans to manage local subscriptions.${problems.length ? ' Problems: ' + problems.join('; ') + '.' : ''}`
+      : `My price: ${priced.covered} model${priced.covered === 1 ? '' : 's'} priced from your ${plans.length} plan${plans.length === 1 ? '' : 's'} (${plans.map(p => p.name).join(', ')}); everything else stays at list price.${problems.length ? ' Skipped: ' + problems.join('; ') + '.' : ''}`
   const catalogNote = data && data.bundled === false ? `Note: /iolite is using ${data.catalog_source || 'another catalog'}; this pane always plots the bundled snapshot.` : null
   const taskNote = rest.status !== 'ok' ? null
     : data.measure_usage === false ? 'Per-task views are off (measure_usage), so cost, time and tokens per task are not measured.'
@@ -272,59 +333,69 @@ export function LandscapePane({ ctx }) {
   const found = useMemo(() => findModels(layout.points, query), [layout, query])
   const btnProps = { pinnedId, highlightId, picks, setFocusId, setHoverId, setPinnedId, pal }
   const noteFor = p => `${p.m.i} · ${effectiveX === X_PRICE ? fmtShownPrice(p.m).replace('/M', '').replace(' (free tier)', ' free') : axis.value(p.xv, p.m)}`
-  const label = `${view === '3d' ? '3D' : '2D'} model landscape: ${axis.title.split(' · ')[0].toLowerCase()}, intelligence${view === '3d' ? ' and ' + (effectiveZ === Z_SPEED ? 'locally measured speed' : 'context window') : ''}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === '3d' ? 'Arrow keys rotate, plus and minus zoom, 0 resets. ' : ''}The front list beside the plot has every front model, and Find a model reaches all the others.`
+  const label = `${view === '3d' ? '3D' : '2D'} model landscape: ${axis.title.split(' · ')[0].toLowerCase()}, intelligence${view === '3d' ? ' and ' + (effectiveZ === Z_SPEED ? 'locally measured speed' : 'context window') : ''}. ${layout.plotted} models plotted, ${frontList.length} on the front. ${view === '3d' ? 'Arrow keys rotate, plus and minus zoom, 0 resets. ' : ''}The front list contains every front model. Find a model reaches all plotted models.`
 
   return h('div', { className: 'iolite-ls', style: cssVars },
     h('style', null, CSS),
     h('div', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', style: { padding: '0 16px', color: pal.muted, fontSize: 12 } },
       h('span', { key: pane.revision }, pane.announcement,
         pane.focus_model && !snapshot.models.some(m => m.s === pane.focus_model) ? ' This model has no plotted mark in the bundled catalog.' : '')),
-    h('header', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px 20px', alignItems: 'center', padding: '12px 16px 8px' } },
-      h('h2', { style: { margin: 0, fontFamily: FONT_MONO, fontSize: 12, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase' } }, 'Iolite · model landscape'),
-      h(Segmented, { pal, label: 'View', value: view, onChange: setView, options: [{ id: '3d', label: '3D', title: 'Rotate and zoom the 3D landscape' }, { id: '2d', label: '2D', title: 'Price by intelligence, flat' }] }),
-      h(Segmented, {
-        pal, label: 'Price', value: effectiveBasis, onChange: setBasis,
-        options: [
-          { id: PRICE_LIST, label: 'List', title: 'Public list price per million tokens (LiteLLM)' },
-          { id: PRICE_MINE, label: 'Mine', disabled: priced.covered === 0, title: priced.covered === 0 ? 'No plans in my_prices.json yet' : 'What another token costs you on your own plans' },
-        ],
-      }),
-      h(Segmented, {
-        pal, label: 'X axis', value: effectiveX, onChange: setXMode,
-        options: [
-          { id: X_PRICE, label: '$/M', title: 'Price per million tokens (log)' },
-          { id: X_TASK_COST, label: 'Cost/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? 'Needs 3 measured tasks per model' : 'Median dollars per task at the chosen price (log)' },
-          { id: X_TASK_TIME, label: 'Time/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? 'Needs 3 measured tasks per model' : 'Median model seconds per task (log)' },
-          { id: X_TASK_TOKENS, label: 'Tokens/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? 'Needs 3 measured tasks per model' : 'Median input + output tokens per task (log)' },
-        ],
-      }),
-      h(Segmented, {
-        pal, label: 'Third axis', value: effectiveZ, onChange: setZMode,
-        options: [
-          { id: Z_CONTEXT, label: 'Context', title: 'Context window, tokens (log)' },
-          { id: Z_SPEED, label: 'Speed', disabled: speedCount === 0, title: speedCount === 0 ? 'No locally measured speed yet' : 'Tokens per second measured on this machine (log)' },
-        ],
-      }),
-      view === '3d' ? h('button', { type: 'button', onClick: () => stageRef.current && stageRef.current.resetView(), style: { padding: '4px 10px', border: `1px solid ${pal.hair}`, background: 'transparent', fontFamily: FONT_MONO, fontSize: 12 } }, 'Reset view') : null,
-      h('button', { type: 'button', 'aria-expanded': plansOpen, 'aria-controls': 'iolite-my-plans', onClick: () => setPlansOpen(o => !o), style: { padding: '4px 10px', border: `1px solid ${pal.hair}`, background: plansOpen ? pal.panelRaised : 'transparent', fontFamily: FONT_MONO, fontSize: 12 } }, 'My plans'),
-      h('button', { type: 'button', onClick: load, style: { padding: '4px 10px', border: `1px solid ${pal.hair}`, background: 'transparent', fontFamily: FONT_MONO, fontSize: 12 }, title: 'Read speed and your last shortlist again' }, 'Refresh')),
-    h('div', { style: { padding: '0 16px 10px', color: pal.muted, fontSize: 12 }, 'aria-live': 'polite' },
-      h('div', null, countLine, ` Third axis: ${zLabel.toLowerCase()}.`),
-      h('div', null, restNote),
-      mineNote ? h('div', null, mineNote) : null,
-      taskNote ? h('div', null, taskNote) : null,
-      shortNote ? h('div', null, shortNote) : null,
-      catalogNote ? h('div', null, catalogNote) : null),
-    plansOpen ? h('div', { id: 'iolite-my-plans' }, h(PlansEditor, { ctx, mine, models: snapshot.models, pal, onSaved: load })) : null,
+    h('header', { className: 'iolite-header' },
+      h('div', { className: 'iolite-brand' },
+        h('span', { className: 'iolite-brand-mark', 'aria-hidden': true, style: { color: pal.frontier } }),
+        h('span', { className: 'iolite-wordmark' }, 'Iolite'),
+        h('span', { className: 'iolite-descriptor' }, 'Model landscape')),
+      h('h2', { className: 'iolite-headline' }, frontHeadline(frontList, effectiveX, axis)),
+      h('div', { className: 'iolite-status', role: 'status', 'aria-label': 'Local data status', 'aria-atomic': 'true' }, localStatus),
+      h('div', { className: 'iolite-toolbar', role: 'group', 'aria-label': 'Landscape controls' },
+        h(Segmented, { label: 'View', value: view, onChange: setView, options: [{ id: '3d', label: '3D', title: 'Rotate and zoom the 3D landscape' }, { id: '2d', label: '2D', title: 'Flat X by intelligence projection' }] }),
+        h(Segmented, {
+          label: 'Price', value: effectiveBasis, onChange: setBasis,
+          options: [
+            { id: PRICE_LIST, label: 'List', title: 'Public list price per million tokens (LiteLLM)' },
+            { id: PRICE_MINE, label: 'Mine', disabled: priced.covered === 0, title: priced.covered === 0 ? localDisabled || 'No model prices from local plans yet' : 'What another token costs you on your own plans' },
+          ],
+        }),
+        h(Segmented, {
+          label: 'X axis', value: effectiveX, onChange: setXMode,
+          options: [
+            { id: X_PRICE, label: '$/M', title: 'Price per million tokens (log)' },
+            { id: X_TASK_COST, label: 'Cost/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? localDisabled || 'Needs 3 measured tasks per model' : 'Median dollars per task at the chosen price (log)' },
+            { id: X_TASK_TIME, label: 'Time/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? localDisabled || 'Needs 3 measured tasks per model' : 'Median model seconds per task (log)' },
+            { id: X_TASK_TOKENS, label: 'Tokens/task', disabled: tasksMeasured === 0, title: tasksMeasured === 0 ? localDisabled || 'Needs 3 measured tasks per model' : 'Median input + output tokens per task (log)' },
+          ],
+        }),
+        h(Segmented, {
+          label: 'Third axis', value: effectiveZ, onChange: setZMode,
+          options: [
+            { id: Z_CONTEXT, label: 'Context', title: 'Context window, tokens (log)' },
+            { id: Z_SPEED, label: 'Speed', disabled: speedCount === 0, title: speedCount === 0 ? localDisabled || 'No locally measured speed yet' : 'Tokens per second measured on this machine (log)' },
+          ],
+        }),
+        h('div', { className: 'iolite-controls', role: 'group', 'aria-label': 'Landscape actions' },
+          view === '3d' ? h('button', { type: 'button', onClick: () => stageRef.current?.resetView() }, 'Reset view') : null,
+          h('button', { type: 'button', 'aria-expanded': plansOpen, 'aria-controls': 'iolite-my-plans', onClick: () => setPlansOpen(o => !o) }, 'My plans'),
+          h('button', { type: 'button', onClick: refresh, title: 'Reload local measurements, plans and shortlist' }, 'Refresh')))),
+    plansOpen ? h('div', { id: 'iolite-my-plans' }, h(PlansEditor, { ctx, mine, loading: rest.status === 'loading', models: snapshot.models, pal, onSaved: refresh })) : null,
     h('div', { className: 'iolite-body' },
-      h('div', { className: 'iolite-stage', ref: wrapRef, style: { background: pal.ground, border: `1px solid ${pal.hair}` } },
-        h('canvas', { ref: canvasRef, role: 'img', 'aria-label': label, tabIndex: 0, style: { display: 'block', position: 'absolute', inset: 0, touchAction: 'none', cursor: view === '3d' ? 'grab' : 'default' } }),
-        layout.plotted === 0 ? h('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: pal.muted, padding: 24, textAlign: 'center' } }, 'Nothing to plot on this axis yet.') : null),
+      h('figure', { className: 'iolite-figure', 'aria-label': 'Model landscape chart' },
+        h('ul', { className: 'iolite-legend', 'aria-label': 'Chart legend' },
+          GLYPHS.map(([id, name]) => h('li', { key: id }, h('span', { className: `iolite-glyph iolite-glyph-${id}`, 'aria-hidden': true }), name)),
+          floorShown === null ? null : h('li', null, h('span', { className: 'iolite-glyph iolite-glyph-floor', 'aria-hidden': true }), `Intelligence floor ${floorShown}`)),
+        h('div', { className: 'iolite-stage', ref: wrapRef },
+          h('canvas', { ref: canvasRef, role: 'img', 'aria-label': label, tabIndex: 0, style: { display: 'block', position: 'absolute', inset: 0, touchAction: 'none', cursor: view === '3d' ? 'grab' : 'default' } }),
+          layout.plotted === 0 ? h('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: pal.muted, padding: 24, textAlign: 'center', pointerEvents: 'none' } }, 'There are no models with data for these axes.') : null),
+        view === '3d' ? h('ul', { className: 'iolite-axes', 'aria-label': 'Chart axes' },
+          h('li', null, h('b', null, 'X'), axis.title),
+          h('li', null, h('b', null, 'Y'), 'INTELLIGENCE 0–100'),
+          h('li', null, h('b', null, 'Z'), zTitle(layout.z))) : null,
+        h('figcaption', null, 'The front connects models for which a better X value would mean a lower intelligence score.')),
       h('aside', { className: 'iolite-aside' },
         // minHeight reserves the filled panel's height, so hovering a list below never shifts that list.
         h('section', { 'aria-label': 'Selected model', 'aria-live': 'polite', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, boxSizing: 'border-box', minHeight: '21em' } },
+          h('h3', { style: { margin: '0 0 6px', fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } }, 'Selected model'),
           h(Detail, { point: highlighted, front: frontList, isPick: !!highlighted && picks.has(highlighted.id), speed, tasks, xMode: effectiveX, pal })),
-        h('section', { 'aria-label': 'Cost by intelligence front', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, minHeight: 0 } },
+        h('section', { 'aria-label': 'Intelligence front', style: { background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, minHeight: 0 } },
           h('h3', { style: { margin: '0 0 6px', fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted } },
             `Front · ${frontList.length} models, ${effectiveX === X_PRICE ? 'cheapest' : effectiveX === X_TASK_TIME ? 'fastest' : effectiveX === X_TASK_TOKENS ? 'fewest tokens' : 'cheapest per task'} first`),
           h('ol', { style: { maxHeight: 300, overflowY: 'auto' } },
@@ -340,9 +411,13 @@ export function LandscapePane({ ctx }) {
             !query.trim() ? `Any of the ${layout.plotted} plotted models; Tab to a result to show it.`
               : found.total === 0 ? 'No plotted model matches.'
                 : `${found.total} match${found.total === 1 ? '' : 'es'}${found.total > found.hits.length ? `, showing the ${found.hits.length} smartest` : ''}.`),
-          found.hits.length ? h('ol', null, found.hits.map(p => h(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) }))) : null))),
+          found.hits.length ? h('ol', null, found.hits.map(p => h(ModelButton, { key: p.id, p, ...btnProps, note: noteFor(p) }))) : null),
+        h('details', null,
+          h('summary', null, 'Coverage and local data'),
+          [countLine, speedNote, mineNote, taskNote, shortNote, catalogNote, rest.reason].filter(Boolean).map((note, i) => h('p', { key: i }, note))))),
     h('footer', { style: { padding: '8px 16px 14px', color: pal.muted, fontSize: 11.5, borderTop: `1px solid ${pal.hair}` } },
-      h('div', null, 'Frontier = no model is as good or better on the X axis and at least as smart. Dominated models are small rings; front models are wire spheres on the ridge; picks have a diamond; the copper ring is focus. Openness is not in the catalog, so there is one glyph per class.'),
-      snapshot.credits.map((c, i) => h('div', { key: i }, c)),
-      h('div', null, `Snapshot ${snapshot.generated}. Not affiliated with Epoch AI, LMArena or LiteLLM. Full notices: ATTRIBUTION.md in the plugin.`)))
+      h('details', null,
+        h('summary', null, `Data sources and attribution · ${snapshot.generated}`),
+        snapshot.credits.map((c, i) => h('p', { key: i }, c)),
+        h('p', null, 'Iolite is independent of Epoch AI, LMArena and LiteLLM. See ATTRIBUTION.md in the plugin for the full notices.'))))
 }

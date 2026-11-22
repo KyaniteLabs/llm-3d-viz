@@ -1,6 +1,7 @@
 """Plugin surface: registration, config, refusals, and tool output shape."""
 import importlib.util
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -43,6 +44,16 @@ def _setup(config):
 
 def test_registers_all_tools():
     assert set(_setup({}).tools) == {"iolite_shortlist", "iolite_model", "iolite_show"}
+
+
+def test_installed_version_matches_the_desktop_and_plugin_manifests():
+    _setup({"measure_speed": False})
+    reported = plugin.landscape_state()["version"]
+    manifest = (ROOT / "plugin.yaml").read_text()
+    declared = re.search(r"^version:[ \t]*[\"']?([^\s\"']+)", manifest, re.M)
+    assert declared and declared.group(1) == reported
+    for path in ("dashboard/manifest.json", "desktop-src/package.json"):
+        assert json.loads((ROOT / path).read_text())["version"] == reported, path
 
 
 def test_no_source_configured_refuses_without_network(monkeypatch):
