@@ -117,7 +117,7 @@ export const ATLAS_TOOL_DEFINITIONS = [
   {
     name: "query_catalog",
     description:
-      "Compositional filter+rank over the catalog: combine objective (min_cost/max_speed/max_intelligence) with constraints (floor, openness, maxPrice $/M, minTps tok/s, modality vision|audio, minContext tokens, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider). Speed objectives and thresholds require measured tok/s. Treat scoped max_speed results as read-only. Use rank_eligible to preview a Decide ranking. Returns ranked ModelSummary[].",
+      "Compositional filter+rank over the catalog: combine objective (min_cost/max_speed/max_intelligence) with constraints (floor, openness, maxPrice $/M, minTps tok/s, modality vision|audio, minContext tokens, reasoning, frontierOnly, minSweBench, minGpqa, provider, excludeProvider). Speed objectives and thresholds require measured tok/s. Present scoped rankings as read-only results. Use rank_eligible to preview a Decide ranking. Returns ranked ModelSummary[].",
     parameters: {
       type: "object",
       properties: {
@@ -317,7 +317,7 @@ Rules:
 4. High-impact: floor changes, filter wipes, reset_scope -> needs_confirm true, auto_apply false.
 5. Low-impact: cinema, pin, economy basis, weight presets -> auto_apply true, needs_confirm false.
 6. Prefer model ids from tool results. Stay on this product.
-7. Answer scoped max_speed catalog queries with the measured results from query_catalog. Finish with only summary and shortlist_ids. When the user requests a Decide shortlist, use rank_eligible and describe its ranking dimensions and any missing speed.`;
+7. Answer scoped catalog ranking questions with the results from query_catalog. Finish with only summary and shortlist_ids. When the user requests a Decide shortlist, use rank_eligible and describe its ranking dimensions and any missing speed.`;
 
 export type DispatchOutcome =
   | { kind: "tool_result"; content: unknown; trace: AtlasToolTrace }

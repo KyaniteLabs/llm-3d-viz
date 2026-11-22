@@ -119,34 +119,32 @@ export function runOfflineAtlas(
     const parsed = parseConstraints(raw, ctx);
     if (isCompositional(parsed)) {
       const c = parsed.constraints;
-      const q = toolQueryCatalog(ctx, c);
-      trace.push(q.trace);
-      let ids = q.result.map((s) => s.id);
+      let query = toolQueryCatalog(ctx, c);
+      trace.push(query.trace);
       let active = c;
       let label = describeConstraints(c);
 
       // Empty result? If a constraint sits on an axis the catalog has no data
       // for (vision modality, SWE-bench, GPQA), de-scope it and re-query so the
       // user still gets real answers — and say so honestly.
-      if (ids.length === 0) {
+      if (query.result.length === 0) {
         const gaps = unsupportedDataAxes(ctx, c);
         const scoped = dropUnsupportedData(ctx, c);
-        let missingMeasuredSpeed = q.missingMeasuredSpeed;
+        let missingMeasuredSpeed = query.missingMeasuredSpeed;
         const hasOtherAxes = Object.entries(scoped).some(
           ([k, v]) => k !== "limit" && v != null,
         );
         if (gaps.length && hasOtherAxes && !sameConstraints(scoped, c)) {
-          const q2 = toolQueryCatalog(ctx, scoped);
-          trace.push(q2.trace);
-          missingMeasuredSpeed ||= q2.missingMeasuredSpeed;
-          const ids2 = q2.result.map((s) => s.id);
-          if (ids2.length) {
-            ids = ids2;
+          const retry = toolQueryCatalog(ctx, scoped);
+          trace.push(retry.trace);
+          missingMeasuredSpeed ||= retry.missingMeasuredSpeed;
+          if (retry.result.length) {
+            query = retry;
             active = scoped;
             label = `${describeConstraints(scoped)} (ignored: ${gaps.join(", ")})`;
           }
         }
-        if (ids.length === 0) {
+        if (query.result.length === 0) {
           const why = missingMeasuredSpeed
             ? gaps.length
               ? `I couldn't check ${gaps.join(", ")}. With those constraints removed, no matching models have measured speed.`
@@ -161,33 +159,22 @@ export function runOfflineAtlas(
         }
       }
 
-      const rankedLabel = label.charAt(0).toUpperCase() + label.slice(1);
-      if (active.objective === "max_speed") {
+      const ids = query.result.map(({ id }) => id);
+      if (active.objective) {
+        const rankedLabel = label.charAt(0).toUpperCase() + label.slice(1);
+        const speedRanking = active.objective === "max_speed";
+        const basis = speedRanking ? " by measured speed" : "";
+        const missingSpeed = query.missingSpeedCount;
+        const coverage = speedRanking && missingSpeed > 0
+          ? ` ${missingSpeed} ${missingSpeed === 1 ? "model" : "models"} in this scope lacked measured speed.`
+          : "";
         return emptyProposal(
           snap,
-          `${rankedLabel} matches by measured speed include ${speakableList(ids)}.`,
+          `${rankedLabel} matches${basis} include ${speakableList(ids)}.${coverage}`,
           {
             shortlist_ids: ids,
             needs_confirm: false,
             auto_apply: false,
-            tool_trace: trace,
-          },
-        );
-      }
-
-      // Other ranking objectives can propose changes to the Decide view.
-      if (active.objective) {
-        return emptyProposal(
-          snap,
-          `${rankedLabel}: ${speakableList(ids)}. Apply Decide with this ranking?`,
-          {
-            floor: active.floor ?? ctx.floor,
-            decide_mode: true,
-            cost_speed_bias: active.objective === "min_cost" ? -1 : ctx.costSpeedBias,
-            shortlist_ids: ids,
-            highlight_model_ids: ids,
-            filters_patch: constraintFiltersPatch(ctx, active),
-            needs_confirm: true,
             tool_trace: trace,
           },
         );

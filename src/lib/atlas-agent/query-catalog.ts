@@ -95,7 +95,12 @@ function byMetric(get: (m: Model) => number | null, dir: 1 | -1) {
 export function toolQueryCatalog(
   ctx: AtlasAgentContext,
   c: CatalogConstraints = {},
-): { result: ModelSummary[]; trace: AtlasToolTrace; missingMeasuredSpeed: boolean } {
+): {
+  result: ModelSummary[];
+  trace: AtlasToolTrace;
+  missingMeasuredSpeed: boolean;
+  missingSpeedCount: number;
+} {
   const pool = ctx.visible.slice();
   const f = num(c.floor) ? c.floor : ctx.floor;
 
@@ -121,9 +126,11 @@ export function toolQueryCatalog(
 
   const minTps = num(c.minTps) ? c.minTps : null;
   let missingMeasuredSpeed = false;
+  let missingSpeedCount = 0;
   if (c.objective === "max_speed" || minTps !== null) {
     const matches = rows.length;
     rows = rows.filter(hasSpeed);
+    missingSpeedCount = matches - rows.length;
     missingMeasuredSpeed = matches > 0 && rows.length === 0;
     if (minTps !== null) rows = rows.filter((m) => m.tps! >= minTps);
   }
@@ -160,10 +167,12 @@ export function toolQueryCatalog(
   if (c.excludeProvider) bits.push(`!${c.excludeProvider}`);
   if (c.family) bits.push(`family:${c.family}`);
   if (missingMeasuredSpeed) bits.push("no measured speed among matching models");
+  else if (missingSpeedCount > 0) bits.push(`${missingSpeedCount} missing speed`);
 
   return {
     result: top,
     missingMeasuredSpeed,
+    missingSpeedCount,
     trace: {
       name: "query_catalog",
       ok: true,

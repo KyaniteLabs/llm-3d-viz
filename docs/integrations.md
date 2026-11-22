@@ -52,6 +52,8 @@ Tools: `get_catalog_meta`, `search_models`, `get_model`, `list_eligible`, `rank_
 
 `list_eligible` lists models at or above the intelligence floor with measured prices. `rank_eligible` uses that pool and requires measured speed for `max_speed`, as the CLI does with an Atlas-format catalog. For `min_cost` and `balanced`, incomplete speed coverage triggers the disclosed price-and-intelligence fallback. In-app Atlas proposals retain the full eligible pool so applying a proposal reproduces the Decide ranking.
 
+In the app, scoped `query_catalog` rankings are read-only results. Simple eligible and floor commands can propose changes to Decide.
+
 Set `ATLAS_MCP_FULL=1` to expose the additional view and decision-proposal tools. A client can call only the tools offered in its server's `tools/list`. View and decision tools return proposals that an attached UI can apply.
 
 ## 4. Embedding the tools directly (TS)
