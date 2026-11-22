@@ -89,6 +89,50 @@ it.each([
   expect(result.stderr).toContain(message);
 }, 15_000);
 
+const legacyRow = {
+  model: "Legacy Sparse",
+  provider: "Fixture",
+  aa_intelligence_index: null,
+  tps: null,
+  blended_price_per_M: null,
+  modality: ["text"],
+  sources: { modality: { origin: "provider", kind: "list" } },
+};
+
+it.each<[string, unknown[], string[], number]>([
+  ["null", [null], ["meta"], 0],
+  ["number", [1], ["eligible"], 0],
+  ["empty object", [{}], ["rank"], 0],
+  ["missing provider", [legacyRow, { model: "Broken" }], ["compare", "Legacy Sparse", "Unresolved"], 1],
+  ["non-string model", [{ model: 1, provider: "Fixture" }], ["get", "Unresolved"], 0],
+  ["non-string provider", [{ model: "Broken", provider: null }], ["search", "Fixture"], 0],
+])("rejects row shape %s with the catalog path and row index on stderr", (label, rows, args, index) => {
+  const path = join(fixture, `row-${label}.json`);
+  writeFileSync(path, JSON.stringify(rows));
+  const result = cli(...args, "--catalog", path);
+  expect(result.status).toBe(3);
+  expect(result.stdout).toBe("");
+  expect(result.stderr.trim().split(/\r?\n/)).toHaveLength(1);
+  expect(result.stderr).toContain(path);
+  expect(result.stderr).toContain(`row at index ${index}`);
+  expect(result.stderr).toContain('string "model" and "provider" fields');
+}, 15_000);
+
+it("accepts legacy rows with missing measurements and nested provenance", () => {
+  const path = join(fixture, "legacy-sparse.json");
+  writeFileSync(path, JSON.stringify([legacyRow]));
+  const result = cli("get", "Legacy Sparse", "--catalog", path);
+  expect(result.status, result.stderr).toBe(0);
+  expect(result.stderr).toBe("");
+  expect(JSON.parse(result.stdout)).toMatchObject({
+    id: "Legacy Sparse",
+    index: null,
+    price: null,
+    tps: null,
+    modalities: ["text"],
+  });
+}, 15_000);
+
 it.each([
   ["get", "definitely-not-a-model-xyz-999"],
   ["floor", "--anchor", "definitely-not-a-model-xyz-999"],

@@ -2,7 +2,6 @@ import { incompleteModels, incompleteAxisCoverage, quarantinedModels, type Model
 import {
   availableAxisMetrics,
   isAxisMetricId,
-  mappingHeading,
   type AxisMetricId,
   type SceneAxis,
 } from "../lib/axis-metrics";
@@ -862,9 +861,6 @@ export class DecisionConsole {
         state.filters.families.length === 1 && state.filters.families[0] === famId,
       );
     });
-
-    const stageTitle = document.getElementById("stage-title");
-    if (stageTitle) stageTitle.textContent = mappingHeading(state.axisMapping);
 
     const activePreset = (
       Object.entries(presets) as [keyof typeof presets, (typeof presets)[keyof typeof presets]][]

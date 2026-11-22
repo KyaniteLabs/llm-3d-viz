@@ -8,21 +8,22 @@ test("an old observatory link stays in the observatory after resetting its last 
   await page.getByRole("button", { name: "Apply scope" }).click();
   await expect(page).toHaveURL(/\/\?view=observatory#stage-title$/);
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Speed × cost × intelligence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Model observatory" })).toBeVisible();
 });
 
-test("the product edition opens the observatory at the root", async ({ page }) => {
+test("the product edition opens the observatory without rewriting the root URL", async ({ page }) => {
   await page.route((url) => url.pathname === "/src/config/edition.ts", (route) => route.fulfill({
     contentType: "application/javascript",
     body: 'export const EDITION = "product"; export const isOssEdition = false;',
   }));
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Speed × cost × intelligence" })).toBeVisible();
+  await expect(page.locator("#stage-title")).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
 });
 
 for (const { view, path, chunk, heading } of [
   { view: "public decision", path: "/", chunk: "/src/ui/public-decision.ts", heading: "Choose a model by price and capability" },
-  { view: "observatory", path: "/?view=observatory", chunk: "/src/main.ts", heading: "Speed × cost × intelligence" },
+  { view: "observatory", path: "/?view=observatory", chunk: "/src/main.ts", heading: "Model observatory" },
 ]) {
   test(`a failed ${view} download shows a reload control`, async ({ page }) => {
     const matchesChunk = (url: URL) => url.pathname === chunk;
