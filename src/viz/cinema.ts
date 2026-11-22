@@ -39,7 +39,7 @@ export class CinemaMode {
   constructor(
     stage: Stage3DSurface,
     store: AppStore,
-    private readonly catalogMethod: { sources: string; asOf: string },
+    private readonly catalogMethod: { headline: string; sources: string; asOf: string },
   ) {
     this.stage = stage;
     this.store = store;
@@ -147,8 +147,8 @@ export class CinemaMode {
 
   private methodLine(): string {
     const n = (window as unknown as { __viz?: { visibleCount?: number } }).__viz?.visibleCount;
-    const { sources, asOf } = this.catalogMethod;
-    return `${APP_BRANDING.tagline} · sources ${sources} · catalog ${asOf}` +
+    const { headline, sources, asOf } = this.catalogMethod;
+    return `${headline} · sources ${sources} · catalog ${asOf}` +
       (n != null ? ` · N=${n}` : "");
   }
 

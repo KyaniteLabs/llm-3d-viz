@@ -2,9 +2,9 @@ name: Iolite Hermes plugin
 on:
   push:
     branches: [main]
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "tsconfig.json", "package.json", "package-lock.json"]
   pull_request:
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "tsconfig.json", "package.json", "package-lock.json"]
 permissions:
   contents: read
 jobs:
@@ -36,8 +36,8 @@ jobs:
       - name: Dependency advisory report (informational)
         continue-on-error: true
         run: npm audit --json
-      - name: Full root suite and Desktop node tests (includes parity)
-        run: npm test
+      - name: Full Vitest suite (includes parity)
+        run: npm run test:vitest
   desktop:
     runs-on: ubuntu-latest
     defaults:

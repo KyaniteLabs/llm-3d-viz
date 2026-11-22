@@ -19,4 +19,16 @@ describe("share-copy", () => {
   it("fail-closed sparse story", () => {
     expect(defaultStoryLine({ decideMode: false, nPlottable: 1 })).toMatch(/Insufficient/);
   });
+
+  it("reports the floor when Decide has no eligible models", () => {
+    const story = defaultStoryLine({ decideMode: true, decideEligible: 0, floor: 72, nPlottable: 6 });
+    expect(story).toContain("No models qualify at Index floor 72");
+  });
+
+  it("describes the cost and intelligence shortlist even without three plottable models", () => {
+    const story = defaultStoryLine({
+      decideMode: true, decideBasis: "intelligence", decideEligible: 2, floor: 60, nPlottable: 1,
+    });
+    expect(story).toContain("Index floor 60 ranked on cost × intelligence");
+  });
 });

@@ -37,8 +37,8 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 - Per-model cards: `/m/<slug>/` — one static page per catalog model (measured speed, blended cost, intelligence index, percentile context, provenance labels); all-models index at `/m/`.
 - Embeddable cards: `/embed/<slug>` — iframe-ready per-model cards, always regenerated with the catalog.
-- Frontier log: `/frontier-watch.md` — dated movement log of the measured Pareto frontier (price × intelligence); machine-readable copy at `/frontier-watch.json`, Atom feed at `/frontier-watch.xml`.
-- Head-to-head comparisons: `/compare/<a>-vs-<b>/` — static measured comparison pages (staged set; dominance-gated verdicts, null-honest); every model card links its comparisons.
+- Frontier Watch at `/frontier-watch.md` gives the public price × capability snapshot from Epoch AI scores and LiteLLM list prices. Its JSON at `/frontier-watch.json` includes the snapshot date, score and price definitions, and decision-catalog rows. The public Atom feed at `/frontier-watch.xml` has no movement entries with a single comparable snapshot. Private builds use their measured catalog and tracked private refreshes record movements.
+- Head-to-head comparisons at `/compare/<a>-vs-<b>/` are generated for measured pairs when the selected catalog supplies the necessary metrics. Model cards link to their available comparisons.
 - Launch post: `/blog/2026-08-24-model-observatory/` (linked above).
 - URL inventory: `/sitemap.xml` (`/`, `/m/`, `/m/<slug>/`, `/compare/<a>-vs-<b>/`, `/frontier-watch.md`, `/blog/2026-08-24-model-observatory/`, `/about.md`, `/llms.txt`, `/llms-full.txt`).
 
@@ -46,7 +46,7 @@ A browser WebGL app that plots curated LLM metrics in 3D:
 
 - Product name: **Iolite** (formerly Model Observatory; repo: llm-3d-viz)
 - Free, MIT, no account required for the viz
-- Data: Arena dataset (CC BY 4.0) + vendor-published figures + first-party pricing; some third-party measurement data is not republished here for licensing reasons — see /sources/
+- The public observatory catalog uses Arena (CC BY 4.0), vendor-published figures, and first-party pricing. Public Frontier Watch uses the separate Epoch AI and LiteLLM decision catalog, so a frontier model may have no `/m/` card. See `/sources/`.
 - Live stage requires JavaScript + WebGL
 
 ## For agents / crawlers
