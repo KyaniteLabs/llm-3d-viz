@@ -892,17 +892,20 @@ var TEMPLATES = [
   { id: "qwen", label: "Qwen", cover: "qwen" }
 ];
 var PERIODS = [1, 3, 6, 12, 24];
+var validPeriod = (months) => Number.isFinite(months) && months > 0;
 var seq = 0;
 var newId = () => `p${++seq}`;
 function toDraft(p) {
   const str = (v) => typeof v === "number" && Number.isFinite(v) ? String(v) : "";
+  const months = validPeriod(p.period_months) ? p.period_months : 12;
   return {
     id: newId(),
     name: String(p.name || ""),
     mode: KINDS.some((k) => k.id === p.mode) ? p.mode : "sunk",
     cover: [...(p.models || []).map((m) => "=" + m), ...p.match || []].join(", "),
     paid: str(p.paid_usd),
-    months: PERIODS.includes(p.period_months) ? p.period_months : 12,
+    months,
+    customMonths: PERIODS.includes(months) ? void 0 : months,
     tokens: str(p.tokens_per_month_m),
     usd: str(p.mode === "fixed" ? p.usd_per_m_set ?? p.usd_per_m : void 0)
   };
@@ -948,6 +951,7 @@ function toPlan(d, slugs) {
   if (d.mode === "amortized") {
     const paid = num(d.paid), tokens = num(d.tokens);
     if (paid === null || Number.isNaN(paid) || paid < 0) return { problem: `${name}: enter what you paid` };
+    if (!validPeriod(d.months)) return { problem: `${name}: choose a positive subscription period` };
     plan.paid_usd = paid;
     plan.period_months = d.months;
     if (tokens !== null) {
@@ -982,6 +986,7 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
   const covered = useMemo(() => coveredBy(d, models), [d.cover, models]);
   const set = (k, v) => onChange({ ...d, [k]: v });
   const kind = KINDS.find((k) => k.id === d.mode);
+  const periods = d.customMonths === void 0 ? PERIODS : [...PERIODS, d.customMonths].sort((a, b) => a - b);
   const fid = `iolite-plan-${d.id}`;
   return h(
     "fieldset",
@@ -1022,7 +1027,7 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
       h(
         "select",
         { value: d.months, onChange: (e) => set("months", Number(e.target.value)), style: fieldStyle(pal) },
-        PERIODS.map((m) => h("option", { key: m, value: m }, m === 1 ? "1 month" : m === 12 ? "1 year" : m === 24 ? "2 years" : `${m} months`))
+        periods.map((m) => h("option", { key: m, value: m }, m === 1 ? "1 month" : m === 12 ? "1 year" : m === 24 ? "2 years" : `${m} months`))
       )
     ) : null,
     d.mode === "amortized" ? h(

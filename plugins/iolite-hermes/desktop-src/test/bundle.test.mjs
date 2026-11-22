@@ -120,7 +120,7 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     }
     const resolveRead = async data => { reads.at(-1)(data); await Promise.resolve() }
     const valid = { ok: true, my_prices: {
-      plans: [{ name: 'Existing', mode: 'amortized', paid_usd: 12, period_months: 1, models: ['gpt-6.1-sol'] }],
+      plans: [{ name: 'Existing', mode: 'amortized', paid_usd: 12, period_months: 18, models: ['gpt-6.1-sol'] }],
       prices: {}, problems: ['Existing: waiting for measured usage'], revision: 'first-valid-read', skipped_plans: 0,
     } }
 
@@ -143,8 +143,19 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     button(pane(), 'Refresh').props.onClick()
     pane()
     await resolveRead(valid)
-    const original = field(plans()).props
-    original.onChange({ ...original.d, name: 'Edited draft' })
+    const originalField = field(plans())
+    const original = originalField.props
+    const fields = nodes(hooks.render(originalField.type, original))
+    const periodSelect = fields.find(n => n.type === 'select' && n.props.value === 18)
+    assert.ok(periodSelect, 'the saved custom period is selected')
+    assert.ok(nodes(periodSelect).some(n => n.type === 'option' && n.props.value === 18), 'the selected custom period has an option')
+    periodSelect.props.onChange({ target: { value: '12' } })
+    const changedField = field(plans())
+    const changedSelect = nodes(hooks.render(changedField.type, changedField.props)).find(n => n.type === 'select' && n.props.value === 12)
+    assert.ok(nodes(changedSelect).some(n => n.type === 'option' && n.props.value === 18), 'the custom period remains available while editing')
+    changedSelect.props.onChange({ target: { value: '18' } })
+    const restored = field(plans()).props
+    restored.onChange({ ...restored.d, name: 'Edited draft' })
     button(pane(), 'Refresh').props.onClick()
     pane()
     assertBlocked()
@@ -168,6 +179,7 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     save.props.onClick()
     assert.equal(writes.length, 1, 'a pending save blocks a second POST')
     assert.equal(writes[0].plans[0].name, 'Edited draft')
+    assert.equal(writes[0].plans[0].period_months, 18)
     writes[0].resolve({ ok: false, problems: ['retry me'] })
     await Promise.resolve()
     assert.equal(field(plans()).props.d.name, 'Edited draft')

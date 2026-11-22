@@ -1163,10 +1163,27 @@ def _validate_plan(raw: Any, n: int) -> Tuple[Optional[dict], Optional[str]]:
     return clean, None
 
 
+def _plan_editor_problem(raw: dict, clean: dict) -> Optional[str]:
+    """Detect content the Desktop cannot round-trip, while allowing normal canonicalization."""
+    name = clean["name"]
+    if any(key not in clean and value is not None for key, value in raw.items()):
+        return f"{name}: contains fields the editor cannot preserve"
+    raw_name = raw.get("name")
+    if raw_name is not None and (not isinstance(raw_name, str) or len(_safe_text(raw_name, 81)) > 80):
+        return f"{name}: saved name cannot be preserved by the editor"
+    for key in ("models", "match"):
+        entries = raw.get(key)
+        if entries is not None and (not isinstance(entries, list) or len(entries) != len(clean[key])):
+            return f"{name}: {key} has invalid entries or exceeds the saved plan limit"
+        if any(re.search(r"[\s,\ufeff]", value) or (key == "match" and value.startswith("=")) for value in clean[key]):
+            return f"{name}: {key} has entries the editor cannot preserve"
+    return None
+
+
 def _read_my_prices() -> dict:
     """Your own prices, from my_prices.json in the plugin data directory. You write that file
     (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
-    Returns plans, problems, a revision, and the number of plans that could not be loaded.
+    Returns plans, problems, a revision, and the number of plans that could not be fully loaded for editing.
     A plan's usd_per_m is None while it waits for measured usage. Never raises."""
     out: Dict[str, Any] = {"plans": [], "problems": [], "revision": None, "skipped_plans": 0}
     try:
@@ -1194,6 +1211,11 @@ def _read_my_prices() -> dict:
                 out["problems"].append(problem)
                 out["skipped_plans"] += 1
                 continue
+            editor_problem = _plan_editor_problem(raw, clean)
+            if editor_problem:
+                # Keep the usable price overlay, but never let a whole-list save drop the original fields.
+                out["problems"].append(editor_problem)
+                out["skipped_plans"] += 1
             out["plans"].append({**clean, "usd_per_m": _my_plan_price(clean)})
         out["revision"] = hashlib.sha256(raw_file).hexdigest()
     except Exception:

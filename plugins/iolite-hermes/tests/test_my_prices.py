@@ -144,3 +144,37 @@ def test_measured_usage_notice_does_not_block_editor_save(tmp_path, monkeypatch)
     state = plugin.landscape_state()["my_prices"]
     assert any("waiting for measured usage" in note for note in state["problems"])
     assert plugin.save_my_prices({"plans": [plan], "revision": state["revision"]})["ok"]
+
+
+@pytest.mark.parametrize("partial", [
+    {"models": ["glm-5.3"] * 201},
+    {"match": ["glm"] * 41},
+    {"match": ["glm", "g"]},
+    {"match": "glm"},
+    {"match": ["glm,example"]},
+    {"match": ["=glm-5.3"]},
+    {"tokens_per_month_m": "50"},
+    {"custom_note": "keep this annotation"},
+    {"name": "a" * 81},
+])
+def test_save_preserves_a_file_with_a_partly_representable_plan(tmp_path, monkeypatch, partial):
+    plan = {"name": "Existing", "mode": "amortized", "paid_usd": 36, "period_months": 18, "models": ["glm-5.3"]}
+    _at(tmp_path, monkeypatch, {"plans": [{**plan, **partial}]})
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    original = path.read_bytes()
+    state = plugin.landscape_state()["my_prices"]
+    assert plugin.save_my_prices({"plans": [plan], "revision": state["revision"]})["ok"] is False
+    assert state["skipped_plans"] == 1
+    assert len(state["plans"]) == 1, "the usable plan remains available for pricing"
+    assert path.read_bytes() == original
+
+
+def test_save_allows_normalizing_case_spacing_and_optional_empty_values(tmp_path, monkeypatch):
+    plan = {"name": "  Existing   plan  ", "mode": "amortized", "paid_usd": 36,
+            "period_months": 2, "models": [" Glm-5.3 "], "match": None, "tokens_per_month_m": None}
+    _at(tmp_path, monkeypatch, {"plans": [plan]})
+    state = plugin.landscape_state()["my_prices"]
+    assert state["skipped_plans"] == 0
+    assert plugin.save_my_prices({"plans": state["plans"], "revision": state["revision"]})["ok"]
+    saved = plugin.landscape_state()["my_prices"]["plans"][0]
+    assert (saved["name"], saved["period_months"], saved["models"]) == ("Existing plan", 2, ["glm-5.3"])

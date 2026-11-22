@@ -16,6 +16,7 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
   const covered = useMemo(() => coveredBy(d, models), [d.cover, models])
   const set = (k, v) => onChange({ ...d, [k]: v })
   const kind = KINDS.find(k => k.id === d.mode)
+  const periods = d.customMonths === undefined ? PERIODS : [...PERIODS, d.customMonths].sort((a, b) => a - b)
   const fid = `iolite-plan-${d.id}`
   return h('fieldset', { disabled, style: { border: `1px solid ${pal.hair}`, borderRadius: 6, padding: '8px 10px', margin: 0, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))' } },
     h('legend', { style: { fontFamily: FONT_MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: pal.muted, padding: '0 4px' } }, `Plan ${n}`),
@@ -30,7 +31,7 @@ function PlanFields({ d, n, onChange, onRemove, models, saved, pal, disabled }) 
       h('input', { type: 'number', min: 0, step: 'any', inputMode: 'decimal', value: d.paid, onChange: e => set('paid', e.target.value), style: fieldStyle(pal) })) : null,
     d.mode === 'amortized' ? h('label', { style: labelStyle(pal) }, 'For',
       h('select', { value: d.months, onChange: e => set('months', Number(e.target.value)), style: fieldStyle(pal) },
-        PERIODS.map(m => h('option', { key: m, value: m }, m === 1 ? '1 month' : m === 12 ? '1 year' : m === 24 ? '2 years' : `${m} months`)))) : null,
+        periods.map(m => h('option', { key: m, value: m }, m === 1 ? '1 month' : m === 12 ? '1 year' : m === 24 ? '2 years' : `${m} months`)))) : null,
     d.mode === 'amortized' ? h('label', { style: labelStyle(pal) }, 'Tokens a month, millions (blank: measure)',
       h('input', { type: 'number', min: 0, step: 'any', inputMode: 'decimal', value: d.tokens, onChange: e => set('tokens', e.target.value), style: fieldStyle(pal) })) : null,
     d.mode === 'fixed' ? h('label', { style: labelStyle(pal) }, 'Price per million tokens ($)',

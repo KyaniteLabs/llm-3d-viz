@@ -26,6 +26,7 @@ export const TEMPLATES = [
 ]
 
 export const PERIODS = [1, 3, 6, 12, 24]
+const validPeriod = months => Number.isFinite(months) && months > 0
 
 let seq = 0
 const newId = () => `p${++seq}`
@@ -33,13 +34,15 @@ const newId = () => `p${++seq}`
 /** A saved plan (from the Python half) as an editable draft; numbers become strings. */
 export function toDraft(p) {
   const str = v => (typeof v === 'number' && Number.isFinite(v) ? String(v) : '')
+  const months = validPeriod(p.period_months) ? p.period_months : 12
   return {
     id: newId(),
     name: String(p.name || ''),
     mode: KINDS.some(k => k.id === p.mode) ? p.mode : 'sunk',
     cover: [...(p.models || []).map(m => '=' + m), ...(p.match || [])].join(', '),
     paid: str(p.paid_usd),
-    months: PERIODS.includes(p.period_months) ? p.period_months : 12,
+    months,
+    customMonths: PERIODS.includes(months) ? undefined : months,
     tokens: str(p.tokens_per_month_m),
     usd: str(p.mode === 'fixed' ? (p.usd_per_m_set ?? p.usd_per_m) : undefined),
   }
@@ -93,6 +96,7 @@ export function toPlan(d, slugs) {
   if (d.mode === 'amortized') {
     const paid = num(d.paid), tokens = num(d.tokens)
     if (paid === null || Number.isNaN(paid) || paid < 0) return { problem: `${name}: enter what you paid` }
+    if (!validPeriod(d.months)) return { problem: `${name}: choose a positive subscription period` }
     plan.paid_usd = paid
     plan.period_months = d.months
     if (tokens !== null) {
