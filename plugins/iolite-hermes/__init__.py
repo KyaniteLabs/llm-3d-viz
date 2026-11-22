@@ -1166,9 +1166,9 @@ def _validate_plan(raw: Any, n: int) -> Tuple[Optional[dict], Optional[str]]:
 def _read_my_prices() -> dict:
     """Your own prices, from my_prices.json in the plugin data directory. You write that file
     (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
-    Returns plans, problems, and a revision of the file; a plan's usd_per_m is None while it waits for
-    measured usage. A missing file gives no plans and no problems. Never raises."""
-    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": None}
+    Returns plans, problems, a revision, and the number of plans that could not be loaded.
+    A plan's usd_per_m is None while it waits for measured usage. Never raises."""
+    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": None, "skipped_plans": 0}
     try:
         path = _data_dir() / MY_PRICES_FILE
         try:
@@ -1180,18 +1180,22 @@ def _read_my_prices() -> dict:
             out["problems"].append("my_prices.json is not a small regular file")
             return out
         raw_file = path.read_bytes()
-        out["revision"] = hashlib.sha256(raw_file).hexdigest()
         data = json.loads(raw_file)
         plans = data.get("plans") if isinstance(data, dict) else None
         if not isinstance(plans, list):
             out["problems"].append("my_prices.json has no 'plans' list")
             return out
+        out["skipped_plans"] = max(0, len(plans) - MY_PRICES_MAX_PLANS)
+        if out["skipped_plans"]:
+            out["problems"].append(f"my_prices.json has more than {MY_PRICES_MAX_PLANS} plans")
         for n, raw in enumerate(plans[:MY_PRICES_MAX_PLANS], 1):
             clean, problem = _validate_plan(raw, n)
             if problem:
                 out["problems"].append(problem)
+                out["skipped_plans"] += 1
                 continue
             out["plans"].append({**clean, "usd_per_m": _my_plan_price(clean)})
+        out["revision"] = hashlib.sha256(raw_file).hexdigest()
     except Exception:
         out["problems"].append("my_prices.json could not be read as JSON")
     return out
@@ -1217,10 +1221,11 @@ def save_my_prices(payload: Any) -> dict:
         return {"ok": False, "problems": ["the plans are too large to save"]}
     revision = payload.get("revision")
     with _my_prices_lock:
-        if revision is not None:
-            current = _read_my_prices()["revision"]
-            if current is None or current != revision:
-                return {"ok": False, "problems": ["Saved plans changed or could not be read. Refresh before saving again."]}
+        current = _read_my_prices()
+        if current["revision"] is None or current["skipped_plans"]:
+            return {"ok": False, "problems": ["Fix or back up and move my_prices.json before refreshing and saving again."]}
+        if revision is not None and current["revision"] != revision:
+            return {"ok": False, "problems": ["Saved plans changed. Refresh before saving again."]}
         d = _data_dir()
         d.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
@@ -1307,7 +1312,7 @@ def my_prices_state(rows: List[dict]) -> dict:
             e["usd_per_m_set"] = p.get("usd_per_m")
         shown.append(e)
     return {"prices": my_price_overrides(rows, plans), "plans": shown, "problems": problems[:10],
-            "file": MY_PRICES_FILE, "revision": mine["revision"]}
+            "file": MY_PRICES_FILE, "revision": mine["revision"], "skipped_plans": mine["skipped_plans"]}
 
 
 def landscape_state() -> dict:

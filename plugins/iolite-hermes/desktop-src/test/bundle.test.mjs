@@ -54,8 +54,9 @@ let cursor = 0, slots, pending, cleanups
 const instances = new Map()
 export function useState(value) {
   const i = cursor++
-  if (!(i in slots)) slots[i] = typeof value === 'function' ? value() : value
-  return [slots[i], next => { slots[i] = typeof next === 'function' ? next(slots[i]) : next }]
+  const state = slots
+  if (!(i in state)) state[i] = typeof value === 'function' ? value() : value
+  return [state[i], next => { state[i] = typeof next === 'function' ? next(state[i]) : next }]
 }
 export function useRef() { const i = cursor++; return slots[i] ||= { current: null } }
 export function useMemo(f) { return f() }
@@ -75,7 +76,13 @@ export function render(Component, props) {
   const tasks = pending; pending = []; tasks.forEach(f => f())
   return tree
 }
-export function unmount() { for (const instance of instances.values()) instance.cleanups.forEach(f => { if (f) f() }) }
+export function unmount(Component) {
+  for (const [key, instance] of instances) {
+    if (Component && key !== Component) continue
+    instance.cleanups.forEach(f => { if (f) f() })
+    instances.delete(key)
+  }
+}
 `
 
 const nodes = tree => !tree || typeof tree !== 'object' ? [] : [tree, ...tree.children.flat(Infinity).flatMap(nodes)]
@@ -91,16 +98,17 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     const registered = [], reads = [], writes = []
     const ctx = { register: c => registered.push(c), rest: (route, opts) => new Promise(resolve => {
       if (route === '/landscape') reads.push(resolve)
-      else if (route === '/my-prices') writes.push({ plans: opts.body.plans, resolve })
+      else if (route === '/my-prices') writes.push({ ...opts.body, resolve })
     }) }
     plugin.register(ctx)
     registered.find(c => c.area === 'command-palette').data.run()
     const el = stubs.calls.workspaces[0].opts.render()
     const pane = () => nodes(hooks.render(el.type, el.props))
     const button = (tree, name) => tree.find(n => n.type === 'button' && n.children[0] === name)
-    const plans = () => {
-      const editor = pane().find(n => n.props.id === 'iolite-my-plans').children[0]
-      hooks.render(editor.type, editor.props)
+    const planEditor = () => pane().find(n => n.props.id === 'iolite-my-plans').children[0]
+    const plans = (settled = true) => {
+      const editor = planEditor()
+      if (settled) hooks.render(editor.type, editor.props)
       return nodes(hooks.render(editor.type, editor.props))
     }
     const field = tree => tree.find(n => n.props.d)
@@ -111,7 +119,10 @@ test('built plan editor guards whole-list saves across loading, failed reads and
       assert.equal(writes.length, 0)
     }
     const resolveRead = async data => { reads.at(-1)(data); await Promise.resolve() }
-    const valid = { ok: true, my_prices: { plans: [{ name: 'Existing', mode: 'sunk', models: ['gpt-6.1-sol'] }], prices: {}, problems: [] } }
+    const valid = { ok: true, my_prices: {
+      plans: [{ name: 'Existing', mode: 'amortized', paid_usd: 12, period_months: 1, models: ['gpt-6.1-sol'] }],
+      prices: {}, problems: ['Existing: waiting for measured usage'], revision: 'first-valid-read', skipped_plans: 0,
+    } }
 
     button(pane(), 'My plans').props.onClick()
     assertBlocked()
@@ -121,6 +132,13 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     pane()
     await resolveRead({ ok: true, my_prices: { plans: [], problems: ['my_prices.json could not be read as JSON'] } })
     assertBlocked()
+    assert.ok(plans().some(node => containsText(node, 'back up and move my_prices.json')))
+
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, skipped_plans: 1 } })
+    assertBlocked()
+    assert.ok(plans().some(node => containsText(node, 'saved plan could not be loaded')))
 
     button(pane(), 'Refresh').props.onClick()
     pane()
@@ -136,7 +154,7 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     assert.equal(field(plans()).props.d.name, 'Edited draft')
     button(pane(), 'Refresh').props.onClick()
     pane()
-    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, plans: [
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, revision: 'external-save', plans: [
       ...valid.my_prices.plans, { name: 'Saved elsewhere', mode: 'sunk', models: ['gpt-6.1-sol'] },
     ] } })
     assertBlocked()
@@ -157,6 +175,32 @@ test('built plan editor guards whole-list saves across loading, failed reads and
     assert.equal(!!retry.props.disabled, false)
     retry.props.onClick()
     assert.equal(writes.length, 2, 'a failed write can be retried')
+    assert.equal(writes[1].revision, 'first-valid-read')
+    writes[1].resolve({ ok: true })
+    await Promise.resolve()
+    const pendingField = field(plans()).props
+    assert.equal(pendingField.disabled, true, 'editing waits for the post-save read')
+    pendingField.onChange({ ...pendingField.d, name: 'Unexpected edit' })
+    assert.equal(field(plans()).props.d.name, 'Edited draft')
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, revision: 'own-save', plans: writes[1].plans } })
+    assert.equal(button(plans(false), 'Save plans').props.disabled, true, 'the new revision waits for its matching drafts')
+    assert.equal(button(plans(), 'Save plans').props.disabled, false, 'the editor accepts its own new revision')
+    assert.equal(field(plans()).props.disabled, false)
+
+    const stale = field(plans()).props
+    stale.onChange({ ...stale.d, name: 'Discarded draft' })
+    button(pane(), 'Refresh').props.onClick()
+    pane()
+    await resolveRead({ ...valid, my_prices: { ...valid.my_prices, revision: 'newer-save', plans: [
+      { name: 'Saved elsewhere', mode: 'sunk', models: ['gpt-6.1-sol'] },
+    ] } })
+    assert.equal(button(plans(), 'Save plans').props.disabled, true)
+    const editor = planEditor()
+    button(pane(), 'My plans').props.onClick()
+    hooks.unmount(editor.type)
+    button(pane(), 'My plans').props.onClick()
+    assert.equal(field(plans()).props.d.name, 'Saved elsewhere')
+    assert.equal(button(plans(), 'Save plans').props.disabled, false, 'reopening loads the latest list')
   } finally { if (hooks) hooks.unmount(); rmSync(dir, { recursive: true, force: true }) }
 })
 
@@ -233,6 +277,14 @@ host.onEvent = (name, fn) => { listeners.set(name, fn); return () => listeners.d
     hooks.unmount()
     assert.equal(stubs.listeners.size, 0)
   } finally { if (hooks) hooks.unmount(); rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('bundle ships the font assets and their SIL Open Font License notice', () => {
+  const notice = readFileSync(path.join(here, '../FONT-LICENSE.txt'), 'utf8').trimEnd()
+  assert.ok(src.includes(`\n/*\n${notice}\n*/`))
+  assert.equal((src.match(/data:font\/woff2;base64,/g) || []).length, 3)
+  assert.match(src, /@font-face \{ font-family: 'Iolite Inter Tight'/)
+  assert.match(src, /@font-face \{ font-family: 'Iolite IBM Plex Mono'/)
 })
 
 test('bundle: no forbidden constructs and no remote or dynamic imports', () => {

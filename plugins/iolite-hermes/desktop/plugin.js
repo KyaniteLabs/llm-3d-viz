@@ -1062,36 +1062,32 @@ function planRevision(mine, plans) {
   ]));
 }
 function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
-  const fileError = Array.isArray(mine?.problems) && mine.problems.some((p) => typeof p === "string" && p.startsWith("my_prices.json "));
-  const savedPlans = !loading && Array.isArray(mine?.plans) && !fileError ? mine.plans : null;
+  const fileError = mine?.revision === null || mine?.revision === void 0 && Array.isArray(mine?.problems) && mine.problems.some((p) => typeof p === "string" && p.startsWith("my_prices.json "));
+  const skipped = mine?.skipped_plans ?? 0;
+  const savedPlans = !loading && Array.isArray(mine?.plans) && !fileError && !skipped ? mine.plans : null;
   const revision = savedPlans === null ? null : planRevision(mine, savedPlans);
-  const draftRevision = useRef(revision);
-  const [drafts, setDrafts] = useState(() => savedPlans?.map(toDraft) ?? null);
+  const [draft, setDraft] = useState(() => ({ revision, plans: savedPlans?.map(toDraft) ?? null }));
   const [status, setStatus] = useState(null);
   const [template, setTemplate] = useState("");
   const dirty = useRef(false);
   const saveInFlight = useRef(false);
   useEffect(() => {
-    if (savedPlans && !dirty.current) {
-      draftRevision.current = revision;
-      setDrafts(savedPlans.map(toDraft));
-    }
+    if (savedPlans && !dirty.current) setDraft({ revision, plans: savedPlans.map(toDraft) });
   }, [savedPlans, revision]);
   const slugs = useMemo(() => models.map((m) => m.s), [models]);
   const savedByName = new Map((savedPlans || []).map((p) => [p.name, p]));
   const saving = status?.kind === "saving";
-  const editDisabled = drafts === null || saving;
-  const synced = revision !== null && revision === draftRevision.current;
+  const synced = revision !== null && revision === draft.revision;
+  const editDisabled = !synced || saving;
   const conflict = dirty.current && revision !== null && !synced;
-  const canSave = synced && !editDisabled;
   const updateDrafts = (update) => {
     if (editDisabled || saveInFlight.current) return;
     dirty.current = true;
-    setDrafts(update);
+    setDraft((prev) => ({ ...prev, plans: update(prev.plans) }));
   };
   const save = async () => {
-    if (!canSave || saveInFlight.current) return;
-    const out = drafts.map((d) => toPlan(d, slugs));
+    if (editDisabled || saveInFlight.current) return;
+    const out = draft.plans.map((d) => toPlan(d, slugs));
     const problems = out.filter((o) => o.problem).map((o) => o.problem);
     if (problems.length) {
       setStatus({ kind: "error", text: problems.join("; ") });
@@ -1104,7 +1100,7 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
     saveInFlight.current = true;
     setStatus({ kind: "saving", text: "Saving\u2026" });
     try {
-      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan), revision: typeof mine?.revision === "string" ? draftRevision.current : void 0 }, timeoutMs: 5e3 });
+      const res = await ctx.rest("/my-prices", { method: "POST", body: { plans: out.map((o) => o.plan), revision: typeof mine?.revision === "string" ? draft.revision : void 0 }, timeoutMs: 5e3 });
       if (res?.ok) {
         dirty.current = false;
         setStatus({ kind: "info", text: `Saved ${out.length} plan${out.length === 1 ? "" : "s"} on this machine.` });
@@ -1123,6 +1119,7 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
     updateDrafts((ds) => [...ds, t ? fromTemplate(t) : blankDraft()]);
     setTemplate("");
   };
+  const readNotice = loading ? "Reading saved plans before enabling Save." : skipped ? `${skipped} saved plan${skipped === 1 ? "" : "s"} could not be loaded. Fix or back up and move my_prices.json, then refresh.` : fileError ? "Could not read saved plans. Fix or back up and move my_prices.json, then refresh." : "Could not read saved plans. Refresh before saving.";
   return h(
     "section",
     { "aria-label": "My plans", style: { margin: "0 16px 12px", background: pal.panelRaised, border: `1px solid ${pal.hair}`, borderRadius: 8, padding: 12, display: "grid", gap: 10 } },
@@ -1132,24 +1129,20 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
       { style: { margin: 0, fontSize: 12, color: pal.muted } },
       "Price the models you already pay for, so the front shows what is cheapest for you. Saved to my_prices.json in the Iolite plugin data folder; it stays on this machine. Templates fill in the provider only; amounts are yours."
     ),
-    savedPlans === null ? h(
-      "p",
-      { style: { margin: 0, color: pal.muted } },
-      loading ? "Reading saved plans before enabling Save." : "Could not read saved plans. Refresh before saving."
-    ) : null,
+    savedPlans === null ? h("p", { style: { margin: 0, color: pal.muted } }, readNotice) : null,
     conflict ? h(
       "p",
       { role: "alert", style: { margin: 0, color: pal.copper } },
       "Saved plans changed. Reopen My plans to load the new list before saving."
     ) : null,
-    (drafts || []).map((d, i) => h(PlanFields, {
+    (draft.plans || []).map((d, i) => h(PlanFields, {
       key: d.id,
       d,
       n: i + 1,
       models,
       pal,
       saved: savedByName.get(d.name.trim()),
-      disabled: saving,
+      disabled: editDisabled,
       onChange: (nd) => updateDrafts((ds) => ds.map((x) => x.id === d.id ? nd : x)),
       onRemove: () => updateDrafts((ds) => ds.filter((x) => x.id !== d.id))
     })),
@@ -1168,7 +1161,7 @@ function PlansEditor({ ctx, mine, loading, models, pal, onSaved }) {
         )
       ),
       h("button", { type: "button", onClick: add, disabled: editDisabled, style: btn(pal) }, "Add plan"),
-      h("button", { type: "button", onClick: save, disabled: !canSave, style: { ...btn(pal), background: pal.frontier, color: pal.ground, borderColor: pal.frontier } }, "Save plans")
+      h("button", { type: "button", onClick: save, disabled: editDisabled, style: { ...btn(pal), background: pal.frontier, color: pal.ground, borderColor: pal.frontier } }, "Save plans")
     ),
     status ? h("div", { role: status.kind === "error" ? "alert" : "status", style: { fontSize: 12, color: status.kind === "error" ? pal.copper : pal.text } }, status.text) : null
   );

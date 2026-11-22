@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("iolite_plugin_myprices", ROOT / "__init__.py")
 plugin = importlib.util.module_from_spec(spec)
@@ -20,7 +22,7 @@ def _at(tmp_path, monkeypatch, body):
 
 def test_no_file_means_no_plans_and_no_problems(tmp_path, monkeypatch):
     _at(tmp_path, monkeypatch, None)
-    assert plugin._read_my_prices() == {"plans": [], "problems": [], "revision": "missing"}
+    assert plugin._read_my_prices() == {"plans": [], "problems": [], "revision": "missing", "skipped_plans": 0}
     assert plugin.landscape_state()["my_prices"]["prices"] == {}
 
 
@@ -98,3 +100,47 @@ def test_revision_missing_cannot_overwrite_an_unreadable_file(tmp_path, monkeypa
     path.write_bytes(oversized)
     assert plugin.save_my_prices({"plans": [], "revision": revision})["ok"] is False
     assert path.read_bytes() == oversized
+
+
+def test_revision_missing_cannot_overwrite_a_new_valid_file(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    revision = plugin.landscape_state()["my_prices"]["revision"]
+    saved = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    contents = b'{"plans": []}'
+    saved.write_bytes(contents)
+    assert plugin.save_my_prices({"plans": [], "revision": revision})["ok"] is False
+    assert saved.read_bytes() == contents
+
+
+@pytest.mark.parametrize("extra", ["invalid plan", "over the limit"])
+def test_save_refuses_to_discard_plans_skipped_during_read(tmp_path, monkeypatch, extra):
+    valid = {"name": "Existing", "mode": "sunk", "models": ["glm-5.3"]}
+    plans = [valid, {"name": "Bad plan", "mode": "sunk"}] if extra == "invalid plan" else [valid] * (plugin.MY_PRICES_MAX_PLANS + 1)
+    _at(tmp_path, monkeypatch, {"plans": plans})
+    state = plugin.landscape_state()["my_prices"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    change = {"plans": [valid], "revision": state["revision"]}
+    assert plugin.save_my_prices(change)["ok"] is False
+    assert plugin.save_my_prices({"plans": [valid]})["ok"] is False
+    assert state["skipped_plans"] == 1
+    assert path.read_bytes() == before
+
+
+def test_failed_parse_cannot_be_overwritten_from_editor(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, "{not json")
+    state = plugin.landscape_state()["my_prices"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    assert plugin.save_my_prices({"plans": [], "revision": state["revision"]})["ok"] is False
+    assert plugin.save_my_prices({"plans": []})["ok"] is False
+    assert state["revision"] is None
+    assert path.read_bytes() == before
+
+
+def test_measured_usage_notice_does_not_block_editor_save(tmp_path, monkeypatch):
+    plan = {"name": "Subscription", "mode": "amortized", "paid_usd": 12, "period_months": 1, "match": ["glm"]}
+    _at(tmp_path, monkeypatch, {"plans": [plan]})
+    state = plugin.landscape_state()["my_prices"]
+    assert any("waiting for measured usage" in note for note in state["problems"])
+    assert plugin.save_my_prices({"plans": [plan], "revision": state["revision"]})["ok"]
