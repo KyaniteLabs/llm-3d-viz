@@ -156,6 +156,10 @@ def test_measured_usage_notice_does_not_block_editor_save(tmp_path, monkeypatch)
     {"tokens_per_month_m": "50"},
     {"custom_note": "keep this annotation"},
     {"name": "a" * 81},
+    {"name": "Credits <team>"},
+    {"name": "Credits `team`"},
+    {"name": "Credits @team"},
+    {"name": "Credits\u2060 team"},
 ])
 def test_save_preserves_a_file_with_a_partly_representable_plan(tmp_path, monkeypatch, partial):
     plan = {"name": "Existing", "mode": "amortized", "paid_usd": 36, "period_months": 18, "models": ["glm-5.3"]}
@@ -178,3 +182,16 @@ def test_save_allows_normalizing_case_spacing_and_optional_empty_values(tmp_path
     assert plugin.save_my_prices({"plans": state["plans"], "revision": state["revision"]})["ok"]
     saved = plugin.landscape_state()["my_prices"]["plans"][0]
     assert (saved["name"], saved["period_months"], saved["models"]) == ("Existing plan", 2, ["glm-5.3"])
+
+
+def test_plan_names_previously_sanitized_by_iolite_remain_editable(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    plan = {"name": "Credits @team <private> `preview`", "mode": "sunk", "models": ["glm-5.3"]}
+    assert plugin.save_my_prices({"plans": [plan]})["ok"]
+    state = plugin.landscape_state()["my_prices"]
+    assert state["skipped_plans"] == 0
+    assert state["plans"][0]["name"] == "Credits @\u200bteam ‹private› 'preview'"
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    assert plugin.save_my_prices({"plans": state["plans"], "revision": state["revision"]})["ok"]
+    assert path.read_bytes() == before

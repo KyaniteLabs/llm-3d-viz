@@ -1169,8 +1169,12 @@ def _plan_editor_problem(raw: dict, clean: dict) -> Optional[str]:
     if any(key not in clean and value is not None for key, value in raw.items()):
         return f"{name}: contains fields the editor cannot preserve"
     raw_name = raw.get("name")
-    if raw_name is not None and (not isinstance(raw_name, str) or len(_safe_text(raw_name, 81)) > 80):
-        return f"{name}: saved name cannot be preserved by the editor"
+    if raw_name is not None:
+        # A stored name may already contain Iolite's escaped markup or @ marker.
+        # Accept that canonical form and whitespace cleanup, but never rewrite other text.
+        normalized_name = " ".join(raw_name.split()) if isinstance(raw_name, str) else None
+        if normalized_name not in ("", name):
+            return f"{name}: saved name cannot be preserved by the editor"
     for key in ("models", "match"):
         entries = raw.get(key)
         if entries is not None and (not isinstance(entries, list) or len(entries) != len(clean[key])):
