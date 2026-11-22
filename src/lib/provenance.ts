@@ -16,6 +16,22 @@ const ORIGIN_LABEL: Record<string, string> = {
   curated: "curated lab map", // W1 truth-source openness — curation, not a provider statement
 };
 
+/** Catalog-wide credits for the method strip and Cinema exports. */
+export function formatCatalogSourceLabel(models: readonly Model[]): string {
+  const origins = new Set<string>();
+  for (const model of models) {
+    for (const [field, stamp] of Object.entries(model.sources ?? {})) {
+      if (stamp && model[field as keyof Model] != null) origins.add(stamp.origin);
+    }
+  }
+  const credits = [];
+  if (origins.has("aa") || origins.has("aa-api")) credits.push(ORIGIN_LABEL.aa);
+  if (origins.has("openrouter")) credits.push(ORIGIN_LABEL.openrouter);
+  if (origins.has("arena")) credits.push("Arena (CC BY 4.0)");
+  if (origins.has("provider")) credits.push("provider-published figures");
+  return credits.join(" · ") || "Iolite catalog";
+}
+
 const KIND_LABEL: Record<string, string> = {
   measured: "measured",
   list: "list price",
@@ -37,7 +53,7 @@ const FIELD_SHORT: Record<string, string> = {
   modality: "modality",
   cost_per_index_task_usd: "cost/task",
   time_per_index_task_s: "time/task",
-  arena_elo: "Arena Elo",
+  arena_elo: "Arena rating",
   openness: "openness",
 };
 
@@ -118,9 +134,12 @@ export function formatCoverageBadge(opts: {
 
 /** Extra inspector lines for optional metrics (Arena, task cost/time). */
 export function optionalMetricDlRows(model: Model): string {
+  const published = model.arena_publish_date && /^\d{4}-\d{2}-\d{2}$/.test(model.arena_publish_date)
+    ? ` · ${model.arena_publish_date}`
+    : "";
   const arena =
     model.arena_elo != null
-      ? `<div><dt>Arena Elo</dt><dd>${formatArenaElo(model.arena_elo)}</dd></div>`
+      ? `<div><dt>Arena rating</dt><dd>${formatArenaElo(model.arena_elo)}${published}</dd></div>`
       : "";
   const costTask =
     model.cost_per_index_task_usd != null && model.cost_per_index_task_usd > 0

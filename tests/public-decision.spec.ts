@@ -49,3 +49,45 @@ test("newly scored releases show the date from the Epoch row", async ({ page }) 
   const { generated } = JSON.parse(readFileSync(catalog, "utf8")) as { generated: string };
   await expect(page.getByText(`Snapshot ${generated}`, { exact: false })).toBeVisible();
 });
+
+test("original Decide explains missing measurements and links to the public shortlist", async ({ page }) => {
+  await page.goto("/?view=observatory");
+  await expect(page.locator("[data-story-line]")).toContainText("No models have measurements for all three axes");
+  await expect(page.getByRole("region", { name: "Simple model picker" })
+    .getByRole("link", { name: "Compare public model prices" })).toBeVisible();
+  await page.locator("[data-decide-toggle]").click();
+  await expect(page.locator("[data-decide-chart]")).toContainText("This catalog has no models with both a capability score and a blended price.");
+  await page.getByRole("link", { name: "Compare public model prices" }).click();
+  await expect(page.getByRole("table")).toBeVisible();
+});
+
+test("public Cinema credits the available observatory sources", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?view=observatory");
+  await expect(page.locator("html")).toHaveAttribute("data-stage-backend", "r3f");
+  await page.waitForFunction(() => typeof (window as any).__viz?.captureCinemaFrame === "function");
+  await page.keyboard.press("c");
+  const method = page.locator("[data-cinema-method]");
+  await expect(method).toContainText("Arena");
+  await expect(method).toContainText(/catalog \d{4}-\d{2}-\d{2}/);
+  await expect(method).not.toContainText(/Artificial Analysis|OpenRouter/);
+  await expect.poll(() => method.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  const exported = await page.evaluate(() => {
+    const credits: string[] = [];
+    const original = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
+      credits.push(text);
+      original.call(this, text, x, y, maxWidth);
+    };
+    try {
+      const uri = (window as any).__viz.captureCinemaFrame() as string;
+      return { createdPng: uri.startsWith("data:image/png"), credits };
+    } finally {
+      CanvasRenderingContext2D.prototype.fillText = original;
+    }
+  });
+  expect(exported.createdPng).toBe(true);
+  expect(exported.credits).toContain("Iolite");
+  expect(exported.credits.join(" ")).toContain("Arena");
+  expect(exported.credits.join(" ")).not.toContain("OpenRouter");
+});

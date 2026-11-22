@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
+import { resolve } from "node:path";
 import sharp from "sharp";
+import { createServer, normalizePath, type ViteDevServer } from "vite";
 
 /**
  * V01 pixel-level regression: display-P3 whiteout.
@@ -31,14 +33,15 @@ async function whitePct(buf: Buffer): Promise<number> {
   return (white / px) * 100;
 }
 
-async function waitForStageReady(page: Page, timeoutMs = 20_000): Promise<void> {
-  await page.goto("/");
+async function waitForStageReady(page: Page, origin: string, backend: "r3f" | "plotly"): Promise<void> {
+  await page.goto(new URL(`/?stage=${backend}&age=0&me=0`, origin).href);
   await page.waitForFunction(
-    () => {
+    (expectedBackend) => {
       const v = (window as any).__viz;
-      return v?.visibleCount != null && v.visibleCount > 0 && v.pointCount > 0;
+      return document.documentElement.dataset.stageBackend === expectedBackend && v?.pointCount > 0;
     },
-    { timeout: timeoutMs },
+    backend,
+    { timeout: 20_000 },
   );
   // Give Plotly + Three extra paint cycles to settle colours.
   await page.waitForTimeout(2000);
@@ -55,15 +58,46 @@ async function waitForProjectionsRendered(page: Page, timeoutMs = 15_000): Promi
       }
       return true;
     },
+    null,
     { timeout: timeoutMs },
   );
   await page.waitForTimeout(1000); // extra settle for Plotly animations
 }
 
 test.describe("V01 display-P3 whiteout pixel regression", () => {
+  let fixtureServer: ViteDevServer;
+  let fixtureOrigin: string;
+
+  test.beforeAll(async () => {
+    // Mount the real app against test-only data on loopback. Public artifacts
+    // and the normal browser server always use their own catalog.
+    const catalog = normalizePath(resolve("data/models.v0.draft.json"));
+    let fixtureCatalog: string;
+    fixtureServer = await createServer({
+      cacheDir: ".cache/render-fixture/vite",
+      server: { host: "127.0.0.1", port: 4214, hmr: false },
+      plugins: [{
+        name: "pixel-test-catalog",
+        enforce: "pre",
+        transform(_source, id, options) {
+          return id === catalog && !options?.ssr ? fixtureCatalog : null;
+        },
+      }],
+    });
+    const { syntheticModels } = await fixtureServer.ssrLoadModule("/tests/helpers/synthetic-catalog.ts");
+    fixtureCatalog = JSON.stringify(syntheticModels);
+    await fixtureServer.listen();
+    fixtureOrigin = fixtureServer.resolvedUrls?.local[0] ?? "";
+    expect(fixtureOrigin).toMatch(/^http:\/\/127\.0\.0\.1:/);
+  });
+
+  test.afterAll(async () => {
+    await fixtureServer?.close();
+  });
+
   test("3D stage is not whiteout", async ({ page }) => {
     test.setTimeout(45_000);
-    await waitForStageReady(page);
+    await waitForStageReady(page, fixtureOrigin, "r3f");
     const stage = page.locator(".stage-visual");
     const buf = await stage.screenshot();
     const pct = await whitePct(buf);
@@ -74,7 +108,7 @@ test.describe("V01 display-P3 whiteout pixel regression", () => {
 
   test("projection panels are not whiteout", async ({ page }) => {
     test.setTimeout(60_000);
-    await waitForStageReady(page);
+    await waitForStageReady(page, fixtureOrigin, "r3f");
     // Projections are visible in 3D mode (hidden only in table mode).
     await waitForProjectionsRendered(page);
 
@@ -91,22 +125,12 @@ test.describe("V01 display-P3 whiteout pixel regression", () => {
     }
   });
 
-  test("Plotly layout colours are sRGB hex, not raw display-p3", async ({ page }) => {
+  test("Plotly receives both background colours in sRGB", async ({ page }) => {
     test.setTimeout(45_000);
-    await waitForStageReady(page);
-    const colours = await page.evaluate(() => {
-      const results: Record<string, string> = {};
-      const gd = (window as any).__viz?.gd;
-      if (gd?.layout) {
-        results.paper_bgcolor = String(gd.layout.paper_bgcolor ?? "");
-        results.plot_bgcolor = String(gd.layout.plot_bgcolor ?? "");
-      }
-      return results;
-    });
-    // Every Plotly colour must be a plain hex — no "color(display-p3" leak.
-    for (const [key, val] of Object.entries(colours)) {
-      expect(val, `${key} should be hex`).toMatch(/^#[0-9a-f]{3,8}$/i);
-      expect(val, `${key} must not contain display-p3`).not.toContain("display-p3");
-    }
+    await waitForStageReady(page, fixtureOrigin, "plotly");
+    const srgb = /^(?:#[0-9a-f]{3}(?:[0-9a-f]{3})?|rgb\(\d{1,3},\s*\d{1,3},\s*\d{1,3}\))$/i;
+    const layout = await page.evaluate(() => (window as any).__viz.gd.layout);
+    expect(layout.paper_bgcolor).toMatch(srgb);
+    expect(layout.plot_bgcolor).toMatch(srgb);
   });
 });

@@ -703,7 +703,7 @@ export class DecisionConsole {
 
   private leaderboard(state: Readonly<AppState>, activePreset: string | undefined) {
     if (state.decideMode) {
-      return `<p class="console-note" data-decide-leaderboard-suppressed>Value-score optimum is off in Decide mode — use the shortlist and cost×speed chart above.</p>`;
+      return `<p class="console-note" data-decide-leaderboard-suppressed>Use the Decide shortlist and chart above.</p>`;
     }
     if (this.models.length === 0) {
       return `<p class="console-note">No models in the visible set. Relax age, provider, or family filters — or Clear filters.</p>`;
@@ -962,16 +962,18 @@ export class DecisionConsole {
   private positionTooltip() {
     if (this.tooltip.hidden) return;
     const offset = 12;
+    const maxLeft = window.innerWidth - this.tooltip.offsetWidth;
+    const maxTop = window.innerHeight - this.tooltip.offsetHeight;
     const left =
-      this.cursor.x + offset + this.tooltip.offsetWidth > window.innerWidth
+      this.cursor.x + offset > maxLeft
         ? this.cursor.x - this.tooltip.offsetWidth - offset
         : this.cursor.x + offset;
     const top =
-      this.cursor.y + offset + this.tooltip.offsetHeight > window.innerHeight
+      this.cursor.y + offset > maxTop
         ? this.cursor.y - this.tooltip.offsetHeight - offset
         : this.cursor.y + offset;
-    this.tooltip.style.left = `${left}px`;
-    this.tooltip.style.top = `${top}px`;
+    this.tooltip.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`;
+    this.tooltip.style.top = `${Math.max(0, Math.min(top, maxTop))}px`;
   }
 
   handleHover(modelId: string, clientX?: number, clientY?: number) {
