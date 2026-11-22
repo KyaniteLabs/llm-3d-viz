@@ -27,11 +27,14 @@ Iolite plots a curated catalog of large language models in a Three.js/WebGL stag
 npm install
 npm run dev          # local Vite
 npm test             # vitest
-npm run build
+npm run build         # public build in this OSS checkout
+npm run preview      # serve the generated dist/ files
 npm run test:render  # Playwright (optional)
 ```
 
-Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[docs/forkers/README.md](docs/forkers/README.md)** for branding, lab colors, tokens, catalog, and defaults.
+Open the local Vite URL printed by `npm run dev` when working on the app. The dev server serves the checked-in snapshots of model pages, embeds, and Frontier Watch for direct-file consumers. Run `npm run build` followed by `npm run preview` to see freshly generated pages, the sitemap, and redirects in `dist/`. `npm run build:public` explicitly selects the public data plane. Maintainers with a private catalog can build it with `VIZ_DATA_PLANE=private npm run build`. The scheduled private catalog refresh also enables movement tracking.
+
+To customize a fork, see **[docs/forkers/README.md](docs/forkers/README.md)** for branding, lab colors, tokens, catalog, and defaults.
 
 ## Features
 
@@ -41,7 +44,7 @@ Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[do
 - **Provenance and coverage:** The curated catalog keeps per-axis source information where available and reports measured versus missing fields. Missing Index, tokens-per-second, or price values remain missing; the client does not invent metrics.
 - **Atlas:** The in-app Atlas dock can navigate catalog and app state with offline tools, with optional BYOK OpenAI-compatible or Anthropic-compatible LLM configuration. Atlas CLI and MCP are local developer surfaces, not hosted public endpoints.
 - **Per-model pages and embed cards:** every catalog model gets a static, self-contained card at `/m/<slug>/` plus an iframe-embeddable card at `/embed/<slug>`, with an all-models index at `/m/` — all regenerated from the catalog on every build with per-field provenance and catalog-date stamps.
-- **SEO and agent assets:** `public/` ships `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `about.md`, the per-model `/m/<slug>/` pages + `/embed/<slug>` cards, the `/blog/2026-08-24-model-observatory/` launch post, the `/frontier-watch.md` movement log, and the `index.html` meta/JSON-LD surface for crawlers and agents.
+- **SEO and agent assets:** The build ships `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `about.md`, the per-model `/m/<slug>/` pages + `/embed/<slug>` cards, the `/blog/2026-08-24-model-observatory/` launch post, Frontier Watch, and the `index.html` meta/JSON-LD surface for crawlers and agents.
 
 ## Docs
 
@@ -55,7 +58,7 @@ Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[do
 
 ## SEO / GEO / AIEO (crawl + agents)
 
-Static discovery files ship from `public/` and are served at the site root:
+The build serves static discovery files at the site root.
 
 | Path | Purpose |
 |------|---------|
@@ -67,8 +70,12 @@ Static discovery files ship from `public/` and are served at the site root:
 | `/m/<slug>/` | Static per-model cards (zero JS, provenance-labeled) + `/m/` index |
 | `/embed/<slug>` | Iframe-embeddable per-model cards (legacy `/embed/<slug>.html` links 308-redirect to the canonical path) |
 | `/blog/2026-08-24-model-observatory/` | Launch post (SEO + AIGEO structured) |
-| `/frontier-watch.md` | Pareto-frontier movement log (price × intelligence) |
+| `/frontier-watch.md` | Public price × capability snapshot or private measured frontier and movement log |
+| `/frontier-watch.json` | Machine-readable frontier with fields specific to the build's data plane |
+| `/frontier-watch.xml` | Atom feed of recorded private movements. The public feed has no entries with a single comparable snapshot. |
 | `index.html` meta + JSON-LD | Classic SEO, social, and schema.org metadata |
+
+The public Frontier Watch uses the bundled decision catalog with direct Epoch Capabilities Index scores and LiteLLM list prices. This catalog has its own coverage. A frontier model may have no `/m/` card in the separate observatory catalog. Public JSON uses the snapshot date (`YYYY-MM-DD`) in `as_of`, includes `score_basis` and `price_basis`, and carries decision-catalog rows with nested `price` and `intelligence` fields. Private JSON uses an ISO timestamp and rows with `model`, `provider`, `price`, `ii`, and `tps`. A tracked private run includes that run's events in `events` and records movement history for the Atom feed.
 
 Canonical production host: **https://viz.kyanitelabs.tech/**.
 
@@ -97,7 +104,7 @@ Atlas CLI and MCP run against the local repository/catalog. They are not hosted 
 
 ### What does Iolite measure?
 
-It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. This repository ships the PUBLIC data plane: publicly displayed measurements come only from the Arena leaderboard (CC BY 4.0), vendor-published launch figures, first-party provider pricing pages, and the project's own measurements — see `/sources/` on the live site. Fields whose provenance would require a third-party measurement license are nulled rather than republished (`scripts/gen-public-catalog.mjs`); operators running the private pipeline with their own API keys fill them for internal use.
+It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. The public observatory catalog can include Arena leaderboard data (CC BY 4.0), vendor-published launch figures, first-party provider pricing, and the project's own measurements. The public Frontier Watch uses Epoch AI scores and LiteLLM list prices. See `/sources/` on the live site. `scripts/gen-public-catalog.mjs` clears restricted fields from the observatory catalog. Operators running the private pipeline with their own API keys can fill those fields for internal use.
 
 ### How does Decide mode choose a model?
 

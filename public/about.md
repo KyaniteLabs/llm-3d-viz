@@ -41,7 +41,7 @@ Some third-party measurement services are intentionally not republished here und
 
 ## Static model pages and embeds
 
-Every catalog model also gets a **static page** at `/m/<slug>/` (measured speed, blended cost, intelligence index, percentile context, provenance labels) and an **iframe-embeddable card** at `/embed/<slug>`, plus an all-models index at `/m/`. These pages are self-contained, need no JavaScript, and regenerate on every catalog refresh. `/frontier-watch.md` tracks the measured Pareto frontier (price × intelligence) as a dated movement log, and `/blog/2026-08-24-model-observatory/` is the launch post.
+Every catalog model also gets a **static page** at `/m/<slug>/` (measured speed, blended cost, intelligence index, percentile context, provenance labels) and an **iframe-embeddable card** at `/embed/<slug>`, plus an all-models index at `/m/`. These pages are self-contained, need no JavaScript, and regenerate on every build. `/frontier-watch.md` shows the public price × capability snapshot from Epoch AI scores and LiteLLM list prices. Tracked private catalog refreshes record movement in the private frontier. `/blog/2026-08-24-model-observatory/` is the launch post.
 
 ## Atlas
 
