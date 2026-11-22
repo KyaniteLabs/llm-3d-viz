@@ -66,6 +66,31 @@ describe("atlas tools", () => {
     expect(result.shortlist[0]?.id).toBe("Fast Cheap");
   });
 
+  it("ranks speed only on measured candidates and counts exclusions above the floor", () => {
+    const visible = [
+      ...catalog, m("Cheap Unknown Speed", 90, null, 0.1), m("Below Floor Unknown Speed", 30, null, 1),
+    ];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed");
+    expect(result.shortlist.map((model) => model.id)).toEqual(["Fast Cheap"]);
+    expect(result).toMatchObject({ bias: 1, mode: "cost_speed", missing_speed_count: 1 });
+    expect(result.message).toMatch(/excluded.*missing speed/i);
+  });
+
+  it("returns an explained empty speed shortlist when no speed is measured", () => {
+    const visible = [m("Cheap Unknown Speed", 90, null, 0.1)];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed");
+    expect(result).toMatchObject({ shortlist: [], mode: null, missing_speed_count: 1 });
+    expect(result.message).toMatch(/no eligible models have measured speed/i);
+  });
+
+  it.each(["min_cost", "balanced"] as const)("names the cost–intelligence fallback for %s", (objective) => {
+    const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, objective);
+    expect(result.shortlist.map((model) => model.id)).toEqual(["Cheap Unknown Speed"]);
+    expect(result).toMatchObject({ mode: "cost", missing_speed_count: 1 });
+    expect(result.message).toMatch(/price and intelligence/i);
+  });
+
   it("proposes floor from anchor model Index", () => {
     const { result, trace } = toolProposeFloor(ctx(), { anchor: "Slow Smart" });
     expect(trace.ok).toBe(true);

@@ -8,8 +8,10 @@ import {
   clampBias,
   clampFloor,
   filterPickEligible,
+  hasSpeed,
   shortlistFromDecide,
   type CostSpeedBias,
+  type DecideMode,
 } from "../decide";
 import type { AtlasAgentContext, AtlasToolTrace, RankObjective } from "./types";
 
@@ -168,20 +170,46 @@ export function toolRankEligible(
   objective: RankObjective,
   n = 3,
 ): {
-  result: { shortlist: ModelSummary[]; bias: CostSpeedBias };
+  result: {
+    shortlist: ModelSummary[];
+    bias: CostSpeedBias;
+    mode: DecideMode | null;
+    missing_speed_count: number;
+    message: string | null;
+  };
   trace: AtlasToolTrace;
 } {
   const f = clampFloor(floor);
   const bias: CostSpeedBias =
     objective === "min_cost" ? -1 : objective === "max_speed" ? 1 : clampBias(ctx.costSpeedBias);
-  const pool = ctx.visible;
-  const { shortlist } = shortlistFromDecide(pool, f, bias, n);
+  const eligible = filterPickEligible(ctx.visible, f, false);
+  const measured = eligible.filter(hasSpeed);
+  const missingSpeed = eligible.length - measured.length;
+  const needsSpeed = objective === "max_speed";
+  const { shortlist, mode } = shortlistFromDecide(needsSpeed ? measured : eligible, f, bias, n);
+  let message: string | null = null;
+  if (needsSpeed && measured.length === 0) {
+    message = missingSpeed > 0
+      ? "No eligible models have measured speed."
+      : "No models meet the floor with price and intelligence data.";
+  } else if (missingSpeed > 0) {
+    const models = missingSpeed === 1 ? "1 eligible model" : `${missingSpeed} eligible models`;
+    message = needsSpeed
+      ? `Excluded ${models} with missing speed.`
+      : `Ranked by price and intelligence because ${models} lacked measured speed.`;
+  }
   return {
-    result: { shortlist: shortlist.map(summary), bias },
+    result: {
+      shortlist: shortlist.map(summary),
+      bias,
+      mode: shortlist.length ? mode : null,
+      missing_speed_count: missingSpeed,
+      message,
+    },
     trace: {
       name: "rank_eligible",
       ok: true,
-      detail: `${shortlist.length} shortlist · ${objective} · floor ${f}`,
+      detail: `${shortlist.length} shortlist · ${objective} · floor ${f}${message ? ` · ${message}` : ""}`,
     },
   };
 }
