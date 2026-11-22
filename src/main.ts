@@ -1,8 +1,9 @@
 import "./styles/tokens.css";
-import { allModels, models, type Model } from "./data/models";
+import { allModels, isScorable, models, type Model } from "./data/models";
 import {
   applyEconomyBasis,
   detectEconomyBasis,
+  hasMappedAxes,
   sameAxisMapping,
   type AxisMapping,
   type EconomyBasis,
@@ -39,7 +40,7 @@ import {
   saveCatalogSnapshot,
   type CatalogSnapshot,
 } from "./lib/catalog-diff";
-import { formatCoverageBadge } from "./lib/provenance";
+import { formatCatalogSourceLabel, formatCoverageBadge } from "./lib/provenance";
 import { isOssEdition } from "./config/edition";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
@@ -409,7 +410,11 @@ async function boot() {
     presentationMode,
   );
 
-  const cinema = new CinemaMode(stage, store);
+  const catalogMethod = {
+    sources: formatCatalogSourceLabel(allModels),
+    asOf: allModels.map((model) => model.data_date).filter(Boolean).sort().at(-1) ?? "unknown",
+  };
+  const cinema = new CinemaMode(stage, store, catalogMethod);
   // Agent ↔ view-local control parity: register the controls that aren't store
   // state so Atlas can drive them too (ui_action bus, allow-listed).
   registerUiAction("reset_view", "Recenter the 3D camera and clear the pin", () => {
@@ -471,15 +476,15 @@ async function boot() {
     } else {
       store.update({ decideMode: next });
     }
-    decideToggle.setAttribute("aria-pressed", String(next));
-    decideToggle.classList.toggle("is-active", next);
   });
-  store.subscribe((state) => {
+  const syncDecideToggle = (state: Readonly<AppState>) => {
     if (!decideToggle) return;
     decideToggle.setAttribute("aria-pressed", String(state.decideMode));
     decideToggle.classList.toggle("is-active", state.decideMode);
     document.documentElement.dataset.decideMode = state.decideMode ? "1" : "0";
-  });
+  };
+  store.subscribe(syncDecideToggle);
+  syncDecideToggle(store.getState());
   // M1 (uiux 2026-08-15): the cinema button lives in the scope bar (header),
   // outside the console root — the old console-side lookup never found it, so
   // aria-pressed stayed "false" forever. Sync pressed state + label from here.
@@ -562,21 +567,27 @@ async function boot() {
     weights: AppState["weights"],
     axisMapping: AxisMapping,
     appState: AppState,
+    decide: ReturnType<typeof shortlistFromDecide> | null,
   ) {
     const scores = normalizedScores(visibleSet, weights, visibleSet);
     const top = weightedOptimum(scores)?.model;
-    const story = defaultStoryLine({
-      decideMode: appState.decideMode,
-      floor: appState.intelligenceFloor,
-      topModel: top ? displayName(top.model) : null,
-      nPlottable: visibleSet.length,
-      intentLabel: null,
-    });
+    const nPlottable = visibleSet.filter((model) => hasMappedAxes(model, axisMapping) &&
+      (activeBackend !== "plotly" || isScorable(model))).length;
+    const story = !appState.decideMode && visibleSet.length && nPlottable === 0
+      ? "No models have measurements for all three axes. Open Table to see coverage."
+      : defaultStoryLine({
+          decideMode: appState.decideMode,
+          decideBasis: decide?.mode === "cost" ? "intelligence" : "speed",
+          decideEligible: decide?.eligible.length,
+          floor: appState.intelligenceFloor,
+          topModel: top ? displayName(top.model) : null,
+          nPlottable,
+          intentLabel: null,
+        });
     if (storyLineEl) renderStoryLine(storyLineEl, story, top ? displayName(top.model) : null);
     const axes = `${axisMapping.x} × ${axisMapping.y} × ${axisMapping.z}`;
-    const asOf = new Date().toISOString().slice(0, 10);
-    const sources = "Artificial Analysis · OpenRouter · Arena (CC BY 4.0)";
-    latestShareInput = { story, axes, sources, asOf, nPlottable: visibleSet.length };
+    const { sources, asOf } = catalogMethod;
+    latestShareInput = { story, axes, sources, asOf, nPlottable };
     const costTaskN = visibleSet.filter(
       (m) => m.cost_per_index_task_usd != null && m.cost_per_index_task_usd > 0,
     ).length;
@@ -714,7 +725,7 @@ async function boot() {
     simpleDecision?.setModels(visibleSet);
     atlasPanel.setVisible(visibleSet);
     stageGuide.setModels(visibleSet);
-    updateTrustChrome(visibleSet, weights, axisMapping, appState);
+    updateTrustChrome(visibleSet, weights, axisMapping, appState, decide);
     document.querySelector(".stage-visual")?.classList.add("is-ready");
     document.querySelectorAll(".stage-placeholder").forEach((el) => {
       el.classList.add("is-dismissed");
