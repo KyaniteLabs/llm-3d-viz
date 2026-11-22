@@ -1561,7 +1561,11 @@ test.describe("2D Projection Render + Coupling Specs", () => {
 
     const read = () => page.evaluate(() => {
       const graph = (window as any).__viz.projectionsInstance.gds[0];
-      return { range: graph._fullLayout.xaxis.range.slice(), revision: graph.layout.datarevision };
+      return {
+        range: graph.layout.xaxis.range.slice(),
+        visibleRange: graph._fullLayout.xaxis.range.slice(),
+        revision: graph.layout.datarevision,
+      };
     });
     await page.getByRole("tab", { name: "2D" }).click();
     await page.locator(".projection .nsewdrag").first().hover();
@@ -1575,7 +1579,9 @@ test.describe("2D Projection Render + Coupling Specs", () => {
 
     await page.locator("#weight-cost").fill("9");
     await expect.poll(async () => (await read()).revision).toBeGreaterThan(zoomed.revision);
-    expect((await read()).range).toEqual(zoomed.range);
+    const rendered = await read();
+    expect(rendered.range).toEqual(zoomed.range);
+    expect(rendered.visibleRange).toEqual(zoomed.range);
   });
 
   test("residuals closeout: h1 untruncated, heat note muted, disclosure survives weight change", async ({ page }) => {
