@@ -70,7 +70,7 @@ describe("atlas tools", () => {
     const visible = [
       ...catalog, m("Cheap Unknown Speed", 90, null, 0.1), m("Below Floor Unknown Speed", 30, null, 1),
     ];
-    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed");
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed", 3, { requireMeasuredSpeed: true });
     expect(result.shortlist.map((model) => model.id)).toEqual(["Fast Cheap"]);
     expect(result).toMatchObject({ bias: 1, mode: "cost_speed", missing_speed_count: 1 });
     expect(result.message).toMatch(/excluded.*missing speed/i);
@@ -78,7 +78,7 @@ describe("atlas tools", () => {
 
   it("returns an explained empty speed shortlist when no speed is measured", () => {
     const visible = [m("Cheap Unknown Speed", 90, null, 0.1)];
-    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed");
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed", 3, { requireMeasuredSpeed: true });
     expect(result).toMatchObject({ shortlist: [], mode: null, missing_speed_count: 1 });
     expect(result.message).toMatch(/no eligible models have measured speed/i);
   });
@@ -114,6 +114,12 @@ describe("offline atlas agent", () => {
     const p = runOfflineAtlas("cheapest eligible", ctx(50));
     expect(p.shortlist_ids?.[0]).toBe("Fast Cheap");
     expect(p.summary.toLowerCase()).toMatch(/cheap|fast cheap/);
+  });
+
+  it("keeps Atlas and applied Decide on the same candidate pool", () => {
+    const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
+    const p = runOfflineAtlas("fastest eligible", { ...ctx(), catalog: visible, visible });
+    expect(p.shortlist_ids).toEqual(["Cheap Unknown Speed"]);
   });
 
   it("why is Below Floor out explains Index vs floor", () => {

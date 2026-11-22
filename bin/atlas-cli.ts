@@ -227,7 +227,7 @@ function main() {
       print(toolListEligible(ctx, floor).result);
       break;
     case "rank":
-      print(toolRankEligible(ctx, floor, objective, n).result);
+      print(toolRankEligible(ctx, floor, objective, n, { requireMeasuredSpeed: true }).result);
       break;
     case "floor": {
       const proposed = toolProposeFloor(ctx, {
