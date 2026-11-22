@@ -136,6 +136,7 @@ function main() {
     parsed = parseArgs({
       args,
       allowPositionals: true,
+      tokens: true,
       options: {
         catalog: { type: "string" }, floor: { type: "string" },
         objective: { type: "string" }, n: { type: "string" }, anchor: { type: "string" },
@@ -145,7 +146,13 @@ function main() {
   } catch (error) {
     throw new UsageError(error instanceof Error ? error.message : String(error));
   }
-  const { values, positionals } = parsed;
+  const { values, positionals, tokens } = parsed;
+  const seenOptions = new Set<string>();
+  for (const token of tokens) {
+    if (token.kind !== "option") continue;
+    if (seenOptions.has(token.name)) throw new UsageError(`--${token.name} may only be specified once.`);
+    seenOptions.add(token.name);
+  }
   if (values.help) {
     process.stdout.write(HELP);
     return;

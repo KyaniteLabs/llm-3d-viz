@@ -9,6 +9,9 @@ function cli(...args: string[]) {
 }
 
 it.each([
+  [["rank", "--floor", "abc", "--floor", "50"], 1, "--floor"],
+  [["rank", "--objective", "bogus", "--objective", "min_cost"], 1, "--objective"],
+  [["rank", "--n", "abc", "--n", "3"], 1, "--n"],
   [["rank", "--floor", "abc"], 1, "--floor"],
   [["rank", "--n", "-5"], 1, "--n"],
   [["rank", "--objective", "bogus"], 1, "--objective"],
