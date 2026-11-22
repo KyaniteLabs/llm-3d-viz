@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: "22"
       - name: Verify frozen install and npm 10 lockfile stability
+        id: install
         run: |
           node --version
           npm --version
@@ -29,8 +30,8 @@ jobs:
       - name: Validate root suites separately from known issue 15
         run: npx vitest run --exclude 'plugins/iolite-hermes/desktop-src/test/**'
       - name: Validate Desktop node suites
-        if: always()
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm --prefix plugins/iolite-hermes/desktop-src test
       - name: Validate build
-        if: always()
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
