@@ -17,7 +17,7 @@
 
 ## What ships
 
-- Multi-surface static site: the 3D observatory SPA at `/` (query-driven state; `?heat=1` opts in to the diagnostic heat encoding, default off), generated per-model pages `/m/<slug>/` + all-models `/m/` index, embeddable cards `/embed/<slug>`, the blog post `/blog/2026-08-24-model-observatory/`, and the `/frontier-watch.md` movement log.
+- Multi-surface static site: the 3D observatory SPA at `/` (query-driven state; `?heat=1` opts in to the diagnostic heat encoding, default off), generated per-model pages `/m/<slug>/` + all-models `/m/` index, embeddable cards `/embed/<slug>`, the blog post `/blog/2026-08-24-model-observatory/`, and the public Frontier Watch snapshot at `/frontier-watch.md`.
 - Self-hosted fonts (Inter Tight + IBM Plex Mono woff2 under `/assets/`).
 - Plotly bundle (~4.9 MB JS / ~1.5 MB gzip) — acceptable for Pages; first load is the cost.
 
@@ -28,7 +28,7 @@
 3. Fresh verify:
 
 ```bash
-npm run build
+npm run build:public
 npx tsc --noEmit
 npm test
 # optional, slower: npm run test:render
@@ -47,8 +47,8 @@ cd ~/workspaces/llm-3d-viz
 git checkout main && git pull --ff-only
 
 # PATH C (2026-08-29): the PUBLIC deploy builds the PUBLIC plane — AA/OpenRouter-derived
-# values are stripped from every surface (legal, GC-007). The private instance builds
-# with plain `npm run build` (full data, internal use is license-permitted).
+# values are stripped from every surface (legal, GC-007). The private catalog updater
+# selects `VIZ_DATA_PLANE=private` explicitly and enables movement tracking.
 npm run build:public
 npx tsc --noEmit && npm test
 
@@ -108,6 +108,6 @@ If the custom domain must go dark: remove the custom domain in Pages (or delete 
 ## Local look (no publish)
 
 ```bash
-npm run build && npx vite preview --host 127.0.0.1 --port 4173
+npm run build:public && npx vite preview --host 127.0.0.1 --port 4173
 # open http://127.0.0.1:4173/
 ```

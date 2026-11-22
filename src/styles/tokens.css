@@ -1028,6 +1028,7 @@ html.is-cinema .cinema-exit-fab {
 .app-shell.is-scope-open .filter-shelf:not([hidden]) { display: flex; }
 
 /* Author `display` rules beat UA [hidden]{display:none} — force hide. */
+#app-shell[hidden],
 .projection-row[hidden],
 .table-pane[hidden],
 .stage[hidden],

@@ -16,13 +16,20 @@ npm run atlas:cli -- eligible --floor 50 --provider Anthropic
 npm run atlas:cli -- rank --catalog /path/to/atlas.json --floor 50 --objective max_speed
 ```
 
-Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. They accept an optional provider and return results sorted by blended price. The public catalog has no speed measurements. Requesting `max_speed` or `balanced` returns an empty shortlist with an explanation.
+Public `rank` and `eligible` use direct Epoch Capabilities Index (0–100 rescaled) and LiteLLM list prices blended at 75% input and 25% output. `eligible` lists all priced models above the floor. `rank` returns the cost–capability frontier for the requested provider, or across all providers, ordered by blended price. The public catalog has no speed measurements. `max_speed` explains the missing input. `balanced` labels its cost–capability fallback.
 
 With `--catalog` or `ATLAS_CATALOG_PATH`, these commands use the supplied Atlas-format array and its AA Index scale. Other commands (`meta`, `search`, `get`, `floor`, `compare`) use the Atlas-format catalog. The resolver checks the explicit file, then the environment variable, then the local Atlas snapshot if exported, then the shipped draft.
 
 Legacy `max_speed` ranks only models with a measured speed. For `min_cost` and `balanced`, the legacy tool can use cost and intelligence when eligible rows lack speed. The `mode`, `missing_speed_count`, and `message` fields report the dimensions used and the coverage gap.
 
-Use `npx tsx bin/atlas-cli.ts` directly if you need stdout to contain only JSON. Exit codes are 0 for a valid query (including an explained empty result) or help, 1 for invalid usage, 2 for an unresolved model lookup or anchor, and 3 for a catalog read or processing failure.
+Direct invocation with `npx tsx bin/atlas-cli.ts` keeps status diagnostics on stderr. Its exit codes and stdout are:
+
+| Exit | Meaning | Stdout |
+|---|---|---|
+| `0` | Valid query, including an empty result, or help | JSON for queries, plain text for help |
+| `1` | Invalid arguments | Empty |
+| `2` | Unresolved model lookup, anchor, or compare operand | JSON `null` for a lookup or anchor, or the matched rows for `compare` |
+| `3` | Catalog read, parse, or processing failure | Empty |
 
 ## 3. Atlas MCP server (stdio, JSON-RPC 2.0)
 

@@ -135,13 +135,14 @@ export function toolGetModel(
 export function toolListEligible(
   ctx: AtlasAgentContext,
   floor: number,
+  needSpeed = true,
 ): {
   result: { eligible: ModelSummary[]; excluded_sample: { id: string; reason: string }[] };
   trace: AtlasToolTrace;
 } {
   const f = clampFloor(floor);
   const pool = ctx.visible;
-  const eligible = filterPickEligible(pool, f).map(summary);
+  const eligible = filterPickEligible(pool, f, needSpeed).map(summary);
   const excluded_sample: { id: string; reason: string }[] = [];
   for (const m of pool) {
     if (excluded_sample.length >= 5) break;
@@ -150,8 +151,10 @@ export function toolListEligible(
       excluded_sample.push({ id: m.model, reason: "unmeasured intelligence" });
     } else if (iq < f) {
       excluded_sample.push({ id: m.model, reason: `index ${iq} < floor ${f}` });
-    } else if (m.tps == null || m.blended_price_per_M == null) {
-      excluded_sample.push({ id: m.model, reason: "missing cost or speed" });
+    } else if (m.blended_price_per_M == null) {
+      excluded_sample.push({ id: m.model, reason: "missing cost" });
+    } else if (needSpeed && !hasSpeed(m)) {
+      excluded_sample.push({ id: m.model, reason: "missing speed" });
     }
   }
   return {

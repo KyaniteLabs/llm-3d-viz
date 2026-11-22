@@ -180,6 +180,11 @@ function renderStoryLine(el: HTMLElement, story: string, topModel: string | null
 }
 
 export function startObservatory() {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("view") !== "observatory") {
+    url.searchParams.set("view", "observatory");
+    window.history.replaceState(window.history.state, "", url);
+  }
   document.querySelector<HTMLElement>("#app-shell")!.hidden = false;
   void boot().catch((err) => {
     console.error("[boot] fatal", err);
@@ -411,6 +416,7 @@ async function boot() {
   );
 
   const catalogMethod = {
+    headline: allModels.some(isScorable) ? APP_BRANDING.tagline : "Model observatory",
     sources: formatCatalogSourceLabel(allModels),
     asOf: allModels.map((model) => model.data_date).filter(Boolean).sort().at(-1) ?? "unknown",
   };

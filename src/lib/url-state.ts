@@ -41,6 +41,7 @@ import {
   type FloorProvenance,
 } from "./floor-state";
 import { DEFAULT_FILTERS, type ModelFilters } from "./filters";
+import { OBSERVATORY_BOOT_KEYS, SHAREABLE_STATE_KEYS } from "./observatory-url";
 import { presets, type ScoreWeights } from "./score";
 
 export interface ShareableDecideState {
@@ -244,31 +245,13 @@ export function serializeShareableState(
 ): URLSearchParams {
   const params = existing ? new URLSearchParams(existing) : new URLSearchParams();
 
-  const keep = ["stage", "heat", "debug", "enc", "catalog"];
   const preserved: Record<string, string> = {};
-  for (const key of keep) {
+  for (const key of OBSERVATORY_BOOT_KEYS) {
     const v = params.get(key);
     if (v !== null) preserved[key] = v;
   }
 
-  for (const key of [
-    "age",
-    "agem",
-    "providers",
-    "families",
-    "ax",
-    "w",
-    "me",
-    "decide",
-    "floor",
-    "bias",
-    "anchor",
-    "open",
-    "openness",
-    "vram",
-    "nr",
-    "fam",
-  ]) {
+  for (const key of SHAREABLE_STATE_KEYS) {
     params.delete(key);
   }
   for (const [key, value] of Object.entries(preserved)) {
