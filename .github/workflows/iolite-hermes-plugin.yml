@@ -2,9 +2,9 @@ name: Iolite Hermes plugin
 on:
   push:
     branches: [main]
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
   pull_request:
-    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
+    paths: ["plugins/iolite-hermes/**", ".github/workflows/iolite-hermes-plugin.yml", "src/**", "bin/**", "tests/**", "data/**", "scripts/**", "vite.config.ts", "package.json", "package-lock.json"]
 permissions:
   contents: read
 jobs:
