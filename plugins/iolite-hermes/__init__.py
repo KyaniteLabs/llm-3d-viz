@@ -65,7 +65,7 @@ except ImportError:  # loaded as a bare module (tests, validator)
 logger = logging.getLogger(__name__)
 
 PLUGIN_NAME = "iolite"
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 DEFAULTS: Dict[str, Any] = {
     "catalog_url": "",
     "catalog_path": "",
@@ -1106,6 +1106,7 @@ def _read_last_shortlist() -> Optional[dict]:
 
 # ----------------------------------------------------------------------------- my prices (personal overlay)
 MY_PRICES_FILE = "my_prices.json"
+_my_prices_lock = threading.Lock()
 MY_PRICES_MAX_PLANS = 40
 MY_PRICES_MAX_BYTES = 64 * 1024
 MY_PRICE_MODES = ("sunk", "amortized", "fixed")
@@ -1162,32 +1163,65 @@ def _validate_plan(raw: Any, n: int) -> Tuple[Optional[dict], Optional[str]]:
     return clean, None
 
 
+def _plan_editor_problem(raw: dict, clean: dict) -> Optional[str]:
+    """Detect content the Desktop cannot round-trip, while allowing normal canonicalization."""
+    name = clean["name"]
+    if any(key not in clean and value is not None for key, value in raw.items()):
+        return f"{name}: contains fields the editor cannot preserve"
+    raw_name = raw.get("name")
+    if raw_name is not None:
+        # A stored name may already contain Iolite's escaped markup or @ marker.
+        # Accept that canonical form and whitespace cleanup, but never rewrite other text.
+        normalized_name = " ".join(raw_name.split()) if isinstance(raw_name, str) else None
+        if normalized_name not in ("", name):
+            return f"{name}: saved name cannot be preserved by the editor"
+    for key in ("models", "match"):
+        entries = raw.get(key)
+        if entries is not None and (not isinstance(entries, list) or len(entries) != len(clean[key])):
+            return f"{name}: {key} has invalid entries or exceeds the saved plan limit"
+        if any(re.search(r"[\s,\ufeff]", value) or (key == "match" and value.startswith("=")) for value in clean[key]):
+            return f"{name}: {key} has entries the editor cannot preserve"
+    return None
+
+
 def _read_my_prices() -> dict:
     """Your own prices, from my_prices.json in the plugin data directory. You write that file
     (by hand or from the Desktop pane's My plans editor); it is never shipped or uploaded.
-    Returns {"plans": [...], "problems": [...]}; a plan's usd_per_m is None while it waits for
-    measured usage. A missing file gives no plans and no problems. Never raises."""
-    out: Dict[str, Any] = {"plans": [], "problems": []}
+    Returns plans, problems, a revision, and the number of plans that could not be fully loaded for editing.
+    A plan's usd_per_m is None while it waits for measured usage. Never raises."""
+    out: Dict[str, Any] = {"plans": [], "problems": [], "revision": None, "skipped_plans": 0}
     try:
         path = _data_dir() / MY_PRICES_FILE
         try:
             st = path.stat()
         except FileNotFoundError:
+            out["revision"] = "missing"
             return out
         if not stat.S_ISREG(st.st_mode) or st.st_size > MY_PRICES_MAX_BYTES:
             out["problems"].append("my_prices.json is not a small regular file")
             return out
-        data = json.loads(path.read_bytes())
+        raw_file = path.read_bytes()
+        data = json.loads(raw_file)
         plans = data.get("plans") if isinstance(data, dict) else None
         if not isinstance(plans, list):
             out["problems"].append("my_prices.json has no 'plans' list")
             return out
+        out["skipped_plans"] = max(0, len(plans) - MY_PRICES_MAX_PLANS)
+        if out["skipped_plans"]:
+            out["problems"].append(f"my_prices.json has more than {MY_PRICES_MAX_PLANS} plans")
         for n, raw in enumerate(plans[:MY_PRICES_MAX_PLANS], 1):
             clean, problem = _validate_plan(raw, n)
             if problem:
                 out["problems"].append(problem)
+                out["skipped_plans"] += 1
                 continue
+            editor_problem = _plan_editor_problem(raw, clean)
+            if editor_problem:
+                # Keep the usable price overlay, but never let a whole-list save drop the original fields.
+                out["problems"].append(editor_problem)
+                out["skipped_plans"] += 1
             out["plans"].append({**clean, "usd_per_m": _my_plan_price(clean)})
+        out["revision"] = hashlib.sha256(raw_file).hexdigest()
     except Exception:
         out["problems"].append("my_prices.json could not be read as JSON")
     return out
@@ -1211,20 +1245,27 @@ def save_my_prices(payload: Any) -> dict:
                        "never shipped or uploaded", "plans": clean}, allow_nan=False, indent=1)
     if len(body.encode("utf-8")) > MY_PRICES_MAX_BYTES:
         return {"ok": False, "problems": ["the plans are too large to save"]}
-    d = _data_dir()
-    d.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            fh.write(body)
-        os.chmod(tmp, 0o600)
-        os.replace(tmp, d / MY_PRICES_FILE)
-    except BaseException:
+    revision = payload.get("revision")
+    with _my_prices_lock:
+        current = _read_my_prices()
+        if current["revision"] is None or current["skipped_plans"]:
+            return {"ok": False, "problems": ["Fix or back up and move my_prices.json before refreshing and saving again."]}
+        if revision is not None and current["revision"] != revision:
+            return {"ok": False, "problems": ["Saved plans changed. Refresh before saving again."]}
+        d = _data_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(prefix=".my-prices-", suffix=".tmp", dir=d)
         try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(body)
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, d / MY_PRICES_FILE)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
     state = landscape_state()
     return {"ok": True, "my_prices": state.get("my_prices")}
 
@@ -1297,7 +1338,7 @@ def my_prices_state(rows: List[dict]) -> dict:
             e["usd_per_m_set"] = p.get("usd_per_m")
         shown.append(e)
     return {"prices": my_price_overrides(rows, plans), "plans": shown, "problems": problems[:10],
-            "file": MY_PRICES_FILE}
+            "file": MY_PRICES_FILE, "revision": mine["revision"], "skipped_plans": mine["skipped_plans"]}
 
 
 def landscape_state() -> dict:

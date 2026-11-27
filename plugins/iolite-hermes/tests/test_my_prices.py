@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("iolite_plugin_myprices", ROOT / "__init__.py")
 plugin = importlib.util.module_from_spec(spec)
@@ -20,7 +22,7 @@ def _at(tmp_path, monkeypatch, body):
 
 def test_no_file_means_no_plans_and_no_problems(tmp_path, monkeypatch):
     _at(tmp_path, monkeypatch, None)
-    assert plugin._read_my_prices() == {"plans": [], "problems": []}
+    assert plugin._read_my_prices() == {"plans": [], "problems": [], "revision": "missing", "skipped_plans": 0}
     assert plugin.landscape_state()["my_prices"]["prices"] == {}
 
 
@@ -74,3 +76,122 @@ def test_overrides_exact_slug_beats_fragment_and_landscape_carries_them(tmp_path
 def test_my_prices_never_ship_in_the_bundle():
     assert not list(ROOT.rglob(plugin.MY_PRICES_FILE))
     assert "my_prices" not in (ROOT / "desktop-src" / "src" / "snapshot.json").read_text()
+
+
+def test_revision_stops_another_editor_overwriting_saved_plans(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    first = {"name": "First plan", "mode": "sunk", "models": ["glm-5.3"]}
+    second = {"name": "Second plan", "mode": "sunk", "models": ["glm-5.3"]}
+    assert plugin.save_my_prices({"plans": [first]})["ok"]
+    old = plugin.landscape_state()["my_prices"]["revision"]
+    assert plugin.save_my_prices({"plans": [first, second], "revision": old})["ok"]
+    conflicting = plugin.save_my_prices({"plans": [first], "revision": old})
+    assert conflicting["ok"] is False
+    assert [plan["name"] for plan in plugin.landscape_state()["my_prices"]["plans"]] == [
+        "First plan", "Second plan",
+    ]
+
+
+def test_revision_missing_cannot_overwrite_an_unreadable_file(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    revision = plugin.landscape_state()["my_prices"]["revision"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    oversized = b" " * (plugin.MY_PRICES_MAX_BYTES + 1)
+    path.write_bytes(oversized)
+    assert plugin.save_my_prices({"plans": [], "revision": revision})["ok"] is False
+    assert path.read_bytes() == oversized
+
+
+def test_revision_missing_cannot_overwrite_a_new_valid_file(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    revision = plugin.landscape_state()["my_prices"]["revision"]
+    saved = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    contents = b'{"plans": []}'
+    saved.write_bytes(contents)
+    assert plugin.save_my_prices({"plans": [], "revision": revision})["ok"] is False
+    assert saved.read_bytes() == contents
+
+
+@pytest.mark.parametrize("extra", ["invalid plan", "over the limit"])
+def test_save_refuses_to_discard_plans_skipped_during_read(tmp_path, monkeypatch, extra):
+    valid = {"name": "Existing", "mode": "sunk", "models": ["glm-5.3"]}
+    plans = [valid, {"name": "Bad plan", "mode": "sunk"}] if extra == "invalid plan" else [valid] * (plugin.MY_PRICES_MAX_PLANS + 1)
+    _at(tmp_path, monkeypatch, {"plans": plans})
+    state = plugin.landscape_state()["my_prices"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    change = {"plans": [valid], "revision": state["revision"]}
+    assert plugin.save_my_prices(change)["ok"] is False
+    assert plugin.save_my_prices({"plans": [valid]})["ok"] is False
+    assert state["skipped_plans"] == 1
+    assert path.read_bytes() == before
+
+
+def test_failed_parse_cannot_be_overwritten_from_editor(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, "{not json")
+    state = plugin.landscape_state()["my_prices"]
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    assert plugin.save_my_prices({"plans": [], "revision": state["revision"]})["ok"] is False
+    assert plugin.save_my_prices({"plans": []})["ok"] is False
+    assert state["revision"] is None
+    assert path.read_bytes() == before
+
+
+def test_measured_usage_notice_does_not_block_editor_save(tmp_path, monkeypatch):
+    plan = {"name": "Subscription", "mode": "amortized", "paid_usd": 12, "period_months": 1, "match": ["glm"]}
+    _at(tmp_path, monkeypatch, {"plans": [plan]})
+    state = plugin.landscape_state()["my_prices"]
+    assert any("waiting for measured usage" in note for note in state["problems"])
+    assert plugin.save_my_prices({"plans": [plan], "revision": state["revision"]})["ok"]
+
+
+@pytest.mark.parametrize("partial", [
+    {"models": ["glm-5.3"] * 201},
+    {"match": ["glm"] * 41},
+    {"match": ["glm", "g"]},
+    {"match": "glm"},
+    {"match": ["glm,example"]},
+    {"match": ["=glm-5.3"]},
+    {"tokens_per_month_m": "50"},
+    {"custom_note": "keep this annotation"},
+    {"name": "a" * 81},
+    {"name": "Credits <team>"},
+    {"name": "Credits `team`"},
+    {"name": "Credits @team"},
+    {"name": "Credits\u2060 team"},
+])
+def test_save_preserves_a_file_with_a_partly_representable_plan(tmp_path, monkeypatch, partial):
+    plan = {"name": "Existing", "mode": "amortized", "paid_usd": 36, "period_months": 18, "models": ["glm-5.3"]}
+    _at(tmp_path, monkeypatch, {"plans": [{**plan, **partial}]})
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    original = path.read_bytes()
+    state = plugin.landscape_state()["my_prices"]
+    assert plugin.save_my_prices({"plans": [plan], "revision": state["revision"]})["ok"] is False
+    assert state["skipped_plans"] == 1
+    assert len(state["plans"]) == 1, "the usable plan remains available for pricing"
+    assert path.read_bytes() == original
+
+
+def test_save_allows_normalizing_case_spacing_and_optional_empty_values(tmp_path, monkeypatch):
+    plan = {"name": "  Existing   plan  ", "mode": "amortized", "paid_usd": 36,
+            "period_months": 2, "models": [" Glm-5.3 "], "match": None, "tokens_per_month_m": None}
+    _at(tmp_path, monkeypatch, {"plans": [plan]})
+    state = plugin.landscape_state()["my_prices"]
+    assert state["skipped_plans"] == 0
+    assert plugin.save_my_prices({"plans": state["plans"], "revision": state["revision"]})["ok"]
+    saved = plugin.landscape_state()["my_prices"]["plans"][0]
+    assert (saved["name"], saved["period_months"], saved["models"]) == ("Existing plan", 2, ["glm-5.3"])
+
+
+def test_plan_names_previously_sanitized_by_iolite_remain_editable(tmp_path, monkeypatch):
+    _at(tmp_path, monkeypatch, None)
+    plan = {"name": "Credits @team <private> `preview`", "mode": "sunk", "models": ["glm-5.3"]}
+    assert plugin.save_my_prices({"plans": [plan]})["ok"]
+    state = plugin.landscape_state()["my_prices"]
+    assert state["skipped_plans"] == 0
+    assert state["plans"][0]["name"] == "Credits @\u200bteam ‹private› 'preview'"
+    path = tmp_path / "pd" / plugin.MY_PRICES_FILE
+    before = path.read_bytes()
+    assert plugin.save_my_prices({"plans": state["plans"], "revision": state["revision"]})["ok"]
+    assert path.read_bytes() == before

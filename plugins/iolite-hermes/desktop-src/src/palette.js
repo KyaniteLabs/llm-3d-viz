@@ -2,9 +2,11 @@
  * Colours for the stage, from DESIGN-SYSTEM.md (observatory-after-dark). The design system is
  * dark-first and defines no light mode, so LIGHT is derived: the same roles on warm paper,
  * with the ink and copper darkened until text keeps 4.5:1 and marks keep 3:1. test/palette.test.mjs
- * checks both modes. Copper marks focus and nothing else; frontier, picks and dominated models
- * differ by shape and luminance as well as colour.
+ * checks both modes. The Iolite accents distinguish the frontier and shortlist, and copper
+ * identifies the active model. Chart marks differ in shape as well as colour.
  */
+const BRAND = { dark: '#AAA6FF', light: '#4C45A8' }
+
 export const DARK = {
   mode: 'dark',
   ground: '#070C0B',
@@ -13,9 +15,10 @@ export const DARK = {
   hair: 'rgba(231,226,216,0.10)',
   text: '#E7E2D8',
   muted: '#89939E',
-  frontier: '#E8F1E4',
+  frontier: BRAND.dark,
   frontierDim: '#C9D4C4',
   dominated: '#5E7B88',
+  pick: '#81CDB7',
   below: '#3D5560',
   copper: '#C47A3A',
   axis: 'rgba(231,226,216,0.34)',
@@ -31,9 +34,10 @@ export const LIGHT = {
   hair: 'rgba(27,31,29,0.14)',
   text: '#1B1F1D',
   muted: '#55616A',
-  frontier: '#0B1110',
+  frontier: BRAND.light,
   frontierDim: '#2F3B38',
   dominated: '#5F747E',
+  pick: '#176B5D',
   below: '#9DADB4',
   copper: '#A4561A',
   axis: 'rgba(27,31,29,0.42)',
@@ -41,8 +45,8 @@ export const LIGHT = {
   floor: 'rgba(47,59,56,0.6)',
 }
 
-export const FONT_MONO = '"IBM Plex Mono", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace'
-export const FONT_SANS = '"Inter Tight", Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
+export const FONT_MONO = '"Iolite IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace'
+export const FONT_SANS = '"Iolite Inter Tight", Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
 
 export function paletteFor(mode) { return mode === 'light' ? LIGHT : DARK }
 

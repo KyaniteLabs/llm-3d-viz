@@ -254,7 +254,7 @@ export class Stage {
     }
     // intelligence floor: a plane with cross-hatch, drawn behind the marks
     const fy = floorPosition(domains, s.floor)
-    if (fy !== null) this.drawFloor3d(ctx, P, fy, pal, s.floor)
+    if (fy !== null) this.drawFloor3d(ctx, P, fy, pal)
     // labels on the edges nearest the viewer
     setFont(ctx, 11); spaced(ctx, '0.06em'); ctx.fillStyle = pal.muted; ctx.textBaseline = 'middle'
     const place = (p, text, align = 'center') => {
@@ -265,25 +265,18 @@ export class Stage {
       return { text, align, x, y: q.y, l: x - lo, r: x + hi, t: q.y - 7, b: q.y + 7 }
     }
     const draw = it => { ctx.textAlign = it.align; ctx.fillText(it.text, it.x, it.y) }
-    // Axis titles are placed first and always drawn; tick labels from every axis then thin out
-    // rather than touch each other or a title (a foreshortened axis, two axes meeting at a corner).
-    const titles = [
-      place([0, -1, sz * 1.7], (s.layout.xTitle || s.layout.priceTitle || 'PRICE $/M · LOG')),
-      place([sx * 1.4, -1, 0], zTitle(s.layout.z), sx < 0 ? 'right' : 'left'),
-      place([sx * 1.04, 1.12, sz * 1.04], 'INTELLIGENCE 0-100', sx < 0 ? 'right' : 'left'),
-    ]
+    // The 3D titles live outside the canvas. Axis identifiers on ticks connect the rotating
+    // cube to that fixed key even when the axes change orientation.
     const tickLabels = [
-      ...ticks.x.map(t => place([pos(t, domains.x, true), -1, sz * 1.12], (s.layout.xTick || fmtPriceTick)(t))),
-      ...ticks.z.map(t => place([sx * 1.12, -1, pos(t, domains.z, true)], fmtTokens(t), sx < 0 ? 'right' : 'left')),
-      ...ticks.y.map(t => place([sx * 1.04, pos(t, domains.y, false), sz * 1.04], String(t), sx < 0 ? 'right' : 'left')),
+      ...ticks.x.map(t => place([pos(t, domains.x, true), -1, sz * 1.12], `X ${(s.layout.xTick || fmtPriceTick)(t)}`)),
+      ...ticks.z.map(t => place([sx * 1.12, -1, pos(t, domains.z, true)], `Z ${fmtTokens(t)}`, sx < 0 ? 'right' : 'left')),
+      ...ticks.y.map(t => place([sx * 1.04, pos(t, domains.y, false), sz * 1.04], `Y ${t}`, sx < 0 ? 'right' : 'left')),
     ]
-    for (const i of keepApart(tickLabels, 4, titles)) draw(tickLabels[i])
-    ctx.fillStyle = pal.text
-    titles.forEach(draw)
+    for (const i of keepApart(tickLabels)) draw(tickLabels[i])
     this.drawMarks(ctx, s, pal, P, true)
   }
 
-  drawFloor3d(ctx, P, y, pal, value) {
+  drawFloor3d(ctx, P, y, pal) {
     const corners = [[-1, y, -1], [1, y, -1], [1, y, 1], [-1, y, 1]].map(P)
     ctx.beginPath(); corners.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath()
     ctx.strokeStyle = pal.floor; ctx.lineWidth = 1.25; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([])
@@ -295,11 +288,6 @@ export class Stage {
       const c = P([t, y, -1]), d = P([t, y, 1]); ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.stroke()
     }
     ctx.restore()
-    const tag = P([1, y, 1])
-    setFont(ctx, 11, 500); spaced(ctx, '0.08em'); ctx.fillStyle = pal.text; ctx.textBaseline = 'bottom'
-    const left = tag.x > this.width - 110
-    ctx.textAlign = left ? 'right' : 'left'
-    ctx.fillText(`FLOOR · ${value}`, tag.x + (left ? -6 : 6), tag.y - 3)
   }
 
   /* ---------------------------------------------------------------- 2D */
@@ -330,8 +318,6 @@ export class Stage {
       const y = py(s.floor)
       ctx.setLineDash([6, 4]); ctx.strokeStyle = pal.floor; ctx.lineWidth = 1.25
       ctx.beginPath(); ctx.moveTo(l, y); ctx.lineTo(l + w, y); ctx.stroke(); ctx.setLineDash([])
-      setFont(ctx, 11, 500); spaced(ctx, '0.08em'); ctx.fillStyle = pal.text; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'
-      ctx.fillText(`FLOOR · ${s.floor}`, l + w - 4, y - 3)
     }
     this.drawMarks(ctx, s, pal, P, false)
   }
@@ -359,7 +345,7 @@ export class Stage {
       if (pt.id === s.highlightId) { active = o; }
       if (pt.front) drawSphere(ctx, q.x, q.y, r, under ? pal.below : pal.frontier)
       else drawRing(ctx, q.x, q.y, r, under ? pal.below : pal.dominated)
-      if (isPick) drawDiamond(ctx, q.x, q.y, r + 6, pal.frontier)
+      if (isPick) drawDiamond(ctx, q.x, q.y, r + 6, pal.pick)
     }
     if (active) {
       const { pt, q } = active
