@@ -61,7 +61,9 @@ export interface Model {
   cost_per_index_task_usd?: number | null;
   /** AA Time per Intelligence Index Task (seconds); null until scraped. */
   time_per_index_task_s?: number | null;
+  /** Legacy JSON key for LMArena's style-controlled Bradley–Terry rating. */
   arena_elo: number | null;
+  arena_publish_date?: string;
   /**
    * Provider-published curated benchmarks (2026-08-14 amendment): the AA free
    * API does not supply these, but provider announcements do — manual-additions

@@ -1,5 +1,7 @@
 # Iolite
 
+The default public decision view compares blended LiteLLM list prices at a minimum direct Epoch capability score (0–100). Public speed measurements are unavailable. See [the public data sources and licences](/sources/#decision-data). The original observatory described below is available at `/?view=observatory`.
+
 **URL:** [https://viz.kyanitelabs.tech/](https://viz.kyanitelabs.tech/)  
 **Also known as:** Model Observatory, llm-3d-viz
 
@@ -7,7 +9,7 @@
 
 Iolite is an interactive **3D data visualization** for comparing large language models on three axes:
 
-1. **Intelligence** — intelligence index (Arena Elo, vendor-published figures, and this project's own measurements, where measured)  
+1. **Intelligence** — the observatory identifies its benchmark fields separately, including LMArena's style-controlled Bradley–Terry rating where available.
 2. **Cost** — blended price per million tokens (default)  
 3. **Speed** — tokens per second (default)
 

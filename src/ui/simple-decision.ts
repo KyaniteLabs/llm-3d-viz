@@ -69,7 +69,12 @@ export class SimpleDecision {
     this.root.setAttribute("aria-label", "Simple model picker");
     host.prepend(this.root);
     this.renderShell();
-    this.store.subscribe(() => this.refreshOutcome());
+    const syncVisibility = (state: ReturnType<AppStore["getState"]>) => {
+      this.root.hidden = state.decideMode;
+      this.refreshOutcome();
+    };
+    this.store.subscribe(syncVisibility);
+    syncVisibility(this.store.getState());
   }
 
   setModels(models: readonly Model[]) {
@@ -171,9 +176,18 @@ export class SimpleDecision {
       }
     });
 
-    // default need: just talk
-    const first = needRow.querySelector<HTMLButtonElement>('[data-need="chat"]');
-    first?.click();
+    const { cost, intelligence, speed } = this.store.getState().weights;
+    const total = cost + intelligence + speed;
+    if (total > 0) {
+      this.afford = cost / total;
+      this.smarts = intelligence / total;
+      this.speed = speed / total;
+    }
+    const matchingNeed = NEEDS.find((need) =>
+      need.weights.cost === cost && need.weights.intelligence === intelligence && need.weights.speed === speed,
+    );
+    if (matchingNeed) needRow.querySelector(`[data-need="${matchingNeed.id}"]`)?.classList.add("is-active");
+    this.syncSliderInputs();
   }
 
   private syncSliderInputs() {
@@ -206,7 +220,9 @@ export class SimpleDecision {
     if (!box) return;
     const top = this.topList(5);
     if (!top.length) {
-      box.innerHTML = `<p class="console-note">No models in view — relax filters or open Advanced.</p>`;
+      box.innerHTML = this.models.length
+        ? '<p class="console-note">This view has no complete benchmark rows. <a href="/">Compare public model prices</a> using Epoch scores.</p>'
+        : '<p class="console-note">No models match the current scope. Open Edit scope to change filters.</p>';
       return;
     }
     const opt = weightedOptimum(top) ?? top[0];

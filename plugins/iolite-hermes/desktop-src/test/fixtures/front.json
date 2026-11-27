@@ -3,8 +3,9 @@
  "front": [
   "claude-fable-5.2",
   "claude-haiku-5.5",
+  "gemini-4-carbon",
   "gemma-4-31b-it",
-  "gpt-6.1-sol",
-  "gpt-6.1-terra"
+  "gpt-6.1-terra",
+  "mimo-v2.6-flash"
  ]
 }

@@ -210,8 +210,8 @@ def fetch_litellm(cache: Optional[Path]) -> Tuple[dict, str, str, str]:
 # ----------------------------------------------------------------------------- matching
 
 def norm(s: str) -> str:
-    """Lowercase ASCII letters and digits only: 'GPT-5.2' and 'gpt-5-2' are both 'gpt52'."""
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+    """Ignore formatting while preserving variant markers such as the plus in Command R+."""
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().replace("+", "plus")
     return re.sub(r"[^a-z0-9]+", "", s)
 
 
@@ -327,6 +327,7 @@ def clamp100(v: float) -> float:
 def build(epoch: List[dict], lma: List[dict], litellm: dict, litellm_sha: str, litellm_date: str,
           access_date: str) -> Tuple[dict, dict]:
     prices = PriceIndex(litellm)
+    accessed = dt.date.fromisoformat(access_date)
 
     # One entry per model: ECI first, then LMArena names that ECI does not cover.
     entries: Dict[str, dict] = {}
@@ -336,7 +337,8 @@ def build(epoch: List[dict], lma: List[dict], litellm: dict, litellm_sha: str, l
         if k in entries:
             eci_dupes += 1
             continue
-        entries[k] = {"name": r["name"], "org": r["org"], "eci": r["eci"], "lma": None}
+        entries[k] = {"name": r["name"], "org": r["org"], "eci": r["eci"],
+                      "released": r.get("released"), "lma": None}
     lma_by_key: Dict[str, dict] = {}
     for r in lma:
         k = norm(r["name"])
@@ -379,6 +381,13 @@ def build(epoch: List[dict], lma: List[dict], litellm: dict, litellm_sha: str, l
             slug = f"{slug}-{used_slugs[slug]}"
         row: Dict[str, Any] = {"model": e["name"], "provider": e["org"] or None, "slug": slug}
         if e["eci"] is not None:
+            released = e.get("released")
+            if released and re.fullmatch(r"\d{4}-\d{2}-\d{2}", released):
+                try:
+                    if dt.date.fromisoformat(released) <= accessed:
+                        row["release_date"] = released
+                except ValueError:
+                    pass
             row["intelligence"] = {
                 "value": scale(e["eci"]), "raw": round(e["eci"], 2), "metric": EPOCH_METRIC,
                 "scale": "0-100, see scale in the catalog header", "source": EPOCH_SOURCE,
@@ -503,7 +512,8 @@ Only `{EPOCH_ECI_MEMBER}` is read, which is Epoch's own data. The `*_external.cs
 upstream licences and are not used. No benchmark question or answer is included.
 
 Changes: subset to the models in this catalog; each ECI score is rescaled to 0-100 (the original
-value is kept as `intelligence.raw`).
+value is kept as `intelligence.raw`). `release_date` uses the full calendar date from the Epoch
+row. Arena publication dates describe leaderboard snapshots.
 
 ## Intelligence fallback: LMArena Bradley-Terry rating (CC BY 4.0)
 
@@ -536,6 +546,10 @@ Blended price: {BLEND_RULE}.
 There is no speed data in this catalog. No public source of per-model hosted-API speed can be
 redistributed. Iolite records tokens per second from your own calls, on your own machine, and
 never uploads them.
+
+## Hermes Desktop pane
+
+The Desktop landscape pane draws a compact snapshot of the same catalog (`desktop-src/src/snapshot.json`, built by `scripts/build_snapshot.py`) and shows the same credits and notices on screen. It adds no data source.
 
 ## Not affiliated
 

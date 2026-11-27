@@ -1,8 +1,10 @@
 import "./styles/tokens.css";
-import { allModels, models, type Model } from "./data/models";
+import { allModels, isScorable, models, type Model } from "./data/models";
 import {
   applyEconomyBasis,
   detectEconomyBasis,
+  hasMappedAxes,
+  mappingHeading,
   sameAxisMapping,
   type AxisMapping,
   type EconomyBasis,
@@ -39,7 +41,7 @@ import {
   saveCatalogSnapshot,
   type CatalogSnapshot,
 } from "./lib/catalog-diff";
-import { formatCoverageBadge } from "./lib/provenance";
+import { formatCatalogSourceLabel, formatCoverageBadge } from "./lib/provenance";
 import { isOssEdition } from "./config/edition";
 
 // Trace-carried `text` labels hold the model ID (see stage3d.ts / projections.ts),
@@ -178,7 +180,13 @@ function renderStoryLine(el: HTMLElement, story: string, topModel: string | null
   el.append(name, story.slice(at + topModel.length));
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+export function startObservatory() {
+  const url = new URL(window.location.href);
+  if (isOssEdition && url.searchParams.get("view") !== "observatory") {
+    url.searchParams.set("view", "observatory");
+    window.history.replaceState(window.history.state, "", url);
+  }
+  document.querySelector<HTMLElement>("#app-shell")!.hidden = false;
   void boot().catch((err) => {
     console.error("[boot] fatal", err);
     if (document.querySelector("[data-boot-fail]")) return;
@@ -191,15 +199,21 @@ document.addEventListener("DOMContentLoaded", () => {
     banner.querySelector("button")?.addEventListener("click", () => location.reload());
     document.body.appendChild(banner);
   });
-});
+}
 
 async function boot() {
+  const hasScorableModels = allModels.some(isScorable);
+  const catalogMethod = {
+    headline: hasScorableModels ? APP_BRANDING.tagline : "Model observatory",
+    sources: formatCatalogSourceLabel(allModels),
+    asOf: allModels.map((model) => model.data_date).filter(Boolean).sort().at(-1) ?? "unknown",
+  };
   document.title = APP_BRANDING.documentTitle;
   // Canonical hooks: data-app-title / data-app-tagline on index.html scope-bar-brand.
   const wordmark = document.querySelector("[data-app-title]");
   if (wordmark) wordmark.textContent = APP_BRANDING.title;
-  const tag = document.querySelector("[data-app-tagline]");
-  if (tag) tag.textContent = APP_BRANDING.tagline;
+  const stageTitle = document.querySelector("[data-app-tagline]");
+  if (stageTitle) stageTitle.textContent = catalogMethod.headline;
   const stagePanel = document.querySelector(".stage") as HTMLElement;
   const stageVisual = stagePanel?.querySelector(".stage-visual") as HTMLElement | null;
   const placeholder = stageVisual?.querySelector(".stage-placeholder");
@@ -353,7 +367,8 @@ async function boot() {
 
   // Always-visible economy basis: rate ($/M · tok/s) vs task ($/task · s/task).
   // Remaps cost (X) and speed (Z); intelligence (Y) stays put.
-  const syncEconomyToggle = (mapping: AxisMapping) => {
+  const syncAxisControls = (mapping: AxisMapping) => {
+    if (stageTitle && hasScorableModels) stageTitle.textContent = mappingHeading(mapping);
     const basis = detectEconomyBasis(mapping);
     canvasHost.querySelectorAll<HTMLButtonElement>("[data-economy-basis]").forEach((btn) => {
       const id = btn.dataset.economyBasis as EconomyBasis | undefined;
@@ -370,8 +385,8 @@ async function boot() {
       store.update({ axisMapping: applyEconomyBasis(cur, basis) });
     });
   });
-  store.subscribe((state) => syncEconomyToggle(state.axisMapping));
-  syncEconomyToggle(store.getState().axisMapping);
+  store.subscribe((state) => syncAxisControls(state.axisMapping));
+  syncAxisControls(store.getState().axisMapping);
 
   let stage: Stage3DSurface;
   let activeBackend = stageBackend;
@@ -408,7 +423,7 @@ async function boot() {
     presentationMode,
   );
 
-  const cinema = new CinemaMode(stage, store);
+  const cinema = new CinemaMode(stage, store, catalogMethod);
   // Agent ↔ view-local control parity: register the controls that aren't store
   // state so Atlas can drive them too (ui_action bus, allow-listed).
   registerUiAction("reset_view", "Recenter the 3D camera and clear the pin", () => {
@@ -470,15 +485,15 @@ async function boot() {
     } else {
       store.update({ decideMode: next });
     }
-    decideToggle.setAttribute("aria-pressed", String(next));
-    decideToggle.classList.toggle("is-active", next);
   });
-  store.subscribe((state) => {
+  const syncDecideToggle = (state: Readonly<AppState>) => {
     if (!decideToggle) return;
     decideToggle.setAttribute("aria-pressed", String(state.decideMode));
     decideToggle.classList.toggle("is-active", state.decideMode);
     document.documentElement.dataset.decideMode = state.decideMode ? "1" : "0";
-  });
+  };
+  store.subscribe(syncDecideToggle);
+  syncDecideToggle(store.getState());
   // M1 (uiux 2026-08-15): the cinema button lives in the scope bar (header),
   // outside the console root — the old console-side lookup never found it, so
   // aria-pressed stayed "false" forever. Sync pressed state + label from here.
@@ -561,21 +576,27 @@ async function boot() {
     weights: AppState["weights"],
     axisMapping: AxisMapping,
     appState: AppState,
+    decide: ReturnType<typeof shortlistFromDecide> | null,
   ) {
     const scores = normalizedScores(visibleSet, weights, visibleSet);
     const top = weightedOptimum(scores)?.model;
-    const story = defaultStoryLine({
-      decideMode: appState.decideMode,
-      floor: appState.intelligenceFloor,
-      topModel: top ? displayName(top.model) : null,
-      nPlottable: visibleSet.length,
-      intentLabel: null,
-    });
+    const nPlottable = visibleSet.filter((model) => hasMappedAxes(model, axisMapping) &&
+      (activeBackend !== "plotly" || isScorable(model))).length;
+    const story = !appState.decideMode && visibleSet.length && nPlottable === 0
+      ? "No models have measurements for all three axes. Open Table to see coverage."
+      : defaultStoryLine({
+          decideMode: appState.decideMode,
+          decideBasis: decide?.mode === "cost" ? "intelligence" : "speed",
+          decideEligible: decide?.eligible.length,
+          floor: appState.intelligenceFloor,
+          topModel: top ? displayName(top.model) : null,
+          nPlottable,
+          intentLabel: null,
+        });
     if (storyLineEl) renderStoryLine(storyLineEl, story, top ? displayName(top.model) : null);
     const axes = `${axisMapping.x} × ${axisMapping.y} × ${axisMapping.z}`;
-    const asOf = new Date().toISOString().slice(0, 10);
-    const sources = "Artificial Analysis · OpenRouter · Arena (CC BY 4.0)";
-    latestShareInput = { story, axes, sources, asOf, nPlottable: visibleSet.length };
+    const { sources, asOf } = catalogMethod;
+    latestShareInput = { story, axes, sources, asOf, nPlottable };
     const costTaskN = visibleSet.filter(
       (m) => m.cost_per_index_task_usd != null && m.cost_per_index_task_usd > 0,
     ).length;
@@ -713,7 +734,7 @@ async function boot() {
     simpleDecision?.setModels(visibleSet);
     atlasPanel.setVisible(visibleSet);
     stageGuide.setModels(visibleSet);
-    updateTrustChrome(visibleSet, weights, axisMapping, appState);
+    updateTrustChrome(visibleSet, weights, axisMapping, appState, decide);
     document.querySelector(".stage-visual")?.classList.add("is-ready");
     document.querySelectorAll(".stage-placeholder").forEach((el) => {
       el.classList.add("is-dismissed");

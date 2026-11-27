@@ -1,5 +1,7 @@
 # Iolite — full agent brief (llms-full.txt)
 
+The default public decision view compares blended LiteLLM list prices at a minimum direct Epoch capability score (0–100). Public speed measurements are unavailable. See [the public data sources and licences](/sources/#decision-data). The original observatory described below is available at `/?view=observatory`.
+
 Canonical: https://viz.kyanitelabs.tech/
 Updated: 2026-08-27
 

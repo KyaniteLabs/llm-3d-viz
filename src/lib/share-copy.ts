@@ -34,16 +34,21 @@ export function buildInsightMethodCopy(input: ShareCopyInput): string {
 
 export function defaultStoryLine(opts: {
   decideMode: boolean;
+  decideBasis?: "speed" | "intelligence";
+  decideEligible?: number;
   floor?: number;
   topModel?: string | null;
   nPlottable: number;
   intentLabel?: string | null;
 }): string {
-  if (opts.nPlottable < 3) {
-    return "Insufficient data for insight — widen scope or lower filters.";
+  if (opts.decideMode && opts.decideEligible === 0) {
+    return `No models qualify at Index floor ${opts.floor ?? 50}. See Decide for available measurements.`;
   }
   if (opts.decideMode) {
-    return `Models at or above Index floor ${opts.floor ?? 50} ranked on cost × speed (Decide shortlist).`;
+    return `Models at or above Index floor ${opts.floor ?? 50} ranked on cost × ${opts.decideBasis ?? "speed"} (Decide shortlist).`;
+  }
+  if (opts.nPlottable < 3) {
+    return "Insufficient data for insight — widen scope or lower filters.";
   }
   if (opts.topModel) {
     const cleanTop = sanitizeSingleLine(opts.topModel);

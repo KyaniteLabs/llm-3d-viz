@@ -12,7 +12,7 @@ tldr: Interactive 3D LLM benchmark observatory (speed × cost × intelligence) w
 
 ## TL;DR
 
-Iolite plots a curated catalog of large language models in a Three.js/WebGL stage. Compare the Pareto surface, set an intelligence floor, and find models that are cheapest, fastest, or balanced among the eligible set. The site is live at [viz.kyanitelabs.tech](https://viz.kyanitelabs.tech/); the application is free to use and requires no account.
+The public Iolite view lets you set a minimum Epoch capability score and compare eligible models by blended list price. It shows the cost–capability frontier and the number of models excluded for missing prices. The public snapshot has no speed measurements. The original Three.js/WebGL observatory is available at `?view=observatory` for catalogs with all three benchmark axes.
 
 ## Who it's for
 

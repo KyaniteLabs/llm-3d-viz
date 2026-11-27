@@ -170,6 +170,8 @@ describe("manual additions — curated file regression", () => {
     expect(glm.swe_bench).toBe(80.6);
     expect(glm.aider_pct).toBe(89.6);
     expect(glm.aa_intelligence_index).toBeNull(); // never preliminary
+    expect(glm.tps).toBeNull();
+    expect(glm.openness).toBe("open");
     expect(glm.sources?.gpqa).toEqual({ origin: "provider", kind: "list" });
     expect(glm.source).toContain("PRELIMINARY");
   });

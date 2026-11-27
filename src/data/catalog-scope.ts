@@ -81,6 +81,7 @@ export const LAB_OPENNESS_CLASS: Readonly<Record<string, LabOpennessClass>> = {
   Meta: "open", // Muse / Llama
   MiniMax: "open",
   NVIDIA: "open", // Nemotron
+  Reflection: "open", // Beam open weights
   "DeepReinforce AI": "open", // Ornith — MIT self-hosted weights
   "Stealth": "closed", // Ox Alpha — unknown lab, honest default (identity unverified)
   // Mixed portfolio: open-weight AND closed-API families; closed by default.
@@ -129,10 +130,9 @@ export const FAMILY_OPENNESS_EXCEPTIONS: Readonly<Record<string, "open" | "close
   "gpt-oss-20b": "open",
   // ByteDance Seed OSS line — open weights inside a mixed lab.
   "seed-oss-36b-instruct": "open",
-  // Z.ai GLM-5.3 — provider says weights ship ~2 weeks post-announcement
-  // (2026-08-14); closed until downloadable. Remove when weights are out.
-  // (Key is normalizeFamily("GLM-5.3") — dots collapse to dashes.)
-  "glm-5-3": "closed",
+  // Hosted Meta models with closed weights, distinct from Muse Spark Open.
+  "muse-spark-1-3": "closed",
+  "muse-wonder": "closed",
   // Nous Research Hermes line — open weights (Llama-based finetunes).
   "hermes-3-llama-3-1-70b": "open",
   "hermes-4-llama-3-1-405b": "open",
@@ -144,6 +144,8 @@ export const FAMILY_OPENNESS_EXCEPTIONS: Readonly<Record<string, "open" | "close
   "mistral-small-3-1": "open",
   "mistral-small-3-2": "open",
   "mistral-small-4": "open",
+  "mistral-large-4": "open",
+  "mistral-large-4-preview": "open",
   "devstral-small-2": "open",
   "magistral-small-1-2": "open",
 };
@@ -287,6 +289,7 @@ export const HELD_LABS_FOR_LATER = [
   "LongCat",
   "Microsoft",
   "Mistral",
+  "Reflection",
   "Multiverse Computing",
   "Nex AGI",
   "Nous Research",

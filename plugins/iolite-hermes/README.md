@@ -6,19 +6,19 @@ Choosing a model usually turns into a spreadsheet: which models are smart enough
 
 ## Quick start
 
-Install it and ask. There is nothing to configure: the plugin ships a real catalog of 621 models (Epoch AI's ECI, LMArena ratings, LiteLLM prices), and it works offline. To see an answer without Hermes:
+Install it and ask. There is nothing to configure: the plugin ships a real catalog of 631 models (Epoch AI's ECI, LMArena ratings, LiteLLM prices), and it works offline. To see an answer without Hermes:
 
 ```sh
 python3 plugins/iolite-hermes/demo/try_it.py "shortlist"
 ```
 
 ```text
-Floor 50 (default), balanced: 234 models clear it, 5 on the cost x intelligence front.
+Floor 50 (default), balanced: 246 models clear it, 6 on the cost x intelligence front.
 Speed: not measured yet, so these are ranked on cost and intelligence.
-1. GPT-6.1 Terra (OpenAI): intelligence 95.0 (ECI), $2.00/M, speed: not measured yet
-2. GPT-6.1 Sol (OpenAI): intelligence 95.7 (ECI), $4.00/M, speed: not measured yet
-3. Claude Haiku 5.5 (Anthropic): intelligence 88.7 (ECI), $0.20/M, speed: not measured yet
-Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100.
+1. GPT-6.1 Terra (OpenAI): intelligence 95.4 (ECI), $2.00/M, speed: not measured yet
+2. Gemini 4 Carbon (Google): intelligence 97.0 (ECI), $4.00/M, speed: not measured yet
+3. Claude Haiku 5.5 (Anthropic): intelligence 89.5 (ECI), $0.20/M, speed: not measured yet
+Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 21 Nov 2026. Modified: subset to catalog models; rescaled to 0-100.
 Prices: LiteLLM model_prices_and_context_window.json, MIT licence.
 Licences: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/ ; MIT https://opensource.org/licenses/MIT . Full notices: ATTRIBUTION.md
 ```
@@ -67,12 +67,12 @@ The bundled catalog is `data/catalog.json`; `ATTRIBUTION.md` has the full credit
 
 | What | Source | Licence | Rows |
 |---|---|---|---|
-| Intelligence | Epoch AI Benchmarking Hub, Epoch Capabilities Index (ECI) | CC BY | 255 |
-| Arena rating | LMArena leaderboard dataset, shown as a Bradley-Terry rating, not Elo | CC BY 4.0 | 419 |
-| Prices | LiteLLM `model_prices_and_context_window.json` | MIT | 254 priced models |
+| Intelligence | Epoch AI Benchmarking Hub, Epoch Capabilities Index (ECI) | CC BY | 258 |
+| Arena rating | LMArena leaderboard dataset, style-controlled Bradley–Terry rating | CC BY 4.0 | 426 |
+| Prices | LiteLLM `model_prices_and_context_window.json` | MIT | 265 priced models |
 
-- 621 models in all; 254 have both an intelligence score and a price. Only those can be picked.
-- 366 models are not in Epoch's list. Their intelligence is their LMArena rating mapped onto the ECI scale with a line fitted on the 53 models in both (R² 0.92). The answer labels these `(LMArena)` instead of `(ECI)`.
+- 631 models in all; 265 have both an intelligence score and a price. Only those can be picked.
+- 373 models use the Arena estimate. Iolite maps those ratings onto the ECI scale using a line fitted to the 53 models in both sources (R² 0.92). The estimates are labelled `(LMArena)`.
 - Prices come from the model's own vendor where LiteLLM lists one, and from a hosting provider (Together, Fireworks, DeepInfra and a few more) for some open models. Effort variants such as "high" or "xhigh" share their base model's price.
 - Refresh it with `python3 scripts/build_catalog.py` from the repository root. It downloads the three sources and rewrites the catalog and `ATTRIBUTION.md`.
 - Not bundled: speed, and anything from Artificial Analysis or OpenRouter.
@@ -190,11 +190,12 @@ The plugin lives in a subdirectory, so `hermes plugins install <owner/repo>` can
 hermes plugins install iolite
 ```
 
-Until then, copy the directory into your Hermes plugins folder:
+Until then, copy the plugin from a fresh checkout into your Hermes plugins folder. The same copy steps update an existing installation and preserve local measurements and saved prices.
 
 ```sh
 git clone --depth 1 https://github.com/KyaniteLabs/llm-3d-viz
-cp -r llm-3d-viz/plugins/iolite-hermes ~/.hermes/plugins/iolite
+plugin_dir="${HERMES_HOME:-$HOME/.hermes}/plugins/iolite"
+mkdir -p "$plugin_dir" && cp -R llm-3d-viz/plugins/iolite-hermes/. "$plugin_dir/"
 hermes plugins enable iolite
 ```
 

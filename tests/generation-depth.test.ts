@@ -137,15 +137,13 @@ describe("D-H4 exemption derives from the W1 truth map (ticket #188 regression)"
     },
   );
 
-  it("exemption set is exactly the map's open classes — identical to the retired OPEN_WEIGHT_LABS (spot check)", () => {
+  it("exemption set follows the known open-weight labs", () => {
     const openLabs = Object.entries(LAB_OPENNESS_CLASS)
       .filter(([, cls]) => cls === "open")
       .map(([lab]) => lab)
       .sort();
-    // The retired OPEN_WEIGHT_LABS list, pinned once so the derivation cannot
-    // drift. DeepReinforce AI added 2026-08-24 (Ornith, MIT self-hosted).
     expect(openLabs).toEqual(
-      ["Alibaba", "DeepReinforce AI", "DeepSeek", "Kimi", "Meta", "MiniMax", "NVIDIA", "Z AI"].sort(),
+      ["Alibaba", "DeepReinforce AI", "DeepSeek", "Kimi", "Meta", "MiniMax", "NVIDIA", "Reflection", "Z AI"].sort(),
     );
   });
 });

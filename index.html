@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#070C0B" />
     <meta name="color-scheme" content="dark" />
-    <title>Iolite — LLM speed × cost × intelligence (3D)</title>
+    <title>Iolite — Compare model prices and capability</title>
     <meta
       name="description"
-      content="Interactive 3D observatory of LLM benchmarks: intelligence index, blended cost, and tokens/s. Set an intelligence floor, rank eligible models by cost or speed, compare open vs closed weights, and share Decide shortlists. Free, browser-based, MIT."
+      content="Choose a minimum Epoch capability score and compare eligible models by blended list price. The public snapshot also shows the cost–capability frontier."
     />
     <meta
       name="keywords"
-      content="LLM benchmark, AI model comparison, intelligence index, tokens per second, cost per million tokens, open weights, Decide mode, 3D data visualization"
+      content="LLM benchmark, AI model comparison, Epoch Capabilities Index, cost per million tokens"
     />
     <meta name="author" content="Kyanite Labs / Simon Gonzalez De Cruz" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
@@ -24,20 +24,20 @@
     <meta property="og:site_name" content="Iolite" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://viz.kyanitelabs.tech/" />
-    <meta property="og:title" content="Iolite — LLM speed × cost × intelligence" />
+    <meta property="og:title" content="Iolite — Compare model prices and capability" />
     <meta
       property="og:description"
-      content="3D benchmark stage for LLMs: intelligence floor, cost×speed shortlist, multi-effort trails, open vs closed. Shareable Decide links."
+      content="Filter by provider and minimum Epoch capability score, then compare blended list prices."
     />
     <meta property="og:image" content="https://viz.kyanitelabs.tech/og-image.png" />
-    <meta property="og:image:alt" content="Iolite 3D stage — speed, cost, intelligence axes" />
+    <meta property="og:image:alt" content="Illustration of the original Iolite observatory" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Iolite — LLM speed × cost × intelligence" />
+    <meta name="twitter:title" content="Iolite — Compare model prices and capability" />
     <meta
       name="twitter:description"
-      content="Interactive 3D LLM benchmarks. Floor intelligence, rank by cost or speed, compare models honestly."
+      content="Compare model prices at your required Epoch capability score."
     />
     <meta name="twitter:image" content="https://viz.kyanitelabs.tech/og-image.png" />
 
@@ -59,10 +59,10 @@
             "name": "Iolite",
             "alternateName": ["Model Observatory", "llm-3d-viz", "LLM 3D Viz"],
             "url": "https://viz.kyanitelabs.tech/",
-            "description": "Interactive 3D visualization of LLM benchmarks across speed (tokens/s), cost (blended $/M), and intelligence. Decide mode: set an intelligence floor and shortlist by cost or speed.",
+            "description": "Public model comparison by blended list price and direct Epoch capability score.",
             "applicationCategory": "DataVisualizationApplication",
             "operatingSystem": "Web browser",
-            "browserRequirements": "Requires JavaScript and WebGL",
+            "browserRequirements": "Requires JavaScript",
             "isAccessibleForFree": true,
             "license": "https://opensource.org/licenses/MIT",
             "offers": {
@@ -76,35 +76,21 @@
               "url": "https://kyanitelabs.tech"
             },
             "featureList": [
-              "3D stage: cost × intelligence × speed",
-              "Decide mode with intelligence floor and cost/speed bias",
-              "Multi-effort trails and Pareto ridge",
-              "Open vs closed weight encoding",
-              "Local VRAM tier filters (8/12/24 GB)",
-              "Shareable URL state",
-              "Atlas agent dock (offline tools + optional BYOK LLM)"
+              "Minimum Epoch capability score",
+              "Blended list price per million tokens",
+              "Provider filter and cost–capability frontier"
             ]
           },
           {
             "@type": "Dataset",
             "@id": "https://viz.kyanitelabs.tech/#catalog",
-            "name": "Iolite curated LLM catalog",
-            "description": "Curated per-model metrics for visualization: intelligence index, tokens/s, blended price, openness. Nulls preserved; metrics are never invented client-side.",
-            "license": "https://opensource.org/licenses/MIT",
-            "creator": { "@type": "Organization", "name": "Kyanite Labs" },
-            "variableMeasured": [
-              "aa_intelligence_index",
-              "tps",
-              "blended_price_per_M",
-              "openness"
-            ],
+            "name": "Iolite public decision catalog",
+            "description": "Direct Epoch Capabilities Index scores on a 0–100 scale and blended LiteLLM list prices.",
+            "license": "https://viz.kyanitelabs.tech/sources/#decision-data",
+            "variableMeasured": ["Normalized Epoch Capabilities Index", "Blended USD per million tokens"],
             "isBasedOn": [
-              {
-                "@type": "Dataset",
-                "name": "LMSYS Chatbot Arena leaderboard dataset",
-                "url": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
-                "license": "https://creativecommons.org/licenses/by/4.0/"
-              }
+              { "@type": "Dataset", "name": "Epoch AI Capabilities Index", "url": "https://epoch.ai/benchmarks/use-this-data", "license": "https://creativecommons.org/licenses/by/4.0/" },
+              { "@type": "Dataset", "name": "LiteLLM model prices and context window", "url": "https://github.com/BerriAI/litellm", "license": "https://opensource.org/licenses/MIT" }
             ]
           },
           {
@@ -120,11 +106,11 @@
     </script>
   </head>
   <body>
-    <div class="app-shell observatory" id="app-shell">
+    <div class="app-shell observatory" id="app-shell" hidden>
       <header class="scope-bar" aria-label="Visible set summary">
         <div class="scope-bar-brand">
           <p class="eyebrow" data-app-title>MODEL OBSERVATORY</p>
-          <h1 id="stage-title" data-app-tagline>Speed × cost × intelligence</h1>
+          <h1 id="stage-title" data-app-tagline>Model observatory</h1>
         </div>
         <button type="button" class="scope-summary" data-scope-edit aria-expanded="false" aria-controls="filter-shelf">
           <span class="scope-summary-text" data-scope-text>Loading scope…</span>
@@ -227,30 +213,19 @@
         </span>
       </footer>
     </div>
+    <main id="app-load-error" hidden style="max-width:42rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif;color:#e8efe9;background:#070c0b">
+      <h1>Iolite could not load</h1>
+      <p>Reload the page to try again.</p>
+      <button type="button">Reload</button>
+    </main>
     <noscript>
       <article class="seo-fallback" style="max-width:42rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif;line-height:1.5;color:#e8efe9;background:#070c0b">
         <h1>Iolite</h1>
-        <p>
-          Interactive <strong>3D LLM benchmark visualization</strong> of
-          <strong>speed × cost × intelligence</strong>. Compare models on
-          intelligence index, blended $/M, and tokens per second. Use Decide mode to set an
-          intelligence floor and shortlist by cost or speed.
-        </p>
-        <p>
-          JavaScript and WebGL are required for the live stage.
-          Read the agent-facing brief at <a href="/llms.txt">/llms.txt</a>
-          and product notes at <a href="/about.md">/about.md</a>.
-        </p>
-        <p>
-          Data sources:
-          <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">Arena (CC BY 4.0)</a>,
-          vendor-published launch figures, first-party pricing pages —
-          <a href="/sources/">full attribution</a>.
-          Model names are trademarks of their owners; not affiliated with any provider.
-          MIT licensed open source.
-        </p>
+        <p>Compare models by blended list price and direct Epoch capability score. The public catalog has no speed measurements.</p>
+        <p>Enable JavaScript to filter and sort models, or read the <a href="/frontier-watch.md">public frontier</a>.</p>
+        <p><a href="/sources/#decision-data">Data sources, method and licences</a></p>
       </article>
     </noscript>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/entry.ts"></script>
   </body>
 </html>

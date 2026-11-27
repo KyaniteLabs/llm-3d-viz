@@ -1,5 +1,6 @@
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import sharp from "sharp";
+import { test } from "./helpers/renderer-fixture";
 
 /**
  * V01 pixel-level regression: display-P3 whiteout.
@@ -31,14 +32,15 @@ async function whitePct(buf: Buffer): Promise<number> {
   return (white / px) * 100;
 }
 
-async function waitForStageReady(page: Page, timeoutMs = 20_000): Promise<void> {
-  await page.goto("/");
+async function waitForStageReady(page: Page, backend: "r3f" | "plotly"): Promise<void> {
+  await page.goto(`/?stage=${backend}&age=0&me=0`);
   await page.waitForFunction(
-    () => {
+    (expectedBackend) => {
       const v = (window as any).__viz;
-      return v?.visibleCount != null && v.visibleCount > 0 && v.pointCount > 0;
+      return document.documentElement.dataset.stageBackend === expectedBackend && v?.pointCount > 0;
     },
-    { timeout: timeoutMs },
+    backend,
+    { timeout: 20_000 },
   );
   // Give Plotly + Three extra paint cycles to settle colours.
   await page.waitForTimeout(2000);
@@ -55,6 +57,7 @@ async function waitForProjectionsRendered(page: Page, timeoutMs = 15_000): Promi
       }
       return true;
     },
+    null,
     { timeout: timeoutMs },
   );
   await page.waitForTimeout(1000); // extra settle for Plotly animations
@@ -63,7 +66,7 @@ async function waitForProjectionsRendered(page: Page, timeoutMs = 15_000): Promi
 test.describe("V01 display-P3 whiteout pixel regression", () => {
   test("3D stage is not whiteout", async ({ page }) => {
     test.setTimeout(45_000);
-    await waitForStageReady(page);
+    await waitForStageReady(page, "r3f");
     const stage = page.locator(".stage-visual");
     const buf = await stage.screenshot();
     const pct = await whitePct(buf);
@@ -74,7 +77,7 @@ test.describe("V01 display-P3 whiteout pixel regression", () => {
 
   test("projection panels are not whiteout", async ({ page }) => {
     test.setTimeout(60_000);
-    await waitForStageReady(page);
+    await waitForStageReady(page, "r3f");
     // Projections are visible in 3D mode (hidden only in table mode).
     await waitForProjectionsRendered(page);
 
@@ -91,22 +94,12 @@ test.describe("V01 display-P3 whiteout pixel regression", () => {
     }
   });
 
-  test("Plotly layout colours are sRGB hex, not raw display-p3", async ({ page }) => {
+  test("Plotly receives both background colours in sRGB", async ({ page }) => {
     test.setTimeout(45_000);
-    await waitForStageReady(page);
-    const colours = await page.evaluate(() => {
-      const results: Record<string, string> = {};
-      const gd = (window as any).__viz?.gd;
-      if (gd?.layout) {
-        results.paper_bgcolor = String(gd.layout.paper_bgcolor ?? "");
-        results.plot_bgcolor = String(gd.layout.plot_bgcolor ?? "");
-      }
-      return results;
-    });
-    // Every Plotly colour must be a plain hex — no "color(display-p3" leak.
-    for (const [key, val] of Object.entries(colours)) {
-      expect(val, `${key} should be hex`).toMatch(/^#[0-9a-f]{3,8}$/i);
-      expect(val, `${key} must not contain display-p3`).not.toContain("display-p3");
-    }
+    await waitForStageReady(page, "plotly");
+    const srgb = /^(?:#[0-9a-f]{3}(?:[0-9a-f]{3})?|rgb\(\d{1,3},\s*\d{1,3},\s*\d{1,3}\))$/i;
+    const layout = await page.evaluate(() => (window as any).__viz.gd.layout);
+    expect(layout.paper_bgcolor).toMatch(srgb);
+    expect(layout.plot_bgcolor).toMatch(srgb);
   });
 });
