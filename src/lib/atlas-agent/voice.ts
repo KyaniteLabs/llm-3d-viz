@@ -298,6 +298,19 @@ export function humanizeForSpeech(text: string): string {
 
 let activePremiumAudio: HTMLAudioElement | null = null;
 let lastTtsEngine: "kokoro" | "openai" | "webspeech" | "none" = "none";
+let speechGeneration = 0;
+
+function currentPlayback(): () => boolean {
+  const generation = speechGeneration;
+  return () => generation === speechGeneration && !isAtlasVoiceMuted();
+}
+
+function releasePremiumAudio(audio: HTMLAudioElement): void {
+  URL.revokeObjectURL(audio.src);
+  audio.pause();
+  audio.removeAttribute("src");
+  if (activePremiumAudio === audio) activePremiumAudio = null;
+}
 
 export function getLastTtsEngine(): "kokoro" | "openai" | "webspeech" | "none" {
   return lastTtsEngine;
@@ -307,8 +320,8 @@ export function getLastTtsEngine(): "kokoro" | "openai" | "webspeech" | "none" {
  * Premium path: OpenAI gpt-4o-mini-tts (male onyx) via same-origin worker
  * POST /api/atlas/tts — only works on viz.kyanitelabs.tech (worker) when secret set.
  */
-export async function speakAtlasPremium(text: string): Promise<boolean> {
-  if (isAtlasVoiceMuted()) return false;
+export async function speakAtlasPremium(text: string, shouldPlay = currentPlayback()): Promise<boolean> {
+  if (!shouldPlay()) return false;
   const spoken = humanizeForSpeech(text);
   if (!spoken) return false;
 
@@ -322,23 +335,23 @@ export async function speakAtlasPremium(text: string): Promise<boolean> {
         model: "gpt-4o-mini-tts",
       }),
     });
-    if (!res.ok) return false;
+    if (!res.ok || !shouldPlay()) return false;
     const ct = res.headers.get("content-type") || "";
     if (!ct.includes("audio")) return false;
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    if (activePremiumAudio) {
-      activePremiumAudio.pause();
-      activePremiumAudio.src = "";
-    }
+    if (!shouldPlay()) return false;
+    if (activePremiumAudio) releasePremiumAudio(activePremiumAudio);
     if (speechSynthesisSupported()) globalThis.speechSynthesis.cancel();
-    const audio = new Audio(url);
+    const audio = new Audio(URL.createObjectURL(blob));
     activePremiumAudio = audio;
-    audio.onended = () => {
-      URL.revokeObjectURL(url);
-      if (activePremiumAudio === audio) activePremiumAudio = null;
-    };
-    await audio.play();
+    audio.onended = () => releasePremiumAudio(audio);
+    try {
+      await audio.play();
+    } catch {
+      releasePremiumAudio(audio);
+      return false;
+    }
+    if (!shouldPlay()) return false;
     lastTtsEngine = "openai";
     return true;
   } catch {
@@ -346,14 +359,10 @@ export async function speakAtlasPremium(text: string): Promise<boolean> {
   }
 }
 
-function speakAtlasWebSpeech(text: string, opts?: { cancel?: boolean }): void {
-  if (!speechSynthesisSupported() || isAtlasVoiceMuted()) return;
+function speakAtlasWebSpeech(text: string, shouldPlay: () => boolean): void {
+  if (!speechSynthesisSupported() || !shouldPlay()) return;
   const synth = globalThis.speechSynthesis;
-  if (opts?.cancel !== false) synth.cancel();
-  if (activePremiumAudio) {
-    activePremiumAudio.pause();
-    activePremiumAudio = null;
-  }
+  if (activePremiumAudio) releasePremiumAudio(activePremiumAudio);
 
   const reduced =
     typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -366,8 +375,11 @@ function speakAtlasWebSpeech(text: string, opts?: { cancel?: boolean }): void {
     u.rate = reduced ? 1.02 : 0.96;
     u.pitch = 0.92;
     u.volume = 1;
-    lastTtsEngine = "webspeech";
-    setTimeout(() => synth.speak(u), 20);
+    setTimeout(() => {
+      if (!shouldPlay()) return;
+      lastTtsEngine = "webspeech";
+      synth.speak(u);
+    }, 20);
   };
 
   const list = synth.getVoices();
@@ -392,10 +404,11 @@ export function speakAtlas(text: string, opts?: { cancel?: boolean }): void {
   if (opts?.cancel !== false) {
     stopAtlasSpeech();
   }
+  const shouldPlay = currentPlayback();
   void (async () => {
     try {
       const { speakWithKokoro } = await import("./kokoro-tts");
-      const ok = await speakWithKokoro(text, { voice: "am_michael" });
+      const ok = await speakWithKokoro(text, { voice: "am_michael", shouldPlay });
       if (ok) {
         lastTtsEngine = "kokoro";
         return;
@@ -403,8 +416,9 @@ export function speakAtlas(text: string, opts?: { cancel?: boolean }): void {
     } catch {
       /* fall through */
     }
-    const premium = await speakAtlasPremium(text);
-    if (!premium) speakAtlasWebSpeech(text, { cancel: false });
+    if (!shouldPlay()) return;
+    const premium = await speakAtlasPremium(text, shouldPlay);
+    if (!premium) speakAtlasWebSpeech(text, shouldPlay);
   })();
 }
 
@@ -414,12 +428,9 @@ export function warmAtlasVoices(): void {
 }
 
 export function stopAtlasSpeech(): void {
+  speechGeneration++;
   if (speechSynthesisSupported()) globalThis.speechSynthesis.cancel();
-  if (activePremiumAudio) {
-    activePremiumAudio.pause();
-    activePremiumAudio.src = "";
-    activePremiumAudio = null;
-  }
+  if (activePremiumAudio) releasePremiumAudio(activePremiumAudio);
   void import("./kokoro-tts")
     .then((m) => m.stopKokoroSpeech())
     .catch(() => undefined);
@@ -432,13 +443,15 @@ export function getActiveAtlasVoiceName(): string | null {
 }
 
 export interface ListenHandle {
-  stop: () => void;
+  finish: () => void;
+  cancel: () => void;
 }
 
 /** Push-to-talk style listen; requires user gesture to start. */
 export function listenAtlasOnce(
   onFinal: (transcript: string) => void,
   onError?: (msg: string) => void,
+  onEnd?: () => void,
 ): ListenHandle | null {
   const Ctor = getRecognitionCtor();
   if (!Ctor) {
@@ -457,17 +470,26 @@ export function listenAtlasOnce(
   rec.onerror = (ev) => {
     onError?.(ev.error ?? "recognition error");
   };
-  rec.onend = () => {
-    /* one-shot done */
-  };
+  rec.onend = () => onEnd?.();
   try {
     rec.start();
   } catch (e) {
     onError?.(e instanceof Error ? e.message : "could not start mic");
     return null;
   }
+  let stopping = false;
   return {
-    stop: () => {
+    finish: () => {
+      if (stopping) return;
+      stopping = true;
+      try {
+        rec.stop();
+      } catch (error) {
+        onError?.(error instanceof Error ? error.message : "could not stop mic");
+      }
+    },
+    cancel: () => {
+      rec.onresult = rec.onerror = rec.onend = null;
       try {
         rec.abort();
       } catch {

@@ -71,22 +71,22 @@ After first deploy, note the `*.pages.dev` URL from wrangler output and smoke it
 
 ## Post-deploy smoke (must pass)
 
-Run the content-asserted helper (asserts page CONTENT — title, entry-asset
-vocabulary, blog page vs SPA shell, llms.txt, sitemap — never status-only):
+Run the smoke helper to check the public decision bundle, frontier, blog,
+discovery files, model cards, and embed headers.
 
 ```bash
-VIZ_DATA_PLANE=public SMOKE_MODEL="Qwen3.8 27B (xhigh)" bash scripts/public-smoke.sh
+VIZ_DATA_PLANE=public SMOKE_MODEL="Gemma 4 31B IT" bash scripts/public-smoke.sh
 ```
 
-Manual equivalents (legacy table — the script covers these):
+Manual browser checks:
 
 | Check | Expect |
 |-------|--------|
-| `https://llm-3d-viz.pages.dev/` (or project URL) | 200, dark observatory chrome |
-| `https://viz.kyanitelabs.tech/` | 200 once DNS is attached |
-| Console | no uncaught errors on load + one rotate + one slider move |
+| `https://llm-3d-viz.pages.dev/` (or project URL) | 200, public price and capability view |
+| `https://viz.kyanitelabs.tech/` | 200 and the same decision view once DNS is attached |
+| Console | no uncaught errors on load, while changing the public score floor, or while rotating the original observatory |
 | `?heat=1` | diagnostic heat encoding on (default is off) |
-| Cinema (`C`) | enters cinema mode; fonts still self-hosted (no fonts.googleapis.com) |
+| Cinema (`C` at `?view=observatory`) | enters cinema mode with self-hosted fonts |
 | Network | no third-party font/CDN leaks for type |
 
 ## Rollback

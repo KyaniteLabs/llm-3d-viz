@@ -581,6 +581,7 @@ dt { color: var(--color-text-muted); } dd { margin: 0; color: var(--filament); }
   background: rgba(232, 241, 228, 0.06);
 }
 .atlas-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.atlas-mic { touch-action: none; }
 .atlas-mic.is-listening {
   border-color: var(--copper, #c47a3a);
   color: var(--copper, #c47a3a);
@@ -2229,6 +2230,17 @@ select:focus-visible {
   .status-bar {
     font-size: 0.625rem; /* L8 micro-type floor: 10px */
     padding: 0.15rem 0.4rem;
+    white-space: normal;
+  }
+  .status-bar .data-sources {
+    flex: 1 1 100%;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  /* Copy insight and the sources page expose these details without shrinking the stage. */
+  .status-bar :is(.method-strip, .trademark-note) {
+    display: none;
   }
 }
 

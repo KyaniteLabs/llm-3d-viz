@@ -49,6 +49,7 @@ export interface AtlasProposal {
   decide_mode?: boolean;
   cost_speed_bias?: number;
   highlight_model_ids?: string[];
+  /** Ranked results displayed on the response card. */
   shortlist_ids?: string[];
   pinned_model_id?: string | null;
   hovered_model_id?: string | null;
@@ -143,14 +144,14 @@ export function isLowImpactProposal(p: AtlasProposal): boolean {
  * Host-owned auto-apply decision. Never trusts model-supplied auto_apply for high-impact writes.
  */
 export function shouldAutoApplyProposal(p: AtlasProposal): boolean {
-  if (!isLowImpactProposal(p)) return false;
+  if (!proposalHasApplyableChanges(p) || !isLowImpactProposal(p)) return false;
   // Low-impact navigation always applies; model cannot force-confirm-block cinema/pin.
   // Explicit needs_confirm:true still shows Apply (e.g. rare soft confirm).
   if (p.needs_confirm === true) return false;
   return true;
 }
 
-/** Whether the proposal has any store-affecting fields. */
+/** Whether applying the proposal changes the store or dispatches a UI action. */
 export function proposalHasApplyableChanges(p: AtlasProposal): boolean {
   return (
     p.floor != null ||
@@ -166,6 +167,6 @@ export function proposalHasApplyableChanges(p: AtlasProposal): boolean {
     p.pinned_model_id !== undefined ||
     p.hovered_model_id !== undefined ||
     Boolean(p.highlight_model_ids?.length) ||
-    Boolean(p.shortlist_ids?.length)
+    Boolean(p.ui_actions?.length)
   );
 }

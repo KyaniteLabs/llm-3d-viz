@@ -3,12 +3,12 @@
 **Open-source entry:** this GitHub tree (MIT).  
 Simon’s product checkout lives on **Forgejo only** and does **not** include the simple Liani-style picker — that path is **OSS edition only** (`src/config/edition.ts` → `"oss"`).
 
-See `docs/agents/dual-repo.md`.
+See the [repository roles in the README](../../README.md#source-two-repos-not-one-mirror).
 
 ## 1. Run
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm test
 npm run build

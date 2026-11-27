@@ -61,12 +61,9 @@ async function getKokoro(): Promise<KokoroInstance> {
     try {
       const { KokoroTTS } = await import("kokoro-js");
       loadProgress = 0.15;
-      // Prefer WebGPU when available (faster); else WASM (CPU, free everywhere).
-      const hasWebGpu =
-        typeof navigator !== "undefined" && "gpu" in navigator;
-      const tts = await KokoroTTS.from_pretrained(MODEL_ID, {
-        dtype: hasWebGpu ? "fp32" : "q8",
-        device: hasWebGpu ? "webgpu" : "wasm",
+      const load = (device: "webgpu" | "wasm", dtype: "fp32" | "q8") => KokoroTTS.from_pretrained(MODEL_ID, {
+        dtype,
+        device,
         progress_callback: (p: unknown) => {
           const prog = (p as { progress?: number } | null)?.progress;
           if (typeof prog === "number") {
@@ -74,6 +71,12 @@ async function getKokoro(): Promise<KokoroInstance> {
           }
         },
       });
+      const gpu = typeof navigator === "undefined" ? undefined :
+        (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
+      const adapter = await gpu?.requestAdapter().catch(() => null);
+      const tts = adapter
+        ? await load("webgpu", "fp32").catch(() => load("wasm", "q8"))
+        : await load("wasm", "q8");
       loadProgress = 1;
       return tts as unknown as KokoroInstance;
     } catch (e) {
@@ -84,17 +87,6 @@ async function getKokoro(): Promise<KokoroInstance> {
     }
   })();
   return ttsPromise;
-}
-
-/** Warm model in background after user opens Atlas (still free, just bandwidth). */
-export function warmKokoroTts(): void {
-  if (typeof window === "undefined") return;
-  // Defer so first paint isn't blocked
-  window.setTimeout(() => {
-    void getKokoro().catch(() => {
-      /* fallback path handles failure */
-    });
-  }, 2500);
 }
 
 function floatToWavBlob(samples: Float32Array, sampleRate: number): Blob {
@@ -133,12 +125,14 @@ function floatToWavBlob(samples: Float32Array, sampleRate: number): Blob {
  */
 export async function speakWithKokoro(
   text: string,
-  opts?: { voice?: KokoroMaleVoice; speed?: number },
+  opts?: { voice?: KokoroMaleVoice; speed?: number; shouldPlay?: () => boolean },
 ): Promise<boolean> {
+  const shouldPlay = opts?.shouldPlay ?? (() => true);
   const spoken = humanizeForSpeech(text);
-  if (!spoken) return false;
+  if (!spoken || !shouldPlay()) return false;
   try {
     const tts = await getKokoro();
+    if (!shouldPlay()) return false;
     const result = await tts.generate(spoken, {
       voice: opts?.voice ?? DEFAULT_VOICE,
       speed: opts?.speed ?? 1,
@@ -156,19 +150,18 @@ export async function speakWithKokoro(
       blob = floatToWavBlob(samples, rate);
     }
 
-    const url = URL.createObjectURL(blob);
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.src = "";
-    }
-    const el = new Audio(url);
+    if (!shouldPlay()) return false;
+    stopKokoroSpeech();
+    const el = new Audio(URL.createObjectURL(blob));
     activeAudio = el;
-    el.onended = () => {
-      URL.revokeObjectURL(url);
-      if (activeAudio === el) activeAudio = null;
-    };
-    await el.play();
-    return true;
+    el.onended = () => releaseAudio(el);
+    try {
+      await el.play();
+      return shouldPlay();
+    } catch (error) {
+      releaseAudio(el);
+      throw error;
+    }
   } catch (e) {
     lastError = e instanceof Error ? e.message : String(e);
     return false;
@@ -176,9 +169,12 @@ export async function speakWithKokoro(
 }
 
 export function stopKokoroSpeech(): void {
-  if (activeAudio) {
-    activeAudio.pause();
-    activeAudio.src = "";
-    activeAudio = null;
-  }
+  if (activeAudio) releaseAudio(activeAudio);
+}
+
+function releaseAudio(audio: HTMLAudioElement): void {
+  URL.revokeObjectURL(audio.src);
+  audio.pause();
+  audio.removeAttribute("src");
+  if (activeAudio === audio) activeAudio = null;
 }

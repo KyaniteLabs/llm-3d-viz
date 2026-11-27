@@ -16,7 +16,7 @@ catalog generators -> public cards/embeds/comparisons/frontier files -> static h
 
 Atlas [controller](src/lib/atlas-agent/controller.ts) attempts the configured LLM when ready, with a 60-second failure backoff and offline fallback. [llm-config](src/lib/atlas-agent/llm-config.ts) persists endpoint/key settings in localStorage and defaults to an enabled same-origin preset if storage is absent. Optional speech/voice code is separate. The Vite proxy, when a target is configured, uses curl, server-side credentials and temporary request/response files. Static deployments need their own endpoint arrangement; this code does not prove the production route exists.
 
-The [MCP entrypoint](bin/atlas-mcp-server.ts) reads an explicitly selected/preferred local snapshot or falls back to draft, exposes JSON-RPC catalog resources/tools, and defaults to a catalog-only tools listing. `ATLAS_MCP_FULL` broadens discovery; tools/call dispatch itself is not filtered by that listing, so the flag is not an authorization boundary. No public network listener is supplied by this stdio entrypoint.
+The MCP stdio entrypoint reads an explicitly selected or preferred local snapshot and falls back to the draft when that snapshot is unavailable. Its default JSON-RPC tool set includes catalog tools and the `ui_action` proposal tool. Set `ATLAS_MCP_FULL=1` to expose additional view and decision controls. In either mode, `tools/call` accepts only names returned by `tools/list` and returns error `-32602` for unlisted tools. [MCP entrypoint](bin/atlas-mcp-server.ts)
 
 ## Risky paths and failure signatures
 

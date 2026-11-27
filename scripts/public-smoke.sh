@@ -25,11 +25,24 @@ index_html="$(fetch "$PUBLIC_ORIGIN/")"
 [[ "$index_html" == *"Iolite"* ]] || fail "index.html does not name Iolite"
 
 # 2) The entry asset exists and carries real content (not an empty chunk).
-entry="$(printf '%s' "$index_html" | grep -oE 'assets/index-[a-zA-Z0-9_-]+\.js' | head -1)"
-[[ -n "$entry" ]] || fail "no entry asset in index.html"
+[[ "$index_html" =~ assets/index-[a-zA-Z0-9_-]+\.js ]] || fail "no entry asset in index.html"
+entry="${BASH_REMATCH[0]}"
 bundle="$(fetch "$PUBLIC_ORIGIN/$entry")"
-[[ -n "$bundle" && ${#bundle} -gt 100000 ]] || fail "entry asset missing or implausibly small"
-[[ "$bundle" == *"Pareto"* ]] || fail "entry asset lacks app vocabulary (Pareto) — wrong or broken bundle"
+if [[ "${VIZ_DATA_PLANE:-private}" == "public" ]]; then
+  [[ "$bundle" =~ public-decision-[a-zA-Z0-9_-]+\.js ]] || fail "entry asset does not load the public decision view"
+  decision_asset="${BASH_REMATCH[0]}"
+  decision_bundle="$(fetch "$PUBLIC_ORIGIN/assets/$decision_asset")"
+  [[ "$decision_bundle" == *"Choose a model by price and capability"* ]] || fail "public decision view content is missing"
+  frontier="$(fetch "$PUBLIC_ORIGIN/frontier-watch.json")"
+  [[ "$frontier" == *"Epoch Capabilities Index"* ]] || fail "public frontier lacks the Epoch score basis"
+else
+  if [[ "$bundle" =~ main-[a-zA-Z0-9_-]+\.js ]]; then
+    decision_bundle="$(fetch "$PUBLIC_ORIGIN/assets/${BASH_REMATCH[0]}")"
+  else
+    decision_bundle="$bundle"
+  fi
+  [[ "$decision_bundle" == *"Pareto"* ]] || fail "observatory asset lacks Pareto content"
+fi
 
 # 3) Blog post serves its OWN page (unique title fragment), not the SPA shell
 #    — the exact 2026-08-24 false-positive class.
@@ -47,15 +60,15 @@ sitemap="$(fetch "$PUBLIC_ORIGIN/sitemap.xml")"
 
 # 6) Optional model-presence assertion: pass a model name via SMOKE_MODEL.
 if [[ -n "${SMOKE_MODEL:-}" ]]; then
-  [[ "$bundle" == *"$SMOKE_MODEL"* ]] || fail "model '$SMOKE_MODEL' missing from the served bundle"
+  [[ "$decision_bundle" == *"$SMOKE_MODEL"* ]] || fail "model '$SMOKE_MODEL' missing from the served bundle"
 fi
 
 # 7) Model card serves a REAL generated page with phase-1 SEO surface
 #    (canonical + JSON-LD + provenance chips), not the SPA shell.
 #    SMOKE_SLUG selects the card (default: first entry from the sitemap).
 smoke_slug="${SMOKE_SLUG:-}"
-if [[ -z "$smoke_slug" ]]; then
-  smoke_slug="$(printf '%s' "$sitemap" | grep -oE '/m/[a-z0-9-]+/' | head -1 | sed 's|^/m/||; s|/$||')"
+if [[ -z "$smoke_slug" && "$sitemap" =~ /m/([a-z0-9-]+)/ ]]; then
+  smoke_slug="${BASH_REMATCH[1]}"
 fi
 if [[ -n "$smoke_slug" ]]; then
   card="$(fetch "$PUBLIC_ORIGIN/m/$smoke_slug/")"
@@ -82,8 +95,8 @@ fi
 #     compare selector legitimately emits ZERO pages (no pair has both sides
 #     measured). Empty is a pass on the public plane; the private instance
 #     smoke keeps expecting pages.
-compare_slug="$(printf '%s' "$sitemap" | grep -oE '/compare/[a-z0-9-]+-vs-[a-z0-9-]+/' | head -1)"
-if [[ -n "$compare_slug" ]]; then
+if [[ "$sitemap" =~ /compare/[a-z0-9-]+-vs-[a-z0-9-]+/ ]]; then
+  compare_slug="${BASH_REMATCH[0]}"
   cmp_page="$(fetch "$PUBLIC_ORIGIN$compare_slug")"
   [[ "$cmp_page" == *"measured comparison"* ]] || fail "compare page $compare_slug is not generated (SPA shell?)"
   [[ "$cmp_page" == *'class="verdict'* ]] || fail "compare page $compare_slug lacks its verdict block"

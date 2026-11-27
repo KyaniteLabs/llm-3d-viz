@@ -8,6 +8,7 @@ import {
   type AtlasAgentContext,
   type AtlasProposal,
   type AtlasLlmConfig,
+  type ListenHandle,
   runAtlasTurn,
   isAtlasVoiceMuted,
   setAtlasVoiceMuted,
@@ -48,7 +49,7 @@ export class AtlasAgentPanel {
   private pending: AtlasProposal | null = null;
   private undoState: AppState | null = null;
   private listening = false;
-  private listenHandle: { stop: () => void } | null = null;
+  private listenHandle: ListenHandle | null = null;
   private turnId = 0;
   private inFlightTurn: number | null = null;
 
@@ -59,12 +60,6 @@ export class AtlasAgentPanel {
     this.root.setAttribute("aria-label", "Atlas agent");
     this.renderShell();
     warmAtlasVoices();
-    // Prefetch Kokoro in background (dynamic import — free OSS neural male).
-    window.setTimeout(() => {
-      void import("../lib/atlas-agent/kokoro-tts")
-        .then((m) => m.warmKokoroTts())
-        .catch(() => undefined);
-    }, 2000);
     void loadAtlasVoices().then(() => this.refreshVoiceLabel());
     this.store.subscribe(() => this.syncFromStore());
   }
@@ -110,7 +105,7 @@ export class AtlasAgentPanel {
           <span class="atlas-sub">decision agent · navigate · talk</span>
         </summary>
         <div class="atlas-body">
-          <p class="atlas-hint">Decision surface: <em>floor 50</em> · <em>cheapest eligible</em> · <em>cinema on</em> · <em>pin Claude</em> · <em>open weights only</em> · <em>task economy</em> · <em>reset scope</em>. Navigation auto-applies; floor/filters need Apply. Optional BYOK LLM / NUCBox (local Vite). Voice: <strong>Kokoro</strong>. <span data-atlas-voice-name></span></p>
+          <p class="atlas-hint">Decision surface: <em>floor 50</em> · <em>cheapest eligible</em> · <em>cinema on</em> · <em>pin Claude</em> · <em>open weights only</em> · <em>task economy</em> · <em>reset scope</em>. Navigation auto-applies. Floor, filter, and axis changes need Apply. Optional BYOK LLM / NUCBox (local Vite). Voice: <strong>Kokoro</strong>. <span data-atlas-voice-name></span></p>
           <p class="atlas-llm-status" data-atlas-llm-status>${esc(describeAtlasLlmConfig(llm))}</p>
           <div class="atlas-row">
             <input type="text" class="atlas-input" data-atlas-input placeholder="Ask Atlas…" autocomplete="off" aria-label="Atlas command" />
@@ -204,18 +199,45 @@ export class AtlasAgentPanel {
       }
     });
 
-    // Push-to-talk: mousedown start, mouseup stop
-    mic?.addEventListener("mousedown", (e) => {
+    let microphonePointer: number | null = null;
+    let microphoneKey: string | null = null;
+    mic?.addEventListener("pointerdown", (e) => {
+      if (!e.isPrimary || e.button !== 0 || microphonePointer !== null || microphoneKey !== null) return;
       e.preventDefault();
+      mic.setPointerCapture(e.pointerId);
+      microphonePointer = e.pointerId;
       this.startListen(mic);
     });
-    mic?.addEventListener("mouseup", () => this.stopListen(mic));
-    mic?.addEventListener("mouseleave", () => this.stopListen(mic));
-    mic?.addEventListener("touchstart", (e) => {
+    mic?.addEventListener("pointerup", (e) => {
+      if (e.pointerId !== microphonePointer) return;
+      microphonePointer = null;
+      this.listenHandle?.finish();
+    });
+    const cancelPointer = (e: PointerEvent) => {
+      if (e.pointerId !== microphonePointer || !mic) return;
+      microphonePointer = null;
+      this.cancelListen(mic);
+    };
+    mic?.addEventListener("pointercancel", cancelPointer);
+    mic?.addEventListener("lostpointercapture", cancelPointer);
+    mic?.addEventListener("blur", () => {
+      microphonePointer = null;
+      microphoneKey = null;
+      this.cancelListen(mic);
+    });
+    mic?.addEventListener("keydown", (e) => {
+      if (e.key !== " " && e.key !== "Enter") return;
       e.preventDefault();
+      if (e.repeat || microphonePointer !== null || microphoneKey !== null) return;
+      microphoneKey = e.key;
       this.startListen(mic);
-    }, { passive: false });
-    mic?.addEventListener("touchend", () => this.stopListen(mic));
+    });
+    mic?.addEventListener("keyup", (e) => {
+      if (e.key !== microphoneKey) return;
+      e.preventDefault();
+      microphoneKey = null;
+      this.listenHandle?.finish();
+    });
   }
 
   private readLlmForm(): AtlasLlmConfig {
@@ -257,18 +279,24 @@ export class AtlasAgentPanel {
       (t) => {
         const input = this.root.querySelector<HTMLInputElement>("[data-atlas-input]");
         if (input) input.value = t;
-        this.stopListen(mic);
+        this.cancelListen(mic);
         void this.submit(t);
       },
       (err) => {
         this.showTrace([{ name: "mic", ok: false, detail: err }]);
-        this.stopListen(mic);
+        this.cancelListen(mic);
       },
+      () => this.resetListen(mic),
     );
   }
 
-  private stopListen(mic: HTMLButtonElement) {
-    this.listenHandle?.stop();
+  private cancelListen(mic: HTMLButtonElement) {
+    const handle = this.listenHandle;
+    this.resetListen(mic);
+    handle?.cancel();
+  }
+
+  private resetListen(mic: HTMLButtonElement) {
     this.listenHandle = null;
     this.listening = false;
     mic.classList.remove("is-listening");
@@ -358,7 +386,7 @@ export class AtlasAgentPanel {
       ${shortlist ? `<p class="atlas-shortlist"><strong>Shortlist</strong> ${shortlist}</p>` : ""}
       ${p.floor != null ? `<p class="atlas-meta">Floor → <strong>${p.floor}</strong></p>` : ""}
       <div class="atlas-actions">
-        <button type="button" class="atlas-btn primary" data-atlas-apply ${canApply ? "" : "disabled"}>Apply</button>
+        ${canApply ? '<button type="button" class="atlas-btn primary" data-atlas-apply>Apply</button>' : ""}
         <button type="button" class="atlas-btn" data-atlas-dismiss>Dismiss</button>
       </div>
     `;

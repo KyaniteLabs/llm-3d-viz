@@ -518,23 +518,17 @@ export class SweepScheduler {
 
   private start(state: Readonly<AppState>) {
     this.cancel();
+    if (state.decideMode || state.cinemaMode) return;
     this.lastBatch = -1;
-    // Stage graph may still be empty while Plotly newPlot is in flight — defer
-    // until model ids exist so we don't capture an empty MarkerState for the run.
-    if (!graphIds(this.stage).length) {
-      const deferredRun = this.run;
-      requestAnimationFrame(() => {
-        if (this.run !== deferredRun) return;
-        if (!graphIds(this.stage).length) {
-          // One more frame; still empty → give up until next store/setModels tick.
-          requestAnimationFrame(() => {
-            if (this.run !== deferredRun) return;
-            if (graphIds(this.stage).length) this.start(this.store.getState());
-          });
-          return;
-        }
+    // Plotly's lazy import and first paint can span many animation frames.
+    // Wait for its committed render so the initial sweep sees the live ids.
+    if (this.stage.getAttribute("aria-busy") === "true" || !graphIds(this.stage).length) {
+      const onRendered = () => {
+        this.ensureAfterPlotListeners();
         this.start(this.store.getState());
-      });
+      };
+      this.stage.addEventListener("stage:rendered", onRendered, { once: true });
+      this.cancelScheduled = () => this.stage.removeEventListener("stage:rendered", onRendered);
       return;
     }
     const currentRun = this.run;

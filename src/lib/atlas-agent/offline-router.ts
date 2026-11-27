@@ -6,7 +6,7 @@
 import { displayName } from "../display-name";
 import { DEFAULT_FILTERS } from "../filters";
 import type { ModelFilters } from "../filters";
-import type { AtlasAgentContext, AtlasProposal, AtlasToolTrace } from "./types";
+import type { AtlasAgentContext, AtlasProposal, AtlasToolTrace, RankObjective } from "./types";
 import { emptyProposal } from "./types";
 import type { CatalogConstraints } from "./query-catalog";
 import {
@@ -33,6 +33,20 @@ function speakableList(ids: string[], max = 3): string {
   if (names.length === 1) return names[0]!;
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+function describeShortlist(
+  ids: string[],
+  objective: RankObjective,
+  { mode, message }: ReturnType<typeof toolRankEligible>["result"],
+): string {
+  const label = objective === "min_cost" ? "cheapest shortlist"
+    : mode === "cost" ? "shortlist"
+    : objective === "max_speed" ? "fastest shortlist" : "balanced shortlist";
+  const summary = ids.length
+    ? `The ${label} includes ${speakableList(ids)}.`
+    : "The shortlist is empty.";
+  return message ? `${summary} ${message}` : summary;
 }
 
 /** Map compositional constraints onto the viz filter surface (best-effort). */
@@ -105,61 +119,62 @@ export function runOfflineAtlas(
     const parsed = parseConstraints(raw, ctx);
     if (isCompositional(parsed)) {
       const c = parsed.constraints;
-      const q = toolQueryCatalog(ctx, c);
-      trace.push(q.trace);
-      let ids = q.result.map((s) => s.id);
+      let query = toolQueryCatalog(ctx, c);
+      trace.push(query.trace);
       let active = c;
       let label = describeConstraints(c);
 
       // Empty result? If a constraint sits on an axis the catalog has no data
       // for (vision modality, SWE-bench, GPQA), de-scope it and re-query so the
       // user still gets real answers — and say so honestly.
-      if (ids.length === 0) {
+      if (query.result.length === 0) {
         const gaps = unsupportedDataAxes(ctx, c);
         const scoped = dropUnsupportedData(ctx, c);
+        let missingMeasuredSpeed = query.missingMeasuredSpeed;
         const hasOtherAxes = Object.entries(scoped).some(
           ([k, v]) => k !== "limit" && v != null,
         );
         if (gaps.length && hasOtherAxes && !sameConstraints(scoped, c)) {
-          const q2 = toolQueryCatalog(ctx, scoped);
-          trace.push(q2.trace);
-          const ids2 = q2.result.map((s) => s.id);
-          if (ids2.length) {
-            ids = ids2;
+          const retry = toolQueryCatalog(ctx, scoped);
+          trace.push(retry.trace);
+          missingMeasuredSpeed ||= retry.missingMeasuredSpeed;
+          if (retry.result.length) {
+            query = retry;
             active = scoped;
             label = `${describeConstraints(scoped)} (ignored: ${gaps.join(", ")})`;
           }
         }
-        if (ids.length === 0) {
-          const why = gaps.length
-            ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
+        if (query.result.length === 0) {
+          const why = missingMeasuredSpeed
+            ? gaps.length
+              ? `I couldn't check ${gaps.join(", ")}. With those constraints removed, no matching models have measured speed.`
+              : "No matching models have measured speed."
+            : gaps.length ? `I don't track ${gaps.join(", ")} in this catalog yet, so I can't answer that.`
             : `No models match (${label}). Try loosening a constraint.`;
           return emptyProposal(snap, why, {
             needs_confirm: false,
-            refuse_reason: gaps.length ? "unsupported data" : "empty query",
+            refuse_reason: missingMeasuredSpeed || gaps.length ? "unsupported data" : "empty query",
             tool_trace: trace,
           });
         }
       }
 
-      // Objective set → Decide + ranked shortlist, honoring every constraint.
+      const ids = query.result.map(({ id }) => id);
       if (active.objective) {
+        const rankedLabel = label.charAt(0).toUpperCase() + label.slice(1);
+        const speedRanking = active.objective === "max_speed";
+        const basis = speedRanking ? " by measured speed" : "";
+        const missingSpeed = query.missingSpeedCount;
+        const coverage = speedRanking && missingSpeed > 0
+          ? ` ${missingSpeed} ${missingSpeed === 1 ? "model" : "models"} in this scope lacked measured speed.`
+          : "";
         return emptyProposal(
           snap,
-          `${label.charAt(0).toUpperCase()}${label.slice(1)}: ${speakableList(ids)}. Apply Decide with this ranking?`,
+          `${rankedLabel} matches${basis} include ${speakableList(ids)}.${coverage}`,
           {
-            floor: active.floor ?? ctx.floor,
-            decide_mode: true,
-            cost_speed_bias:
-              active.objective === "min_cost"
-                ? -1
-                : active.objective === "max_speed"
-                  ? 1
-                  : ctx.costSpeedBias,
             shortlist_ids: ids,
-            highlight_model_ids: ids,
-            filters_patch: constraintFiltersPatch(ctx, active),
-            needs_confirm: true,
+            needs_confirm: false,
+            auto_apply: false,
             tool_trace: trace,
           },
         );
@@ -199,7 +214,7 @@ export function runOfflineAtlas(
       const ids = rank.result.shortlist.map((s) => s.id);
       return emptyProposal(
         snap,
-        `Floor ${prop.result.floor}. Among eligible, balanced shortlist: ${speakableList(ids)}. Apply to update Decide?`,
+        `Floor ${prop.result.floor}. ${describeShortlist(ids, "balanced", rank.result)} Apply to update Decide?`,
         {
           floor: prop.result.floor,
           floor_anchor_model_id: null,
@@ -245,7 +260,7 @@ export function runOfflineAtlas(
       const anchorLabel = displayName(prop.result.anchor_id!);
       return emptyProposal(
         snap,
-        `Floor ${prop.result.floor} from ${anchorLabel}. Shortlist: ${speakableList(ids)}. Apply?`,
+        `Floor ${prop.result.floor} from ${anchorLabel}. ${describeShortlist(ids, "balanced", rank.result)} Apply?`,
         {
           floor: prop.result.floor,
           floor_anchor_model_id: prop.result.anchor_id,
@@ -268,17 +283,15 @@ export function runOfflineAtlas(
       const objective = cheap ? "min_cost" : fast ? "max_speed" : "balanced";
       const floorMatch = text.match(/\b(?:over|above|floor\s*)(\d{1,3})\b/);
       const floor = floorMatch ? Number(floorMatch[1]) : ctx.floor;
-      const list = toolListEligible(ctx, floor);
+      const list = toolListEligible(ctx, floor, false);
       trace.push(list.trace);
       const rank = toolRankEligible(ctx, floor, objective, 3);
       trace.push(rank.trace);
       const ids = rank.result.shortlist.map((s) => s.id);
-      const label =
-        objective === "min_cost" ? "cheapest" : objective === "max_speed" ? "fastest" : "balanced";
       if (ids.length === 0) {
         return emptyProposal(
           snap,
-          `No eligible models at floor ${floor} with measured cost and speed.`,
+          `No eligible models at floor ${floor} with price and intelligence data.`,
           {
             floor,
             decide_mode: true,
@@ -290,7 +303,7 @@ export function runOfflineAtlas(
       }
       return emptyProposal(
         snap,
-        `At floor ${floor}, ${label} shortlist: ${speakableList(ids)}. Apply Decide with this ranking?`,
+        `Floor ${floor}. ${describeShortlist(ids, objective, rank.result)} Apply Decide with this ranking?`,
         {
           floor,
           decide_mode: true,

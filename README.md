@@ -33,8 +33,10 @@ npm run dev          # local Vite
 npm test              # Vitest and Desktop Node tests
 npm run build         # public build in this OSS checkout
 npm run preview       # serve the generated dist/ files
-npm run test:render  # Playwright (optional)
+npm run test:render -- public-decision.spec.ts decide-mode.spec.ts viz-pixel.spec.ts
 ```
+
+On a Linux CPU-only machine, use `ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm ci` to omit ONNX Runtime's optional CUDA download.
 
 Open the local Vite URL printed by `npm run dev` when working on the app. The dev server serves the checked-in snapshots of model pages, embeds, and Frontier Watch for direct-file consumers. Run `npm run build` followed by `npm run preview` to see freshly generated pages, the sitemap, and redirects in `dist/`. `npm run build:public` explicitly selects the public data plane. Maintainers with a private catalog can build it with `VIZ_DATA_PLANE=private npm run build`. The scheduled private catalog refresh also enables movement tracking.
 
@@ -62,7 +64,7 @@ To run a single Vitest file, use `npm test -- tests/decide.test.ts`.
 | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Visual system |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Module seams |
 | [docs/forkers/README.md](docs/forkers/README.md) | Fork guide |
-| `docs/agents/mcp-cli-api-requirements.md` (Forgejo product repo only; not in this GitHub copy) | MCP + CLI API requirements |
+| [docs/integrations.md](docs/integrations.md) | Public catalog, Atlas CLI and MCP reference |
 
 ## SEO / GEO / AIEO (crawl + agents)
 
@@ -89,16 +91,16 @@ Canonical production host: **https://viz.kyanitelabs.tech/**.
 
 ## Agent surface (local)
 
-Atlas exposes the same pure catalog tools used by the in-app agent:
+The Atlas CLI exposes the same public price shortlist as the default web view:
 
 ```bash
-npm run catalog:snapshot          # export data/atlas-catalog-snapshot.json
-npm run atlas:cli -- meta
 npm run atlas:cli -- rank --floor 50 --objective min_cost
-npm run atlas:mcp                 # stdio MCP server (JSON-RPC)
+npm run atlas:cli -- eligible --floor 50 --provider Anthropic
 ```
 
-Atlas CLI and MCP run against the local repository/catalog. They are not hosted services on the production origin. For an MCP client, use `command: npx`, `args: ["tsx", "bin/atlas-mcp-server.ts"]`, and `cwd: <repo>`. Set `ATLAS_MCP_FULL=1` to expose UI-control tools such as filters and cinema; the default is catalog-only.
+The public rank and eligible commands use direct Epoch Capabilities Index scores rescaled to 0–100 and LiteLLM blended USD per million tokens (75% input, 25% output). Arena ratings and their fitted estimates are outside this ranking. A price or speed measurement that is unavailable stays missing. See [data attribution](plugins/iolite-hermes/ATTRIBUTION.md).
+
+Pass `--catalog /path/to/atlas.json` or set `ATLAS_CATALOG_PATH` to use the original Atlas schema and an AA Index floor. Other CLI commands and `npm run atlas:mcp` use the Atlas schema, whose AA Index, speed, and cost fields are empty on the shipped legacy snapshot. Atlas CLI and MCP run against the local repository/catalog. They are not hosted services on the production origin. For an MCP client, use `command: npx`, `args: ["tsx", "bin/atlas-mcp-server.ts"]`, and `cwd: <repo>`. Set `ATLAS_MCP_FULL=1` for additional controls such as filters and cinema. The default tool set includes the `ui_action` proposal tool. An attached UI decides whether to apply a proposal.
 
 ## Encoding (glance-first)
 
@@ -112,11 +114,11 @@ Atlas CLI and MCP run against the local repository/catalog. They are not hosted 
 
 ### What does Iolite measure?
 
-It visualizes curated model data on intelligence, blended cost per million tokens, and tokens per second. The public observatory catalog can include Arena leaderboard data (CC BY 4.0), vendor-published launch figures, first-party provider pricing, and the project's own measurements. The public Frontier Watch uses Epoch AI scores and LiteLLM list prices. See `/sources/` on the live site. `scripts/gen-public-catalog.mjs` clears restricted fields from the observatory catalog. Operators running the private pipeline with their own API keys can fill those fields for internal use.
+The public decision view shows direct Epoch capability scores and LiteLLM blended list prices. The original observatory ships Arena ratings and vendor-published figures where available. See the [public data sources and licences](public/sources/index.html). The public build removes measurements whose licences restrict redistribution.
 
 ### How does Decide mode choose a model?
 
-Decide mode first applies the intelligence floor and measured-data requirements, then ranks eligible models by minimum cost, maximum speed, or balanced cost × speed. It is a decision aid, not a claim that one model is universally best.
+The public view filters by provider and minimum Epoch score, then sorts models with a bundled price from cheapest to most expensive. The original observatory can rank by cost and speed when its catalog supplies the required measurements.
 
 ### Are the benchmark numbers complete?
 
@@ -132,7 +134,7 @@ Yes. It is an MIT-licensed build, and [docs/forkers/README.md](docs/forkers/READ
 
 ## Status
 
-The live product is **https://viz.kyanitelabs.tech/**. The repository currently has **633 unit tests green + 1 skip** (per HEAD run, 2026-08-29), with the data pipeline (Artificial Analysis + OpenRouter + Arena, honesty-core nulls, provenance stamps, canary/alerting with stage-truthful failure codes and supersede-drift alerts) and the full S+ visual program (four independent vision critics, zero mechanical defects) landed through 2026-08-26; the distribution-surface phase 0+1 (embed framing lane, per-card canonical/og/JSON-LD, provenance chips, shared slug lib + alias registry) landed 2026-08-29; the Path C public/private data plane (AA-derived values stripped from every public surface + hygiene set) landed same day. The build is fork-friendly; production deploy configuration is operator-specific and is not required to run or fork the project.
+The live product is **https://viz.kyanitelabs.tech/**. The public snapshot date appears in the decision view and CLI results. See [discussions and open issues](https://github.com/KyaniteLabs/llm-3d-viz/issues) for development status.
 
 ## Source (two repos, not one mirror)
 
@@ -141,7 +143,7 @@ The live product is **https://viz.kyanitelabs.tech/**. The repository currently 
 | **Product (Forgejo, private, maintainers only)** [simon/llm-3d-viz](https://git.kyanitelabs.tech/simon/llm-3d-viz) | Product source of truth for development, catalog operations, and deployment |
 | **Open source (GitHub)** [KyaniteLabs/llm-3d-viz](https://github.com/KyaniteLabs/llm-3d-viz) | Separate public MIT repository for forks and customization |
 
-Product work stays on **Forgejo only**. GitHub is **not a live mirror**; it is refreshed only when deliberately published. Policy: `docs/agents/dual-repo.md` in the Forgejo product repo (not included in this GitHub copy).
+Product development and deployment run from Forgejo. The GitHub repository receives individual public releases.
 
 ## License
 

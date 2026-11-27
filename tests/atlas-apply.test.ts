@@ -3,6 +3,7 @@ import { createStore } from "../src/state";
 import {
   emptyProposal,
   isLowImpactProposal,
+  proposalHasApplyableChanges,
   shouldAutoApplyProposal,
   proposalToStorePatch,
   validateProposal,
@@ -90,6 +91,19 @@ describe("full-app atlas apply", () => {
     store.update(patch);
     expect(store.getState().intelligenceFloor).toBe(60);
     expect(store.getState().decideMode).toBe(true);
+  });
+
+  it("uses regular Apply for state changes and auto-applies recognized UI actions", () => {
+    const floor = emptyProposal("t", "Floor 60.", { floor: 60, needs_confirm: true });
+    expect(proposalHasApplyableChanges(floor)).toBe(true);
+    expect(shouldAutoApplyProposal(floor)).toBe(false);
+
+    const ui = emptyProposal("t", "Reset the camera.", {
+      ui_actions: [{ id: "reset_view" }],
+      needs_confirm: false,
+    });
+    expect(proposalHasApplyableChanges(ui)).toBe(true);
+    expect(shouldAutoApplyProposal(ui)).toBe(true);
   });
 
   it("host ignores model auto_apply on high-impact floor change", () => {

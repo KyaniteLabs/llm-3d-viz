@@ -8,7 +8,13 @@ import {
   unsupportedDataAxes,
 } from "../src/lib/atlas-agent/query-catalog";
 import { runOfflineAtlas } from "../src/lib/atlas-agent/offline-router";
-import { validateProposal, type AtlasAgentContext } from "../src/lib/atlas-agent/types";
+import { proposalToStorePatch } from "../src/lib/atlas-agent/apply";
+import {
+  proposalHasApplyableChanges,
+  shouldAutoApplyProposal,
+  validateProposal,
+  type AtlasAgentContext,
+} from "../src/lib/atlas-agent/types";
 import { DEFAULT_FILTERS } from "../src/lib/filters";
 
 type Overrides = Partial<
@@ -87,6 +93,22 @@ describe("toolQueryCatalog", () => {
     const { result } = toolQueryCatalog(ctx(), { objective: "max_speed" });
     const tps = result.map((r) => r.tps);
     expect(tps).toEqual([...tps].sort((a, b) => (b ?? 0) - (a ?? 0)));
+  });
+
+  it("requires measured speed for a speed objective or threshold", () => {
+    const visible = [
+      m("Missing speed", 80, null, 1),
+      m("Invalid speed", 70, -5, 2),
+      m("Measured speed", 60, 20, 3),
+    ];
+    const scoped = { ...ctx(), visible };
+    const fastest = toolQueryCatalog(scoped, { objective: "max_speed", limit: 1 });
+    expect(fastest.result.map(({ id }) => id)).toEqual(["Measured speed"]);
+    expect(fastest.missingSpeedCount).toBe(2);
+    expect(toolQueryCatalog(scoped, { minTps: 0 }).result.map(({ id }) => id))
+      .toEqual(["Measured speed"]);
+    expect(toolQueryCatalog(scoped).result.map(({ id }) => id))
+      .toEqual(["Missing speed", "Invalid speed", "Measured speed"]);
   });
 
   it("honors the intelligence floor", () => {
@@ -206,13 +228,68 @@ describe("isCompositional", () => {
 });
 
 describe("runOfflineAtlas — compositional queries", () => {
-  it("answers a multi-axis question with a valid shortlist proposal", () => {
+  it("answers a multi-axis question with a valid read-only shortlist", () => {
     const p = runOfflineAtlas("cheapest open model above floor 50 with vision", ctx());
     expect(validateProposal(p)).toBe(true);
-    expect(p.shortlist_ids?.length).toBeGreaterThan(0);
-    expect(p.decide_mode).toBe(true);
-    expect(p.cost_speed_bias).toBe(-1);
+    expect(p.shortlist_ids).toEqual(["Open Coder"]);
+    expect(proposalHasApplyableChanges(p)).toBe(false);
     expect(p.summary.toLowerCase()).toContain("open");
+  });
+
+  it.each([
+    { objective: "fastest", expected: ["Measured Fast", "Measured Slow"] },
+    { objective: "cheapest", expected: ["Unknown Smart", "Measured Fast", "Measured Slow"] },
+    { objective: "smartest", expected: ["Unknown Smart", "Measured Slow", "Measured Fast"] },
+  ])("returns $objective scoped results without Apply", ({ objective, expected }) => {
+    const visible = [
+      m("Unknown Smart", 95, null, 1, { openness: "open" }),
+      m("Measured Slow", 75, 20, 3, { openness: "open" }),
+      m("Measured Fast", 60, 200, 2, { openness: "open" }),
+      m("Closed Unknown", 98, null, 0.1, { openness: "closed" }),
+      m("Below Floor Unknown", 40, null, 0.1, { openness: "open" }),
+    ];
+    const proposal = runOfflineAtlas(`${objective} open model above 50`, { ...ctx(), catalog: visible, visible });
+    expect(validateProposal(proposal)).toBe(true);
+    expect(proposal.shortlist_ids).toEqual(expected);
+    expect(proposal.summary).toContain(expected[0]);
+    expect(proposal.summary).not.toMatch(/apply|decide/i);
+    expect(proposal.needs_confirm).toBe(false);
+    expect(proposalHasApplyableChanges(proposal)).toBe(false);
+    expect(shouldAutoApplyProposal(proposal)).toBe(false);
+    expect(proposalToStorePatch(proposal, DEFAULT_FILTERS)).toEqual({ patch: {}, appliedKeys: [] });
+  });
+
+  it("counts unmeasured speed only within the matching scope", () => {
+    const visible = [
+      m("Open Measured", 70, 20, 3, { openness: "open" }),
+      m("Open Unknown", 80, null, 1, { openness: "open" }),
+      m("Closed Unknown", 70, null, 1, { openness: "closed" }),
+      m("Below Floor Unknown", 40, null, 1, { openness: "open" }),
+    ];
+    const proposal = runOfflineAtlas("fastest open model above 50", { ...ctx(), catalog: visible, visible });
+    expect(proposal.shortlist_ids).toEqual(["Open Measured"]);
+    expect(proposal.summary).toMatch(/1 model in this scope lacked measured speed/i);
+    expect(proposal.tool_trace[0]?.detail).toMatch(/1 missing speed/i);
+  });
+
+  it("reports missing speed when the requested provider has no measured rows", () => {
+    const visible = [
+      m("Missing speed", 80, null, 1, { provider: "Anthropic" }),
+      m("Other provider", 60, 20, 3, { provider: "OpenAI" }),
+    ];
+    const proposal = runOfflineAtlas("fastest from Anthropic", { ...ctx(), catalog: visible, visible });
+    expect(proposal.shortlist_ids ?? []).toEqual([]);
+    expect(proposal.summary).toMatch(/no matching models have measured speed/i);
+    expect(proposal.tool_trace[0]?.detail).toMatch(/no measured speed/i);
+  });
+
+  it("reports an unsupported constraint even when the retried scope has no measured speed", () => {
+    const visible = [m("Missing speed", 80, null, 1, { provider: "Anthropic" })];
+    const proposal = runOfflineAtlas("fastest from Anthropic with vision", { ...ctx(), catalog: visible, visible });
+    expect(proposal.shortlist_ids ?? []).toEqual([]);
+    expect(proposal.summary).toMatch(/couldn't check vision/i);
+    expect(proposal.summary).toMatch(/no matching models have measured speed/i);
+    expect(proposal.tool_trace.at(-1)?.detail).toMatch(/no measured speed/i);
   });
 
   it("answers a pure filter query without forcing Decide", () => {
@@ -220,6 +297,7 @@ describe("runOfflineAtlas — compositional queries", () => {
     expect(validateProposal(p)).toBe(true);
     expect(p.highlight_model_ids?.length).toBeGreaterThan(0);
     expect(p.decide_mode).not.toBe(true);
+    expect(proposalHasApplyableChanges(p)).toBe(true);
   });
 
   it("falls back gracefully when no model matches", () => {
@@ -238,6 +316,8 @@ describe("runOfflineAtlas — compositional queries", () => {
     const p = runOfflineAtlas("cheapest eligible", ctx());
     expect(validateProposal(p)).toBe(true);
     expect(p.shortlist_ids?.length).toBeGreaterThan(0);
+    expect(p.decide_mode).toBe(true);
+    expect(proposalHasApplyableChanges(p)).toBe(true);
   });
 
   it("narrows the VIEW to a provider ('only anthropic')", () => {
