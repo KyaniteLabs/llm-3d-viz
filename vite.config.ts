@@ -269,6 +269,8 @@ export default defineConfig(({ mode }) => {
         ".git",
         ".cache",
         "tests/*.spec.ts",
+        // These suites use node:test and run through test:desktop instead.
+        "plugins/iolite-hermes/desktop-src/test/**",
       ],
     },
   } as any;

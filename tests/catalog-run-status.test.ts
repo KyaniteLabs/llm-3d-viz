@@ -10,7 +10,12 @@ import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// These are process integration tests, not in-memory unit tests. Keep the
+// existing 30s child deadline below the test deadline, including cold starts
+// while the aggregate suite is competing for a hosted runner.
+vi.setConfig({ testTimeout: 35_000 });
 
 const SCRIPT = path.resolve(__dirname, "../scripts/catalog-auto-update.sh");
 const SRC = fs.readFileSync(SCRIPT, "utf8");
@@ -72,15 +77,59 @@ function sandbox(opts: { builderRc?: number; draft?: string; priorStatus?: strin
   };
 }
 
+function sandboxEnv(root: string, env: Record<string, string> = {}, host = process.env) {
+  // Never pass operator secrets, shell startup hooks, Node preload hooks or
+  // build/deploy controls from the developer/CI environment into the fixture.
+  return {
+    PATH: host.PATH,
+    HOME: root,
+    TMPDIR: root,
+    LANG: "C.UTF-8",
+    REPO_ROOT: root,
+    ARCHIVE_TAG_ENABLED: "0",
+    DEPLOY_PAGES: "0",
+    SKIP_DEPLOY: "1",
+    ...env,
+  };
+}
+
 function run(root: string, env: Record<string, string> = {}) {
-  return spawnSync("bash", [SCRIPT], {
-    env: { ...process.env, REPO_ROOT: root, ARCHIVE_TAG_ENABLED: "0", DEPLOY_PAGES: "0", ...env },
+  const started = performance.now();
+  const result = spawnSync("bash", [SCRIPT], {
+    env: sandboxEnv(root, env),
     encoding: "utf8",
     timeout: 30_000,
   });
+  const elapsed = performance.now() - started;
+  if (result.error || elapsed > 1_000) {
+    // Fixture output contains no real credentials or upstream requests.
+    console.warn(`catalog fixture took ${Math.round(elapsed)}ms`, result.error ?? "", result.stdout, result.stderr);
+  }
+  return result;
 }
 
 const AT = '"at":"\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ"';
+
+describe("catalog run-status: sandbox isolation", () => {
+  it("inherits only executable lookup, never operator controls or startup hooks", () => {
+    const host = {
+      PATH: "/usr/bin:/bin",
+      HOME: "/operator-home",
+      BASH_ENV: "/operator-startup.sh",
+      NODE_OPTIONS: "--require /operator-preload.js",
+      FORCE: "1",
+      MIN_ROWS: "999",
+      LOG_DIR: "/operator-logs",
+      AA_API_KEY: "not-a-real-key",
+      CLOUDFLARE_API_TOKEN: "not-a-real-token",
+    };
+    expect(sandboxEnv("/fixture", { SKIP_BUILD: "1" }, host)).toEqual({
+      PATH: host.PATH, HOME: "/fixture", TMPDIR: "/fixture", LANG: "C.UTF-8",
+      REPO_ROOT: "/fixture", ARCHIVE_TAG_ENABLED: "0", DEPLOY_PAGES: "0",
+      SKIP_DEPLOY: "1", SKIP_BUILD: "1",
+    });
+  });
+});
 
 describe("catalog run-status: stage table", () => {
   it("STATUS_FAIL_STAGES in the script equals the known stage table", () => {

@@ -30,12 +30,14 @@ Sharp's Node 20.9 minimum is covered by Vite 7's existing Node requirement (20.1
 ```bash
 npm ci
 npm run dev          # local Vite
-npm test             # vitest
+npm test             # Vitest and Desktop Node tests
 npm run build
 npm run test:render  # Playwright (optional)
 ```
 
 Open the local Vite URL printed by `npm run dev`. To customize a fork, see **[docs/forkers/README.md](docs/forkers/README.md)** for branding, lab colors, tokens, catalog, and defaults.
+
+To run a single Vitest file, use `npm test -- tests/decide.test.ts`.
 
 ## Features
 
