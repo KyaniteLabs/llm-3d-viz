@@ -232,14 +232,26 @@ def _arg_number(args: dict, name: str) -> Optional[float]:
 
 
 def _clamp_n(n: Any) -> int:
-    """Shortlist size: an integer from 1 to MAX_N. A numeric string counts; anything
-    else unusable means the default."""
-    if isinstance(n, str) and _NUM_RE.match(n.strip()) and len(n.strip()) <= 40:
-        n = float(n.strip())
+    """Shortlist size: an integer from 1 to MAX_N. Non-positive or unusable values raise ArgError."""
+    if n is None:
+        return decide.DEFAULT_SHORTLIST_N
+    if isinstance(n, str):
+        text = n.strip()
+        if not _NUM_RE.match(text) or len(text) > 40:
+            raise ArgError(f"n must be a number, got {_safe_text(n, 40)!r}")
+        try:
+            n = float(text)
+        except OverflowError:
+            raise ArgError("n is too large; give a finite number") from None
+    elif isinstance(n, bool) or not isinstance(n, (int, float)):
+        raise ArgError("n must be a number")
     f = netio._num(n)
     if f is None:
-        return decide.DEFAULT_SHORTLIST_N
-    return max(1, min(MAX_N, int(f)))
+        raise ArgError("n is too large or not finite; give a finite number")
+    try:
+        return decide.validate_n(f, MAX_N)
+    except ValueError as exc:
+        raise ArgError(str(exc)) from None
 
 
 def _safe_text(v: Any, limit: int = MAX_TEXT) -> str:
@@ -290,7 +302,47 @@ def _provenance_is_prohibited(row: dict) -> bool:
     return any(_names_aa(row.get(k)) for k in _PROVENANCE_KEYS)
 
 
-def _clean_row(r: dict) -> dict:
+_DEFAULT_ARENA_SCALE = {
+    "eci_low": 48.88,
+    "eci_high": 173.4,
+    "lmarena_to_eci": {"slope": 0.1646, "intercept": -88.1662},
+}
+_cached_arena_scale: Optional[dict] = None
+
+
+def _default_arena_scale() -> dict:
+    """Calibration block from the bundled catalog, falling back to hardcoded constants."""
+    global _cached_arena_scale
+    if _cached_arena_scale is None:
+        scale = None
+        try:
+            if BUNDLED_CATALOG.is_file():
+                data = json.loads(BUNDLED_CATALOG.read_bytes())
+                if isinstance(data, dict) and isinstance(data.get("scale"), dict):
+                    scale = data["scale"]
+        except Exception:
+            scale = None
+        _cached_arena_scale = scale or _DEFAULT_ARENA_SCALE
+    return _cached_arena_scale
+
+
+def _arena_to_index(rating: float, scale: Optional[dict] = None) -> Optional[float]:
+    """Map a raw LMArena Bradley-Terry rating onto the 0-100 ECI scale."""
+    if rating < 0:
+        return None
+    sc = scale if isinstance(scale, dict) else _default_arena_scale()
+    l2e = sc.get("lmarena_to_eci") if isinstance(sc.get("lmarena_to_eci"), dict) else {}
+    lo, hi = netio._num(sc.get("eci_low")), netio._num(sc.get("eci_high"))
+    slope, icpt = netio._num(l2e.get("slope")), netio._num(l2e.get("intercept"))
+    if None in (lo, hi, slope, icpt) or hi <= lo:
+        sc = _DEFAULT_ARENA_SCALE
+        lo, hi = sc["eci_low"], sc["eci_high"]
+        slope, icpt = sc["lmarena_to_eci"]["slope"], sc["lmarena_to_eci"]["intercept"]
+    eci = slope * rating + icpt
+    return netio.index_or_none(round(max(0.0, min(100.0, 100.0 * (eci - lo) / (hi - lo))), 1))
+
+
+def _clean_row(r: dict, scale: Optional[dict] = None) -> dict:
     """A copy of a catalog row holding only known fields. Numbers are finite or None
     (a string, NaN, infinity, a huge integer or an index outside 0-100 reads as
     unknown, so one bad row is left out of scoring instead of crashing it) and
@@ -310,36 +362,94 @@ def _clean_row(r: dict) -> dict:
     price = r.get("price") if isinstance(r.get("price"), dict) else {}
     intel = r.get("intelligence") if isinstance(r.get("intelligence"), dict) else {}
     arena = r.get("arena") if isinstance(r.get("arena"), dict) else {}
+    sources = r.get("sources") if isinstance(r.get("sources"), dict) else {}
     for k in _NUMERIC:
         if k in r:
             row[k] = netio._num(r[k])
     if "blended_price_per_M" not in row and price:
         row["blended_price_per_M"] = netio._num(price.get("blended_per_M"))
-    # Intelligence: the nested catalog block, the flat `intelligence` number, or the
-    # deprecated flat `aa_intelligence_index` alias, in that order.
-    if intel:
+    arena_rating = netio._num(arena.get("rating")) if arena else None
+    if arena_rating is None and "arena_rating" in r:
+        arena_rating = netio._num(r.get("arena_rating"))
+    if arena_rating is None and "arena_elo" in r:
+        arena_rating = netio._num(r.get("arena_elo"))
+    if arena_rating is not None:
+        row["arena_rating"] = arena_rating
+    # Intelligence: the nested catalog block, flat `intelligence`, deprecated
+    # `aa_intelligence_index`, or calibrated `arena_rating` fallback, in that order.
+    if intel and intel.get("value") is not None:
         row["intelligence"] = netio.index_or_none(intel.get("value"))
-    elif "intelligence" in r:
+    elif r.get("intelligence") is not None and not isinstance(r.get("intelligence"), dict):
         row["intelligence"] = netio.index_or_none(r["intelligence"])
-    elif "aa_intelligence_index" in r:
+    elif r.get("aa_intelligence_index") is not None:
         row["intelligence"] = netio.index_or_none(r["aa_intelligence_index"])
+    elif arena_rating is not None:
+        mapped = _arena_to_index(arena_rating, scale)
+        if mapped is not None:
+            row["intelligence"] = mapped
+            row["intelligence_metric"] = _safe_text(arena.get("metric"), 80) or "LMArena Bradley-Terry rating (style-controlled)"
+            ar_src = sources.get("arena_rating") if isinstance(sources.get("arena_rating"), dict) else {}
+            as_of = arena.get("as_of") or ar_src.get("as_of")
+            if as_of:
+                row["intelligence_as_of"] = _safe_text(as_of, 20) or None
+    elif "intelligence" in r or "aa_intelligence_index" in r or intel:
+        row["intelligence"] = None
     credits: List[str] = []
+    has_arena_credit = False
+    has_price_credit = False
     if intel:
         row["intelligence_metric"] = _safe_text(intel.get("metric"), 80) or None
         row["intelligence_as_of"] = _safe_text(intel.get("as_of"), 20) or None
-        credits.append(_safe_text(intel.get("attribution"), 600))
+        attr = _safe_text(intel.get("attribution"), 600)
+        if attr:
+            credits.append(attr)
     if arena:
-        row["arena_rating"] = netio._num(arena.get("rating"))
-        credits.append(_safe_text(arena.get("attribution"), 600))
+        attr = _safe_text(arena.get("attribution"), 600)
+        if attr:
+            credits.append(attr)
+            has_arena_credit = True
+        elif arena.get("source"):
+            metric = _safe_text(arena.get("metric"), 120) or "LMArena Bradley-Terry rating (style-controlled)"
+            src = _safe_text(arena.get("source"), 160)
+            lic = _safe_text(arena.get("license"), 40)
+            url_s = _safe_text(arena.get("source_url"), 200)
+            credits.append((f"{metric}. Source: {src}" + (f", {lic}" if lic else "") + (f". {url_s}" if url_s else ""))[:600])
+            has_arena_credit = True
     if price:
         row["price_provider"] = _safe_text(price.get("litellm_provider"), 60) or None
         src = _safe_text(price.get("source"), 120)
         lic = _safe_text(price.get("license"), 20)
         if src:
             credits.append(f"Prices: {src}" + (f", {lic} licence" if lic else "") + ".")
+            has_price_credit = True
         key = price.get("litellm_key")
         if isinstance(key, str):
             row["_price_key"] = key
+    if sources:
+        if not has_arena_credit and row.get("intelligence") is not None:
+            ar_s = sources.get("arena_rating") or sources.get("arena_elo")
+            if isinstance(ar_s, dict) and ar_s.get("origin") == "arena":
+                lic = _safe_text(ar_s.get("license"), 40) or "CC BY 4.0"
+                url_s = _safe_text(ar_s.get("source_url"), 200)
+                credits.append((f"LMArena Bradley-Terry rating (style-controlled), {lic}" + (f". {url_s}" if url_s else ""))[:600])
+        if not has_price_credit and row.get("blended_price_per_M") is not None:
+            pr_s = sources.get("blended_price_per_M") or sources.get("price_in_per_M") or sources.get("price_out_per_M")
+            if isinstance(pr_s, dict):
+                origin = str(pr_s.get("origin") or "").strip()
+                lic_raw = pr_s.get("license") or (sources.get("price_in_per_M") or {}).get("license")
+                lic = _safe_text(lic_raw, 40)
+                url_s = _safe_text(pr_s.get("source_url") or (sources.get("price_in_per_M") or {}).get("source_url"), 200)
+                if origin == "litellm":
+                    credits.append(("Prices: LiteLLM model_prices_and_context_window.json"
+                                    + (f", {lic} licence" if lic else "")
+                                    + (f". Row source: {url_s}" if url_s else "") + ".")[:600])
+                elif origin:
+                    credits.append((f"Prices: {_safe_text(origin, 60)}"
+                                    + (f", {lic} licence" if lic else "")
+                                    + (f". Row source: {url_s}" if url_s else "") + ".")[:600])
+                lkey = pr_s.get("litellm_key")
+                if isinstance(lkey, str) and "_price_key" not in row:
+                    row["_price_key"] = lkey
     row["_credits"] = [c for c in credits if c]
     return row
 
@@ -349,6 +459,26 @@ class _Rows(list):
     catalog's own header (when it has one)."""
     rejected = 0
     meta: Dict[str, str] = {}
+
+
+def _detect_price_basis(payload: Any, rows: List[Any]) -> str:
+    if isinstance(payload, dict) and isinstance(payload.get("blend_rule"), str):
+        br = payload["blend_rule"]
+        if "3 * input_per_M + 1 * output_per_M" in br:
+            return "list price (LiteLLM), blended $/M"
+        return _safe_text(br, 120) or "catalog blended $/M"
+    has_litellm_sources = any(
+        isinstance(r, dict) and isinstance(r.get("sources"), dict)
+        and (r["sources"].get("blended_price_per_M") or {}).get("origin") == "litellm"
+        for r in rows
+    )
+    if has_litellm_sources:
+        has_cache = any(isinstance(r, dict) and r.get("price_cache_per_M") is not None for r in rows)
+        return "list price (LiteLLM), 70%-cached blend $/M" if has_cache else "list price (LiteLLM), blended $/M"
+    if any(isinstance(r, dict) and isinstance(r.get("price"), dict)
+           and "litellm" in str(r["price"].get("source", "")).casefold() for r in rows):
+        return "list price (LiteLLM), blended $/M"
+    return "catalog blended $/M"
 
 
 def _rows(payload: Any) -> List[dict]:
@@ -362,17 +492,25 @@ def _rows(payload: Any) -> List[dict]:
         raise CatalogError(f"catalog has {len(rows)} rows; Iolite reads at most {MAX_ROWS}")
     out = _Rows()
     out.meta = {}
+    scale = None
     if isinstance(payload, dict):
+        if isinstance(payload.get("scale"), dict):
+            scale = payload["scale"]
         for k in ("generated", "schema"):
             if isinstance(payload.get(k), str):
                 out.meta[k] = _safe_text(payload[k], 40)
+        if "generated" not in out.meta and isinstance(payload.get("meta"), dict):
+            date_val = payload["meta"].get("catalog_date") or payload["meta"].get("data_date")
+            if isinstance(date_val, str):
+                out.meta["generated"] = _safe_text(date_val, 40)
+    out.meta["price_basis"] = _detect_price_basis(payload, rows)
     for r in rows:
         if not isinstance(r, dict) or not isinstance(r.get("model"), str):
             continue
         if _provenance_is_prohibited(r):
             out.rejected += 1
             continue
-        clean = _clean_row(r)
+        clean = _clean_row(r, scale=scale)
         if clean.get("model"):
             out.append(clean)
     return out
@@ -1466,8 +1604,11 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
     anchor = args.get("anchor_model")
     if anchor is not None and not isinstance(anchor, str):
         return _err("anchor_model must be a model name")
+    has_anchor = bool(anchor and anchor.strip())
+    if has_anchor and floor_arg is not None:
+        raise ArgError("floor and anchor_model cannot be used together; pass one or the other")
     anchor_row = None
-    if anchor and anchor.strip():
+    if has_anchor:
         anchor_row = _resolve_anchor(rows, anchor)
         floor = decide.floor_from_anchor([anchor_row], anchor_row["model"])
         if floor is None:
@@ -1482,7 +1623,7 @@ def _shortlist(rows: List[dict], source: str, args: dict) -> str:
     if price_arg not in ("list", "mine"):
         return _err("price must be list or mine")
     snapshot_id = decide.catalog_snapshot_id(rows)
-    basis = "list price (LiteLLM), blended $/M"
+    basis = getattr(rows, "meta", {}).get("price_basis") or "catalog blended $/M"
     if price_arg == "mine":
         rows, covered = _rows_at_my_prices(rows)
         basis = (f"your own plan prices from {MY_PRICES_FILE} for {covered} model{'s' if covered != 1 else ''}, "
@@ -1672,9 +1813,10 @@ def _parse_words(rest: str) -> Tuple[dict, Optional[str]]:
         low = w.casefold()
         if low.startswith("n=") and not any(c.isspace() for c in w):
             try:
-                args["n"] = int(low[2:])
+                n_val = int(low[2:])
             except ValueError:
                 raise ValueError(f"n must be a whole number, got {_safe_text(w[2:], 40)!r}") from None
+            args["n"] = decide.validate_n(n_val, MAX_N)
         elif low in ("price=mine", "price=list"):
             args["price"] = low[6:]
         elif low.startswith("bias=") and not any(c.isspace() for c in w):
@@ -1805,7 +1947,7 @@ def _fmt_shortlist(res: dict) -> str:
             advice = (f"{res['scorable_count']} models have a price and a score, but none reaches the floor"
                       + (f" (the highest score is {top:g}). Try a floor at or below {top:g}." if top is not None else "."))
         return head + "\n" + advice + _provenance_line(res)
-    if res.get("price_basis") and not str(res["price_basis"]).startswith("list price (LiteLLM)"):
+    if res.get("price_basis") and str(res["price_basis"]) not in ("list price (LiteLLM), blended $/M", "catalog blended $/M"):
         head += f"\nPrices: {_md(res['price_basis'])}."
     lines = [head]
     for m in res["shortlist"]:

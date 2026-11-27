@@ -121,15 +121,28 @@ def test_slash_never_raises(ctx, monkeypatch):
     assert "unexpected error" in slash(ctx, "shortlist")
 
 
-@pytest.mark.parametrize("n,want", [(0, 1), (-5, 1), (2.9, 2), (999, plugin.MAX_N), (True, 3),
-                                    ("4", 4), (None, 3), (float("nan"), 3), (float("inf"), 3)])
+@pytest.mark.parametrize("n,want", [(2.9, 2), (999, plugin.MAX_N), ("4", 4), (None, 3)])
 def test_clamp_n(n, want):
     assert plugin._clamp_n(n) == want
 
 
-def test_n_zero_still_returns_one(ctx):
-    out = json.loads(ctx.tools["iolite_shortlist"]({"floor": 0, "n": 0}))
-    assert len(out["shortlist"]) == 1
+@pytest.mark.parametrize("bad", [0, -5, 0.5, True, float("nan"), float("inf")])
+def test_clamp_n_rejects_non_positive_and_invalid(bad):
+    with pytest.raises(plugin.ArgError):
+        plugin._clamp_n(bad)
+
+
+def test_n_zero_and_negative_are_rejected(ctx):
+    for bad in (0, -3):
+        out = json.loads(ctx.tools["iolite_shortlist"]({"floor": 0, "n": bad}))
+        assert out["ok"] is False and "between 1 and 25" in out["error"]
+    assert "between 1 and 25" in slash(ctx, "shortlist 50 n=0")
+    assert "between 1 and 25" in slash(ctx, "shortlist 50 n=-1")
+
+
+def test_floor_and_anchor_model_are_mutually_exclusive(ctx):
+    out = json.loads(ctx.tools["iolite_shortlist"]({"floor": 99, "anchor_model": "tie alpha"}))
+    assert out["ok"] is False and "floor" in out["error"] and "anchor_model" in out["error"]
 
 
 @pytest.mark.parametrize("val", ["soon", -3, None, float("nan")])
