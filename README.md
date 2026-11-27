@@ -23,8 +23,10 @@ Iolite plots a curated catalog of large language models in a Three.js/WebGL stag
 
 ## Quick start
 
+CI validates the lockfile with Node 22 and npm 10. Use `npm ci` to install the locked dependencies.
+
 ```bash
-npm install
+npm ci
 npm run dev          # local Vite
 npm test             # vitest
 npm run build
