@@ -14673,17 +14673,17 @@
     ],
     "family_id": "Gemini 4 Hydrogen",
     "effort_tier": "default",
-    "context_length": null,
+    "context_length": 1048576,
     "release_date": "2026-11-12",
     "data_date": "2026-11-21",
     "source_url": "https://epoch.ai/benchmarks/use-this-data",
     "source": "Epoch AI Capabilities Index metadata (CC BY), accessed 2026-11-21. Release date and weight availability from the Epoch row. The direct Epoch score is available in the public decision catalog.",
     "tps": null,
     "ttft": null,
-    "price_in_per_M": null,
-    "price_out_per_M": null,
-    "price_cache_per_M": null,
-    "blended_price_per_M": null,
+    "price_in_per_M": 1.5,
+    "price_out_per_M": 7.5,
+    "price_cache_per_M": 0.075,
+    "blended_price_per_M": 1.1025,
     "aa_intelligence_index": null,
     "arena_elo": null,
     "swe_bench": null,
@@ -14701,6 +14701,26 @@
       },
       "openness": {
         "origin": "curated",
+        "kind": "list"
+      },
+      "price_in_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_out_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "blended_price_per_M": {
+        "origin": "provider",
+        "kind": "derived_list_blend"
+      },
+      "context_length": {
+        "origin": "provider",
         "kind": "list"
       }
     }
@@ -14714,17 +14734,17 @@
     ],
     "family_id": "Gemini 4 Carbon",
     "effort_tier": "default",
-    "context_length": null,
+    "context_length": 1048576,
     "release_date": "2026-11-10",
     "data_date": "2026-11-21",
     "source_url": "https://epoch.ai/benchmarks/use-this-data",
     "source": "Epoch AI Capabilities Index metadata (CC BY), accessed 2026-11-21. Release date and weight availability from the Epoch row. The direct Epoch score is available in the public decision catalog.",
     "tps": null,
     "ttft": null,
-    "price_in_per_M": null,
-    "price_out_per_M": null,
-    "price_cache_per_M": null,
-    "blended_price_per_M": null,
+    "price_in_per_M": 2,
+    "price_out_per_M": 10,
+    "price_cache_per_M": 0.1,
+    "blended_price_per_M": 1.47,
     "aa_intelligence_index": null,
     "arena_elo": null,
     "swe_bench": null,
@@ -14742,6 +14762,26 @@
       },
       "openness": {
         "origin": "curated",
+        "kind": "list"
+      },
+      "price_in_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_out_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "blended_price_per_M": {
+        "origin": "provider",
+        "kind": "derived_list_blend"
+      },
+      "context_length": {
+        "origin": "provider",
         "kind": "list"
       }
     }
@@ -15006,17 +15046,17 @@
     ],
     "family_id": "Gemini 4 Argon",
     "effort_tier": "default",
-    "context_length": null,
+    "context_length": 1048576,
     "release_date": "2026-10-13",
     "data_date": "2026-11-21",
     "source_url": "https://epoch.ai/benchmarks/use-this-data",
     "source": "Epoch AI Capabilities Index metadata (CC BY), accessed 2026-11-21. Release date and weight availability from the Epoch row. The direct Epoch score is available in the public decision catalog.",
     "tps": null,
     "ttft": null,
-    "price_in_per_M": null,
-    "price_out_per_M": null,
-    "price_cache_per_M": null,
-    "blended_price_per_M": null,
+    "price_in_per_M": 2,
+    "price_out_per_M": 10,
+    "price_cache_per_M": 0.1,
+    "blended_price_per_M": 1.47,
     "aa_intelligence_index": null,
     "arena_elo": null,
     "swe_bench": null,
@@ -15034,6 +15074,26 @@
       },
       "openness": {
         "origin": "curated",
+        "kind": "list"
+      },
+      "price_in_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_out_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "price_cache_per_M": {
+        "origin": "provider",
+        "kind": "list"
+      },
+      "blended_price_per_M": {
+        "origin": "provider",
+        "kind": "derived_list_blend"
+      },
+      "context_length": {
+        "origin": "provider",
         "kind": "list"
       }
     }
