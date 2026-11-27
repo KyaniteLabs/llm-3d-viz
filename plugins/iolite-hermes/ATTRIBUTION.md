@@ -1,11 +1,11 @@
 # Data attribution and licences
 
 The bundled `data/catalog.json` is a derived work of three openly licensed sources. It was built
-by `scripts/build_catalog.py` on 2026-11-21. Each catalog row repeats the credit that applies to it.
+by `scripts/build_catalog.py` on 2026-11-26. Each catalog row repeats the credit that applies to it.
 
 ## Intelligence: Epoch AI Capabilities Index (CC BY)
 
-Epoch AI, 'Capabilities & benchmarking'. Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/use-this-data' [online resource]. Accessed 21 Nov 2026.
+Epoch AI, 'Capabilities & benchmarking'. Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/use-this-data' [online resource]. Accessed 26 Nov 2026.
 
 Licence: [Creative Commons Attribution](https://creativecommons.org/licenses/by/4.0/). Epoch AI's data is free to use, distribute
 and reproduce provided the source and authors are credited.
@@ -21,7 +21,7 @@ row. Arena publication dates describe leaderboard snapshots.
 
 LMArena (Chatbot Arena) leaderboard, Bradley-Terry rating (style-controlled). Source: the
 `lmarena-ai/leaderboard-dataset` dataset on Hugging Face (https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset), config
-`text_style_control`, split `latest`, category `overall`, leaderboard publish date 2026-11-19.
+`text_style_control`, split `latest`, category `overall`, leaderboard publish date 2026-11-22.
 Licence: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 The rating is a Bradley-Terry score, not an Elo rating (LMArena moved from Elo to Bradley-Terry on
@@ -34,7 +34,7 @@ line fitted on the models that have both, then rescaled to 0-100 (see `scale` in
 ## Price: LiteLLM (MIT)
 
 Prices and context lengths come from `model_prices_and_context_window.json` in the BerriAI/litellm repository
-(commit 0946b7416c5bb13f04f692bc3604b91b897d5e43, 2026-11-21). Each row keeps LiteLLM's own `source` as
+(commit 306b73d11341eb6e5b90b5e4d2fd03d0e8bf5775, 2026-11-26). Each row keeps LiteLLM's own `source` as
 `price.row_source`. 11 rows whose source is a third-party benchmark aggregator or mirror, and every row
 served by an aggregator or reseller provider outside the allowed list, are dropped.
 Blended price: blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4.
