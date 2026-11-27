@@ -29,6 +29,7 @@ import {
   toolRankEligible,
   toolSearchModels,
 } from "../src/lib/atlas-agent/tools";
+import { PUBLIC_SCORE_FLOOR, PUBLIC_SPEED_MESSAGE, publicDecision, publicFrontier } from "../src/lib/public-decision";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const FALLBACK_CATALOG = resolve(ROOT, "data/models.v0.draft.json");
@@ -93,10 +94,14 @@ Commands:
   meta
   search <query>
   get <name>
-  eligible [--floor N]
-  rank [--floor N] [--objective min_cost|max_speed|balanced] [--n N]
+  eligible [--floor N] [--provider NAME]
+  rank [--floor N] [--objective min_cost|max_speed|balanced] [--n N] [--provider NAME]
   floor --floor N | --anchor <name>
   compare <a> <b> [c...]
+
+Without an override, eligible and rank use direct Epoch scores (0–100) and the
+bundled public price catalog. Public rank defaults to min_cost on the price and
+capability frontier. max_speed requires measured speed.
 
 Options:
   --catalog <path>   use an Atlas-format catalog with an AA Index floor;
@@ -113,8 +118,8 @@ const commandOptions = {
   meta: [],
   search: [],
   get: [],
-  eligible: ["floor"],
-  rank: ["floor", "objective", "n"],
+  eligible: ["floor", "provider"],
+  rank: ["floor", "objective", "n", "provider"],
   floor: ["floor", "anchor"],
   compare: [],
 } as const;
@@ -154,7 +159,7 @@ function main() {
       allowPositionals: true,
       tokens: true,
       options: {
-        catalog: { type: "string" }, floor: { type: "string" },
+        catalog: { type: "string" }, floor: { type: "string" }, provider: { type: "string" },
         objective: { type: "string" }, n: { type: "string" }, anchor: { type: "string" },
         help: { type: "boolean", short: "h" },
       },
@@ -194,14 +199,39 @@ function main() {
     throw new UsageError("floor requires exactly one of --floor or --anchor.");
   }
 
-  const floor = numericOption(values.floor, "floor", 50, 100);
+  const usePublic = (command === "eligible" || command === "rank") &&
+    !values.catalog && !process.env.ATLAS_CATALOG_PATH?.trim();
+  const floor = numericOption(values.floor, "floor", PUBLIC_SCORE_FLOOR, 100);
   const n = numericOption(values.n, "n", 3, Number.MAX_SAFE_INTEGER, 1);
-  const objective = values.objective ?? "balanced";
+  const objective = values.objective ?? (usePublic ? "min_cost" : "balanced");
   if (objective !== "min_cost" && objective !== "max_speed" && objective !== "balanced") {
     throw new UsageError("--objective requires min_cost, max_speed, or balanced.");
   }
+  if (usePublic) {
+    const { eligible, ...coverage } = publicDecision(floor, values.provider?.trim());
+    if (command === "eligible") print({ ...coverage, eligible });
+    else {
+      const needsSpeed = objective === "max_speed";
+      print({
+        ...coverage,
+        objective,
+        shortlist: needsSpeed ? [] : publicFrontier(eligible).slice(0, n),
+        message: coverage.message ?? (needsSpeed ? PUBLIC_SPEED_MESSAGE : objective === "balanced"
+          ? "Speed is unavailable. Showing the cost–capability frontier by price." : null),
+      });
+    }
+    return;
+  }
+
   const catalog = loadCatalog(resolveCatalogPath(values.catalog));
   const ctx = ctxFrom(catalog, floor);
+  if (values.provider) {
+    const provider = values.provider.trim().toLowerCase();
+    ctx.visible = catalog.filter((row) => row.provider.toLowerCase() === provider);
+  }
+  const emptyMessage = values.provider && ctx.visible.length === 0
+    ? "No models match the requested provider."
+    : "No models meet the floor with price and intelligence data.";
   switch (command) {
     case "meta":
       print(toolGetCatalogMeta(ctx).result);
@@ -214,12 +244,17 @@ function main() {
       printLookup(got.result, got.trace.detail);
       break;
     }
-    case "eligible":
-      print(toolListEligible(ctx, floor).result);
+    case "eligible": {
+      const { result } = toolListEligible(ctx, floor, false);
+      print({ ...result, message: result.eligible.length ? null : emptyMessage });
       break;
-    case "rank":
-      print(toolRankEligible(ctx, floor, objective, n).result);
+    }
+    case "rank": {
+      const { result } = toolRankEligible(ctx, floor, objective, n, { requireMeasuredSpeed: true });
+      print({ ...result, message: result.shortlist.length ? result.message
+        : ctx.visible.length === 0 ? emptyMessage : result.message ?? emptyMessage });
       break;
+    }
     case "floor": {
       const proposed = toolProposeFloor(ctx, {
         floor: values.floor !== undefined ? floor : undefined,

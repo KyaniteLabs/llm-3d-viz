@@ -61,9 +61,52 @@ describe("atlas tools", () => {
     expect(ids).toEqual(["Fast Cheap", "Slow Smart"]);
   });
 
+  it("explains exclusions using the same scores and valid costs as eligibility", () => {
+    const visible = [
+      { ...m("Alternate Index", null, 80, 1), intelligence: 60 },
+      { ...m("Alternate Below Floor", 80, 80, 1), intelligence: 40 },
+      m("Invalid Index", Number.NaN, 80, 1),
+      m("Invalid Cost", 60, 80, -1),
+      m("Speed Missing", 60, null, 1),
+    ];
+    const { result } = toolListEligible({ ...ctx(), visible }, 50);
+    expect(result.eligible).toEqual([expect.objectContaining({ id: "Alternate Index", index: 60 })]);
+    expect(result.excluded_sample).toEqual([
+      { id: "Alternate Below Floor", reason: "index 40 < floor 50" },
+      { id: "Invalid Index", reason: "unmeasured intelligence" },
+      { id: "Invalid Cost", reason: "missing or invalid cost" },
+      { id: "Speed Missing", reason: "missing speed" },
+    ]);
+  });
+
   it("ranks cheapest among eligible", () => {
     const { result } = toolRankEligible(ctx(50), 50, "min_cost", 3);
     expect(result.shortlist[0]?.id).toBe("Fast Cheap");
+  });
+
+  it("ranks speed only on measured candidates and counts exclusions above the floor", () => {
+    const visible = [
+      ...catalog, m("Cheap Unknown Speed", 90, null, 0.1), m("Below Floor Unknown Speed", 30, null, 1),
+    ];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed", 3, { requireMeasuredSpeed: true });
+    expect(result.shortlist.map((model) => model.id)).toEqual(["Fast Cheap"]);
+    expect(result).toMatchObject({ bias: 1, mode: "cost_speed", missing_speed_count: 1 });
+    expect(result.message).toMatch(/excluded.*missing speed/i);
+  });
+
+  it("returns an explained empty speed shortlist when no speed is measured", () => {
+    const visible = [m("Cheap Unknown Speed", 90, null, 0.1)];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, "max_speed", 3, { requireMeasuredSpeed: true });
+    expect(result).toMatchObject({ shortlist: [], mode: null, missing_speed_count: 1 });
+    expect(result.message).toMatch(/no eligible models have measured speed/i);
+  });
+
+  it.each(["min_cost", "balanced"] as const)("names the cost–intelligence fallback for %s", (objective) => {
+    const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
+    const { result } = toolRankEligible({ ...ctx(), visible }, 50, objective);
+    expect(result.shortlist.map((model) => model.id)).toEqual(["Cheap Unknown Speed"]);
+    expect(result).toMatchObject({ mode: "cost", missing_speed_count: 1 });
+    expect(result.message).toMatch(/price and intelligence/i);
   });
 
   it("proposes floor from anchor model Index", () => {
@@ -89,6 +132,12 @@ describe("offline atlas agent", () => {
     const p = runOfflineAtlas("cheapest eligible", ctx(50));
     expect(p.shortlist_ids?.[0]).toBe("Fast Cheap");
     expect(p.summary.toLowerCase()).toMatch(/cheap|fast cheap/);
+  });
+
+  it("keeps Atlas and applied Decide on the same candidate pool", () => {
+    const visible = [...catalog, m("Cheap Unknown Speed", 90, null, 0.1)];
+    const p = runOfflineAtlas("fastest eligible", { ...ctx(), catalog: visible, visible });
+    expect(p.shortlist_ids).toEqual(["Cheap Unknown Speed"]);
   });
 
   it("why is Below Floor out explains Index vs floor", () => {

@@ -8,8 +8,12 @@ import {
   clampBias,
   clampFloor,
   filterPickEligible,
+  hasSpeed,
+  intelligenceOf,
+  isScorable,
   shortlistFromDecide,
   type CostSpeedBias,
+  type DecideMode,
 } from "../decide";
 import type { AtlasAgentContext, AtlasToolTrace, RankObjective } from "./types";
 
@@ -34,7 +38,7 @@ export function summary(m: Model): ModelSummary {
     id: m.model,
     display: displayName(m.model),
     provider: m.provider,
-    index: m.aa_intelligence_index,
+    index: intelligenceOf(m),
     tps: m.tps,
     price: m.blended_price_per_M,
     openness: m.openness,
@@ -133,23 +137,26 @@ export function toolGetModel(
 export function toolListEligible(
   ctx: AtlasAgentContext,
   floor: number,
+  needSpeed = true,
 ): {
   result: { eligible: ModelSummary[]; excluded_sample: { id: string; reason: string }[] };
   trace: AtlasToolTrace;
 } {
   const f = clampFloor(floor);
   const pool = ctx.visible;
-  const eligible = filterPickEligible(pool, f).map(summary);
+  const eligible = filterPickEligible(pool, f, needSpeed).map(summary);
   const excluded_sample: { id: string; reason: string }[] = [];
   for (const m of pool) {
     if (excluded_sample.length >= 5) break;
-    const iq = m.aa_intelligence_index;
-    if (iq == null) {
+    const iq = intelligenceOf(m);
+    if (iq === null || !Number.isFinite(iq) || iq < 0) {
       excluded_sample.push({ id: m.model, reason: "unmeasured intelligence" });
     } else if (iq < f) {
       excluded_sample.push({ id: m.model, reason: `index ${iq} < floor ${f}` });
-    } else if (m.tps == null || m.blended_price_per_M == null) {
-      excluded_sample.push({ id: m.model, reason: "missing cost or speed" });
+    } else if (!isScorable(m, false)) {
+      excluded_sample.push({ id: m.model, reason: "missing or invalid cost" });
+    } else if (needSpeed && !hasSpeed(m)) {
+      excluded_sample.push({ id: m.model, reason: "missing speed" });
     }
   }
   return {
@@ -167,21 +174,48 @@ export function toolRankEligible(
   floor: number,
   objective: RankObjective,
   n = 3,
+  { requireMeasuredSpeed = false } = {},
 ): {
-  result: { shortlist: ModelSummary[]; bias: CostSpeedBias };
+  result: {
+    shortlist: ModelSummary[];
+    bias: CostSpeedBias;
+    mode: DecideMode | null;
+    missing_speed_count: number;
+    message: string | null;
+  };
   trace: AtlasToolTrace;
 } {
   const f = clampFloor(floor);
   const bias: CostSpeedBias =
     objective === "min_cost" ? -1 : objective === "max_speed" ? 1 : clampBias(ctx.costSpeedBias);
-  const pool = ctx.visible;
-  const { shortlist } = shortlistFromDecide(pool, f, bias, n);
+  const eligible = filterPickEligible(ctx.visible, f, false);
+  const measured = eligible.filter(hasSpeed);
+  const missingSpeed = eligible.length - measured.length;
+  const needsSpeed = objective === "max_speed" && requireMeasuredSpeed;
+  const { shortlist, mode } = shortlistFromDecide(needsSpeed ? measured : eligible, f, bias, n);
+  let message: string | null = null;
+  if (needsSpeed && measured.length === 0) {
+    message = missingSpeed > 0
+      ? "No eligible models have measured speed."
+      : "No models meet the floor with price and intelligence data.";
+  } else if (missingSpeed > 0) {
+    const models = missingSpeed === 1 ? "1 eligible model" : `${missingSpeed} eligible models`;
+    message = needsSpeed
+      ? `Excluded ${models} with missing speed.`
+      : `Ranked by price and intelligence because ${models} lacked measured speed.`;
+  }
   return {
-    result: { shortlist: shortlist.map(summary), bias },
+    result: {
+      shortlist: shortlist.map(summary),
+      bias,
+      mode: shortlist.length ? mode : null,
+      missing_speed_count: missingSpeed,
+      message,
+    },
     trace: {
       name: "rank_eligible",
       ok: true,
-      detail: `${shortlist.length} shortlist · ${objective} · floor ${f}`,
+      detail: `${shortlist.length} shortlist · ${objective} · floor ${f}${message ? ` · ${message}` : ""}`,
     },
   };
 }
