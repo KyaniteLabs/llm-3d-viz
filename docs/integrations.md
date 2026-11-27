@@ -21,7 +21,16 @@ npx tsx bin/atlas-cli.ts get "GLM-5.3 (max)"
 npx tsx bin/atlas-cli.ts compare "GPT-5.6 Sol" "Gemini 3.7 Flash (high)"
 ```
 
-All output is JSON on stdout. `ATLAS_CATALOG_PATH=/path/catalog.json` points it at any catalog file (default: the repo snapshot) — you can pin a versioned copy for reproducible builds. Semantics: the CLI serves the **full admitted catalog** (all labs, all dates); scope policies (cloud labs, release floor, generation cap) are a UI-layer concern you can re-apply with `filterProductCatalog` from `src/data/catalog-scope.ts`.
+The CLI resolves Atlas-format catalogs in this order, using `--catalog <path>` first, then `ATLAS_CATALOG_PATH`, then the local `data/atlas-catalog-snapshot.json` when readable, and finally the shipped `data/models.v0.draft.json`. It queries the selected catalog across all labs and dates. To apply the application's scope policies in your own code, use `filterProductCatalog` from `src/data/catalog-scope.ts`.
+
+Direct invocation with `npx tsx bin/atlas-cli.ts` keeps status diagnostics on stderr. Its exit codes and stdout are:
+
+| Exit | Meaning | Stdout |
+|---|---|---|
+| `0` | Valid query, including an empty result, or help | JSON for queries, plain text for help |
+| `1` | Invalid arguments | Empty |
+| `2` | Unresolved model lookup, anchor, or compare operand | JSON `null` for a lookup or anchor, or the matched rows for `compare` |
+| `3` | Catalog read, parse, or processing failure | Empty |
 
 ## 3. Atlas MCP server (stdio, JSON-RPC 2.0)
 
