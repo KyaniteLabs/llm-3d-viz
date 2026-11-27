@@ -34,7 +34,7 @@ function publicDataPlane(): Plugin {
   }
   const fullId = resolve(process.cwd(), "data/models.v0.draft.json");
   const trimmed = readFileSync(
-    resolve(process.cwd(), "data/generated/public-catalog.json"),
+    process.env.VIZ_PUBLIC_CATALOG_PATH ?? resolve(process.cwd(), "data/generated/public-catalog.json"),
     "utf8",
   );
   return {

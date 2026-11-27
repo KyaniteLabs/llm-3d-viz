@@ -168,6 +168,7 @@ export function buildRedirects(aliases, currentSlugs) {
 }
 
 function main() {
+  const output = process.env.VIZ_BUILD_PUBLIC_DIR ?? join(ROOT, "public");
   const rows = loadCatalog();
   // same catalog the site builds from (src/data/models.ts) — pages regenerate on every refresh
   const dataDate = rows.map(r => r.data_date).filter(Boolean).sort().pop() || '';
@@ -185,19 +186,19 @@ function main() {
     const s = slug(r.model);
     if (!s) continue;
     slugs.push(s);
-    mkdirSync(join(ROOT, 'public/m', s), { recursive: true });
-    writeFileSync(join(ROOT, `public/m/${s}/index.html`), page(r));
-    mkdirSync(join(ROOT, 'public/embed'), { recursive: true });
-    writeFileSync(join(ROOT, `public/embed/${s}.html`), embedCard(r));
+    mkdirSync(join(output, 'm', s), { recursive: true });
+    writeFileSync(join(output, `m/${s}/index.html`), page(r));
+    mkdirSync(join(output, 'embed'), { recursive: true });
+    writeFileSync(join(output, `embed/${s}.html`), embedCard(r));
     n++;
   }
-  writeFileSync(join(ROOT, 'public/m/index.html'), indexPage());
+  writeFileSync(join(output, 'm/index.html'), indexPage());
   console.log(`gen-model-pages: ${n} model pages + ${n} embed cards + index -> public/m, public/embed (catalog ${dataDate})`);
 
   // sitemap: base URLs ride in from the previous file; /m/*, /compare/*,
   // /embed/* and frontier-watch.md are re-emitted here, so they must never
   // ride in (frontier-watch.md used to gain one duplicate <loc> per refresh — BUG-SMELL-REGISTRY).
-  const SM = join(ROOT, 'public/sitemap.xml');
+  const SM = join(output, 'sitemap.xml');
   let base = [ORIGIN + '/'];
   try {
     base = [...readFileSync(SM, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1])
@@ -211,7 +212,7 @@ function main() {
   // alias registry -> public/_redirects (stale targets fail the build — never ship a dead redirect)
   const aliases = existsSync(join(ROOT, 'data/slug-aliases.json'))
     ? JSON.parse(readFileSync(join(ROOT, 'data/slug-aliases.json'), 'utf8')) : {};
-  writeFileSync(join(ROOT, 'public/_redirects'), buildRedirects(aliases, new Set(slugs)));
+  writeFileSync(join(output, '_redirects'), buildRedirects(aliases, new Set(slugs)));
   if (Object.keys(aliases).length) console.log(`redirects: ${Object.keys(aliases).length} slug alias(es) -> public/_redirects`);
 }
 

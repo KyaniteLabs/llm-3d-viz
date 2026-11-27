@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeFrontier } from '../scripts/frontier-watch.mjs';
+import { computeFrontier } from '../scripts/lib/frontier.mjs';
 
 describe('computeFrontier (price × intelligence Pareto)', () => {
   const row = (model, price, ii) => ({ model, provider: 'x', blended_price_per_M: price, aa_intelligence_index: ii, tps: 1 });

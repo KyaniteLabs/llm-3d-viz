@@ -241,8 +241,8 @@ if [[ "${SKIP_BUILD:-0}" == "1" ]]; then
 fi
 
 # 2) Build
-log "building…"
-if ! npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+log "building private data plane…"
+if ! VIZ_DATA_PLANE=private VIZ_FRONTIER_TRACK_MOVEMENT=1 npm run build >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
   log "ERROR: build failed"
   status_fail build "\"rows\":$row_count"
   exit 3
@@ -291,6 +291,12 @@ fi
 #    DEPLOY_PAGES=1 in addition to CLOUDFLARE_API_TOKEN + PAGES_PROJECT.
 #    This preserves the approval-gated public-publish policy (see `npm run deploy:pages`).
 if [[ "${DEPLOY_PAGES:-0}" == "1" && "${SKIP_PAGES:-0}" != "1" && -n "${CLOUDFLARE_API_TOKEN:-}" && -n "${PAGES_PROJECT:-}" ]]; then
+  log "building public data plane for Pages…"
+  if ! VIZ_DATA_PLANE=public npm run build:public >>"$LOG_DIR/catalog-auto-update.log" 2>&1; then
+    log "ERROR: public build for Pages failed"
+    status_fail pages "\"rows\":$row_count"
+    exit 7
+  fi
   log "deploy pages → $PAGES_PROJECT (branch=${PAGES_BRANCH:-main})"
   if ! npx wrangler pages deploy "$REPO_ROOT/dist" \
         --project-name="$PAGES_PROJECT" --branch="${PAGES_BRANCH:-main}" --commit-dirty=true \

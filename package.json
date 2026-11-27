@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/gen-model-pages.mjs && node scripts/gen-compare-pages.mjs && node scripts/frontier-watch.mjs && vite build",
-    "build:public": "node scripts/gen-public-catalog.mjs && VIZ_DATA_PLANE=public npm run build",
+    "build": "node --import tsx scripts/build.ts",
+    "build:public": "node --import tsx scripts/build.ts --public",
     "preview": "node scripts/preview.mjs",
     "test": "node scripts/run-tests.mjs",
     "test:vitest": "vitest run",

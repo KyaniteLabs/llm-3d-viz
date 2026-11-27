@@ -1,62 +1,183 @@
 {
- "as_of": "2026-08-29T19:00:30.435Z",
- "frontier": [
-  {
-   "model": "Gemma 4 31B (Reasoning)",
-   "provider": "Google",
-   "price": 0,
-   "ii": 29.7,
-   "tps": 35.21
-  },
-  {
-   "model": "Ling 3.0 Flash",
-   "provider": "InclusionAI",
-   "price": 0.043000000000000003,
-   "ii": 37.8,
-   "tps": 385.27
-  },
-  {
-   "model": "Agnes 2.5 Pro Beta",
-   "provider": "Sapiens AI",
-   "price": 0.05700000000000001,
-   "ii": 49.1,
-   "tps": 159.32
-  },
-  {
-   "model": "Qwen3.8-Flash-Next",
-   "provider": "Alibaba",
-   "price": 0.091,
-   "ii": 55.8,
-   "tps": 73.33
-  },
-  {
-   "model": "GLM-5.3-Flash",
-   "provider": "Z AI",
-   "price": 0.101,
-   "ii": 57.5,
-   "tps": 49.82
-  },
-  {
-   "model": "GLM-5.3 (max)",
-   "provider": "Z AI",
-   "price": 0.9019999999999999,
-   "ii": 59.5,
-   "tps": 76.6
-  },
-  {
-   "model": "Grok 4.6 (high)",
-   "provider": "SpaceXAI",
-   "price": 1.35,
-   "ii": 60.9,
-   "tps": 57.75
-  },
-  {
-   "model": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
-   "provider": "Anthropic",
-   "price": 3.85,
-   "ii": 63.1,
-   "tps": 55.38
-  }
- ],
- "events": []
+  "as_of": "2026-11-11",
+  "score_basis": "Epoch Capabilities Index (ECI), normalized to 0–100",
+  "price_basis": "USD per million tokens, 75% input and 25% output list price",
+  "frontier": [
+    {
+      "model": "Gemma 4 31B IT",
+      "provider": "Google DeepMind",
+      "slug": "gemma-4-31b-it",
+      "intelligence": {
+        "value": 75.7,
+        "raw": 144.24,
+        "metric": "Epoch Capabilities Index (ECI)",
+        "scale": "0-100, see scale in the catalog header",
+        "source": "Epoch AI, 'Capabilities & benchmarking'",
+        "source_url": "https://epoch.ai/benchmarks/use-this-data",
+        "license": "CC BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "as_of": "2026-11-11",
+        "changes": "subset to catalog models; rescaled to 0-100",
+        "attribution": "Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100."
+      },
+      "price": {
+        "input_per_M": 0,
+        "output_per_M": 0,
+        "blended_per_M": 0,
+        "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+        "source": "LiteLLM model_prices_and_context_window.json",
+        "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit",
+        "as_of": "2026-11-11",
+        "litellm_key": "gemini/gemma-4-31b-it",
+        "litellm_provider": "gemini",
+        "row_source": "https://ai.google.dev/gemini-api/docs/pricing",
+        "match": "exact",
+        "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://ai.google.dev/gemini-api/docs/pricing."
+      },
+      "context_length": 262144
+    },
+    {
+      "model": "Claude Haiku 5.5",
+      "provider": "Anthropic",
+      "slug": "claude-haiku-5.5",
+      "intelligence": {
+        "value": 88.7,
+        "raw": 160.25,
+        "metric": "Epoch Capabilities Index (ECI)",
+        "scale": "0-100, see scale in the catalog header",
+        "source": "Epoch AI, 'Capabilities & benchmarking'",
+        "source_url": "https://epoch.ai/benchmarks/use-this-data",
+        "license": "CC BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "as_of": "2026-11-11",
+        "changes": "subset to catalog models; rescaled to 0-100",
+        "attribution": "Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100."
+      },
+      "price": {
+        "input_per_M": 0.1,
+        "output_per_M": 0.5,
+        "blended_per_M": 0.2,
+        "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+        "source": "LiteLLM model_prices_and_context_window.json",
+        "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit",
+        "as_of": "2026-11-11",
+        "litellm_key": "claude-haiku-5-5",
+        "litellm_provider": "anthropic",
+        "row_source": "https://platform.claude.com/docs/en/models/haiku-5-5/overview",
+        "match": "exact",
+        "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://platform.claude.com/docs/en/models/haiku-5-5/overview."
+      },
+      "context_length": 1000000
+    },
+    {
+      "model": "GPT-6.1 Terra",
+      "provider": "OpenAI",
+      "slug": "gpt-6.1-terra",
+      "intelligence": {
+        "value": 95,
+        "raw": 168.11,
+        "metric": "Epoch Capabilities Index (ECI)",
+        "scale": "0-100, see scale in the catalog header",
+        "source": "Epoch AI, 'Capabilities & benchmarking'",
+        "source_url": "https://epoch.ai/benchmarks/use-this-data",
+        "license": "CC BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "as_of": "2026-11-11",
+        "changes": "subset to catalog models; rescaled to 0-100",
+        "attribution": "Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100."
+      },
+      "price": {
+        "input_per_M": 1,
+        "output_per_M": 5,
+        "blended_per_M": 2,
+        "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+        "source": "LiteLLM model_prices_and_context_window.json",
+        "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit",
+        "as_of": "2026-11-11",
+        "litellm_key": "gpt-6.1-terra",
+        "litellm_provider": "openai",
+        "row_source": "https://developers.openai.com/api/docs/pricing",
+        "match": "exact",
+        "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://developers.openai.com/api/docs/pricing."
+      },
+      "context_length": 922000
+    },
+    {
+      "model": "GPT-6.1 Sol",
+      "provider": "OpenAI",
+      "slug": "gpt-6.1-sol",
+      "intelligence": {
+        "value": 95.7,
+        "raw": 168.87,
+        "metric": "Epoch Capabilities Index (ECI)",
+        "scale": "0-100, see scale in the catalog header",
+        "source": "Epoch AI, 'Capabilities & benchmarking'",
+        "source_url": "https://epoch.ai/benchmarks/use-this-data",
+        "license": "CC BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "as_of": "2026-11-11",
+        "changes": "subset to catalog models; rescaled to 0-100",
+        "attribution": "Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100."
+      },
+      "price": {
+        "input_per_M": 2,
+        "output_per_M": 10,
+        "blended_per_M": 4,
+        "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+        "source": "LiteLLM model_prices_and_context_window.json",
+        "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit",
+        "as_of": "2026-11-11",
+        "litellm_key": "gpt-6.1-sol",
+        "litellm_provider": "openai",
+        "row_source": "https://developers.openai.com/api/docs/pricing",
+        "match": "exact",
+        "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://developers.openai.com/api/docs/pricing."
+      },
+      "context_length": 922000
+    },
+    {
+      "model": "Claude Fable 5.2",
+      "provider": "Anthropic",
+      "slug": "claude-fable-5.2",
+      "intelligence": {
+        "value": 100,
+        "raw": 174.24,
+        "metric": "Epoch Capabilities Index (ECI)",
+        "scale": "0-100, see scale in the catalog header",
+        "source": "Epoch AI, 'Capabilities & benchmarking'",
+        "source_url": "https://epoch.ai/benchmarks/use-this-data",
+        "license": "CC BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "as_of": "2026-11-11",
+        "changes": "subset to catalog models; rescaled to 0-100",
+        "attribution": "Source: Epoch AI, 'Capabilities & benchmarking', epoch.ai/benchmarks/use-this-data (CC BY). Accessed 11 Nov 2026. Modified: subset to catalog models; rescaled to 0-100."
+      },
+      "price": {
+        "input_per_M": 8,
+        "output_per_M": 40,
+        "blended_per_M": 16,
+        "blend_rule": "blended_per_M = (3 * input_per_M + 1 * output_per_M) / 4",
+        "source": "LiteLLM model_prices_and_context_window.json",
+        "source_url": "https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json",
+        "license": "MIT",
+        "license_url": "https://opensource.org/license/mit",
+        "as_of": "2026-11-11",
+        "litellm_key": "claude-fable-5-2",
+        "litellm_provider": "anthropic",
+        "row_source": "https://platform.claude.com/docs/en/about-claude/pricing",
+        "match": "exact",
+        "attribution": "Price: LiteLLM model_prices_and_context_window.json, MIT licence, Copyright (c) 2023 Berri AI. Row source: https://platform.claude.com/docs/en/about-claude/pricing."
+      },
+      "context_length": 1000000
+    }
+  ],
+  "events": []
 }

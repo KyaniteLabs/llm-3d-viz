@@ -3,8 +3,8 @@
  *
  * Runs the REAL script inside a throwaway REPO_ROOT whose builder, coverage
  * and alert scripts are stubs, then checks the persisted record and the
- * failure alert. Deploy/build stages are not exercised end-to-end (they need
- * npm/rsync/ssh); their stage names are covered by the exhaustive table check.
+ * failure alert. Build fixtures check the selected planes and stub the Pages
+ * uploader so no deployment takes place.
  */
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -156,6 +156,48 @@ describe("catalog run-status: stage table", () => {
 });
 
 describe("catalog run-status: persisted records (byte format unchanged)", () => {
+  it("builds with private data and movement tracking even when the caller selects public data", () => {
+    const sb = sandbox({});
+    fs.writeFileSync(path.join(sb.root, "package.json"), JSON.stringify({ scripts: { build: "node scripts/test-build.mjs" } }));
+    fs.writeFileSync(path.join(sb.root, "scripts/test-build.mjs"),
+      `import fs from "node:fs";\nfs.writeFileSync("build-env.json", JSON.stringify([process.env.VIZ_DATA_PLANE, process.env.VIZ_FRONTIER_TRACK_MOVEMENT]));\n`,
+    );
+    const result = run(sb.root, { VIZ_DATA_PLANE: "public" });
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+    expect(JSON.parse(fs.readFileSync(path.join(sb.root, "build-env.json"), "utf8"))).toEqual(["private", "1"]);
+  });
+
+  it("rebuilds with public data before passing dist to the Pages uploader", () => {
+    const sb = sandbox({});
+    // The real updater loads this fixture .env in its own shell. The functions
+    // intercept both build commands and the uploader without a network call.
+    fs.writeFileSync(path.join(sb.root, ".env"), `
+npm() {
+  [[ "$1" == run ]] || return 91
+  mkdir -p dist
+  printf '%s\\n' "$VIZ_DATA_PLANE" > dist/plane
+  printf '%s %s\\n' "$*" "$VIZ_DATA_PLANE" >> commands.log
+}
+npx() {
+  [[ "$1 $2 $3" == 'wrangler pages deploy' ]] || return 92
+  local plane
+  plane=$(cat "$4/plane") || return
+  printf '%s %s\\n' "$1 $2 $3" "$plane" >> commands.log
+}
+`);
+    const result = run(sb.root, {
+      DEPLOY_PAGES: "1",
+      CLOUDFLARE_API_TOKEN: "fixture-pages-token",
+      PAGES_PROJECT: "fixture-pages-project",
+    });
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+    expect(fs.readFileSync(path.join(sb.root, "commands.log"), "utf8").trim().split("\n")).toEqual([
+      "run build private",
+      "run build:public public",
+      "wrangler pages deploy public",
+    ]);
+  });
+
   it("SKIP_BUILD scrape → ok:true changed:true scraped:true deployed:false", () => {
     const sb = sandbox({});
     const r = run(sb.root, { SKIP_BUILD: "1" });
