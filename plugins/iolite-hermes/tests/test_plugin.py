@@ -164,3 +164,112 @@ def test_legal_f2_f3_disclosure_text():
     for route in ("/api/plugins/iolite/landscape", "/api/plugins/iolite/my-prices",
                   "/api/plugins/iolite/pane-receipt"):
         assert route in readme
+
+
+def test_catalog_url_scores_public_api_v1_models_and_keeps_aa_refusal(monkeypatch):
+    payload = {
+        "schema_version": "1",
+        "meta": {
+            "catalog_date": "2026-11-11",
+            "data_date": "2026-11-11",
+            "plane": "public",
+            "intelligence": {"field": "arena_rating", "label": "LMArena Bradley-Terry rating (style-controlled)"},
+        },
+        "models": [
+            {
+                "slug": "gemini-4-carbon-high",
+                "model": "Gemini 4 Carbon (High)",
+                "provider": "Google",
+                "blended_price_per_M": 1.47,
+                "price_in_per_M": 2,
+                "price_out_per_M": 10,
+                "price_cache_per_M": 0.1,
+                "aa_intelligence_index": None,
+                "arena_rating": 1526.0,
+                "arena": {
+                    "rating": 1526.0,
+                    "metric": "LMArena Bradley-Terry rating (style-controlled)",
+                    "source": "LMArena (Chatbot Arena) leaderboard — lmarena-ai/leaderboard-dataset",
+                    "source_url": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
+                    "license": "CC BY 4.0",
+                    "as_of": "2026-11-09",
+                },
+                "sources": {
+                    "blended_price_per_M": {
+                        "origin": "litellm",
+                        "kind": "derived",
+                        "source_url": "https://aistudio.google.com/docs/pricing",
+                        "license": "MIT",
+                        "litellm_key": "gemini/gemini-4-carbon",
+                    },
+                    "arena_rating": {
+                        "origin": "arena",
+                        "kind": "measured",
+                        "source_url": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
+                        "license": "CC BY 4.0",
+                        "as_of": "2026-11-09",
+                    },
+                },
+                "null_reason": "intelligence (AA): not published — Artificial Analysis terms bar public redistribution",
+            },
+            {
+                "slug": "flat-arena-only",
+                "model": "Flat Arena Only",
+                "provider": "TestLab",
+                "blended_price_per_M": 0.5,
+                "price_cache_per_M": 0.1,
+                "aa_intelligence_index": None,
+                "arena_rating": 1450.0,
+                "sources": {
+                    "blended_price_per_M": {"origin": "litellm", "kind": "derived", "license": "MIT"},
+                    "arena_rating": {"origin": "arena", "kind": "measured", "license": "CC BY 4.0"},
+                },
+            },
+            {
+                "slug": "aa-leaked-row",
+                "model": "AA Leaked",
+                "provider": "BadLab",
+                "blended_price_per_M": 0.1,
+                "aa_intelligence_index": 99,
+                "sources": {"aa_intelligence_index": {"origin": "Artificial Analysis", "kind": "measured"}},
+            },
+        ],
+    }
+
+    class Resp:
+        def __init__(self, data: bytes):
+            self._body = data
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self, n=-1):
+            if n < 0:
+                chunk, self._body = self._body, b""
+            else:
+                chunk, self._body = self._body[:n], self._body[n:]
+            return chunk
+
+    monkeypatch.setattr(plugin, "_url_opener", lambda req, t: Resp(json.dumps(payload).encode()))
+    ctx = _setup({"catalog_url": "https://viz.kyanitelabs.tech/api/v1/models.json", "measure_speed": False})
+
+    shortlist = json.loads(ctx.tools["iolite_shortlist"]({"floor": 50, "objective": "min_cost"}))
+    assert shortlist["ok"] is True
+    assert shortlist["scorable_count"] == 2
+    assert shortlist["eligible_count"] == 2
+    assert shortlist["refusals"] == []
+    assert shortlist["rows_refused_for_provenance"] == 1
+    assert shortlist["catalog_generated"] == "2026-11-11"
+    assert "70%-cached blend" in shortlist["price_basis"]
+    credits = " ".join(shortlist["data_credits"])
+    assert "LMArena" in credits and "CC BY 4.0" in credits and "LiteLLM" in credits and "MIT" in credits
+
+    lookup = json.loads(ctx.tools["iolite_model"]({"query": "gemini-4-carbon-high"}))
+    assert lookup["total_matches"] == 1
+    m = lookup["matches"][0]
+    assert m["intelligence"] is not None and 85 <= m["intelligence"] <= 95
+    assert m["arena_rating"] == 1526.0
+    assert any("LMArena" in c for c in lookup["data_credits"])

@@ -29,6 +29,7 @@ Model = Dict[str, Any]
 DEFAULT_INTELLIGENCE_FLOOR = 50.0
 DEFAULT_COST_SPEED_BIAS = 0.0
 DEFAULT_SHORTLIST_N = 3
+MAX_SHORTLIST_N = 25
 
 def _finite(v: Any) -> bool:
     if not isinstance(v, (int, float)) or isinstance(v, bool):
@@ -72,6 +73,18 @@ def clamp_bias(n: Any) -> float:
     if not _finite(n):
         return 0.0
     return min(1.0, max(-1.0, float(n)))
+
+
+def validate_n(n: Any, max_n: int = MAX_SHORTLIST_N) -> int:
+    """Validate shortlist size (1..max_n). None -> DEFAULT_SHORTLIST_N; non-positive raises ValueError."""
+    if n is None:
+        return DEFAULT_SHORTLIST_N
+    if isinstance(n, bool) or not _finite(n):
+        raise ValueError("n must be a number")
+    val = int(n)
+    if val <= 0:
+        raise ValueError(f"n must be between 1 and {max_n}, got {val}")
+    return min(max_n, val)
 
 
 def is_pick_eligible(m: Model, floor: float, need_speed: bool = True) -> bool:
